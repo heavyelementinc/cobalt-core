@@ -1,0 +1,233 @@
+{
+    "domain_name": {
+        "default": ""
+    },
+    "app_name": {
+        "default": "Cobalt Engine",
+        "$public": true
+    },
+    "app_short_name": {
+        "default": "",
+        "$alt": "app_name",
+        "$public": true
+    },
+    "app_copyright_name": {
+        "default": "",
+        "$alt": "app_short_name"
+    },
+    "designer": {
+        "default": {
+            "name": "Heavy Element, Inc.",
+            "href": "https://heavyelement.io/",
+            "title": "Maine's Premier New Media Production Studio"
+        }
+    },
+    "cache_settings": {
+        "default": true
+    },
+    "version": {
+        "default": "0.0"
+    },
+    "debug": {
+        "default": true
+    },
+    "api_routes": {
+        "default": {
+            "admin": {
+                "processor": "Web\\AdminHandler",
+                "prefix": "/admin/",
+                "permission": "Admin_panel_access"
+            },
+            "shared": {
+                "processor": "Web\\SharedHandler",
+                "prefix": "/core-content/"
+            },
+            "apiv1": {
+                "processor": "Api\\ApiHandler",
+                "prefix": "/api/v1/"
+            },
+            "webhookv1": {
+                "processor": "Api\\ApiHandler",
+                "prefix": "/webhook/v1/"
+            }
+        },
+        "$merge": true
+    },
+    "enable_debug_routes": {
+        "default": true
+    },
+    "route_cache_enabled": {
+        "default": false
+    },
+    "enable_core_content": {
+        "default": true
+    },
+    "database": {
+        "default": ""
+    },
+    "db_usr": {
+        "default": ""
+    },
+    "db_pwd": {
+        "default": ""
+    },
+    "db_addr": {
+        "default": "localhost:27017"
+    },
+    "database_authentication": {
+        "default": false,
+        "$combine": [
+            "db_usr",
+            ":",
+            "db_pwd",
+            "@"
+        ]
+    },
+    "server_address": {
+        "default": "",
+        "$combine": [
+            "mongodb://",
+            "database_authentication",
+            "db_addr"
+        ],
+        "$env": "MONGODB"
+    },
+    "fonts": {
+        "default": {
+            "head": {
+                "family": "'Assistant', sans-serif",
+                "import": "Assistant:500,800"
+            },
+            "body": {
+                "family": "'Open Sans', sans-serif",
+                "import": "Open+Sans:400,400i,800,800i"
+            }
+        },
+        "$merge": true,
+        "$style": true
+    },
+    "css-vars": {
+        "default": {
+            "modal-z-index": 2000,
+            "body-background": "#efefef",
+            "color-header-branding": "#004BA8",
+            "color-user-panel-button": "#342A21",
+            "color-acknowledge": "#598B2C",
+            "color-active": "#598B2C",
+            "color-inactive": "#B1C1C0",
+            "color-input-disabled": "#F4F6F6",
+            "color-disabled": "rgba(0,0,0,.2)",
+            "color-problem": "#FE5F55",
+            "color-button-init": "#004BA8",
+            "color-button-text": "#FFF",
+            "color-button-hover": "#9DD1F1",
+            "color-button-hover-text": "#000",
+            "color-button-pressed": "#00377A"
+        },
+        "$merge": true,
+        "$style": true
+    },
+    "login-hero-sidebar": {
+        "default": "url(/core-content/img/default_poster_image.jpg)",
+        "$style": true
+    },
+    "packages": {
+        "default": [
+            "global_functions.js",
+            "InputComponents.js",
+            "Modal.js",
+            "TabbedUI.js",
+            "Slideshow.js",
+            "InputClasses.js",
+            "FormRequest.js",
+            "ApiFetch.js",
+            "UserMenu.js",
+            "Router.js",
+            "main.js"
+        ],
+        "$prepend": true
+    },
+    "session_cookie_name": {
+        "default": "token_session"
+    },
+    "csrf_seed": {
+        "default": ""
+    },
+    "csrf_required_default": {
+        "default": true
+    },
+    "Web_normally_open_pages": {
+        "default": true
+    },
+    "Web_main_content_via_api": {
+        "default": true
+    },
+    "Render_strict_variable_parsing": {
+        "default": false
+    },
+    "Auth_user_accounts_enabled": {
+        "default": true
+    },
+    "Admin_panel_prefix": {
+        "default": "/admin"
+    },
+    "Admin_panel_access": {
+        "default": true,
+        "$required": {
+            "Auth_user_accounts_enabled": true
+        }
+    },
+    "Auth_min_password_length": {
+        "default": 6
+    },
+    "Auth_logins_enabled": {
+        "default": true,
+        "$required": {
+            "Auth_user_accounts_enabled": true
+        }
+    },
+    "Auth_enable_insecure_logins": {
+        "default": true
+    },
+    "Auth_session_panel_enabled": {
+        "default": true,
+        "$required": {
+            "Auth_user_accounts_enabled": true
+        }
+    },
+    "Auth_user_menu_enabled": {
+        "default": true,
+        "$required": {
+            "Auth_user_accounts_enabled": true
+        }
+    },
+    "Auth_account_creation_enabled": {
+        "default": false,
+        "$required": {
+            "Auth_user_accounts_enabled": true
+        }
+    },
+    "Auth_login_page": {
+        "default": "/login",
+        "$public": true
+    },
+    "Auth_onboading_url": {
+        "default": "/onboarding"
+    },
+    "Auth_user_manager_individual_page": {
+        "default": "/manage/user"
+    },
+    "Auth_enable_root_group": {
+        "default": false,
+        "comment": "THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!!"
+    },
+    "API_CORS_allowed_origins": {
+        "default": [],
+        "$add": [
+            "domain_name"
+        ]
+    },
+    "HTTP_error_body_id": {
+        "default": "cobalt_http_error"
+    }
+}

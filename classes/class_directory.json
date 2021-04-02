@@ -1,0 +1,18 @@
+{
+    "classes": {
+        "SettingsManager": {
+            "path": "__ENV_CLASSES__/SettingsManager/SettingsManager.php"
+        },
+        "SettingsManagerException": {
+            "path": "__ENV_CLASSES__/SettingsManager/SettingsManagerException.php"
+        },
+        "ApiHandler": {
+            "path": "__ENV_CLASSES__/Api/ApiHandler.php"
+        }
+    },
+    "namespaces": {
+        "Exceptions\\HTTP": {
+            "path": "__ENV_CLASSES__/Exceptions/HTTP/"
+        }
+    }
+}

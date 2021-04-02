@@ -1,0 +1,120 @@
+class FormRequest {
+    constructor(form, { asJSON = true, errorField = null }) {
+        this.asJSON = asJSON;
+        if (typeof form === "string") this.form = document.querySelector(form);
+        else this.form = form;
+        this.form.addEventListener("submit", e => { this.submit(e) });
+        this.action = this.form.getAttribute("action");
+        this.method = this.form.getAttribute("method");
+        this.format = this.form.getAttribute("format") || "application/json; charset=utf-8";
+        this.headers = {
+            'X-CSRF-Mitigation': document.querySelector("meta[name='token']").getAttribute("content") || null
+        };
+        this.autosave = (["true", "autosave"].includes(this.form.getAttribute("autosave"))) ? true : false;
+        this.include = this.form.getAttribute("include") ?? null;
+        this.form_elements();
+        this.errorField = errorField;
+    }
+
+    /** Add all the form elements to this instance's list of elements */
+    form_elements() {
+        this.elements = this.form.querySelectorAll("input[name], select[name], textarea[name]");
+        this.el_list = [];
+        for (let el of this.elements) {
+            this.add(el);
+        }
+    }
+
+    /** Add an individual item to this list */
+    add(el) {
+        const name = el.getAttribute("name");
+        if (!name) return false;
+        let type = el.getAttribute("type") || "default";
+        switch (el.tagName) {
+            case "TEXTAREA":
+                type = 'textarea';
+                break;
+            case "SELECT":
+                type = 'select';
+                break;
+        }
+        if (type in classMap === false) type = "default";
+        // const className = "InputClass_" + type;
+        this.el_list[name] = new classMap[type](el, {});
+        if (this.autosave) el.addEventListener("change", event => this.autosave_handler(this.el_list[name], event));
+        return true;
+    }
+
+    /** Submit the entire form data */
+    async submit(e) {
+        this.reset_errors();
+        if (this.asJSON === false) return;
+        // if
+        e.preventDefault();
+        let formdata = new FormData(this.form);
+        let data = Object.fromEntries(formdata);
+        this.send(data)
+    }
+
+    async send(data) {
+        const post = new ApiFetch(this.action, this.method, { headers: this.headers });
+        let result;
+        try {
+            result = await post.send(data, {});
+        } catch (error) {
+            this.errorHandler(error, result, post);
+            return;
+        }
+    }
+
+    /** Autosave handler */
+    autosave_handler(element, event) {
+        // console.log(element, element.value())
+        let data = this.build_query([element]);
+        this.send(data);
+    }
+
+    /** Build the list of items */
+    build_query(list) {
+        let query = {};
+        for (var i in list) {
+            query[list[i].name] = list[i].value();
+        }
+        if (this.autosave && this.include) query.include = this.include;
+        return query;
+    }
+
+    errorHandler(error, result = null, post = null) {
+        let field = this.errorField;
+        if (!field) field = this.form.querySelector(".error")
+        if (field) field.innerText = error.result.error
+
+    }
+
+    reset_errors() {
+
+        // this.form.querySelector(".error").innerText = ""
+    }
+
+}
+
+class LoginFormRequest extends FormRequest {
+    async submit(e) {
+        if (this.asJSON === false) return;
+        e.preventDefault();
+        let error_container = this.form.querySelector(".error");
+        error_container.innerText = "";
+        let formdata = new FormData(this.form);
+        let data = Object.fromEntries(formdata);
+        let headers = { ...this.headers, "Authentication": btoa(`${data.username}:${data.password}`) }
+        delete data.username, data.password;
+        const post = new ApiFetch(this.action, this.method, { headers: headers });
+        try {
+            var result = await post.send(data, {});
+        } catch (error) {
+            error_container.innerText = error.result.error
+            return;
+        }
+        if (result.login === "successful") window.location.reload();
+    }
+}

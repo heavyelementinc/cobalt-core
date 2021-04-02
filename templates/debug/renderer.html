@@ -1,0 +1,50 @@
+<h1>Renderer Test</h1>
+<pre>
+<table>
+    <tr>
+        <th colspan="3">Getting Values</th>
+    </tr>
+    <tr>
+        <td>&#123;&#123;mustache&#125;&#125;</td>
+        <td>{{mustache}}</td>
+    </tr>
+    <tr>
+        <td>&#123;&#123;!mustache&#125;&#125;</td>
+        <td>{{!mustache}}</td>
+    </tr>
+    <tr>
+        <td>&#37;&#37;tictac&#37;&#37;</td>
+        <td>%%tictac%%</td>
+    </tr>
+    <tr>
+        <td>&#37;&#37;!tictac&#37;&#37;</td>
+        <td>%%!tictac%%</td>
+    </tr>
+    <tr>
+        <td>&#123;&#123;lookup.field&#125;&#125;</td>
+        <td>{{lookup.field}}</td>
+    </tr>
+    <tr>
+        <td>&commat;app("domain_name");</td>
+        <td>@app("domain_name");</td>
+    </tr>
+    <tr>
+        <th colspan='3'></th>
+    </tr>
+    <tr>
+        <th colspan='3'>Datatype Presentation</th>
+    </tr>
+    <tr>
+        <td>booleans</td>
+        <td><code>{{bools.true}} {{bools.false}} {{null}}</code></td>
+    </tr>
+    <tr>
+        <td>Object Reference</td>
+        <td>{{object}}</td>
+    </tr>
+    <tr>
+        <td>Object Lookup</td>
+        <td>{{object.property}}</td>
+    </tr>
+</table>
+</pre>

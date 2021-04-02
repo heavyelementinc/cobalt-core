@@ -1,0 +1,6 @@
+{
+    "require": {
+        "mongodb/mongodb": "^1.5",
+        "erusev/parsedown": "^1.7"
+    }
+}

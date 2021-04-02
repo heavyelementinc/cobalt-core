@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{title}} | {{app.app_name}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="version" content='{{app.version}}'>
+    <meta name="token" content="@get_csrf_token();">
+    <meta name="theme-color" content="#fafafa">
+    <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <link
+        href="https://fonts.googleapis.com/css?family={{app.fonts.head.import}}|{{app.fonts.body.import}}&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+    @app_settings@
+
+    @app_meta@
+
+    @router_table@
+    <link rel="manifest" href="site.webmanifest?{{app.version}}">
+    <link rel="apple-touch-icon" href="icon.png?{{app.version}}">
+    <!-- Place favicon.ico in the root directory -->
+
+    <link rel="stylesheet" href="/core-content/css/normalize.css?{{app.version}}">
+    <link rel="stylesheet" href="/res/css/main.css?{{app.version}}">
+</head>
+
+<body id="{{body_id}}">
+    <noscript>
+        {{app.name}} <strong>REQUIRES</strong> JavaScript. Basic functionality <strong>will not work</strong>
+        without JavaScript enabled. Please enable JavaScript or upgrade your browser.</noscript>
+    <label id="nav-menu-spawn" for="nav-menu-spawn-nojs">
+        <ion-icon name="menu"></ion-icon>
+    </label>
+    <input type="checkbox" id="nav-menu-spawn-nojs">
+    <header>
+        @header_content@
+        @session_panel@
+        @user_menu@
+    </header>
+    @auth_panel@
+    <main id="{{main_id}}">
+        @main_content@
+    </main>
+    <footer>
+        @footer_content@
+        <section class='footer-credits'>
+
+            <span>&copy;@date("Y"); {{app.app_copyright_name}}</span> &mdash; <span>All Rights Reserved</span> &mdash;
+            <span>Design by <a href="{{app.designer.href}}"
+                    title="{{app.designer.title}}">{{app.designer.name}}</a></span>
+        </section>
+    </footer>
+    @script_content@
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+{
+    "no-session": {
+        "SignIn": {
+            "icon": "log-in",
+            "text": "Log in",
+            "prereq": {
+                "Auth_logins_enabled": true
+            }
+        }
+    },
+    "session": {
+        "SignOut": {
+            "icon": "log-out",
+            "text": "Log out",
+            "prereq": {
+                "Auth_logins_enabled": true
+            }
+        }
+    }
+}

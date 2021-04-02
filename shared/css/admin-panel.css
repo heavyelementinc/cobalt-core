@@ -1,0 +1,48 @@
+:root {
+    --admin-panel-width: 200px;
+}
+
+nav#admin-panel {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    width: var(--admin-panel-width);
+    height: 100%;
+}
+
+#admin-panel ul {
+    background: var(--project-color-header-branding);
+    flex-grow: 1;
+    height: 100%;
+}
+
+#admin-panel li a {
+    display: flex;
+    flex-direction: column;
+    /*     align-items:center; */
+    justify-content: center;
+    padding: 10px;
+    height: 50px;
+    box-sizing: border-box;
+    color: white;
+    text-decoration: none;
+    transition: background-color .3s, color .2s, padding-left .5s;
+}
+
+#admin-panel li a.nav-panel--active {
+    background-color: white;
+    color: black;
+    padding-left: 20px;
+}
+
+#admin-panel li a:hover {
+    background-color: white;
+    color: black;
+    padding-left: 20px;
+}
+
+main {
+    margin-left: var(--admin-panel-width);
+    padding: 20px;
+}

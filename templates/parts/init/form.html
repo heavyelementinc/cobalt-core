@@ -1,0 +1,25 @@
+<h1>Welcome to {{app.app_name}}</h1>
+<form-request method="POST" action="/setup">
+    <h2>{{app.app_name}} Database Config</h2>
+    <fieldset>
+        <label>Database</label>
+        <input name="database">
+    </fieldset>
+    <fieldset>
+        <label>Supply your database username</label>
+        <input name="db_usr">
+    </fieldset>
+    <fieldset>
+        <label>Supply your database password</label>
+        <input name="db_pwd" type="password">
+    </fieldset>
+    <h2>{{app.app_name}} Admin User</h2>
+    <fieldset>
+        <label>Create your admin user</label>
+        <input name="uname">
+    </fieldset>
+    <fieldset>
+        <label>Create your admin password</label>
+        <input name="pword" type="password">
+    </fieldset>
+</form-request>

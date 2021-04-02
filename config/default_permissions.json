@@ -1,0 +1,34 @@
+{
+    "Admin_panel_access": {
+        "groups": {
+            "Admin": true
+        },
+        "label": "Access to the admin panel.",
+        "dangerous": true,
+        "default": false
+    },
+    "Auth_allow_editing_users": {
+        "groups": {
+            "Users": true
+        },
+        "label": "Access user editing features and change user account info.",
+        "dangerous": true,
+        "default": false
+    },
+    "Auth_allow_modifying_user_permissions": {
+        "groups": {
+            "Users": true
+        },
+        "label": "Modify user account permissions and add/remove users from groups.",
+        "dangerous": true,
+        "default": false
+    },
+    "Auth_delete_user_accounts": {
+        "groups": {
+            "Users": true
+        },
+        "label": "Able to delete user accounts",
+        "dangerous": true,
+        "default": false
+    }
+}
