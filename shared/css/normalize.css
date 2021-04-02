@@ -310,10 +310,6 @@ header nav a.navigation--current {
     margin-right: .5rem;
 }
 
-a.button {
-    color: white;
-}
-
 footer {
     display: flex;
     flex-direction: row;

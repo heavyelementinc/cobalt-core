@@ -87,7 +87,7 @@ require_once __DIR__ . "/SettingsManagerException.php"; // Just in case we need 
 
 class SettingsManager implements Iterator{
     private $enable_settings_from_cache = true;
-    private $default_settings_path = __ENV_ROOT__ . "/config/setting_definitions.json";
+    private $default_settings_path = __ENV_ROOT__ . "/config/setting_definitions.jsonc";
     private $default;
 
     private $app_settings_path = [
@@ -97,7 +97,7 @@ class SettingsManager implements Iterator{
     ];
     private $app_cache_filename = "config/settings.json";
     private $app_settings = [];
-    
+
     // Public settings are exposed to the client as a JavaScript Object Literal and with every API
     // call which has the "X-Update-Client-State" header set to "true"
     // TODO: API needs to handle "X-Update-Client-State" header!
@@ -112,9 +112,18 @@ class SettingsManager implements Iterator{
         $this->enable_settings_from_cache = $cache;
         // Check if the core settings file exists
         if(!file_exists($this->default_settings_path)) throw new SettingsManagerException("No core settings file found");
-
-        // Import and decode our settings definitions.
-        $this->default = json_decode(file_get_contents($this->default_settings_path),true,512,JSON_THROW_ON_ERROR);
+        
+        // Import our settings definitions
+        $json = file_get_contents($this->default_settings_path);
+        // // Strip all comments from the settings
+        // $json = preg_replace( '/\s*(?!<\")\/\*[^\*]+\*\/(?!\")\s*/m' , '' , $json);
+        
+        try{
+            // Try to decode our settings definitions.
+            $this->default = jsonc_decode($json,true,512,JSON_THROW_ON_ERROR);
+        } catch (Exception $e){
+            die("Syntactic error in settings definitions");
+        }
         
         // Check if we need to import our settings from the cache
         $this->got_from_cache = $this->from_cache();

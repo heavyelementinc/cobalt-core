@@ -1,0 +1,20 @@
+/* THIS DOES NOT WORK YET */
+.cobalt-parallax--container{
+  --parallax-depth: 8px;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  perspective: var(--parallax-depth);
+  perspective-origin: 0%;
+  /* display: flex;
+  flex-direction: column; */
+  position:relative;
+}
+
+.cobalt-parallax--item{
+  --z-placement: 3px;
+  --scale: calc(calc(var(--parallax-depth) / var(--z-placement)) / var(--parallax-depth) );
+  transform-origin: 0;
+  transform: translateZ(var(--z-placement)) scale(var(--scale));
+  position: absolute;
+}

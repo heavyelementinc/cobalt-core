@@ -274,6 +274,13 @@ function get_json($file_name,$array = true){
     return json_decode(file_get_contents($file_name),$array);
 }
 
+function jsonc_decode($json, $assoc = false, $depth = 512, $options = 0) {
+    /** Remove // and multiline comments from JSON, then parse. */
+    $json = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#", '', $json);
+
+    return json_decode($json, $assoc, $depth, $options);
+}
+
 /** Build Object */
 
 function build_array_from_path(&$arr,$path,$value,$delimiter = "."){

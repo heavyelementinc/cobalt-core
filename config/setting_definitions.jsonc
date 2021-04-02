@@ -1,20 +1,37 @@
+/*
+ *   Setting Definitions
+ *   This document provides a default value for every setting included in the Cobalt
+ *   Engine as well as an optional list of directives (denoted by a $ prepending 
+ *   their name).
+ *
+ *   These optional directives provide a list of instructions to the SettingsManager
+ *   which allows for dynamic assignment of setting properties across both the 
+ *   default and app-specific settings.
+ *
+ *   A full list of directives can be found in the SettingsManger documentation.
+*/
 {
+    /* Provide a doman name that we expect to be listening for. This will later be used to add CORS headers. */
     "domain_name": {
         "default": ""
     },
+    /* The full name of the application. */
     "app_name": {
         "default": "Cobalt Engine",
         "$public": true
     },
+    /* A shortened name for the application. */
     "app_short_name": {
         "default": "",
         "$alt": "app_name",
         "$public": true
     },
+    /* A bespoke name to be listed in the copyright notice */
     "app_copyright_name": {
         "default": "",
         "$alt": "app_short_name"
     },
+    /* The name of the designer as well as their website and title text */
     "designer": {
         "default": {
             "name": "Heavy Element, Inc.",
@@ -22,15 +39,19 @@
             "title": "Maine's Premier New Media Production Studio"
         }
     },
+    /* If true, the settings will be cached after being processed and the cache will only be updated if any of the settings files are modified. */
     "cache_settings": {
         "default": true
     },
+    /* The version number of our application. Used most frequently as a cache break */
     "version": {
         "default": "0.0"
     },
+    /* If debugging is true, then a bunch of things happen. TODO: Document all this. */
     "debug": {
         "default": true
     },
+    /* API Routes consist of prefixes for URI path names. These prefixes are used to load the appropriate routing table and tell the engine which processor to use to handle the request. */
     "api_routes": {
         "default": {
             "admin": {
@@ -53,27 +74,35 @@
         },
         "$merge": true
     },
+    /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
-        "default": true
+        "default": false
     },
+    /* I don't think this does anything yet -GM */
     "route_cache_enabled": {
         "default": false
     },
+    /* Enabled the core-content/ route */
     "enable_core_content": {
         "default": true
     },
+    /* The name of our Mongo database */
     "database": {
         "default": ""
     },
+    /* Our database user */
     "db_usr": {
         "default": ""
     },
+    /* Our db user's password */
     "db_pwd": {
         "default": ""
     },
+    /* Our default address. */
     "db_addr": {
         "default": "localhost:27017"
     },
+    /* Our databse authentication string, if default is non-false */
     "database_authentication": {
         "default": false,
         "$combine": [
@@ -83,6 +112,7 @@
             "@"
         ]
     },
+    /* Our total server address. */
     "server_address": {
         "default": "",
         "$combine": [
@@ -90,8 +120,9 @@
             "database_authentication",
             "db_addr"
         ],
-        "$env": "MONGODB"
+        "$env": "COBALT_MONGODB"
     },
+    /* Fonts to be used. This can be referenced by the rendering engine for email templates and more. */
     "fonts": {
         "default": {
             "head": {
@@ -106,6 +137,7 @@
         "$merge": true,
         "$style": true
     },
+    /* Basic CSS variables we want included in our body. Can also be used for email templates and more. */
     "css-vars": {
         "default": {
             "modal-z-index": 2000,
@@ -127,6 +159,7 @@
         "$merge": true,
         "$style": true
     },
+    /* The image displayed when loading a page. */
     "login-hero-sidebar": {
         "default": "url(/core-content/img/default_poster_image.jpg)",
         "$style": true
@@ -218,8 +251,8 @@
         "default": "/manage/user"
     },
     "Auth_enable_root_group": {
-        "default": false,
-        "comment": "THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!!"
+        /* THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
+        "default": false
     },
     "API_CORS_allowed_origins": {
         "default": [],

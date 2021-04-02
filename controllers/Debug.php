@@ -19,4 +19,11 @@ class Debug extends \Controllers\Pages{
         add_vars(['title' => 'Input Test']);
         add_template("/debug/inputs.html");
     }
+    function debug_parallax(){
+        add_vars([
+            'title' => 'Parallax Test',
+            'body_class' => "cobalt-parallax--container"
+        ]);
+        add_template("/debug/parallax.html");
+    }
 }
