@@ -270,6 +270,7 @@
             "domain_name"
         ]
     },
+    /* The id attribute of the body tag when errors happen in a web context. */
     "HTTP_error_body_id": {
         "default": "cobalt_http_error"
     }
