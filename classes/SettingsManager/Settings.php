@@ -1,7 +1,7 @@
 <?php
 /** This should be where settings are actually stored. */
 namespace SettingsManager;
-class Settings implements Iterator{
+class Settings implements \Iterator{
     function __construct(){
 
     }

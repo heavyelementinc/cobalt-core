@@ -27,7 +27,11 @@ require_once __DIR__ . "/vendor/autoload.php";
 spl_autoload_register("cobalt_autoload",true);
 
 // Instantiate our settings (true for loading settings from cache)
-$application = new SettingsManager(true);
+try{
+    $application = new SettingsManager(true);
+} catch (Exception $e){
+    die($e->getMessage());
+}
 $GLOBALS['app'] = $application;
 define("__APP_SETTINGS__",$application->get_settings());
 

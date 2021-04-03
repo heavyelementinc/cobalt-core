@@ -94,24 +94,34 @@
  *   #2 MUST have a 'default' directive--even if other directives override its 
  *      value
  * 
- * Unrecognized settings in app_settings lacking definition directives will 
+ * Unrecognized settings in tmp_app_setting_values lacking definition directives will 
  * throw a warning.
  */
 
 require_once __DIR__ . "/SettingsManagerException.php"; // Just in case we need to throw an exception
 
 class SettingsManager implements Iterator{
+    /** Allow the SettingsManager to "compile" the app's settings with the 
+     * defaults and restore them from the "compiled" version later. */
     private $enable_settings_from_cache = true;
-    private $default_settings_path = __ENV_ROOT__ . "/config/setting_definitions.jsonc";
-    private $default;
+    /** The path to the default setting definitions file. */
+    private $path_to_settings_definitions_file = __ENV_ROOT__ . "/config/setting_definitions.jsonc";
+    
+    /** The parsed default settings */
+    private $setting_definitions = []; 
 
-    private $app_settings_path = [
-        __ENV_ROOT__ . "/ignored/config/settings.json",
-        __APP_ROOT__ . "/ignored/config/settings.json",
-        __APP_ROOT__ . "/private/config/settings.json"
+    /** Possible files containing app settings */
+    private $app_paths_settings = [
+        __ENV_ROOT__ . "/ignored/config/settings.json", // .gitignored file
+        __APP_ROOT__ . "/ignored/config/settings.json", // .gitignored file
+        __APP_ROOT__ . "/private/config/settings.json"  // App's settings
     ];
+
+    /** Filename where the "compiled" settings should be saved to */
     private $app_cache_filename = "config/settings.json";
-    private $app_settings = [];
+    
+    /** Decoded  */
+    private $tmp_app_setting_values = [];
 
     // Public settings are exposed to the client as a JavaScript Object Literal and with every API
     // call which has the "X-Update-Client-State" header set to "true"
@@ -123,21 +133,31 @@ class SettingsManager implements Iterator{
      *  Manage settings
      *  ===============
      */
+
+    /** SettingsManager will load and construct our settings either from a
+     * previous "compiled" cache or by "compiling" our settings using the setting
+     * definitions file as a list of instructions (directives).
+     * 
+     * @param bool $cache - `true` to enable caching (default's to true)
+     * @return object
+    */
     function __construct($cache = true){
         $this->enable_settings_from_cache = $cache;
+        $this->settings = new \SettingsManager\Settings();
+
         // Check if the core settings file exists
-        if(!file_exists($this->default_settings_path)) throw new SettingsManagerException("No core settings file found");
+        if(!file_exists($this->path_to_settings_definitions_file)) throw new SettingsManagerException("No core settings file found");
         
         // Import our settings definitions
-        $json = file_get_contents($this->default_settings_path);
+        $json = file_get_contents($this->path_to_settings_definitions_file);
         // // Strip all comments from the settings
         // $json = preg_replace( '/\s*(?!<\")\/\*[^\*]+\*\/(?!\")\s*/m' , '' , $json);
         
         try{
             // Try to decode our settings definitions.
-            $this->default = jsonc_decode($json,true,512,JSON_THROW_ON_ERROR);
+            $this->setting_definitions = jsonc_decode($json,true,512,JSON_THROW_ON_ERROR);
         } catch (Exception $e){
-            die("Syntactic error in settings definitions");
+            die("Syntactic error in setting definitions file");
         }
         
         // Check if we need to import our settings from the cache
@@ -147,12 +167,12 @@ class SettingsManager implements Iterator{
             // Load the cached settings file
             $settings = $this->cache_resource->get("json");
 
-            $this->app_settings = $settings['app']; // Restore our app settings 
+            $this->tmp_app_setting_values = $settings['app']; // Restore our app settings 
             $this->public_settings = $settings['public']; // Restore our public settings
             $this->root_style_definition = $settings['style']; // Restore our root style definitions
 
             // Import every key into the settings object
-            foreach($this->app_settings as $name => $setting){
+            foreach($this->tmp_app_setting_values as $name => $setting){
                 $this->set($name,$setting);
             }
         } else { // Settings DO NOT exist.
@@ -167,16 +187,18 @@ class SettingsManager implements Iterator{
                 'style' => $this->root_style_definition
             ],true);
         }
-        $this->index = array_keys($this->default);
+        $this->index = array_keys($this->setting_definitions);
     }
 
-    function __destruct(){
-
-    }
-
+    /** Checks file modified times for all settings files (including definitions) 
+     * and returns a "false" if any of them have a newer modified time than our
+     * cached version.
+     * 
+     * @return bool
+     */
     function from_cache(){
         $this->cache_resource = new \Cache\Manager($this->app_cache_filename);
-        $res = [$this->default_settings_path,...$this->app_settings_path];
+        $res = [$this->path_to_settings_definitions_file,...$this->app_paths_settings];
 
         foreach($res as $file){
             if(!file_exists($file)) continue;
@@ -185,60 +207,82 @@ class SettingsManager implements Iterator{
         return true;
     }
 
+    /** Loads and parses JSON files if they exist 
+     *
+     * @return null
+    */
     function load_settings(){
-        foreach($this->app_settings_path as $path){
-            // Check if the app settings file exists and decode it (it should be okay if the app settings don't exist)
-            if(file_exists($path)) $this->app_settings = array_merge($this->app_settings,json_decode(file_get_contents($path),true,512,JSON_THROW_ON_ERROR));
+        foreach($this->app_paths_settings as $path){
+            if(!file_exists($path)) continue; // Skip this file, it doesn't exist.
+            // Load JSON file and decode it
+            // Shuld this be jsonc_decode?
+            $json = json_decode(file_get_contents($path),true,512,JSON_THROW_ON_ERROR);
+            // Check if the app settings file exists and decode it (it should be
+            // okay if the app settings don't exist)
+            $this->tmp_app_setting_values = array_merge($this->tmp_app_setting_values,$json);
         }
     }
 
     function process(){
-        // If we're defining a new setting in our app settings, we need to integrate that
-        // into our default_settings before we continue
-        foreach($this->app_settings as $k => $v){
-            // Check if they key does not exist in default, check its type and look for a 'default'
-            if(!key_exists($k,$this->default)){
-                if(gettype($v) === "array" && key_exists('default',$v)) {
-                    // Add the definition to our defaults
-                    $this->default[$k] = $v;
-                    // Then overwrite the app_setting to the default value.
-                    $this->app_settings[$k] = $v['default'];
-                } else trigger_error("$k is not a recognized setting and lacks proper definition directives.",E_USER_WARNING);
+        // If we're defining a new setting in our app settings, we need to
+        // integrate that into our default_settings before we continue
+        foreach($this->tmp_app_setting_values as $k => $v){
+            // Check if the key does not exist in default, check its type and 
+            // look for a 'default'
+            if(!key_exists($k,$this->setting_definitions)){
+                $this->process_app_definitions($k,$v);
             }
         }
 
-        /** TODO: HIDEOUS NESTING! FIX THIS! */
         try{
             // Loop through our settings file
-            foreach($this->default as $key => $meta){
-                // Loop through our directives
-                foreach($meta as $directive => $value){
-                    if($directive === "default") $this->set($key,$value);
-
-                    // Check if our directive starts with a $
-                    if($directive[0] !== "$") continue;
-
-                    // If it does, remove the dollar sign and check if the method exists
-                    $directive = substr($directive,1);
-                    if(!method_exists($this,$directive)) throw new SettingsManagerException("Directive $directive does not have a corresponding method.");
-                    // Execute the method and store the return value as the setting
-                    $this->{$directive}($value,$meta,$key);
-                    continue; // Skip setting the default value
-                }
+            foreach($this->setting_definitions as $key => $meta){
+                $this->process_directives($key,$meta);
             }
         } catch(SettingsManagerException $e){
             die($e->getMessage());
         }
     }
 
+    function process_app_definitions($k,$v){
+        if(gettype($v) !== "array" || !key_exists('default',$v)) {
+            trigger_error("$k is not a recognized setting and lacks proper definition directives.",E_USER_WARNING);
+            return;
+        }
+        // Add the app's definitions to our list of definitions.
+        $this->setting_definitions[$k] = $v;
+        
+        // Then set the app_setting to the default value.
+        $this->tmp_app_setting_values[$k] = $v['default'];
+    }
+
+    function process_directives($key,$meta){
+        // Loop through our directives
+        foreach($meta as $directive => $value){
+            if($directive === "default") $this->set($key,$value);
+
+            // Check if our directive starts with a $
+            if($directive[0] !== "$") continue;
+
+            // If it does, remove the dollar sign and check if the method exists
+            $directive = substr($directive,1);
+            if(!method_exists($this,$directive)) throw new SettingsManagerException("Directive $directive does not have a corresponding method.");
+            
+            // Execute the method and store the return value as the setting
+            $this->{$directive}($value,$meta,$key);
+
+            continue; // Skip setting the default value
+        }
+    }
+
     function set($key,$value){
         /** Check if the key exists, if it does, set a matching propety in this class with the value
-         * stored in app_settings[$key] and return
+         * stored in tmp_app_setting_values[$key] and return
          * 
          * Otherwise, assign the default.
          */
-        if(key_exists($key,$this->app_settings)) {
-            $this->{$key} = $this->app_settings[$key];
+        if(key_exists($key,$this->tmp_app_setting_values)) {
+            $this->{$key} = $this->tmp_app_setting_values[$key];
             return;
         }
         $this->{$key} = $value;
@@ -257,7 +301,7 @@ class SettingsManager implements Iterator{
     function alt($reference, $meta, $key){
         /** Get the value we already have assigned */
         $value = $this->{$key};
-        if(!key_exists($key,$this->app_settings)) $value = "";
+        if(!key_exists($key,$this->tmp_app_setting_values)) $value = "";
         /** Check its type and see if it's a string. If it's not, do nothing */
         $type = gettype($value);
         if($type !== "string") return;
@@ -281,13 +325,13 @@ class SettingsManager implements Iterator{
 
     function merge($value, $meta, $key){
         $apps = [];
-        if(key_exists($key,$this->app_settings)) $apps = $this->app_settings[$key];
+        if(key_exists($key,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$key];
         $this->{$key} = array_merge($meta['default'],$apps);
     }
 
     function mergeAll($value, $meta, $key){
         $apps = [];
-        if(key_exists($key,$this->app_settings)) $apps = $this->app_settings[$key];
+        if(key_exists($key,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$key];
         $this->{$key} = array_merge_recursive($meta['default'],$apps);
     }
 
@@ -306,9 +350,9 @@ class SettingsManager implements Iterator{
         // As specified in the above documentation, this directive uses the 'default' value for
         // as our pathname or, where available, the app's specific pathname
         if(key_exists('default',$meta)) $path_name = $meta['default'];
-        if(key_exists($key,$this->app_settings)) {
+        if(key_exists($key,$this->tmp_app_setting_values)) {
             $root = __APP_ROOT__ . "/";
-            $path_name = $this->app_settings[$key];
+            $path_name = $this->tmp_app_setting_values[$key];
         }
         if($path_name === null) throw new SettingsManagerException("The app must specifiy a file to load! ($key)");
         if($path_name[0] !== "/") $path_name = $root . $path_name;
@@ -380,7 +424,7 @@ class SettingsManager implements Iterator{
 
     function get_settings(){
         $settings = [];
-        foreach($this->default as $key => $value){
+        foreach($this->setting_definitions as $key => $value){
             $settings[$key] = $this->{$key};
         }
         return $settings;
