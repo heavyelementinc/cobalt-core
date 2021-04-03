@@ -184,7 +184,8 @@
             "ApiFetch.js",
             "UserMenu.js",
             "Router.js",
-            "main.js"
+            "main.js",
+            "app.js"
         ],
         "$prepend": true
     },
