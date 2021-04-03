@@ -1,17 +1,18 @@
 /*
  *   Setting Definitions
- *   This document provides a default value for every setting included in the Cobalt
- *   Engine as well as an optional list of directives (denoted by a $ prepending 
- *   their name).
+ *   This document provides a default value for every setting included in the
+ *   Cobalt Engine as well as an optional list of directives (denoted by a $ 
+ *   prepending their name).
  *
- *   These optional directives provide a list of instructions to the SettingsManager
- *   which allows for dynamic assignment of setting properties across both the 
- *   default and app-specific settings.
+ *   These optional directives provide a list of instructions to the 
+ *   SettingsManager which allows for dynamic assignment of setting properties 
+ *   across both the default and app-specific settings.
  *
  *   A full list of directives can be found in the SettingsManger documentation.
 */
 {
-    /* Provide a doman name that we expect to be listening for. This will later be used to add CORS headers. */
+    /* Provide a doman name that we expect to be listening for. This will later 
+    be used to add CORS headers. */
     "domain_name": {
         "default": ""
     },
@@ -39,19 +40,24 @@
             "title": "Maine's Premier New Media Production Studio"
         }
     },
-    /* If true, the settings will be cached after being processed and the cache will only be updated if any of the settings files are modified. */
+    /* If true, the settings will be cached after being processed and the cache 
+    will only be updated if any of the settings files are modified. */
     "cache_settings": {
         "default": true
     },
-    /* The version number of our application. Used most frequently as a cache break */
+    /* The version number of our application. Used most frequently as a 
+    cache break */
     "version": {
         "default": "0.0"
     },
-    /* If debugging is true, then a bunch of things happen. TODO: Document all this. */
+    /* If debugging is true, then a bunch of things happen. TODO: Document 
+    all this. */
     "debug": {
         "default": true
     },
-    /* API Routes consist of prefixes for URI path names. These prefixes are used to load the appropriate routing table and tell the engine which processor to use to handle the request. */
+    /* API Routes consist of prefixes for URI path names. These prefixes are 
+    used to load the appropriate routing table and tell the engine which 
+    processor to use to handle the request. */
     "api_routes": {
         "default": {
             "admin": {
@@ -122,7 +128,8 @@
         ],
         "$env": "COBALT_MONGODB"
     },
-    /* Fonts to be used. This can be referenced by the rendering engine for email templates and more. */
+    /* Fonts to be used. This can be referenced by the rendering engine for 
+    email templates and more. */
     "fonts": {
         "default": {
             "head": {
@@ -137,7 +144,8 @@
         "$merge": true,
         "$style": true
     },
-    /* Basic CSS variables we want included in our body. Can also be used for email templates and more. */
+    /* Basic CSS variables we want included in our body. Can also be used for 
+    email templates and more. */
     "css-vars": {
         "default": {
             "modal-z-index": 2000,
@@ -251,7 +259,8 @@
         "default": "/manage/user"
     },
     "Auth_enable_root_group": {
-        /* THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
+        /* THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS 
+        *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
         "default": false
     },
     "API_CORS_allowed_origins": {

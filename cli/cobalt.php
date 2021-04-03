@@ -1,4 +1,10 @@
 <?php
+
+/** CHECK PHP VERSION */
+
+if( version_compare(phpversion(), '7.3.0', '<=') ) die("Your version of PHP must be version 7.4 or above.");
+
+/** Import our helper functions */
 require __DIR__ . "/cobalt_cli_helper_functions.php";
 require __DIR__ . "/cobalt_cli_command_functions.php";
 

@@ -242,6 +242,9 @@ class WebHandler{
         return file_get_contents($candidates[0]);
     }
 
+    function flush_body_template(){
+        $this->template_body = $this->main_content_replacement;
+    } 
     /** A wrapper function for main_content_from_template. This is for backwards
      * compatibilty with Ephemeral 1.0
      */

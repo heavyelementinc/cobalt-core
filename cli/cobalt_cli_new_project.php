@@ -4,15 +4,21 @@ function __new_project(){
     print("Let's set up your new Cobalt App!\nType `!quit` at any point to abort without making any changes.\n");
     $app = [
         'root' => [
-            'prompt' => 'Your app directory',
+            'prompt' => "Project directory (name only, not path)",
             'validate' => '__np_validate_directory',
+            'value' => null,
+            'execute' => '__np_create_directory',
         ],
         'app_name' => [
             'prompt' => "What's your app name?",
+            'validate' => '__np_validate_cannot_be_blank',
+            'value' => null,
+            'execute' => '__np_write_app_settings',
         ],
         'database' => [
             'prompt' => "Provide a unique name for your database",
-            'validate' => "__np_validate_cannot_be_blank"
+            'validate' => "__np_validate_cannot_be_blank",
+            'value' => null,
         ],
         'Auth_enable_logins' => [
             'prompt' => "Enable user accounts? (Y/n)",

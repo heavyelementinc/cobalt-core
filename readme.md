@@ -15,12 +15,23 @@ To get started with Cobalt, you'll need at least PHP version 7.4 and MongoDB on 
 
 ## On Ubuntu:
 ```
-  sudo apt install apache2 php7.4
+  sudo apt install apache2 php7.4 php-mongodb
+  # Depending on your setup, you'll also want MongoDB set up on your system
   sudo a2enmod rewrite
 ```
 
 ## MongoDB
 If you have enabled MongoDB authentication, you'll want to provide your username and password in `app_directory/ignored/settings.json`. You *can* add these to your `app_directory/private/config/settings.json` but this is **not** recommended.
+
+If you're running Cobalt in a Docker container, you can specify your MongoDB connection information as an environment variable.
+
+```
+COBALT_MONGODB=mongodb:\\localhost:27017
+
+--- OR ---
+
+COBALT_MONGODB=mongodb:\\username:password@localhost:27017
+```
 
 ## Cloning this repo
 If you plan on cloning this repository, you must run composer as the `www-data` user in the core directory.
