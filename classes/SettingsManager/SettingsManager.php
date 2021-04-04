@@ -63,7 +63,7 @@
  *   $mergeAll - Recursively merges the 'default' of default settings and the 
  *               value of the app setting with app settings taking precedence.
  *
- *   $add      - Accepts an array of variable names, will append those variables
+ *   $push     - Accepts an array of variable names, will append those variables
  *               to the end of the default and app's specified array
  * 
  * MISC HANDLING
@@ -329,7 +329,7 @@ class SettingsManager{
         $this->set($key, $value);
     }
 
-    function add($reference, $meta, $key){
+    function push($reference, $meta, $key){
         $mutant = [];
         foreach($reference as $ref){
             $value = lookup_js_notation($ref,$this,false);

@@ -296,7 +296,7 @@
     },
     "API_CORS_allowed_origins": {
         "default": [],
-        "$add": [
+        "$push": [
             "domain_name"
         ]
     },
