@@ -72,13 +72,16 @@
  *   $required - This directive accepts a key => pair value of Setting_name => 
  *               bool value and will compare the value of Setting_name to the 
  *               bool specified. If the comparison FAILS, the current setting 
- *               will be set to false. If the comparison for all required 
+ *               will be set to the value of on_fail_value or false if no 
+ *               on_fail_value is supplied. If the comparison for all required 
  *               settings succeeds, either the app's setting OR the default 
  *               value will be allowed to stand.
  * 
+ *               on_fail_value should be supplied as a key in the $required
+ *               directive. It doesn't matter what order the list is supplied.
+ * 
  *               NOTE: non-boolean values of $required settings may fail the 
- *               check and result in a boolean value if the check fails. This 
- *               directive is meant for use with normally boolean.
+ *               check. Please supply an on_fail_value for non-boolean values.
  * 
  *   $public   - If truthy, this setting is exposed to the client as JavaScript.
  *               Should be last directive.
@@ -100,7 +103,7 @@
 
 require_once __DIR__ . "/SettingsManagerException.php"; // Just in case we need to throw an exception
 
-class SettingsManager implements Iterator{
+class SettingsManager{
     /** Allow the SettingsManager to "compile" the app's settings with the 
      * defaults and restore them from the "compiled" version later. */
     private $enable_settings_from_cache = true;
@@ -120,7 +123,7 @@ class SettingsManager implements Iterator{
     /** Filename where the "compiled" settings should be saved to */
     private $app_cache_filename = "config/settings.json";
     
-    /** Decoded  */
+    /** Decoded value  */
     private $tmp_app_setting_values = [];
 
     // Public settings are exposed to the client as a JavaScript Object Literal and with every API
@@ -175,19 +178,22 @@ class SettingsManager implements Iterator{
             foreach($this->tmp_app_setting_values as $name => $setting){
                 $this->set($name,$setting);
             }
-        } else { // Settings DO NOT exist.
-            $GLOBALS['time_to_update'] = true;
-            // Load all the settings files
-            $this->load_settings();
-            // Process the settings
-            $this->process();
-            $this->cache_resource->set([
-                'app' => $this->get_settings(),
-                'public' => $this->public_settings,
-                'style' => $this->root_style_definition
-            ],true);
+            $this->settings->set_index(array_keys($this->setting_definitions));
+            return $this;
         }
-        $this->index = array_keys($this->setting_definitions);
+        
+        $GLOBALS['time_to_update'] = true;
+        // Load all the settings files
+        $this->load_settings();
+        // Process the settings
+        $this->process();
+        $settings = $this->get_settings();
+        $this->cache_resource->set([
+            'app' => $settings,
+            'public' => $this->public_settings,
+            'style' => $this->root_style_definition
+        ],true);
+    
     }
 
     /** Checks file modified times for all settings files (including definitions) 
@@ -242,6 +248,8 @@ class SettingsManager implements Iterator{
         } catch(SettingsManagerException $e){
             die($e->getMessage());
         }
+
+        $this->settings->set_index(array_keys($this->setting_definitions));
     }
 
     function process_app_definitions($k,$v){
@@ -259,7 +267,11 @@ class SettingsManager implements Iterator{
     function process_directives($key,$meta){
         // Loop through our directives
         foreach($meta as $directive => $value){
-            if($directive === "default") $this->set($key,$value);
+            if($directive === "default") {
+                $v = $this->tmp_app_setting_values[$key] ?? $value;
+                // if(isset($this->tmp_app_setting_values[$key])) $v = ;
+                $this->set($key,$v);
+            }
 
             // Check if our directive starts with a $
             if($directive[0] !== "$") continue;
@@ -275,17 +287,22 @@ class SettingsManager implements Iterator{
         }
     }
 
+    function get($key){
+        if(!isset($this->settings->{$key})) return null;
+        return $this->settings->{$key};
+    }
+
     function set($key,$value){
         /** Check if the key exists, if it does, set a matching propety in this class with the value
          * stored in tmp_app_setting_values[$key] and return
          * 
          * Otherwise, assign the default.
          */
-        if(key_exists($key,$this->tmp_app_setting_values)) {
-            $this->{$key} = $this->tmp_app_setting_values[$key];
-            return;
-        }
-        $this->{$key} = $value;
+        // if(key_exists($key,$this->tmp_app_setting_values)) {
+        //     $this->get($key) = $this->tmp_app_setting_values[$key];
+        //     return;
+        // }
+        $this->settings->{$key} = $value;
     }
 
     /** ==================
@@ -295,12 +312,12 @@ class SettingsManager implements Iterator{
 
     function env($reference, $meta, $key){
         if(!getenv($reference)) return;
-        $this->{$key} = getenv($reference);
+        $this->set($key, getenv($reference));
     }
 
     function alt($reference, $meta, $key){
         /** Get the value we already have assigned */
-        $value = $this->{$key};
+        $value = $this->get($key);
         if(!key_exists($key,$this->tmp_app_setting_values)) $value = "";
         /** Check its type and see if it's a string. If it's not, do nothing */
         $type = gettype($value);
@@ -308,8 +325,8 @@ class SettingsManager implements Iterator{
         /** Check if the value is empty */
         if(!empty($value)) return;
         /** Look up the value of our */
-        $value = lookup_js_notation($reference,$this,false);
-        $this->{$key} = $value;
+        $value = lookup_js_notation($reference,$this->settings,false);
+        $this->set($key, $value);
     }
 
     function add($reference, $meta, $key){
@@ -319,28 +336,29 @@ class SettingsManager implements Iterator{
             // if(is_string($value)) $value = [$value];
             array_push($mutant,$value);
         }
-        $mutant = array_unique(array_merge($meta['default'],$this->{$key},$mutant));
-        $this->{$key} = $mutant;
+        $mutant = array_unique(array_merge($meta['default'],$this->get($key),$mutant));
+        $this->set($key, $mutant);
     }
 
     function merge($value, $meta, $key){
         $apps = [];
         if(key_exists($key,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$key];
-        $this->{$key} = array_merge($meta['default'],$apps);
+        $this->set($key, array_merge($meta['default'],$apps));
     }
 
     function mergeAll($value, $meta, $key){
         $apps = [];
         if(key_exists($key,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$key];
-        $this->{$key} = array_merge_recursive($meta['default'],$apps);
+        $this->set($key, array_merge_recursive($meta['default'],$apps));
     }
 
     function prepend($value,$meta,$key){
-        if($meta['default'] === $this->{$key}) return; // If the arrays are the same, do nothing
+        $setting = $this->get($key);
+        if($meta['default'] === $setting) return; // If the arrays are the same, do nothing
         
-        if( !is_array($this->{$key}) ) throw new SettingsManagerException("The values provided by the app's $key are not an array.");
-        /** Merge the values of the APP (stored in $this->{$key} ) with the default values */
-        $this->{$key} = array_unique(array_merge($this->{$key},$this->meta['default']));
+        if( !is_array($setting) ) throw new SettingsManagerException("The values provided by the app's $key are not an array.");
+        /** Merge the values of the APP (stored in $this->get($key) ) with the default values */
+        $this->set($key, array_unique(array_merge($setting,$this->meta['default'])));
     }
 
     function loadJSON($value, $meta, $key){
@@ -357,7 +375,7 @@ class SettingsManager implements Iterator{
         if($path_name === null) throw new SettingsManagerException("The app must specifiy a file to load! ($key)");
         if($path_name[0] !== "/") $path_name = $root . $path_name;
         if(!file_exists($path_name)) throw new SettingsManagerException("File does not exist: $path_name");
-        $this->{$key} = json_decode(file_get_contents($path_name),$value,512,JSON_THROW_ON_ERROR);
+        $this->set($key, json_decode(file_get_contents($path_name),$value,512,JSON_THROW_ON_ERROR));
     }
 
     /** The $public directive should (probably) be the last directive */
@@ -366,55 +384,63 @@ class SettingsManager implements Iterator{
             trigger_error("The \$public directive must be set to `true` to expose $key to clients",E_USER_WARNING);
             return;
         }
-        if(property_exists($this,$key)) $value = $this->{$key};
+        if(property_exists($this,$key)) $value = $this->get($key);
         else $value = $meta['default'];
         $this->public_settings[$key] = $value; // Add the value to the public settings
     }
 
     function style($value, $meta, $key){
+        $setting = $this->get($key);
         if($key === "fonts"){
-            foreach($this->{$key} as $type => $v){
+            foreach($setting as $type => $v){
                 $this->root_style_definition .= "--project-$type-family: $v[family];\n";
             }
             return;
         }
 
         if($key === "css-vars"){
-            foreach($this->{$key} as $type => $v){
+            foreach($setting as $type => $v){
                 $this->root_style_definition .= "--project-$type: $v;\n";
             }
             return;
         }
         
-        $this->root_style_definition .= "--project-$key: ".$this->{$key}.";\n";
+        $this->root_style_definition .= "--project-$key: ".$this->get($key).";\n";
     }
 
     function combine($combination_array,$meta,$key){
-        if($this->{$key} === false ){
-            $this->{$key} = "";
+        if($this->get($key) === false ){
+            $this->set($key, "");
             return;
         }
         $mutant = "";
         foreach($combination_array as $v){
+            $property = $this->get($v);
             if ($v === '$default') $mutant .= $meta['default'];
-            else if(property_exists($this,$v)) $mutant .= $this->{$v};
+            else if($property !== null) $mutant .= $property;
             else $mutant .= $v;
         }
-        $this->{$key} = $mutant;
+        $this->set($key, $mutant);
     }
 
     function required($value,$meta,$key){
+        // The on_fail_value is not required for this method and will default to
+        // false.
+        $on_fail_value = $value['on_fail_value'] ?? false;
+        unset($value['on_fail_value']);
+
         /** Loop through the required settings */
         foreach($value as $k => $v){
-            /** If the setting is not equal to the value */
-            if($this->{$k} !== $v) {
-                /** Set the CURRENT setting to false and return */
-                $this->{$key} = false;
+            /** If the setting is not equal to the value provided */
+            if($this->get($k) !== $v) {
+                /** Set the CURRENT setting to on_fail_value */
+                $this->set($key, $on_fail_value);
                 return;
             }
         }
-        /** Check if the app has already defined this setting and if not, set th value to default */
-        if(!isset($this->{$key})) $this->{$key} = $meta['default'];
+        /** Check if the app has already defined this setting and if not, set the
+         *  value to default */
+        if($this->get($key) !== null) $this->set($key, $meta['default']);
     }
 
     /** =============
@@ -422,45 +448,17 @@ class SettingsManager implements Iterator{
      *  =============
      */
 
+    /** Gets the entire list of settings for the app. */
     function get_settings(){
-        $settings = [];
-        foreach($this->setting_definitions as $key => $value){
-            $settings[$key] = $this->{$key};
-        }
-        return $settings;
+        // $settings = [];
+        // foreach($this->setting_definitions as $key => $value){
+        //     $settings[$key] = $this->get($key);
+        // }
+        return iterator_to_array($this->settings);
     }
 
     function get_public_settings(){
         return $this->public_settings;
     }
 
-    function cleanup(){
-        return true;
-    }
-
-    /** ==============
-     *  Iterator Stuff 
-     *  ==============
-     */
-    private $pointer = 0;
-
-    public function current(){
-        return $this->{$this->index[$this->pointer]};
-    }
-
-    public function key(){
-        return $this->index[$this->pointer];
-    }
-
-    public function next(){
-        $this->pointer++;
-    }
-
-    public function rewind(){
-        $this->pointer = 0;
-    }
-
-    public function valid(){
-        return isset($this->index[$this->pointer]);
-    }
 }

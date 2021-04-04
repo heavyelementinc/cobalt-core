@@ -8,7 +8,8 @@ class Authentication{
     function __construct(){
         if(app("Auth_user_accounts_enabled")) return false;
         $this->session = new CurrentSession();
-        $ua = new UserAccount($this->session->session->user_id);
+        if(isset($this->session->session->user_id)) $ua = new UserAccount($this->session->session->user_id);
+        else return $this;
         $this->user = $ua->get_user_by_id($this->session->session->user_id);
         $this->permissions = new Permissions();
         if(!$this->user) {

@@ -16,6 +16,7 @@
 namespace Routes;
 class Router{
     public $current_route = null;
+    private $route_cache_name = "config/routes.json";
     function __construct($route_context = "web",$method = null){
         if($method === null) $method = $_SERVER['REQUEST_METHOD'];
         $this->route_context = $route_context;
@@ -25,8 +26,7 @@ class Router{
     function get_routes(){
         $GLOBALS['route_table_address'] = $this->route_context . "_routes";
         $GLOBALS[$GLOBALS['route_table_address']] = [];
-        if(app('route_cache_enabled')){
-            $this->table_from_cache();
+        if(app('route_cache_enabled') && $this->table_from_cache()){
             return;
         }
 
@@ -48,6 +48,11 @@ class Router{
 
         $this->routes = $GLOBALS[$GLOBALS['route_table_address']];
 
+    }
+
+    function table_from_cache(){
+        $this->cache_resource = new \Cache\Manager($this->route_cache_name);
+        return false;
     }
 
     function discover_route($route = null,$query = null){
@@ -100,7 +105,8 @@ class Router{
         $exe = $this->routes[$this->method][$this->current_route];
         if(isset($exe['permission']) && !$GLOBALS['auth']->has_permission($exe['permission'],$exe['group'])) throw new \Exceptions\HTTP\Unauthorized('You do not have the required privileges.');
         /** Check if we're a callable or a string and execute as necessary */
-        if(is_callable($exe['controller'])) return $this->controller_callable($exe);
+        if(is_callable($exe['controller'])) throw new Exception("Anonymous functions are no longer supported as controllers due to a desire for caching routes.");//return $this->controller_callable($exe);
+        
         if(is_string($exe['controller'])) return $this->controller_string($exe);
     }
 

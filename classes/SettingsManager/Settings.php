@@ -10,6 +10,10 @@ class Settings implements \Iterator{
      *  ==============
      */
     private $pointer = 0;
+    private $index = [];
+    public function set_index($index){
+        $this->index = $index;
+    }
 
     public function current(){
         return $this->{$this->index[$this->pointer]};

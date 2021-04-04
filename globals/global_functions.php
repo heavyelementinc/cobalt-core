@@ -18,7 +18,7 @@ function app($setting = null){
  * TODO: Implement user accounts and sessions.
  */
 function session($name = null){
-    if($name === null) return $GLOBALS['session'];
+    if($name === null) return $GLOBALS['session'] ?? null;
     if(key_exists($name,$GLOBALS['session'])) return $GLOBALS['session'][$name];
     throw new Exception("Field $name does not exist");
 }

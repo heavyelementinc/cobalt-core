@@ -52,11 +52,11 @@ class Route{
         /** Store our route data in the full route table. */
         $GLOBALS[$router_table_address][$type][$regex] = [
             'controller' => $controller,
-            'handler' => $additional['handler'],
-            'handler_data' => $handler_data,
-            'csrf_required' => $additional['requires_csrf'] ?? app("csrf_required_default"),
+            'handler'    => $additional['handler'],
+            'handler_data'  => $handler_data,
+            'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
             'permission' => $additional['permission'] ?? null,
-            'group' => $additional['group'] ?? null,
+            'group'      => $additional['group'] ?? null,
             'original_path' => $path,
             'panel_name' => $additional['name'] ?? null,
             'uri_var_names' => $var_names[1],

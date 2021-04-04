@@ -1,14 +1,22 @@
-/*
- *   Setting Definitions
- *   This document provides a default value for every setting included in the
- *   Cobalt Engine as well as an optional list of directives (denoted by a $ 
- *   prepending their name).
- *
- *   These optional directives provide a list of instructions to the 
- *   SettingsManager which allows for dynamic assignment of setting properties 
- *   across both the default and app-specific settings.
- *
- *   A full list of directives can be found in the SettingsManger documentation.
+/*  Setting Definitions
+    ===================
+
+    This document provides a default value for every setting included in the
+    Cobalt Engine as well as an optional list of directives (denoted by a $ 
+    prepending their name) for each setting.
+ 
+    These optional directives provide a list of instructions to the 
+    SettingsManager which allows for dynamic assignment of setting properties 
+    across both the default and app-specific settings.
+ 
+    A full list of directives can be found in the SettingsManger documentation.
+ 
+    At runtime, settings are stored in the __APP_SETTINGS__ constant as well as
+    $GLOBALS['app']->settings (an instance of SettingsManger\Settings())
+ 
+    After any settings file is modified, the next request will initiate the
+    "compilation" process and the computed values of every setting will be
+    cached for later reference until any settings file is modified again.
 */
 {
     /* Provide a doman name that we expect to be listening for. This will later 
@@ -172,6 +180,8 @@
         "default": "url(/core-content/img/default_poster_image.jpg)",
         "$style": true
     },
+    /* A list of JS files to be concatenated, minified, and sent to the client
+    with every page */
     "packages": {
         "default": [
             "global_functions.js",
@@ -187,15 +197,28 @@
             "main.js",
             "app.js"
         ],
-        "$prepend": true
+        "$prepend": true // Prepend user packages (is that what we want to do?)
+    },
+    /* A list of CSS files to be concatenated, minified, and sent to the client
+    with every page.
+    
+    TODO: Implement this. */
+    "css_packages": {
+        "default": [],
+        "$merge": true // User's packages should come second.
     },
     "session_cookie_name": {
-        "default": "token_session"
+        "default": "token_session" // Changing this in production will log everyone out.
     },
+    /* The CSRF seed is a secret string that is prepended to the client's 
+    session cookie to form a unique "password". This password is then encrypted
+    and sent to the client as the CSRF Token. */
     "csrf_seed": {
         "default": ""
     },
-    "csrf_required_default": {
+    /* If a route has not specified if it needs a CSRF token, this will be the
+    default value supplied for its router table entry */
+    "Router_csrf_required_default": {
         "default": true
     },
     "Web_normally_open_pages": {
@@ -207,6 +230,9 @@
     "Render_strict_variable_parsing": {
         "default": false
     },
+    /* A meta setting which will disable ALL user account settings. Anything
+    that requires privileges, has to do with user accounts, or sessions should
+    "$required": {"Auth_user_accounts_enabled": true} */
     "Auth_user_accounts_enabled": {
         "default": true
     },
@@ -251,6 +277,10 @@
     },
     "Auth_login_page": {
         "default": "/login",
+        "$required": {
+            "Auth_user_accounts_enabled": true,
+            "on_fail_value": ""
+        },
         "$public": true
     },
     "Auth_onboading_url": {
