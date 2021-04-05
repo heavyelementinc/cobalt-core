@@ -27,6 +27,7 @@ class WebHandler{
      * the `body.html` template, this is where you add them. */ 
     private $content_replacement = [
         "@app_meta@"       => "",
+        "@style_meta@"     => "",
         "@app_settings@"   => "",
         "@user_menu@"      => "",
         "@router_table@"   => "",
@@ -154,11 +155,20 @@ class WebHandler{
 
     function script_content(){
         $script_cache_name = "template-precomp/script.html";
-        $cache = new \Cache\Manager($script_cache_name);
+        return $this->cache_handler($script_cache_name,"generate_script_content");
+    }
+
+    function style_meta(){
+        $style_cache_name = "template-precomp/style.html";
+        return $this->cache_handler($style_cache_name,"generate_style_meta");
+    }
+
+    function cache_handler($cache_name,$callable){
+        $cache = new \Cache\Manager($cache_name);
         $script_content = "";
         // if($cache->outdated(__APP_ROOT__ . "/cache/config/settings.000.json",5)) {
         if($GLOBALS['time_to_update']){
-            $script_content = $this->generate_script_content($script_cache_name);
+            $script_content = $this->{$callable}($cache_name);
             $cache->set($script_content,false);
         }
         else $script_content = $cache->get();
@@ -180,12 +190,12 @@ class WebHandler{
     }
 
     function generate_script_content($script_name){
-        $script = "";
+        $script_tags = "";
         $compiled = "";
         $debug = app("debug");
         foreach(app('packages') as $package){
             if($debug){
-                $script .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
+                $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
             } else {
                 $files = files_exist([
                     __APP_ROOT__ . "/private/js/$package",
@@ -194,10 +204,47 @@ class WebHandler{
                 $compiled .= "\n\n" . file_get_contents($files[0]);
             }
         }
-        if($script === "") $script = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
-        $cache = new \Cache\Manager("js-precomp/package.js");
-        $cache->set($compiled,false);
-        return $script;
+        if($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
+
+        if($compiled !== ""){
+            $minifier = new \MatthiasMullie\Minify\JS();
+            $minifier->add($compiled);
+            $compiled = $minifier->minify();
+    
+            $cache = new \Cache\Manager("js-precomp/package.js");
+            $cache->set($compiled,false);
+        }
+        return $script_tags;
+    }
+
+    function generate_style_meta(){
+        $link_tags = "";
+        $compiled = "";
+        $debug = app("debug");
+        foreach(app('css_packages') as $package){
+            $files = files_exist([
+                __APP_ROOT__ . "/public/res/css/$package",
+                __ENV_ROOT__ . "/shared/css/$package"
+            ]);
+            if($debug === true){
+                $path = "/res/css/";
+                if( strpos($files[0], "/shared/css/") ) $path = "/core-content/css/";
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
+            } else {
+                $compiled .= "\n\n" . file_get_contents($files[0]);
+            }
+        }
+        if($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
+        
+        if($compiled !== ""){
+            $minifier = new \MatthiasMullie\Minify\CSS();
+            $minifier->add($compiled);
+            $compiled = $minifier->minify();
+    
+            $cache = new \Cache\Manager("css-precomp/package.css");
+            $cache->set($compiled,false);
+        }
+        return $link_tags;
     }
 
     function session_panel(){

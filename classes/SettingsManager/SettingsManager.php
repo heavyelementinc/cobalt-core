@@ -242,8 +242,8 @@ class SettingsManager{
 
         try{
             // Loop through our settings file
-            foreach($this->setting_definitions as $key => $meta){
-                $this->process_directives($key,$meta);
+            foreach($this->setting_definitions as $setting_name => $directives){
+                $this->process_directives($setting_name,$directives);
             }
         } catch(SettingsManagerException $e){
             die($e->getMessage());
@@ -264,13 +264,13 @@ class SettingsManager{
         $this->tmp_app_setting_values[$k] = $v['default'];
     }
 
-    function process_directives($key,$meta){
+    function process_directives($setting_name,$directives){
         // Loop through our directives
-        foreach($meta as $directive => $value){
+        foreach($directives as $directive => $value){
             if($directive === "default") {
-                $v = $this->tmp_app_setting_values[$key] ?? $value;
-                // if(isset($this->tmp_app_setting_values[$key])) $v = ;
-                $this->set($key,$v);
+                $v = $this->tmp_app_setting_values[$setting_name] ?? $value;
+                // if(isset($this->tmp_app_setting_values[$setting_name])) $v = ;
+                $this->set($setting_name,$v);
             }
 
             // Check if our directive starts with a $
@@ -281,28 +281,28 @@ class SettingsManager{
             if(!method_exists($this,$directive)) throw new SettingsManagerException("Directive $directive does not have a corresponding method.");
             
             // Execute the method and store the return value as the setting
-            $this->{$directive}($value,$meta,$key);
+            $this->{$directive}($value,$directives,$setting_name);
 
             continue; // Skip setting the default value
         }
     }
 
-    function get($key){
-        if(!isset($this->settings->{$key})) return null;
-        return $this->settings->{$key};
+    function get($setting_name){
+        if(!isset($this->settings->{$setting_name})) return null;
+        return $this->settings->{$setting_name};
     }
 
-    function set($key,$value){
+    function set($setting_name,$value){
         /** Check if the key exists, if it does, set a matching propety in this class with the value
-         * stored in tmp_app_setting_values[$key] and return
+         * stored in tmp_app_setting_values[$setting_name] and return
          * 
          * Otherwise, assign the default.
          */
-        // if(key_exists($key,$this->tmp_app_setting_values)) {
-        //     $this->get($key) = $this->tmp_app_setting_values[$key];
+        // if(key_exists($setting_name,$this->tmp_app_setting_values)) {
+        //     $this->get($setting_name) = $this->tmp_app_setting_values[$setting_name];
         //     return;
         // }
-        $this->settings->{$key} = $value;
+        $this->settings->{$setting_name} = $value;
     }
 
     /** ==================
@@ -310,15 +310,15 @@ class SettingsManager{
      *  ==================
      */
 
-    function env($reference, $meta, $key){
+    function env($reference, $directives, $setting_name){
         if(!getenv($reference)) return;
-        $this->set($key, getenv($reference));
+        $this->set($setting_name, getenv($reference));
     }
 
-    function alt($reference, $meta, $key){
+    function alt($reference, $directives, $setting_name){
         /** Get the value we already have assigned */
-        $value = $this->get($key);
-        if(!key_exists($key,$this->tmp_app_setting_values)) $value = "";
+        $value = $this->get($setting_name);
+        if(!key_exists($setting_name,$this->tmp_app_setting_values)) $value = "";
         /** Check its type and see if it's a string. If it's not, do nothing */
         $type = gettype($value);
         if($type !== "string") return;
@@ -326,104 +326,104 @@ class SettingsManager{
         if(!empty($value)) return;
         /** Look up the value of our */
         $value = lookup_js_notation($reference,$this->settings,false);
-        $this->set($key, $value);
+        $this->set($setting_name, $value);
     }
 
-    function push($reference, $meta, $key){
+    function push($reference, $directives, $setting_name){
         $mutant = [];
         foreach($reference as $ref){
             $value = lookup_js_notation($ref,$this,false);
             // if(is_string($value)) $value = [$value];
             array_push($mutant,$value);
         }
-        $mutant = array_unique(array_merge($meta['default'],$this->get($key),$mutant));
-        $this->set($key, $mutant);
+        $mutant = array_unique(array_merge($directives['default'],$this->get($setting_name),$mutant));
+        $this->set($setting_name, $mutant);
     }
 
-    function merge($value, $meta, $key){
+    function merge($value, $directives, $setting_name){
         $apps = [];
-        if(key_exists($key,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$key];
-        $this->set($key, array_merge($meta['default'],$apps));
+        if(key_exists($setting_name,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$setting_name];
+        $this->set($setting_name, array_merge($directives['default'],$apps));
     }
 
-    function mergeAll($value, $meta, $key){
+    function mergeAll($value, $directives, $setting_name){
         $apps = [];
-        if(key_exists($key,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$key];
-        $this->set($key, array_merge_recursive($meta['default'],$apps));
+        if(key_exists($setting_name,$this->tmp_app_setting_values)) $apps = $this->tmp_app_setting_values[$setting_name];
+        $this->set($setting_name, array_merge_recursive($directives['default'],$apps));
     }
 
-    function prepend($value,$meta,$key){
-        $setting = $this->get($key);
-        if($meta['default'] === $setting) return; // If the arrays are the same, do nothing
+    function prepend($value,$directives,$setting_name){
+        $setting = $this->get($setting_name);
+        if($directives['default'] === $setting) return; // If the arrays are the same, do nothing
         
-        if( !is_array($setting) ) throw new SettingsManagerException("The values provided by the app's $key are not an array.");
-        /** Merge the values of the APP (stored in $this->get($key) ) with the default values */
-        $this->set($key, array_unique(array_merge($setting,$this->meta['default'])));
+        if( !is_array($setting) ) throw new SettingsManagerException("The values provided by the app's $setting_name are not an array.");
+        /** Merge the values of the APP (stored in $this->get($setting_name) ) with the default values */
+        $this->set($setting_name, array_unique(array_merge($setting,$this->meta['default'])));
     }
 
-    function loadJSON($value, $meta, $key){
-        if(!is_bool($value)) throw new SettingsManagerException("The value provided for $key.\$loadJSON is invalid (must be bool). If you want to specify the path, it should be stored at $key.default or as $key in app settings file.");
+    function loadJSON($value, $directives, $setting_name){
+        if(!is_bool($value)) throw new SettingsManagerException("The value provided for $setting_name.\$loadJSON is invalid (must be bool). If you want to specify the path, it should be stored at $setting_name.default or as $setting_name in app settings file.");
         $root = __ENV_ROOT__ . "/"; // Set our root location
         $path_name = null; 
         // As specified in the above documentation, this directive uses the 'default' value for
         // as our pathname or, where available, the app's specific pathname
-        if(key_exists('default',$meta)) $path_name = $meta['default'];
-        if(key_exists($key,$this->tmp_app_setting_values)) {
+        if(key_exists('default',$directives)) $path_name = $directives['default'];
+        if(key_exists($setting_name,$this->tmp_app_setting_values)) {
             $root = __APP_ROOT__ . "/";
-            $path_name = $this->tmp_app_setting_values[$key];
+            $path_name = $this->tmp_app_setting_values[$setting_name];
         }
-        if($path_name === null) throw new SettingsManagerException("The app must specifiy a file to load! ($key)");
+        if($path_name === null) throw new SettingsManagerException("The app must specifiy a file to load! ($setting_name)");
         if($path_name[0] !== "/") $path_name = $root . $path_name;
         if(!file_exists($path_name)) throw new SettingsManagerException("File does not exist: $path_name");
-        $this->set($key, json_decode(file_get_contents($path_name),$value,512,JSON_THROW_ON_ERROR));
+        $this->set($setting_name, json_decode(file_get_contents($path_name),$value,512,JSON_THROW_ON_ERROR));
     }
 
     /** The $public directive should (probably) be the last directive */
-    function public($value, $meta, $key){
+    function public($value, $directives, $setting_name){
         if($value !== true) {
-            trigger_error("The \$public directive must be set to `true` to expose $key to clients",E_USER_WARNING);
+            trigger_error("The \$public directive must be set to `true` to expose $setting_name to clients",E_USER_WARNING);
             return;
         }
-        if(property_exists($this,$key)) $value = $this->get($key);
-        else $value = $meta['default'];
-        $this->public_settings[$key] = $value; // Add the value to the public settings
+        if(property_exists($this,$setting_name)) $value = $this->get($setting_name);
+        else $value = $directives['default'];
+        $this->public_settings[$setting_name] = $value; // Add the value to the public settings
     }
 
-    function style($value, $meta, $key){
-        $setting = $this->get($key);
-        if($key === "fonts"){
+    function style($value, $directives, $setting_name){
+        $setting = $this->get($setting_name);
+        if($setting_name === "fonts"){
             foreach($setting as $type => $v){
                 $this->root_style_definition .= "--project-$type-family: $v[family];\n";
             }
             return;
         }
 
-        if($key === "css-vars"){
+        if($setting_name === "css-vars"){
             foreach($setting as $type => $v){
                 $this->root_style_definition .= "--project-$type: $v;\n";
             }
             return;
         }
         
-        $this->root_style_definition .= "--project-$key: ".$this->get($key).";\n";
+        $this->root_style_definition .= "--project-$setting_name: ".$this->get($setting_name).";\n";
     }
 
-    function combine($combination_array,$meta,$key){
-        if($this->get($key) === false ){
-            $this->set($key, "");
+    function combine($combination_array,$directives,$setting_name){
+        if($this->get($setting_name) === false ){
+            $this->set($setting_name, "");
             return;
         }
         $mutant = "";
         foreach($combination_array as $v){
             $property = $this->get($v);
-            if ($v === '$default') $mutant .= $meta['default'];
+            if ($v === '$default') $mutant .= $directives['default'];
             else if($property !== null) $mutant .= $property;
             else $mutant .= $v;
         }
-        $this->set($key, $mutant);
+        $this->set($setting_name, $mutant);
     }
 
-    function required($value,$meta,$key){
+    function required($value,$directives,$setting_name){
         // The on_fail_value is not required for this method and will default to
         // false.
         $on_fail_value = $value['on_fail_value'] ?? false;
@@ -431,16 +431,17 @@ class SettingsManager{
 
         /** Loop through the required settings */
         foreach($value as $k => $v){
+            $set_value = $this->get($k);
             /** If the setting is not equal to the value provided */
-            if($this->get($k) !== $v) {
+            if($set_value !== null && $set_value !== $v) {
                 /** Set the CURRENT setting to on_fail_value */
-                $this->set($key, $on_fail_value);
+                $this->set($setting_name, $on_fail_value);
                 return;
             }
         }
         /** Check if the app has already defined this setting and if not, set the
          *  value to default */
-        if($this->get($key) !== null) $this->set($key, $meta['default']);
+        if($this->get($setting_name) === null) $this->set($setting_name, $directives['default']);
     }
 
     /** =============
@@ -451,8 +452,8 @@ class SettingsManager{
     /** Gets the entire list of settings for the app. */
     function get_settings(){
         // $settings = [];
-        // foreach($this->setting_definitions as $key => $value){
-        //     $settings[$key] = $this->get($key);
+        // foreach($this->setting_definitions as $setting_name => $value){
+        //     $settings[$setting_name] = $this->get($setting_name);
         // }
         return iterator_to_array($this->settings);
     }

@@ -25,7 +25,7 @@ class FileController extends \Controllers\FileController{
     function javascript($match){
         $cache = new \Cache\Manager("js-precomp/$match");
         if($cache->exists) {
-            $file = $cache->path_name;
+            $file = $cache->file_path;
         } else {
             $files = files_exist([
                 __APP_ROOT__ . "/private/js/$match",
@@ -36,6 +36,21 @@ class FileController extends \Controllers\FileController{
         }
 
         header("Content-Type: application/javascript;charset=UTF-8");
+        header('Content-Length: ' . filesize($file));
+        readfile($file);
+    }
+
+    function css($match){
+        $cache = new \Cache\Manager("css-precomp/$match");
+        if($cache->exists) {
+            $file = $cache->file_path;
+        } else {
+            $file = __ENV_ROOT__ . "/shared/css/$match";
+            $file_exists = file_exists($file);
+            if(!$file_exists)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
+        }
+
+        header("Content-Type: text/css;charset=UTF-8");
         header('Content-Length: ' . filesize($file));
         readfile($file);
     }

@@ -28,7 +28,7 @@ spl_autoload_register("cobalt_autoload",true);
 
 // Instantiate our settings (true for loading settings from cache)
 try{
-    $application = new SettingsManager(true);
+    $application = new SettingsManager(false);
 } catch (Exception $e){
     die($e->getMessage());
 }

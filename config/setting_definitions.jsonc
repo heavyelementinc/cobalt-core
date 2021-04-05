@@ -58,8 +58,14 @@
     "version": {
         "default": "0.0"
     },
-    /* If debugging is true, then a bunch of things happen. TODO: Document 
-    all this. */
+    /* 
+    If debugging is TRUE, then a bunch of things happen. 
+        - core/apiv1.php will add a HelloWorld route
+        - HTTPExceptions used to display an B64 value of the exception message
+    If debugging is FALSE, then:
+        - The WebHandler will cache a concat of all JS files in `packages`
+        - The WebHandler will cache a concat of all CSS files in `css-packages`
+    */
     "debug": {
         "default": true
     },
@@ -202,9 +208,13 @@
     /* A list of CSS files to be concatenated, minified, and sent to the client
     with every page.
     
-    TODO: Implement this. */
+    If "debug" is `true`, this list will be used to create <link> tags to the 
+    files for use there. */
     "css_packages": {
-        "default": [],
+        "default": [
+            "normalize.css",
+            "main.css"
+        ],
         "$merge": true // User's packages should come second.
     },
     "session_cookie_name": {
