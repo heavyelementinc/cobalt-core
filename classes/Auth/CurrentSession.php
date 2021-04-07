@@ -18,7 +18,7 @@ class CurrentSession{
         $this->default_cookie_expiration = $this->now + $this->month;
         $this->default_token_expiration = $this->now + $this->month;
         $this->default_token_refresh = $this->now + $this->day;
-        $this->collection = \mongo_cursor('sessions');
+        $this->collection = \db_cursor('sessions');
         $this->cookie_options = [
             'expires' => $this->default_cookie_expiration,
             'path' => '/',

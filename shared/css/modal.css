@@ -1,0 +1,97 @@
+/** ===================
+     BUILT-IN ELEMENTS
+    =================== */
+
+modal-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, .3);
+  transition: opacity .4s;
+  opacity: 0;
+  z-index: var(--project-modal-z-index);
+}
+
+  modal-container.lightbox {
+      background: rgba(0, 0, 0, .8);
+      backdrop-filter: blur(10px);
+  }
+
+  modal-container.lightbox .modal-body {
+      padding: 0;
+      margin: 0;
+      background: black;
+  }
+
+  modal-container.lightbox img{
+      max-width: 95vw;
+      max-height: 95vh;
+  }
+
+  modal-container>button.modal-close-button {
+      border: none;
+      background: transparent;
+      font-size: 2rem;
+      position: absolute;
+      right: 0;
+      top: 0;
+      color: black;
+      text-shadow: 1px 1px white, 1px -1px white, -1px -1px white, -1px 1px white;
+  }
+
+modal-box {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    position: relative;
+    min-height: 20%;
+    min-width: 20%;
+    transition: transform .5s;
+}
+
+  modal-box.modal-window--input input {
+      width: 100%;
+      box-sizing: border-box;
+  }
+
+  modal-box.modal-window--input input:invalid {
+      box-shadow: 0 0 10px rgba(255, 0, 0, .5) inset;
+      background: white;
+  }
+
+  section.modal-body {
+      flex-grow: 1;
+      margin: 1rem;
+  }
+
+modal-button-row {
+    display: flex;
+    justify-content: end;
+    position: sticky;
+    bottom: 0;
+}
+
+  modal-button-row button {
+      flex-grow: 1;
+      border-radius: 0;
+      border: none;
+      min-height: 2rem;
+      padding: .7rem 0;
+      font-weight: bold;
+      font-family: var(--project-head-family);
+      font-size: 1.5rem;
+  }
+
+  modal-button-row button.modal-button-okay {
+      background: var(--project-color-acknowledge);
+  }
+
+  modal-button-row button.modal-button-delete {
+      background: var(--project-color-action-danger);
+  }
+

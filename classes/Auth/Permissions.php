@@ -5,14 +5,15 @@
 namespace Auth;
 class Permissions{
     private $permission_files = [
-        __ENV_ROOT__ . "/config/default_permissions.json",
-        __APP_ROOT__ . "/config/app_permissions.json"
+        __ENV_ROOT__ . "/config/default_permissions.jsonc",
+        __APP_ROOT__ . "/config/app_permissions.jsonc",
+        __APP_ROOT__ . "/config/app_permissions.json",
     ];
     public $valid = [];
 
     function __construct(){
         $this->load_permissions();
-        $this->collection = \mongo_cursor('users');
+        $this->collection = \db_cursor('users');
     }
 
     /** Load the permissions and create a list of valid groups*/

@@ -52,17 +52,33 @@ class Authentication{
         return $this->session->logout_session();
     }
 
-    /** Our permission check routine */
+    /**
+     * Check if the current user has a permission.
+     * 
+     * This routine checks if a user is logged in and will throw an 
+     * HTTP\Unauthorized Exception if they are not logged in. It will then check
+     * if the permission is valid and throw an Exception if it is not.
+     * 
+     * @throws \Exceptions\HTTP\Unauthorized if not logged in
+     * @throws Exception if the permission specified does not exist
+     * 
+     * @param  string $perm_name the name of the permission to check for
+     * @param  string|array $group the group name or list of group names. 
+     *                      Can be null.
+     * @return bool true if the user has permission, false otherwise
+     */
     function has_permission($permission,$group = null){
         // If the user is not logged in, they obviously don't have permission
         if(!$this->user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.",['login' => true]);
         // If the permission is not valid, we throw an exception.
         if(!isset($this->permissions->valid[$permission])) throw new \Exception("The \"$permission\" permission cannot be validated!");
         
-        // If the app allows root users AND the user belongs to the root group, they have permission
+        // If the app allows root users AND the user belongs to the root group, 
+        // they have permission
         if(app('Auth_enable_root_group') && in_array('root',(array)$this->user['groups'])) return true;
 
-        // If the user account has the permission, we return that value--whatever it may be
+        // If the user account has the permission, we return that value, 
+        // whatever it may be
         if(isset($this->user['permissions'][$permission])) return $this->user['permissions'][$permission];
  
         // If no group is specified, return the permission's default value

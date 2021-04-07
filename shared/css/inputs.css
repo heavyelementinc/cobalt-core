@@ -1,0 +1,72 @@
+/** Inputs */
+
+input, textarea {
+  border: 0;
+  background: #fff;
+  padding: .4rem;
+  border-radius: .6rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, .3) inset;
+  font-size: 1.1rem;
+}
+
+input:focus, textarea:focus {
+  background: var(--project-color-input-disabled);
+  box-shadow: none;
+}
+
+input:disabled, textarea:disabled {
+  background: var(--project-color-input-disabled);
+}
+
+/** BUTTON LINKS **/
+
+.button {
+  --btn-normal: var(--project-color-button-init);
+  --btn-text: var(--project-color-button-text);
+  --btn-hover: var(--project-color-button-hover);
+  --btn-hover-text: var(--project-color-button-text-hover);
+  background-color: var(--btn-normal);
+  color: var(--btn-text);
+  padding: .7rem 1.4rem;
+  border-radius: 2rem;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+a.button {
+  color: var(--btn-text);
+}
+
+.button.light-alt {
+  --btn-normal: rgba(255, 255, 255, .8);
+  --btn-text: #000;
+  --btn-hover: #FFF;
+  --btn-hover-text: #000;
+  border: 1px solid;
+}
+
+.button.dark-alt {
+  --btn-normal: #000;
+  --btn-text: #FFF;
+  --btn-hover: #101010;
+  --btn-hover-text: #FFF;
+  border: 1px solid;
+}
+
+.button:hover {
+  background-color: var(--btn-hover);
+  color: var(--btn-hover-text);
+}
+
+/* .button */
+
+.lightbox-item {
+  cursor: pointer;
+}
+
+.lightbox-zoom {
+  cursor: zoom-in;
+}

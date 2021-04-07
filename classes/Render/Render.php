@@ -1,8 +1,8 @@
 <?php
-/** Render\Html is our way of parsing HTML template strings, finding {{variables}}, %%variables%%
+/** Render\Render is our way of parsing HTML template strings, finding {{variables}}, %%variables%%
  * or @function("calls"); and executing them.
  * 
- * Render\Html accepts accepts vars with the set_vars method. It's capable of including preset
+ * Render\Render accepts accepts vars with the set_vars method. It's capable of including preset
  * global vars. The vars array lets us expose certain variables to be included in our templates
  * 
  * Variables can be referenced in a template using either syntax
@@ -56,7 +56,7 @@
  * TODO: Add callable vars support
  */
 namespace Render;
-class Html{
+class Render{
     public $body = "";
     public $vars = [];
 
@@ -96,6 +96,25 @@ class Html{
 
         // Then we return the status
         return $status;
+    }
+    
+    /**
+     * Set the body content to be parsed by the renderer from a template.
+     * 
+     * @throws Exception if the specified template cannot be found
+     * @param  mixed $template_path The path to the template you want to use
+     * @return void
+     */
+    function from_template(string $template_path){
+        if(!\property_exists($this,"template_cache")) $this->template_cache = [];
+        if(!key_exists($template_path,$this->template_cache)){
+            $contenders = files_exist([
+                __APP_ROOT__ . "/private/templates/$template_path",
+                __ENV_ROOT__ . "/templates/$template_path"
+            ]);
+            $this->template_cache[$template_path] = file_get_contents($contenders[0]);
+        }
+        $this->set_body($this->template_cache[$template_path],$template_path);
     }
 
     /** Set the body html template. $body is the template we'll be parsing for 

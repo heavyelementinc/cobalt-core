@@ -13,8 +13,10 @@ class CoreApi extends \Controllers\Pages{
     }
 
     function page(){
+        $GLOBALS['write_to_buffer_handled'] = true;
         $route = $_GET['route'];
         $processor = new \Web\WebHandler();
+        $processor->no_write_on_destruct();
         $router = new \Routes\Router("web","get");
         $router->get_routes();
         if(method_exists($processor,'post_router_init')) $processor->post_router_init();

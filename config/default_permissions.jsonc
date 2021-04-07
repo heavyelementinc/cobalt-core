@@ -1,3 +1,4 @@
+/* Core permissions file. */
 {
     "Admin_panel_access": {
         "groups": {

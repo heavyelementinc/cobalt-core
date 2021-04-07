@@ -1,0 +1,97 @@
+/* =========================
+         INPUT SWITCH
+   ========================= */
+
+input-switch {
+  display: inline-block;
+  width: 64px;
+  height: 26px;
+  /* margin: .25rem .5rem;
+  border: 1px solid white; */
+  border-radius: 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+  input-switch[disabled="true"] span, input-switch[disabled="disabled"] span {
+    opacity: .5;
+  }
+
+  input-switch input {
+    visibility: hidden;
+  }
+
+  input-switch span {
+    position: absolute;
+    background: var(--project-color-inactive);
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 6px rgba(0, 0, 0, .3) inset;
+    border-radius: 17px;
+  }
+
+  input-switch span:before {
+    content: "ON";
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    font-family: 'Arial Narrow', 'Arial', sans-serif;
+    font-weight: bolder;
+    font-size: 10pt;
+    color: white;
+  }
+
+  input-switch span:after {
+    content: "";
+    display: block;
+    height: 20px;
+    width: 50%;
+    background: rgb(255, 255, 255);
+    /* background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 6%, rgba(214, 214, 214, 1) 10%, rgba(255, 255, 255, 1) 10%, rgba(255, 255, 255, 1) 100%); */
+    border-radius: 20px;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: left .2s;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+  }
+
+  input-switch input:checked+span {
+    background: var(--project-color-active);
+  }
+
+  input-switch input:checked+span:after {
+    left: 28px;
+  }
+
+  input-switch input:indeterminate+span {
+    background: var(--project-color-problem);
+  }
+
+  input-switch input:indeterminate+span:before {
+    content: "";
+  }
+
+  input-switch input:indeterminate+span:after {
+    left: 15px;
+  }
+
+  input-switch[large] {
+    width: 83px;
+    height: 32px;
+  }
+
+  input-switch[large] span:before {
+    font-size: 13pt;
+    left: 8px;
+  }
+
+  input-switch[large] span:after {
+    height: 26px;
+  }
+
+  input-switch[large] input:checked+span:after {
+    left: 38px;
+  }

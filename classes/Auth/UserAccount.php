@@ -8,7 +8,7 @@ class UserAccount{
     public $account = null;
 
     function __construct(){
-        $this->collection = mongo_cursor('users');
+        $this->collection = \db_cursor('users');
     }
 
     function get_user_by_id($id){

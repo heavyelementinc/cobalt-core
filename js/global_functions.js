@@ -74,15 +74,58 @@ async function confirmModal(message, yes = "Okay", no = "Cancel") {
     const modal = new Modal({});
 }
 
+async function removeLoadingSpinner(spinner) {
+    return new Promise((resolve, reject) => {
+        if (!spinner) resolve();
+        const timeout = setTimeout(() => {
+            resolve();
+            console.warn("Timeout", spinner);
+        }, 1500)
+        const anon = () => {
+            clearTimeout(timeout);
+            resolve();
+            console.log(spinner);
+            spinner.parentNode.removeChild(spinner)
+        }
+        spinner.addEventListener("transitionend", anon, { once: true });
+        spinner.addEventListener("-moz-transitionend", anon, { once: true });
+        spinner.addEventListener("-webkit-transitionend", anon, { once: true });
+        spinner.style.opacity = 0;
+    })
+}
+
+
+/**
+ * Creates a lightbox popup window to display a full size image or a YouTube
+ * video embed.
+ * 
+ * @param {string} imageUrl A URL to an image or a youtube.com/youtu.be video
+ * @returns Modal object
+ */
 function lightbox(imageUrl) {
+    let lightbox_content = `<img src='${imageUrl}'>`;
+    if (imageUrl.indexOf("youtube.com") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split("?v=")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    if (imageUrl.indexOf("youtu.be") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split(".be/")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     const modal = new Modal({
         parentClass: "lightbox",
-        body: `<img src='${imageUrl}'>`,
+        body: lightbox_content,
         chrome: null,
         clickoutCallback: e => true,
     });
+    return modal;
 }
 
+/**
+ * An async modal confirm. If you await modalConfirm(), a promise will be
+ * returned and when resolved, will be either true or false.
+ * 
+ * @todo Fix ugly nesting
+ * @todo Figure out some way to prevent this from being callback hell.
+ * @param {string} message The message to prompt the user with
+ * @param {string} okay Button label for the TRUE option
+ * @param {string} cancel Button label for the FALSE option
+ * @returns Promise which resolves to either true or false. Cannot reject.
+ */
 async function modalConfirm(message, okay = "Okay", cancel = "Cancel") {
     return new Promise((resolve, reject) => {
         const modal = new Modal({
@@ -91,18 +134,20 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel") {
                 cancel: {
                     label: cancel,
                     callback: async (event) => {
-                        resolve(false)
+                        resolve(false); // Resolve promise
+                        return true; // Close modal window
                     }
                 },
                 okay: {
                     label: okay,
                     callback: async (event) => {
-                        resolve(true)
+                        resolve(true); // Resolve promise
+                        return true; // Close modal window
                     }
                 }
             }
         });
-    })
+    });
 }
 
 async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "" }) {

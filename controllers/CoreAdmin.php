@@ -5,7 +5,7 @@ class CoreAdmin extends \Controllers\Pages {
         add_template("/authentication/admin-dashboard/index.html");
     }
     function manage_users(){
-        $collection = mongo_cursor('users');
+        $collection = \db_cursor('users');
         $list = "<ul>";
         foreach($collection->find([]) as $user){
             $list .= "<li><a href='/auth/manage/user/$user[uname]'>@$user[uname] &mdash; $user[fname] $user[lname]</a></li>";

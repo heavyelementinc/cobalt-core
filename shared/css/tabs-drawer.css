@@ -1,0 +1,49 @@
+/** TAB/DRAWERS **/
+
+ul.tab-list--tab-row {
+  list-style: none;
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
+
+ul.tab-list--tab-row li {
+  flex-grow: 1;
+}
+
+ul.tab-list--tab-row button {
+  font-weight: normal;
+  height: 4rem;
+  font-size: 1.25rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+ul.tab-list--tab-row button.tab-list--active {
+  background: white;
+  position: relative;
+  font-weight: bold;
+}
+
+ul.tab-list--tab-row button.tab-list--active::after {
+  content: "";
+  display: block;
+  height: 5px;
+  width: 80%;
+  background: black;
+  position: absolute;
+  bottom: 0;
+  left: calc(calc(100% - 80%) / 2)
+}
+
+.drawer-list--item {
+  display: none;
+  padding: 10px;
+}
+
+.drawer-list--item.drawer-list--active {
+  display: block;
+  background: white;
+}
+

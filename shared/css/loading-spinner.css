@@ -1,0 +1,83 @@
+loading-spinner{
+  display: flex;
+  justify-content: center;
+  height:calc(4em * 4);
+  align-items:flex-end;
+  transition: opacity .6s;
+}
+
+loading-spinner:before{
+  content:"";
+  display:block;
+  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+PHN2ZyB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iICAgeG1sbnM6Y2M9Imh0dHA6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL25zIyIgICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiICAgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICAgd2lkdGg9IjgwbW0iICAgaGVpZ2h0PSI4MG1tIiAgIHZpZXdCb3g9IjAgMCA4MCA4MCIgICB2ZXJzaW9uPSIxLjEiICAgaWQ9InN2ZzgzNiI+ICA8ZyAgICAgaWQ9ImxheWVyMSI+ICAgIDxyZWN0ICAgICAgIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjkuNTM2NDQ7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgICAgICAgaWQ9InJlY3QxMzk5IiAgICAgICB3aWR0aD0iNzAuNDYzNTYyIiAgICAgICBoZWlnaHQ9IjcwLjQ2MzU2MiIgICAgICAgeD0iNC43NjgyMTk5IiAgICAgICB5PSI0Ljc2ODIxOTkiICAgICAgIHJ5PSIwIiAvPiAgPC9nPjwvc3ZnPg==');
+  background-size: contain;
+  display: block;
+  height: 4em;
+  width: 4em;
+/*   justify-self:center; */
+/*   align-self: center; */
+  animation: loadingSpinner 2000ms;
+  animation-play-state: running;
+  animation-iteration-count: infinite;
+  --rotation-stage-1: rotate(15deg);
+  --rotation-stage-2: rotate(180deg);
+}
+
+loading-spinner:after{
+  content:"";
+  display:block;
+  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgd2lkdGg9IjIxMG1tIgogICBoZWlnaHQ9IjIxMG1tIgogICB2aWV3Qm94PSIwIDAgMjEwIDIxMCIKICAgdmVyc2lvbj0iMS4xIgogICBpZD0ic3ZnOCI+CiAgPGRlZnMKICAgICBpZD0iZGVmczIiIC8+CiAgPG1ldGFkYXRhCiAgICAgaWQ9Im1ldGFkYXRhNSI+CiAgICA8cmRmOlJERj4KICAgICAgPGNjOldvcmsKICAgICAgICAgcmRmOmFib3V0PSIiPgogICAgICAgIDxkYzpmb3JtYXQ+aW1hZ2Uvc3ZnK3htbDwvZGM6Zm9ybWF0PgogICAgICAgIDxkYzp0eXBlCiAgICAgICAgICAgcmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIgLz4KICAgICAgICA8ZGM6dGl0bGU+PC9kYzp0aXRsZT4KICAgICAgPC9jYzpXb3JrPgogICAgPC9yZGY6UkRGPgogIDwvbWV0YWRhdGE+CiAgPGcKICAgICBpZD0ibGF5ZXIxIj4KICAgIDxnCiAgICAgICBpZD0iZzg4NiIKICAgICAgIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsLTg3LjQyMDgwNykiCiAgICAgICBzdHlsZT0iZmlsbDojMDAwMDAwIj4KICAgICAgPGcKICAgICAgICAgYXJpYS1sYWJlbD0iaEUiCiAgICAgICAgIGlkPSJ0ZXh0ODM3IgogICAgICAgICBzdHlsZT0iZm9udC1zdHlsZTpub3JtYWw7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTo5Ni40ODc4cHg7bGluZS1oZWlnaHQ6MS4yNTtmb250LWZhbWlseTpzYW5zLXNlcmlmO2xldHRlci1zcGFjaW5nOjBweDt3b3JkLXNwYWNpbmc6MHB4O2ZpbGw6IzAwMDAwMDtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MS4wMDUwOCI+CiAgICAgICAgPHBhdGgKICAgICAgICAgICBkPSJNIDk4LjM0MjM2MywyMjUuMzcxMDUgSCA4NS40MTI5OTggdiAtMjguMzY3NDIgcSAwLC01Ljk4MjI0IC0yLjIxOTIxOSwtOC43ODAzOSAtMi4yMTkyMiwtMi44OTQ2MyAtNi4yNzE3MDcsLTIuODk0NjMgLTEuNzM2NzgxLDAgLTMuNjY2NTM3LDAuNzcxOSAtMS45Mjk3NTYsMC43NzE5MSAtMy42NjY1MzYsMi4yMTkyMiAtMS43MzY3ODEsMS4zNTA4MyAtMy4xODQwOTgsMy4yODA1OSAtMS40NDczMTcsMS45Mjk3NSAtMi4xMjI3MzEsNC4yNDU0NiB2IDI5LjUyNTI3IEggNTEuMzUyODA0IHYgLTcwLjQzNjEgSCA2NC4yODIxNyB2IDI5LjIzNTgxIHEgMi43OTgxNDYsLTQuOTIwODggNy41MjYwNDgsLTcuNTI2MDUgNC44MjQzOSwtMi43MDE2NiAxMC42MTM2NTgsLTIuNzAxNjYgNC45MjA4NzgsMCA4LjAwODQ4OCwxLjczNjc4IDMuMDg3NjA5LDEuNjQwMjkgNC44MjQzOSw0LjQzODQ0IDEuNzM2NzgsMi43OTgxNSAyLjQxMjE5NSw2LjM2ODE5IDAuNjc1NDE0LDMuNTcwMDUgMC42NzU0MTQsNy4zMzMwOCB6IgogICAgICAgICAgIHN0eWxlPSJmb250LXN0eWxlOm5vcm1hbDtmb250LXZhcmlhbnQ6bm9ybWFsO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zdHJldGNoOm5vcm1hbDtmb250LXNpemU6OTYuNDg3OHB4O2ZvbnQtZmFtaWx5OlJhbGV3YXk7LWlua3NjYXBlLWZvbnQtc3BlY2lmaWNhdGlvbjonUmFsZXdheSBCb2xkJztzdHJva2Utd2lkdGg6MS4wMDUwODtmaWxsOiMwMDAwMDAiCiAgICAgICAgICAgaWQ9InBhdGgyMTA5IiAvPgogICAgICAgIDxwYXRoCiAgICAgICAgICAgZD0ibSAxNTguNDU0MDksMjEzLjY5NjAyIHYgMTEuNjc1MDMgSCAxMTAuODg1NiB2IC02OC41MDYzNCBoIDQ2LjcwMDEgdiAxMS42NzUwMiBoIC0zMy4zODQ3OCB2IDE2LjQ5OTQyIGggMjguMDU3NTYgbCAwLjc5MjI5LDEwLjgwNjYzIGggLTI4Ljg0OTg1IHYgMTcuODUwMjQgeiIKICAgICAgICAgICBzdHlsZT0iZm9udC1zdHlsZTpub3JtYWw7Zm9udC12YXJpYW50Om5vcm1hbDtmb250LXdlaWdodDpib2xkO2ZvbnQtc3RyZXRjaDpub3JtYWw7Zm9udC1zaXplOjk2LjQ4NzhweDtmb250LWZhbWlseTpSYWxld2F5Oy1pbmtzY2FwZS1mb250LXNwZWNpZmljYXRpb246J1JhbGV3YXkgQm9sZCc7ZmlsbDojMDAwMDAwO3N0cm9rZS13aWR0aDoxLjAwNTA4IgogICAgICAgICAgIGlkPSJwYXRoMjExMSIgLz4KICAgICAgPC9nPgogICAgICAKICAgICAgPGcKICAgICAgICAgaWQ9Imc4NjMiCiAgICAgICAgIHRyYW5zZm9ybT0ibWF0cml4KDEuNTM0ODM2OCwwLDAsMS41MzQ4MzY4LC0xNy44MTg2OTQsMi40OTEyMDAxKSIKICAgICAgICAgc3R5bGU9ImZpbGw6IzAwMDAwMCIgLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPgoK');  background-size: contain;
+  display: block;
+  height: 4em;
+  width: 4em;
+/*   justify-self:center; */
+/*   align-self: center; */
+  animation: loadingSpinner 2000ms;
+  animation-play-state: running;
+  animation-iteration-count: infinite;
+  position:absolute;
+  --rotation-stage-1: rotate(0);
+  --rotation-stage-2: rotate(0);
+}
+
+@keyframes loadingSpinner{
+  0%{
+    transform: translateY(0);
+  }
+  20%{
+    /** Jump anticipation **/
+    transform: translateY(10%) scale(1.3, .7);
+    animation-timing-function: linear;
+  }
+  28%{
+    /** Start the jump and stretch **/
+    transform: translateY(-70%) scale( .8, 1.2) var(--rotation-stage-1);
+    animation-timing-function: ease-out;
+  }
+  60%{ /** START FALL **/
+    /** Reach max height of jump and rotate 90 degrees **/
+    transform: translateY(-200%) scale( .95, 1.05) var(--rotation-stage-2);
+    animation-timing-function: step-end;
+  }
+  61%{ /** START FALL **/
+    /** Step to next frame and reset rotation **/
+    transform: translateY(-200%) scale( .95, 1.05);
+    /** Ease in as if gravity is assisting the fall **/
+    animation-timing-function: ease-in;
+  }
+  75%{
+    transform: translateY(0%) scale( 1.1, .9);
+    /** Ease in as if gravity is assisting the fall **/
+    animation-timing-function: ease-out;
+  }
+  80%{
+    transform: translateY(15%) scale(1.4, .6);
+    animation-timing-function: ease-in-out
+  }
+  90%{
+    transform: translateY(0) scale(1,1);
+  }
+  100%{
+    
+  }
+}

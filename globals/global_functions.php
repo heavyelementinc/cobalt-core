@@ -1,8 +1,18 @@
 <?php
+/**
+ * Global helper functions for the Cobalt Engine
+ * 
+ * The Cobalt Engine offers a variety of helpful functions that allow developers
+ * more flexibility and handle many of the more tedious and oft-repeated tasks
+ * that we've encountered while writing Cobalt.
+ * 
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @license https://github.com/heavyelementinc/cobalt-core/license
+ */
 
-/** A shorthand way of getting a specific setting by providing the name of the setting
- * as the only argument, calling this function without an argument will return all
- * the settings.
+/** A shorthand way of getting a specific setting by providing the name of the 
+ * setting as the only argument, calling this function without an argument will 
+ * return all the settings.
  */
 function app($setting = null){
     if($setting === null) return __APP_SETTINGS__;
@@ -11,39 +21,58 @@ function app($setting = null){
     // throw new Warning("Setting $setting does not exist");
 }
 
-/** A shorthand way of accessing the current user's session from anywhere in the program
- * Ideally, this should work like the app function and provide everything about the
- * user when called with no agruments.
+/** A getter function for accessing the current user's info.
  * 
- * TODO: Implement user accounts and sessions.
+ * Get the current user's information when called without arguments or specify
+ * the name of the field you're trying to access.
+ *  
+ * @throws Exception 
+ * @param string|null $info (Optional) The field name you're trying to access
+ * @return mixed Session object, session property, or null if session does not 
+ *               exist
  */
-function session($name = null){
-    if($name === null) return $GLOBALS['session'] ?? null;
-    if(key_exists($name,$GLOBALS['session'])) return $GLOBALS['session'][$name];
-    throw new Exception("Field $name does not exist");
+function session($info = null){
+    if($info === null) return $GLOBALS['session'] ?? null;
+    if(key_exists($info,$GLOBALS['session'])) return $GLOBALS['session'][$info];
+    throw new Exception("Field $info does not exist");
 }
 
+/**
+ * Check if the session exists
+ *
+ * @return bool
+ */
 function session_exists(){
     if(isset($GLOBALS['session']) && $GLOBALS['session'] === null) return false;
     if(isset($GLOBALS['session']) && !empty($GLOBALS['session']['pword'])) return true;
     return false;
 }
 
+/**
+ * Check if the current user has permission.
+ *
+ * @throws \Exceptions\HTTP\Unauthorized if not logged in
+ * @throws Exception if the permission specified does not exist
+ * @param  string $perm_name the name of the permission to check for
+ * @param  string|array $group the group name or list of group names. 
+ *                      Can be null.
+ * @return bool true if the user has permission, false otherwise
+ */
 function has_permission($perm_name,$group = null){
     return $GLOBALS['auth']->has_permission($perm_name,$group);
 }
 
-/** This function will return a merged array of decoded JSON files that are found to
- * exist. Later elements in the $paths argument will overwrite earlier elements of
- * the same name.
+/** This function will return a merged array of decoded JSON files that are 
+ * found to exist. Later elements in the $paths argument will overwrite earlier 
+ * elements of the same name.
  * 
- * If $merged is false, the decoded files will be returned as separate elements of
- * the array.
+ * If $merged is false, the decoded files will be returned as separate elements 
+ * of the array.
  */
 function get_all_where_available($paths,$merged = true){
     $available = [];
     foreach($paths as $key => $path){
-        if(file_exists($path)) $available[$key] = json_decode(file_get_contents($path),true);
+        if(file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path),true);
     }
     if($merged) return array_merge(...$available);
     return $available;
@@ -61,8 +90,8 @@ function files_exist_the_hard_way($arr,$error_on_empty = true){
 }
 
 /** Hand this function an array of files that might exist and this function will
- * return an array of file paths that exist. If TRUE is used as the second argument
- * and no files are found, an exception will be thrown.
+ * return an array of file paths that exist. If TRUE is used as the second 
+ * argument and no files are found, an exception will be thrown.
  */
 function files_exist($arr,$error_on_empty = true){
     $values = array_values(array_filter($arr,"file_exists"));
@@ -128,18 +157,16 @@ function cobalt_autoload($class){
 }
 
 function add_template($path){
-    // if($GLOBALS['route_context'] !== "web") throw new Exception("You're not in the correct context to be adding templates like this!");
     $GLOBALS['web_processor_template'] = $path;
 }
 
 function add_vars($vars){
-    // if($GLOBALS['route_context'] !== "web") throw new Exception("You're not in the correct context to be adding variables like this!");
     $GLOBALS['web_processor_vars'] = $vars;
 }
 
 /** 
- * This function accepts a JS object notated $path_map and searches $vars for a value
- * which matches $path_map
+ * This function accepts a JS object notated $path_map and searches $vars for a 
+ * value which matches $path_map
  *  $path_map = "map.get.item"
  *  $vars = ['map' => ['get' => ['item' => 'value']]]
  *  "value" // Result
@@ -183,8 +210,8 @@ function lookup_js_notation(String $path_map,$vars,$throw_on_fail = false){
 
     }
 
-    /** We're adding a . to the end of $path_map because that's what we're appending
-     * to the $looked_up string when we successfully find the object
+    /** We're adding a . to the end of $path_map because that's what we're 
+     * appending to the $looked_up string when we successfully find the object
      */
     if($looked_up === "$path_map.") return $mutant;
     else if($throw_on_fail == "warn") \trigger_error("Could not find `$path_map`");
@@ -192,16 +219,35 @@ function lookup_js_notation(String $path_map,$vars,$throw_on_fail = false){
     else return; // Return undefined
 }
 
-/** Give this function a string and it will parse it as Markdown. $untrusted tells markdown to 
+/** Give this function a string and it will parse it as Markdown. $untrusted 
+ * tells markdown to 
  * sanitize any HTML or links in the the parsing process.
  */
-function from_markdown($string,$untrusted = true){
+
+
+/**
+ * from_markdown
+ *
+ * @param  string $string - The string you wish to parse as markdown
+ * @param  bool $untrusted - Whether the markdown is user input
+ * @return string - HTML-formatted string
+ */
+function from_markdown(string $string,bool $untrusted = true){
     $md = new Parsedown();
     $md->setSafeMode($untrusted);
     return $md->text($string);
 }
 
-function mongo_cursor($collection,$database = null){
+
+/**
+ * db_cursor
+ * The
+ * 
+ * @param string $collection - The name of the collection
+ * @param string $database - (Optional) The name of the database
+ * @return void
+ */
+function db_cursor($collection,$database = null){
     if(!$database) $database = app('database');
     try{
         $client = new MongoDB\Client(app('server_address'));
@@ -212,8 +258,15 @@ function mongo_cursor($collection,$database = null){
     return $database->{$collection};
 }
 
-function random_string($length,$string = null){
-    $validChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+/**
+ * random_string
+ *
+ * @param  int $length
+ * @param  string $string
+ * @return string Random string
+ */
+function random_string($length,$fromChars = null){
+    $validChars = $fromChars ?? "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     $min = 0;
     $max = strlen($validChars) - 1;
     $random = "";
@@ -228,13 +281,18 @@ function random_string($length,$string = null){
  *  ============================================== 
  */
 
-/** Returns a CSRF Token (basically, an encrypted password) that's been truncated */
+/** 
+ * Returns a CSRF Token (basically, an encrypted password) that's been 
+ * truncated 
+ * @return string Encrypted CSRF Token
+ * */
 function get_csrf_token(){
     return str_replace('$2y$10$',"",password_hash(csrf_session_token(), PASSWORD_BCRYPT));
 }
 
-/** Validate our supplied CSRF token 
- * @param string $token - A CSRF token generated by get_csrf_token()
+/** 
+ * Validate our supplied CSRF token 
+ * @param string $token A CSRF token generated by get_csrf_token()
 */
 function validate_csrf_token($token){
     /** We get our raw CSRF token */
@@ -245,7 +303,9 @@ function validate_csrf_token($token){
     return password_verify($raw_text_seed,$password_string);
 }
 
-/** Returns a raw CSRF token (unencrypted) */
+/** Returns a raw CSRF token (unencrypted)
+ * @return string Unencrypted CSRF token
+ */
 function csrf_session_token(){
     if(key_exists('csrf_old_token',$_COOKIE)) return app('csrf_seed') . $_COOKIE['csrf_old_token'];
     // Add "was updated" check
@@ -260,12 +320,17 @@ function csrf_token_date(){
     return floor(time(),18000);
 }
 
-/** Add a CSRF Token element to any template with @csrf_token(); */
+/** Add a CSRF Token element to any template with @csrf_token(); 
+ * @return string  HTML hidden input named csrf_token with its value set to 
+ *                 the result of get_csrf_token()
+*/
 function csrf_token(){
     return "<input type='hidden' name='csrf_token' value='".get_csrf_token()."'>";
 }
 
-/** Add a CSRF token as an attribute to any template with @csrf_attribute(); */
+/** Add a CSRF token as an attribute to any template with @csrf_attribute(); 
+ * @return string - Token Attribute
+*/
 function csrf_attribute(){
     return "token=\"".get_csrf_token()."\"";
 }

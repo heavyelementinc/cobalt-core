@@ -1,0 +1,55 @@
+/** LOGIN FORM **/
+
+#login-form-container {
+  display: flex;
+}
+
+.login-hero-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: var(--project-login-hero-sidebar);
+  background-color: gray;
+  background-size: cover;
+  height: 30vh;
+  width: 50%;
+}
+
+modal-box#login-modal {
+  height: 30vh;
+  width: 40vw;
+}
+
+modal-box#login-modal>section {
+  margin: 0
+}
+
+#login-form {
+  padding: 1rem;
+  text-align: center;
+}
+
+#login-form fieldset {
+  padding: 0;
+}
+
+#login-form input[type="username"], #login-form input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--project-head-family);
+  padding: .35rem;
+  margin-bottom: 1rem;
+  font-size: 1.15rem;
+}
+
+#login-form input {
+  margin-bottom: 1rem;
+}
+
+#login-form button {
+  width: 100%;
+  padding: .35rem;
+  font-size: 1.15rem;
+  font-family: var(--project-head-family);
+}

@@ -203,7 +203,7 @@
             "main.js",
             "app.js"
         ],
-        "$prepend": true // Prepend user packages (is that what we want to do?)
+        "$merge": true // Prepend user packages (is that what we want to do?)
     },
     /* A list of CSS files to be concatenated, minified, and sent to the client
     with every page.
@@ -213,6 +213,13 @@
     "css_packages": {
         "default": [
             "normalize.css",
+            "inputs.css",
+            "loading-spinner.css",
+            "modal.css",
+            "login-form.css",
+            "modal.css",
+            "tabs-drawer.css",
+            "webcomponents.css",
             "main.css"
         ],
         "$merge": true // User's packages should come second.

@@ -57,7 +57,7 @@ class WebHandler{
         } else {
             $this->template_body = $this->main_content_replacement;
         }
-        $this->renderer = new \Render\Html();
+        $this->renderer = new \Render\Render();
     }
 
     function post_router_init(){
@@ -76,6 +76,10 @@ class WebHandler{
     }
 
     protected $results_sent_to_client = false;
+
+    function no_write_on_destruct(){
+        $this->results_sent_to_client = true;
+    }
 
     function __destruct(){
         /**

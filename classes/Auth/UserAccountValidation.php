@@ -2,7 +2,7 @@
 namespace Auth;
 class UserAccountValidation{
     function __construct(){
-        $this->collection = \mongo_cursor('users');
+        $this->collection = \db_cursor('users');
     }
 
     /** Functions are called via the \Auth\CRUDUser class with the following arguments: [$value, $field, $submitted_user_info] */
