@@ -1,5 +1,5 @@
 <?php
-require "cobalt_cli_new_project.php";
+require __CLI_ROOT__ . "/new_project.php";
 function __help(){
     print("\n== COBALT HELP ==\n");
     foreach($GLOBALS['cobalt_cli_commands'] as $cmd => $items){
@@ -22,6 +22,13 @@ function __create_new_user(){
     return "New user was not created";
 }
 
+function __new_project(){
+    require_once __CLI_ROOT__ . "/new_project.php";
+    $project = new NewProject();
+    $project->__collect_new_project_settings();
+    return "";
+}
+
 function __exit(){
     print("Goodbye\n");
     exit;
@@ -31,10 +38,12 @@ $GLOBALS['cobalt_cli_commands'] = [
     'help' => [
         'description' => 'Print this message',
         'callback' => '__help',
+        'parse' => 0
     ],
-    'setup' => [
+    'init' => [
         'description' => 'Create a new project',
-        'callback' => '__new_project'
+        'callback' => '__new_project',
+        'parse' => 5
     ],
     // 'useradd' => [
     //     'description' => 'Add a new user',
@@ -42,10 +51,12 @@ $GLOBALS['cobalt_cli_commands'] = [
     // ],
     'update' => [
         'description' => 'Update your current project',
-        'callback' => '__update'
+        'callback' => '__update',
+        'parse' => 0
     ],
     'exit' => [
         'description' => 'Exit the current program',
-        'callback' => '__exit'
+        'callback' => '__exit',
+        'parse' => 0
     ]
 ];
