@@ -4,14 +4,103 @@ class FormRequestElement extends HTMLElement {
     }
 
     connectedCallback() {
+        this.setup_content();
+
         // Basically, we want to attach the FormRequest to the <form-request> element.
         // This WebComponent should allow us to make form bots a thing of the past.
         this.request = new FormRequest(this, { asJSON: true, errorField: this.querySelector(".error") });
         if (this.request.autosave === false) {
             this.querySelector("button[type='submit'],input[type='button']").addEventListener('click', (e) => {
-                this.submit(e);
+                this.send();
             });
         }
+        let error = this.querySelector(".error");
+        if (!error) {
+            error = document.createElement("div");
+            error.classList.add("error");
+            let button = this.stages[0].querySelector("button[type='submit']");
+            this.stages[0].appendChild(error);
+        }
+        this.request.errorField = error;
+    }
+
+    async send() {
+        let allow_final_stage = false;
+        await this.advance();
+        try {
+            await this.request.send(this.request.build_query());
+            allow_final_stage = true;
+        } catch (error) {
+            console.log(error);
+            await this.regress();
+        }
+        if (!allow_final_stage) return;
+        try {
+            await this.confirm_stage();
+            await this.advance();
+        } catch (error) {
+            this.stages[1].innerHTML("Your data was submitted.");
+        }
+    }
+
+    setup_content() {
+        this.pointer = 0;
+        this.stages = [];
+        this.stages[0] = document.createElement("section");
+        this.stages[0].innerHTML = this.innerHTML;
+        this.stages[0].classList.add("form-request--actual");
+        this.innerHTML = "";
+        this.appendChild(this.stages[0]);
+
+        this.stages[1] = document.createElement("section");
+        this.stages[1].innerHTML = "<loading-spinner></loading-spinner>";
+        this.stages[1].classList.add("form-request--processing", "next");
+        this.appendChild(this.stages[1]);
+
+        this.stages[2] = document.createElement("section");
+        this.stages[2].classList.add("form-request--complete", "next");
+        this.appendChild(this.stages[2]);
+    }
+
+    async confirm_stage() {
+        let confirm = this.getAttribute("success");
+        let page = "<p>Your form was submitted successfully.</p>";
+        if (confirm) page = await new ApiFetch(`/api/v1/page?route=${encodeURI()}`, "GET", {});
+        this.stages[2].innerHTML = page;
+    }
+
+    advance() {
+        return new Promise((resolve, reject) => {
+            this.stages[this.pointer].addEventListener("transitionend", () => {
+                resolve();
+                clearTimeout(failsafe);
+            }, { once: true })
+            this.stages[this.pointer].classList.add("previous");
+            this.stages[this.pointer].classList.remove("current");
+            this.pointer++;
+            this.stages[this.pointer].classList.add("current");
+            this.stages[this.pointer].classList.remove("previous");
+            let failsafe = setTimeout(() => {
+                resolve();
+            }, 600)
+        })
+    }
+
+    regress() {
+        return new Promise((resolve, reject) => {
+            this.stages[this.pointer].addEventListener("transitionend", () => {
+                resolve();
+                clearTimeout(failsafe);
+            }, { once: true })
+            this.stages[this.pointer].classList.add("next");
+            this.stages[this.pointer].classList.remove("current");
+            this.pointer--;
+            this.stages[this.pointer].classList.add("current");
+            this.stages[this.pointer].classList.remove("previous");
+            let failsafe = setTimeout(() => {
+                resolve();
+            }, 600)
+        })
     }
 }
 

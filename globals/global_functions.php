@@ -309,6 +309,7 @@ function validate_csrf_token($token){
 function csrf_session_token(){
     if(key_exists('csrf_old_token',$_COOKIE)) return app('csrf_seed') . $_COOKIE['csrf_old_token'];
     // Add "was updated" check
+    if( !isset($_COOKIE[app('session_cookie_name')]) ) return app('csrf_seed');
     return app('csrf_seed') . $_COOKIE[app('session_cookie_name')];
 }
 
@@ -317,7 +318,7 @@ function csrf_session_token(){
  */
 function csrf_token_date(){
     /** TODO: TOKEN EXPIRATION */
-    return floor(time(),18000);
+    return (string)round(time(),-5);
 }
 
 /** Add a CSRF Token element to any template with @csrf_token(); 
@@ -367,4 +368,27 @@ function build_object_from_paths($object){
         $mutant = array_merge_recursive($mutant,$arr);
     }
     return $mutant;
+}
+
+function is_secure() {
+    return
+      (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+      || $_SERVER['SERVER_PORT'] == 443;
+}
+
+
+/**
+ * A shorthand way of rendering a template and getting the results. This is
+ * included so you can include a template inside another template. This has the
+ * potential to cause some recursive crap... so use caution!
+ *
+ * @param  string $template The name of the template
+ * @param  mixed  $vars     Variables to include
+ * @return string Processed template
+ */
+function with(string $template, $vars = []){
+    $render = new \Render\Render();
+    $render->set_vars($vars);
+    $render->from_template($template);
+    return $render->execute();
 }

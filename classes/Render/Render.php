@@ -231,6 +231,9 @@ class Render{
             if(!is_callable($funct)) $this->debug_template($function[0][$i],"$funct is not callable");
             $args = \json_decode("[".$functions[2][$i]."]",true,512,JSON_THROW_ON_ERROR);
             $mutant_vars = $this->functs_get_vars($args);
+            // We want to include the current context's variables when @with is called
+            // from inside a template, so we add a special case. Fun.
+            if($funct === "with" && !isset($mutant_vars[1])) $mutant_vars[1] = $mutant_vars;
             $result = $funct(...$mutant_vars);
             $mutant = \str_replace($functions[0][$i],$result,$mutant);
         }

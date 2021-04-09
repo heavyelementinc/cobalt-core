@@ -191,13 +191,13 @@
     "packages": {
         "default": [
             "global_functions.js",
-            "InputComponents.js",
             "Modal.js",
             "TabbedUI.js",
             "Slideshow.js",
             "InputClasses.js",
             "FormRequest.js",
             "ApiFetch.js",
+            "InputComponents.js",
             "UserMenu.js",
             "Router.js",
             "main.js",
@@ -217,6 +217,7 @@
             "loading-spinner.css",
             "modal.css",
             "login-form.css",
+            "form-request.css",
             "modal.css",
             "tabs-drawer.css",
             "webcomponents.css",
@@ -317,8 +318,54 @@
             "domain_name"
         ]
     },
+    "API_CORS_enable_other_origins": {
+        "default": true
+    },
+    "API_contact_form_enabled": {
+        "default": false
+    },
+    "API_contact_form_email_to": {
+        "default": ""
+    },
     /* The id attribute of the body tag when errors happen in a web context. */
     "HTTP_error_body_id": {
         "default": "cobalt_http_error"
+    },
+    /** Mail **/
+    "Mail_smtp_host": {
+        "default": "",
+        "$env": "MAIL_SMTP_HOST"
+    },
+    "Mail_smtp_auth": {
+        "default": true,
+        "$env": "MAIL_AUTH"
+    },
+    "Mail_username": {
+        "default": "",
+        "$env": "MAIL_USERNAME"
+    },
+    "Mail_from_address": {
+        "default": "",
+        "$alt": "Mail_username"
+    },
+    "Mail_from_name": {
+        "default": "",
+        "$alt": "app_short_name"
+    },
+    "Mail_reply_to_address": {
+        "default": "",
+        "$alt": "Mail_from_address"
+    },
+    "Mail_reply_to_name": {
+        "default": "",
+        "$alt": "app_short_name"
+    },
+    "Mail_password": {
+        "default": "",
+        "$env": "MAIL_PASSWORD"
+    },
+    "Mail_port": {
+        "default": 587,
+        "$env": "MAIL_PORT"
     }
 }

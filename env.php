@@ -73,6 +73,7 @@ $processor = "Web\WebHandler";
 
 if(method_exists($context_processor,'post_router_init')) $context_processor->post_router_init();
 $router->discover_route();
+if(method_exists($context_processor,'post_router_discovery')) $context_processor->post_router_discovery();
 $router_result = $router->execute_route();
 if(method_exists($context_processor,'post_router_execute')) $context_processor->post_router_execute();
 

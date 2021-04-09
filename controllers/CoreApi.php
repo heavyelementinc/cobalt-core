@@ -29,6 +29,29 @@ class CoreApi extends \Controllers\Pages{
         ];
     }
 
-    
+    function contact(){
+
+        if(empty($_POST['phone']) && empty($_POST['email']))
+            throw new \Exceptions\HTTP\BadRequest("You must specify an email or phone number (or both)");
+
+        if(empty($_POST['name']))
+            throw new \Exceptions\HTTP\BadRequest("You need to provide your name");
+
+        $email = new \Mail\SendMail();
+        $email->set_vars(array_merge(
+            $_POST,
+            [
+                "ip" => $_SERVER['REMOTE_ADDR'],
+                "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"]
+            ]
+        ));
+        $email->set_body_template("/emails/contact-form.html");
+        try{
+            $email->send(app("API_contact_form_email_to"),"New contact form submission");
+        } catch (Exception $e) {
+            return "Failed to submit your request. Try again later.";
+        }
+        return $_POST;
+    }
 
 }

@@ -15,15 +15,28 @@ class ApiHandler{
     private $methods_from_stdin = ['POST','PUT','PATCH','DELETE'];
     private $content_type = "application/json; charset=utf-8";
     function __construct(){
-
+        $this->http_mode = (is_secure()) ? "https" : "http";
         $this->headers = apache_request_headers();
         $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->allowed_modes = ["https://","http://"];
         
+        /** This will make the allowed origins be http or https */
+        $this->allowed_origins = [];
+        foreach(app("API_CORS_allowed_origins") as $el){
+            array_push($this->allowed_origins,$this->url_to_current_mode($el));
+        }
+    }
+
+    
+
+    function post_router_discovery(){
         /** The request validation is pretty straight-forward, so let's do that */
         $this->request_validation();
     }
 
     function request_validation(){
+        // if(!isset($GLOBALS['current_route_meta'])) throw new \Exceptions\HTTP\NotFound("404 Not Found");
+
         /** Handle Cross-Origin Resource Sharing validation */
         $this->cors_management();
 
@@ -65,20 +78,23 @@ class ApiHandler{
         $allowed_methods = "GET, POST, PUT, PATCH, DELETE";
         
         /** Check if our route allows us to ignore CORS */
-        if(isset($GLOBALS['current_route_meta']) && $GLOBALS['current_route_meta']['cors_disabled']){
+        if(isset($GLOBALS['current_route_meta']['cors_disabled']) && $GLOBALS['current_route_meta']['cors_disabled']){
             /** If it does, we send the origin back to as the allowed origin */
             $allowed_origin = $_SERVER['HTTP_ORIGIN'];
             /** TODO: Send the current route's method back, too. */
-        } else if(isset($_SERVER['HTTP_ORIGIN']) ){
+        } else if( app("API_CORS_enable_other_origins") && isset($_SERVER['HTTP_ORIGIN']) ){
             /** If HTTP_ORIGIN is set, we'll check if the origin is in our allowed origins and if not,
              * throw an unauthorized error */
-            if(!in_array($_SERVER['HTTP_ORIGIN'],app("API_CORS_allowed_origins"))) $this->cors_error();
+            if( !in_array($_SERVER['HTTP_ORIGIN'],$this->allowed_origins)
+            ) $this->cors_error();
             /** Otherwise, we'll set our to the server origin, since its allowed */
             $allowed_origin = $_SERVER['HTTP_ORIGIN'];
         }
         
+        $allowed_origin = $this->url_to_current_mode($allowed_origin);
+
         /** Now we'll throw the headers back to the client */
-        header("Access-Control-Allow-Origin: https://$allowed_origin");
+        header("Access-Control-Allow-Origin: $allowed_origin");
         header("Access-Control-Allow-Credentials: true");
         header("Access-Control-Allow-Methods: $allowed_methods");
         header("Content-Type: " . $this->content_type);
@@ -86,8 +102,9 @@ class ApiHandler{
     }
 
     function cors_error(){
+        $origin = $this->url_to_current_mode(app('domain_name'));
         /** Throw the domain name back as a CORS header */
-        header("Access-Control-Allow-Origin: https://".app('domain_name'));
+        header("Access-Control-Allow-Origin: $origin");
         header("Access-Control-Allow-Credentials: true");
         header("Content-Type: " . $this->content_type);
         /** Throw an unauthorized error */
@@ -107,6 +124,10 @@ class ApiHandler{
         else $return_value = $GLOBALS['router_result'];
         /** Echo the result to the output buffer */
         echo json_encode($return_value);
+    }
+
+    function url_to_current_mode($url){
+        return "$this->http_mode://" . str_replace($this->allowed_modes,"",$url);
     }
 
     function execute(){

@@ -15,6 +15,10 @@ if(app('Web_main_content_via_api')){
     \Routes\Route::get("/page","CoreApi@page");
 }
 
+if(app('API_contact_form_enabled')){
+    \Routes\Route::post("/contact","CoreApi@contact");
+}
+
 if(app('debug')){
     \Routes\Route::get("/hello_world/{something}/{machina}?","HelloWorld@do_it",[ // Hello World test route
         'requires_csrf' => false,

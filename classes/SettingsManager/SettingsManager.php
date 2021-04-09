@@ -332,7 +332,7 @@ class SettingsManager{
     function push($reference, $directives, $setting_name){
         $mutant = [];
         foreach($reference as $ref){
-            $value = lookup_js_notation($ref,$this,false);
+            $value = lookup_js_notation($ref,$this->settings,false);
             // if(is_string($value)) $value = [$value];
             array_push($mutant,$value);
         }

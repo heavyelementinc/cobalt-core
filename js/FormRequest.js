@@ -57,13 +57,14 @@ class FormRequest {
     }
 
     async send(data) {
+        this.reset_errors();
         const post = new ApiFetch(this.action, this.method, { headers: this.headers });
         let result;
         try {
             result = await post.send(data, {});
         } catch (error) {
             this.errorHandler(error, result, post);
-            return;
+            throw new Error(error);
         }
     }
 
@@ -75,7 +76,8 @@ class FormRequest {
     }
 
     /** Build the list of items */
-    build_query(list) {
+    build_query(list = null) {
+        if (list === null) list = this.el_list
         let query = {};
         for (var i in list) {
             query[list[i].name] = list[i].value();
@@ -92,8 +94,7 @@ class FormRequest {
     }
 
     reset_errors() {
-
-        // this.form.querySelector(".error").innerText = ""
+        if (this.errorField) this.errorField.innerText = "";
     }
 
 }
