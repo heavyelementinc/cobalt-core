@@ -1,15 +1,31 @@
 <?php
-// if(empty($_SERVER['HTTPS'])) die("Connection not secure.");
 /**
- * Define our environment variables so we have absolute knowledge of where we are
- * in the filesystem. We rely on our webserver to tell us the root project.
+ * env.php - The Cobalt Environment Bootstrapper
+ * 
+ * Copyright 2021 - Heavy Element, Inc
+ * 
+ * Defines Cobalt's constants as well as loads the settings file for the current
+ * project (internally referred to as an APP). The cobalt-core directory can
+ * serve many apps at once but will only ever execute a single app while
+ * fulfilling a request.
+ * 
+ * These files will not do *anything* unless invoked from within the context of
+ * an APP. Please create a new app using the CLI and configure your webserver to
+ * point to the app's /public directory.
+ * 
+ * @license cobalt-core/license
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
+
+// ENV_ROOT defines the root of the core files (the dir this file resides in)
 define("__ENV_ROOT__", __DIR__);
 
-/** Establish our app root */
+// Establish our app root
 $app_root = "";
-if(isset($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../"; // Go up one directory so we're not in the public space
-else if(isset($GLOBALS['cli_app_root'])) $app_root = $GLOBALS['cli_app_root']; // Rely on the Cobal CLI to mandate the path to our app
+// Go up one directory so we're not in the public space
+if(isset($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../";
+// Rely on the Cobalt CLI to mandate the path to our app
+else if(isset($GLOBALS['cli_app_root'])) $app_root = $GLOBALS['cli_app_root'];
 else die("Cannot establish absolute path to app root"); // Die.
 
 define("__APP_ROOT__", realpath($app_root));
@@ -23,12 +39,12 @@ require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
 // Import Composer's autoload
 require_once __DIR__ . "/vendor/autoload.php";
-// And then define our spl_autoload method
+// And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload",true);
 
-// Instantiate our settings (true for loading settings from cache)
+// Instantiate our settings (`true` for loading settings from cache)
 try{
-    $application = new SettingsManager(false);
+    $application = new SettingsManager(true);
 } catch (Exception $e){
     die($e->getMessage());
 }

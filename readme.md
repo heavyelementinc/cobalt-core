@@ -34,8 +34,8 @@ COBALT_MONGODB=mongodb:\\username:password@localhost:27017
 ```
 
 ## Cloning this repo
-If you plan on cloning this repository, you must run composer as the `www-data` user in the cobalt-core directory.
+If you plan on cloning this repository, you must run `composer install` in `/path/to/cobalt-core` directory.
+
 
 ## Creating your first project
 Copy `core/cli/app/` to be a sibling directory of this project. Rename it to whatever you'd like. Point your webserver's webroot to `[app-name]/public` and you should be good to go!
-
