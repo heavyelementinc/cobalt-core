@@ -10,7 +10,7 @@ class FormRequestElement extends HTMLElement {
         // This WebComponent should allow us to make form bots a thing of the past.
         this.request = new FormRequest(this, { asJSON: true, errorField: this.querySelector(".error") });
         if (this.request.autosave === false) {
-            this.querySelector("button[type='submit'],input[type='button']").addEventListener('click', (e) => {
+            this.querySelector("button[type='submit'],input[type='submit']").addEventListener('click', (e) => {
                 this.send();
             });
         }
@@ -233,3 +233,37 @@ class AudioPlayer extends HTMLElement {
 }
 
 customElements.define("audio-player", AudioPlayer)
+
+
+class LoadingSpinner extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        let mode = app("loading_spinner");
+        console.log(mode);
+        this.classList.add(`mode--${mode}`);
+        this.innerHTML = `${this[mode]()}`;
+
+    }
+
+    dashes() {
+        return `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="calc(2em * 4)" height="calc(2em * 4)" viewBox="0 0 100 100" version="1.1" id="svg1091"><circle class="spinner-dashes" style="fill:none;stroke:${getComputedStyle(this).color};stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1" id="path1964" cx="50" cy="50" r="43.098995" /></svg>`
+    }
+
+    he() {
+        let color = getComputedStyle(this).color;
+        return `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="calc(2em * 4)" height="calc(2em * 4)" viewBox="0 0 80 80" version="1.1" id="hE_spinner">
+        <g id="hE_spinner--rect" style="stroke-width:7;stroke-miterlimit:4;stroke-dasharray:none">
+           <rect style="fill:none;stroke:${color};stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect1399" width="70.463562" height="70.463562" x="4.7682199" y="4.7682199" ry="0" />
+        </g>
+        <g aria-label="hE" id="hE_spinner--text" style="fill:${color};fill-opacity:1;stroke:none;stroke-width:1.00508" transform="matrix(0.42502761,0,0,0.42502761,-4.5868625,-40.820276)">
+           <path d="M 98.342363,225.37105 H 85.412998 v -28.36742 q 0,-5.98224 -2.219219,-8.78039 -2.21922,-2.89463 -6.271707,-2.89463 -1.736781,0 -3.666537,0.7719 -1.929756,0.77191 -3.666536,2.21922 -1.736781,1.35083 -3.184098,3.28059 -1.447317,1.92975 -2.122731,4.24546 v 29.52527 H 51.352804 v -70.4361 H 64.28217 v 29.23581 q 2.798146,-4.92088 7.526048,-7.52605 4.82439,-2.70166 10.613658,-2.70166 4.920878,0 8.008488,1.73678 3.087609,1.64029 4.82439,4.43844 1.73678,2.79815 2.412195,6.36819 0.675414,3.57005 0.675414,7.33308 z" id="path2109" />
+           <path d="m 158.45409,213.69602 v 11.67503 H 110.8856 v -68.50634 h 46.7001 v 11.67502 h -33.38478 v 16.49942 h 28.05756 l 0.79229,10.80663 h -28.84985 v 17.85024 z" id="path2111" />
+        </g>
+     </svg>`
+    }
+}
+
+if (app("loading_spinner") !== false) customElements.define("loading-spinner", LoadingSpinner)

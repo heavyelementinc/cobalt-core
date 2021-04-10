@@ -228,6 +228,10 @@
     "session_cookie_name": {
         "default": "token_session" // Changing this in production will log everyone out.
     },
+    "loading_spinner": {
+        "default": "dashes",
+        "$public": true
+    },
     /* The CSRF seed is a secret string that is prepended to the client's 
     session cookie to form a unique "password". This password is then encrypted
     and sent to the client as the CSRF Token. */
@@ -324,7 +328,7 @@
     "API_contact_form_enabled": {
         "default": false
     },
-    "API_contact_form_email_to": {
+    "API_contact_form_recipient": {
         "default": ""
     },
     /* The id attribute of the body tag when errors happen in a web context. */

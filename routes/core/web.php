@@ -8,6 +8,7 @@ if(app("enable_debug_routes")) {
     Routes\Route::get("/debug/slideshow","Debug@debug_slideshow");
     Routes\Route::get("/debug/inputs","Debug@debug_inputs");
     Routes\Route::get("/debug/parallax","Debug@debug_parallax");
+    Routes\Route::get("/debug/loading","Debug@debug_loading");
 }
 
 /** If authentications are enabled, these routes should be added to the table */

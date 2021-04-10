@@ -384,7 +384,7 @@ class SettingsManager{
             trigger_error("The \$public directive must be set to `true` to expose $setting_name to clients",E_USER_WARNING);
             return;
         }
-        if(property_exists($this,$setting_name)) $value = $this->get($setting_name);
+        if(property_exists($this->settings,$setting_name)) $value = $this->get($setting_name);
         else $value = $directives['default'];
         $this->public_settings[$setting_name] = $value; // Add the value to the public settings
     }

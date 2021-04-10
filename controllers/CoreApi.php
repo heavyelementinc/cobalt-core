@@ -31,8 +31,11 @@ class CoreApi extends \Controllers\Pages{
 
     function contact(){
 
-        if(empty($_POST['phone']) && empty($_POST['email']))
-            throw new \Exceptions\HTTP\BadRequest("You must specify an email or phone number (or both)");
+        if(empty($_POST['phone']) && empty($_POST['email'])) {
+            $error = "";
+            if(key_exists('phone',$_POST)) $error .= " or phone number (or both)";
+            throw new \Exceptions\HTTP\BadRequest("You must specify an email$error");
+        }
 
         if(empty($_POST['name']))
             throw new \Exceptions\HTTP\BadRequest("You need to provide your name");
@@ -47,7 +50,9 @@ class CoreApi extends \Controllers\Pages{
         ));
         $email->set_body_template("/emails/contact-form.html");
         try{
-            $email->send(app("API_contact_form_email_to"),"New contact form submission");
+            $subject = "New contact form submission";
+            if(key_exists("subject",$_POST)) $subject = "Webform: \"" . strip_tags($_POST['subject'] . "\"");
+            $email->send(app("API_contact_form_recipient"),$subject);
         } catch (Exception $e) {
             return "Failed to submit your request. Try again later.";
         }
