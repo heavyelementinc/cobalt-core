@@ -17,6 +17,10 @@
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
 
+// Let's make sure we're running a suppoted version of PHP (since we use 
+// the not-insane array syntax and the spread "..." syntax)
+if(!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
+
 // ENV_ROOT defines the root of the core files (the dir this file resides in)
 define("__ENV_ROOT__", __DIR__);
 
