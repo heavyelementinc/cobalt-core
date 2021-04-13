@@ -28,7 +28,7 @@ class SendMail{
     $this->mail->Host       = $this->SMTP_host;                 // Set the SMTP server to send through
     $this->mail->SMTPAuth   = $this->SMTP_auth;                 // Enable SMTP authentication
     if(!empty($this->SMTP_opts)) $this->mail->SMTPOptions = $this->SMTP_opts;
-    if(app('debug')) $this->mail->SMTPDebug = 1;
+    // if(app('debug')) $this->mail->SMTPDebug = 1;
     $this->mail->Username   = $this->username;                  // SMTP username
     $this->mail->Password   = $this->password;                  // SMTP password
     $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;   // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged

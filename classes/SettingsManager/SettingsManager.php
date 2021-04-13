@@ -116,8 +116,8 @@ class SettingsManager{
     /** Possible files containing app settings */
     private $app_paths_settings = [
         __ENV_ROOT__ . "/ignored/config/settings.json", // .gitignored file
-        __APP_ROOT__ . "/ignored/config/settings.json", // .gitignored file
-        __APP_ROOT__ . "/private/config/settings.json"  // App's settings
+        __APP_ROOT__ . "/private/config/settings.json",  // App's settings
+        __APP_ROOT__ . "/ignored/config/settings.json", // .gitignored file can override APP settings
     ];
 
     /** Filename where the "compiled" settings should be saved to */
