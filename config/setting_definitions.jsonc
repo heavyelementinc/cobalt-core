@@ -43,6 +43,7 @@
     /* The name of the designer as well as their website and title text */
     "designer": {
         "default": {
+            "prefix": "Designed by",
             "name": "Heavy Element, Inc.",
             "href": "https://heavyelement.io/",
             "title": "Maine's Premier New Media Production Studio"
@@ -225,6 +226,14 @@
         ],
         "$merge": true // User's packages should come second.
     },
+    "opengraph": {
+        "default": {
+            "type": "website",
+            "image": "/core-content/img/branding/cobalt-logo.svg",
+            "description": "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io"
+        },
+        "$merge": true
+    },
     "session_cookie_name": {
         "default": "token_session" // Changing this in production will log everyone out.
     },
@@ -247,6 +256,9 @@
         "default": true
     },
     "Web_main_content_via_api": {
+        "default": true
+    },
+    "Web_display_designer_credit": {
         "default": true
     },
     "Render_strict_variable_parsing": {
@@ -343,6 +355,9 @@
     "Mail_smtp_auth": {
         "default": true,
         "$env": "MAIL_AUTH"
+    },
+    "Mail_SMTP_options": {
+        "default": {}
     },
     "Mail_username": {
         "default": "",

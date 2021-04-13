@@ -1,7 +1,7 @@
 class Router {
     constructor() {
         window.router_entities = {};
-        this.navigation_items = document.querySelectorAll("header nav a");
+        this.navigation_items = document.querySelectorAll("header nav a, footer nav a");
         this.current_route = null;
         document.addEventListener("navigationEvent", (e) => {
             this.navigation_event(e);
@@ -38,7 +38,9 @@ class Router {
     find_current_navlist_item() {
         for (const i of this.navigation_items) {
             i.classList.remove("navigation--current");
-            if (i.href !== location.href) continue;
+            if (location.href.length < i.href.length) continue;
+            if (location.pathname !== "/" && i.getAttribute('href') === "/") continue;
+            if (location.href.substr(0, i.href.length) !== i.href) continue;
             i.classList.add("navigation--current");
         }
     }

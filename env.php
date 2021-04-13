@@ -38,7 +38,9 @@ $write_to_buffer_handled = false;
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
 // Import Composer's autoload
-require_once __DIR__ . "/vendor/autoload.php";
+$composer = __DIR__ . "/vendor/autoload.php";
+if(file_exists($composer)) require_once $composer;
+else die("Dependencies have not been installed. Run `composer install` in the cobalt-core directory");
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload",true);
 

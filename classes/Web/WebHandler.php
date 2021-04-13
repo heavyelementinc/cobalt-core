@@ -34,6 +34,7 @@ class WebHandler{
         "@auth_panel@"     => "",
         "@header_content@" => "",
         "@footer_content@" => "",
+        "@footer_credits@" => "",
         "@script_content@" => "",
         "@session_panel@"  => "",
     ];
@@ -68,6 +69,10 @@ class WebHandler{
          * the final template including the @main_content@ to the renderer as one complete doc.
          */
         $this->prepare_html_framework();
+    }
+
+    function post_router_discovery(){
+        $this->renderer->stock_vars['route'] = $GLOBALS['current_route_meta'];
     }
 
     function post_router_execute(){
@@ -143,6 +148,14 @@ class WebHandler{
 
     function footer_content(){
         return $this->load_template("parts/footer.html");
+    }
+
+    function footer_credits(){
+        $credits  = '<section class="footer-credits">';
+        $credits .= '<span>&copy;@date("Y"); {{app.app_copyright_name}}</span> &mdash; <span>All Rights Reserved</span>';
+        if(app('Web_display_designer_credit')) $credits .= ' &mdash; <span>{{app.designer.prefix}} <a href="{{app.designer.href}}" title="{{app.designer.title}}">{{app.designer.name}}</a></span>';
+        $credits .= '</section>';
+        return $credits;
     }
 
     function user_menu(){

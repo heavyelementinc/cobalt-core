@@ -1,9 +1,10 @@
 <?php
-/** Render\Render is our way of parsing HTML template strings, finding {{variables}}, %%variables%%
- * or @function("calls"); and executing them.
+/** Render\Render is our way of parsing HTML template strings, finding 
+ * {{variables}}, %%variables%% or @function("calls"); and executing them.
  * 
- * Render\Render accepts accepts vars with the set_vars method. It's capable of including preset
- * global vars. The vars array lets us expose certain variables to be included in our templates
+ * Render\Render accepts accepts vars with the set_vars method. It's capable of 
+ * including preset global vars. The vars array lets us expose certain variables
+ * to be included in our templates
  * 
  * Variables can be referenced in a template using either syntax
  *  - [x] {{mustache}}
@@ -11,47 +12,51 @@
  *  - [ ] {%non-standard%}  // UNTESTED AND NOT SUPPORTED!
  *  - [ ] %{non_standard}%  // UNTESTED AND NOT SUPPORTED!
  * 
- * We allow two different syntaxes in our templates because certain linters in varying scenarios
- * will "correct" the {{mustache}} syntax and insert new lines in between the braces. 
+ * We allow two different syntaxes in our templates because certain linters in 
+ * varying scenarios will "correct" the {{mustache}} syntax and insert new lines
+ * in between the braces. 
  * 
- * The %%tictac%% syntax allows us to reference renderer variables inside CSS or JS files where
- * linters are most likely to be applied. HOWEVER, where possible, {{mustache}} references are
- * the *preferred* reference.
+ * The %%tictac%% syntax allows us to reference renderer variables inside CSS or
+ * JS files where linters are most likely to be applied. HOWEVER, where possible,
+ * {{mustache}} references are the *preferred* reference.
  * 
- * You may enable strict {{mustache}}-style parsing before execution of the rendering process
- * by calling $this->strict_variable_parsing(true) or by changing Render_strict_variable_parsing
- * in your app's config/settings.json file. Note that enabling this setting will *always* enforce
- * strict parsing unless use $this->strict_variable_parsing(false) before parsing.
+ * You may enable strict {{mustache}}-style parsing before execution of the 
+ * rendering process by calling $this->strict_variable_parsing(true) or by 
+ * changing Render_strict_variable_parsing in your app's config/settings.json 
+ * file. Note that enabling this setting will *always* enforce strict parsing 
+ * unless use $this->strict_variable_parsing(false) before parsing.
  * 
  * Of note here is that if you reference a variable like so:
  * 
  *   >  <h1>{{mustache}}<h1>
  * 
- * It will automatically sanitize HTML characters by escaping them. In order to include the raw
- * value of the references variable, you must prepend the variable name with an ! exclamation point:
+ * It will automatically sanitize HTML characters by escaping them. In order to
+ * include the raw value of the references variable, you must prepend the 
+ * variable name with an ! exclamation point:
  * 
  *   > <h1>{{!mustache}}</h1>
  * 
- * ONLY DO THIS where you're certain it's safe to insert raw variables into your HTML as there
- * will be no way for the client to distinguish what's authentic HTML and what is user-submitted
- * data. User-submitted data parsed as HTML enables XSS attacks. BE CAREFUL.
+ * ONLY DO THIS where you're certain it's safe to insert raw variables into your
+ * HTML as there will be no way for the client to distinguish what's authentic
+ * HTML and what is user-submitted data. User-submitted data parsed as HTML 
+ * enables XSS attacks. BE CAREFUL.
  *
  * ================
  *  FUNCTION CALLS 
  * ================
  *  
- * Then we have function calls. Currently FUNCTION calls (not methods or static methods) are
- * callable.
+ * Then we have function calls. Currently FUNCTION calls (not methods or static 
+ * methods) are callable.
  * 
  * Functions may be called from within a template like so:
  *  - [x] @function_name("arg",1);
  *  - [ ] @other_function(23,"args")
  * 
- * Datatypes of the arguments are preserved here, and if the parsing of the arguments fails, an
- * exception will be thrown.
+ * Datatypes of the arguments are preserved here, and if the parsing of the 
+ * arguments fails, an exception will be thrown.
  * 
- * Note that you can call a function with or without a trailing ; semicolon. However, including the
- * semicolon is the preferred syntax.
+ * Note that you can call a function with or without a trailing ; semicolon. 
+ * However, including the semicolon is the preferred syntax.
  * 
  * TODO: Add callable vars support
  */
@@ -69,14 +74,27 @@ class Render{
 
     function __construct(){
         if(app('Render_strict_variable_parsing')) $this->strict_variable_parsing(true);
-        $this->stock_vars = ['app' => app(),'get' => $_GET,'post' => $_POST,'session' => session()];
+        $http = (\is_secure()) ? "https" : "http";
+        $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
+        $this->stock_vars = [
+            'app' => __APP_SETTINGS__,
+            'get' => $_GET,
+            'post' => $_POST,
+            'session' => session(),
+            'request' => [
+                'url' => "$http://$_SERVER[SERVER_NAME]" . "$_SERVER[REQUEST_URI]$query_string",
+                'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
+            ],
+            'og_template' => "/parts/opengraph/default.html"
+        ];
     }
 
     /**
-     * You can call this method with a boolean argument to swap to strictly enforce {{mustache}}-style 
-     * references.  Use of this method will only take effect if called before $this->execute()
+     * You can call this method with a boolean argument to swap to strictly 
+     * enforce {{mustache}}-style references. Use of this method will only take 
+     * effect if called before $this->execute()
      */
-    function strict_variable_parsing(Bool $status = false){
+    function strict_variable_parsing(bool $status = false){
         // Get the current status
         $current = $this->enable_strict_mustache_syntax;
         // Check if our current state is correct
@@ -233,7 +251,7 @@ class Render{
             $mutant_vars = $this->functs_get_vars($args);
             // We want to include the current context's variables when @with is called
             // from inside a template, so we add a special case. Fun.
-            if($funct === "with" && !isset($mutant_vars[1])) $mutant_vars[1] = $mutant_vars;
+            if(in_array($funct,['maybe_with','with']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
             $result = $funct(...$mutant_vars);
             $mutant = \str_replace($functions[0][$i],$result,$mutant);
         }

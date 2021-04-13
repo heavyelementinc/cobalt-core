@@ -51,16 +51,29 @@ class Route{
         $router_table_address = $GLOBALS['route_table_address'];
         /** Store our route data in the full route table. */
         $GLOBALS[$router_table_address][$type][$regex] = [
+            // Original pathname
+            'original_path' => $path,
+            
+            // The PHP controller name
             'controller' => $controller,
-            'handler'    => $additional['handler'],
-            'handler_data'  => $handler_data,
-            'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
+
+            // The var names that will be parsed out of the URI
+            'uri_var_names' => $var_names[1],
+            'uri_var_types' => [], // Unused?
+            
+            // The client-side controller (in JavaScript)
+            'handler'    => $additional['handler'], 
+            'handler_data'  => $handler_data, // Handler script data
+
+            // Permission for a page or API 
             'permission' => $additional['permission'] ?? null,
             'group'      => $additional['group'] ?? null,
-            'original_path' => $path,
+            
+            // Admin panel name
             'panel_name' => $additional['name'] ?? null,
-            'uri_var_names' => $var_names[1],
-            'uri_var_types' => []
+
+            // API authentication stuff
+            'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
         ];
     }
 

@@ -54,7 +54,7 @@ class CoreApi extends \Controllers\Pages{
             if(key_exists("subject",$_POST)) $subject = "Webform: \"" . strip_tags($_POST['subject'] . "\"");
             $email->send(app("API_contact_form_recipient"),$subject);
         } catch (Exception $e) {
-            return "Failed to submit your request. Try again later.";
+            throw new \Exceptions\HTTP\ServiceUnavailable("There was an error on our end.");
         }
         return $_POST;
     }

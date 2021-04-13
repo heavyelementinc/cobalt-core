@@ -7,6 +7,7 @@ use PHPMailer\PHPMailer\Exception;
 class SendMail{
   var $SMTP_host    =  __APP_SETTINGS__["Mail_smtp_host" ];
   var $SMTP_auth    =  __APP_SETTINGS__["Mail_smtp_auth"];
+  var $SMTP_opts    =  __APP_SETTINGS__['Mail_SMTP_options'];
   var $username     =  __APP_SETTINGS__["Mail_username"];
   var $password     =  __APP_SETTINGS__["Mail_password"];
   var $port         =  __APP_SETTINGS__["Mail_port"];
@@ -26,6 +27,8 @@ class SendMail{
     $this->mail->isSMTP();                                      // Send using SMTP
     $this->mail->Host       = $this->SMTP_host;                 // Set the SMTP server to send through
     $this->mail->SMTPAuth   = $this->SMTP_auth;                 // Enable SMTP authentication
+    if(!empty($this->SMTP_opts)) $this->mail->SMTPOptions = $this->SMTP_opts;
+    if(app('debug')) $this->mail->SMTPDebug = 1;
     $this->mail->Username   = $this->username;                  // SMTP username
     $this->mail->Password   = $this->password;                  // SMTP password
     $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;   // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
@@ -63,6 +66,6 @@ class SendMail{
     
     $this->mail->Subject = $subject;
     $this->mail->Body = $body;
-    $this->mail->send();
+    if(!$this->mail->send()) throw new Exception("Mail not sent!");
   }
 }

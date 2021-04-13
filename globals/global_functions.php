@@ -392,3 +392,20 @@ function with(string $template, $vars = []){
     $render->from_template($template);
     return $render->execute();
 }
+
+/** An error-tolerant template inclusion routine. Wraps the `with` function in a
+ * try/catch block
+ * 
+ * @param string  $template The name of the template
+ * @param mixed   $vars     Variables to include
+ * @return string The processed template OR an empty string on error
+ */
+function maybe_with($template,$vars){
+    if(!$template) return "";
+    if(!is_string($template)) return "";
+    try{
+        return with($template,$vars);
+    } catch (Exception $e){
+        return "";
+    }
+}
