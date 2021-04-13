@@ -230,6 +230,8 @@
         "default": {
             "type": "website",
             "image": "/core-content/img/branding/cobalt-logo.svg",
+            "image_X": 500,
+            "image_Y": 500,
             "description": "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io"
         },
         "$merge": true
