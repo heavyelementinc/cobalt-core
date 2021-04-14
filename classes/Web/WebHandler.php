@@ -102,7 +102,7 @@ class WebHandler{
             // Let's make sure that we aren't double-sending the final document.
             try{
                 if(!$this->results_sent_to_client) echo $this->process();
-            } catch(\Exception\HTTP\HTTPException $e){
+            } catch(\Exceptions\HTTP\HTTPException $e){
                 echo $this->process();
             }
             $this->results_sent_to_client = true;

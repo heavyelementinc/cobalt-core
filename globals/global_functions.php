@@ -161,7 +161,12 @@ function add_template($path){
 }
 
 function add_vars($vars){
-    $GLOBALS['web_processor_vars'] = $vars;
+    if(!isset($GLOBALS['web_processor_vars'])) {
+        $GLOBALS['web_processor_vars'] = $vars;
+        return;
+    }
+
+    $GLOBALS['web_processor_vars'] = array_merge($GLOBALS['web_processor_vars'],$vars);
 }
 
 /** 

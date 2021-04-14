@@ -1,0 +1,18 @@
+<article>
+  <h1>Welcome to {{app.app_name}}</h1>
+  <p><strong>Powered by <a href="https://heavyelement.io/">Cobalt Engine</a></strong></p>
+  <p>Before you can continue, you'll need to create a user account.</p>
+  <p>Please fill out the form below and we'll get everything set up for you!</p>
+  <pre class="error">{{error}}</pre>
+  <form method="POST">
+    {{!prompts}}
+    <button type="submit">Get started</button>
+  </form>
+</article>
+
+<style>
+  article {
+    width: 40%;
+    margin: 0 auto;
+  }
+</style>

@@ -6,8 +6,9 @@
  * in the router table.
  * 
  * @todo When the router parses the values, it should check for name collisions
- * between existing $_GET parameters and save them as $_GET["<name>"] or $_GET["uri_<name>"]
- * if a collision exists. The "..." should be saved as a string called $_GET['uri_misc']
+ * between existing $_GET parameters and save them as $_GET["<name>"] or 
+ * $_GET["uri_<name>"] if a collision exists. The "..." should be saved as a 
+ * string called $_GET['uri_misc']
  * 
  * @todo Add typing so that digit:{varname} would be typecast to a digit or,
  * throws an BadRequest error if its no a digit
@@ -27,13 +28,15 @@ class Router{
     $this->method = strtolower($method);
   }
 
-  function get_routes(){
+  function init_route_table(){
     /** Export our route table to the global space, we use this to specify where
      * we should look for our routes.
      */
     $GLOBALS['route_table_address'] = $this->route_context . "_routes";
-    $GLOBALS[$GLOBALS['route_table_address']] = [];
+    if(!isset($GLOBALS[$GLOBALS['route_table_address']])) $GLOBALS[$GLOBALS['route_table_address']] = [];
+  }
 
+  function get_routes(){
     /** Check if we're supposed to cache our routes
      *  @todo Complete the table_from_cache functionality */
     if(app('route_cache_enabled') && $this->table_from_cache()){
@@ -71,8 +74,8 @@ class Router{
   function discover_route($route = null,$query = null){
     if($route === null) $route = $_SERVER['REQUEST_URI'];
     if($query === null) $query = $_SERVER['QUERY_STRING'];
-    /** Let's remove the query string from the incoming request URI and decode any special
-     * characters in our URI.
+    /** Let's remove the query string from the incoming request URI and decode 
+     * any special characters in our URI.
      */
     $this->uri = urldecode(str_replace(["?".$query],"",$route));
     if($this->route_context !== "web"){
@@ -133,8 +136,8 @@ class Router{
     $controller_method = $explode[1];
     
     try{
-      // We are doing these in reverse order because we want our app's controllers
-      // to override the core's controllers.
+      // We are doing these in reverse order because we want our app's 
+      // controllers to override the core's controllers.
       $controller_file = files_exist([
         __APP_ROOT__ . "/private/controllers/$controller_name.php",
         __ENV_ROOT__ . "/controllers/$controller_name.php"
@@ -143,18 +146,19 @@ class Router{
       die("Controller $controller_name not found.");
     }
     
-    // We need to require this because the controllers folder is outside of our classes
-    // path and the developer is going to be able to create new controllers
+    // We need to require this because the controllers folder is outside of our 
+    // classes path and the developer is going to be able to create new controllers
     require_once $controller_file[0];
 
     // Instantiate our controller and then execute it
     $ctrl = new $controller_name();
     if(!method_exists($ctrl,$controller_method)) throw new \Exceptions\HTTP\NotFound("Specified method was not found.");
     $test = new \ReflectionMethod($controller_name,$controller_method);
-    /** We check to make sure that we're not going to have callable exception where we
-     * aren't supplying the correct number of arguments to a callable. So we check how
-     * many arguments are required for the callable and then count the number of matches
-     * we found to ensure that there will always be enough matches.
+    /** We check to make sure that we're not going to have callable exception 
+     * where we aren't supplying the correct number of arguments to a callable. 
+     * So we check how many arguments are required for the callable and then 
+     * count the number of matches we found to ensure that there will always be 
+     * enough matches.
      * 
      * Otherwise, we'll throw a 400 Bad Request.
      */

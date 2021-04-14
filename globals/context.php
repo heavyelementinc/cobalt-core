@@ -30,8 +30,18 @@ if($route_context !== "web") $processor = app("api_routes")[$route_context]['pro
 // Invoke our context processor.
 $context_processor = new $processor();
 
+// Check if we need to initialize Cobalt and start initialization if needed.
+// When we init, we change the route_context to "init" so as to ignore all
+// other web routes.
+$init_file = __APP_ROOT__ . "/ignored/init.json";
+if(file_exists($init_file)) require_once __ENV_ROOT__ . "/globals/init.php";
+
 // The router takes care of much of the rest of this process.
 $router = new Routes\Router($route_context);
+
+// Create the routing table for the current context so that the Cobalt init
+// script has something to bind its routes to.
+$router->init_route_table();
 
 // We load our routing tables for the current context
 $router->get_routes();

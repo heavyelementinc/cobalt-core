@@ -80,6 +80,10 @@
                 "prefix": "/admin/",
                 "permission": "Admin_panel_access"
             },
+            "init": {
+                "processor": "Web\\WebHandler",
+                "prefix": null
+            },
             "shared": {
                 "processor": "Web\\SharedHandler",
                 "prefix": "/core-content/"

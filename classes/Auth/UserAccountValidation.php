@@ -19,40 +19,44 @@ class UserAccountValidation{
     /** Validate the username */
     function validate_uname($value){
         $v = trim($value);
-        if($v !== $value) throw new \Exceptions\HTTP\BadRequest("Your username cannot begin or end with spaces.");
+        if($v !== $value) throw new \Exception("Your username cannot begin or end with spaces.");
         /** Count the number of users with the supplied username */
         $uname_uniqueness = $this->collection->count(['uname' => $v]);
         /** If the username is not zero (meaning it's in use), throw an error */
-        if($uname_uniqueness !== 0) throw new \Exceptions\HTTP\BadRequest("That username is already in use.");
+        if($uname_uniqueness !== 0) throw new \Exception("That username is already in use.");
         return $v;
     }
 
     function validate_pword($value){
+        $password_fail = "";
+        
         /** Check if the password starts or ends with whitespace (not allowed) */
-        if( $value !== trim($value) ) throw new \Exceptions\HTTP\BadRequest("Passwords must not begin or end with spaces.");
+        if( $value !== trim($value) ) $password_fail .= "Passwords must not begin or end with spaces.\n";
         
         /** Check if the password length meets the minimum required length */
-        if( strlen($value) < app("Auth_min_password_length") ) throw new \Exception\HTTP\BadRequest("Password must be at least " . app("Auth_min_password_length") . " characters long.");
+        if( strlen($value) < app("Auth_min_password_length") ) $password_fail .= "Password must be at least " . app("Auth_min_password_length") . " characters long.\n";
         
         /** Detect if submitted passwords are all alphabetical or all numerical characters */
-        if( ctype_alpha($value) || ctype_digit($value) ) throw new \Exception\HTTP\BadRequest("Password must include at least one letter and one number.");
+        if( ctype_alpha($value) || ctype_digit($value) ) $password_fail .= "Password must include at least one letter and one number.\n";
         
         /** Check if strings are only comprised of alphanumeric characters */
-        if( ctype_alnum($value) ) throw new \Exception\HTTP\BadRequest("Password must contain at least one special character.");
+        if( ctype_alnum($value) ) $password_fail .= "Password must contain at least one special character.\n";
         
+        if(!empty($password_fail)) throw new \Exception($password_fail);
+
         /** Finally, we have a valid password. */
         return password_hash($value,PASSWORD_DEFAULT);
     }
 
     function validate_email($value){
         $value = trim($value);
-        if(!filter_var($value,FILTER_VALIDATE_EMAIL)) throw new \Exceptions\HTTP\BadRequest("Email address contains invalid characters.");
+        if(!filter_var($value,FILTER_VALIDATE_EMAIL)) throw new \Exception("Email address contains invalid characters.");
         
         /** Count the number of users with the supplied email address */
         $email_uniqueness = $this->collection->count(['email' => $value]);
         
         /** If the email address is in use (meaning it's not zero), then throw an error */
-        if($email_uniqueness !== 0) throw new \Exception\HTTP\BadRequest("That email address is already in use.");
+        if($email_uniqueness !== 0) throw new \Exception("That email address is already in use.");
         return $value;
     }
 
@@ -69,12 +73,12 @@ class UserAccountValidation{
         else $value = strtotime($value) * 1000;
         
         /** Return a Mongo UTC Date Time object */
-        return new MongoDB\BSON\UTCDateTime($value);
+        return new \MongoDB\BSON\UTCDateTime($value);
     }
 
     function validate_verified($value){
         /**  */
-        if(!is_bool($value)) throw new \Exceptions\HTTP\BadRequest("Validated must be a boolean value.");
+        if(!is_bool($value)) throw new \Exception("Validated must be a boolean value.");
         return $value;
     }
 
@@ -112,7 +116,7 @@ class UserAccountValidation{
             if(!key_exists($permission,$perms->valid)) continue;
         
             /** If it's not a boolean, we will throw an error */
-            if(!is_bool($value)) throw new \Exceptions\HTTP\BadRequest("Could not validate user permission table");
+            if(!is_bool($value)) throw new \Exception("Could not validate user permission table");
         
             /** If we're here, we know it's safe to add the permission to the list */
             $mutant[$permission] = $value;
