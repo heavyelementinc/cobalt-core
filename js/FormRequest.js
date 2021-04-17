@@ -1,5 +1,7 @@
 class FormRequest {
     constructor(form, { asJSON = true, errorField = null }) {
+        this.onsuccess = new Event("requestSuccess");
+        this.onfail = new Event("requestFail");
         this.asJSON = asJSON;
         if (typeof form === "string") this.form = document.querySelector(form);
         else this.form = form;
@@ -66,6 +68,7 @@ class FormRequest {
             this.errorHandler(error, result, post);
             throw new Error(error);
         }
+        this.form.dispatchEvent(this.onsuccess);
     }
 
     /** Autosave handler */
@@ -90,12 +93,13 @@ class FormRequest {
         let field = this.errorField;
         if (!field) field = this.form.querySelector(".error")
         if (field) field.innerText = error.result.error
-
+        this.form.dispatchEvent(this.onfail);
     }
 
     reset_errors() {
         if (this.errorField) this.errorField.innerText = "";
     }
+
 
 }
 

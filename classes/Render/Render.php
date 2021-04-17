@@ -191,12 +191,12 @@ class Render{
             $is_inline_html = false;
             /** Check if this variable is supposed to be inline HTML (as denoted by the "!")
              * if it is, we need to remove the exclamation point from the name */
-            if($name[0] === "!") {
+            if($name[0] === "!") { // {{!reference}}
                 $name = substr($name,1); // Remove the !
                 $is_inline_html = true; // Set our inline flag
             }
             $replace[$i] = $this->lookup_value($name);
-            if(!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i]);
+            if(!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i]); // < = &lt;
         }
         return str_replace($search,$replace,$subject);
     }
