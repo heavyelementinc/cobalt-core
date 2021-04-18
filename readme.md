@@ -1,7 +1,7 @@
 # Cobalt Engine
-**By [Heavy Element, Inc.](https://heavyelement.io)**
+
 <img align="left" src="shared/img/branding/cobalt-logo.svg" alt="Heavy Element" height="200" width="auto">
-This engine is meant to provide developers with a simple and intuitive router-based web development frontend. It's compatible with Docker and easily deployed.
+Cobalt Engine is meant to provide developers with a simple and intuitive router-based web development frontend. It's compatible with Docker and easily deployed.
 
 Cobalt provides an all-in-one framework which includes
  * An expressive HTML template engine
@@ -9,6 +9,8 @@ Cobalt provides an all-in-one framework which includes
  * Route contexts for both HTML content and RESTful APIs
  * Frontend WebComponents for easily interacting with the API
  * User account management and extendable permission system
+
+It was created by [Heavy Element, Inc](https://heavyelement.io).
 
 # Getting Started
 To get started with Cobalt, you'll need at least PHP version 7.4 and MongoDB on your system. 
