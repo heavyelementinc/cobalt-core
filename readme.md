@@ -1,4 +1,4 @@
-![Cobalt Engine](shared/img/branding/cobalt-logo.svg)
+<img align="left" src="shared/img/branding/cobalt-logo.svg" alt="Heavy Element" height="180" width="auto">
 # Cobalt Engine
 ## By Heavy Element
 This engine is meant to provide developers with a simple and intuitive router-based web development frontend. It's compatible with Docker and easily deployed.
