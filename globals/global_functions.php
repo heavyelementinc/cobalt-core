@@ -13,11 +13,19 @@
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
  * return all the settings.
+ * 
+ * @throws E_USER_ERROR If the setting was not found, an error will be thrown
+ * @param string|null The name of the setting OR null
+ * @return mixed The value of the setting
  */
 function app($setting = null){
     if($setting === null) return __APP_SETTINGS__;
     if(key_exists($setting,__APP_SETTINGS__)) return __APP_SETTINGS__[$setting];
-    trigger_error("Setting $setting does not exist",E_USER_ERROR);
+    try{
+        lookup_js_notation($setting,__APP_SETTINGS__,true);
+    } catch (Exception $e){
+        trigger_error("Setting $setting does not exist",E_USER_ERROR);
+    }
     // throw new Warning("Setting $setting does not exist");
 }
 

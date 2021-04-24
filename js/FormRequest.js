@@ -10,7 +10,7 @@ class FormRequest {
         this.method = this.form.getAttribute("method");
         this.format = this.form.getAttribute("format") || "application/json; charset=utf-8";
         this.headers = {
-            'X-CSRF-Mitigation': document.querySelector("meta[name='token']").getAttribute("content") || null
+            'X-Mitigation': document.querySelector("meta[name='token']").getAttribute("content") || null
         };
         this.autosave = (["true", "autosave"].includes(this.form.getAttribute("autosave"))) ? true : false;
         this.include = this.form.getAttribute("include") ?? null;
@@ -112,7 +112,8 @@ class LoginFormRequest extends FormRequest {
         let formdata = new FormData(this.form);
         let data = Object.fromEntries(formdata);
         let headers = { ...this.headers, "Authentication": btoa(`${data.username}:${data.password}`) }
-        delete data.username, data.password;
+        delete data.username;
+        delete data.password;
         const post = new ApiFetch(this.action, this.method, { headers: headers });
         try {
             var result = await post.send(data, {});

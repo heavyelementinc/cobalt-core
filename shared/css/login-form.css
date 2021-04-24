@@ -28,6 +28,8 @@ modal-box#login-modal>section {
 #login-form {
   padding: 1rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 #login-form fieldset {
@@ -45,6 +47,18 @@ modal-box#login-modal>section {
 
 #login-form input {
   margin-bottom: 1rem;
+}
+
+#login-form .error{
+  flex-grow: 1;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#login-form hr{
+  width:100%;
 }
 
 #login-form button {

@@ -1,5 +1,5 @@
 <?php
-require __CLI_ROOT__ . "/new_project.php";
+// require __CLI_ROOT__ . "/new_project.php";
 function __help(){
     print("\n== COBALT HELP ==\n");
     foreach($GLOBALS['cobalt_cli_commands'] as $cmd => $items){

@@ -49,6 +49,8 @@ class Route{
         if(!key_exists('handler',$additional)) $additional['handler'] = null;
         else $handler_data = Route::get_js_handler($additional['handler'],$regex,$controller);
         $router_table_address = $GLOBALS['route_table_address'];
+        $context_permission = ($GLOBALS['permission_needed'] == true) ? $GLOBALS['permission_needed'] : null;
+
         /** Store our route data in the full route table. */
         $GLOBALS[$router_table_address][$type][$regex] = [
             // Original pathname
@@ -66,7 +68,7 @@ class Route{
             'handler_data'  => $handler_data, // Handler script data
 
             // Permission for a page or API 
-            'permission' => $additional['permission'] ?? null,
+            'permission' => $additional['permission'] ?? $context_permission ?? null,
             'group'      => $additional['group'] ?? null,
             
             // Admin panel name
@@ -118,7 +120,7 @@ class Route{
         
         // The default context is web
         $context = "web";
-        $endpoints = app("api_routes"); // Get our API endpoints
+        $endpoints = app("context_prefixes"); // Get our API endpoints
 
         /** Determine if the admin panel should be an available router context */
         if(!app("Admin_panel_access") && isset($endpoints['admin'])) unset($endpoints['admin']);

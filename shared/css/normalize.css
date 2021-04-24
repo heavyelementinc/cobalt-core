@@ -47,9 +47,15 @@ hr {
 
 pre {
     font-family: monospace, monospace;
-    /* 1 */
     font-size: 1em;
-    /* 2 */
+}
+
+pre.error--message{
+    background-color:#232323;
+    color:white;
+    padding: 1rem;
+    width:50%;
+    margin:0 auto;
 }
 
 a {
@@ -231,8 +237,8 @@ header nav a {
 }
 
 header nav a.navigation--current {
-    background: white;
-    color: black;
+    /* background: white;
+    color: black; */
 }
 
 .user-panel {

@@ -22,10 +22,13 @@ $auth = new Auth\Authentication();
 
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
 $processor = "Web\WebHandler";
-
+$permission_needed = false;
 /** Check if we're actually in a web context and, if not, get the name of the
  * appropriate context processor. */
-if($route_context !== "web") $processor = app("api_routes")[$route_context]['processor'];
+if($route_context !== "web") {
+    $processor = app("context_prefixes")[$route_context]['processor'];
+    $permission_needed = app("context_prefixes")[$route_context]['permission'] ?? false;
+}
 
 // Invoke our context processor.
 $context_processor = new $processor();
@@ -34,7 +37,13 @@ $context_processor = new $processor();
 // When we init, we change the route_context to "init" so as to ignore all
 // other web routes.
 $init_file = __APP_ROOT__ . "/ignored/init.json";
-if(file_exists($init_file)) require_once __ENV_ROOT__ . "/globals/init.php";
+
+// Check the settings to see if user accounts are enabled, and then check if we
+// have set the current file.
+if($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists("$init_file.set")){
+    // if(file_exists($init_file)) 
+    require_once __ENV_ROOT__ . "/globals/init.php";
+}
 
 // The router takes care of much of the rest of this process.
 $router = new Routes\Router($route_context);

@@ -70,18 +70,23 @@ class Authentication{
     function has_permission($permission,$group = null){
         // If the user is not logged in, they obviously don't have permission
         if(!$this->user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.",['login' => true]);
-        // If the permission is not valid, we throw an exception.
+        
+        // If the permission is a boolean true AND we've made it here, we're 
+        // logged in, so we're good to go, right?
+        if($permission === true) return true;
+        
+        // If the permission is NOT valid, we throw an exception.
         if(!isset($this->permissions->valid[$permission])) throw new \Exception("The \"$permission\" permission cannot be validated!");
         
         // If the app allows root users AND the user belongs to the root group, 
-        // they have permission
+        // they have permission no matter what
         if(app('Auth_enable_root_group') && in_array('root',(array)$this->user['groups'])) return true;
 
         // If the user account has the permission, we return that value, 
         // whatever it may be
         if(isset($this->user['permissions'][$permission])) return $this->user['permissions'][$permission];
  
-        // If no group is specified, return the permission's default value
+        // If NO group is specified, return the permission's default value
         if($group === null) return $this->permissions->valid[$permission]['default'];
 
         // Check if the user DOES NOT have the group in their groups
@@ -93,6 +98,5 @@ class Authentication{
         // Return false? (Shouldn't this be returning TRUE?)
         return false;
     }
-
     
 }

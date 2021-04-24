@@ -54,28 +54,33 @@ function confirm_message($message,$default = false,$additional = ""){
 }
 
 function say($str,$type = "normal",$formatted = false){
+    $fmt = fmt($str,$type);
+
+    if($formatted !== false) printf($fmt . " \n",$formatted);
+    print($fmt . " \n");
+}
+
+function fmt($str,$type = "normal"){
     $fmt = "";
     switch($type){
         case "b":
-            $fmt = "\033[1m$str \033[0m\n";
+            $fmt = "\033[1m$str\033[0m";
         break;
         case 'e': //error
-            $fmt = "\033[31m$str \033[0m\n";
+            $fmt = "\033[31m$str\033[0m";
         break;
         case 's': //success
-            $fmt = "\033[32m$str \033[0m\n";
+            $fmt = "\033[32m$str\033[0m";
         break;
         case 'w': //warning
-            $fmt = "\033[33m$str \033[0m\n";
+            $fmt = "\033[33m$str\033[0m";
         break;  
         case 'i': //info
-            $fmt = "\033[36m$str \033[0m\n";
+            $fmt = "\033[36m$str\033[0m";
         break;
         case "normal":
         default:
-            $fmt = $str . "\n";
+            $fmt = $str . "";
     }
-
-    if($formatted !== false) printf($fmt,$formatted);
-    print($fmt);
+    return $fmt;
 }

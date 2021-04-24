@@ -79,7 +79,7 @@ class Router{
      */
     $this->uri = urldecode(str_replace(["?".$query],"",$route));
     if($this->route_context !== "web"){
-      $this->context_prefix = app("api_routes")[$this->route_context]['prefix'];
+      $this->context_prefix = app("context_prefixes")[$this->route_context]['prefix'];
       $this->uri = substr($this->uri,strlen($this->context_prefix) - 1);
     }
     
@@ -118,9 +118,17 @@ class Router{
   function execute_route(){
     /** Store our route data for easy access */
     $exe = $this->routes[$this->method][$this->current_route];
-    if(isset($exe['permission']) && !$GLOBALS['auth']->has_permission($exe['permission'],$exe['group'])) throw new \Exceptions\HTTP\Unauthorized('You do not have the required privileges.');
+    if(isset($exe['permission'])) {
+      $permission = true;
+      try{
+        $permission = $GLOBALS['auth']->has_permission($exe['permission'],$exe['group']);
+      } catch (\Exceptions\HTTP\Unauthorized $e) {
+        $permission = false;
+      }
+      if(!$permission) throw new \Exceptions\HTTP\Unauthorized('You do not have the required privileges.');
+    }
     /** Check if we're a callable or a string and execute as necessary */
-    if(is_callable($exe['controller'])) throw new Exception("Anonymous functions are no longer supported as controllers due to a desire for caching routes.");//return $this->controller_callable($exe);
+    if(is_callable($exe['controller'])) throw new Exception("Anonymous functions are no longer supported as controllers.");//return $this->controller_callable($exe);
     
     if(is_string($exe['controller'])) return $this->controller_string($exe);
   }

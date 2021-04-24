@@ -16,19 +16,19 @@ class ApiFetch {
             cache: this.cache,
             headers: {
                 "Content-Type": this.format,
+                "X-Mitigation": document.querySelector("meta[name='token']").getAttribute("content"),
                 ...this.headers
             },
         }
         if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
         let result = await fetch(this.uri, send);
-        if (result.ok === false) throw new FetchError("HTTP Error!", result, await result.json());
+        if (result.ok === false) throw new FetchError("HTTP Error", result, await result.json());
         return await result.json();
     }
 }
 
-class FetchError extends Error {
+class FetchError {
     constructor(message, data, result) {
-        super();
         this.message = message;
         this.request = data;
         this.result = result;

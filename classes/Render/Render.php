@@ -85,6 +85,7 @@ class Render{
                 'url' => "$http://$_SERVER[SERVER_NAME]" . "$_SERVER[REQUEST_URI]$query_string",
                 'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
             ],
+            'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
             'og_template' => "/parts/opengraph/default.html"
         ];
     }

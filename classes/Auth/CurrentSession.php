@@ -23,7 +23,7 @@ class CurrentSession{
             'expires' => $this->default_cookie_expiration,
             'path' => '/',
             'domain' => $_SERVER['SERVER_NAME'],
-            'secure' => true,
+            'secure' => is_secure(),
             'samesite' => true
         ];
         $this->context = ($GLOBALS['route_context'] === "web") ? true : false;

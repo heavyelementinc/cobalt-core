@@ -73,12 +73,16 @@
     /* API Routes consist of prefixes for URI path names. These prefixes are 
     used to load the appropriate routing table and tell the engine which 
     processor to use to handle the request. */
-    "api_routes": {
+    "context_prefixes": {
         "default": {
             "admin": {
                 "processor": "Web\\AdminHandler",
                 "prefix": "/admin/",
-                "permission": "Admin_panel_access"
+                "exception_mode": "web",
+                "permission": "Admin_panel_access",
+                "vars": {
+                    "html_class": "admin-panel"
+                }
             },
             "init": {
                 "processor": "Web\\WebHandler",

@@ -1,6 +1,6 @@
 # Cobalt Engine
 
-<img align="left" src="shared/img/branding/cobalt-logo.svg" alt="Heavy Element" height="200" width="auto">
+<img align="right" src="shared/img/branding/cobalt-logo.svg" alt="Heavy Element" height="200" width="auto">
 Cobalt Engine is meant to provide developers with a simple and intuitive router-based web development frontend. It's compatible with Docker and easily deployed.
 
 Cobalt provides an all-in-one framework which includes

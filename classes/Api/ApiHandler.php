@@ -43,8 +43,8 @@ class ApiHandler{
         // Check if we need to search for CSRF token in the header.
         if(isset($GLOBALS['current_route_meta']) && $GLOBALS['current_route_meta']['csrf_required']){
             // Check if the X-CSRF-Mitigation token is specified
-            if(!key_exists("X-CSRF-Mitigation",$this->headers)) throw new \Exceptions\HTTP\Unauthorized("Missing CSRF Token");
-            if(!\validate_csrf_token($this->headers['X-CSRF-Mitigation'])) throw new \Exceptions\HTTP\Unauthorized("CSRF Failure");
+            if(!key_exists("X-Mitigation",$this->headers)) throw new \Exceptions\HTTP\Unauthorized("Missing CSRF Token");
+            if(!\validate_csrf_token($this->headers['X-Mitigation'])) throw new \Exceptions\HTTP\Unauthorized("CSRF Failure");
         }
 
         /** Check if our request is using a valid method. */

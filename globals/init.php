@@ -32,7 +32,10 @@ function __cobalt_initialize($values){
   // Check to see if we have at least one user account, if so, return.
   $collection = db_cursor('users');
   $result = $collection->count([]);
-  if( $result !== 0 ) return;
+  if( $result !== 0 ) {
+    __cobalt_initialize_set_init_file_complete();
+    return;
+  }
   
   // A list of fields that we require to be filled out to create a new user
   $required_fields = [
@@ -110,15 +113,27 @@ function __cobalt_initialize_create_user($root_user){
     die($err);
   }
   
-  // If we fail to rename the init_file, die with an error.
-  if(!rename($GLOBALS['init_file'],$GLOBALS['init_file'] . ".set")){
-    die($err);
-  }
+  __cobalt_initialize_set_init_file_complete();
 
   // Force a settings update on next load.
   touch(__APP_ROOT__ . "/private/config/settings.json");
 
   return true;
+}
+
+/**
+ * __cobalt_initialize_set_init_file_complete
+ *
+ * @return void
+ */
+function __cobalt_initialize_set_init_file_complete() {
+  $file = $GLOBALS['init_file'];
+  // If the file doesn't exist, create it
+  if(!file_exists($file)) touch($file);
+  // If we fail to rename the init_file, die with an error.
+  if(!rename($file,$file . ".set")){
+    die($err);
+  }
 }
 
 __cobalt_initialize(get_json($init_file));
