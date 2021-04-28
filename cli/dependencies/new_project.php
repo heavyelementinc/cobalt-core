@@ -41,6 +41,9 @@ class NewProject{
         "create" => [
             'execute' => '__np_create_directory',
         ],
+        "ignored" => [
+            'execute' => '__np_create_ignored',
+        ],
         "settings" => [
             'execute' => '__np_write_app_settings',
         ],
@@ -156,6 +159,12 @@ class NewProject{
         print(" -> Copying new project files to ".fmt($dir,"b")."... ");
         recursive_copy(__CLI_ROOT__ . "/app",$dir);
         return true;
+    }
+
+    function __np_create_ignored(){
+        file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/");
+        @mkdir($this->new_project_dir . "/ignored");
+        touch($this->new_project_dir . "/ignored/settings.json");
     }
 
     function __np_write_app_settings(){

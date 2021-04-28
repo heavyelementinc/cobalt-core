@@ -2,10 +2,11 @@
 
 require_once __CLI_ROOT__ . "/dependencies/new_project.php";
 
-class Project implements Command{
+class Project{
     public $help_documentation = [
         'init' => [
-            'description' => "Initialized a new project."
+            'description' => "Initialized a new project.",
+            'context_required' => false
         ]
     ];
 
@@ -13,4 +14,6 @@ class Project implements Command{
         $this->np = new NewProject();
         $this->np->__collect_new_project_settings();
     }
+
+    
 }

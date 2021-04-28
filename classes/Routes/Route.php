@@ -51,6 +51,13 @@ class Route{
         $router_table_address = $GLOBALS['route_table_address'];
         $context_permission = ($GLOBALS['permission_needed'] == true) ? $GLOBALS['permission_needed'] : null;
 
+        $file = null;
+        if(app("enable_debug_routes")) {
+            $backtrace = debug_backtrace();
+            $file = $backtrace[1]['file'] . " - Line " . $backtrace[1]['line'];
+            $file = str_replace([__APP_ROOT__,__ENV_ROOT__],["__APP_ROOT__","__ENV_ROOT__"],$file);
+        }
+
         /** Store our route data in the full route table. */
         $GLOBALS[$router_table_address][$type][$regex] = [
             // Original pathname
@@ -73,7 +80,7 @@ class Route{
             
             // Admin panel name
             'panel_name' => $additional['name'] ?? null,
-
+            'route_file' => $file,
             // API authentication stuff
             'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
         ];

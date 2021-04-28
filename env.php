@@ -27,9 +27,9 @@ define("__ENV_ROOT__", __DIR__);
 // Establish our app root
 $app_root = "";
 // Go up one directory so we're not in the public space
-if(isset($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../";
+if(!empty($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../";
 // Rely on the Cobalt CLI to mandate the path to our app
-else if(isset($GLOBALS['cli_app_root'])) $app_root = $GLOBALS['cli_app_root'];
+else if(key_exists("cli_app_root",$GLOBALS)) $app_root = $GLOBALS['cli_app_root'];
 else die("Cannot establish absolute path to app root"); // Die.
 
 define("__APP_ROOT__", realpath($app_root));

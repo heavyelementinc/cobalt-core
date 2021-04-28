@@ -185,7 +185,13 @@
             "color-button-text": "#FFF",
             "color-button-hover": "#9DD1F1",
             "color-button-hover-text": "#000",
-            "color-button-pressed": "#00377A"
+            "color-button-pressed": "#00377A",
+            "calendar-borders": "1px solid var(--project-color-button-init)",
+            "calendar-cell-bg": "#FFF",
+            "calendar-cell-other-bg": "#EFEFEF",
+            "calendar-cell-txt": "#000",
+            "calendar-header-color": "var(--project-color-button-init)",
+            "calendar-header-text": "var(--project-color-button-text)"
         },
         "$merge": true,
         "$style": true
@@ -229,6 +235,7 @@
             "form-request.css",
             "modal.css",
             "tabs-drawer.css",
+            "calendar.css",
             "webcomponents.css",
             "main.css"
         ],

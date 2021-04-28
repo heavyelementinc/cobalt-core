@@ -1,0 +1,44 @@
+<div class="route--debug">
+    <h1 style="text-transform: unset;"><span style="text-transform: uppercase">{{method}}:</span> {{opts.original_path}}
+    </h1>
+    <table>
+        <tr>
+            <th>Definition </th>
+            <td colspan="3"><code>{{opts.route_file}}</code></td>
+        </tr>
+        <tr>
+            <th>Interpreted URI</th>
+            <td><code>{{route}}</code></td>
+            <th>HTTP Method</th>
+            <td><code>{{method}}</code></td>
+        </tr>
+        <tr>
+            <th>Original Path</th>
+            <td><code>{{opts.original_path}}</code></td>
+            <th>Controller</th>
+            <td><code>{{opts.controller}}</code></td>
+        </tr>
+        <tr>
+            <th>JS Handler</th>
+            <td><code>{{opts.handler}}</code></td>
+            <th>Handler Data</th>
+            <td><code>{{opts.handler_data}}</code></td>
+        </tr>
+        <tr>
+            <th>Permission</th>
+            <td><code>{{opts.permission}}</code></td>
+            <th>Group</th>
+            <td><code>{{opts.group}}</code></td>
+        </tr>
+        <tr>
+            <th>Variable Names</th>
+            <td><code>{{opts.uri_var_names}}</code></td>
+            <th>Data Types</th>
+            <td><code>{{opts.uri_var_types}}</code></td>
+        </tr>
+    </table>
+    <pre style="height:45px;overflow:hidden;">
+<h1 style="height:30px;font-size:100%;margin:0;text-align:center" onclick="(this.parentNode.style.height == 'unset') ? this.parentNode.style.height = '45px' : this.parentNode.style.height = 'unset' ;">Raw</h1>
+{{json}}
+    </pre>
+</div>

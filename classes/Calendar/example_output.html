@@ -1,0 +1,215 @@
+<calendar-table class="calendar--current-month">
+    <calendar-week class="calendar--header" data-week-of-year="header">
+        <calendar-header>Sunday</calendar-header>
+        <calendar-header>Monday</calendar-header>
+        <calendar-header>Tuesday</calendar-header>
+        <calendar-header>Wednesday</calendar-header>
+        <calendar-header>Thursday</calendar-header>
+        <calendar-header>Friday</calendar-header>
+        <calendar-header>Saturday</calendar-header>
+    </calendar-week>
+    <!-- If this is the current month, the calendar should have the calendar--current-month class -->
+    <calendar-week data-week-of-year="13">
+        <!-- The calendar week container should have the data-week-of-year attribute set to the week of the year -->
+        <calendar-cell id="mar-28" data-date="1616904000" class="calendar--past calendar--other-month">
+            <div class="date">Mar 28</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="mar-29" data-date="1616990400" class="calendar--past calendar--other-month">
+            <div class="date">Mar 29</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="mar-30" data-date="1617076800" class="calendar--past calendar--other-month">
+            <div class="date">Mar 30</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="mar-31" data-date="1617163200"
+            class="calendar--yesterday calendar--past calendar--other-month">
+            <div class="date">Mar 31</div>
+
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-01" data-date="1617249600" class="calendar--today">
+            <div class="date">1</div>
+            <!-- 
+                id is equivalent to strtolower(date("M-d",$date))
+                data-date is equivalent to strtotime("$timestamp 12:00 AM") where $timestamp = "2021/04/01"
+                
+                CLASSES
+                dates that are in the past should have a class of calendar--past
+                today, yesterday, and tomorrow should have a class of calendar--today, calendar--yesterday, calendar-tomorrow
+
+                STYLE
+                The style attr contains a CSS var that will be displayed as the date of the calendar
+
+                IF the cell is part of the current month, it will only display a digit
+                otherwise it will display the return value of date("M d")
+             -->
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-02" data-date="1617336000" class="calendar--tomorrow">
+            <div class="date">2</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-03" data-date="1617422400">
+            <div class="date">3</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+    </calendar-week>
+    <calendar-week data-week-of-year="14">
+        <calendar-cell id="apr-04" data-date="1616904000">
+            <div class="date">4</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-05" data-date="1616990400">
+            <div class="date">5</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-06" data-date="1617076800">
+            <div class="date">6</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-07" data-date="1617163200" class="">
+            <div class="date">7</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-08" data-date="1617249600">
+            <div class="date">8</div>
+
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-09" data-date="1617336000">
+            <div class="date">9</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-10" data-date="1617422400">
+            <div class="date">10</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+    </calendar-week>
+    <calendar-week data-week-of-year="14">
+        <calendar-cell id="apr-11" data-date="1616904000">
+            <div class="date">11</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-12" data-date="1616990400">
+            <div class="date">12</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-13" data-date="1617076800">
+            <div class="date">13</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-14" data-date="1617163200" class="">
+            <div class="date">14</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-15" data-date="1617249600">
+            <div class="date">15</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-16" data-date="1617336000">
+            <div class="date">16</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-17" data-date="1617422400">
+            <div class="date">17</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+    </calendar-week>
+    <calendar-week data-week-of-year="14">
+        <calendar-cell id="apr-18" data-date="1616904000">
+            <div class="date">18</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-19" data-date="1616990400">
+            <div class="date">19</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-20" data-date="1617076800">
+            <div class="date">20</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-21" data-date="1617163200" class="">
+            <div class="date">21</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-22" data-date="1617249600">
+            <div class="date">22</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-23" data-date="1617336000">
+            <div class="date">23</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-24" data-date="1617422400">
+            <div class="date">24</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+    </calendar-week>
+    <calendar-week data-week-of-year="14">
+        <calendar-cell id="apr-25" data-date="1616904000">
+            <div class="date">25</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-26" data-date="1616990400">
+            <div class="date">26</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-27" data-date="1617076800">
+            <div class="date">27</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-28" data-date="1617163200" class="">
+            <div class="date">28</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-29" data-date="1617249600">
+            <div class="date">29</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="apr-23" data-date="1617336000">
+            <div class="date">30</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+        <calendar-cell id="may-01" data-date="1617422400" class="calendar--other-month">
+            <div class="date">1</div>
+            <div class="calendar--events"></div>
+            <div class="calendar--meta"></div>
+        </calendar-cell>
+    </calendar-week>
+</calendar-table>

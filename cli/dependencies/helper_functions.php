@@ -60,27 +60,54 @@ function say($str,$type = "normal",$formatted = false){
     print($fmt . " \n");
 }
 
-function fmt($str,$type = "normal"){
+function fmt($str,$type = "normal",$back = "normal"){
     $fmt = "";
     switch($type){
         case "b":
-            $fmt = "\033[1m$str\033[0m";
+            $fmt = "1m";
         break;
         case 'e': //error
-            $fmt = "\033[31m$str\033[0m";
+            $fmt = "31m";
         break;
         case 's': //success
-            $fmt = "\033[32m$str\033[0m";
+            $fmt = "32m";
         break;
         case 'w': //warning
-            $fmt = "\033[33m$str\033[0m";
+            $fmt = "33m";
         break;  
         case 'i': //info
-            $fmt = "\033[36m$str\033[0m";
+            $fmt = "36m";
+        break;
+        case 'white':
+            $fmt = "1;37m";
+        break;
+        case 'grey':
+            $fmt = "37m";
         break;
         case "normal":
         default:
-            $fmt = $str . "";
+            $fmt = "";
     }
-    return $fmt;
+    switch($back){
+        case "red":
+            $bg = "\033[41m";
+        break;
+        case "green":
+            $bg = "\033[42m";
+        break;
+        case "blue":
+            $bg = "\033[44m";
+        break;
+        case "normal":
+        default:
+            $bg = "";
+    }
+    return "\033[$fmt$bg$str\033[0m";
+}
+
+function log_item($message,$lvl = 1,$type = "grey",$back = "normal"){
+    if($lvl > $GLOBALS['cli_verbosity']) return;
+    $m = fmt("[LOG $lvl]",'i');
+    $m .= " " . fmt($message,$type,$back);
+    print($m."\n");
 }
