@@ -11,6 +11,9 @@ class Project{
         'rebuild' => [
             'description' => "Schedule a rebuild of cached settings on next request.",
             'context_required' => true
+        ],
+        'upgrade' => [
+            'description' => '[all], app, env - Pull from specified Git remotes.'
         ]
     ];
 
@@ -25,6 +28,14 @@ class Project{
             if(!mkdir(pathinfo($file,PATHINFO_DIRNAME),true)) throw new Exception("Unable to create APP_ROOT/ignored/config path");
         }
         touch($file);
-    
+        return "Next web request will regenerate settings cache.";
+    }
+
+    function upgrade($repo = "all"){
+        return "This method has not been implemented yet.\nNo action taken.";
+    }
+
+    function get_deps(){
+
     }
 }
