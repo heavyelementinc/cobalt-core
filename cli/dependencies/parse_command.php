@@ -30,9 +30,16 @@ require_once $cmd_file;
 log_item("Instanitating dependency");
 $class = new $cmd();
 
+/** If our subcommand is empty, then we need to print out the help documentation
+ * for that command.
+ * 
+ * @todo Add a way to specify a default command 
+ */
 if(empty($subcmd)){
-    say("Invalid operand","e");
-    exit;
+    require_once __CLI_ROOT__ . "/commands/Help.php";
+    $class = new Help();
+    $subcmd = strtolower($cmd);
+    $cmd = "Help";
 }
 if(!method_exists($class,$subcmd) && $cmd !== "Help") {
     say("Unrecognized command", "e");
