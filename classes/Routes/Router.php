@@ -46,9 +46,9 @@ class Router{
     try{
       /** Get a list of route tables that exist */
       $route_tables = files_exist([
-        __ENV_ROOT__ . "/routes/core/".$this->route_context.".php",
+        __ENV_ROOT__ . "/routes/core/".$this->route_context.".php", // "/"
         __ENV_ROOT__ . "/routes/".$this->route_context.".php",
-        __APP_ROOT__ . "/private/routes/".$this->route_context.".php",
+        __APP_ROOT__ . "/private/routes/".$this->route_context.".php", // "/"
       ]);
     } catch(\Exception $e){
       /** If there are no routes available, die with a nice message */
