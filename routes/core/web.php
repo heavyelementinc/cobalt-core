@@ -10,6 +10,7 @@ if(app("enable_debug_routes")) {
     Routes\Route::get("/debug/parallax","Debug@debug_parallax");
     Routes\Route::get("/debug/loading","Debug@debug_loading");
     Routes\Route::get("/debug/calendar","Debug@debug_calendar");
+    Routes\Route::get("/debug/calendar_example","Debug@debug_calendar");
 }
 
 /** If authentications are enabled, these routes should be added to the table */
