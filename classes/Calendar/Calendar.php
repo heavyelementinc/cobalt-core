@@ -74,14 +74,25 @@ class Calendar {
     }
 
     /**
+     * OUTPUT: Example HTRML [DELETE THIS WHEN DOEN].
+     */
+    public function draw_example() {
+        return file_get_contents(__DIR__ . "/example_output.html");
+    }
+
+    /**
      * OUTPUT: An html string representing the day given in $target_day and the
      * tags given in $meta_data.
      */
     private function make_day_html($target_timestamp) {
+        $cell_class = $this->meta_data["cell_class"];
+        if($target_timestamp === $this->target_day_timestamp) {
+            $cell_class = "calendar--today";
+        }
         $day_of_month = date("d", $target_timestamp);
         return  "<calendar-cell id='" . $this->meta_data["cell_id"] .
                 "' data-date='" . $this->meta_data["data_date"] .
-                "' class='" . $this->meta_data["cell_class"] .
+                "' class='" . $cell_class .
                     "'><div class='date'>$day_of_month</div>
                     <div class='calendar--events'></div>
                     <div class='calendar--meta'></div>
@@ -108,23 +119,28 @@ class Calendar {
      * tags given in $meta_data.
      */
     private function make_month_html($target_timestamp) {
-        $week_to_draw = $target_timestamp;
-        $week_start_offset = date("d", $target_timestamp) - date("w", $target_timestamp);
-        while($week_start_offset > 1) {
-            $week_to_draw = strtotime("-1 week", $week_to_draw);
-            $week_start_offset -= 7;
+        //Calculate the starting week for the month.
+        $start_of_week_offset = date("w", $target_timestamp);
+        $current_week_to_draw = $target_timestamp;
+        $current_week_start_day = date("d", $target_timestamp) - $start_of_week_offset;
+        while($current_week_start_day > 1) {
+            $current_week_to_draw = strtotime("-1 week", $current_week_to_draw);
+            $current_week_start_day -= 7;
         }
-
-
-
-        $num_rows = 6;
-
-
-
+        //Make the rows. Check that we are in the same month before drawing the next.
         $month_rows = "";
-        for($i = 0; $i < $num_rows; $i++) {
-            $month_rows .= $this->make_week_html($week_to_draw);
-            $week_to_draw = strtotime("+1 week", $week_to_draw);
+        // $same_month = true;
+        // while($same_month) {
+        //     $month_rows .= $this->make_week_html($current_week_to_draw);
+        //     $current_week_to_draw = strtotime("+1 week", $current_week_to_draw);
+        //     if(date("n", $current_week_to_draw) !== date("n", $target_timestamp)) {
+        //         $same_month = false;
+        //     }
+        // }
+
+        for($i = 0; $i < 6; $i++) {
+            $month_rows .= $this->make_week_html($current_week_to_draw);
+            $current_week_to_draw = strtotime("+1 week", $current_week_to_draw);
         }
         return $month_rows;
     }
