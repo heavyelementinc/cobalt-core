@@ -74,7 +74,7 @@ class Calendar {
     }
 
     /**
-     * OUTPUT: Example HTRML [DELETE THIS WHEN DOEN].
+     * OUTPUT: Example HTRML [DELETE THIS WHEN DONE].
      */
     public function draw_example() {
         return file_get_contents(__DIR__ . "/example_output.html");
@@ -119,29 +119,29 @@ class Calendar {
      * tags given in $meta_data.
      */
     private function make_month_html($target_timestamp) {
-        //Calculate the starting week for the month.
-        $start_of_week_offset = date("w", $target_timestamp);
-        $current_week_to_draw = $target_timestamp;
-        $current_week_start_day = date("d", $target_timestamp) - $start_of_week_offset;
-        while($current_week_start_day > 1) {
-            $current_week_to_draw = strtotime("-1 week", $current_week_to_draw);
-            $current_week_start_day -= 7;
-        }
-        //Make the rows. Check that we are in the same month before drawing the next.
-        $month_rows = "";
-        // $same_month = true;
-        // while($same_month) {
-        //     $month_rows .= $this->make_week_html($current_week_to_draw);
-        //     $current_week_to_draw = strtotime("+1 week", $current_week_to_draw);
-        //     if(date("n", $current_week_to_draw) !== date("n", $target_timestamp)) {
-        //         $same_month = false;
-        //     }
-        // }
+        $week_to_draw = $target_timestamp;
+        $week_start_offset = date("w", $target_timestamp);
 
-        for($i = 0; $i < 6; $i++) {
-            $month_rows .= $this->make_week_html($current_week_to_draw);
-            $current_week_to_draw = strtotime("+1 week", $current_week_to_draw);
+        //Calculate and set the starting week of the month.
+        $day_of_month = date("d", $target_timestamp) - $week_start_offset;
+        while($day_of_month > 1) {
+            $week_to_draw = strtotime("-1 week", $week_to_draw);
+            $day_of_month -= 7;
         }
+
+        //Calculate the number of weeks in the month.
+        $current_month = date("F", $target_timestamp);
+        $current_year = date("Y", $target_timestamp);
+        $month_start_offset = date("w", strtotime("1 $current_month $current_year"));
+        $num_weeks = (date("t", $target_timestamp) + $month_start_offset) / 7;
+
+        //Draw each week of the month.
+        $month_rows = "";
+        for($i = 0; $i < $num_weeks; $i++) {
+            $month_rows .= $this->make_week_html($week_to_draw);
+            $week_to_draw = strtotime("+1 week", $week_to_draw);
+        }
+
         return $month_rows;
     }
 }
