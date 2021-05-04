@@ -62,10 +62,10 @@ class Debug extends \Controllers\Pages{
     function debug_calendar($date = null){
         if($date === null) $date = time();
         $meta_data = ["cell_id"=>"apr-01", "data_date"=>"1617249600", "cell_class"=>""];
-        $calendar = new \Calendar\Calendar(1577321168, $meta_data); //Change this to match class.
+        $calendar = new \Calendar\Calendar($date, $meta_data); //Change this to match class.
         add_vars([
             'title' => 'Calendar test',
-            'main' => $calendar->draw_month() //Change this to match function.
+            'main' => $calendar->draw() //Change this to match function.
         ]);
 
         add_template("/parts/main.html");

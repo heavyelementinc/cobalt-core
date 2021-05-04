@@ -9,7 +9,7 @@ if(app("enable_debug_routes")) {
     Routes\Route::get("/debug/inputs","Debug@debug_inputs");
     Routes\Route::get("/debug/parallax","Debug@debug_parallax");
     Routes\Route::get("/debug/loading","Debug@debug_loading");
-    Routes\Route::get("/debug/calendar","Debug@debug_calendar");
+    Routes\Route::get("/debug/calendar/{date}?","Debug@debug_calendar");
     /*DELETE THIS WHEN DONE*/Routes\Route::get("/debug/calendar-example","Debug@debug_calendar_example");
 }
 
