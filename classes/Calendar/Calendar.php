@@ -42,7 +42,11 @@ class Calendar {
      */
     public function draw($type = "month") {
         $type = strtolower($type);
-        $output = $this->make_title_headline_html() . "<calendar-table class='calendar--current-month'>";
+        $month_class = "calendar--current-month";
+        if(date("Y-m", $this->timestamp_input) != date("Y-m", time())) {
+            $month_class = "calendar--other-month";
+        }
+        $output = $this->make_title_headline_html() . "<calendar-table class='$month_class'>";
 
         if($type === "day") {
             $week_of_year = date("W", $this->timestamp_input);
@@ -50,7 +54,7 @@ class Calendar {
                     "<calendar-week data-week-of-year='$week_of_year'>" .
                         $this->make_day_html($this->timestamp_input) .
                     "</calendar-week>
-                </calendar-table>";;
+                </calendar-table>";
         }
 
         $output .= $this->make_week_header_html();
@@ -126,39 +130,44 @@ class Calendar {
         $data_unix = $timestamp;
         $class = "";
         $past_month_check = 0; //Value set to 2 when its valid.
+        $today = $this->make_timestamp_uniform(time());
 
         //Other month.
-        if(date("M", $timestamp) !== date("M", $this->timestamp_input)) {
+        if(date("M", $timestamp) !== date("M", $today)) {
             $class .= " calendar--other-month";
             $past_month_check++;
         }
 
         //Past days.
-        if($timestamp < $this->timestamp_input) {
+        if($timestamp < $today) {
             $class .= " calendar--past";
             $past_month_check++;
         }
 
         //Yesterday.
-
+        if($timestamp === strtotime("yesterday", $today)) {
+            $class .= " calendar--yesterday";
+        }
 
         //Today.
-        if($timestamp == $this->timestamp_input) {
+        if($timestamp == $today) {
             $class .= " calendar--today";
         }
 
         //Tomorrow.
-
+        if($timestamp === strtotime("tomorrow", $today)) {
+            $class .= " calendar--tomorow";
+        }
         
         //Target day.
         if($timestamp == $this->timestamp_input) {
             $class .= " calendar--target-date";
         }
         
-        //Day output.
+        //Day number output.
         $day_of_month = date("d", $timestamp);
         if($past_month_check === 2) {
-            $day_of_month = date("M", $timestamp) . " " . $day_of_month;
+            $day_of_month = date("M d", $timestamp);
         }
 
         return  "<calendar-cell id='$id' data-unix-timestamp='$data_unix' class='$class'>
