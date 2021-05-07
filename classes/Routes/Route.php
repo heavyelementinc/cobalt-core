@@ -49,7 +49,7 @@ class Route{
         if(!key_exists('handler',$additional)) $additional['handler'] = null;
         else $handler_data = Route::get_js_handler($additional['handler'],$regex,$controller);
         $router_table_address = $GLOBALS['route_table_address'];
-        $context_permission = ($GLOBALS['permission_needed'] == true) ? $GLOBALS['permission_needed'] : null;
+        $context_permission = ($GLOBALS['permission_needed'] !== false) ? $GLOBALS['permission_needed'] : null;
 
         $file = null;
         if(app("enable_debug_routes")) {

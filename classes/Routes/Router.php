@@ -105,7 +105,7 @@ class Router{
     $_GET['uri'] = \array_fill_keys($directives['uri_var_names'],$match);
     foreach($directives['uri_var_names'] as $i => $name){
       if(key_exists($name,$_GET)) $name = "uri_$name";
-      $_GET['uri'][$name] = $match[$i];
+      if(key_exists($i,$match)) $_GET['uri'][$name] = $match[$i];
     }
     $this->routes[$this->method][$route]['matches'] = $match;
     // array_shift($match);
