@@ -1,0 +1,35 @@
+========================================
+||    HTML TAGS FOR CALENDAR CLASS    ||
+========================================
+
+<calendar-table id="something" class="calendar--current-month">
+
+<calendar-week class="calendar--header" data-week-of-year="header">
+<calendar-week data-week-of-year="13">
+
+<calendar-cell id="mar-28" data-unix-timestamp="1616904000">
+<calendar-cell class="calendar--past calendar--other-month"> **Past includes current month.
+<calendar-cell class="calendar--yesterday">
+<calendar-cell class="calendar--today">
+<calendar-cell class="calendar--tomorrow">
+<calendar-cell class="calendar--target-date">
+
+<div class="date">
+
+<div class="calendar--events">
+
+<div class="calendar--meta">
+
+================================================================================
+
+$GLOBALS['original_path'] = "/{debug}/calendar/{date}/somethingelse"
+$_SERVER['REQUEST_URI'] = "/foo/calendar/2021-05-04/somethingelse"
+$this->currentDate = "2021-05-04"
+
+$_GET['uri'] => [
+  'debug' => 'foo',
+  'date' => '2021-05-04'
+];
+
+$index = array_search($date_string,array_values($_GET['uri']))
+$key = array_keys($_GET['uri'])[$index];
