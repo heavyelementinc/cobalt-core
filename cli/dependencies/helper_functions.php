@@ -49,7 +49,7 @@ function confirm_message($message,$default = false,$additional = ""){
         $auto_prompt = "Y/n";
         $default_to_yes = true;
     }
-    $question = readline("$message ($default): ");
+    $question = readline("$message ($auto_prompt): ");
     return cli_to_bool( $question, $default_to_yes );
 }
 

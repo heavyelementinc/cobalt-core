@@ -37,8 +37,8 @@ class CRUDUser{
     $validated_user['since'] = new \MongoDB\BSON\UTCDateTime();
 
     $result = $this->collection->insertOne($validated_user);
-    if($this->getInsertedCount() !== 1) throw new \Exception("Failed to add user to database.");
-    $validated_user['_id'] = $this->getInsertedId();
+    if($result->getInsertedCount() !== 1) throw new \Exception("Failed to add user to database.");
+    $validated_user['_id'] = $result->getInsertedId();
     return $validated_user;
   }
 
@@ -56,6 +56,24 @@ class CRUDUser{
       ['$set' => $valid]
     );
     if($result->getModifiedCount() !== 1) throw new \Exception("Failed to update the user entry.");
+    return $result;
+  }
+
+  function delete_user($user_id){
+    if(empty($user_id)) throw new \Exception("Missing _id");
+    try{
+      $uid = new \MongoDB\BSON\ObjectId($user_id);
+    } catch (Exception $e) {
+      throw new \Exception("The _id is malformed");
+    }
+
+    $query = ['_id' => $uid];
+
+    $count = $this->collection->count($query);
+
+    $result = $this->collection->deleteOne($query);
+
+    if($result->getDeletedCount() !== 1) throw new Exception("An unknown error has occured");
     return $result;
   }
 }

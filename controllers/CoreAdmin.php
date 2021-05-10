@@ -8,7 +8,7 @@ class CoreAdmin extends \Controllers\Pages {
         $collection = \db_cursor('users');
         $list = "<ul>";
         foreach($collection->find([]) as $user){
-            $list .= "<li><a href='/auth/manage/user/$user[uname]'>@$user[uname] &mdash; $user[fname] $user[lname]</a></li>";
+            $list .= "<li><a href='/admin".app("Auth_user_manager_individual_page")."/$user[uname]'>@$user[uname] &mdash; $user[fname] $user[lname]</a></li>";
         }
         $list .= "</ul>";
         add_vars([

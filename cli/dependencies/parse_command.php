@@ -22,6 +22,7 @@ if(empty($cmd)) {
 $cmd_file = __CLI_ROOT__ . "/commands/$cmd.php";
 if(!file_exists($cmd_file)){
     say("Unrecognized command","e");
+    exit;
 }
 
 log_item("Loading command dependency");
@@ -68,7 +69,12 @@ if($context_failed === true){
     exit;
 }
 log_item("Executing command with " . count($commands) . " arguments...");
-$result = $class->{$subcmd}(...$commands);
+try{
+    $result = $class->{$subcmd}(...$commands);
+} catch (Exception $e){
+    say("ABORTING: " . $e->getMessage(),"e");
+    exit;
+}
 
 if(gettype($result) === "string") print($result);
 log_item("Exiting");

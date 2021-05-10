@@ -170,14 +170,15 @@ class WebHandler{
         return $menu;
     }
 
+    var $script_cache_name = "template-precomp/script.html";
+
     function script_content(){
-        $script_cache_name = "template-precomp/script.html";
-        return $this->cache_handler($script_cache_name,"generate_script_content");
+        return $this->cache_handler($this->script_cache_name,"generate_script_content");
     }
 
+    var $style_cache_name = "template-precomp/style.html";
     function style_meta(){
-        $style_cache_name = "template-precomp/style.html";
-        return $this->cache_handler($style_cache_name,"generate_style_meta");
+        return $this->cache_handler($this->style_cache_name,"generate_style_meta");
     }
 
     function cache_handler($cache_name,$callable){
@@ -193,11 +194,11 @@ class WebHandler{
         return $script_content;
     }
 
+    var $route_table_cache = "js-precomp/router-table.js";
     function router_table(){
-        $route_table_cache = "js-precomp/router-table.js";
-        $cache = new \Cache\Manager($route_table_cache);
+        $cache = new \Cache\Manager($this->route_table_cache);
         $table_content = "";
-        if($GLOBALS['time_to_update']){
+        if($GLOBALS['time_to_update'] || !$cache->cache_exists()){
             $table_content = $GLOBALS['router']->get_js_route_table();
             $cache->set($table_content,false);
         }

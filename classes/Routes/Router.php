@@ -179,6 +179,9 @@ class Router{
   /** @todo Fix terrible nested loops/logic */
   function get_js_route_table(){
     $table = [];
+    $prefix = "";
+    if($GLOBALS['route_context']) $prefix = "^" . app("context_prefixes")[$GLOBALS['route_context']]['prefix'];
+    $prefix = substr($prefix,0,-1);
     foreach($this->routes as $method => $routes){
       foreach($routes as $path => $route){
         $handler = $route['handler'];
@@ -187,7 +190,8 @@ class Router{
             __APP_ROOT__ . "/private/controllers/client/$handler",
             __ENV_ROOT__ . "/controllers/client/$handler",
         ]);
-        array_push($table,"\n'$path': ".file_get_contents($files[0]));
+        if($prefix !== "" && $path[0] = "^") $path = substr($path,2);
+        array_push($table,"\n'$prefix$path': ".file_get_contents($files[0]));
       }
     }
     return "\nconst router_table = {\n" . implode(",\n",array_unique($table)) . "\n}\n";

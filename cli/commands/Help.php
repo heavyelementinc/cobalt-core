@@ -14,7 +14,7 @@ class Help{
             'context_required' => false
         ],
         'flags' => [
-            'description' => "List the known flags this .",
+            'description' => "List known flags.",
             'context_required' => false
         ]
     ];

@@ -5,7 +5,7 @@ require_once __CLI_ROOT__ . "/dependencies/new_project.php";
 class Project{
     public $help_documentation = [
         'init' => [
-            'description' => "Initialized a new project.",
+            'description' => "Initializes a new project.",
             'context_required' => false
         ],
         'rebuild' => [
@@ -13,7 +13,7 @@ class Project{
             'context_required' => true
         ],
         'upgrade' => [
-            'description' => '[all], app, env - Pull from specified Git remotes.'
+            'description' => '["all"*|"app"|"env"] - Pull from [specified] Git remotes.'
         ]
     ];
 

@@ -2,7 +2,8 @@
 
 namespace Web;
 class AdminHandler extends WebHandler{
-    
+    var $route_table_cache = "js-precomp/admin-router-table.js";
+    // var $script_cache_name = "template-precomp/admin-script.html";
     // function post_router_init(){
     //     $this->prepare_html_framework();
     // }
