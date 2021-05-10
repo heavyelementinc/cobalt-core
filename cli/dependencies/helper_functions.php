@@ -1,103 +1,106 @@
 <?php
 
-function cli_parse_args(){
+function cli_parse_args() {
     $args = $argv;
     array_shift($args);
     $arguments = [];
-    foreach($args as $i => $arg){
-        $values = explode("=",$arg);
-        $arguments[str_replace('--','__',$values[0])] = $values[1];
+    foreach ($args as $i => $arg) {
+        $values = explode("=", $arg);
+        $arguments[str_replace('--', '__', $values[0])] = $values[1];
     }
     return $arguments;
 }
 
-function cli_parse_input($string){
-    $raw = explode(" ",$string);
+function cli_parse_input($string) {
+    $raw = explode(" ", $string);
     $args = [];
-    
-    for($i = 0; $i <= count($raw); $i++){
+
+    for ($i = 0; $i <= count($raw); $i++) {
         // $GLOBALS['cobalt_cli_commands']
 
     }
-
 }
 
-function readline_parse($input){
-    $pos = explode(' ',$input);
+function readline_parse($input) {
+    $pos = explode(' ', $input);
     $command = array_shift($pos);
-    $args = implode(' ',$pos);
-    if(!empty($args)) $args = json_decode("[$args]",true);
+    $args = implode(' ', $pos);
+    if (!empty($args)) $args = json_decode("[$args]", true);
     else $args = [];
     return ['command' => $command, 'args' => $args];
 }
 
-function dbg($var){
+function dbg($var) {
     return false;
-    print(json_encode($var,JSON_PRETTY_PRINT) . "\n");
+    print(json_encode($var, JSON_PRETTY_PRINT) . "\n");
 }
 
-function cli_to_bool($input,$defaultToYes = false){
-    $allowed = ['y','yes','true','on','enable','enabled'];
-    if($defaultToYes) array_push($allowed,"");
-    return in_array(strtolower($input),$allowed);
+function cli_to_bool($input, $defaultToYes = false) {
+    $allowed = ['y', 'yes', 'true', 'on', 'enable', 'enabled'];
+    if ($defaultToYes) array_push($allowed, "");
+    return in_array(strtolower($input), $allowed);
 }
 
-function confirm_message($message,$default = false,$additional = ""){
+function confirm_message($message, $default = false, $additional = "") {
     $auto_prompt = "y/N";
     $default_to_yes = false;
-    if(cli_to_bool($default) || $default === true) {
+    if (cli_to_bool($default) || $default === true) {
         $auto_prompt = "Y/n";
         $default_to_yes = true;
     }
     $question = readline("$message ($auto_prompt): ");
-    return cli_to_bool( $question, $default_to_yes );
+    return cli_to_bool($question, $default_to_yes);
 }
 
-function say($str,$type = "normal",$formatted = false){
-    $fmt = fmt($str,$type);
+function say($str, $type = "normal", $formatted = false) {
+    $fmt = fmt($str, $type);
 
-    if($formatted !== false) printf($fmt . " \n",$formatted);
+    if ($formatted !== false) printf($fmt . " \n", $formatted);
     print($fmt . " \n");
 }
 
-function fmt($str,$type = "normal",$back = "normal"){
+function fmt($str, $type = "normal", $back = "normal") {
     $fmt = "";
-    switch($type){
+    $arr = [
+        'b' => '1m'
+    ];
+
+    switch ($type) {
         case "b":
             $fmt = "1m";
-        break;
+            break;
         case 'e': //error
             $fmt = "31m";
-        break;
+            break;
         case 's': //success
             $fmt = "32m";
-        break;
+            break;
         case 'w': //warning
             $fmt = "33m";
-        break;  
+            break;
         case 'i': //info
             $fmt = "36m";
-        break;
+            break;
         case 'white':
             $fmt = "1;37m";
-        break;
+            break;
         case 'grey':
             $fmt = "37m";
-        break;
+            break;
         case "normal":
         default:
             $fmt = "";
     }
-    switch($back){
+    switch ($back) {
         case "red":
             $bg = "\033[41m";
-        break;
+            break;
         case "green":
             $bg = "\033[42m";
-        break;
+            break;
         case "blue":
             $bg = "\033[44m";
-        break;
+            break;
         case "normal":
         default:
             $bg = "";
@@ -105,9 +108,9 @@ function fmt($str,$type = "normal",$back = "normal"){
     return "\033[$fmt$bg$str\033[0m";
 }
 
-function log_item($message,$lvl = 1,$type = "grey",$back = "normal"){
-    if($lvl > $GLOBALS['cli_verbosity']) return;
-    $m = fmt("[LOG $lvl]",'i');
-    $m .= " " . fmt($message,$type,$back);
-    print($m."\n");
+function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
+    if ($lvl > $GLOBALS['cli_verbosity']) return;
+    $m = fmt("[LOG $lvl]", 'i');
+    $m .= " " . fmt($message, $type, $back);
+    print($m . "\n");
 }
