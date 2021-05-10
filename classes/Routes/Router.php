@@ -46,9 +46,9 @@ class Router{
     try{
       /** Get a list of route tables that exist */
       $route_tables = files_exist([
-        __ENV_ROOT__ . "/routes/core/".$this->route_context.".php",
+        __ENV_ROOT__ . "/routes/core/".$this->route_context.".php", // "/"
         __ENV_ROOT__ . "/routes/".$this->route_context.".php",
-        __APP_ROOT__ . "/private/routes/".$this->route_context.".php",
+        __APP_ROOT__ . "/private/routes/".$this->route_context.".php", // "/"
       ]);
     } catch(\Exception $e){
       /** If there are no routes available, die with a nice message */
@@ -105,7 +105,7 @@ class Router{
     $_GET['uri'] = \array_fill_keys($directives['uri_var_names'],$match);
     foreach($directives['uri_var_names'] as $i => $name){
       if(key_exists($name,$_GET)) $name = "uri_$name";
-      $_GET['uri'][$name] = $match[$i];
+      if(key_exists($i,$match)) $_GET['uri'][$name] = $match[$i];
     }
     $this->routes[$this->method][$route]['matches'] = $match;
     // array_shift($match);
