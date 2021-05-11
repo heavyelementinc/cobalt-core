@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Routing Table
  * =============
@@ -84,3 +85,7 @@
  * This means that name collisions in the specified route are possible and later
  * instances will overwrite former instances in $_GET['uri']
  */
+
+use Routes\Route;
+
+// Route::get("/","Pages@index");

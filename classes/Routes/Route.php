@@ -6,7 +6,12 @@ class Route {
 
     public static $preg_quote = "[^/?]+";
 
-    /** Add a GET route to the site */
+    /** Register a GET route for the site
+     * 
+     * @param string $path A REQUEST_URI to be matched against using Cobalt's route syntax
+     * @param string $controller A controller/method pair in the "Controller@method" format
+     * @param array $additional An array of optional items for this
+     */
     static function get(String $path, $controller, array $additional = []) {
         Route::add_route($path, $controller, $additional, 'get');
     }
