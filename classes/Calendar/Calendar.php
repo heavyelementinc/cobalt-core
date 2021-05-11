@@ -2,27 +2,36 @@
 
 namespace Calendar;
 
+/**
+ * This class is a representation of a Gregorian calendar. It can display a day,
+ * week, or month focused around a specified day.
+ * 
+ * @author Ethan <ethan@heavyelement.io>
+ */
 class Calendar {
+    /** @var int $timestamp_input The target timestamp this calendar draws itself around */
     private $timestamp_input;
 
     /**
-     * Constructs the Calendar and stores the input date uniformly as a unix timestamp.
+     * Constructs a calendar with a target date.
      * 
-     * INPUT: $date as UNIX TIMESTAMP | "YYYY-MM-DD" | "DD-MM-YYYY".
+     * @param int|string $date as UNIX TIMESTAMP | "Y-m-d" | "d-m-Y".
      */
     public function __construct($date) {
         $this->set_timestamp($date);
     }
 
     /**
-     * OUTPUT: 
+     * @return int Returns the currently stored value of $timestamp_input.
      */
     public function get_timestamp() {
-        return $timestamp_input;
+        return $this->timestamp_input;
     }
 
     /**
-     * INPUT: 
+     * Properly stores a value for $timestamp_input with correct formating.
+     * 
+     * @param int|string $date as UNIX TIMESTAMP | "Y-m-d" | "d-m-Y".
      */
     public function set_timestamp($date) {
         $this->timestamp_input = $date;
@@ -36,17 +45,21 @@ class Calendar {
     }
 
     /**
-     * INPUT: 
+     * Draws a calander with the correct number of day cells to represent a day,
+     * week, or month.
      * 
-     * OUTPUT: 
+     * @param string $type Type of calendar to draw as "day" | "week" | "month".
+     * @param bool $month_changes TRUE if month can be changed | FALSE if not.
+     * 
+     * @return string A string of html representing a calendar.
      */
-    public function draw($type = "month") {
+    public function draw($type = "month", $month_changes = TRUE) {
         $type = strtolower($type);
         $month_class = "calendar--current-month";
         if(date("Y-m", $this->timestamp_input) != date("Y-m", time())) {
             $month_class = "calendar--other-month";
         }
-        $output = $this->make_title_headline_html() . "<calendar-table class='$month_class'>";
+        $output = $this->make_title_headline_html($type, $month_changes) . "<calendar-table class='$month_class'>";
 
         if($type === "day") {
             $week_of_year = date("W", $this->timestamp_input);
@@ -67,7 +80,9 @@ class Calendar {
     }
 
     /**
-     * OUTPUT: TRUE if valid unix timestamp | False if not valid unix timestamp.
+     * @param int $timestamp The timestamp to check.
+     * 
+     * @return bool TRUE if valid unix timestamp | FALSE if not valid unix timestamp.
      */
     private function is_timestamp($timestamp) {
         return((string)(int)$timestamp === $timestamp) &&
@@ -75,37 +90,61 @@ class Calendar {
     }
 
     /**
-     * INPUT: 
+     * @param int $timestamp The timestamp to be made uniform. All uniform timstamps
+     * share the same time of day.
      * 
-     * OUTPUT: 
+     * @return int The uniform timestamp.
      */
     private function make_timestamp_uniform($timestamp) {
         return strtotime(date("Y-m-d", $timestamp));
     }
 
     /**
-     * INPUT: The string "day" | "week" | "month".
+     * @param string $type The string "day" | "week" | "month".
+     * @param bool $month_changes TRUE if month can be changed | FALSE if not.
      * 
-     * OUTPUT: 
+     * @return string A string of html representing the headline of the calendar.
      */
-    private function make_title_headline_html($type = "month") {
-        $type = strtolower($type);
-        //////THIS DOESNT WORK!!!
-        if(!$type === "day" || !$type === "week" || !$type === "month")
-            return "[Error: Invalid input to make_title_headline_html().]";
-        $last = date("Y-m-d", strtotime("last $type", $this->timestamp_input));
-        $next = date("Y-m-d", strtotime("next $type", $this->timestamp_input));
-        return "<div class='calendar--headline'>
-                    <a href='http://dev.he/debug/calendar/$last'>Last $type</a>
-                    <h2>" . date("F Y", $this->timestamp_input) . "</h2>
-                    <a href='http://dev.he/debug/calendar/$next'>Next $type</a>
-                </div>";
+    private function make_title_headline_html($type = "month", $month_changes = TRUE) {
+        $anchors = ["", ""];
+        if($month_changes) {
+            $type = strtolower($type);
+
+            //Establish the targets.
+            $last_date = date("Y-m-d", strtotime("last $type", $this->timestamp_input));
+            $next_date = date("Y-m-d", strtotime("next $type", $this->timestamp_input));
+            $target = date("Y-m-d", $this->timestamp_input);
+
+            //Find the targets.
+            $index = array_search($target, array_values($_GET['uri']));
+            $key = array_keys($_GET['uri'])[$index];
+
+            //Set the targets. Handle if there is no date in the URL.
+            $last_url = str_replace($_GET['uri'][$key], $last_date, $_SERVER['REQUEST_URI']);
+            $next_url = str_replace($_GET['uri'][$key], $next_date, $_SERVER['REQUEST_URI']);
+            if($last_url === $_SERVER['REQUEST_URI']) {
+                if(substr($_SERVER['REQUEST_URI'], -1) != "/") {
+                    $last_url .= "/";
+                    $next_url .= "/";
+                }
+                $last_url .= $last_date;
+                $next_url .= $next_date;
+            }
+            $anchors = ["<a href='$last_url'>Last $type</a>",
+                        "<a href='$next_url'>Next $type</a>"];
+        }
+        return "<div class='calendar--headline'>" .
+                    $anchors[0] .
+                    "<h2>" . date("F Y", $this->timestamp_input) . "</h2>" .
+                    $anchors[1] .
+                "</div>";
     }
 
     /**
-     * INPUT: 
+     * @param bool $is_week TRUE if the calendar is drawing an entire week of cells |
+     * FALSE if the calendar is drawing just one day cell of the calendar.
      * 
-     * OUTPUT: 
+     * @return string A string of html representing the header of the calendar.
      */
     private function make_week_header_html($is_week = true) {
         $week_header_html = ["<calendar-header>Sunday</calendar-header>",
@@ -122,14 +161,15 @@ class Calendar {
     }
 
     /**
-     * OUTPUT: An html string representing the day given in $target_day and the
-     * tags given in $meta_data.
+     * @param string $timestamp The target days timestamp.
+     * 
+     * @return string A string of html representing the given day.
      */
     private function make_day_html($timestamp) {
         $id = date("M-d", $timestamp);
         $data_unix = $timestamp;
         $class = "";
-        $past_month_check = 0; //Value set to 2 when its valid.
+        $past_month_check = 0; //Value === 2 when $past_month_check is valid.
         $today = $this->make_timestamp_uniform(time());
 
         //Other month.
@@ -178,8 +218,9 @@ class Calendar {
     }
 
     /**
-     * OUTPUT: An html string representing the week given in $target_day and the
-     * tags given in $meta_data.
+     * @param string $timestamp The target days timestamp.
+     * 
+     * @return string A string of html representing the given week.
      */
     private function make_week_html($timestamp) {
         $week_start_offset = 0 - date("w", $timestamp);
@@ -195,8 +236,9 @@ class Calendar {
     }
 
     /**
-     * OUTPUT: An html string representing the month given in $target_day and the
-     * tags given in $meta_data.
+     * @param string $timestamp The target days timestamp.
+     * 
+     * @return string A string of html representing the given month.
      */
     private function make_month_html($timestamp) {
         $week_to_draw = $timestamp;
