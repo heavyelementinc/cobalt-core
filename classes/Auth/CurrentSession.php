@@ -45,15 +45,18 @@ class CurrentSession {
     function create_session() {
         if (!$this->context) return false;
         $token = $this->get_unique_token();
-        $result = $this->collection->insertOne(
-            [
-                $this->cookie_name => $token,
-                'user_id' => null, // You're not gonna be logged in at this point
-                'refresh' => $this->default_token_refresh,
-                'expires' => $this->default_token_expiration,
-                'persist' => true
-            ]
-        );
+        try {
+            $result = $this->collection->insertOne(
+                [
+                    $this->cookie_name => $token,
+                    'user_id' => null, // You're not gonna be logged in at this point
+                    'refresh' => $this->default_token_refresh,
+                    'expires' => $this->default_token_expiration,
+                    'persist' => true
+                ]
+            );
+        } catch (\Exception $e) {
+        }
         $this->send_session_cookie($token);
     }
 
@@ -61,16 +64,19 @@ class CurrentSession {
         if (!$this->context) return false;
         $user_id = $this->session['_id'] ?? (string)session("_id");
         $token = $this->get_unique_token();
-        $result = $this->collection->updateOne(
-            [$this->cookie_name => $this->token_value],
-            [
-                '$set' => [
-                    'user_id' => $user_id,
-                    'refresh' => $this->default_token_refresh,
+        try {
+            $result = $this->collection->updateOne(
+                [$this->cookie_name => $this->token_value],
+                [
+                    '$set' => [
+                        'user_id' => $user_id,
+                        'refresh' => $this->default_token_refresh,
+                    ]
                 ]
-            ]
-            // We DO NOT want to upsert, here. The session should exist;
-        );
+                // We DO NOT want to upsert, here. The session should exist;
+            );
+        } catch (\Exception $e) {
+        }
         $_COOKIE['csrf_old_token'] = $this->token_value;
 
         $this->send_session_cookie($token);
