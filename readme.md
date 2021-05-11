@@ -15,7 +15,7 @@ It was created by [Heavy Element, Inc](https://heavyelement.io).
 # Getting Started
 
 ## Preparation
-To get started with Cobalt, you'll need at least PHP version 7.4 and MongoDB on your system. 
+To get started with Cobalt, you'll need at least PHP version 7.4 and MongoDB on your host system. 
 
 ### On Ubuntu
 ```shell
@@ -33,7 +33,7 @@ Let's clone this repository and install our dependencies.
 
 ```shell
 cd /var/www/
-git clone https://github.com/heavyelementinc/cobalt-core
+git clone https://github.com/heavyelementinc/cobalt-core.git
 cd cobalt-core
 composer install
 ```
