@@ -9,7 +9,7 @@ The size of the calendar can be set to a single day, a week, or an entire month.
 Additionally the user can choose to display buttons that allow the calendar to 
 switch to the previous or next set of days. If the target day of the calendar needs
 to be changed the user can do so by calling the "set_timestamp($date)" function.
-They will then have to re-draw the calendar to show the new resaults of the date
+They will then have to re-draw the calendar to show the new results of the date
 change.
 
 ---

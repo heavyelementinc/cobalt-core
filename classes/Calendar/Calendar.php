@@ -85,7 +85,7 @@ class Calendar {
      * @return bool TRUE if valid unix timestamp | FALSE if not valid unix timestamp.
      */
     private function is_timestamp($timestamp) {
-        return((string)(int)$timestamp === $timestamp) &&
+        return ((string)(int)$timestamp === $timestamp) &&
             ($timestamp <= PHP_INT_MAX) && ($timestamp >= ~PHP_INT_MAX);
     }
 
@@ -169,19 +169,20 @@ class Calendar {
         $id = date("M-d", $timestamp);
         $data_unix = $timestamp;
         $class = "";
-        $past_month_check = 0; //Value === 2 when $past_month_check is valid.
         $today = $this->make_timestamp_uniform(time());
 
+        //Day number output.
+        $day_of_month = date("d", $timestamp);
+
         //Other month.
-        if(date("M", $timestamp) !== date("M", $today)) {
+        if(date("M", $timestamp) !== date("M", $this->timestamp_input)) {
             $class .= " calendar--other-month";
-            $past_month_check++;
+            $day_of_month = date("M d", $timestamp);
         }
 
         //Past days.
         if($timestamp < $today) {
             $class .= " calendar--past";
-            $past_month_check++;
         }
 
         //Yesterday.
@@ -202,12 +203,6 @@ class Calendar {
         //Target day.
         if($timestamp == $this->timestamp_input) {
             $class .= " calendar--target-date";
-        }
-        
-        //Day number output.
-        $day_of_month = date("d", $timestamp);
-        if($past_month_check === 2) {
-            $day_of_month = date("M d", $timestamp);
         }
 
         return  "<calendar-cell id='$id' data-unix-timestamp='$data_unix' class='$class'>

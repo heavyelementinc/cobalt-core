@@ -64,7 +64,7 @@ class Debug extends \Controllers\Pages{
         $calendar = new \Calendar\Calendar($date);
         add_vars([
             'title' => 'Calendar test',
-            'main' => $calendar->draw()
+            'main' => $calendar->draw("day") . $calendar->draw("week") . $calendar->draw()
         ]);
         add_template("/parts/main.html");
     }
