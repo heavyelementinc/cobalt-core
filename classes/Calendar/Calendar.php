@@ -9,7 +9,7 @@ namespace Calendar;
  * @author Ethan <ethan@heavyelement.io>
  */
 class Calendar {
-    /** @var int $timestamp_input The target timestamp this calendar draws itself around */
+    /** @var int $timestamp_input The target timestamp this calendar renders itself around */
     private $timestamp_input;
 
     /**
@@ -45,24 +45,30 @@ class Calendar {
     }
 
     /**
-     * Draws a calander with the correct number of day cells to represent a day,
+     * Renders a calander with the correct number of cells to represent a day,
      * week, or month.
      * 
-     * @param string $type Type of calendar to draw as "day" | "week" | "month".
+     * @param string $type Type of calendar to render as "day" | "week" | "month".
      * @param bool $month_changes TRUE if month can be changed | FALSE if not.
      * 
      * @return string A string of html representing a calendar.
      */
-    public function draw($type = "month", $month_changes = TRUE) {
+    public function render($type = "month", $month_changes = TRUE) {
         $type = strtolower($type);
-        $month_class = "calendar--current-month";
-        if(date("Y-m", $this->timestamp_input) != date("Y-m", time())) {
-            $month_class = "calendar--other-month";
+
+        $class_attribute = "calendar--other";
+        if($this->timestamp_input === $this->make_timestamp_uniform(time())) {
+            $class_attribute = "calendar--current";
+        } else if($type === "week" && $this->week_number($this->timestamp_input) === $this->week_number(time())) {
+            $class_attribute = "calendar--current";
+        } else if($type === "month" && date("Y-m", $this->timestamp_input) === date("Y-m", time())) {
+            $class_attribute = "calendar--current";
         }
-        $output = $this->make_title_headline_html($type, $month_changes) . "<calendar-table class='$month_class'>";
+        $output = $this->make_title_headline_html($type, $month_changes) .
+                "<calendar-table class='$class_attribute'>";
 
         if($type === "day") {
-            $week_of_year = date("W", $this->timestamp_input);
+            $week_of_year = $this->week_number($this->timestamp_input);
             return $output . $this->make_week_header_html(false) .
                     "<calendar-week data-week-of-year='$week_of_year'>" .
                         $this->make_day_html($this->timestamp_input) .
@@ -98,6 +104,23 @@ class Calendar {
     private function make_timestamp_uniform($timestamp) {
         return strtotime(date("Y-m-d", $timestamp));
     }
+    
+    /**
+     * This function replaces date("W") which starts its weeks on a Monday. We
+     * want our start of the week to be on a Sunday.
+     * 
+     * @param int $timestamp The timestamp that you want the week number for.
+     * 
+     * @return int The week number of the year starting on Sunday. 
+     */
+    private function week_number($timestamp) {
+        $week = date("W", $timestamp);
+        if(date("D", $timestamp) === "Sun") {
+            $week++;
+            if(date("z", $timestamp) < 7) $week = 1;
+        }
+        return $week;
+    }
 
     /**
      * @param string $type The string "day" | "week" | "month".
@@ -111,8 +134,8 @@ class Calendar {
             $type = strtolower($type);
 
             //Establish the targets.
-            $last_date = date("Y-m-d", strtotime("last $type", $this->timestamp_input));
-            $next_date = date("Y-m-d", strtotime("next $type", $this->timestamp_input));
+            $last_date = date("Y-m-d", strtotime("-1 $type", $this->timestamp_input));
+            $next_date = date("Y-m-d", strtotime("+1 $type", $this->timestamp_input));
             $target = date("Y-m-d", $this->timestamp_input);
 
             //Find the targets.
@@ -141,8 +164,8 @@ class Calendar {
     }
 
     /**
-     * @param bool $is_week TRUE if the calendar is drawing an entire week of cells |
-     * FALSE if the calendar is drawing just one day cell of the calendar.
+     * @param bool $is_week TRUE if the calendar is rendering an entire week of 
+     * cells | FALSE if the calendar is rendering just one day cell of the calendar.
      * 
      * @return string A string of html representing the header of the calendar.
      */
@@ -225,7 +248,7 @@ class Calendar {
             $week_cells .= $this->make_day_html($day_to_draw);
             $week_start_offset++;
         }
-        $week_of_year = date("W", $this->timestamp_input);
+        $week_of_year = $this->week_number($this->timestamp_input);
         return "<calendar-week data-week-of-year='$week_of_year'>" . $week_cells .
             "</calendar-week>";
     }
