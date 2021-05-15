@@ -1,8 +1,24 @@
 <?php
-namespace Cache;
-class Manager{
 
-    function __construct($filename){
+/**
+ * Cache Manager
+ * 
+ * The Cobalt Engine offers a file-based approach to cached files. This class
+ * handles caches.
+ * 
+ * @todo Provide a mongo-based cache alternative
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @license https://github.com/heavyelementinc/cobalt-core/license
+ */
+
+namespace Cache;
+
+class Manager {
+
+    private $cache_dir = __APP_ROOT__ . "/cache";
+
+    function __construct($filename) {
+        if (!is_dir($this->cache_dir)) mkdir($this->cache_dir);
         $this->reference = $filename;
         $this->file_path = $this->cache_name($this->reference);
         $this->exists = $this->cache_exists();
@@ -11,47 +27,47 @@ class Manager{
 
     /** Retrieve a file by it's common reference (for example, "config/settings.json") and retrieve the
      * latest file name. An argument of false will just return the pathname */
-    function get($load = true){
+    function get($load = true) {
         $path = $this->file_path;
-        if(!$this->exists) throw new \Error("File `$this->reference` does not exist in cache");
-        if($load === "json") return get_json($path);
-        if($load) return file_get_contents($path);
+        if (!$this->exists) throw new \Exception("File `$this->reference` does not exist in cache");
+        if ($load === "json") return get_json($path);
+        if ($load) return file_get_contents($path);
         return $this->reference;
     }
 
-    function set($contents,$json = true){
+    function set($contents, $json = true) {
         $path = $this->file_path;
-        $info = pathinfo($path,PATHINFO_DIRNAME);
+        $info = pathinfo($path, PATHINFO_DIRNAME);
         $mkdir = true;
-        if(!is_dir($info)) $make_dir = mkdir($info,0777,true);
-        if(!$mkdir) throw new \Error("Could not make the directory path for $this->reference");
-        if($json) $contents = json_encode($contents);
-        if(file_put_contents($path,$contents) === false) throw new \Error("Could not write to $this->reference.");
+        if (!is_dir($info)) $make_dir = mkdir($info, 0777, true);
+        if (!$mkdir) throw new \Exception("Could not make the directory path for $this->reference");
+        if ($json) $contents = json_encode($contents);
+        if (file_put_contents($path, $contents) === false) throw new \Exception("Could not write to $this->reference.");
         return $path;
     }
 
-    function cache_exists(){
+    function cache_exists() {
         return file_exists($this->file_path);
     }
 
-    function outdated($compare,$margin = 0){
-        if(!$this->exists) return true;
+    function outdated($compare, $margin = 0) {
+        if (!$this->exists) return true;
         $path = $this->file_path;
-        if(!file_exists($compare)) return false;
+        if (!file_exists($compare)) return false;
         $resource_date = filemtime($compare);
         $val = ($resource_date - $margin > $this->last_modified);
         return $val;
     }
 
-    function modified(){
-        if($this->exists) return filemtime($this->file_path);
+    function modified() {
+        if ($this->exists) return filemtime($this->file_path);
         return 0;
     }
 
-    function cache_name($reference){
+    function cache_name($reference) {
         $info = pathinfo($reference);
-        $version = (isset($GLOBALS['app']) && property_exists($GLOBALS['app'],'version')) ? $GLOBALS['app']->version : "000";
-        $path = __APP_ROOT__ . "/cache/$info[dirname]/$info[filename].$version.$info[extension]";
+        $version = (isset($GLOBALS['app']) && property_exists($GLOBALS['app'], 'version')) ? $GLOBALS['app']->version : "000";
+        $path = $this->cache_dir . "/$info[dirname]/$info[filename].$version.$info[extension]";
         return $path;
     }
 }
