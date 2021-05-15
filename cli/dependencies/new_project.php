@@ -55,7 +55,7 @@ class NewProject{
         // ]
     ];
 
-    var $complete = "\n";
+    var $complete = "Your new project has been created!\n";
 
     var $new_app = [];
 
@@ -106,6 +106,7 @@ class NewProject{
         }
         
         print($this->complete);
+        print("You can now copy " . fmt($this->apache_config_file,"b") . " to your Apache configuration directory.");
     }
     
     function __np_validate_enable_logins($validate){
@@ -126,10 +127,10 @@ class NewProject{
         $this->new_project_dir = $dir_name;
         return $dir_name;
     }
-    
+    var $apache_config_file = "private/config/apache/cobalt.conf";
     function __np_apache_config(){
         print(" -> Generating Apache VirtualHost configuration... ");
-        $file = $this->new_project_dir . "/private/config/apache/cobalt.conf";
+        $file = $this->new_project_dir . "/$this->apache_config_file";
 
         $conf = file_get_contents($file);
         $repl = [
@@ -162,9 +163,11 @@ class NewProject{
     }
 
     function __np_create_ignored(){
+        print(" -> Creating ignored files... ");
         file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/");
         @mkdir($this->new_project_dir . "/ignored");
         touch($this->new_project_dir . "/ignored/settings.json");
+        return true;
     }
 
     function __np_write_app_settings(){
