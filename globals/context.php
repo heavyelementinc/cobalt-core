@@ -1,4 +1,5 @@
 <?php
+
 /**
  * context.php - The Cobalt Context Bootstrapper
  * 
@@ -14,8 +15,9 @@
 
 /** We need to determine which routing tables we need to load 
  * @global $route_context Stores the value of the route context
-*/
+ */
 $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
+
 
 /** @global $auth Access the Authentication class */
 $auth = new Auth\Authentication();
@@ -25,7 +27,7 @@ $processor = "Web\WebHandler";
 $permission_needed = false;
 /** Check if we're actually in a web context and, if not, get the name of the
  * appropriate context processor. */
-if($route_context !== "web") {
+if ($route_context !== "web") {
     $processor = app("context_prefixes")[$route_context]['processor'];
     $permission_needed = app("context_prefixes")[$route_context]['permission'] ?? false;
 }
@@ -40,7 +42,7 @@ $init_file = __APP_ROOT__ . "/ignored/init.json";
 
 // Check the settings to see if user accounts are enabled, and then check if we
 // have set the current file.
-if($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists("$init_file.set")){
+if ($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists("$init_file.set")) {
     // if(file_exists($init_file)) 
     require_once __ENV_ROOT__ . "/globals/init.php";
 }
@@ -57,13 +59,13 @@ $router->get_routes();
 
 /** Here we check if any "router stage" methods exist in our context processor
  * and we execute them if they do, then we move on to the next router stage. */
-if(method_exists($context_processor,'post_router_init')) $context_processor->post_router_init();
+if (method_exists($context_processor, 'post_router_init')) $context_processor->post_router_init();
 
 $router->discover_route();
-if(method_exists($context_processor,'post_router_discovery')) $context_processor->post_router_discovery();
+if (method_exists($context_processor, 'post_router_discovery')) $context_processor->post_router_discovery();
 
 $router_result = $router->execute_route();
-if(method_exists($context_processor,'post_router_execute')) $context_processor->post_router_execute();
+if (method_exists($context_processor, 'post_router_execute')) $context_processor->post_router_execute();
 
 
 
