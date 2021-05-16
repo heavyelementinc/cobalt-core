@@ -94,7 +94,8 @@ class Router {
 
                 $this->current_route = $route;
                 $GLOBALS['current_route_meta'] = $directives;
-                break;
+                return [$route, $directives];
+                break; // Just in case 😉
             }
         }
 
