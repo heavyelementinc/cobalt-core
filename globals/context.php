@@ -12,6 +12,7 @@
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
 
+ob_start();
 
 /** We need to determine which routing tables we need to load 
  * @global $route_context Stores the value of the route context
@@ -35,8 +36,14 @@ if ($route_context !== "web") {
 // Invoke our context processor.
 $context_processor = new $processor();
 
-if (!is_a($context_processorn, "Handlers\RequestHandler")) die("Invalid context processor");
+if (!is_a($context_processor, "Handlers\RequestHandler")) {
+    if (app("debug")) die("Context processor must be an instance of Handlers\RequestHandler");
+    else die("Error");
+}
 
+// We use _stage_bootstrap as a means of keeping track of where we are in the
+// bootstrapping process. This gives us insight we can later use to handle any
+// errors which might arise before we're ready to present errors to the client.
 $context_processor->_stage_bootstrap = [
     '_stage_init'    => false,  '_stage_route_discovered' => false,
     '_stage_execute' => false,  '_stage_output'           => false,
@@ -77,7 +84,9 @@ try {
 
     $context_processor->_stage_output();
     $context_processor->_stage_bootstrap['_stage_output'] = true;
+    ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
+    ob_clean(); // Clear the output buffer
     $context_processor->_public_exception_handler($e);
     exit;
 } catch (Exception $e) {

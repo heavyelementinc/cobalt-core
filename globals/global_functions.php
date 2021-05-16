@@ -422,3 +422,25 @@ function maybe_with($template, $vars) {
         return "";
     }
 }
+
+/** Compare two pathnames
+ * 
+ * $base_dir is used to substr $path after they have both been canonincalized.
+ * If the two pathnames exactly match after this process, we know that $path is 
+ * a descendant of $base_dir.
+ * 
+ * NOTE: This function returns null if either pathname cannot be canonincalized.
+ * 
+ * @param string $base_dir The dir we are checking against
+ * @param string $path The path we want to see 
+ * @return bool|null Returns null if unable to resolve canonincal pathname
+ */
+function is_child_dir($base_dir, $path) {
+    // Check if files exist
+    if (!file_exists($path) || !file_exists($base_dir)) return null;
+    $base_dir = realpath($base_dir); // Canonicalize base dir
+    $base_len = strlen($base_dir);
+    // if($path && strlen($base_dir) < strlen($path))
+    $substr = substr(realpath($path), 0, $base_len);
+    return ($substr === $base_dir); // return comparison operation.
+}

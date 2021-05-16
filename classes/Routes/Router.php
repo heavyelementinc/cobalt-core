@@ -13,7 +13,9 @@
  * 
  * @todo Add typing so that digit:{varname} would be typecast to a digit or,
  * throws an BadRequest error if its no a digit
- * 
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @license https://github.com/heavyelementinc/cobalt-core/license
+ * @copyright 2021 - Heavy Element, Inc.
  */
 
 namespace Routes;
@@ -86,15 +88,14 @@ class Router {
 
         $route = null;
         /** Search through our current routes and look for a match */
-        foreach ($this->routes[$this->method] as $route => $directives) {
+        foreach ($this->routes[$this->method] as $preg_pattern => $directives) {
             $match = [];
             /** Regular Expression against our uri, store any matches in $match */
-            if (preg_match($route, $this->uri, $match) === 1) {
-                if ($match !== null) $this->set_uri_vars($directives, $match, $route);
+            if (preg_match($preg_pattern, $this->uri, $match) === 1) {
+                if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern);
 
-                $this->current_route = $route;
-                return [$route, $directives];
-                break; // Just in case 😉
+                $this->current_route = $preg_pattern;
+                return [$preg_pattern, $directives];
             }
         }
 
