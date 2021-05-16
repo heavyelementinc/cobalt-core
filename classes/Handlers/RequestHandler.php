@@ -10,7 +10,7 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
-namespace Handler;
+namespace Handlers;
 
 interface RequestHandler {
 
@@ -23,7 +23,7 @@ interface RequestHandler {
      * @param $context_meta all relevant data regarding the current route context
      * @return void
      */
-    public function stage_init($context_meta);
+    public function _stage_init($context_meta);
 
     /** 
      * Called after the router discovers the route
@@ -36,17 +36,28 @@ interface RequestHandler {
      * @param array $directives - The route 
      * @return bool
      */
-    public function stage_route_discovered($route, $directives);
+    public function _stage_route_discovered($route, $directives);
 
     /**
      * Called after the route controller has been executed.
+     * 
+     * This method handles executing/updating the current state of the handler
+     * after route execution.
+     * 
+     * @param $router_result - the return value of the route controller
+     * @return void - this method should write to the output
+     */
+    public function _stage_execute($router_result);
+
+    /**
+     * Called at the end of the context.php
      * 
      * This method outputs the final results of the request to the client.
      * 
      * @param $router_result - the return value of the route controller
      * @return void - this method should write to the output
      */
-    public function stage_execute($router_result);
+    public function _stage_output();
 
     /**
      * Called when an Exception\HTTP\* error is thrown.
@@ -54,8 +65,7 @@ interface RequestHandler {
      * This public exception handler is meant to make the exception handling
      * more sane.
      * 
-     * @param string $message - A message string to be displayed
-     * @param array $data - Additional data for the exception
+     * @param object $error - The error object as thrown
      */
-    public function public_exception_handler($message, $data = []);
+    public function _public_exception_handler($error);
 }

@@ -23,7 +23,7 @@ $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
 $auth = new Auth\Authentication();
 
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
-$processor = "Web\WebHandler";
+$processor = "Handlers\WebHandler";
 $permission_needed = false;
 /** Check if we're actually in a web context and, if not, get the name of the
  * appropriate context processor. */
@@ -35,55 +35,53 @@ if ($route_context !== "web") {
 // Invoke our context processor.
 $context_processor = new $processor();
 
-// Check if we need to initialize Cobalt and start initialization if needed.
-// When we init, we change the route_context to "init" so as to ignore all
-// other web routes.
-$init_file = __APP_ROOT__ . "/ignored/init.json";
+if (!is_a($context_processorn, "Handlers\RequestHandler")) die("Invalid context processor");
 
-// Check the settings to see if user accounts are enabled, and then check if we
-// have set the current file.
-if ($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists("$init_file.set")) {
-    // if(file_exists($init_file)) 
-    require_once __ENV_ROOT__ . "/globals/init.php";
+$context_processor->_stage_bootstrap = [
+    '_stage_init'    => false,  '_stage_route_discovered' => false,
+    '_stage_execute' => false,  '_stage_output'           => false,
+];
+try {
+    // Check if we need to initialize Cobalt and start initialization if needed.
+    // When we init, we change the route_context to "init" so as to ignore all
+    // other web routes.
+    $init_file = __APP_ROOT__ . "/ignored/init.json";
+
+    // Check the settings to see if user accounts are enabled, and then check if we
+    // have set the current file.
+    if ($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists("$init_file.set")) {
+        require_once __ENV_ROOT__ . "/globals/init.php";
+    }
+
+    // The router takes care of much of the rest of this process.
+    $router = new Routes\Router($route_context);
+
+    // Create the routing table for the current context so that the Cobalt init
+    // script has something to bind its routes to.
+    $router->init_route_table();
+
+    // We load our routing tables for the current context
+    $router->get_routes();
+
+    $context_processor->_stage_init(app("context_prefixes")[$route_context]);
+    $context_processor->_stage_bootstrap['_stage_init'] = true;
+    /** @global array $current_route_meta contains the discovered route's metadata */
+    $current_route_meta = $router->discover_route();
+
+    $context_processor->_stage_route_discovered(...$current_route_meta);
+    $context_processor->_stage_bootstrap['_stage_route_discovered'] = true;
+
+    $router_result = $router->execute_route();
+    $context_processor->_stage_execute($router_result);
+    $context_processor->_stage_bootstrap['_stage_execute'] = true;
+
+    $context_processor->_stage_output();
+    $context_processor->_stage_bootstrap['_stage_output'] = true;
+} catch (Exceptions\HTTP\HTTPException $e) {
+    $context_processor->_public_exception_handler($e);
+    exit;
+} catch (Exception $e) {
+    header("HTTP/1.0 500 Unknown Error");
+    if (app("debug")) die($e->getMessage());
+    else die("An unknown error has occurred.");
 }
-
-// The router takes care of much of the rest of this process.
-$router = new Routes\Router($route_context);
-
-// Create the routing table for the current context so that the Cobalt init
-// script has something to bind its routes to.
-$router->init_route_table();
-
-// We load our routing tables for the current context
-$router->get_routes();
-
-/** Here we check if any "router stage" methods exist in our context processor
- * and we execute them if they do, then we move on to the next router stage. */
-if (method_exists($context_processor, 'post_router_init')) $context_processor->post_router_init();
-
-$router->discover_route();
-if (method_exists($context_processor, 'post_router_discovery')) $context_processor->post_router_discovery();
-
-$router_result = $router->execute_route();
-if (method_exists($context_processor, 'post_router_execute')) $context_processor->post_router_execute();
-
-
-
-
-/** @todo Finish the initial setup process!!!!! */
-
-// if(file_exists(__APP_ROOT__ . '/private/config/setup')){
-// } else {
-//     /** Handle setup if we need to */
-//     $route_context = "web";
-//     $processor = "Web\WebHandler";
-//     require __ENV_ROOT__ . "/globals/init/setup.php";
-//     $router = new Routes\Router($route_context);
-//     \Routes\Route::get("/", "Setup@init");
-//     \Routes\Route::post("/complete", "Setup@complete");
-// }
-
-
-// At some point we should figure out handling erros other than our HTTP exceptions
-// $err_handler = set_exception_handler("exception_handler");
-// throw new Exception("Major exception"); // Testing exception

@@ -93,7 +93,6 @@ class Router {
                 if ($match !== null) $this->set_uri_vars($directives, $match, $route);
 
                 $this->current_route = $route;
-                $GLOBALS['current_route_meta'] = $directives;
                 return [$route, $directives];
                 break; // Just in case 😉
             }

@@ -76,7 +76,7 @@
     "context_prefixes": {
         "default": {
             "admin": {
-                "processor": "Web\\AdminHandler",
+                "processor": "Handlers\\AdminHandler",
                 "prefix": "/admin/",
                 "exception_mode": "web",
                 "permission": "Admin_panel_access",
@@ -85,20 +85,24 @@
                 }
             },
             "init": {
-                "processor": "Web\\WebHandler",
+                "processor": "Handlers\\WebHandler",
                 "prefix": null
             },
             "shared": {
-                "processor": "Web\\SharedHandler",
+                "processor": "Handlers\\SharedHandler",
                 "prefix": "/core-content/"
             },
             "apiv1": {
-                "processor": "Api\\ApiHandler",
+                "processor": "Handlers\\ApiHandler",
                 "prefix": "/api/v1/"
             },
             "webhookv1": {
-                "processor": "Api\\ApiHandler",
+                "processor": "Handlers\\ApiHandler",
                 "prefix": "/webhook/v1/"
+            },
+            "web": {
+                "processor": "Handlers\\WebHandler",
+                "prefix": "/"
             }
         },
         "$merge": true
