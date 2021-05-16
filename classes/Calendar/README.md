@@ -1,15 +1,14 @@
 # Calendar
-
 ## About
 This calendar class is designed to be a simple and effective representation of the
 Gregorian calendar. Upon instantiation the user can specify a target date for the
-calendar to draw itself around. If no date is given, the curent date is used as 
-a default. The user can then call the "draw()" function to display the calendar.
+calendar to render itself around. If no date is given, the curent date is used as 
+a default. The user can then call the "render()" function to display the calendar.
 The size of the calendar can be set to a single day, a week, or an entire month.
 Additionally the user can choose to display buttons that allow the calendar to 
 switch to the previous or next set of days. If the target day of the calendar needs
 to be changed the user can do so by calling the "set_timestamp($date)" function.
-They will then have to re-draw the calendar to show the new results of the date
+They will then have to re-render the calendar to show the new results of the date
 change.
 
 ---
@@ -18,7 +17,7 @@ change.
 * __construct($date)
 * get_timestamp()
 * set_timestamp($date)
-* draw($type = "month", $month_changes = TRUE)
+* render($type = "month", $month_changes = TRUE)
 
 ---
 
@@ -36,26 +35,24 @@ $calendar = new \Calendar\Calendar($date);
 ### Getters and Setters...
 ```
 //Gets the currently stored timestamp.
-get_timestamp();
+$calendar->get_timestamp();
 
 //Sets the target date for the calendar to draw itself around.
 $date = "2021-05-12"; //Also excepts "d-m-Y" and unix timestamp formats.
-set_timestamp($date);
+$calendar->set_timestamp($date);
+$calendar->render(); //Dont forget to re-render the calendar to show new results.
 ```
 
 ### Display the calendar...
 ```
-//First you must instantiate the calendar.
-$calendar = new \Calendar\Calendar();
+//Display a month calendar that can switch to a different month.
+$calendar->render();
 
-//Draw a month calendar that can switch to a different month.
-$calendar->draw();
+//Display a day calendar that can not switch to a different month.
+$calendar->render("day", FALSE);
 
-//Draw a day calendar that can not switch to a different month.
-$calendar->draw("day", FALSE);
-
-//Draw a week calendar that can switch to a different month.
-$calendar->draw("week");
+//Display a week calendar that can switch to a different month.
+$calendar->render("week");
 ```
 
 ---
