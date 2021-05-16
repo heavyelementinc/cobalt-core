@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * CurrentSession
+ * 
+ * Manages the session information. This sets the browser cookies and handles the
+ * storage, lookup and logging in of sessions.
+ * 
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @license https://github.com/heavyelementinc/cobalt-core/license
+ */
+
 namespace Auth;
 
 class CurrentSession {
@@ -24,7 +34,7 @@ class CurrentSession {
             'expires' => $this->default_cookie_expiration,
             'path' => '/',
             'domain' => $_SERVER['SERVER_NAME'],
-            'secure' => is_secure(),
+            'secure' => app("session_secure_status"),
             'samesite' => true
         ];
         $this->context = ($GLOBALS['route_context'] === "web") ? true : false;

@@ -254,6 +254,10 @@
     "session_cookie_name": {
         "default": "token_session" // Changing this in production will log everyone out.
     },
+    "session_secure_status": {
+        "default": true,
+        "$env": "SESSION_SECURE"
+    },
     "loading_spinner": {
         "default": "dashes",
         "$public": true
