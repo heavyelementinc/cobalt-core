@@ -42,7 +42,7 @@ class ApiHandler implements RequestHandler {
 
     public function _stage_route_discovered($route, $directives) {
         /** The request validation is pretty straight-forward, so let's do that */
-        return $this->request_validation();
+        return $this->request_validation($directives);
     }
 
     public function _stage_execute($router_result) {
@@ -73,14 +73,14 @@ class ApiHandler implements RequestHandler {
         if (!$this->_stage_bootstrap['_stage_output']) $this->_stage_output();
     }
 
-    function request_validation() {
+    function request_validation($directives) {
         // if(!isset($GLOBALS['current_route_meta'])) throw new \Exceptions\HTTP\NotFound("404 Not Found");
 
         /** Handle Cross-Origin Resource Sharing validation */
         $this->cors_management();
 
         // Check if we need to search for CSRF token in the header.
-        if ($this->method !== "GET" && isset($GLOBALS['current_route_meta']) && $GLOBALS['current_route_meta']['csrf_required']) {
+        if ($this->method !== "GET" && isset($directives) && $directives['csrf_required']) {
             // Check if the X-CSRF-Mitigation token is specified
             if (!key_exists("X-Mitigation", $this->headers)) throw new \Exceptions\HTTP\Unauthorized("Missing CSRF Token");
             if (!\validate_csrf_token($this->headers['X-Mitigation'])) {
