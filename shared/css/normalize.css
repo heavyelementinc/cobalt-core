@@ -217,9 +217,9 @@ nav ul {
     padding: 0;
 }
 
-header {
+body > header {
     display: flex;
-    background-color: var(--project-color-header-branding);
+    background: var(--project-color-header-branding);
     align-items: center;
 }
 
