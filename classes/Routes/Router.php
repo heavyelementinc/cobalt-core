@@ -13,6 +13,7 @@
  * 
  * @todo Add typing so that digit:{varname} would be typecast to a digit or,
  * throws an BadRequest error if its no a digit
+ * 
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @license https://github.com/heavyelementinc/cobalt-core/license
  * @copyright 2021 - Heavy Element, Inc.
@@ -24,7 +25,10 @@ class Router {
 
     public $current_route = null;
     private $route_cache_name = "config/routes.json";
-
+    public $router_table_list = [
+        __ENV_ROOT__ . "/routes/" . $this->route_context . ".php",
+        __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php",
+    ];
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
         if ($method === null) $method = $_SERVER['REQUEST_METHOD'];
@@ -38,6 +42,12 @@ class Router {
          */
         $GLOBALS['route_table_address'] = $this->route_context . "_routes";
         if (!isset($GLOBALS[$GLOBALS['route_table_address']])) $GLOBALS[$GLOBALS['route_table_address']] = [];
+
+        // Load plugin stuff
+        foreach ($GLOBALS['ACTIVE_PLUGINS'] as $plugin) {
+            $result = $plugin->register_routes($this->route_context);
+            if ($result) array_push($this->router_table_list, $result);
+        }
     }
 
     function get_routes() {
@@ -49,11 +59,7 @@ class Router {
 
         try {
             /** Get a list of route tables that exist */
-            $route_tables = files_exist([
-                __ENV_ROOT__ . "/routes/core/" . $this->route_context . ".php", // "/"
-                __ENV_ROOT__ . "/routes/" . $this->route_context . ".php",
-                __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php", // "/"
-            ]);
+            $route_tables = files_exist($this->router_table_list);
         } catch (\Exception $e) {
             /** If there are no routes available, die with a nice message */
             die("Could not load route for context $GLOBALS[route_context]");
