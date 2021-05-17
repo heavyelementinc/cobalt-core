@@ -23,7 +23,7 @@ change.
 
 ## Examples
 ### Constructor...
-```
+```php
 //Create a calendar instance with todays date as the target.
 $calendar = new \Calendar\Calendar();
 
@@ -33,7 +33,7 @@ $calendar = new \Calendar\Calendar($date);
 ```
 
 ### Getters and Setters...
-```
+```php
 //Gets the currently stored timestamp.
 $calendar->get_timestamp();
 
@@ -44,7 +44,7 @@ $calendar->render(); //Dont forget to re-render the calendar to show new results
 ```
 
 ### Display the calendar...
-```
+```php
 //Display a month calendar that can switch to a different month.
 $calendar->render();
 
