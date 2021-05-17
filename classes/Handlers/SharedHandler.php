@@ -17,6 +17,5 @@ class SharedHandler extends WebHandler {
     private $filename = "";
 
     public function _stage_execute($router_result = "") {
-        "test";
     }
 }

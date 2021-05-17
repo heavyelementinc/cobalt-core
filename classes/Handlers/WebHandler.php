@@ -28,10 +28,11 @@ class WebHandler implements RequestHandler {
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
 
-    /** The `body.html` is scanned for these specific tags and then the corresponding
-     * methods are called and their results are stored with the key. Then they're
-     * str_replace()'d in the body document. If you need to precompile templates into
-     * the `body.html` template, this is where you add them. */
+    /** The `body.html` is scanned for these specific tags and then the 
+     * corresponding methods are called and their results are stored with the 
+     * key. Then they're str_replace()'d in the body document. If you need to 
+     * precompile templates into the `body.html` template, this is where you add
+     * them. */
     private $content_replacement = [
         "@app_meta@"       => "",
         "@style_meta@"     => "",

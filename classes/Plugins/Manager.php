@@ -12,7 +12,7 @@
 
 namespace Plugins;
 
-use Plugins\Exceptions\MissingPlugin;
+use \Plugins\Exceptions\MissingPlugin;
 
 class Manager {
     private $active_file = __APP_ROOT__ . "/ignored/config/active_plugins.json";
@@ -47,13 +47,15 @@ class Manager {
 
     function get_active() {
         $plugins = [];
-        foreach ($this->active as $plg) {
+        foreach ($this->active as $i => $plg) {
             $name = $plg['name'];
-            $entrypoint = __APP_ROOT__ . "/$name/$name.php";
+            $entrypoint = __PLG_ROOT__ . "/$name/$name.php";
+            $config = __PLG_ROOT__ . "/$name/config.json";
             if (!file_exists($entrypoint)) throw new MissingPlugin("Plugin $name is missing!");
             require_once $entrypoint;
-            $instantiation = "\Plugins\\$entrypoint";
-            array_push($plugins, new $instantiation());
+            $instantiation = "\Plugins\\$name";
+            $plugins[$i] = new $instantiation();
+            $plugins[$i]->_config = get_json($config);
         }
 
         return $plugins;

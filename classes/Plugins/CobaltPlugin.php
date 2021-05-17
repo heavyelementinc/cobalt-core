@@ -25,6 +25,8 @@ interface CobaltPlugin {
     /** Plugin route registration should be handled by the router */
     public function register_routes($context);
 
+    public function register_controllers();
+
     /** Register plugin's template directory
      * 
      * 
@@ -34,4 +36,6 @@ interface CobaltPlugin {
     public function register_shared_content_dir();
 
     public function register_cli_commands();
+
+    public function register_dependencies();
 }

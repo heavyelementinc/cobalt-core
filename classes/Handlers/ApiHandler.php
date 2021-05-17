@@ -158,7 +158,4 @@ class ApiHandler implements RequestHandler {
     function url_to_current_mode($url) {
         return "$this->http_mode://" . str_replace($this->allowed_modes, "", $url);
     }
-
-    function execute() {
-    }
 }

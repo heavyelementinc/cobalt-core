@@ -25,10 +25,8 @@ class Router {
 
     public $current_route = null;
     private $route_cache_name = "config/routes.json";
-    public $router_table_list = [
-        __ENV_ROOT__ . "/routes/" . $this->route_context . ".php",
-        __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php",
-    ];
+    public $router_table_list = [];
+
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
         if ($method === null) $method = $_SERVER['REQUEST_METHOD'];
@@ -42,12 +40,17 @@ class Router {
          */
         $GLOBALS['route_table_address'] = $this->route_context . "_routes";
         if (!isset($GLOBALS[$GLOBALS['route_table_address']])) $GLOBALS[$GLOBALS['route_table_address']] = [];
+        $this->router_table_list = [
+            __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
+        ];
 
-        // Load plugin stuff
-        foreach ($GLOBALS['ACTIVE_PLUGINS'] as $plugin) {
+        foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
             $result = $plugin->register_routes($this->route_context);
             if ($result) array_push($this->router_table_list, $result);
+            $this->registered_plugin_controllers[$i] = $plugin->register_controllers();
         }
+
+        array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
     }
 
     function get_routes() {
@@ -151,20 +154,23 @@ class Router {
         $controller_name = $explode[0];
         $controller_method = $explode[1];
 
+        $controller_search = [
+            __APP_ROOT__ . "/private/controllers",
+            ...$this->registered_plugin_controllers,
+            __ENV_ROOT__ . "/controllers"
+        ];
+
         try {
             // We are doing these in reverse order because we want our app's 
             // controllers to override the core's controllers.
-            $controller_file = files_exist([
-                __APP_ROOT__ . "/private/controllers/$controller_name.php",
-                __ENV_ROOT__ . "/controllers/$controller_name.php"
-            ]);
+            $controller_file = find_one_file($controller_search, "$controller_name.php");
         } catch (\Exception $e) {
             die("Controller $controller_name not found.");
         }
 
         // We need to require this because the controllers folder is outside of our 
         // classes path and the developer is going to be able to create new controllers
-        require_once $controller_file[0];
+        require_once $controller_file;
 
         // Instantiate our controller and then execute it
         $ctrl = new $controller_name();
