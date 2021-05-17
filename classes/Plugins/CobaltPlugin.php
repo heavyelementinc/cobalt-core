@@ -15,7 +15,6 @@
 namespace Plugins;
 
 interface CobaltPlugin {
-    const __PLG_ROOT__ = __APP_ROOT__ . "/plugins";
 
     /** Plugin settings should be handled by SettingsManger */
     public function register_settings();
@@ -31,4 +30,8 @@ interface CobaltPlugin {
      * 
      */
     public function register_templates();
+
+    public function register_shared_content_dir();
+
+    public function register_cli_commands();
 }

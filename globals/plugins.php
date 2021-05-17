@@ -3,14 +3,12 @@
 /**
  * Plugins.php
  * 
- * This class handles mapping URL paths to the corresponding functions/methods
- * in the router table.
+ * This file loads active plugins into memory.
  * 
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @license https://github.com/heavyelementinc/cobalt-core/license
  * @copyright 2021 - Heavy Element, Inc.
  */
 
-function get_plugins() {
-    $plugin_db = db_cursor("plugins");
-}
+$plugin_manager = new Plugins\Manager();
+$ACTIVE_PLUGINS = $plugin_manager->get_active();
