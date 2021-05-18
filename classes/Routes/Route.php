@@ -85,6 +85,9 @@ class Route {
             'permission' => $additional['permission'] ?? $context_permission ?? null,
             'group'      => $additional['group'] ?? null,
 
+            // Header stuff -- May contain keys: 'label', 'href', 'attributes'
+            'header_nav' => $additional['header_nav'] ?? null,
+
             // Admin panel name
             'panel_name' => $additional['name'] ?? null,
             'route_file' => $file,

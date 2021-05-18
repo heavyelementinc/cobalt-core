@@ -2,7 +2,11 @@
 
 use Routes\Route;
 
-Route::get("/", "Pages@index");
+Route::get("/", "Pages@index", [
+    'header_nav' => [
+        'label' => 'Home'
+    ]
+]);
 
 /** Debug routes are for testing purposes and should not be enabled in production */
 if (app("enable_debug_routes")) {

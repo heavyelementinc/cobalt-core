@@ -28,6 +28,7 @@ class Manager {
 
     function init_plugins_file() {
         $contents = scandir(__PLG_ROOT__);
+        if ($contents === false) return false;
         if (count($contents) === 2) return false;
 
         $directory = [];

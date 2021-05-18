@@ -47,7 +47,7 @@ class Router {
         foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
             $result = $plugin->register_routes($this->route_context);
             if ($result) array_push($this->router_table_list, $result);
-            $this->registered_plugin_controllers[$i] = $plugin->register_controllers();
+            $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
         }
 
         array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");

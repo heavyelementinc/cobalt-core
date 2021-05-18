@@ -175,11 +175,25 @@ class WebHandler implements RequestHandler {
         $settings .= "<style>:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
         return $settings;
     }
-
+    var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
         $header = $this->load_template("parts/header.html");
+        $this->add_vars(['header_nav' => $this->cache_handler($this->header_nav_cache_name, "header_nav")]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
+    }
+
+    function header_nav() {
+        $links = "";
+        foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
+            if (!isset($route['header_nav'])) continue;
+            $href  = $route['header_nav']['href'] ?? $route['original_path'];
+            $label = $route['header_nav']['label'];
+            $attrs = " " . $route['header_nav']['attributes'] ?? "";
+            $links .= "<li><a href=\"$href\"$attrs>$label</a></li>";
+        }
+
+        return "<ul class=\"cobalt--navigation\">$links</ul>";
     }
 
     function auth_panel() {
@@ -221,6 +235,9 @@ class WebHandler implements RequestHandler {
         return $this->cache_handler($this->style_cache_name, "generate_style_meta");
     }
 
+    /**
+     * 
+     */
     function cache_handler($cache_name, $callable) {
         $cache = new CacheManager($cache_name);
         $script_content = "";
