@@ -182,6 +182,9 @@
             "color-acknowledge": "#598B2C",
             "color-active": "#598B2C",
             "color-inactive": "#B1C1C0",
+            "color-input-border-nofocus": "#b1c3c3",
+            "color-input-border-focus": "#000",
+            "color-input-background": "#fff",
             "color-input-disabled": "#F4F6F6",
             "color-disabled": "rgba(0,0,0,.2)",
             "color-problem": "#FE5F55",
@@ -272,6 +275,15 @@
     "csrf_seed": {
         "default": ""
     },
+    "Plugin_enable_plugin_support": {
+        "default": true
+    },
+    "Plugin_enabled_plugins": {
+        "default": []
+    },
+    "Plugin_blacklisted_plugins": {
+        "default": []
+    },
     /* If a route has not specified if it needs a CSRF token, this will be the
     default value supplied for its router table entry */
     "Router_csrf_required_default": {
@@ -351,7 +363,7 @@
     "Auth_enable_root_group": {
         /* THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS 
         *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
-        "default": false
+        "default": true
     },
     "API_CORS_allowed_origins": {
         "default": [],

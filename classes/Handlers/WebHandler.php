@@ -184,16 +184,17 @@ class WebHandler implements RequestHandler {
     }
 
     function header_nav() {
-        $links = "";
-        foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
-            if (!isset($route['header_nav'])) continue;
-            $href  = $route['header_nav']['href'] ?? $route['original_path'];
-            $label = $route['header_nav']['label'];
-            $attrs = " " . $route['header_nav']['attributes'] ?? "";
-            $links .= "<li><a href=\"$href\"$attrs>$label</a></li>";
-        }
+        return get_route_group("main_navigation", false, "navigation--main");
+        // $links = "";
+        // foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
+        //     if (!isset($route['header_nav'])) continue;
+        //     $href  = $route['header_nav']['href'] ?? $route['original_path'];
+        //     $label = $route['header_nav']['label'];
+        //     $attrs = $route['header_nav']['attributes'] ?? "";
+        //     $links .= "<li><a href=\"$href\"$attrs>$label</a></li>";
+        // }
 
-        return "<ul class=\"cobalt--navigation\">$links</ul>";
+        // return "<ul class=\"cobalt--navigation\">$links</ul>";
     }
 
     function auth_panel() {
@@ -348,25 +349,25 @@ class WebHandler implements RequestHandler {
         else $this->template_body = str_replace($this->main_content_replacement, $this->template_main_content, $this->template_body);
     }
 
+    /** @todo restore .session.html functionality */
     function load_template($template_name) {
-        $ext = pathinfo($template_name, PATHINFO_EXTENSION);
-        $session_template_name = str_replace($ext, "session.$ext", $template_name);
+        // $ext = pathinfo($template_name, PATHINFO_EXTENSION);
+        // $session_template_name = str_replace($ext, "session.$ext", $template_name);
         $templates = [
-            __APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
-            __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",
-            __APP_ROOT__ . "/private/$this->template_cache_dir/$template_name",
-            __ENV_ROOT__ . "/$this->template_cache_dir/$template_name"
+            // __APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
+            // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",
+            ...$GLOBALS['TEMPLATE_PATHS']
         ];
-        $session = session_exists();
-        if (!$session) {
-            array_shift($templates);
-            array_shift($templates);
-        }
-        $candidates = \files_exist($templates, false);
+        // $session = session_exists();
+        // if (!$session) {
+        //     array_shift($templates);
+        //     array_shift($templates);
+        // }
+        $candidates = \find_one_file($templates, $template_name);
 
-        if (!count($candidates)) throw new NotFound("Cannot find that file");
+        if (!$candidates) throw new NotFound("Cannot find that file");
 
-        return file_get_contents($candidates[0]);
+        return file_get_contents($candidates);
     }
 
     function flush_body_template() {
@@ -385,7 +386,7 @@ class WebHandler implements RequestHandler {
 
     function process() {
         if (isset($GLOBALS['web_processor_template'])) $this->main_content_from_template($GLOBALS['web_processor_template']);
-        if (isset($GLOBALS['web_processor_vars'])) $this->add_vars($GLOBALS['web_processor_vars']);
+        if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
         $this->renderer->set_body($this->template_body);
         $this->renderer->set_vars($this->template_vars);
         return $this->renderer->execute();

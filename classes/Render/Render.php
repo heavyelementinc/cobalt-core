@@ -1,4 +1,5 @@
 <?php
+
 /** Render\Render is our way of parsing HTML template strings, finding 
  * {{variables}}, %%variables%% or @function("calls"); and executing them.
  * 
@@ -60,8 +61,10 @@
  * 
  * TODO: Add callable vars support
  */
+
 namespace Render;
-class Render{
+
+class Render {
     public $body = "";
     public $vars = [];
 
@@ -72,8 +75,8 @@ class Render{
 
     public $allow_stock_variable_access = true; // Controls whether app, get, and post are accessible during execution
 
-    function __construct(){
-        if(app('Render_strict_variable_parsing')) $this->strict_variable_parsing(true);
+    function __construct() {
+        if (app('Render_strict_variable_parsing')) $this->strict_variable_parsing(true);
         $http = (\is_secure()) ? "https" : "http";
         $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
         $this->stock_vars = [
@@ -95,28 +98,28 @@ class Render{
      * enforce {{mustache}}-style references. Use of this method will only take 
      * effect if called before $this->execute()
      */
-    function strict_variable_parsing(bool $status = false){
+    function strict_variable_parsing(bool $status = false) {
         // Get the current status
         $current = $this->enable_strict_mustache_syntax;
         // Check if our current state is correct
         $is_current_state = ($status === $current);
 
         // Abort if we don't need to do anything.
-        if($is_current_state === true) return $this->enable_strict_mustache_syntax;
-        
+        if ($is_current_state === true) return $this->enable_strict_mustache_syntax;
+
         // If the current state is false, we store both values and then swap them.
         $a = $this->variable;
         $b = $this->variable_alt;
         $this->variable = $b;
         $this->variable_alt = $a;
-        
+
         // Now we store the current status.
         $this->enable_strict_mustache_syntax = !$this->enable_strict_mustache_syntax;
 
         // Then we return the status
         return $status;
     }
-    
+
     /**
      * Set the body content to be parsed by the renderer from a template.
      * 
@@ -124,55 +127,52 @@ class Render{
      * @param  mixed $template_path The path to the template you want to use
      * @return void
      */
-    function from_template(string $template_path){
-        if(!\property_exists($this,"template_cache")) $this->template_cache = [];
-        if(!key_exists($template_path,$this->template_cache)){
-            $contenders = files_exist([
-                __APP_ROOT__ . "/private/templates/$template_path",
-                __ENV_ROOT__ . "/templates/$template_path"
-            ]);
-            $this->template_cache[$template_path] = file_get_contents($contenders[0]);
+    function from_template(string $template_path) {
+        if (!\property_exists($this, "template_cache")) $this->template_cache = [];
+        if (!key_exists($template_path, $this->template_cache)) {
+            $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
+            $this->template_cache[$template_path] = file_get_contents($contenders);
         }
-        $this->set_body($this->template_cache[$template_path],$template_path);
+        $this->set_body($this->template_cache[$template_path], $template_path);
     }
 
     /** Set the body html template. $body is the template we'll be parsing for 
      * variables and function calls. Name is the name of the template file. This
      * is really only needed for debugging purposes. */
-    function set_body($body,$name = null){
+    function set_body($body, $name = null) {
         $this->body = $body;
         $this->name = $name;
     }
 
     /** Set the variables that we intend to use in our template. Should be an array. */
-    function set_vars($vars){
+    function set_vars($vars) {
         $this->vars = $vars;
     }
 
     /** Start the template parsing process. Will return the finished template. */
-    function execute(){
+    function execute() {
         $this->add_stock_vars(); // Add stock variables so they're accessible
         $matched_variables = $this->parse_for_vars();
-        $mutant = $this->replace_vars($this->body,$matched_variables);
+        $mutant = $this->replace_vars($this->body, $matched_variables);
 
         $matched_functions = $this->parse_for_functions();
-        $mutant = $this->replace_functs($mutant,$matched_functions);
+        $mutant = $this->replace_functs($mutant, $matched_functions);
 
         return $mutant;
     }
 
     /** Merge the stock variables */
-    function add_stock_vars(){
-        if(!$this->allow_stock_variable_access) return;
+    function add_stock_vars() {
+        if (!$this->allow_stock_variable_access) return;
         $this->vars = array_merge(
             $this->stock_vars,
             $this->vars
         );
     }
 
-    function parse_for_vars(){
+    function parse_for_vars() {
         $match = []; // Store our standard syntax's matches
-        \preg_match_all($this->variable,$this->body,$match); // Scan for mustache or tictac syntax
+        \preg_match_all($this->variable, $this->body, $match); // Scan for mustache or tictac syntax
         return $match;
 
         // 03/13/21 Updated the regex to support {{mustache}} or %%tictac%% syntax in a single scan
@@ -183,101 +183,101 @@ class Render{
         // return [array_merge($match[0],$match_alt[0]),array_merge($match[1],$match_alt[1])];
     }
 
-    function replace_vars($subject,$replacements){
+    function replace_vars($subject, $replacements) {
         $search = [];
         $replace = [];
-        foreach($replacements[0] as $i => $replacement){
+        foreach ($replacements[0] as $i => $replacement) {
             $search[$i] = $replacement;
             $name = $replacements[1][$i];
             $is_inline_html = false;
             /** Check if this variable is supposed to be inline HTML (as denoted by the "!")
              * if it is, we need to remove the exclamation point from the name */
-            if($name[0] === "!") { // {{!reference}}
-                $name = substr($name,1); // Remove the !
+            if ($name[0] === "!") { // {{!reference}}
+                $name = substr($name, 1); // Remove the !
                 $is_inline_html = true; // Set our inline flag
             }
             $replace[$i] = $this->lookup_value($name);
-            if(!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i]); // < = &lt;
+            if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i]); // < = &lt;
         }
-        return str_replace($search,$replace,$subject);
+        return str_replace($search, $replace, $subject);
     }
 
-    function lookup_value($name){
-        $lookup = \lookup_js_notation($name,$this->vars);
+    function lookup_value($name) {
+        $lookup = \lookup_js_notation($name, $this->vars);
         return $this->process_vars($lookup);
     }
 
-    function process_vars($val){
-        switch(\gettype($val)){
+    function process_vars($val) {
+        switch (\gettype($val)) {
             case "boolean":
-            // case "NULL":
+                // case "NULL":
             case "array":
             case "object":
                 $value = \json_encode($val); // Is this what we want?
-            break;
+                break;
             case "resource":
             case "resource (closed)":
                 $value = "[resource]";
-            break;
+                break;
             default:
                 $value = $val;
-            break;
+                break;
                 // $value = ($val) ? "`true`" : "`false`";
-            // break;
-            // case "null": 
-            //     $value = "`null`";
-            // break;
-            // case "array":
-            //     $value = \implode(", ",$val);
-            // break;
-            // case "object":
-            //     $value = "[Object]";
-            // break;
-            
+                // break;
+                // case "null": 
+                //     $value = "`null`";
+                // break;
+                // case "array":
+                //     $value = \implode(", ",$val);
+                // break;
+                // case "object":
+                //     $value = "[Object]";
+                // break;
+
         }
         return $value;
     }
 
-    function parse_for_functions(){
+    function parse_for_functions() {
         $match = [];
-        \preg_match_all($this->function,$this->body,$match);
+        \preg_match_all($this->function, $this->body, $match);
         return $match;
     }
 
-    function replace_functs($subject,$functions){
+    function replace_functs($subject, $functions) {
         $mutant = $subject;
-        foreach($functions[1] as $i => $funct){
-            if(!is_callable($funct)) $this->debug_template($function[0][$i],"$funct is not callable");
-            $args = \json_decode("[".$functions[2][$i]."]",true,512,JSON_THROW_ON_ERROR);
+        foreach ($functions[1] as $i => $funct) {
+            if (!is_callable($funct)) $this->debug_template($funct[0][$i], "$funct is not callable");
+            $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
             $mutant_vars = $this->functs_get_vars($args);
             // We want to include the current context's variables when @with is called
             // from inside a template, so we add a special case. Fun.
-            if(in_array($funct,['maybe_with','with']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
+            if (in_array($funct, ['maybe_with', 'with']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
             $result = $funct(...$mutant_vars);
-            $mutant = \str_replace($functions[0][$i],$result,$mutant);
+            $mutant = \str_replace($functions[0][$i], $result, $mutant);
         }
         return $mutant;
     }
 
-    function functs_get_vars($vars){
+    function functs_get_vars($vars) {
         $mutant = [];
-        foreach($vars as $value){
-            if($value[0] === "$") array_push($mutant,$this->lookup_value(substr($value,1)));
-            else array_push($mutant,$value);
+        foreach ($vars as $value) {
+            if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1)));
+            else array_push($mutant, $value);
         }
         return $mutant;
     }
 
-    function debug_template($funct){
-        $strpos = \strpos($this->body,$funct);
-        throw new Exception($message . "; at position " . $strpos);
+    function debug_template($funct) {
+        $strpos = \strpos($this->body, $funct);
+        $message = "";
+        throw new \Exception($message . "; at position " . $strpos);
     }
 
-    function strposall($needle,$haystack,$up_to){
-        $hs = explode($needle,$haystack);
+    function strposall($needle, $haystack, $up_to) {
+        $hs = explode($needle, $haystack);
         $strpos = [];
-        foreach($hs as $i => $n){
-            
+        foreach ($hs as $i => $n) {
         }
     }
 }

@@ -52,7 +52,7 @@ else die("Dependencies have not been installed. Run `composer install` in the co
 spl_autoload_register("cobalt_autoload", true);
 
 // Load our ACTIVE plugins.
-require_once __ENV_ROOT__ . "/globals/plugins.php";
+if (app('plugin_support_enabled')) require_once __ENV_ROOT__ . "/globals/plugins.php";
 
 // Instantiate our settings (`true` for loading settings from cache)
 try {

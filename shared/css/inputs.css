@@ -1,13 +1,39 @@
 /** Inputs */
 
 input, textarea {
-  border: 0;
-  background: #fff;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: var(--project-color-input-background);
   padding: .4rem;
-  border-radius: .6rem;
-  box-shadow: 0 0 6px rgba(0, 0, 0, .3) inset;
+  border-radius: 4px;
   font-size: 1.1rem;
+
 }
+
+  input:focus{
+    border: 1px solid var(--project-color-input-border-focus);
+  }
+
+  input::placeholder, input + .placeholder {
+    color: var(--project-color-input-border-nofocus);
+    background: transparent;
+    position: absolute;
+    transition: top 300ms, left 300ms, color 300ms, font-size 300ms;
+    top:10px;
+    left:10px;
+    opacity: 1;
+  }
+
+  :focus-within .placeholder,
+  input::not(:placeholder-shown) + .placeholder{
+    color: var(--project-color-input-border-focus);
+    background: var(--project-color-input-background);
+    font-weight: bold;
+    top:5px;
+    left:5px;
+  }
+  input:focus::placeholder {
+    color: var(--project-color-input-border-focus);
+  }
 
 input:focus, textarea:focus {
   background: var(--project-color-input-disabled);

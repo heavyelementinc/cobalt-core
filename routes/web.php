@@ -3,8 +3,11 @@
 use Routes\Route;
 
 Route::get("/", "Pages@index", [
-    'header_nav' => [
-        'label' => 'Home'
+    'anchor' => [
+        'name' => 'Home'
+    ],
+    'navigation' => [
+        'main_navigation'
     ]
 ]);
 
