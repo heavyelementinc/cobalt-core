@@ -3,7 +3,8 @@
 /**
  *  - Plugins EXTEND the \Plugins\CobaltPlugin class
  *  - Plugins are self-contained in a single directory in __APP_ROOT__/plugins/<plugin name>
- *  - The plugin's entrypoint should be the name of the plugin class which is the same as the plugin directory
+ *  - The plugin's entrypoint should be the name of the plugin class which is 
+ *      the same as the plugin directory
  *  - All controllers, templates, js, settings, etc. are within that directory
  *  - No magic!
  *

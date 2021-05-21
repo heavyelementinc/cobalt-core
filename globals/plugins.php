@@ -11,7 +11,7 @@
  */
 try {
     $plugin_manager = new Plugins\Manager();
-    $ACTIVE_PLUGINS = $plugin_manager->get_active();
+    $GLOBALS['ACTIVE_PLUGINS'] = $plugin_manager->get_active();
 
     $TEMPLATE_PATHS = [
         __APP_ROOT__ . "/private/templates/",
@@ -20,7 +20,7 @@ try {
     $PERMISSIONS = [];
 
     $i = 0;
-    foreach ($ACTIVE_PLUGINS as $i => $plugin) {
+    foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
         array_push($TEMPLATE_PATHS, $plugin->register_templates());
         $PERMISSIONS = array_merge($PERMISSIONS, $plugin->register_permissions());
         array_push($GLOBALS['CLASSES_DIR'], $plugin->register_dependencies());

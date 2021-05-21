@@ -42,7 +42,7 @@ class Manager {
         if (!is_dir($info)) $make_dir = mkdir($info, 0777, true);
         if (!$mkdir) throw new \Exception("Could not make the directory path for $this->reference");
         if ($json) $contents = json_encode($contents);
-        if (file_put_contents($path, $contents) === false) throw new \Exception("Could not write to $this->reference.");
+        if (@file_put_contents($path, $contents) === false) throw new \Exception("Could not write to $this->reference.");
         return $path;
     }
 

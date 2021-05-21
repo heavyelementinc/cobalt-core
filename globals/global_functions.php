@@ -5,7 +5,7 @@
  * 
  * The Cobalt Engine offers a variety of helpful functions that allow developers
  * more flexibility and handle many of the more tedious and oft-repeated tasks
- * that we've encountered while writing Cobalt.
+ * that we've encountered while writing Cobalt. 
  * 
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @license https://github.com/heavyelementinc/cobalt-core/license
@@ -135,7 +135,7 @@ function template_exists($template) {
     return false;
 }
 
-$CLASSES_DIR = [
+$GLOBALS['CLASSES_DIR'] = [
     __APP_ROOT__ . "/private/classes/",
     __ENV_ROOT__ . "/classes/"
 ];
@@ -148,7 +148,7 @@ $CLASSES_DIR = [
 function cobalt_autoload($class) {
     $namespace_to_path = str_replace("\\", "/", $class) . ".php";
 
-    $file = find_one_file($GLOBALS['CLASSES_DIR'], $namespace_to_path);
+    $file = find_one_file($GLOBALS['CLASSES_DIR'], $namespace_to_path) ?? "";
 
     if ($file !== false) {
         require_once $file;
