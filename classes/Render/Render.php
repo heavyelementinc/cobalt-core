@@ -202,9 +202,10 @@ class Render {
         return str_replace($search, $replace, $subject);
     }
 
-    function lookup_value($name) {
+    function lookup_value($name, $process = true) {
         $lookup = \lookup_js_notation($name, $this->vars);
-        return $this->process_vars($lookup);
+        if ($process) return $this->process_vars($lookup);
+        return $lookup;
     }
 
     function process_vars($val) {
@@ -212,8 +213,10 @@ class Render {
             case "boolean":
                 // case "NULL":
             case "array":
-            case "object":
                 $value = \json_encode($val); // Is this what we want?
+                break;
+            case "object":
+                $value = "[object Object]";
                 break;
             case "resource":
             case "resource (closed)":
@@ -262,7 +265,7 @@ class Render {
     function functs_get_vars($vars) {
         $mutant = [];
         foreach ($vars as $value) {
-            if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1)));
+            if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
             else array_push($mutant, $value);
         }
         return $mutant;

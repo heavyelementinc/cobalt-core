@@ -1,8 +1,9 @@
 class InputClass_default {
-    constructor(element, { }) {
+    constructor(element, { form = null }) {
         this.element = element;
         this.type = element.type || "text";
         this.name = element.name || "";
+        this.form = form || this.get_form();
         if (typeof element === "string") this.element = document.querySelector(element);
         if (this.element === null) throw new Error("Can't find element " + element);
     }
@@ -11,6 +12,11 @@ class InputClass_default {
         if (set === null) return this.element.value;
         this.element.value = set;
         return set;
+    }
+
+    get_form() {
+        if (this.form === null) this.form = this.element.closest("form-request");
+        if (this.form === null) throw new Error("Can't find reference <form-request>");
     }
 }
 
@@ -23,8 +29,20 @@ class InputClass_checkbox extends InputClass_default {
 }
 
 class InputClass_radio extends InputClass_default {
-    value(set) {
+    value(set = null) {
+        if (set === null) return this.get()
+        this.set(set);
+    }
 
+    get() {
+        const element = this.form.querySelector(`[name="${this.name}"]:checked`);
+        return element.value;
+    }
+
+    set(set) {
+        if (!set) return;
+        let candidate = this.form.querySelector(`[name="${this.name}"][value="${set}"]`);
+        if (candidate !== null) candidate.checked = true;
     }
 }
 

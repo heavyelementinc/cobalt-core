@@ -1,3 +1,14 @@
+/**
+ * form-request supports the following attributes
+ * 
+ *  * method - functions identically to a <form method=""> attribute
+ *  * action - functions identically to a <form action=""> attribute
+ *  * display-mode - 
+ *     - "edit" - (default) will allow you to continue editing the form after saving
+ *     - "done" - will disable the form after saving and present a "complete" screen
+ *  * success - a web route to be displayed when display-mode="done"
+ */
+
 class FormRequestElement extends HTMLElement {
     constructor() {
         super();
@@ -21,6 +32,7 @@ class FormRequestElement extends HTMLElement {
             let button = this.stages[0].querySelector("button[type='submit']");
             this.stages[0].appendChild(error);
         }
+        this.error = error;
         this.request.errorField = error;
     }
 
@@ -33,6 +45,12 @@ class FormRequestElement extends HTMLElement {
         } catch (error) {
             console.log(error);
             await this.regress();
+        }
+        this.mode = this.getAttribute("display-mode") ?? "edit";
+        if (this.mode === "edit" && allow_final_stage) {
+            await this.regress();
+            this.error.innerText = "Saved.";
+            return;
         }
         if (!allow_final_stage) return;
         try {
@@ -182,16 +200,37 @@ class InputSwitch extends HTMLElement {
 
 customElements.define("input-switch", InputSwitch);
 
-class RadioButton extends HTMLElement {
+/**
+ * radio-groups support the following attributes:
+ *
+ *  * selected - the name of the radio box to be selected
+ *  * default - the default checkbox to be selected
+ * 
+ * There should only ever be *ONE* name per radio-group
+ */
+class RadioGroup extends HTMLElement {
     constructor() {
         super();
+        this.selected = this.getAttribute("selected");
+        this.default = this.getAttribute("default");
+
+        let first = this.querySelector("[input='radio']");
+        if (first) this.name = first.getAttribute("name");
+        if (this.selected) this.updateSelected(this.selected);
+        else if (this.default) this.updateSelected(this.default);
     }
-    connectedCallback() {
-        /** MAKE THIS */
+
+    updateSelected(selected) {
+        let updateQuery = "";
+        if (this.name) updateQuery = `[name="${this.name}"]`
+        const candidate = this.querySelector(`${updateQuery}[value="${selected}"]`);
+        if (candidate) candidate.checked = true;
     }
+
 }
 
-customElements.define("radio-button", RadioButton)
+customElements.define("radio-group", RadioGroup)
+
 
 /**
  * @todo complete this.

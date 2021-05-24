@@ -519,3 +519,22 @@ function build_directory_item($item, $icon = false) {
     $attributes = $item["attributes"] ?? '';
     return "<li><a href='$item[href]' $attributes>$icon" . "$item[name]</a></li>";
 }
+
+/**
+ * @param int $cents 
+ * @return string the dollar value as a string
+ * */
+function cents_to_dollars($cents) {
+    $dollars = round($cents / 100, 2);
+    return number_format($dollars, 2);
+}
+
+/**
+ * @param object $date instance of MongoDB\BSON\UTCDateTime
+ * @param string $fmt the format of the resulting date string
+ * @return string formated date
+ */
+function mongo_date($date, $fmt = "m/d/Y") {
+    $date = (string)$date / 1000;
+    return date($fmt, $date);
+}
