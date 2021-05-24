@@ -9,7 +9,7 @@ class ApiFetch {
         this.headers = headers;
     }
 
-    async send(data, { throwOnError = false, encapsulate_as_array = false }) {
+    async send(data = "", { throwOnError = false, encapsulate_as_array = false }) {
         let send = {
             method: this.method,
             credentials: 'include',

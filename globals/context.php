@@ -93,4 +93,5 @@ try {
     header("HTTP/1.0 500 Unknown Error");
     if (app("debug")) die($e->getMessage());
     else die("An unknown error has occurred.");
+    exit;
 }

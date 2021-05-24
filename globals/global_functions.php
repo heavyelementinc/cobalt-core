@@ -5,10 +5,11 @@
  * 
  * The Cobalt Engine offers a variety of helpful functions that allow developers
  * more flexibility and handle many of the more tedious and oft-repeated tasks
- * that we've encountered while writing Cobalt.
+ * that we've encountered while writing Cobalt. 
  * 
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @license https://github.com/heavyelementinc/cobalt-core/license
+ * @copyright 2021 - Heavy Element, Inc.
  */
 
 /** A shorthand way of getting a specific setting by providing the name of the 
@@ -123,26 +124,34 @@ function find_one_file(array $arr_of_paths, $filename) {
     return false;
 }
 
-
+/** Checks if non-false is returned by find_one_file and returns true, otherwise
+ * returns false
+ * @param string $template path relative to template dirs
+ * @return bool
+ */
 function template_exists($template) {
-    $file = count(files_exist([
-        __APP_ROOT__ . "/private/templates/$template",
-        __ENV_ROOT__ . "/templates/$template"
-    ], false));
-    return (bool)$file;
+    $file = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template);
+    if ($file !== false) return true;
+    return false;
 }
 
-/** The autoload routine of for our classes. */
+$GLOBALS['CLASSES_DIR'] = [
+    __APP_ROOT__ . "/private/classes/",
+    __ENV_ROOT__ . "/classes/"
+];
+
+/** The autoload routine for our classes.
+ * @throws Exception if $class could not be loaded
+ * @todo do we *want* this class to 
+ * @param string $class the class name
+ */
 function cobalt_autoload($class) {
     $namespace_to_path = str_replace("\\", "/", $class) . ".php";
-    $file = [];
-    $file = files_exist([
-        __APP_ROOT__ . "/private/classes/$namespace_to_path",
-        __ENV_ROOT__ . "/classes/$namespace_to_path"
-    ], false);
 
-    if (count($file) >= 1) {
-        require_once $file[0];
+    $file = find_one_file($GLOBALS['CLASSES_DIR'], $namespace_to_path) ?? "";
+
+    if ($file !== false) {
+        require_once $file;
         return;
     }
 
@@ -180,17 +189,25 @@ function cobalt_autoload($class) {
     }
 }
 
+/** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter
+ * @param string $path The path name relative to TEMPLATE_PATHS
+ * @return void
+ */
 function add_template($path) {
     $GLOBALS['web_processor_template'] = $path;
 }
 
+/** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
+ * @param array $vars MUST BE ASSOCIATIVE ARRAY
+ * @return void
+ */
 function add_vars($vars) {
-    if (!isset($GLOBALS['web_processor_vars'])) {
-        $GLOBALS['web_processor_vars'] = $vars;
+    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
+        $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
         return;
     }
 
-    $GLOBALS['web_processor_vars'] = array_merge($GLOBALS['web_processor_vars'], $vars);
+    $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
 }
 
 /** 
@@ -366,21 +383,30 @@ function csrf_attribute() {
     return "token=\"" . get_csrf_token() . "\"";
 }
 
-/** JSON */
-
+/** Load a file containing JSON and parse it 
+ * @param string $file_name path to a JSON file
+ * @param bool $array return the parsed JSON as an array rather than as an object
+ * @return mixed
+ */
 function get_json($file_name, $array = true) {
-    return json_decode(file_get_contents($file_name), $array);
+    $json = file_get_contents($file_name);
+    return json_decode($json, $array);
 }
 
-function jsonc_decode($json, $assoc = false, $depth = 512, $options = 0) {
+/** Parse JSONC (commented JSON)
+ * @param string $json the JSON string to be parsed
+ * @param bool $assoc parse as an object (false) or array (true)
+ * @param int $depth User specified recursion depth.
+ * @param int $flags PHP JSON flags
+ */
+function jsonc_decode($json, $assoc = false, $depth = 512, $flags = 0) {
     /** Remove // and multiline comments from JSON, then parse. */
     $json = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#", '', $json);
 
-    return json_decode($json, $assoc, $depth, $options);
+    return json_decode($json, $assoc, $depth, $flags);
 }
 
 /** Build Object */
-
 function build_array_from_path(&$arr, $path, $value, $delimiter = ".") {
     $keys = explode($delimiter, $path);
     foreach ($keys as $key) {
@@ -459,4 +485,56 @@ function is_child_dir($base_dir, $path) {
     // if($path && strlen($base_dir) < strlen($path))
     $substr = substr(realpath($path), 0, $base_len);
     return ($substr === $base_dir); // return comparison operation.
+}
+
+/** Create a directory listing from existing web GET routes
+ * 
+ * @param string $directory_group the name of the key
+ */
+function get_route_group($directory_group, $with_icon = false, $classes = "", $id = "") {
+    if ($with_icon) $classes .= " directory--icon-group";
+    if ($id) $id = "id='$id' ";
+    if ($classes) $classes = " $classes";
+    $ul = "<ul $id" . "class='directory--group$classes'>";
+
+    foreach ($GLOBALS['router']->routes['get'] as $route) {
+        $groups = $route['navigation'] ?? false;
+        if (!$groups) continue;
+        // If we get here, we know we [probably] have an array
+
+        // Now we check if the directory group is in $groups or the key exists
+        // If both are FALSE, then we skip list assembly.
+        if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
+
+        $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
+        $ul .= build_directory_item($info, $with_icon);
+    }
+
+    return $ul . "</ul>";
+}
+
+function build_directory_item($item, $icon = false) {
+    if ($icon) $icon = "<ion-icon name='$item[icon]'></ion-icon>";
+    else $icon = "";
+    $attributes = $item["attributes"] ?? '';
+    return "<li><a href='$item[href]' $attributes>$icon" . "$item[name]</a></li>";
+}
+
+/**
+ * @param int $cents 
+ * @return string the dollar value as a string
+ * */
+function cents_to_dollars($cents) {
+    $dollars = round($cents / 100, 2);
+    return number_format($dollars, 2);
+}
+
+/**
+ * @param object $date instance of MongoDB\BSON\UTCDateTime
+ * @param string $fmt the format of the resulting date string
+ * @return string formated date
+ */
+function mongo_date($date, $fmt = "m/d/Y") {
+    $date = (string)$date / 1000;
+    return date($fmt, $date);
 }

@@ -26,6 +26,7 @@ class Router {
     public $current_route = null;
     private $route_cache_name = "config/routes.json";
     public $router_table_list = [];
+    public $registered_plugin_controllers = [];
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -38,8 +39,8 @@ class Router {
         /** Export our route table to the global space, we use this to specify where
          * we should look for our routes.
          */
-        $GLOBALS['route_table_address'] = $this->route_context . "_routes";
-        if (!isset($GLOBALS[$GLOBALS['route_table_address']])) $GLOBALS[$GLOBALS['route_table_address']] = [];
+        $GLOBALS['ROUTE_TABLE_ADDRESS'] = $this->route_context . "_routes";
+        if (!isset($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']])) $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']] = [];
         $this->router_table_list = [
             __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
         ];
@@ -47,7 +48,7 @@ class Router {
         foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
             $result = $plugin->register_routes($this->route_context);
             if ($result) array_push($this->router_table_list, $result);
-            $this->registered_plugin_controllers[$i] = $plugin->register_controllers();
+            $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
         }
 
         array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
@@ -73,7 +74,7 @@ class Router {
             require_once $table;
         }
 
-        $this->routes = $GLOBALS[$GLOBALS['route_table_address']];
+        $this->routes = $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']];
     }
 
     /** @todo complete this */

@@ -210,6 +210,21 @@ table, tr, td {
 /* ==================
      STYLE DEFAULTS
    ================== */
+.hbox, .vbox{
+    display:flex;
+}
+
+.vbox{
+    flex-direction: column;
+}
+
+.hbox.reverse{
+    flex-direction: row-reverse;
+}
+
+.vbox.reverse{
+    flex-direction: column-reverse;
+}
 
 nav ul {
     list-style: none;

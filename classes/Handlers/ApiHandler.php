@@ -151,8 +151,8 @@ class ApiHandler implements RequestHandler {
     }
 
     function __destruct() {
-        if ($this->_stage_bootstrap['_stage_output'] === true) return;
-        $this->_stage_output();
+        // if ($this->_stage_bootstrap['_stage_output'] === true) return;
+        // $this->_stage_output();
     }
 
     function url_to_current_mode($url) {

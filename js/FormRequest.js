@@ -42,7 +42,7 @@ class FormRequest {
         }
         if (type in classMap === false) type = "default";
         // const className = "InputClass_" + type;
-        this.el_list[name] = new classMap[type](el, {});
+        this.el_list[name] = new classMap[type](el, { form: this.form });
         if (this.autosave) el.addEventListener("change", event => this.autosave_handler(this.el_list[name], event));
         return true;
     }

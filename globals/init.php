@@ -21,7 +21,7 @@
  * __cobalt_initialize accepts an array of values (either decoded with a uname,
  * pword, and email key) and will take appropriate action to either prompt the
  * user for more information if a key is missing or insert the first user
- * account into the database.
+ * account into the database. 
  *
  * @param  array $values An array containing uname, pword, and email at a minimum
  * @return bool

@@ -2,7 +2,14 @@
 
 use Routes\Route;
 
-Route::get("/", "Pages@index");
+Route::get("/", "Pages@index", [
+    'anchor' => [
+        'name' => 'Home'
+    ],
+    'navigation' => [
+        'main_navigation'
+    ]
+]);
 
 /** Debug routes are for testing purposes and should not be enabled in production */
 if (app("enable_debug_routes")) {
