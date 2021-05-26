@@ -68,4 +68,11 @@ class Debug extends \Controllers\Pages {
         ]);
         add_template("/parts/main.html");
     }
+
+    function flex_table() {
+        add_vars([
+            'title' => 'Flex Table Test'
+        ]);
+        add_template("/debug/flex-table.html");
+    }
 }

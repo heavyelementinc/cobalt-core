@@ -20,6 +20,7 @@ if (app("enable_debug_routes")) {
     Route::get("/debug/parallax", "Debug@debug_parallax");
     Route::get("/debug/loading", "Debug@debug_loading");
     Route::get("/debug/calendar/{date}?", "Debug@debug_calendar");
+    Route::get("/debug/flex-table", "Debug@flex_table");
 }
 
 /** If authentications are enabled, these routes should be added to the table */

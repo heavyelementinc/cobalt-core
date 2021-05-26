@@ -225,3 +225,38 @@ input-array-item{
   }
 
   
+flex-table{
+  display: flex;
+  width: 100%;
+  background: var(--project-color-table-bg-odd);
+  flex-wrap: wrap;
+  border: var(--project-color-table-border);
+}
+
+  flex-row{
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    flex-grow: 0;
+    flex-wrap: wrap;
+  }
+
+  flex-row:nth-of-type(even){
+    background: var(--project-color-table-bg-even);
+  }
+
+  flex-cell + flex-cell,
+  flex-header + flex-header{
+    border-left: var(--project-color-table-border);
+  }
+
+  flex-cell,flex-header{
+    display: flex;
+    flex-grow: 1;
+    padding: .3rem;
+    width: 80px;
+  }
+
+  flex-header{
+    font-weight: bold;
+  }
