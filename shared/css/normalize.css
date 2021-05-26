@@ -38,11 +38,10 @@ h1, h2, h3, h4, h5 {
 
 hr {
     box-sizing: content-box;
-    /* 1 */
     height: 0;
-    /* 1 */
     overflow: visible;
-    /* 2 */
+    border:none;
+    border-top: var(--project-color-table-border)
 }
 
 pre {
