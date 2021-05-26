@@ -95,3 +95,7 @@ input-switch {
   input-switch[large] input:checked+span:after {
     left: 38px;
   }
+
+form-request{
+  overflow: hidden;
+}
