@@ -39,3 +39,26 @@
         <option>Tag 2</option>
     </tag-select>
 </fieldset>
+
+<fieldset>
+    <label>Array test</label>
+    <input-array name="array" multiselect="true" allow-custom="true">
+        <script type="application/json">[1000,"1001", true]</script>
+        <option value="1000">Int</option>
+        <option value="1001">String</option>
+        <option value="true">Boolean <code>true</code></option>
+        <option value="false">Boolean <code>false</code></option>
+        <option value="null"><code style="background:black;color:white">null</code></option>
+    </input-array>
+</fieldset>
+
+<fieldset>
+    <label>Readonly Array test</label>
+    <input-array name="array" readonly="readonly">
+        <script type="application/json">["1000","1001"]</script>
+        <option value="1000">Testing 1000</option>
+        <option value="1001">Testing 1001</option>
+        <option value="1002">Testing 1002</option>
+        <option value="1003">Testing 1004</option>
+    </input-array>
+</fieldset>

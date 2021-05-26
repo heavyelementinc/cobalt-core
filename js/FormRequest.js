@@ -20,7 +20,7 @@ class FormRequest {
 
     /** Add all the form elements to this instance's list of elements */
     form_elements() {
-        this.elements = this.form.querySelectorAll("input[name], select[name], textarea[name]");
+        this.elements = this.form.querySelectorAll("input[name], select[name], textarea[name], input-array[name]");
         this.el_list = [];
         for (let el of this.elements) {
             this.add(el);
@@ -53,9 +53,14 @@ class FormRequest {
         if (this.asJSON === false) return;
         // if
         e.preventDefault();
-        let formdata = new FormData(this.form);
-        let data = Object.fromEntries(formdata);
-        this.send(data)
+        // let formdata = new FormData(this.form);
+        // let data = Object.fromEntries(formdata);
+
+        let data = this.build_query();
+
+        let result = await this.send(data);
+
+        console.log(result);
     }
 
     async send(data) {
@@ -68,6 +73,8 @@ class FormRequest {
             this.errorHandler(error, result, post);
             throw new Error(error);
         }
+
+
         this.form.dispatchEvent(this.onsuccess);
     }
 
@@ -100,6 +107,9 @@ class FormRequest {
         if (this.errorField) this.errorField.innerText = "";
     }
 
+    update_fields(data) {
+
+    }
 
 }
 

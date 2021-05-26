@@ -520,7 +520,7 @@ function build_directory_item($item, $icon = false) {
     return "<li><a href='$item[href]' $attributes>$icon" . "$item[name]</a></li>";
 }
 
-/**
+/** Convert cents to dollars with decimal fomatting (not prepended by a "$" dollar sign)
  * @param int $cents 
  * @return string the dollar value as a string
  * */
@@ -529,12 +529,13 @@ function cents_to_dollars($cents) {
     return number_format($dollars, 2);
 }
 
-/**
+/** Convert a Mongo Date object to a formated date
  * @param object $date instance of MongoDB\BSON\UTCDateTime
- * @param string $fmt the format of the resulting date string
+ * @param string $fmt (optional) the format of the resulting date string
+ *                - defaults to `<input type='date' value="Y/m/d">` expected format
  * @return string formated date
  */
-function mongo_date($date, $fmt = "m/d/Y") {
+function mongo_date($date, $fmt = "Y/m/d") {
     $date = (string)$date / 1000;
     return date($fmt, $date);
 }
