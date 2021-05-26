@@ -106,7 +106,7 @@ input-array {
   border-radius: 4px;
   font-size: 1.1rem;
   overflow: hidden;
-  position: relative;
+  /* position: relative; */
 }
   input-array fieldset{
     display: flex;
@@ -138,6 +138,10 @@ input-array {
     font-size: .9rem;
   }
 
+  input-array input[type="search"]:focus{
+    background: var(--project-color-input-background);
+  }
+
   input-array optgroup, input-array option{
     display: none;
   }
@@ -150,7 +154,8 @@ input-array {
     list-style: none;
     position:absolute;
     background: var(--project-color-input-background);
-    border: inherit;
+    border: 1px solid var(--project-color-input-border-nofocus);
+    border-top: none;
     width: calc(100% - .2rem);
     top:100%;
     left:.1rem;
@@ -181,7 +186,11 @@ input-array {
     color:black;
   }
 
-   .input-array--search-results li.input-array--list-custom:not(.input-array--will-select-on-enter){
+  .input-array--search-results li.input-array--list-custom{
+    font-weight: bold;
+  }
+
+  .input-array--search-results li.input-array--list-custom:not(.input-array--will-select-on-enter){
     color:var(--project-color-input-border-nofocus);
   }
 
@@ -217,11 +226,12 @@ input-array-item{
 
   input-array-item input[type='button']{
     font-size: .8rem;
-    color:var(--project-color-input-border-nofocus);
+    color: var(--project-color-input-border-nofocus);
     border: none;
     border-left: 1px solid var(--project-color-input-border-nofocus);
     border-radius: unset;
-    margin:0;
+    margin: 0;
+    height: 100%;
   }
 
   

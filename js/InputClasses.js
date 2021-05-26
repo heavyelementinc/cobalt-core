@@ -28,6 +28,14 @@ class InputClass_checkbox extends InputClass_default {
     }
 }
 
+class InputClass_switch extends InputClass_default {
+    value(set = null) {
+        if (set === null) return this.element.querySelector("input[type='checkbox']").checked;
+        this.element.querySelector("input[type='checkbox']").checked = set;
+        return set;
+    }
+}
+
 class InputClass_radio extends InputClass_default {
     value(set = null) {
         if (set === null) return this.get()
@@ -59,7 +67,21 @@ class InputClass_number extends InputClass_default {
 }
 
 class InputClass_array extends InputClass_default {
+    value(set = null) {
+        if (set === null) return this.collectArrayElements();
+        else {
+            this.setArrayElements();
+        }
+    }
 
+    collectArrayElements() {
+        let elements = this.element.querySelectorAll('input-array-item');
+        let array = [];
+        for (var e of elements) {
+            array.push(e.getAttribute("value"));
+        }
+        return array;
+    }
 }
 
 class InputClass_select extends InputClass_default {
@@ -97,8 +119,11 @@ class InputClass_select extends InputClass_default {
 
 var classMap = {
     default: InputClass_default,
+    check: InputClass_checkbox,
     checkbox: InputClass_checkbox,
+    switch: InputClass_switch,
     radio: InputClass_radio,
     button: InputClass_button,
     number: InputClass_number,
+    array: InputClass_array,
 }

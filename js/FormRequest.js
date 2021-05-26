@@ -20,11 +20,12 @@ class FormRequest {
 
     /** Add all the form elements to this instance's list of elements */
     form_elements() {
-        this.elements = this.form.querySelectorAll("input[name], select[name], textarea[name], input-array[name]");
+        this.elements = this.form.querySelectorAll("input[name], select[name], textarea[name], input-switch[name], input-array[name]");
         this.el_list = [];
         for (let el of this.elements) {
             this.add(el);
         }
+        return this.el_list;
     }
 
     /** Add an individual item to this list */
@@ -38,6 +39,12 @@ class FormRequest {
                 break;
             case "SELECT":
                 type = 'select';
+                break;
+            case "INPUT-SWITCH":
+                type = "switch";
+                break;
+            case "INPUT-ARRAY":
+                type = "array";
                 break;
         }
         if (type in classMap === false) type = "default";
@@ -87,10 +94,10 @@ class FormRequest {
 
     /** Build the list of items */
     build_query(list = null) {
-        if (list === null) list = this.el_list
+        if (list === null) list = this.el_list;
         let query = {};
         for (var i in list) {
-            query[list[i].name] = list[i].value();
+            query[list[i].element.getAttribute("name")] = list[i].value();
         }
         if (this.autosave && this.include) query.include = this.include;
         return query;

@@ -316,6 +316,13 @@ if (app("loading_spinner") !== false) customElements.define("loading-spinner", L
  *  * pattern - [""] the pattern for custom elements to be matched against
  */
 class InputArray extends HTMLElement {
+
+    static get observedAttributes() {
+        return ['value', 'allow-custom', 'multiselect',
+            // 'readonly'
+        ];
+    }
+
     constructor() {
         super();
 
@@ -324,6 +331,7 @@ class InputArray extends HTMLElement {
         this.searchField = null;
         this.fieldSet = null;
         this.arrowKeySelectionIndex = -1;
+        this.customElementClass = "input-array--list-custom";
 
         this.name = this.getAttribute("name") || null;
         this.readonly = this.getAttribute("readonly") || "false";
@@ -333,7 +341,7 @@ class InputArray extends HTMLElement {
         this.placeholder = this.getAttribute("placeholder") || "Search";
 
         /** Start initializing things */
-        this.value = this.initValue();
+        this.value = this.initValue() || [];
         this.options = this.initOptions();
 
         this.initUI();
@@ -426,8 +434,9 @@ class InputArray extends HTMLElement {
 
             if (!this.parentNode.contains(this.searchResults)) this.parentNode.insertBefore(this.searchResults, this)
 
-            this.searchResults.style.top = this.searchField.offsetTop + this.searchField.offsetHeight;
-            this.searchResults.style.left = this.searchField.offsetLeft + 4;
+            this.searchResults.style.top = this.searchField.offsetTop + this.searchField.offsetHeight - 1 + "px";
+            this.searchResults.style.left = this.searchField.offsetLeft + 4 + "px";
+            this.searchResults.style.width = this.searchField.offsetWidth - 8 + "px";
 
             for (var i in tempOpts) {
                 const matchAgainst = tempOpts[i].search;
@@ -437,14 +446,14 @@ class InputArray extends HTMLElement {
                 // Test if we have a match
                 if (val.test(matchAgainst)) {
                     // Append the result of searchFieldListResults to the results element
-                    this.searchResults.appendChild(this.searchFieldListResults(i, tempOpts, matchAgainst))
+                    this.searchResults.appendChild(this.listSearchFieldResults(i, tempOpts, matchAgainst))
                 }
 
             }
         })
 
         this.searchField.addEventListener("focusout", e => {
-            this.focusOutTimeout = setTimeout(() => this.focusOutHandler(e), 600);
+            // this.focusOutTimeout = setTimeout(() => this.focusOutHandler(e), 600);
         })
     }
 
@@ -452,7 +461,7 @@ class InputArray extends HTMLElement {
         this.searchResults.innerHTML = "";
     }
 
-    searchFieldListResults(i, options, matchAgainst) {
+    listSearchFieldResults(i, options, matchAgainst) {
         let listItem = document.createElement("li");
         listItem.tabIndex = 0;
 
@@ -460,12 +469,18 @@ class InputArray extends HTMLElement {
          higlight our search results with */
         const regex = new RegExp(`(${this.searchField.value})`, 'i');
 
+        /** Check if this is the custom option and add a file */
+        if ("custom" in options[i]) {
+            listItem.classList.add(this.customElementClass);
+            matchAgainst = `${escapeHtml(matchAgainst)}`;
+            i = escapeHtml(i);
+        }
+
         listItem.innerHTML = matchAgainst.replace(regex, "<strong>$1</strong>");
         listItem.setAttribute("value", i);
         listItem.setAttribute("label", options[i]);
 
-        /** Check if this is the custom option and add a file */
-        if ("custom" in options[i]) listItem.classList.add("input-array--list-custom");
+
         listItem.addEventListener("click", e => this.selectSearchResult(e.target));
         listItem.addEventListener("keydown", e => {
             if (e.key === "Enter") this.selectSearchResult(e.target);
@@ -479,6 +494,7 @@ class InputArray extends HTMLElement {
         let val = target.getAttribute('value');
         let label = val;
         if (val in this.options) label = this.options[val].label;
+
         tag.innerHTML = this.addTag(val, label);
 
         this.searchResults.innerHTML = "";
@@ -488,7 +504,7 @@ class InputArray extends HTMLElement {
     }
 
     addTag(val, label, readonly = false) {
-        let ro = (readonly === "true") ? ' readonly="readonly"' : "";
+        let ro = (readonly === "readonly") ? ' readonly="readonly"' : "";
         return `<input-array-item value="${val}"${ro}><span>${label}</span></input-array-item>`;
     }
 
@@ -510,6 +526,38 @@ class InputArray extends HTMLElement {
         const selectOnEnter = "input-array--will-select-on-enter";
         nodes.forEach(e => e.classList.remove(selectOnEnter));
         nodes[index].classList.add(selectOnEnter)
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        console.log(callable, callable in this)
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_allow_custom(newValue, oldValue) {
+        if (newValue === "true") this.allowCustomInputs = "true";
+        else this.allowCustomInputs = "false";
+    }
+
+    change_handler_multiselect(newValue) {
+        if (newValue === "true") this.multiSelect = "true";
+        else this.multiSelect = "false";
+    }
+
+    change_handler_readonly(newValue) {
+        if (newValue === "readonly") this.readonly = "readonly";
+        else this.readonly = "false";
+
+        this.initUI();
+    }
+
+    change_handler_value(newValue, oldValue) {
+        console.log("value")
+        const val = JSON.parse(newValue);
+        this.value = val;
+        this.initUI();
     }
 }
 
