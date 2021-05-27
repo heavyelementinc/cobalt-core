@@ -96,7 +96,7 @@ class Router {
             $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);
         }
 
-        $route = null;
+        // $route = null;
         /** Search through our current routes and look for a match */
         foreach ($this->routes[$this->method] as $preg_pattern => $directives) {
             $match = [];
@@ -105,6 +105,7 @@ class Router {
                 if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern);
 
                 $this->current_route = $preg_pattern;
+                if ($route[strlen($route) - 1] === "/") $GLOBALS['PATH'] = "../";
                 return [$preg_pattern, $directives];
             }
         }

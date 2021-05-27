@@ -80,8 +80,9 @@ class Render {
         $http = (\is_secure()) ? "https" : "http";
         $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
         $this->stock_vars = [
-            'app' => __APP_SETTINGS__,
-            'get' => $_GET,
+            'PATH' => $GLOBALS['PATH'],
+            'app'  => __APP_SETTINGS__,
+            'get'  => $_GET,
             'post' => $_POST,
             'session' => session(),
             'request' => [

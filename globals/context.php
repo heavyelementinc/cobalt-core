@@ -72,6 +72,11 @@ try {
 
     $context_processor->_stage_init(app("context_prefixes")[$route_context]);
     $context_processor->_stage_bootstrap['_stage_init'] = true;
+
+    /** @global string PATH contains either an empty string the URI ends in '/'
+     * or "../" if the URI ends without '/' also available in rendering engine 
+     * as {{PATH}} */
+    $GLOBALS['PATH'] = "";
     /** @global array $current_route_meta contains the discovered route's metadata */
     $current_route_meta = $router->discover_route();
 
