@@ -341,7 +341,7 @@ class InputArray extends HTMLElement {
         this.placeholder = this.getAttribute("placeholder") || "Search";
 
         /** Start initializing things */
-        // this.value = this.initValue() || [];
+        this.value = this.initValue() || [];
         this.options = this.initOptions();
 
         this.initUI();
@@ -382,9 +382,15 @@ class InputArray extends HTMLElement {
         this.searchField = this.querySelector("input[type='search']");
         // this.searchResults = this.querySelector("ul.search-results");
 
-        let tags = "";
+        this.initSelectedValues();
+    }
+
+    initSelectedValues() {
+        this.fieldSet.innerHTML = ""; // Clobber the existing selected values
+
+        let tags = ""; // Create our new elements
         let tempOpts = this.options;
-        for (const i of this.value) { // PROBLEM IS CALLING initUI after initial build
+        for (const i of this.value) {
             /** Check if we allow custom values */
             if (this.allowCustomInputs === "true" && i in tempOpts === false) tempOpts[i] = i;
             if (i in tempOpts === false) continue;
@@ -555,9 +561,10 @@ class InputArray extends HTMLElement {
 
     change_handler_value(newValue, oldValue) {
         try {
+            console.log(newValue);
             const val = JSON.parse(newValue);
             this.value = val;
-            this.initUI();
+            this.initSelectedValues();
         } catch (error) {
         }
     }

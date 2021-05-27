@@ -35,12 +35,33 @@
 
 <fieldset>
     <label>Array test</label>
-    <input-array id="mod" name="array" multiselect="true" allow-custom="true" value="">
-        <script type="application/json">[1000,"1001", true]</script>
-        <option value="1000">Int</option>
-        <option value="1001">String</option>
-        <option value="true">Boolean <code>true</code></option>
-        <option value="false">Boolean <code>false</code></option>
+    <input-array id="mod" name="array" multiselect="true" allow-custom="true" value='["javascript", "something"]'
+        placeholder="Favorite Programming Languages">
+        <option value="actionscript">ActionScript</option>
+        <option value="applescript">AppleScript</option>
+        <option value="asp">Asp</option>
+        <option value="basic">BASIC</option>
+        <option value="c">C</option>
+        <option value="c++">C++</option>
+        <option value="objective c">Objective C</option>
+        <option value="clojure">Clojure</option>
+        <option value="cobol">COBOL</option>
+        <option value="coldfusion">ColdFusion</option>
+        <option value="erlang">Erlang</option>
+        <option value="fortran">Fortran</option>
+        <option value="go">Go</option>
+        <option value="groovy">Groovy</option>
+        <option value="haskell">Haskell</option>
+        <option value="java">Java</option>
+        <option value="javascript">JavaScript</option>
+        <option value="lisp">Lisp</option>
+        <option value="perl">Perl</option>
+        <option value="php">PHP</option>
+        <option value="python">Python</option>
+        <option value="ruby">Ruby</option>
+        <option value="scala">Scala</option>
+        <option value="schem">Schem</option>
+        <option value="vala">Vala</option>
         <option value="something"><code style="background:black;color:white">something</code></option>
     </input-array>
 </fieldset>
@@ -58,7 +79,7 @@
     var array = document.querySelector("#mod")
 
     button.addEventListener("click", e => {
-        array.setAttribute('value', JSON.stringify(['true', '1001', 'false', 'something']))
+        array.setAttribute('value', JSON.stringify(['erlang', 'haskell', 'groovy', 'lisp']))
     });
     readonly.addEventListener("click", e => {
         let set = "readonly";
