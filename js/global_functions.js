@@ -190,3 +190,146 @@ function escapeHtml(text) {
 
     return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
+
+/**
+ * Supports dates and (will ultimately) support the exact same date formatting
+ * string as https://www.php.net/manual/en/datetime.format.php
+ * 
+ * @param date Either an int (Unix micro) or { $date: { $numberLong: "(long)" } }
+ * @param output The string which will be used to format the date
+ */
+class DateConverter {
+    constructor(date, output = "Y-m-d") {
+        this.tokens = {
+            // DAY
+            "d": "getDateWithLeadingZero",
+            "D": "getShortTextualDayOfWeek",
+            "j": "getDayOfMonthNoLeadingZero",
+            "l": "getFullTextualDayOfWeek",
+            "N": "getWeekdayNumber",
+            "s": "getDateOrdinalSuffix",
+
+            // Week
+
+            // Month
+            "m": "getMonth",
+
+            // Year
+            "Y": "getFullYear",
+
+            // Time
+
+            // Timezone
+
+            // Full Date/Time
+        }
+
+        this.months = this.generateMonthList();
+        this.weekdays = this.generateWeekdayList();
+        this.ordinals = this.generateOrdinalsList();
+
+        switch (typeof date) {
+            case "string":
+                if (/^\d+$/.test(date)) {
+                    date = Number(date);
+                    break;
+                } else {
+                    date = JSON.parse(date);
+                    try {
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            case "object":
+                date = Number(date.$date.$numberLong);
+                break;
+            default:
+                throw new Error("Cannot construct a valid date for item.");
+        }
+
+        this.date = new Date(date);
+        this.output = output;
+    }
+
+    /** The primary method */
+    format() {
+        let formatted = "";
+        let output = this.output;
+        for (let i = 0; i < output.length; i++) {
+            if (output[i] in this.tokens) {
+                formatted += this[this.tokens[output[i]]]();
+                continue;
+            }
+            formatted += output[i];
+        }
+        return formatted;
+    }
+
+    generateMonthList() {
+        return [{ name: "January", short: "Jan", num: "01", }, { name: "February", short: "Feb", num: "02", }, { name: "March", short: "Mar", num: "03" }, { name: "April", short: "Apr", num: "04" }, { name: "May", short: "May", num: "05" }, { name: "June", short: "Jun", num: "06" }, { name: "July", short: "Jul", num: "07" }, { name: "August", short: "Aug", num: "08" }, { name: "September", short: "Sep", num: "09" }, { name: "October", short: "Oct", num: "10" }, { name: "November", short: "Nov", num: "11" }, { name: "December", short: "Dec", num: "12" }];
+    }
+
+    /** @todo implement locale/first day of week */
+    generateWeekdayList() {
+        let dow = [{ name: "Sunday", short: "Sun", }, { name: "Monday", short: "Mon", }, { name: "Tuesday", short: "Tue", }, { name: "Wednesday", short: "Wed", }, { name: "Thursday", short: "Thu", }, { name: "Friday", short: "Fri", }, { name: "Saturday", short: "Sat", }];
+        for (const i of dow) {
+            dow[i] = {
+                ...dow[i],
+                num: i + 1
+            }
+        }
+        return dow;
+    }
+
+    generateOrdinalsList() {
+        return ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"];
+    }
+
+    getFullYear() {
+        return this.date.getFullYear();
+    }
+
+    getTwoDigitYear() {
+        const year = String(this.date.getFullYear());
+        return year.substr(2);
+    }
+
+    getMonth() {
+        const month = this.date.getMonth();
+        return this.months[month].num;
+    }
+
+    getDateWithLeadingZero() {
+        let date = String(this.date.getDate());
+        if (date.length < 2) date = `0${date}`;
+        return date;
+    }
+
+    getDayOfMonthNoLeadingZero() {
+        return this.date.getDate();
+    }
+
+    getShortTextualDayOfWeek() {
+        const date = this.date.getDay();
+        return this.weekdays[date].short;
+    }
+
+    getFullTextualDayOfWeek() {
+        const date = this.date.getDay();
+        return this.weekdays[date].name;
+    }
+
+    getWeekdayNumber() {
+        const date = this.date.getDay();
+        return this.weekdays[date].num;
+    }
+
+    getDateOrdinalSuffix() {
+        const date = String(this.date.getDate());
+        date = date[date.length - 1];
+        return this.ordinals[Number(date)];
+    }
+
+
+
+}

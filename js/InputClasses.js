@@ -20,6 +20,14 @@ class InputClass_default {
     }
 }
 
+class InputClass_date extends InputClass_default {
+    value(set = null) {
+        if (set === null) return this.element.value;
+        if (typeof set === "string") return this.element.value = set;
+        if ("$date" in set && "$numberLong" in set.$date) return this.element.value = mongoDate(set.$date.$numberLong)
+    }
+}
+
 class InputClass_checkbox extends InputClass_default {
     value(set = null) {
         if (set === null) return this.element.checked

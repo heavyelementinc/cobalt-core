@@ -77,6 +77,7 @@ class WebHandler implements RequestHandler {
 
     public function _stage_route_discovered($route, $directives) {
         $this->renderer->stock_vars['route'] = $directives;
+        $this->renderer->stock_vars['PATH'] = $GLOBALS['PATH'];
         return true;
     }
 

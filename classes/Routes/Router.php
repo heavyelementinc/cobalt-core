@@ -105,7 +105,9 @@ class Router {
                 if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern);
 
                 $this->current_route = $preg_pattern;
-                if ($route[strlen($route) - 1] === "/") $GLOBALS['PATH'] = "../";
+                if ($route[strlen($route) - 1] === "/") {
+                    $GLOBALS['PATH'] = "../";
+                }
                 return [$preg_pattern, $directives];
             }
         }

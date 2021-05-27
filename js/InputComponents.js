@@ -341,7 +341,7 @@ class InputArray extends HTMLElement {
         this.placeholder = this.getAttribute("placeholder") || "Search";
 
         /** Start initializing things */
-        this.value = this.initValue() || [];
+        // this.value = this.initValue() || [];
         this.options = this.initOptions();
 
         this.initUI();
@@ -351,7 +351,7 @@ class InputArray extends HTMLElement {
 
     /** Init the value of the current component */
     initValue() {
-        let val = this.querySelector("script").innerText || this.getAttribute("value");
+        let val = this.getAttribute("value");
         if (typeof val === "string" && val) return JSON.parse(val);
         return null;
     }
@@ -375,7 +375,7 @@ class InputArray extends HTMLElement {
     initUI() {
         const ro = this.searchElements();
         this.innerHTML = `<fieldset></fieldset><optgroup>${this.optHTML}</optgroup>${ro}`;
-        delete this.optHTML; // Cleanup. We don't need this anymore.
+        // delete this.optHTML; // Cleanup. We don't need this anymore.
 
         /** Establish our UI elements */
         this.fieldSet = this.querySelector("fieldset");
@@ -384,7 +384,7 @@ class InputArray extends HTMLElement {
 
         let tags = "";
         let tempOpts = this.options;
-        for (const i of this.value) {
+        for (const i of this.value) { // PROBLEM IS CALLING initUI after initial build
             /** Check if we allow custom values */
             if (this.allowCustomInputs === "true" && i in tempOpts === false) tempOpts[i] = i;
             if (i in tempOpts === false) continue;
@@ -554,10 +554,12 @@ class InputArray extends HTMLElement {
     }
 
     change_handler_value(newValue, oldValue) {
-        console.log("value")
-        const val = JSON.parse(newValue);
-        this.value = val;
-        this.initUI();
+        try {
+            const val = JSON.parse(newValue);
+            this.value = val;
+            this.initUI();
+        } catch (error) {
+        }
     }
 }
 
@@ -586,3 +588,60 @@ class InputArrayItem extends HTMLElement {
 }
 
 customElements.define("input-array-item", InputArrayItem)
+
+
+class DisplayDate extends HTMLElement {
+    constructor() {
+        super();
+        this.date = this.getValue();
+        this.format = this.getAttribute("format") || "m/d/Y";
+        this.relative = this.getAttribute("relative") || "false";
+
+        if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
+
+
+    }
+
+    getValue() {
+        return this.getAttribute("value") || this.innerText || null
+    }
+
+
+    execute() {
+        if (this.relative === "true") return this.startRelativeTime();
+        let date = new DateConverter(this.date, this.format);
+        this.innerText = date.format();
+    }
+
+    startRelativeTime() {
+        this.relative = "false";
+    }
+
+    static get observedAttributes() {
+        return ['value', 'format', 'relative',];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_value(newValue) {
+        this.date = newValue;
+        this.execute();
+    }
+
+    change_handler_format(newValue) {
+        this.format = newValue;
+        this.execute();
+    }
+
+    change_handler_relative(newValue) {
+        this.relative = newValue;
+        this.execute();
+    }
+}
+
+customElements.define("display-date", DisplayDate)

@@ -71,8 +71,18 @@ class Debug extends \Controllers\Pages {
 
     function flex_table() {
         add_vars([
-            'title' => 'Flex Table Test'
+            'title' => 'Flex Table Test',
         ]);
         add_template("/debug/flex-table.html");
+    }
+
+    function relative_path_test() {
+        add_vars(
+            [
+                'title' => 'Relative Path',
+                'anchor' => "<a href='$GLOBALS[PATH]test'>Test<a>"
+            ]
+        );
+        add_template("/debug/relative_path_test.html");
     }
 }

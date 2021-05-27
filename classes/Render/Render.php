@@ -30,7 +30,7 @@
  * Of note here is that if you reference a variable like so:
  * 
  *   >  <h1>{{mustache}}<h1>
- * 
+ *
  * It will automatically sanitize HTML characters by escaping them. In order to
  * include the raw value of the references variable, you must prepend the 
  * variable name with an ! exclamation point:
@@ -41,6 +41,15 @@
  * HTML as there will be no way for the client to distinguish what's authentic
  * HTML and what is user-submitted data. User-submitted data parsed as HTML 
  * enables XSS attacks. BE CAREFUL.
+ * 
+ * Additionallty, you may prepend your variable with the @ symbol to encode your
+ * value as JSON and store it safely within an HTML attribute.
+ * 
+ *   > <a href="{{@foo}}/bar">Baz</a>
+ * 
+ * Finally, you can pretty-print JSON using the "$" symbol.
+ * 
+ *   > <pre>{{$foo}}</pre>
  *
  * ================
  *  FUNCTION CALLS 
@@ -68,8 +77,8 @@ class Render {
     public $body = "";
     public $vars = [];
 
-    public $variable = "/[%\{]{2}(\!?[\w.\-\[\]$]+)[\}%]{2}/i"; // Define the regex we're using to search for variables
-    public $variable_alt = "/\{\{(\!?[\w.\-\[\]$]+)\}\}/i"; // Stict-mode {{mustache}}-style parsing
+    public $variable = "/[%\{]{2}([!@$]?[\w.\-\[\]$]+)[\}%]{2}/i"; // Define the regex we're using to search for variables
+    public $variable_alt = "/\{\{([!@$]?[\w.\-\[\]$]+)\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
     protected $enable_strict_mustache_syntax = false; // Use use_alt_syntax(true) to swap
 
@@ -80,7 +89,6 @@ class Render {
         $http = (\is_secure()) ? "https" : "http";
         $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
         $this->stock_vars = [
-            'PATH' => $GLOBALS['PATH'],
             'app'  => __APP_SETTINGS__,
             'get'  => $_GET,
             'post' => $_POST,
@@ -191,14 +199,41 @@ class Render {
             $search[$i] = $replacement;
             $name = $replacements[1][$i];
             $is_inline_html = false;
+            $is_inline_json = false;
+            $is_pretty_print = 0;
+            $operator = $name[0];
+            $options = ENT_QUOTES;
+
             /** Check if this variable is supposed to be inline HTML (as denoted by the "!")
              * if it is, we need to remove the exclamation point from the name */
-            if ($name[0] === "!") { // {{!reference}}
-                $name = substr($name, 1); // Remove the !
-                $is_inline_html = true; // Set our inline flag
+
+            switch ($operator) {
+                case "!":
+                    $name = substr($name, 1); // Remove the !
+                    $is_inline_html = true; // Set our inline flag
+                    break;
+                case "$":
+                    $is_pretty_print = JSON_PRETTY_PRINT;
+                case "@":
+                    $name = substr($name, 1); // Remove the @
+                    $is_inline_json = true;
+                    break;
             }
+            // if ($operator === "!") { // {{!reference}}
+            //     $name = substr($name, 1); // Remove the !
+            //     $is_inline_html = true; // Set our inline flag
+            // } else if ($operator === "@") {
+            //     $name = substr($name, 1); // Remove the @
+            //     $is_inline_json = true;
+            // } else if ($operator === "#") {
+            //     $name = substr($name, 1); // Remove the $
+            //     $is_inline_json = true;
+            //     $is_pretty_print = JSON_PRETTY_PRINT;
+            // }
+
             $replace[$i] = $this->lookup_value($name);
-            if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i]); // < = &lt;
+            if ($is_inline_json) $replace[$i] = json_encode($replace[$i], $is_pretty_print); // Convert to JSON
+            if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i], $options); // < = &lt;
         }
         return str_replace($search, $replace, $subject);
     }

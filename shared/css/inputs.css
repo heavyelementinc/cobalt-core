@@ -243,6 +243,11 @@ flex-table{
   border: var(--project-color-table-border);
 }
 
+flex-table[scroll-x]{
+  display:table;
+  overflow-x: scroll;
+}
+
   flex-row{
     display: flex;
     box-sizing: border-box;
@@ -251,22 +256,45 @@ flex-table{
     flex-wrap: wrap;
   }
 
+  [scroll-x] flex-row{
+    display: table-row;
+    flex-wrap: nowrap;
+  }
+
   flex-row:nth-of-type(even){
     background: var(--project-color-table-bg-even);
   }
 
+  flex-fixed + flex-fixed,
+  flex-fixed + flex-cell,
+  flex-fixed + flex-header,
   flex-cell + flex-cell,
   flex-header + flex-header{
     border-left: var(--project-color-table-border);
   }
 
-  flex-cell,flex-header{
+  flex-cell,flex-header,flex-fixed{
     display: flex;
     flex-grow: 1;
     padding: .3rem;
     width: 80px;
   }
+  
+  [scroll-x] flex-cell, [scroll-x] flex-header, [scroll-x] flex-fixed{
+    display: table-cell;
+    width: auto;
+  }
 
-  flex-header{
+  flex-header, flex-row:first-of-type flex-fixed{
     font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    align-items:center;
+    border-bottom: var(--project-color-table-border);
+  }
+
+  /** flex-fixed items should only be the left-most column OR the first row*/
+  flex-fixed{
+    position:sticky;
+    /* left: 0; */
   }
