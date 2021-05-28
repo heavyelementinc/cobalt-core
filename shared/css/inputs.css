@@ -9,6 +9,20 @@ input, textarea {
 
 }
 
+  input[invalid],
+  textarea[invalid],
+  input-array[invalid] {
+    border: 1px solid var(--project-color-input-invalid-border);
+    background: var(--project-color-input-invalid-bg);
+  }
+
+  pre.form-request--field-issue-message{
+    background: var(--project-color-input-invalid-border);
+    color: var(--project-color-input-invalid-label-text);
+    font-size: .9rem;
+    padding: .2rem;
+  }
+
   input:focus{
     border: 1px solid var(--project-color-input-border-focus);
   }

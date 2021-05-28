@@ -104,6 +104,7 @@ class FormRequest {
     }
 
     errorHandler(error, result = null, post = null) {
+        if (error.result.code === 422) this.handleFieldIssues(error.result);
         let field = this.errorField;
         if (!field) field = this.form.querySelector(".error")
         if (field) field.innerText = error.result.error
@@ -111,13 +112,23 @@ class FormRequest {
     }
 
     reset_errors() {
+        console.log("reset_errors")
         if (this.errorField) this.errorField.innerText = "";
+        for (const i in this.el_list) {
+            this.el_list[i].dismiss_error();
+        }
     }
 
     update_fields(data) {
 
     }
 
+    handleFieldIssues(data) {
+        for (const i in data.data) {
+            if (i in this.el_list === false) continue;
+            this.el_list[i].set_error(data.data[i]);
+        }
+    }
 }
 
 class LoginFormRequest extends FormRequest {

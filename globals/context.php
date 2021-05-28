@@ -94,6 +94,10 @@ try {
     ob_clean(); // Clear the output buffer
     $context_processor->_public_exception_handler($e);
     exit;
+} catch (CRUD\Exceptions\ValidationFailed $e) {
+    ob_clean();
+    $context_processor->_public_exception_handler($e);
+    exit;
 } catch (Exception $e) {
     header("HTTP/1.0 500 Unknown Error");
     if (app("debug")) die($e->getMessage());

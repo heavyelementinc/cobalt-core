@@ -4,8 +4,10 @@ class InputClass_default {
         this.type = element.type || "text";
         this.name = element.name || "";
         this.form = form || this.get_form();
+        this.error = false;
         if (typeof element === "string") this.element = document.querySelector(element);
         if (this.element === null) throw new Error("Can't find element " + element);
+        this.callbacks();
     }
 
     value(set = null) {
@@ -17,6 +19,34 @@ class InputClass_default {
     get_form() {
         if (this.form === null) this.form = this.element.closest("form-request");
         if (this.form === null) throw new Error("Can't find reference <form-request>");
+    }
+
+    callbacks() {
+        this.element.addEventListener('focusout', e => {
+            this.dismiss_error();
+        })
+    }
+
+    set_error(message) {
+        let el = document.createElement("pre");
+        el.classList.add("form-request--field-issue-message");
+        el.innerText = message;
+        el.setAttribute('for', this.name);
+        el.addEventListener("click", e => {
+            el.parentNode.removeChild(el);
+        })
+        this.error = el;
+
+        this.element.parentNode.insertBefore(el, this.element);
+        this.element.setAttribute("invalid", "invalid")
+    }
+
+    dismiss_error() {
+        this.element.invalid = false;
+        this.element.removeAttribute("invalid");
+        if (this.error === false) return;
+        this.error.parentNode.removeChild(this.error);
+        this.error = false;
     }
 }
 

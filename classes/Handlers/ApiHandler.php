@@ -66,7 +66,7 @@ class ApiHandler implements RequestHandler {
 
     public function _public_exception_handler($e) {
         $this->router_result = [
-            'code' => $this->status_code,
+            'code' => $e->status_code, // Why is this $this->status_code
             'error' => $e->getMessage(),
             'data' => $e->data
         ];

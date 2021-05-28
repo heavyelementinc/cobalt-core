@@ -22,6 +22,7 @@ if (app("enable_debug_routes")) {
     Route::get("/debug/calendar/{date}?", "Debug@debug_calendar");
     Route::get("/debug/flex-table", "Debug@flex_table");
     Route::get("/debug/relative-paths", "Debug@flex_table");
+    Route::get("/debug/validator", "Debug@form_test");
 }
 
 /** If authentications are enabled, these routes should be added to the table */

@@ -85,4 +85,17 @@ class Debug extends \Controllers\Pages {
         );
         add_template("/debug/relative_path_test.html");
     }
+
+    function form_test() {
+        add_vars([
+            'title' => 'Form Validation Test',
+        ]);
+        add_template(("/debug/validator.html"));
+    }
+
+    function validate_test_form() {
+        $validator = new \CRUD\ExampleValidator();
+        $result = $validator->__validate($_POST);
+        return $result;
+    }
 }

@@ -39,11 +39,11 @@ class FormRequestElement extends HTMLElement {
     async send() {
         let allow_final_stage = false;
         await this.advance();
+        this.request.reset_errors();
         try {
             await this.request.send(this.request.build_query());
             allow_final_stage = true;
         } catch (error) {
-            console.log(error);
             await this.regress();
         }
         this.mode = this.getAttribute("display-mode") ?? "edit";
