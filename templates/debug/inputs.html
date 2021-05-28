@@ -1,13 +1,29 @@
 <fieldset>
+    <label for="">
+        Date
+        <date-span value="1622152662471"></date-span> &mdash;
+        <date-span value="1621807671000" format="l, F jS Y"></date-span>
+    </label>
+    <label for="">
+        Time
+        <date-span value="1622152662471" format="h:i a"></date-span> &mdash;
+        <date-span value="1622152662471" format="H:i"></date-span> &mdash;
+        <date-span value="1622152662471" format="g:i:s A"></date-span>
+    </label>
+    <label for="">
+        From JSON
+        <date-span value="{&quot;$date&quot;:{&quot;$numberLong&quot;:&quot;1622152662471&quot;}}"></date-span>
+    </label>
+    <label>
+        Relative
+        <date-span value="@time();000" relative="true"></date-span>
+    </label>
+</fieldset>
+<fieldset>
     <label>Standard Text Input</label>
     <input type="text" placeholder="Placeholder"> <input type="number" placeholder="1">
     <label>Disabled</label>
     <input type="text" placeholder="Disabled" disabled="disabled">
-</fieldset>
-
-<fieldset>
-    <label>Autocomplete</label>
-    <input-autocomplete></input-autocomplete>
 </fieldset>
 
 <fieldset>
@@ -35,7 +51,7 @@
 
 <fieldset>
     <label>Array test</label>
-    <input-array id="mod" name="array" multiselect="true" allow-custom="true" value='["javascript", "something"]'
+    <input-array id="mod" name="array" multiselect="true" allow-custom="true" value='["php","javascript"]'
         placeholder="Favorite Programming Languages">
         <option value="actionscript">ActionScript</option>
         <option value="applescript">AppleScript</option>
@@ -47,6 +63,7 @@
         <option value="clojure">Clojure</option>
         <option value="cobol">COBOL</option>
         <option value="coldfusion">ColdFusion</option>
+        <option value="dart">Dart</option>
         <option value="erlang">Erlang</option>
         <option value="fortran">Fortran</option>
         <option value="go">Go</option>
@@ -54,13 +71,17 @@
         <option value="haskell">Haskell</option>
         <option value="java">Java</option>
         <option value="javascript">JavaScript</option>
+        <option value="kotlin">Kotlin</option>
         <option value="lisp">Lisp</option>
+        <option value="matlab">MATLAB</option>
         <option value="perl">Perl</option>
         <option value="php">PHP</option>
         <option value="python">Python</option>
         <option value="ruby">Ruby</option>
+        <option value="rust">Rust</option>
         <option value="scala">Scala</option>
         <option value="schem">Schem</option>
+        <option value="swift">Swift</option>
         <option value="vala">Vala</option>
         <option value="something"><code style="background:black;color:white">something</code></option>
     </input-array>
@@ -97,7 +118,3 @@
         array.setAttribute('multiselect', set);
     });
 </script>
-
-<display-date value="1622865600000"></display-date>
-
-<display-date value="{&quot;$date&quot;:{&quot;$numberLong&quot;:&quot;1622865600000&quot;}}"></display-date>

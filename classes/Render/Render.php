@@ -76,9 +76,9 @@ namespace Render;
 class Render {
     public $body = "";
     public $vars = [];
-
-    public $variable = "/[%\{]{2}([!@$]?[\w.\-\[\]$]+)[\}%]{2}/i"; // Define the regex we're using to search for variables
-    public $variable_alt = "/\{\{([!@$]?[\w.\-\[\]$]+)\}\}/i"; // Stict-mode {{mustache}}-style parsing
+    const VAR_STRING = "([!@$]?[\w.\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
+    public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
     protected $enable_strict_mustache_syntax = false; // Use use_alt_syntax(true) to swap
 

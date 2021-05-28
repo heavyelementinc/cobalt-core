@@ -309,11 +309,12 @@ if (app("loading_spinner") !== false) customElements.define("loading-spinner", L
 
 /**
  * `<input-array>` valid attibutes include:
- *  * name - the name of the array
- *  * readonly - [false] disables additional and removal of items from list
- *  * multiselect - [false] allows a single <option> to be added multiple times
- *  * allow-custom - [false] allow custom input
- *  * pattern - [""] the pattern for custom elements to be matched against
+ *   * name - the name of the array
+ *   * value - a JSON-encoded array (can be &quot; escaped)
+ *   * readonly - [false] 'true' disables addition and removal of items from list
+ *   * multiselect - [false] 'true' allows a single <option> to be added multiple times
+ *   * allow-custom - [false] 'true' allow the user to add custom entries
+ *   * pattern - [""] the pattern for custom elements to be matched against
  */
 class InputArray extends HTMLElement {
 
@@ -339,6 +340,7 @@ class InputArray extends HTMLElement {
         this.allowCustomInputs = this.getAttribute("allow-custom") || "false";
         this.pattern = this.getAttribute("pattern") || "";
         this.placeholder = this.getAttribute("placeholder") || "Search";
+        this.limit = 0;
 
         /** Start initializing things */
         this.value = this.initValue() || [];
@@ -568,6 +570,10 @@ class InputArray extends HTMLElement {
         } catch (error) {
         }
     }
+
+    change_handler_limit(newValue) {
+        this.limit = newValue;
+    }
 }
 
 customElements.define("input-array", InputArray)
@@ -605,8 +611,6 @@ class DisplayDate extends HTMLElement {
         this.relative = this.getAttribute("relative") || "false";
 
         if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
-
-
     }
 
     getValue() {
@@ -621,7 +625,24 @@ class DisplayDate extends HTMLElement {
     }
 
     startRelativeTime() {
-        this.relative = "false";
+        // clearTimeout(this.timeout);
+        // this.relative = "false";
+        if (/[\d]+/.test(this.date) === false) this.date = JSON.parse(this.date);
+        else this.date = Number(this.date);
+        let result = relativeTime(new Date(this.date), null, "object");
+        if (result === false) {
+            this.relative = "false";
+            this.execute();
+            return;
+        }
+        this.innerText = result.result;
+        let date = new DateConverter(this.date, "l, F jS Y g:i A");
+        this.setAttribute("title", date.format());
+
+        // if (!["second", "moment"].includes(result.unit)) return;
+        // this.timeout = setTimeout(() => {
+        //     this.startRelativeTime();
+        // }, 60 * 60);
     }
 
     static get observedAttributes() {
@@ -651,4 +672,4 @@ class DisplayDate extends HTMLElement {
     }
 }
 
-customElements.define("display-date", DisplayDate)
+customElements.define("date-span", DisplayDate)

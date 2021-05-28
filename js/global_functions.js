@@ -207,17 +207,31 @@ class DateConverter {
             "j": "getDayOfMonthNoLeadingZero",
             "l": "getFullTextualDayOfWeek",
             "N": "getWeekdayNumber",
-            "s": "getDateOrdinalSuffix",
+            "S": "getDateOrdinalSuffix",
 
             // Week
 
+
             // Month
-            "m": "getMonth",
+            "F": "getTextualMonth",
+            "m": "getMonthWithZeros",
+            "M": "getShortTextualMonth",
+            "n": "getMonthNoZeros",
 
             // Year
             "Y": "getFullYear",
+            "y": "getTwoDigitYear",
 
             // Time
+            "a": "getMeridiem",
+            "A": "getMeridiemUppercase",
+            "g": "get12HourNoZero",
+            "G": "get24HourNoZero",
+            "h": "get12HourWithZero",
+            "H": "get24HourWithZero",
+
+            "i": "getMinuteWithZero",
+            "s": "getSecondWithZero"
 
             // Timezone
 
@@ -234,14 +248,18 @@ class DateConverter {
                     date = Number(date);
                     break;
                 } else {
-                    date = JSON.parse(date);
+                    date = Number(JSON.parse(date).$date.$numberLong);
                     try {
                     } catch (error) {
                         console.log(error);
                     }
                 }
+                break;
             case "object":
                 date = Number(date.$date.$numberLong);
+                break;
+            case "number":
+                date = date;
                 break;
             default:
                 throw new Error("Cannot construct a valid date for item.");
@@ -285,6 +303,40 @@ class DateConverter {
         return ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"];
     }
 
+    getMinuteWithZero() {
+        return this.zeroPrefix(this.date.getMinutes());
+    }
+
+    getSecondWithZero() {
+        return this.zeroPrefix(this.date.getSeconds());
+    }
+
+    get24HourNoZero() {
+        return this.date.getHours();
+    }
+
+    get12HourNoZero() {
+        const hour = this.get24HourNoZero();
+        return (hour > 12) ? hour - 12 : hour;
+    }
+
+    get24HourWithZero() {
+        return this.zeroPrefix(this.get24HourNoZero())
+    }
+
+    get12HourWithZero() {
+        return this.zeroPrefix(this.get12HourNoZero())
+    }
+
+    getMeridiem() {
+        const time = this.date.getHours();
+        return (time > 11) ? "am" : "pm";
+    }
+
+    getMeridiemUppercase() {
+        return this.getMeridiem().toUpperCase();
+    }
+
     getFullYear() {
         return this.date.getFullYear();
     }
@@ -294,15 +346,29 @@ class DateConverter {
         return year.substr(2);
     }
 
-    getMonth() {
+    getMonthWithZeros() {
         const month = this.date.getMonth();
         return this.months[month].num;
     }
 
+    getMonthNoZeros() {
+        return this.date.getMonth() + 1;
+    }
+
+    getTextualMonth() {
+        const month = this.date.getMonth();
+        return this.months[month].name;
+    }
+
+    getShortTextualMonth() {
+        const month = this.date.getMonth();
+        return this.months[month].short;
+    }
+
     getDateWithLeadingZero() {
         let date = String(this.date.getDate());
-        if (date.length < 2) date = `0${date}`;
-        return date;
+        // if (date.length < 2) date = `0${date}`;
+        return this.zeroPrefix(date);
     }
 
     getDayOfMonthNoLeadingZero() {
@@ -325,11 +391,149 @@ class DateConverter {
     }
 
     getDateOrdinalSuffix() {
-        const date = String(this.date.getDate());
+        let date = String(this.date.getDate());
         date = date[date.length - 1];
         return this.ordinals[Number(date)];
     }
 
+    zeroPrefix(number, threshold = 10) {
+        if (number < threshold) return `0${number}`;
+        return number;
+    }
+
+}
 
 
+// function relativeTime({ date, current = null, limit = null, mode = "string" }) {
+//     if (current === null) current = new Date();
+//     const diff = current - date;
+
+//     const units = {
+//         second: { value: 1000, unit: "second", },
+//         min: { value: this.second * 60, unit: "minute", },
+//         hour: { value: this.min * 60, unit: "hour", },
+//         day: { value: this.hour * 24, unit: "day", },
+//         month: { value: this.day * 30, unit: "month", },
+//         year: { value: this.day * 365, unit: "year", }
+//     }
+//     const unit_list = Object.keys(units);
+//     let limit_index = unit_list.length - 1;
+//     if (limit !== null && limit in units) limit_index = unit_list.indexOf(limit);
+
+//     let qualifier = "";
+//     let quantity = false;
+//     let unit = "second";
+
+//     for (let i = 0; i < unit_list.length; i++) {
+//         const current_key = unit_list[i];
+//         const next_key = unit_list[i + 1];
+//         if (i === limit_index + 1) break;
+//         if (diff < units[current_key].value === false) continue;
+//         quantity = Math.round(diff / units[current_key].value);
+//         unit = units[next_key].unit;
+//         qualifier = units[next_key].qualifier;
+//     }
+
+//     if (quantity === false) return false;
+//     if (mode === "object") return { qualifier, quantity, unit, plurality: plurality(quantity) }
+//     return `${qualifier} ${quantity} ${unit}${plurality(quantity)} ago`;
+// }
+
+function relativeTime(prev, current = null, mode = "string", limit = "day") {
+    if (current === null) current = new Date();
+
+    const min = 60 * 1000;
+    const hour = min * 60;
+    const day = hour * 24;
+    const month = day * 30;
+    const year = day * 365;
+
+    let diff = current - prev;
+
+    let plural = "s";
+    let qualifier = "";
+    let quantity = 0;
+    let unit = "second";
+
+    switch (true) {
+        case (diff < min):
+            // return `${} second ago'`;
+            quantity = Math.round(diff / 1000);
+            if (quantity < 30) {
+                quantity = "";
+                unit = "moment";
+            }
+            break;
+        case (diff < hour):
+            // return `${Math.round(diff / min)} minute ago`;
+            quantity = Math.round(diff / min);
+            unit = "minute";
+            break;
+        case (diff < day):
+            // return `${} hour ago`;
+            quantity = Math.round(diff / hour);
+            unit = "hour";
+            break;
+        case (diff < month):
+            // return `${} day ago`;
+            qualifier = "About";
+            quantity = Math.round(diff / day);
+            unit = "day";
+            break;
+        case (diff < year):
+            // return `About ${} months ago`;
+            qualifier = "About";
+            quantity = Math.round(diff / month);
+            unit = "month";
+            break;
+        default:
+            quantity = false;
+            break;
+    }
+    if (quantity === false) return false;
+    let result = `${qualifier} ${quantity} ${unit}${plurality(quantity)} ago`;
+    if (mode === "object") return { qualifier, quantity, plurality: plurality(quantity), unit, result, units: { second: 1000, min, hour, day, } };
+    return result;
+}
+
+
+// function relativeTime(prev, current = null) {
+//     if (current === null) current = new Date();
+
+//     const units = {
+//         min: { value: 60 * 1000 },
+//         hour: { value: min * 60 },
+//         day: { value: hour * 24 },
+//         month: { value: day * 30 },
+//         year: { value: day * 365 }
+//     }
+
+//     let diff = current - prev;
+
+//     let plural = "s";
+//     let quantity = 0;
+//     let unit = "second";
+
+//     switch (true) {
+//         case (diff < min):
+//             // return `${Math.round(diff / 1000)} second ago'`;
+//             break;
+//         case (diff < hour):
+//             // return `${Math.round(diff / min)} minute ago`;
+//             quantity = Math.round(diff / min);
+//             break;
+//         case (diff < day):
+//             return `${Math.round(diff / hour)} hour ago`;
+//         case (diff < month):
+//             return `${Math.round(diff / day)} day ago`;
+//         case (diff < year):
+//             return `About ${Math.round(diff / month)} months ago`;
+//     }
+
+//     return false;
+// }
+
+function plurality(number, returnValue = "s") {
+    if (number == 1) return "";
+    return returnValue;
 }
