@@ -139,12 +139,12 @@ abstract class Validator {
         if (gettype($this->__schema) !== "array") throw new \Exception("Invalid");
 
         // Create a subset of allowed fields from $this->__to_validate
-        $mutant = [];
+        $subset = [];
         foreach ($this->__schema as $key => $validate) {
-            if (key_exists($key, $this->__to_validate)) $mutant[$key] = $this->__to_validate[$key];
+            if (key_exists($key, $this->__to_validate)) $subset[$key] = $this->__to_validate[$key];
         }
 
-        return $mutant;
+        return $subset;
     }
 
     function execute_method($callable, $value, $fieldname, $index) {

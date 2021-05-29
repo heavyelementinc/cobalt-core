@@ -37,15 +37,6 @@ namespace CRUD; // Make sure you use the appropriate namespace for your validato
 // containing whatever failed messages as the data argument.
 use \CRUD\Exceptions\ValidationIssue;
 
-$example_data_needing_validation = [ // This is for illustrative purposes only.
-    'name'   => 'Todd Simons ', // Note the trailing space
-    'email'  => 'todd simons@example.com', // This is intentinally malformed
-    'phone'  => '(818) 555-8558', // Formatted US phone number
-    'region' => 'us-east',
-    'order_count' => '8', // An integer as a string
-    'extra' => 'something else'
-];
-
 class ExampleValidator extends Validator {
 
 
@@ -58,7 +49,7 @@ class ExampleValidator extends Validator {
             'region' => [],
             'order_count' => [
                 "methods" => [
-                    'count'
+                    'example_of_using_method_list'
                 ]
             ],
         ];
@@ -72,7 +63,8 @@ class ExampleValidator extends Validator {
      * @return array Any data you want to have specified. Is overridden by 
      *               validated results
      */
-    function __on_validation_complete() {
+    function __on_validation_complete($mutant) {
+        return [];
     }
 
     /** Every method will be passed the same args in the same order.
@@ -109,6 +101,7 @@ class ExampleValidator extends Validator {
     }
 
     function region($value) {
+        if (empty($value)) throw new ValidationIssue("Cannot be empty");
         $valid_regions = ['us-east', 'uk-south', 'us-west'];
         foreach ($value as $val) {
             if (!in_array($val, $valid_regions)) throw new ValidationIssue("Invalid region");
@@ -116,7 +109,7 @@ class ExampleValidator extends Validator {
         return $value;
     }
 
-    function count($value) {
+    function example_of_using_method_list($value) {
         if (!ctype_digit($value)) throw new ValidationIssue("Malformed orders");
         $value = (int)$value;
         return $value;

@@ -34,6 +34,7 @@ class InputClass_default {
         el.setAttribute('for', this.name);
         el.addEventListener("click", e => {
             el.parentNode.removeChild(el);
+            this.error = false;
         })
         this.error = el;
 
@@ -44,7 +45,7 @@ class InputClass_default {
     dismiss_error() {
         this.element.invalid = false;
         this.element.removeAttribute("invalid");
-        if (this.error === false) return;
+        if (!this.error) return;
         this.error.parentNode.removeChild(this.error);
         this.error = false;
     }

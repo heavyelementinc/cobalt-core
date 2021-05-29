@@ -203,6 +203,7 @@ class Render {
             $is_pretty_print = 0;
             $operator = $name[0];
             $options = ENT_QUOTES;
+            $process_vars = true;
 
             /** Check if this variable is supposed to be inline HTML (as denoted by the "!")
              * if it is, we need to remove the exclamation point from the name */
@@ -211,27 +212,18 @@ class Render {
                 case "!":
                     $name = substr($name, 1); // Remove the !
                     $is_inline_html = true; // Set our inline flag
+                    $process_vars = false;
                     break;
                 case "$":
                     $is_pretty_print = JSON_PRETTY_PRINT;
                 case "@":
                     $name = substr($name, 1); // Remove the @
                     $is_inline_json = true;
+                    $process_vars = false;
                     break;
             }
-            // if ($operator === "!") { // {{!reference}}
-            //     $name = substr($name, 1); // Remove the !
-            //     $is_inline_html = true; // Set our inline flag
-            // } else if ($operator === "@") {
-            //     $name = substr($name, 1); // Remove the @
-            //     $is_inline_json = true;
-            // } else if ($operator === "#") {
-            //     $name = substr($name, 1); // Remove the $
-            //     $is_inline_json = true;
-            //     $is_pretty_print = JSON_PRETTY_PRINT;
-            // }
 
-            $replace[$i] = $this->lookup_value($name);
+            $replace[$i] = $this->lookup_value($name, $process_vars);
             if ($is_inline_json) $replace[$i] = json_encode($replace[$i], $is_pretty_print); // Convert to JSON
             if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i], $options); // < = &lt;
         }
