@@ -539,3 +539,31 @@ function mongo_date($date, $fmt = "Y/m/d") {
     $date = (string)$date / 1000;
     return date($fmt, $date);
 }
+
+function phone_number_format($number, $format = "(ddd) ddd-dddd") {
+    $num_index = 0;
+    $num_max = strlen($number);
+    $formatted = "";
+    for ($i = 0; $i < strlen($format); $i++) {
+        if ($format[$i] === "d") {
+            if ($num_index >= $num_max) {
+                $formatted .= "n";
+                continue;
+            }
+            $format .= $number[$num_index];
+            $num_index++;
+            continue;
+        }
+        $formatted .= $format[$i];
+    }
+    return $formatted;
+}
+
+function phone_number_normalize($number) {
+    // List of characters we don't want to store in our db
+    $junk = ["(", ")", " ", "-", "."];
+
+    // Strip the junk characters out of the string
+    $value = str_replace($junk, "", $number);
+    return $value;
+}

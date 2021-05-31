@@ -120,8 +120,13 @@ input-array {
   border-radius: 4px;
   font-size: 1.1rem;
   overflow: hidden;
-  /* position: relative; */
+  box-sizing: border-box;
 }
+
+  fieldset > input-array{
+    width: 100%;
+  }
+
   input-array fieldset{
     display: flex;
     flex-wrap: wrap;
@@ -132,7 +137,7 @@ input-array {
     margin: 0;
     padding:.4rem;
     gap: .4rem;
-    max-width: 265px;
+    max-width: 100%;
   }
 
   input-array fieldset:empty{

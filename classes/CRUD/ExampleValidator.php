@@ -86,11 +86,7 @@ class ExampleValidator extends Validator {
     }
 
     function phone($value) {
-        // List of characters we don't want to store in our db
-        $junk = ["(", ")", " ", "-", "."];
-
-        // Strip the junk characters out of the string
-        $value = str_replace($junk, "", $value);
+        $value = phone_number_normalize($value);
 
         // Check if the phone number is only digits and if not throw an exception.
         if (!ctype_digit($value)) throw new ValidationIssue("Malformed phone number");
