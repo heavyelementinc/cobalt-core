@@ -25,6 +25,10 @@ class ApiFetch {
         if (result.ok === false) throw new FetchError("HTTP Error", result, await result.json());
         return await result.json();
     }
+
+    async get() {
+        return await this.send("", "GET", {});
+    }
 }
 
 class FetchError {

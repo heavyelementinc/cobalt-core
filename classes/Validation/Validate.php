@@ -40,15 +40,16 @@
  * 
  * @license cobalt-core/license
  * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @copyright 2021 Heavy Element, Inc.
  */
 
-namespace CRUD;
+namespace Validation;
 
 use \Exceptions\HTTP\BadRequest;
 use \CRUD\Exceptions\ValidationFailed;
 use \CRUD\Exceptions\ValidationIssue;
 
-abstract class Validator {
+abstract class Validate {
     function __construct() {
     }
 

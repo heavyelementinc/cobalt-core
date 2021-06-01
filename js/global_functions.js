@@ -61,7 +61,7 @@ async function logInModal() {
         body: login_body.body,
         chrome: false,
     });
-    new LoginFormRequest(modal.modal.querySelector("form"), {});
+    new LoginFormRequest(modal.dialog.querySelector("form"), {});
 }
 
 async function logOutConfirm() {
@@ -133,14 +133,14 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel") {
             chrome: {
                 cancel: {
                     label: cancel,
-                    callback: async (event) => {
+                    callback: async (container) => {
                         resolve(false); // Resolve promise
                         return true; // Close modal window
                     }
                 },
                 okay: {
                     label: okay,
-                    callback: async (event) => {
+                    callback: async (container) => {
                         resolve(true); // Resolve promise
                         return true; // Close modal window
                     }
@@ -150,24 +150,25 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel") {
     });
 }
 
-async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "" }) {
-    if (pattern) pattern = ` pattern="${pattern}" required`
+async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "" }) {
+    if (pattern) pattern = ` pattern="${pattern}" required`;
+    if (value) value = ` value="${value.replace("\"", "&quot;")}"`;
     return new Promise((resolve, reject) => {
         const modal = new Modal({
-            body: `<p>${message}</p><input type="text" name="modalInputField"${pattern}>`,
+            body: `<p>${message}</p><input type="text" name="modalInputField"${pattern}${value}>`,
             classes: "modal-window--input",
             chrome: {
                 cancel: {
                     label: cancel,
-                    callback: async (event) => {
+                    callback: async (container) => {
                         resolve(false);
                         return true;
                     }
                 },
                 okay: {
                     label: okay,
-                    callback: async (event) => {
-                        const val = modal.modal.querySelector("[name=\"modalInputField\"]");
+                    callback: async (container) => {
+                        const val = modal.dialog.querySelector("[name=\"modalInputField\"]");
                         if (val.validity.valueMissing) return false;
                         if (val.validity.patternMismatch) return false;
                         resolve(val.value);

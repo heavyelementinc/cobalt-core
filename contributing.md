@@ -6,13 +6,13 @@ Contributor License Agreement
 =============================
 By contributing code (Submission) to Cobalt Engine (Project) you (Contributor) grant Heavy Element, Inc. (Maintainer) a non-revokable, worldwide, unlimited, legal right to change the license of Contributor's Submission (or Submissions) provided provisions in [License Changes](#license-changes) are observed:
 
-## 1 Licensing Changes
+## 1. Licensing Changes
 
  1. Maintainer provides an explanation for changing the Project's license in writing at least one (1) month before any change takes effect.
  2. Project must remain available under a license which conforms to the "Open Source Definition"[1] in perpetuity.
  3. Maintainer may elect to dual-license or sublicense this project under any terms provided provision 1.2 is observed.
 
-## 2 Acceptance
+## 2. Acceptance
 
  1. Contributor agrees to follow the Code Quality Guidelines (CGL)[2].
  2. Maintainer reserves the right to reject Contributor's Submissions to Project at any time and for any reason, with or without explanation.
@@ -24,9 +24,21 @@ Become a Contributor
 ====================
 Send an email to `no-reply+license-agreement@heavyelement.io` and set the subject to `Contributor License Agreement`. The email must be sent from the same email address you use as your Git user credentials.
 
+The body of the email should contain:
+
+* Your legal name
+* GitHub username
+* Today's date
+* The following text filling in the blank with your name
+> "I, ________, agree to the Contributor License Agreement found here: https://github.com/heavyelementinc/cobalt-core/contributing.md"
+
+You should also include the `@license cobalt-core/contributing.md` tag in the header docblock[3] for every file you intend to submit.
+
 *We look forward to working with you.*
 
 ---
-[1] Open Source Definition [https://opensource.org/osd](https://opensource.org/osd)
+[1] Open Source Definition - [https://opensource.org/osd](https://opensource.org/osd)
 
-[2] Code Quality Guidelines [STYLE.md](https://github.com/heavyelementinc/cobalt-core/STYLE.md)
+[2] Code Quality Guidelines - [style.md](https://github.com/heavyelementinc/cobalt-core/style.md)
+
+[3] Header Docblock - [DocBlock explaination](./style.md#comments--phpdoc)

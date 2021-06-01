@@ -28,16 +28,17 @@
  * 
  * @license cobalt-core/license
  * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @copyright 2021 Heavy Element, Inc.
  */
 
-namespace CRUD; // Make sure you use the appropriate namespace for your validator 
+namespace Validation; // Make sure you use the appropriate namespace for your validator 
 
 // If validation fails, throw this exception. The validator will catch these
 // exceptions, accumulate the them, and throw an \Exceptions\HTTP\BadRequest
 // containing whatever failed messages as the data argument.
-use \CRUD\Exceptions\ValidationIssue;
+use \Validation\Exceptions\ValidationIssue;
 
-class ExampleValidator extends Validator {
+class ExampleValidator extends Validate {
 
 
     // A list of names that are allowed as part of the final dataset.

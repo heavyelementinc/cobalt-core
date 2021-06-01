@@ -9,10 +9,11 @@ class Router {
         });
     }
 
-    discover_route() {
+    discover_route(route = null) {
+        if (route === null) route = location.pathname;
         for (const route in router_table) {
             const rt = new RegExp(route.substr(1, route.length - 2));
-            let match = location.pathname.match(rt);
+            let match = route.match(rt);
             if (!match) continue;
             if (match.length <= 0) continue;
             match.shift();
@@ -25,12 +26,12 @@ class Router {
         return this.route_discovered;
     }
 
-    navigation_event(e = null) {
+    navigation_event(e = null, url = null) {
         this.route_discovered = false;
         this.current_route = null;
         this.route_directives = {};
 
-        if (this.discover_route()) {
+        if (this.discover_route(url)) {
             this.route_directives.navigation_callback(...this.route_args);
         }
     }

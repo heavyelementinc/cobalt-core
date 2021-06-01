@@ -51,7 +51,8 @@ modal-box {
     position: relative;
     min-height: 20%;
     min-width: 20%;
-    transition: transform .5s;
+    opacity: 0;
+    transition: transform .5s, opacity .5s;
 }
 
   modal-box.modal-window--input input {

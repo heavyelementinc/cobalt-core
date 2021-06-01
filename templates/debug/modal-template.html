@@ -1,0 +1,61 @@
+<h1><code>modalInput()</code> Test</h1>
+<p>Clicking the blockquote will allow you to edit the contents using a modal box</p>
+<blockquote id="editable" style="cursor:pointer">Click me to edit this content</blockquote>
+
+<hr>
+
+<h1><code>{url:""}</code> Test (Page Request)</h1>
+<p>These buttons will spawn a route via the <code>/api/v1/page/?route=</code> endpoint
+    or an error page.</p>
+<fieldset>
+    <label for="">Select a route:</label>
+    <select id="url">
+        <option value="/debug/flex-table">Flex Table Test</option>
+        <option value="/debug/inputs">Inputs Test</option>
+        <option value="/">Main Index</option>
+    </select>
+</fieldset>
+<button id="modalspawn1">Spawn URL Modal</button>
+<button id="modalspawn2">Spawn 404 Modal</button>
+
+<hr>
+<h1>Slow Response</h1>
+<fieldset>
+    <label>Delay</label>
+    <input type="number" value="10" min="0" max="30">
+</fieldset>
+<button id="modalspawn3">Modal Delay</button>
+
+<script>
+    window.addEventListener("load", (e) => {
+        const editable = document.querySelector("#editable");
+        editable.addEventListener("click", async e => {
+            let result = await modalInput(`<h1>Edit the blockquote</h1>`, { value: e.target.innerText });
+            if (result) editable.innerText = result;
+        });
+
+
+        const spawn1 = document.querySelector("#modalspawn1");
+        const spawn2 = document.querySelector("#modalspawn2");
+        const spawn3 = document.querySelector("#modalspawn3");
+
+
+        spawn1.addEventListener("click", e => {
+            const modal = new Modal({
+                url: document.querySelector("#url").value
+            })
+        })
+
+        spawn2.addEventListener("click", e => {
+            const modal = new Modal({
+                url: "/404"
+            })
+        })
+
+        spawn3.addEventListener("click", e => {
+            const modal = new Modal({
+                url: `/debug/slow-response/${document.querySelector('[type="number"]').value}`
+            })
+        })
+    })
+</script>

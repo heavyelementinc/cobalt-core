@@ -94,9 +94,28 @@ class Debug extends \Controllers\Pages {
     }
 
     function validate_test_form() {
-        $validator = new \CRUD\ExampleValidator();
+        $validator = new \Validation\ExampleValidator();
         $result = $validator->__validate($_POST);
 
         return $result;
+    }
+    function modal_test() {
+        add_vars([
+            'title' => 'Modal Test'
+        ]);
+
+        add_template("/debug/modal-template.html");
+    }
+
+    function slow_response($delay = 10) {
+        $delay = (int)$delay;
+        if ($delay > 30) $delay = 30;
+        if ($delay < 1) $delay = 1;
+        sleep($delay);
+        add_vars([
+            'title' => 'Slow Response Simulation',
+            'delay' => $delay
+        ]);
+        add_template("/debug/slow-response.html");
     }
 }

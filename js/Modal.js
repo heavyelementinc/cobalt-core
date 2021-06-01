@@ -1,14 +1,32 @@
-/** Constructing a Modal Window is simple
+/**
+ * You should know everything you want in your modal before you instantiate it, 
+ * because new Modal() will create a new modal window. 
  * 
- * You should know everything you want in your modal before you instantiate it, because
- * new Modal() will create a new modal window.
+ * The Modal Constructor accepts an object literal as its sole argument. You may
+ * use the following 
  * 
- * It accepts an object literal as its sole argument.
  * 
- * The body property will be used as the body content of your modal
  * 
- * The chrome property will be used as your buttons. Specifying false or null will prevent
- * any chrome from being drawn.
+ * 
+ * The chrome property will be used as your buttons. Specifying false or null 
+ * will prevent any chrome from being drawn.
+ * 
+ * If you want to easily attach logic to buttons, you may assign logic to 'okay'
+ * or 'close' (or any other button you specified in `chrome` object when you
+ * instantiated the Modal window)
+ * 
+ * Use the following syntax to recieve data from the button click:
+ * 
+ * async function foo(){
+ *      const modal = new Modal();
+ *      const result = await modal.on('okay',(container) => {
+ *          return "some result";
+ *      })
+ *      if (result === "some result") // true!
+ * }
+ * 
+ * This is obviously only good for one go around, though. If you need to collect
+ * data you can listen for the 'modalButtonPress' event on the `modal` property
  */
 
 class Modal {
@@ -21,6 +39,7 @@ class Modal {
         classes = "", // The modal window's HTML classes
         parentClass = "", // The container's HTML classes
         body = "", // The body content of the modal window
+        url = "", // A URL to use to download the modal content of a page
         chrome = {}, // A list of buttons and callbacks we want to include or a non-true value for no buttons
         close_btn = true, // Include a close '✖️' button in the top right corner of the screen
         dismiss_on_router_event = true, // ADD THIS FUNCTIONALITY
@@ -32,11 +51,29 @@ class Modal {
         this.classes = classes;
         this.parentClass = parentClass;
         this.body = body;
+        this.url = url;
         this.chrome = chrome;
         this.close_btn = close_btn;
         this.dismiss_on_router_event = dismiss_on_router_event;
         this.clickoutCallback = clickoutCallback;
         this.animations = animations;
+        this.dialog = document.createElement("modal-box");
+
+        // Our default button configuration will be merged with whatever the
+        // user provided
+        this.defaults = {
+            cancel: {
+                label: "Cancel",
+                callback: async (event) => true, // If true, close the modal
+            },
+            okay: {
+                label: "Okay",
+                callback: async (event) => true, // If true, close the modal,
+                color: "var(--project-progress)"
+            },
+        }
+
+        this.pageTitle = null;
 
         // Animation stuff
         this.container_opacity_start = 0; // Starts RELATIVE to spawning
@@ -49,49 +86,91 @@ class Modal {
     }
 
     /** Render the container and modal box */
-    make_modal() {
+    async make_modal() {
         // Create our container
         this.container = document.createElement("modal-container");
         this.container.classList = this.parentClass;
         this.container.style.opacity = this.container_opacity_start; // Animation stuff
 
-        // Add our modal box
-        this.container.innerHTML = `<modal-box id="${this.id}" class="${this.classes}"><section class='modal-body'>${this.body}</section><modal-button-row></modal-button-row></modal-box>`
-        this.modal = this.container.querySelector('modal-box');
-        this.modal.style.transform = this.window_transform_start; // Animation stuff
-
-        this.button_row = this.modal.querySelector("modal-button-row");
-
-        // Generate our buttons
-        this.buttons();
-
         // Append our modal container and its children to the DOM
         document.querySelector("body").appendChild(this.container);
+
+        this.close_button(); // Add our close button
 
         // Handle animation stuff
         setTimeout(() => {
             this.handle_container_click();
             // Set SPAWN animation values
             this.container.style.opacity = this.container_opacity_end;
-            this.modal.style.transform = this.window_transform_end;
-        }, 50)
+        }, 50);
+
+        this.loading_spinner_start();
+
+        let body = await this.get_body_content(); // Await body content
+
+        setTimeout(() => {
+            this.loading_spinner_end();
+            this.dialog.style.opacity = this.container_opacity_end;
+            this.dialog.style.transform = this.window_transform_end;
+        }, 50);
+
+        // Add our modal box
+        this.dialog.id = this.id || "";
+        this.dialog.setAttribute("class", this.classes || "");
+        this.dialog.innerHTML = `<section class='modal-body'>${body}</section><modal-button-row></modal-button-row>`;
+        this.container.appendChild(this.dialog);
+
+        this.dialog = this.container.querySelector('modal-box');
+
+        this.dialog.style.transform = this.window_transform_start; // Animation stuff
+
+        this.button_row = this.dialog.querySelector("modal-button-row");
+
+        // Generate our buttons
+        this.buttons();
+
+        if (this.url) window.router.navigation_event(null, this.url);
+    }
+
+    loading_spinner_start() {
+        this.loading_spinner = document.createElement("loading-spinner");
+        this.loading_spinner_timeout = setTimeout(() => {
+            this.container.appendChild(this.loading_spinner);
+            let offset_top = this.loading_spinner.offsetTop;
+            let offset_left = this.loading_spinner.offsetLeft;
+            this.loading_spinner.style.position = "absolute";
+            this.loading_spinner.style.top = `${offset_top}px`;
+            this.loading_spinner.style.left = `${offset_left}px`;
+            this.loading_spinner.style.color = "white";
+        }, 200);
+        this.loading_spinner_timeout_error = setTimeout(() => {
+            if ("parentNode" in this.loading_spinner && this.loading_spinner.parentNode) this.loading_spinner.parentNode.removeChild(this.loading_spinner)
+            this.container.append("Something went wrong.");
+        }, 1000 * 20);
+    }
+
+    loading_spinner_end() {
+        clearTimeout(this.loading_spinner_timeout);
+        clearTimeout(this.loading_spinner_timeout_error);
+        if ("parentNode" in this.loading_spinner && this.loading_spinner.parentNode) this.loading_spinner.parentNode.removeChild(this.loading_spinner);
+    }
+
+    async get_body_content() {
+        // If we haven't been explicitly given a URL, return body even if it's blank
+        if (!this.url) return this.body;
+        try {
+            const page = new ApiFetch(`/api/v1/page/?route=${this.url}`, 'GET', {});
+            let body = await page.get();
+            this.pageTitle = document.title
+            document.title = body.title
+            return body.body;
+        } catch (error) {
+            return error.result.error;
+        }
     }
 
     buttons() {
-        // Our default button configuration will be merged with whatever
-        // the user provided
-        const defaults = {
-            cancel: {
-                label: "Cancel",
-                callback: async (event) => true, // If true, close the modal
-            },
-            okay: {
-                label: "Okay",
-                callback: async (event) => true, // If true, close the modal,
-                color: "var(--project-progress)"
-            },
-        }
-        this.close_button(); // Add our close button
+        const defaults = this.defaults;
 
         // Check if our buttons are not true and do nothing in that case
         if (!this.chrome) return;
@@ -118,7 +197,7 @@ class Modal {
 
             element.addEventListener("click", (e) => {
                 // Listen for button interactions and use the button handler method
-                this.button_event(this.chrome[i], e);
+                this.button_event(i, e);
             })
         }
     }
@@ -127,11 +206,25 @@ class Modal {
      * returns a truth-y value, the modal will close automatically!
     */
     async button_event(btn, event) {
-        let result = await btn.callback(event, btn); // Await a promise resolution
-        const modalButton = new CustomEvent("modalButtonPress", { detail: { result: result } })
-        this.modal.dispatchEvent(modalButton)
-        if (!result) return; // If the return value is false, we do not close the modal
+        let result = await this.chrome[btn].callback(this.container, event, btn); // Await a promise resolution
+        const modalButton = new CustomEvent("modalButtonPress", { detail: { type: "", result: result } })
+        this.dialog.dispatchEvent(modalButton);
+        if (result === false) return result; // If the return value is false, we do not close the modal
         this.close(); // Otherwise we close the modal
+        return result;
+    }
+
+    /** Assign a callback to a button after spawning a modal button */
+    async on(button, callback) {
+        if (button in this.chrome) this.chrome[button].callback = callback;
+        else if (button in this.defaults) this.defaults[button].callback = callback;
+        else throw new Error(`That button (${button}) doesn't exist`);
+
+        return new Promise((resolve, reject) => {
+            this.dialog.addEventListener("modalButtonPress", e => {
+                resolve(e);
+            });
+        });
     }
 
     /** The close handler. Call this method to close a modal programatically. */
@@ -144,7 +237,8 @@ class Modal {
         })
         /** Set despawn animation values */
         this.container.style.opacity = this.container_opacity_start;
-        this.modal.style.transform = this.window_transform_start;
+        this.dialog.style.transform = this.window_transform_start;
+        if (this.pageTitle) document.title = this.pageTitle;
     }
 
     /** Generates the close '✖️' button */

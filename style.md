@@ -1,5 +1,5 @@
-Code Style
-==========
+Code Quality Guidelines
+=======================
 This document is meant to suggest a particular and consistent style across this project's codebase. These guidelines are generally meant to provide a baseline of how we expect code to be written.
 
 Tools
@@ -7,8 +7,8 @@ Tools
 
  * [VS Code](https://code.visualstudio.com/) - Or an FOSS derivative like VS Codium or code-server
  * [Intelephense](https://intelephense.com/) - Intelephense is a language server extension for VS Code which facilitates PHP development. It implements reliable PHPDoc Intellisense and debugging.
- * XDebug 
  * Composer - Composer is a prerequisite.
+ * XDebug - Makes your life so much easier.
 
 
 Whitespace
@@ -120,7 +120,7 @@ Secondly consider for a moment if you were to use the `//` token. This style of 
 // $foo = "here's the string";
 ```
 
-If you were to later select both lines and press the hotkey, you would unintentionally toggle the `//` for the comment. Using a different syntax eliminates the chance of this happening.
+If you were to later select both lines and press the hotkey, you would unintentionally remove the `//` from the comment line. Using a different syntax eliminates the chance of this happening.
 
 ## Multi-line comments
 ```php
@@ -271,7 +271,7 @@ Route::get("/api/v1/user-account/{user_id}", "Users@account_by_id");
 const result = fetch("/api/v1/user-account/087317de87ad81fab");
 ```
 
-## Variables, Functions & Methods
+## Variables
 We belive that variables and associative array keys should be descriptive of their use. We also believe that the names of variables should be as long as necessary to describe its contents or use.
 
 ```php
@@ -284,7 +284,22 @@ We use **Snake Case** when naming our variables, functions, and methods in PHP. 
 
 ```php
 $foo_bar = "A string";
-function some_function_name($foo_bar){
+```
+
+## Functions & Methods
+Like variables, we believe that functions and methods should follow the "Snake Case" naming convention. However with functions and methods with believe its name should start with a verb:
+
+ * *get* - returns values (typically a string)
+ * *set* - sets values
+ * *gather* - when returning an array or iterable
+ * *add* - when adding to an array
+ * *is* or *has* - when returning a boolean value
+ * *render* - when returning HTML as a string
+
+We will leave naming up to you, but these are a few ideas
+
+```php
+function parse_foo($bar_baz){
     // ..
 }
 ```
@@ -303,15 +318,6 @@ abstract class FooBarBaz {
 }
 ```
 
-## Prefixing with dunderscore
-Generally when we provide an abscract class, we will name abstract methods with a dunderscore prefix (__underscore).
-
-```php
-abstract class FooBarBaz(){
-    abstract function __method_to_implement($some_param);
-}
-```
-
 Code Quality
 ============
-We believe that by following these common-sense formatting standards, we can ensure that our codebase is easily read, easily understood, and easily used.
+We believe that by following these common-sense formatting standards, we can ensure that our codebase is easily read, easily understood, and easily re-used.
