@@ -15,7 +15,7 @@ Whitespace
 ==========
 Indentation should universally be four spaces for all files in Cobalt Engine. This is non-negotaible.
 
-No single line of code should exceed 120 characters (with 80 begin a soft and preferred limit). Add the following setting to VS Code's `settings.json` to help follow this rule.
+No single line of code should exceed 120 characters (with 80 being a soft and preferred limit). Add the following setting to VS Code's `settings.json` to help follow this rule.
 ```json
 {
     "editor.rulers": [ 80, 120 ]
@@ -136,6 +136,7 @@ Laborum saepe dolorum blanditiis a quia optio accusamus. */
  * A longer description that allows you to expand on what this function does, 
  * when and where you might want to use it, etc.
  * 
+ * @throws \Some\Exception when something goes wrong
  * @param string $bar A string to be mutated by foo
  * @return string A mutated version of $bar
  */
@@ -231,7 +232,7 @@ function foo($some_array) {
 }
 ```
 
-We very much discourage the use of else
+We discourage the use of `else` and `else if`. There are better, more readable ways to write logic. For example [natural flow](#natrual-flow-vs-branching-logic).
 
 ## Nesting in a callable
 Within a method or function we discourage using more than one level of nested closure (or more than one tab/indentation). There may be times where it is necessary to do so but these are the exception.
@@ -255,13 +256,20 @@ function foo($some_array) {
 # Naming
 Naming is something we take seriously. First, we need to talk about our conventions.
 
-## Files & URLs
-Filenames should use *underscores between words*. This is sometimes referred to as "**Snake Case**." We will use that term going forward.
+## Files
+Most filenames should use *underscores between words*. This is sometimes referred to as "**Snake Case**." We will use that term going forward.
 
 ```php
 require "path/to/file_name.php";
 ```
 
+However, **classes** must have a name which matches their class name. Thus, classes will use Pascal Case (or UpperCasedFirstLetters).
+
+```php
+require "/classes/Namespace/ClassName.php";
+```
+
+# URLs
 URLs/routes should use *dashes between words*. This is sometimes referred to as "**Kebab Case**"
 
 ```php
@@ -289,18 +297,18 @@ $foo_bar = "A string";
 ## Functions & Methods
 Like variables, we believe that functions and methods should follow the "Snake Case" naming convention. However with functions and methods with believe its name should start with a verb:
 
- * *get* - returns values (typically a string)
+We will leave naming up to you, but these are a few ideas:
+
+ * *get* - returns values (for a string ends singular, arrays end plural)
  * *set* - sets values
- * *gather* - when returning an array or iterable
- * *add* - when adding to an array
+ * *add* - adds value to array
  * *is* or *has* - when returning a boolean value
  * *render* - when returning HTML as a string
 
-We will leave naming up to you, but these are a few ideas
-
 ```php
-function parse_foo($bar_baz){
+function render_foo($bar_baz){
     // ..
+    return "<p>$bar_baz</p>";
 }
 ```
 
@@ -317,6 +325,10 @@ abstract class FooBarBaz {
 
 }
 ```
+
+Miscellaneous
+=============
+ * Calendars/weeks always start on Sundays.
 
 Code Quality
 ============
