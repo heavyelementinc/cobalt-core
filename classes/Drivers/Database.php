@@ -8,6 +8,7 @@ use Validation\Exceptions\ValidationFailed;
 
 abstract class Database {
     public $db = __APP_SETTINGS__['database'];
+    private $collection;
 
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
