@@ -2,22 +2,23 @@
 
 namespace CRUD;
 
-use Exception;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use CRUD\Exceptions\ValidationFailed;
 
 abstract class CRUD {
     public $db = __APP_SETTINGS__['database'];
+    private $collection;
 
     /**
      * @return string the name of the database collection (table)
      */
-    abstract function set_collection();
+    abstract function get_collection_name();
 
     function __construct() {
-        $this->collection = db_cursor($this->set_collection(), $this->db);
+        $this->collection = db_cursor($this->get_collection_name(), $this->db);
     }
+
 
     /** HELPERS */
     function __id($id = null) {
@@ -47,6 +48,7 @@ abstract class CRUD {
         if ($timestamp) return new UTCDateTime($date);
         throw new ValidationFailed("Invalid date parameter");
     }
+
 
     /** CREATE */
     function insertOne($document, array $options = []) {
