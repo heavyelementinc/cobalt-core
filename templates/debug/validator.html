@@ -1,4 +1,4 @@
-<form-request method="POST" action="/api/v1/debug/validator">
+<form-request method="POST" action="/api/v1/debug/validator" @csrf_attribute();>
     <fieldset>
         <label>Your Name</label>
         <input type="name" name="name">

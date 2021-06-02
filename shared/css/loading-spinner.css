@@ -6,7 +6,7 @@ loading-spinner{
   transition: opacity .6s;
 }
 
-loading-spinner.mode--dashes {
+loading-spinner.mode--dashes > svg {
   animation: loadingSpinning 3s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;

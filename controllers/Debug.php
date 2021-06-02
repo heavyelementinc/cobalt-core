@@ -1,5 +1,10 @@
 <?php
 class Debug extends \Controllers\Pages {
+
+    function debug_directory() {
+        add_vars(['title' => "Debug Directories"]);
+        add_template("/debug/debug.html");
+    }
     function debug_renderer() {
         add_vars([
             'title' => "Welcome to Cobalt!",

@@ -9,8 +9,9 @@ class FormRequest {
         this.action = this.form.getAttribute("action");
         this.method = this.form.getAttribute("method");
         this.format = this.form.getAttribute("format") || "application/json; charset=utf-8";
+        this.token = this.form.getAttribute("token") || "";
         this.headers = {
-            'X-Mitigation': document.querySelector("meta[name='token']").getAttribute("content") || null
+            'X-Mitigation': this.token
         };
         this.autosave = (["true", "autosave"].includes(this.form.getAttribute("autosave"))) ? true : false;
         this.include = this.form.getAttribute("include") ?? null;
@@ -104,6 +105,7 @@ class FormRequest {
     }
 
     errorHandler(error, result = null, post = null) {
+        console.log(error);
         if (error.result.code === 422) this.handleFieldIssues(error.result);
         let field = this.errorField;
         if (!field) field = this.form.querySelector(".error")
