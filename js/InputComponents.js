@@ -677,20 +677,49 @@ customElements.define("date-span", DisplayDate);
 class InputObjectArray extends HTMLElement {
     constructor() {
         super();
+        this.shadow = this.attachShadow({ mode: 'open' });
         this.template = this.querySelector("template").innerHTML;
+        this.withAdditional = this.getAttribute("with-additional") || "false";
+        if (this.hasAttribute("with-additional")) this.withAdditional = "true";
         let json = this.querySelector("var");
         this.values = [];
-        if (json && "innerText" in json) this.values = JSON.parse(json.innerText);
+        if (json && "innerText" in json) {
+            try { this.values = JSON.parse(json.innerText); } catch (error) { }
+        }
         this.initInterface();
     }
 
     initInterface() {
+        this.style = document.createElement("<style>");
+        const main = document.querySelector("#style-main");
+        this.style.innerText = `
+        ${main.innerText}
+        input-fieldset {
+            border: inherit;
+            background: var(--project-color-input-background);
+            border-radius: inherit;
+            position: relative;
+        }
+        
+        input-fieldset button.input-fieldset--delete-button{
+            border: none;
+            border-left: inherit;
+            border-bottom: inherit;
+            border-radius: 0 4px;
+            background: inherit;
+            position:absolute;
+            color: var(--project-color-input-border-nofocus);
+            top:0;
+            right:0;
+            padding: 1px 4px;
+        }`;
         this.addButton();
         let index = -1;
         for (const i of this.values) {
             this.addFieldset(i, index++);
         }
-        this.addFieldset(); // Start with an empty one
+        if (this.withAdditional === "true") this.addFieldset(); // Start with an empty one
+        else if (this.values.length < 1) this.addFieldset();
     }
 
     addButton() {
@@ -700,7 +729,7 @@ class InputObjectArray extends HTMLElement {
         this.button.addEventListener("click", (e) => {
             this.addFieldset();
         })
-        this.appendChild(this.button);
+        this.shadow.appendChild(this.button);
     }
 
     addFieldset(values = {}, index = null) {
@@ -715,7 +744,7 @@ class InputObjectArray extends HTMLElement {
             input.value(values[i]);
         }
         this.addFieldsetButton(fieldset)
-        this.insertBefore(fieldset, this.button);
+        this.shadow.insertBefore(fieldset, this.button);
     }
 
     addFieldsetButton(field) {

@@ -78,7 +78,7 @@ abstract class Validate {
      * 
      * @return array an associative with a list of methods for each field
      */
-    abstract function __get_schema();
+    abstract protected function __get_schema();
 
     /**
      * Returns a subset (possibly all) of $to_validate with their values having
@@ -87,7 +87,7 @@ abstract class Validate {
      * @param array $to_validate 
      * @return array validated subset of $to_validate 
      */
-    final function __validate(array $to_validate) {
+    final public function __validate(array $to_validate) {
         $this->__to_validate = $to_validate;
 
         // Get a subset of allowed fieldnames from the submitted data
@@ -135,29 +135,9 @@ abstract class Validate {
         return array_merge($mutant, $this->{"__on_validation_complete"}($mutant));
     }
 
-    final function validate(array $to_validate) {
+    /** Alias of __validate */
+    final public function validate(array $to_validate) {
         return $this->__validate($to_validate);
-    }
-
-    function get_subset() {
-        // Get the schema from the abstract class and do type checking
-        $this->__schema = $this->__get_schema();
-        if (gettype($this->__schema) !== "array") throw new \Exception("Invalid");
-
-        // Create a subset of allowed fields from $this->__to_validate
-        $subset = [];
-        foreach ($this->__schema as $key => $validate) {
-            if (key_exists($key, $this->__to_validate)) $subset[$key] = $this->__to_validate[$key];
-        }
-
-        return $subset;
-    }
-
-    function execute_method($callable, $value, $fieldname, $index) {
-        // Covers methods in $this class and extensions
-        if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $index);
-        // Covers strings that match the name of a callable and anonymous functions
-        if (is_callable($callable)) return $callable($value, $fieldname, $index);
     }
 
     /** Upon successful validation, this method is called and the return values
@@ -165,7 +145,7 @@ abstract class Validate {
      * 
      * @return array
      */
-    function __on_validation_complete($mutant) {
+    protected function __on_validation_complete($mutant) {
         return [];
     }
 
@@ -183,7 +163,7 @@ abstract class Validate {
      * @return string validated email address
      * @throws ValidationIssue upon failed validation
      */
-    final function validate_email(string $value) {
+    final protected function validate_email(string $value) {
         $value = trim($value);
         if (!\filter_var($value, FILTER_VALIDATE_EMAIL)) throw new ValidationIssue("Malformed email");
         return strtolower($value); // We can return here because we know we have a valid email
@@ -200,7 +180,7 @@ abstract class Validate {
      * @return string validated string of digits
      * @throws ValidationIssue 
      */
-    final function validate_phone($value, $min_length = 10) {
+    final protected function validate_phone($value, $min_length = 10) {
         $value = phone_number_normalize($value);
 
         // Check if the phone number is only digits and if not throw an exception.
@@ -224,7 +204,7 @@ abstract class Validate {
      * @return mixed $value does not modify the value
      * @throws ValidationIssue 
      */
-    final function required_field($value, $allow_false = true) {
+    final protected function required_field($value, $allow_false = true) {
         if ($allow_false && $value === false) return $value;
         if (empty($value) && !is_numeric($value)) throw new ValidationIssue("This field is required");
         return $value;
@@ -247,7 +227,7 @@ abstract class Validate {
      * @throws Exception if $other_field not found in __to_validate
      * @throws ValidationIssue if both values are considered empty
      */
-    final function one_required($value, $other_field, $message = "One of these fields needs to be specified", $allow_false = true) {
+    final protected function one_required($value, $other_field, $message = "One of these fields needs to be specified", $allow_false = true) {
         if (!isset($this->__to_validate[$other_field])) throw new \Exception("Error with your validator. Field '$other_field' does not exist");
         if (empty($value) && empty($this->__to_validate[$other_field]))
             throw new ValidationIssue($message);
@@ -261,7 +241,47 @@ abstract class Validate {
      * @param string $value the value to sanitize
      * @return string sanitized user input
      */
-    final function sanitize($value) {
+    final protected function sanitize($value) {
         return trim(htmlspecialchars($value));
+    }
+
+
+    /* ============================== */
+    /*       PRIVATE FUNCTIONS        */
+    /* ============================== */
+
+    /**
+     * Gets a subset of fields from the schema to be validated
+     * @return array 
+     * @throws Exception 
+     */
+    private function get_subset() {
+        // Get the schema from the abstract class and do type checking
+        $this->__schema = $this->__get_schema();
+        if (gettype($this->__schema) !== "array") throw new \Exception("Invalid");
+
+        // Create a subset of allowed fields from $this->__to_validate
+        $subset = [];
+        foreach ($this->__schema as $key => $validate) {
+            if (key_exists($key, $this->__to_validate)) $subset[$key] = $this->__to_validate[$key];
+        }
+
+        return $subset;
+    }
+
+    /**
+     * Executes a method within $this context
+     * 
+     * @param string $callable a CALLABLE string or function
+     * @param mixed $value the value to be validated
+     * @param string $fieldname the fieldname of the current field
+     * @param mixed $index the index into the 'methods' array
+     * @return mixed a validated (and maybe mutated) version of $value
+     */
+    private function execute_method($callable, $value, $fieldname, $index) {
+        // Covers methods in $this class and extensions
+        if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $index);
+        // Covers strings that match the name of a callable and anonymous functions
+        if (is_callable($callable)) return $callable($value, $fieldname, $index);
     }
 }

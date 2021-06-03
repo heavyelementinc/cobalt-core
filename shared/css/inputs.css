@@ -339,23 +339,3 @@ input-object-array {
   input-object-array .input-object-array--add-button{
     margin-left:auto;
   }
-
-  input-object-array input-fieldset {
-    border: inherit;
-    background: var(--project-color-input-background);
-    border-radius: inherit;
-    position: relative;
-  }
-
-  input-fieldset button.input-fieldset--delete-button{
-    border: none;
-    border-left: inherit;
-    border-bottom: inherit;
-    border-radius: 0 4px;
-    background: inherit;
-    position:absolute;
-    color: var(--project-color-input-border-nofocus);
-    top:0;
-    right:0;
-    padding: 1px 4px;
-  }

@@ -173,7 +173,7 @@ class WebHandler implements RequestHandler {
 
     function app_settings() {
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['app']->public_settings) . "</script>";
-        $settings .= "<style>:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
+        $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
         return $settings;
     }
     var $header_nav_cache_name = "template-precomp/header_nav.html";

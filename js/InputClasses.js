@@ -196,4 +196,5 @@ var classMap = {
     button: InputClass_button,
     number: InputClass_number,
     array: InputClass_array,
+    // objectArray: InputClass_object_array
 }

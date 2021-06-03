@@ -44,16 +44,33 @@ class ExampleValidator extends Validate {
     // A list of names that are allowed as part of the final dataset.
     function __get_schema() {
         return [
-            'name' => [],
+            'name' => [/* 
+                If you do not provide an explicit list of methods then the
+                Validate class will try to infer a method by creating a
+                method field and store the field name as index 0
+            
+                'methods' => ['name']
+            */],
             'email' => [],
             'phone' => [],
             'region' => [],
             'order_count' => [
                 "methods" => [
                     'example_of_using_method_list'
-                ]
+                ],
             ],
         ];
+        /**
+         * $_POST 
+         * 'name'
+         * 'email'
+         * 'phone'
+         * 'region'
+         * 'order_count'
+         * 'foo' - rejected
+         * 'bar' - rejected
+         * 'notes' - rejected
+         */
     }
 
 
@@ -98,7 +115,7 @@ class ExampleValidator extends Validate {
     }
 
     function example_of_using_method_list($value) {
-        if (!ctype_digit($value)) throw new ValidationIssue("Malformed orders");
+        if (!ctype_digit($value)) throw new ValidationIssue("Must be a digit");
         $value = (int)$value;
         return $value;
     }
