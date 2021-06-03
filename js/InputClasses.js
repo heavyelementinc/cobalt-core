@@ -38,14 +38,23 @@ class InputClass_default {
         })
         this.error = el;
 
-        this.element.parentNode.insertBefore(el, this.element);
+        this.insert_before_element().parentNode.insertBefore(el, this.insert_after_element());
         this.element.setAttribute("invalid", "invalid")
+    }
+
+    insert_before_element() {
+        return this.element;
+    }
+
+    insert_after_element() {
+        return this.element.nextSibling;
     }
 
     dismiss_error() {
         this.element.invalid = false;
         this.element.removeAttribute("invalid");
         if (!this.error) return;
+        if (!this.error.parentNode) return;
         this.error.parentNode.removeChild(this.error);
         this.error = false;
     }
@@ -65,6 +74,11 @@ class InputClass_checkbox extends InputClass_default {
         this.element.checked = set;
         return set;
     }
+
+    insert_after_element() {
+        if (this.element.parentNode.tagName === "LABEL") return this.element.parentNode;
+        return this.element.nextSibling;
+    }
 }
 
 class InputClass_switch extends InputClass_default {
@@ -83,6 +97,7 @@ class InputClass_radio extends InputClass_default {
 
     get() {
         const element = this.form.querySelector(`[name="${this.name}"]:checked`);
+        if (!element) return null;
         return element.value;
     }
 
@@ -90,6 +105,22 @@ class InputClass_radio extends InputClass_default {
         if (!set) return;
         let candidate = this.form.querySelector(`[name="${this.name}"][value="${set}"]`);
         if (candidate !== null) candidate.checked = true;
+    }
+
+    insert_before_element() {
+        return this.insert_after_element();
+    }
+
+    insert_after_element() {
+        let last = this.form.querySelectorAll(`input[name='${this.name}']`);
+        if (!last) return null;
+        last = last[last.length - 1];
+        let element;
+        if (last.parentNode.tagName === "LABEL") {
+            element = last.parentNode;
+        } else element = last;
+        console.log(element);
+        return element;
     }
 }
 

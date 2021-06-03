@@ -672,4 +672,61 @@ class DisplayDate extends HTMLElement {
     }
 }
 
-customElements.define("date-span", DisplayDate)
+customElements.define("date-span", DisplayDate);
+
+class InputObjectArray extends HTMLElement {
+    constructor() {
+        super();
+        this.template = this.querySelector("template").innerHTML;
+        let json = this.querySelector("var");
+        this.values = [];
+        if (json && "innerText" in json) this.values = JSON.parse(json.innerText);
+        this.initInterface();
+    }
+
+    initInterface() {
+        this.addButton();
+        let index = -1;
+        for (const i of this.values) {
+            this.addFieldset(i, index++);
+        }
+        this.addFieldset(); // Start with an empty one
+    }
+
+    addButton() {
+        this.button = document.createElement("button");
+        this.button.classList.add("input-object-array--add-button")
+        this.button.innerText = "+";
+        this.button.addEventListener("click", (e) => {
+            this.addFieldset();
+        })
+        this.appendChild(this.button);
+    }
+
+    addFieldset(values = {}, index = null) {
+        if (!index) index = this.values.length;
+        const fieldset = document.createElement("input-fieldset");
+        fieldset.innerHTML = this.template;
+        for (const i in values) {
+            const field = fieldset.querySelector(`[name='${i}']`);
+            if (!field) continue;
+            const parent_form = field.closest("radio-group") || field.closest("form-request") || field.closest("fieldset") || document;
+            const input = get_form_input(field, parent_form);
+            input.value(values[i]);
+        }
+        this.addFieldsetButton(fieldset)
+        this.insertBefore(fieldset, this.button);
+    }
+
+    addFieldsetButton(field) {
+        let button = document.createElement("button");
+        button.classList.add("input-fieldset--delete-button");
+        button.innerText = "✖";
+        button.addEventListener("click", (e) => {
+            field.parentNode.removeChild(field);
+        });
+        field.appendChild(button);
+    }
+}
+
+customElements.define("input-object-array", InputObjectArray);

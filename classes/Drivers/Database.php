@@ -42,7 +42,7 @@ abstract class Database {
 
     final function date_string_parse($date) {
         $timestamp = strtotime($date);
-        if ($timestamp) return new UTCDateTime($date);
+        if ($timestamp) return new UTCDateTime($timestamp * 1000);
         throw new ValidationFailed("Invalid date parameter");
     }
 

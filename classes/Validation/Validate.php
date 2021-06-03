@@ -45,9 +45,10 @@
 
 namespace Validation;
 
+use Exception;
 use \Exceptions\HTTP\BadRequest;
-use \CRUD\Exceptions\ValidationFailed;
-use \CRUD\Exceptions\ValidationIssue;
+use \Validation\Exceptions\ValidationFailed;
+use \Validation\Exceptions\ValidationIssue;
 
 abstract class Validate {
     function __construct() {
@@ -86,7 +87,7 @@ abstract class Validate {
      * @param array $to_validate 
      * @return array validated subset of $to_validate 
      */
-    function __validate(array $to_validate) {
+    final function __validate(array $to_validate) {
         $this->__to_validate = $to_validate;
 
         // Get a subset of allowed fieldnames from the submitted data
@@ -134,6 +135,10 @@ abstract class Validate {
         return array_merge($mutant, $this->{"__on_validation_complete"}($mutant));
     }
 
+    final function validate(array $to_validate) {
+        return $this->__validate($to_validate);
+    }
+
     function get_subset() {
         // Get the schema from the abstract class and do type checking
         $this->__schema = $this->__get_schema();
@@ -162,5 +167,101 @@ abstract class Validate {
      */
     function __on_validation_complete($mutant) {
         return [];
+    }
+
+    /* ============================== */
+    /*        HELPER FUNCTIONS        */
+    /* ============================== */
+
+    /**
+     * Validates an email address
+     * 
+     * Trims and email and validates its formatting using filter_var
+     * 
+     * 
+     * @param string $value 
+     * @return string validated email address
+     * @throws ValidationIssue upon failed validation
+     */
+    final function validate_email(string $value) {
+        $value = trim($value);
+        if (!\filter_var($value, FILTER_VALIDATE_EMAIL)) throw new ValidationIssue("Malformed email");
+        return strtolower($value); // We can return here because we know we have a valid email
+    }
+
+    /**
+     * Validate a phone number and removes junk characters: () -
+     * 
+     * Removes junk characters /[()-\s]/ and checks if the resulting string contains
+     * only digits.
+     * 
+     * @param string $value the phone number to be evaluated
+     * @param int $min_length the minimum number of characters the string should be
+     * @return string validated string of digits
+     * @throws ValidationIssue 
+     */
+    final function validate_phone($value, $min_length = 10) {
+        $value = phone_number_normalize($value);
+
+        // Check if the phone number is only digits and if not throw an exception.
+        if (!ctype_digit($value)) throw new ValidationIssue("Malformed phone number");
+
+        if (strlen($value) < $min_length) throw new ValidationIssue("Not long enough");
+
+        return $value;
+    }
+
+    /**
+     * Fails if most falsey values are found
+     * 
+     * **NOTE** that values *0, 0.0,* and *"0"* are allowed but other falsey
+     * values will result in a failure of this check.
+     * 
+     * Boolean `false` is, by default, considered a value.
+     * 
+     * @param mixed $value the value to check if empty
+     * @param bool $allow_false [true] bool false should be considered a value
+     * @return mixed $value does not modify the value
+     * @throws ValidationIssue 
+     */
+    final function required_field($value, $allow_false = true) {
+        if ($allow_false && $value === false) return $value;
+        if (empty($value) && !is_numeric($value)) throw new ValidationIssue("This field is required");
+        return $value;
+    }
+
+    /**
+     * Test if $value and a comparison field are empty and raise issue.
+     * 
+     * Meant to be used when one or another field are required to have a value.
+     * For example, if a form has a phone number or email and one is required.
+     * If both fields are empty then a ValidationIssue will be thrown.
+     * 
+     * > Note that a 0 value 
+     * 
+     * @param mixed $value the value of the current field
+     * @param mixed $other_field the other field name to test
+     * @param string $message 
+     * @param bool $allow_false [true] if false should be considered a value
+     * @return mixed $value this method does not modify $value
+     * @throws Exception if $other_field not found in __to_validate
+     * @throws ValidationIssue if both values are considered empty
+     */
+    final function one_required($value, $other_field, $message = "One of these fields needs to be specified", $allow_false = true) {
+        if (!isset($this->__to_validate[$other_field])) throw new \Exception("Error with your validator. Field '$other_field' does not exist");
+        if (empty($value) && empty($this->__to_validate[$other_field]))
+            throw new ValidationIssue($message);
+
+        return $value;
+    }
+
+    /**
+     * Escape HTML and trim whitespace
+     * 
+     * @param string $value the value to sanitize
+     * @return string sanitized user input
+     */
+    final function sanitize($value) {
+        return trim(htmlspecialchars($value));
     }
 }

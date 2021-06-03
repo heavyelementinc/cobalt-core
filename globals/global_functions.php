@@ -110,7 +110,7 @@ function files_exist($arr, $error_on_empty = true) {
 
 /**
  * Searches for filename in given directory list.
- *  
+ * 
  * Loops through an array of directories and looks for the filename inside them.
  * @param array $arr_of_paths A list of directories to search for $filename
  * @param string $filename The name of the file to find

@@ -86,7 +86,6 @@
         <option value="something"><code style="background:black;color:white">something</code></option>
     </input-array>
 </fieldset>
-
 <button id="update">Update</button>
 <button id="readonly">Readonly</button>
 <button id="custom">Custom</button>
@@ -118,3 +117,30 @@
         array.setAttribute('multiselect', set);
     });
 </script>
+
+
+
+<fieldset>
+    <label>Object Array test</label>
+    <input-object-array field="field">
+        <var>[
+            {"foo":"value","bar":400,"baz":true,"boo":"one"},
+            {"foo":"Another","bar":-100,"baz":false,"boo":"two"}
+            ]</var>
+        <template>
+            <fieldset>
+                <label>Foo</label>
+                <input name="foo">
+                <label>Bar</label>
+                <input type="number" name="bar">
+                <label>Baz</label>
+                <input type="checkbox" name="baz">
+                <radio-group>
+                    <label><input type="radio" name="boo" value="one"> One</label>
+                    <label><input type="radio" name="boo" value="two"> Two</label>
+                </radio-group>
+            </fieldset>
+        </template>
+    </input-object-array>
+
+</fieldset>

@@ -81,20 +81,11 @@ class ExampleValidator extends Validate {
     }
 
     function email($value) {
-        $value = trim($value);
-        if (!\filter_var($value, FILTER_VALIDATE_EMAIL)) throw new ValidationIssue("Malformed email");
-        return strtolower($value); // We can return here because we know we have a valid email
+        return $this->validate_email($value);
     }
 
     function phone($value) {
-        $value = phone_number_normalize($value);
-
-        // Check if the phone number is only digits and if not throw an exception.
-        if (!ctype_digit($value)) throw new ValidationIssue("Malformed phone number");
-
-        if (strlen($value) < 10) throw new ValidationIssue("Not long enough");
-
-        return $value;
+        return $this->validate_phone($value);
     }
 
     function region($value) {

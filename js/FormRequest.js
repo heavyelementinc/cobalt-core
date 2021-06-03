@@ -32,25 +32,26 @@ class FormRequest {
     /** Add an individual item to this list */
     add(el) {
         const name = el.getAttribute("name");
-        if (!name) return false;
-        let type = el.getAttribute("type") || "default";
-        switch (el.tagName) {
-            case "TEXTAREA":
-                type = 'textarea';
-                break;
-            case "SELECT":
-                type = 'select';
-                break;
-            case "INPUT-SWITCH":
-                type = "switch";
-                break;
-            case "INPUT-ARRAY":
-                type = "array";
-                break;
-        }
-        if (type in classMap === false) type = "default";
+        // if (!name) return false;
+        // let type = el.getAttribute("type") || "default";
+        // switch (el.tagName) {
+        //     case "TEXTAREA":
+        //         type = 'textarea';
+        //         break;
+        //     case "SELECT":
+        //         type = 'select';
+        //         break;
+        //     case "INPUT-SWITCH":
+        //         type = "switch";
+        //         break;
+        //     case "INPUT-ARRAY":
+        //         type = "array";
+        //         break;
+        // }
+        // if (type in classMap === false) type = "default";
         // const className = "InputClass_" + type;
-        this.el_list[name] = new classMap[type](el, { form: this.form });
+        // new classMap[type](el, { form: this.form });
+        this.el_list[name] = get_form_input(el, this.form);
         if (this.autosave) el.addEventListener("change", event => this.autosave_handler(this.el_list[name], event));
         return true;
     }

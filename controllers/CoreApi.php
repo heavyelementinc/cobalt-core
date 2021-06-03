@@ -52,18 +52,21 @@ class CoreApi extends \Controllers\Pages {
 
     function contact() {
 
-        if (empty($_POST['phone']) && empty($_POST['email'])) {
-            $error = "";
-            if (key_exists('phone', $_POST)) $error .= " or phone number (or both)";
-            throw new BadRequest("You must specify an email$error");
-        }
+        $validator = new \Contact\ContactFormValidator();
 
-        if (empty($_POST['name']))
-            throw new BadRequest("You need to provide your name");
+        $mutant = $validator->validate($_POST);
+        // if (empty($_POST['phone']) && empty($_POST['email'])) {
+        //     $error = "";
+        //     if (key_exists('phone', $_POST)) $error .= " or phone number (or both)";
+        //     throw new BadRequest("You must specify an email$error");
+        // }
+
+        // if (empty($_POST['name']))
+        //     throw new BadRequest("You need to provide your name");
 
         $email = new SendMail();
         $email->set_vars(array_merge(
-            $_POST,
+            $mutant,
             [
                 "ip" => $_SERVER['REMOTE_ADDR'],
                 "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"]
@@ -77,6 +80,6 @@ class CoreApi extends \Controllers\Pages {
         } catch (Exception $e) {
             throw new ServiceUnavailable("There was an error on our end.");
         }
-        return $_POST;
+        return $mutant;
     }
 }

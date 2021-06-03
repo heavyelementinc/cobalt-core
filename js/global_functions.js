@@ -538,3 +538,25 @@ function plurality(number, returnValue = "s") {
     if (number == 1) return "";
     return returnValue;
 }
+
+function get_form_input(el, form) {
+    const name = el.getAttribute("name");
+    if (!name) return false;
+    let type = el.getAttribute("type") || "default";
+    switch (el.tagName) {
+        case "TEXTAREA":
+            type = 'textarea';
+            break;
+        case "SELECT":
+            type = 'select';
+            break;
+        case "INPUT-SWITCH":
+            type = "switch";
+            break;
+        case "INPUT-ARRAY":
+            type = "array";
+            break;
+    }
+    if (type in classMap === false) type = "default";
+    return new classMap[type](el, { form: form });
+}

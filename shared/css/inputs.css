@@ -21,6 +21,7 @@ input, textarea {
     color: var(--project-color-input-invalid-label-text);
     font-size: .9rem;
     padding: .2rem;
+    white-space: pre-line;
   }
 
   input:focus{
@@ -316,4 +317,45 @@ flex-table[scroll-x]{
   flex-fixed{
     position:sticky;
     /* left: 0; */
+  }
+
+input-object-array {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 2rem;
+  position: inherit;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: var(--project-color-input-disabled);
+  margin: 0;
+  padding: .4rem;
+  max-width: 100%;
+  border-radius: 4px;
+  gap: .4rem;
+}
+  input-object-array var{
+    display: none;
+  }
+
+  input-object-array .input-object-array--add-button{
+    margin-left:auto;
+  }
+
+  input-object-array input-fieldset {
+    border: inherit;
+    background: var(--project-color-input-background);
+    border-radius: inherit;
+    position: relative;
+  }
+
+  input-fieldset button.input-fieldset--delete-button{
+    border: none;
+    border-left: inherit;
+    border-bottom: inherit;
+    border-radius: 0 4px;
+    background: inherit;
+    position:absolute;
+    color: var(--project-color-input-border-nofocus);
+    top:0;
+    right:0;
+    padding: 1px 4px;
   }
