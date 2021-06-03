@@ -535,7 +535,7 @@ function cents_to_dollars($cents) {
  *                - defaults to `<input type='date' value="Y/m/d">` expected format
  * @return string formated date
  */
-function mongo_date($date, $fmt = "Y/m/d") {
+function mongo_date($date, $fmt = "Y-m-d") {
     $date = (string)$date / 1000;
     return date($fmt, $date);
 }
