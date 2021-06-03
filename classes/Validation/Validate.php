@@ -87,7 +87,7 @@ abstract class Validate {
      * @param array $to_validate 
      * @return array validated subset of $to_validate 
      */
-    final public function __validate(array $to_validate) {
+    final public function validate(array $to_validate) {
         $this->__to_validate = $to_validate;
 
         // Get a subset of allowed fieldnames from the submitted data
@@ -129,25 +129,13 @@ abstract class Validate {
         /* The only reason we would have a count of $problems other than 0 is if
            there were ValidationProblems thrown. */
         if (count($problems) !== 0) throw new ValidationFailed("Validation failed.", $problems);
-        /** Check if we have an __on_validation_complete method and, if so,
-         * array_merge $mutant with the results of __on_validation_complete;
+        /** Check if we have an __merge_private_fields method and, if so,
+         * array_merge $mutant with the results of __merge_private_fields;
          */
-        return array_merge($mutant, $this->{"__on_validation_complete"}($mutant));
+        return array_merge($mutant, $this->__merge_private_fields($mutant));
     }
 
-    /** Alias of __validate */
-    final public function validate(array $to_validate) {
-        return $this->__validate($to_validate);
-    }
 
-    /** Upon successful validation, this method is called and the return values
-     * are merged with the mutant.
-     * 
-     * @return array
-     */
-    protected function __on_validation_complete($mutant) {
-        return [];
-    }
 
     /* ============================== */
     /*        HELPER FUNCTIONS        */
@@ -249,6 +237,17 @@ abstract class Validate {
     /* ============================== */
     /*       PRIVATE FUNCTIONS        */
     /* ============================== */
+
+    /** After fields have been validated, the validate method will call __merge_private_fields
+     * and its return value will be merged into the final validated array.
+     * 
+     * You can implement your own __merge_private_fields
+     * 
+     * @return array private fields to merged
+     */
+    private function __merge_private_fields($mutant): array {
+        return []; // Must return an array
+    }
 
     /**
      * Gets a subset of fields from the schema to be validated

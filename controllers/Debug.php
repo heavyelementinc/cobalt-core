@@ -100,7 +100,7 @@ class Debug extends \Controllers\Pages {
 
     function validate_test_form() {
         $validator = new \Validation\ExampleValidator();
-        $result = $validator->__validate($_POST);
+        $result = $validator->validate($_POST);
 
         return $result;
     }
