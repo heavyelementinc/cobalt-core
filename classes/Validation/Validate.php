@@ -148,6 +148,16 @@ abstract class Validate {
         return array_merge($mutant, $this->__merge_private_fields($mutant));
     }
 
+    /** After fields have been validated, the validate method will call __merge_private_fields
+     * and its return value will be merged into the final validated array.
+     * 
+     * You can implement your own __merge_private_fields
+     * 
+     * @return array private fields to merged
+     */
+    protected function __merge_private_fields($mutant): array {
+        return []; // Must return an array
+    }
 
 
     /* ============================== */
@@ -250,17 +260,6 @@ abstract class Validate {
     /* ============================== */
     /*       PRIVATE FUNCTIONS        */
     /* ============================== */
-
-    /** After fields have been validated, the validate method will call __merge_private_fields
-     * and its return value will be merged into the final validated array.
-     * 
-     * You can implement your own __merge_private_fields
-     * 
-     * @return array private fields to merged
-     */
-    private function __merge_private_fields($mutant): array {
-        return []; // Must return an array
-    }
 
     /**
      * Gets a subset of fields from the schema to be validated

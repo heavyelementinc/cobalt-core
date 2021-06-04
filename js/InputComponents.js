@@ -42,6 +42,7 @@ class FormRequestElement extends HTMLElement {
         await this.advance();
         this.request.reset_errors();
         if (allowDangerous) this.request.headers['X-Confirm-Dangerous'] = "true";
+        else delete this.request.headers['X-Confirm-Dangerous'];
         try {
             await this.request.send(this.request.build_query());
             allow_final_stage = true;
