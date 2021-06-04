@@ -126,7 +126,7 @@ function lightbox(imageUrl) {
  * @param {string} cancel Button label for the FALSE option
  * @returns Promise which resolves to either true or false. Cannot reject.
  */
-async function modalConfirm(message, okay = "Okay", cancel = "Cancel") {
+async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous = false) {
     return new Promise((resolve, reject) => {
         const modal = new Modal({
             body: message,
@@ -140,12 +140,14 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel") {
                 },
                 okay: {
                     label: okay,
+                    dangerous: dangerous,
                     callback: async (container) => {
                         resolve(true); // Resolve promise
                         return true; // Close modal window
                     }
                 }
-            }
+            },
+            close_btn: false
         });
     });
 }

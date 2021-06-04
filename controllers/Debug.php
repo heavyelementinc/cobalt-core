@@ -105,6 +105,13 @@ class Debug extends \Controllers\Pages {
         return $result;
     }
 
+    function confirm_test_form() {
+        confirm("Are you sure?", $_POST);
+        return [
+            'confirm' => "Confirmation that confirm works, confirm!"
+        ];
+    }
+
     function modal_test() {
         add_vars([
             'title' => 'Modal Test'

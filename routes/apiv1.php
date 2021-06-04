@@ -27,5 +27,7 @@ if (app('debug')) {
         'requires_cors' => false,
         'permission' => 'Auth_allow_editing_users'
     ]);
+
     Route::post("/debug/validator", "Debug@validate_test_form");
+    Route::post("/debug/confirm", "Debug@confirm_test_form");
 }

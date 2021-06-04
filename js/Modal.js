@@ -64,12 +64,14 @@ class Modal {
         this.defaults = {
             cancel: {
                 label: "Cancel",
+                dangerous: false,
                 callback: async (event) => true, // If true, close the modal
             },
             okay: {
                 label: "Okay",
+                dangerous: false,
                 callback: async (event) => true, // If true, close the modal,
-                color: "var(--project-progress)"
+                // color: "var(--project-progress)"
             },
         }
 
@@ -184,13 +186,15 @@ class Modal {
             const c = this.chrome[i]; // Our current button
             if ("display" in c && c.display === false) continue; // The display property set to false will ignore that button
             // UNIMPLEMENTED What color should the button be?
-            let color = c.color | "var(--project-gray)"
-
+            let color = c.color | "var(--project-gray)";
+            let classes = "modal-button";
+            if (c.dangerous) classes = " modal--button-dangerous";
             // Create our button element
             // We use actual HTML button elements for accessibility and tab indexing
             const element = document.createElement("button");
-            element.classList.add(`modal-button`, `modal-button-${i}`); // Keeping things organized
+            element.classList.add(`modal-button`, `modal-button-${i}`, classes); // Keeping things organized
             element.innerText = c.label || i;// Set the button's label
+            // element.style.background = color;
 
             // Add the button to the row of buttons
             this.button_row.appendChild(element);

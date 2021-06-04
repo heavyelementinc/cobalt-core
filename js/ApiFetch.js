@@ -28,23 +28,25 @@ class ApiFetch {
         }
         if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
         let result = await fetch(this.uri, send);
-        if (result.ok === false) {
-            switch (result.status) {
-                case 300:
-                    let confirm = FetchConfirm(await result.json(), this);
-                    result = await confirm.draw();
-                    if (result === false)
-                        break;
-                default:
-                    throw new FetchError("HTTP Error", result, await result.json());
-                    break;
-            }
-        }
+        if (result.ok === false) result = await this.handleErrors(result)
         return await result.json();
     }
 
     async get() {
         return await this.send("", "GET", {});
+    }
+
+    async handleErrors(result) {
+        switch (result.status) {
+            case 300:
+                let confirm = new FetchConfirm(await result.json(), this);
+                result = await confirm.draw();
+                if (result.json().error !== "Aborted") break;
+            default:
+                throw new FetchError("HTTP Error", result, await result.json());
+                break;
+        }
+        return result;
     }
 }
 
@@ -59,14 +61,16 @@ class FetchError extends Error {
 
 class FetchConfirm {
     constructor(data, original_fetch) {
-        this.data = data;
+        this.returnValues = data;
         this.fetch = original_fetch;
     }
 
-    // async draw() {
-    //     let confirm = await new modalConfirm(this.data.message);
-    //     if (confirm === false) return;
-    //     this.fetch.headers
-    //     return await 
-    // }
+    async draw() {
+        let confirm = await modalConfirm(this.returnValues.error, this.returnValues.okay, "Cancel", this.returnValues.dangerous);
+        if (confirm === false) return { json: () => { return { status: 400, error: "Aborted", data: false } } };
+        console.log(this.returnValues.data)
+        this.fetch.headers = { ...this.fetch.headers, ...this.returnValues.data.headers };
+        const result = await this.fetch.send(this.returnValues.data.return);
+        return { json: () => result };
+    }
 }

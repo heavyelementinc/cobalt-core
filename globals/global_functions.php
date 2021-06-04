@@ -579,11 +579,12 @@ function phone_number_normalize($number) {
  * 
  * @param string $message confirmation message that the user will see
  * @param array $data data that the confirmation dialog will re-submit
+ * @param string $okay the message to "continue"
  * @return bool true if headers exist 
  * @throws Confirm if headers are not detected throw Confirm
  */
-function confirm($message, $data) {
+function confirm($message, $data, $okay = "Continue", $dangerous = true) {
     $headers = apache_request_headers();
     if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
-    throw new \Exceptions\HTTP\Confirm($message, $data);
+    throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
 }
