@@ -23,7 +23,7 @@ class FormRequestElement extends HTMLElement {
         this.request = new FormRequest(this, { asJSON: true, errorField: this.querySelector(".error") });
         if (this.request.autosave === false) {
             this.querySelector("button[type='submit'],input[type='submit']").addEventListener('click', (e) => {
-                this.send();
+                this.send(e.shiftKey);
             });
         }
         let error = this.querySelector(".error");
@@ -37,10 +37,11 @@ class FormRequestElement extends HTMLElement {
         this.request.errorField = error;
     }
 
-    async send() {
+    async send(allowDangerous = false) {
         let allow_final_stage = false;
         await this.advance();
         this.request.reset_errors();
+        if (allowDangerous) this.request.headers['X-Confirm-Dangerous'] = "true";
         try {
             await this.request.send(this.request.build_query());
             allow_final_stage = true;
