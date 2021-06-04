@@ -63,10 +63,10 @@ class FetchConfirm {
         this.fetch = original_fetch;
     }
 
-    async draw() {
-        let confirm = await new modalConfirm(this.data.message);
-        if (confirm === false) return;
-        this.fetch.headers
-        return await 
-    }
+    // async draw() {
+    //     let confirm = await new modalConfirm(this.data.message);
+    //     if (confirm === false) return;
+    //     this.fetch.headers
+    //     return await 
+    // }
 }
