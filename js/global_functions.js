@@ -539,6 +539,18 @@ function plurality(number, returnValue = "s") {
     return returnValue;
 }
 
+var universal_input_element_query = "input[name], select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name]";
+
+function get_form_elements(form) {
+    const elements = form.querySelectorAll(window.universal_input_element_query);
+    let el_list = [];
+    for (let el of elements) {
+        iface = get_form_input(el, form);
+        el_list[iface.name] = iface;
+    }
+    return el_list;
+}
+
 function get_form_input(el, form) {
     const name = el.getAttribute("name");
     if (!name) return false;

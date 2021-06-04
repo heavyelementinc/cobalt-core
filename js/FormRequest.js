@@ -21,7 +21,9 @@ class FormRequest {
 
     /** Add all the form elements to this instance's list of elements */
     form_elements() {
-        this.elements = this.form.querySelectorAll("input[name], select[name], textarea[name], input-switch[name], input-array[name]");
+        // this.el_list = get_form_elements(this.form);
+        // return this.el_list;
+        this.elements = this.form.querySelectorAll(window.universal_input_element_query);
         this.el_list = [];
         for (let el of this.elements) {
             this.add(el);

@@ -28,18 +28,23 @@ class InputClass_default {
     }
 
     set_error(message) {
+        this.message = message;
+        this.create_error(this.insert_before_element(), this.insert_after_element())
+    }
+
+    create_error(before, after) {
         let el = document.createElement("pre");
         el.classList.add("form-request--field-issue-message");
-        el.innerText = message;
+        el.innerText = this.message;
         el.setAttribute('for', this.name);
         el.addEventListener("click", e => {
             el.parentNode.removeChild(el);
-            this.error = false;
+            this.store_error(false);
         })
-        this.error = el;
+        this.store_error(el);
 
-        this.insert_before_element().parentNode.insertBefore(el, this.insert_after_element());
-        this.element.setAttribute("invalid", "invalid")
+        before.parentNode.insertBefore(el, after);
+        this.element.setAttribute("invalid", "invalid");
     }
 
     insert_before_element() {
@@ -48,6 +53,10 @@ class InputClass_default {
 
     insert_after_element() {
         return this.element.nextSibling;
+    }
+
+    store_error(element) {
+        this.error = element;
     }
 
     dismiss_error() {
@@ -187,6 +196,27 @@ class InputClass_select extends InputClass_default {
     }
 }
 
+class InputClass_object_array extends InputClass_default {
+    set_error(message) {
+        this.message = message;
+
+        for (let i in message) {
+            for (let e of messages[i]) {
+
+            }
+        }
+    }
+
+    dismiss_error() {
+        this.element.invalid = false;
+        this.element.removeAttribute("invalid");
+        if (!this.error) return;
+        if (!this.error.parentNode) return;
+        this.error.parentNode.removeChild(this.error);
+        this.error = false;
+    }
+}
+
 var classMap = {
     default: InputClass_default,
     check: InputClass_checkbox,
@@ -196,5 +226,5 @@ var classMap = {
     button: InputClass_button,
     number: InputClass_number,
     array: InputClass_array,
-    // objectArray: InputClass_object_array
+    objectArray: InputClass_object_array
 }

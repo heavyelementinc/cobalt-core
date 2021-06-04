@@ -686,19 +686,48 @@ class InputObjectArray extends HTMLElement {
         if (json && "innerText" in json) {
             try { this.values = JSON.parse(json.innerText); } catch (error) { }
         }
+        this.fieldItems = [];
         this.initInterface();
     }
 
     initInterface() {
-        this.style = document.createElement("<style>");
+        this.style();
+        this.addButton();
+        let index = -1;
+        for (const i of this.values) {
+            this.addFieldset(i, index++);
+        }
+        if (this.withAdditional === "true") this.addFieldset(); // Start with an empty one
+        else if (this.values.length < 1) this.addFieldset();
+
+        console.log(this.fieldItems);
+    }
+
+    style() {
         const main = document.querySelector("#style-main");
-        this.style.innerText = `
-        ${main.innerText}
+        const links = document.querySelectorAll("link[rel='stylesheet']");
+        let styleLinks = "";
+        for (const i of links) {
+            styleLinks += i.outerHTML;
+        }
+
+        const style = document.createElement("head");
+
+        style.innerHTML = `<style>
+        ${main.textContent}
+        fieldset > label {
+            display:block;
+        }
+        fieldset{
+            padding:0;
+            border:none;
+        }
         input-fieldset {
-            border: inherit;
+            border: 1px solid var(--project-color-input-border-nofocus);
             background: var(--project-color-input-background);
-            border-radius: inherit;
+            border-radius: 4px;
             position: relative;
+            padding: .2rem;
         }
         
         input-fieldset button.input-fieldset--delete-button{
@@ -712,14 +741,8 @@ class InputObjectArray extends HTMLElement {
             top:0;
             right:0;
             padding: 1px 4px;
-        }`;
-        this.addButton();
-        let index = -1;
-        for (const i of this.values) {
-            this.addFieldset(i, index++);
-        }
-        if (this.withAdditional === "true") this.addFieldset(); // Start with an empty one
-        else if (this.values.length < 1) this.addFieldset();
+        }</style>${styleLinks}`;
+        this.shadow.append(style);
     }
 
     addButton() {
@@ -728,21 +751,28 @@ class InputObjectArray extends HTMLElement {
         this.button.innerText = "+";
         this.button.addEventListener("click", (e) => {
             this.addFieldset();
+            console.log(this.fieldItems);
         })
         this.shadow.appendChild(this.button);
+
     }
 
     addFieldset(values = {}, index = null) {
-        if (!index) index = this.values.length;
+        if (!index) index = this.fieldItems.length || this.values.length;
+
         const fieldset = document.createElement("input-fieldset");
+
         fieldset.innerHTML = this.template;
+
+        if (index in this.fieldItems === false) this.fieldItems[index] = {};
+        this.fieldItems[index] = get_form_elements(fieldset);
+
         for (const i in values) {
             const field = fieldset.querySelector(`[name='${i}']`);
             if (!field) continue;
-            const parent_form = field.closest("radio-group") || field.closest("form-request") || field.closest("fieldset") || document;
-            const input = get_form_input(field, parent_form);
-            input.value(values[i]);
+            this.fieldItems[index][i].value(values[i]);
         }
+
         this.addFieldsetButton(fieldset)
         this.shadow.insertBefore(fieldset, this.button);
     }
@@ -752,9 +782,31 @@ class InputObjectArray extends HTMLElement {
         button.classList.add("input-fieldset--delete-button");
         button.innerText = "✖";
         button.addEventListener("click", (e) => {
+            console.log(field)
+            const index = [...field.children].indexOf(field)
             field.parentNode.removeChild(field);
+            delete this.fieldItems[index];
+            this.fieldItems = [...Object.values(this.fieldItems)];
+            console.log(this.fieldItems);
         });
         field.appendChild(button);
+    }
+
+    get value() {
+        let data = {};
+        const objects = this.shadow.querySelectorAll("input-fieldset");
+        objects.forEach((e, i) => {
+            data[i] = {}
+            const fieldElements = get_form_elements(e);
+            fieldElements.forEach(e => {
+                data[i][e.name] = e.value();
+            })
+        })
+        return data;
+    }
+
+    set value(value) {
+        this.values = value;
     }
 }
 

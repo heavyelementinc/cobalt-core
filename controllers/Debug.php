@@ -104,6 +104,7 @@ class Debug extends \Controllers\Pages {
 
         return $result;
     }
+
     function modal_test() {
         add_vars([
             'title' => 'Modal Test'

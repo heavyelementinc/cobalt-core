@@ -47,7 +47,8 @@ class ExampleValidator extends Validate {
             'name' => [/* 
                 If you do not provide an explicit list of methods then the
                 Validate class will try to infer a method by creating a
-                method field and store the field name as index 0
+                method field and store the field's name as index 0 — replacing
+                any dots (.) with double underscores (__)
             
                 'methods' => ['name']
             */],
@@ -58,6 +59,12 @@ class ExampleValidator extends Validate {
                 "methods" => [
                     'example_of_using_method_list'
                 ],
+            ],
+            "test" => [
+                "object_array" => [
+                    'foo' => [],
+                    'bar' => []
+                ]
             ],
         ];
         /**
@@ -117,6 +124,15 @@ class ExampleValidator extends Validate {
     function example_of_using_method_list($value) {
         if (!ctype_digit($value)) throw new ValidationIssue("Must be a digit");
         $value = (int)$value;
+        return $value;
+    }
+
+    function foo($value) {
+        $this->required_field($value);
+        return $value;
+    }
+
+    function bar($value) {
         return $value;
     }
 }

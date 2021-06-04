@@ -540,6 +540,11 @@ function mongo_date($date, $fmt = "Y-m-d") {
     return date($fmt, $date);
 }
 
+/**  */
+function date_instance($date) {
+    
+}
+
 function phone_number_format($number, $format = "(ddd) ddd-dddd") {
     $num_index = 0;
     $num_max = strlen($number);

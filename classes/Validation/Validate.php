@@ -51,6 +51,8 @@ use \Validation\Exceptions\ValidationFailed;
 use \Validation\Exceptions\ValidationIssue;
 
 abstract class Validate {
+    private $failed = [];
+
     function __construct() {
     }
 
@@ -87,11 +89,14 @@ abstract class Validate {
      * @param array $to_validate 
      * @return array validated subset of $to_validate 
      */
-    final public function validate(array $to_validate) {
+    final public function validate(array $to_validate, $using = null) {
         $this->__to_validate = $to_validate;
 
+        $schema = $using;
+        if ($using === null) $schema = $this->__get_schema();
+
         // Get a subset of allowed fieldnames from the submitted data
-        $subset = $this->get_subset();
+        $subset = $this->get_subset($schema);
         if (count($subset) <= 0) throw new BadRequest("No valid data submitted");
 
         $mutant = []; // Establish our mutant
@@ -103,10 +108,16 @@ abstract class Validate {
          */
 
         foreach ($subset as $fieldname => $value) {
+            if (key_exists("object_array", $schema[$fieldname])) {
+                $mutant[$fieldname] = $this->handle_object_arrays($value, $schema[$fieldname]['object_array'], $fieldname);
+                $this->__to_validate = $to_validate;
+                continue;
+            }
+
             // Check if methods are specified for this fieldname
-            if (!key_exists("methods", $this->__schema[$fieldname])) {
-                if (!method_exists($this, $fieldname)) throw new \Exception("$fieldname does not have a validator method");
-                $this->__schema[$fieldname]['methods'] = [$fieldname];
+            if (!key_exists("methods", $schema[$fieldname])) {
+                if (!method_exists($this, $fieldname)) throw new \Exception("\"$fieldname\" does not have a validator method");
+                $schema[$fieldname]['methods'] = [str_replace(".", "__", $fieldname)];
             }
 
             // Add the $value to the $mutant so we can update it through each
@@ -114,7 +125,7 @@ abstract class Validate {
             $mutant[$fieldname] = $value;
 
             // Loop through the available validation methods
-            foreach ($this->__schema[$fieldname]['methods'] as $index => $callable) {
+            foreach ($schema[$fieldname]['methods'] as $index => $callable) {
                 try {
                     // Execute the method
                     $mutant[$fieldname] = $this->execute_method($callable, $mutant[$fieldname], $fieldname, $index);
@@ -125,6 +136,8 @@ abstract class Validate {
                 }
             }
         }
+
+        if ($using === null) $problems = array_merge($problems, $this->failed);
 
         /* The only reason we would have a count of $problems other than 0 is if
            there were ValidationProblems thrown. */
@@ -254,14 +267,13 @@ abstract class Validate {
      * @return array 
      * @throws Exception 
      */
-    private function get_subset() {
+    private function get_subset($schema) {
         // Get the schema from the abstract class and do type checking
-        $this->__schema = $this->__get_schema();
-        if (gettype($this->__schema) !== "array") throw new \Exception("Invalid");
+        if (gettype($schema) !== "array") throw new \Exception("Invalid");
 
         // Create a subset of allowed fields from $this->__to_validate
         $subset = [];
-        foreach ($this->__schema as $key => $validate) {
+        foreach ($schema as $key => $validate) {
             if (key_exists($key, $this->__to_validate)) $subset[$key] = $this->__to_validate[$key];
         }
 
@@ -282,5 +294,22 @@ abstract class Validate {
         if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $index);
         // Covers strings that match the name of a callable and anonymous functions
         if (is_callable($callable)) return $callable($value, $fieldname, $index);
+    }
+
+    private function handle_object_arrays($value, $schema, $field) {
+        $mutant = [];
+        foreach ($value as $index => $data) {
+            try {
+                $mutant[$index] = $this->validate($data, $schema);
+            } catch (ValidationFailed $e) {
+                $data = [];
+                foreach ($e->data as $f => $d) {
+                    $data[$field][$index][$f] = $d;
+                }
+                $this->failed = array_merge($this->failed, $data);
+            }
+        }
+
+        return $mutant;
     }
 }
