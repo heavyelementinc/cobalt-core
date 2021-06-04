@@ -50,7 +50,7 @@ class FormRequestElement extends HTMLElement {
         this.mode = this.getAttribute("display-mode") ?? "edit";
         if (this.mode === "edit" && allow_final_stage) {
             await this.regress();
-            this.error.innerText = "Saved.";
+            this.error.innerText = this.getAttribute("success-message") || "Success";
             return;
         }
         if (!allow_final_stage) return;
