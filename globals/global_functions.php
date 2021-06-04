@@ -12,6 +12,8 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Exceptions\HTTP\Confirm;
+
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
  * return all the settings.
@@ -542,7 +544,6 @@ function mongo_date($date, $fmt = "Y-m-d") {
 
 /**  */
 function date_instance($date) {
-    
 }
 
 function phone_number_format($number, $format = "(ddd) ddd-dddd") {
@@ -571,4 +572,18 @@ function phone_number_normalize($number) {
     // Strip the junk characters out of the string
     $value = str_replace($junk, "", $number);
     return $value;
+}
+
+/**
+ * Check for confirmation headers and throw an exception if they don't exist
+ * 
+ * @param string $message confirmation message that the user will see
+ * @param array $data data that the confirmation dialog will re-submit
+ * @return bool true if headers exist 
+ * @throws Confirm if headers are not detected throw Confirm
+ */
+function confirm($message, $data) {
+    $headers = apache_request_headers();
+    if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
+    throw new \Exceptions\HTTP\Confirm($message, $data);
 }

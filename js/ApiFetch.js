@@ -15,7 +15,7 @@ class ApiFetch {
         this.headers = headers;
     }
 
-    async send(data = "", { throwOnError = true, encapsulate_as_array = false }) {
+    async send(data = "") {
         let send = {
             method: this.method,
             credentials: 'include',
@@ -28,7 +28,18 @@ class ApiFetch {
         }
         if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
         let result = await fetch(this.uri, send);
-        if (result.ok === false) throw new FetchError("HTTP Error", result, await result.json());
+        if (result.ok === false) {
+            switch (result.status) {
+                case 300:
+                    let confirm = FetchConfirm(await result.json(), this);
+                    result = await confirm.draw();
+                    if (result === false)
+                        break;
+                default:
+                    throw new FetchError("HTTP Error", result, await result.json());
+                    break;
+            }
+        }
         return await result.json();
     }
 
@@ -43,5 +54,19 @@ class FetchError extends Error {
         this.message = message;
         this.request = data;
         this.result = result;
+    }
+}
+
+class FetchConfirm {
+    constructor(data, original_fetch) {
+        this.data = data;
+        this.fetch = original_fetch;
+    }
+
+    async draw() {
+        let confirm = await new modalConfirm(this.data.message);
+        if (confirm === false) return;
+        this.fetch.headers
+        return await 
     }
 }

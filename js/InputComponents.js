@@ -6,7 +6,8 @@
  *  * display-mode - 
  *     - "edit" - (default) will allow you to continue editing the form after saving
  *     - "done" - will disable the form after saving and present a "complete" screen
- *  * success - a web route to be displayed when display-mode="done"
+ *  * success-route - a web route to be displayed when display-mode="done"
+ *  * success-message - a message to be displayed
  */
 
 class FormRequestElement extends HTMLElement {
@@ -81,8 +82,8 @@ class FormRequestElement extends HTMLElement {
     }
 
     async confirm_stage() {
-        let confirm = this.getAttribute("success");
-        let page = "<p>Your form was submitted successfully.</p>";
+        let confirm = this.getAttribute("success-route");
+        let page = this.getAttribute("success-message") || "<p>Your form was submitted successfully.</p>";
         if (confirm) page = await new ApiFetch(`/api/v1/page?route=${encodeURI()}`, "GET", {});
         this.stages[2].innerHTML = page;
     }
