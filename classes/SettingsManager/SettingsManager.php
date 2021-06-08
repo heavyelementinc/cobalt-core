@@ -229,7 +229,8 @@ class SettingsManager {
             if (!file_exists($path)) continue; // Skip this file, it doesn't exist.
             // Load JSON file and decode it
             // Shuld this be jsonc_decode?
-            $json = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+            if (!$raw = file_get_contents($path)) continue;
+            $json = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
             // Check if the app settings file exists and decode it (it should be
             // okay if the app settings don't exist)
             $this->tmp_app_setting_values = array_merge($this->tmp_app_setting_values, $json);

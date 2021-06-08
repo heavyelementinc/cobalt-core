@@ -328,7 +328,7 @@ abstract class FooBarBaz {
 
 Miscellaneous
 =============
- * Calendars/weeks always start on Sundays.
+* Calendars/weeks always start on Sundays when part of a dataset
 
 Code Quality
 ============

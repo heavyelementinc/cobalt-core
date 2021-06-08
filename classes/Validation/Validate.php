@@ -201,6 +201,11 @@ abstract class Validate {
 
         return $value;
     }
+    
+    /** @todo implement this */
+    // final protected function date_converter($value) {
+        
+    // }
 
     /**
      * Fails if most falsey values are found

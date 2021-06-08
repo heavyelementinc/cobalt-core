@@ -244,6 +244,8 @@ class Render {
                 $value = \json_encode($val); // Is this what we want?
                 break;
             case "object":
+                if ($val instanceof MongoDB\BSON\ObjectId) return (string)$val;
+                if ($val instanceof MongoDB\BSON\UTCDateTime) return (string)$val;
                 $value = "[object Object]";
                 break;
             case "resource":
