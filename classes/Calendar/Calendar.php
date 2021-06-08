@@ -9,8 +9,10 @@ namespace Calendar;
  * @author Ethan <ethan@heavyelement.io>
  */
 class Calendar {
-    /** @var int $timestamp_input The target timestamp this calendar renders itself around */
+    /** @var int $timestamp_input The target timestamp this calendar renders itself around. */
     private $timestamp_input;
+    /** @var string $calendar_type The type of calendar rendered as "day" | "week" | "month". */
+    private $calendar_type;
 
     /**
      * Constructs a calendar with a target date.
@@ -22,6 +24,8 @@ class Calendar {
     }
 
     /**
+     * Get the currently stored timestamp.
+     * 
      * @return int Returns the currently stored value of $timestamp_input.
      */
     public function get_timestamp() {
@@ -45,6 +49,55 @@ class Calendar {
     }
 
     /**
+     * Get the type of calendar currently rendered. Either "day" | "week" | "month".
+     * 
+     * @return string A string representing the type of calendar rendered.
+     */
+    public function get_calendar_type() {
+        return $this->calendar_type;
+    }
+
+    /**
+     * Get the first cell for the type of calendar currently rendered.
+     * 
+     * @return int A timestamp for the date of the first drawn cell of the calendar.
+     */
+    public function get_first_cell_timestamp() {
+        if ($this->calendar_type === null) return "You must render the calendar first.";
+
+        if ($this->calendar_type === "day") return $this->timestamp_input;
+
+        if ($this->calendar_type === "week") {
+            if (date("w", $this->timestamp_input) === "0") return $this->timestamp_input;
+            return strtotime("last Sunday", $this->timestamp_input);
+        }
+        
+        $first_day_of_month = strtotime(date("Y-m-01", $this->timestamp_input));
+        $start_offset = date("w", $first_day_of_month);
+        return strtotime("-$start_offset days", $first_day_of_month);
+    }
+
+    /**
+     * Get the last cell for the type of calendar currently rendered.
+     * 
+     * @return int A timestamp for the date of the last drawn cell of the calendar.
+     */
+    public function get_last_cell_timestamp() {
+        if ($this->calendar_type === null) return "You must render the calendar first.";
+
+        if ($this->calendar_type === "day") return $this->timestamp_input;
+
+        if ($this->calendar_type === "week") {
+            if (date("w", $this->timestamp_input) === "6") return $this->timestamp_input;
+            return strtotime("next Saturday", $this->timestamp_input);
+        }
+        
+        $last_day_of_month = strtotime(date("Y-m-t", $this->timestamp_input));
+        $end_offset = (6 - date("w", $last_day_of_month));
+        return strtotime("+$end_offset days", $last_day_of_month);
+    }
+
+    /**
      * Renders a calander with the correct number of cells to represent a day,
      * week, or month.
      * 
@@ -55,6 +108,7 @@ class Calendar {
      */
     public function render($type = "month", $month_changes = TRUE) {
         $type = strtolower($type);
+        $this->calendar_type = $type;
 
         $class_attribute = "calendar--other";
         if($this->timestamp_input === $this->make_timestamp_uniform(time())) {

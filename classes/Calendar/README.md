@@ -17,6 +17,9 @@ change.
 * __construct($date)
 * get_timestamp()
 * set_timestamp($date)
+* get_calendar_type()
+* get_first_cell_timestamp()
+* get_last_cell_timestamp()
 * render($type = "month", $month_changes = TRUE)
 
 ---
@@ -41,6 +44,15 @@ $calendar->get_timestamp();
 $date = "2021-05-12"; //Also excepts "d-m-Y" and unix timestamp formats.
 $calendar->set_timestamp($date);
 $calendar->render(); //Dont forget to re-render the calendar to show new results.
+
+//Get the type of calendar currently rendered.
+$calendar->get_calendar_type();
+
+//Get the first cell currently rendered for the calendar.
+$calendar->get_first_cell_timestamp()
+
+//Get the last cell currently rendered for the calendar.
+$calendar->get_last_cell_timestamp()
 ```
 
 ### Display the calendar...
