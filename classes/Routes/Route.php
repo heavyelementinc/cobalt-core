@@ -132,7 +132,7 @@ class Route {
         $new_route = str_replace("/$regex_replace?", "/?$regex_replace?", $new_route);
 
         // Finally, we create our regex pattern
-        $new_route = "/^" . str_replace(["/", "..."], ["\/", "(.*)"], $new_route);
+        $new_route = "%^" . str_replace(["/", "..."], ["\/", "(.*)"], $new_route);
 
 
 
@@ -142,7 +142,7 @@ class Route {
         } else {
             $new_route .= "\/?";
         }
-        return "$new_route$/";
+        return "$new_route$%";
     }
 
     static function get_js_handler($handler, $path, $controller) {

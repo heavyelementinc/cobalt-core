@@ -209,6 +209,7 @@ class Router {
                     __ENV_ROOT__ . "/controllers/client/$handler",
                 ]);
                 if ($prefix !== "" && $path[0] = "^") $path = substr($path, 2);
+                if ($path[strlen($path) - 1] === "%") $path = substr($path, 0, -1);
                 array_push($table, "\n'$prefix$path': " . file_get_contents($files[0]));
             }
         }

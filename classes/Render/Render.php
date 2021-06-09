@@ -215,7 +215,12 @@ class Render {
                     $process_vars = false;
                     break;
                 case "$":
-                    $is_pretty_print = JSON_PRETTY_PRINT;
+                    $name = substr($name, 1);
+                    // $is_pretty_print = JSON_PRETTY_PRINT;
+                    $is_inline_json = true;
+                    $options = ENT_NOQUOTES;
+                    $process_vars = false;
+                    break;
                 case "@":
                     $name = substr($name, 1); // Remove the @
                     $is_inline_json = true;

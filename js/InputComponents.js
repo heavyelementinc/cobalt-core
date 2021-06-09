@@ -22,7 +22,13 @@ class FormRequestElement extends HTMLElement {
         // This WebComponent should allow us to make form bots a thing of the past.
         this.request = new FormRequest(this, { asJSON: true, errorField: this.querySelector(".error") });
         if (this.request.autosave === false) {
-            this.querySelector("button[type='submit'],input[type='submit']").addEventListener('click', (e) => {
+            let searchForButtons = this;
+            let queries = "button[type='submit'],input[type='submit']";
+            if (this.getAttribute("submit")) {
+                searchForButtons = this.closest("modal-container");
+                queries = "button.modal-button-okay";
+            }
+            searchForButtons.querySelector(queries).addEventListener('click', (e) => {
                 this.send(e.shiftKey);
             });
         }

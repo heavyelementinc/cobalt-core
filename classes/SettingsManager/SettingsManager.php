@@ -452,10 +452,20 @@ class SettingsManager {
         if ($this->get($setting_name) === null) $this->set($setting_name, $directives['default']);
     }
 
+    function method($value, $directives, $setting_name) {
+        if (!method_exists($this, $value)) throw new SettingsManagerException("$setting_name's specified method doesn't exist");
+        $this->set($setting_name, $this->{$value}($value, $directives, $setting_name));
+    }
+
     /** =============
      *  Other methods 
      *  =============
      */
+
+    function set_packages($value, $directives, $setting_name) {
+        // Hard code Router.js, main.js, and app.js
+        return array_merge($this->get($setting_name), ['Router.js', 'main.js', 'app.js']);
+    }
 
     /** Gets the entire list of settings for the app. */
     function get_settings() {

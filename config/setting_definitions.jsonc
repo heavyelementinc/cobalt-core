@@ -226,12 +226,10 @@
             "FormRequest.js",
             "ApiFetch.js",
             "InputComponents.js",
-            "UserMenu.js",
-            "Router.js",
-            "main.js",
-            "app.js"
+            "UserMenu.js"
         ],
-        "$merge": true // Prepend user packages (is that what we want to do?)
+        "$merge": true, // Prepend user packages (is that what we want to do?),
+        "$method": "set_packages"
     },
     /* A list of CSS files to be concatenated, minified, and sent to the client
     with every page.

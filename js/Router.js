@@ -1,9 +1,22 @@
 class Router {
     constructor() {
         window.router_entities = {};
+
+        /**  */
         this.navigation_items = document.querySelectorAll("header nav a, footer nav a");
+
+        /** @property Bool - `true` if a route was discovered */
+        this.route_discovered = false;
+        /** @property String - the regex pointer into the router_table */
         this.current_route = null;
+        /** @property Bool - `true` on first run, false the rest of the time */
+        this.first_run = true;
+        /** @property Array - the results of the regex match */
+        this.route_args = null;
+        /** @property Object - the route directives to be used */
+
         document.addEventListener("navigationEvent", (e) => {
+            // if (this.first_run) return;
             this.navigation_event(e);
             this.find_current_navlist_item();
         });
@@ -11,17 +24,18 @@ class Router {
 
     discover_route(route = null) {
         if (route === null) route = location.pathname;
-        for (const route in router_table) {
-            const rt = new RegExp(route.substr(1, route.length - 2));
+        for (const regex in router_table) {
+            const rt = new RegExp(regex);
             let match = route.match(rt);
-            if (!match) continue;
+            if (match === null) continue;
             if (match.length <= 0) continue;
             match.shift();
             this.route_args = match;
             this.route_discovered = true;
-            this.current_route = route;
+            this.current_route = regex;
             break;
         }
+        this.first_run = false;
         if (this.route_discovered) this.route_directives = router_table[this.current_route];
         return this.route_discovered;
     }
