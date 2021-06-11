@@ -54,13 +54,18 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Modal"]
     ]);
+    Route::get("/debug/action-menu", "Debug@action_menu", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Action Menu"]
+    ]);
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
 }
 
 /** If authentications are enabled, these routes should be added to the table */
 if (app("Auth_logins_enabled")) {
     /** Basic login page */
-    Route::get(app("Auth_login_page"), "CoreController@login", ['handler' => 'core/login.js']);
+    Route::get(app("Auth_login_page"), "UserAccounts@login");
+
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
 }

@@ -44,18 +44,21 @@
             const modal = new Modal({
                 url: document.querySelector("#url").value
             })
+            modal.draw();
         })
 
         spawn2.addEventListener("click", e => {
             const modal = new Modal({
                 url: "/404"
             })
+            modal.draw();
         })
 
         spawn3.addEventListener("click", e => {
             const modal = new Modal({
                 url: `/debug/slow-response/${document.querySelector('[type="number"]').value}`
             })
+            modal.draw();
         })
     })
 </script>

@@ -1,0 +1,38 @@
+<h1>Create New User</h1>
+<form-request id="new-user" method="PUT" action="/api/v1/create-user/">
+    <div>
+        <h2>Basic Info</h2>
+        <fieldset>
+            <label>Name</label>
+            <input name="fname" placeholder="First name"> <input name="lname" placeholder="Last name">
+        </fieldset>
+        <fieldset>
+            <label>Contact</label>
+            <input type="email" name="email" placeholder="Email address">
+            <input type="phone" name="phone" placeholder="Phone Number">
+        </fieldset>
+    </div>
+    <div>
+        <h2>Account Details</h2>
+        <fieldset>
+            <label>Username</label>
+            <input type="username" name="uname">
+            <label>Password</label>
+            <input type="password" name="pword">
+        </fieldset>
+    </div>
+    <input type='submit' value="Submit">
+</form-request>
+<style>
+    #new-user {
+        display: flex;
+        background: white;
+        border: 1px solid var(--project-color-input-border-nofocus);
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    h2:first-of-type {
+        margin-top: 0;
+    }
+</style>

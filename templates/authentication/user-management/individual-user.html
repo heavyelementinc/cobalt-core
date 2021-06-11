@@ -1,83 +1,104 @@
-<h1>{{user_account.fname}} {{user_account.lname}}</h1>
-<h2>{{user_account.uname}} &mdash; <span id='user_id'>{{user_id}}</span></h2>
-<div id="tab-list--parent">
-    <ul class="tab-list--tab-row">
-        <li><button for="basics" class="tab-list--active">Basics</button></li>
-        <li><button for="permissions">Permissions</button></li>
-        <li><button for="statistics">Stats</button></li>
-        <li><button for="manage">Manage</button></li>
-    </ul>
-    <section id="basics" class="drawer-list--item drawer-list--active">
-        <h1>Basic Info</h1>
-        <form id="basic-info-form" method='PUT' action="/api/v1/user_update/basics" autosave="autosave"
-            include="{{user_id}}">
-            <fieldset>
-                <label>Name</label>
-                <input name="fname" value="{{user_account.fname}}" placeholder="First name"> <input name="lname"
-                    value="{{user_account.lname}}" placeholder="Last name">
-            </fieldset>
-            <fieldset>
-                <label>Username</label>
-                <input name="uname" value="{{user_account.uname}}">
-            </fieldset>
-            <fieldset>
-                <label>Email</label>
-                <input type="email" name="email" value="{{user_account.email}}">
-            </fieldset>
-        </form>
-        <hr style="width:50%;margin:0 auto">
-        <h1>Change Password</h1>
-        <form id="password-reset" method="PUT" action="/api/v1/user_update/password" include="{{user_id}}">
-            <fieldset>
-                <input type="password" name="pword" placeholder="Password" required="required">
-            </fieldset>
-            <button>Change</button>
-        </form>
-    </section>
-    <section id="permissions" class="drawer-list--item">
-        <h1>Permissions</h1>
-        <form id="permissions-form" method="PUT" action="/api/v1/user_update/permissions" autosave="autosave"
-            include="{{user_id}}">
-            {{!permission_table}}
-        </form>
-    </section>
-    <section id="statistics" class="drawer-list--item">
-        <h1>Statistics</h1>
-        <p>Placeholder section for {{user_account.uname}}'s statistics</p>
-    </section>
-    <section id="manage" class="drawer-list--item">
-        <h1>Manage</h1>
-        <button>Delete</button>
-    </section>
-</div>
-<script src="/core-content/js/protected/UserManager.js?{{app.version}}"></script>
+<h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+    <h2><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></h2>
+    <div id="tab-list--parent">
+        <ul class="tab-list--tab-row">
+            <li><button for="basics" class="tab-list--active">Basics</button></li>
+            <li><button for="permissions">Permissions</button></li>
+            <li><button for="statistics">Stats</button></li>
+            <li><button for="manage">Manage</button></li>
+        </ul>
+        <section id="basics" class="drawer-list--item drawer-list--active">
+            <div>
+                <h2>Basic Info</h2>
+                <form-request id="basic-info-form" method='PUT' action="/api/v1/user_update/basics/{{user_account._id}}"
+                    autosave="autosave">
+                    <fieldset>
+                        <label>Name</label>
+                        <input name="fname" value="{{user_account.fname}}" placeholder="First name" for="#fname"> <input
+                            name="lname" value="{{user_account.lname}}" placeholder="Last name" for="#lname">
+                    </fieldset>
+                    <fieldset>
+                        <label>Username</label>
+                        <input name="uname" value="{{user_account.uname}}" for="#uname">
+                    </fieldset>
+                    <fieldset>
+                        <label>Email</label>
+                        <input type="email" name="email" value="{{user_account.email}}">
+                    </fieldset>
+                </form-request>
+            </div>
+            <hr>
+            <div>
+                <h2>Change Password</h2>
+                <form-request id="password-reset" method="PUT"
+                    action="/api/v1/user_update/password/{{user_account._id}}">
+                    <fieldset>
+                        <input type="password" name="pword" placeholder="Password" required="required">
+                    </fieldset>
+                    <button>Change Password</button>
+                </form-request>
+            </div>
+        </section>
+        <section id="permissions" class="drawer-list--item">
+            <form-request id="permissions-form" method="PUT"
+                action="/api/v1/user_update/permissions/{{user_account._id}}" autosave="autosave">
+                <div style="flex-grow:1">
+                    <h1>Permissions</h1>
+                    {{!permission_table.permissions}}
+                </div>
+                <div style="min-width:35%; padding: 0 0 1rem 1rem;">
+                    <h1>Group Membership<help-span
+                            value="Group membership grants the user *all* permissions for that group."></help-span>
+                    </h1>
+                    {{!permission_table.groups}}
+                </div>
+            </form-request>
+        </section>
+        <section id="statistics" class="drawer-list--item">
+            <h2>Statistics</h2>
+            <p>Placeholder section for {{user_account.uname}}'s statistics</p>
+        </section>
+        <section id="manage" class="drawer-list--item">
+            <h2>Manage</h2>
+            <button>Delete</button>
+        </section>
+    </div>
+    <script src="/core-content/js/protected/UserManager.js?{{app.version}}"></script>
 
-<style>
-    #permissions ul {
-        list-style: none;
-        padding: 0;
-        margin-top: .5rem;
-    }
+    <style>
+        #basics.drawer-list--active {
+            display: flex;
+        }
 
-    #permissions h2 {
-        margin-bottom: 0;
-    }
+        #permissions ul {
+            list-style: none;
+            padding: 0;
+            margin-top: .5rem;
+        }
 
-    #permissions li,
-    #permissions h2 {
-        display: flex;
-        align-items: center;
-    }
+        #permissions h2 {
+            margin-bottom: 0;
+        }
 
-    #permissions li {
-        padding: 1rem 0;
-    }
+        #permissions li,
+        #permissions h2 {
+            display: flex;
+            align-items: center;
+        }
 
-    #permissions li:nth-of-type(odd) {
-        background: rgba(0, 0, 0, .1);
-    }
+        #permissions li {
+            padding: 1rem 0;
+        }
 
-    #permissions input-switch {
-        margin: 0 1rem 0 1rem;
-    }
-</style>
+        #permissions li:nth-of-type(odd) {
+            background: rgba(0, 0, 0, .1);
+        }
+
+        #permissions input-switch {
+            margin: 0 1rem 0 1rem;
+        }
+
+        #permissions-form .form-request--actual {
+            display: flex;
+        }
+    </style>

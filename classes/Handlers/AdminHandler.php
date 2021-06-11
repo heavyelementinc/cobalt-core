@@ -22,14 +22,15 @@ class AdminHandler extends WebHandler {
     function auth_panel() {
         if (!session_exists()) return "";
         $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";
-        $panel .= "<nav id='admin-panel'><ul>";
-        $admin_prefix = app("context_prefixes")['admin']['prefix'];
-        foreach ($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']]['get'] as $route) {
-            if ($route['panel_name'] === null) continue;
-            $path = substr($route['original_path'], 1);
-            $panel .= "<li><a href='$admin_prefix$path'>$route[panel_name]</a></li>";
-        }
-        $panel .= "</ul></nav>";
+        $panel .= "<nav id='admin-panel'>";
+        $panel .= get_route_group("admin_panel", ['prefix' => app("context_prefixes")['admin']['prefix']]);
+        // $admin_prefix = app("context_prefixes")['admin']['prefix'];
+        // foreach ($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']]['get'] as $route) {
+        //     if ($route['panel_name'] === null) continue;
+        //     $path = substr($route['original_path'], 1);
+        //     $panel .= "<li><a href='$admin_prefix$path'>$route[panel_name]</a></li>";
+        // }
+        $panel .= "</nav>";
         return $panel;
     }
 }

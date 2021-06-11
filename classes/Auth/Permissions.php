@@ -9,8 +9,8 @@ namespace Auth;
 class Permissions {
     private $permission_files = [
         __ENV_ROOT__ . "/config/default_permissions.jsonc",
-        __APP_ROOT__ . "/config/app_permissions.jsonc",
-        __APP_ROOT__ . "/config/app_permissions.json",
+        __APP_ROOT__ . "/private/config/app_permissions.jsonc",
+        __APP_ROOT__ . "/private/config/app_permissions.json",
     ];
     public $valid = [];
 
@@ -42,25 +42,19 @@ class Permissions {
         /** Check if the session user has the permission to manage user permissions */
         if (!has_permission("Auth_allow_modifying_user_permissions")) return "<p>You can't modify user permissions</p>";
         $table = [];
+        $groups = "";
         $valid = $this->valid;
+        $root_group = "";
         /** If the app has enabled the `root` user group, add it to the root user */
         if (app("Auth_enable_root_group")) {
-            $valid = array_merge(
-                [
-                    'root' => [
-                        'groups' => [
-                            'root' => true,
-                        ],
-                        'label' => 'A root user is able to bypass ANY priviliged check.',
-                        'dangerous' => true,
-                        'default' => false
-                    ]
-                ],
-                $valid
-            );
+            $checked = "false";
+            if (in_array("root", (array)$user['groups'])) $checked = "true";
+            $root_group =  "<li><input-switch name='groups.root' checked='$checked'></input-switch> Root <help-span
+            value=\"WARNING: Root membership gives this user TOTAL CONTROL over this application.\"></help-span></li>";
         }
         /** Loop through the list of valid permissions */
         foreach ($valid as $name => $item) {
+
             $dangerous = "";
             /** Check the user's permission status for this permission */
             $checked = (isset($user['permissions'][$name]) && $user['permissions'][$name]) ? "true" : "false";
@@ -70,17 +64,20 @@ class Permissions {
             /** Does the user belong to the current group? */
             if (in_array($group, (array)$user['groups'])) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
-            if (!key_exists($group, $table)) $table[$group] = "<h2>$group <input-switch name='groups.$group' checked='$groupCheck'></input-switch></h2>\n<ul>";
+            if (!key_exists($group, $table)) {
+                $table[$group] = "<h2>$group</h2>\n<ul>";
+                $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
+            }
             /** Concat our current permission into the group */
             $table[$group] .= "<li><input-switch type='checkbox' checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
-        return implode("</ul>\n", $table) . "</ul>\n";
+        return ['permissions' => implode("</ul>\n", $table) . "</ul>\n", 'groups' => "<ul>$root_group $groups</ul>"];
     }
 
-    function validate($request) {
-        $include = $request['include'];
-        unset($request['include']);
+    function validate($id, $request) {
+        $include = $id;
+
         // Establish our perms
         $perms = [];
         foreach ($request as $name => $value) {
@@ -103,7 +100,7 @@ class Permissions {
         return [...$result];
     }
 
-    /** TODO: Migrate this over to \Auth\UserAccountValidation->validate_permissions */
+    /** @todo Migrate this over to \Auth\UserAccountValidation->validate_permissions */
     function update_permissions($permissions, $user_id) {
         $valid = [];
         foreach ($permissions as $name => $permission) {
@@ -119,7 +116,7 @@ class Permissions {
         return $valid;
     }
 
-    /** TODO: Migrate this over to \Auth\UserAccountValidation->validate_groups */
+    /** @todo Migrate this over to \Auth\UserAccountValidation->validate_groups */
     function update_groups($groups, $user_id) {
         $valid = [
             '$addToSet' => ['groups' => ['$each' => []]],

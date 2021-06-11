@@ -70,20 +70,20 @@ class Debug extends \Controllers\Pages {
         add_vars([
             'title' => 'Calendar test',
             'main' =>   $calendar->render("day") .
-                        "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                        "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                        "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                        "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" . 
-                        $calendar->render("week") .
-                        "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                        "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                        "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                        "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
-                        $calendar->render() .
-                        "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                        "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                        "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                        "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>"
+                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
+                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
+                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
+                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
+                $calendar->render("week") .
+                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
+                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
+                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
+                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
+                $calendar->render() .
+                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
+                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
+                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
+                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>"
         ]);
         add_template("/parts/main.html");
     }
@@ -144,5 +144,12 @@ class Debug extends \Controllers\Pages {
             'delay' => $delay
         ]);
         add_template("/debug/slow-response.html");
+    }
+
+    function action_menu() {
+        add_vars([
+            'title' => "Action Menu test"
+        ]);
+        add_template("/debug/action_menu.html");
     }
 }

@@ -1,6 +1,6 @@
 <section id="login-form-container">
     <section class="login-hero-sidebar"></section>
-    <form id="login-form" action="/api/v1/login/" method="POST" complete="refresh">
+    <login-form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" @csrf_attribute();>
         <h1>Login to {{app.app_short_name}}</h1>
         <fieldset>
             <input type="username" name="username" placeholder="Username/Email">
@@ -13,7 +13,7 @@
             <label><input type="checkbox" name="stay_logged_in" value="true"> Stay logged in</label>
         </fieldset>
         <span class="error"></span>
-        <button>Sign In</button>
+        <button type="submit">Sign In</button>
         {{!create_account}}
-    </form>
+    </login-form-request>
 </section>

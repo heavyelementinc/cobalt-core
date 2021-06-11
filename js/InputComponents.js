@@ -17,17 +17,14 @@ class FormRequestElement extends HTMLElement {
 
     connectedCallback() {
         this.setup_content();
-
-        // Basically, we want to attach the FormRequest to the <form-request> element.
-        // This WebComponent should allow us to make form bots a thing of the past.
-        this.request = new FormRequest(this, { asJSON: true, errorField: this.querySelector(".error") });
+        this.getRequest();
         if (this.request.autosave === false) {
             let searchForButtons = this;
             let queries = "button[type='submit'],input[type='submit']";
-            if (this.getAttribute("submit")) {
-                searchForButtons = this.closest("modal-container");
-                queries = "button.modal-button-okay";
-            }
+            // if (this.getAttribute("submit")) {
+            //     searchForButtons = this.closest("modal-container");
+            //     queries = "button.modal-button-okay";
+            // }
             searchForButtons.querySelector(queries).addEventListener('click', (e) => {
                 this.send(e.shiftKey);
             });
@@ -43,31 +40,44 @@ class FormRequestElement extends HTMLElement {
         this.request.errorField = error;
     }
 
+    getRequest() {
+        // Basically, we want to attach the FormRequest to the <form-request> element.
+        // This WebComponent should allow us to make form bots a thing of the past.
+        this.request = new FormRequest(this, { asJSON: true, errorField: this.querySelector(".error") });
+    }
+
     async send(allowDangerous = false) {
         let allow_final_stage = false;
+        let has_error = false;
+
         await this.advance();
         this.request.reset_errors();
         if (allowDangerous) this.request.headers['X-Confirm-Dangerous'] = "true";
         else delete this.request.headers['X-Confirm-Dangerous'];
+
         try {
             await this.request.send(this.request.build_query());
             allow_final_stage = true;
         } catch (error) {
             await this.regress();
+            has_error = true;
         }
+
         this.mode = this.getAttribute("display-mode") ?? "edit";
         if (this.mode === "edit" && allow_final_stage) {
             await this.regress();
             this.error.innerText = this.getAttribute("success-message") || "Success";
-            return;
         }
-        if (!allow_final_stage) return;
+
+        if (!allow_final_stage) return has_error;
         try {
             await this.confirm_stage();
             await this.advance();
         } catch (error) {
             this.stages[1].innerHTML("Your data was submitted.");
         }
+
+        return has_error;
     }
 
     setup_content() {
@@ -132,6 +142,25 @@ class FormRequestElement extends HTMLElement {
 }
 
 customElements.define("form-request", FormRequestElement);
+
+
+class LoginForm extends HTMLElement {
+    connectedCallback() {
+        // super.connectedCallback();
+        this.button = this.querySelector("button[type='submit']");
+        console.log(this, this.button)
+        this.getRequest();
+        this.button.addEventListener('click', e => this.request.send(e));
+    }
+
+    getRequest() {
+        this.request = new LoginFormRequest(this, {});
+    }
+
+}
+
+customElements.define("login-form-request", LoginForm);
+
 
 class InputSwitch extends HTMLElement {
     /** InputSwitch gives us a handy way of assigning dynamic functionality to custom

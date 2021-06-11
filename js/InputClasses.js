@@ -1,3 +1,16 @@
+/**
+ * Any element used by form-request will instance this (or an extended version
+ * of this) class. This class acts as a sort-of normalization interface so we can
+ * use both built in HTML inputs and our custom inputs.
+ * 
+ * With that being said, every element using this interface supports the
+ * following attributes:
+ * 
+ *  * name     - the field's variable name
+ *  * for      - Use the `for` attribute to update the innerText of any element
+ *               in the page with the value of the field after it's successfully
+ *               saved. Value of attr must be a valid CSS selector.
+ */
 class InputClass_default {
     constructor(element, { form = null }) {
         this.element = element;
@@ -5,6 +18,11 @@ class InputClass_default {
         this.name = element.name || "";
         this.form = form || this.get_form();
         this.error = false;
+        try {
+            this.update = (this.element.getAttribute("for")) ? document.querySelectorAll(this.element.getAttribute("for")) : false;
+        } catch (error) {
+            this.update = false;
+        }
         if (typeof element === "string") this.element = document.querySelector(element);
         if (this.element === null) throw new Error("Can't find element " + element);
         this.callbacks();
@@ -25,6 +43,13 @@ class InputClass_default {
         this.element.addEventListener('focusout', e => {
             this.dismiss_error();
         })
+        if (this.update) {
+            this.form.addEventListener("requestSuccess", e => {
+                for (const i of this.update) {
+                    i.innerText = this.value();
+                }
+            });
+        }
     }
 
     set_error(message) {

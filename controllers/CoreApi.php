@@ -19,6 +19,7 @@ class CoreApi extends \Controllers\Pages {
         return $GLOBALS['auth']->logout_user();
     }
 
+    /** @todo make this sensitive to contexts */
     function page() {
         $GLOBALS['write_to_buffer_handled'] = true;
         $route = $_GET['route'];

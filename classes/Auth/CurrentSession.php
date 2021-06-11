@@ -14,11 +14,11 @@
 namespace Auth;
 
 class CurrentSession {
-    /** The CurrentSession class takes the current request's validation cookie and looks
-     * up the token in the session database. It runs checks to see if the user's token is
-     * still valid.
-     * 
-     * TODO: Encrypt cookie values in database
+    /* The CurrentSession class takes the current request's validation cookie and looks
+      up the token in the session database. It runs checks to see if the user's token is
+      still valid.
+      
+      TODO: Encrypt cookie values in database
      */
     function __construct() {
         $this->cookie_name = app('session_cookie_name'); // Name of the cookie we send to the client
@@ -39,10 +39,10 @@ class CurrentSession {
             'samesite' => true
         ];
         $this->context = ($GLOBALS['route_context'] === "web") ? true : false;
-        /** Every client must be assigned a token, we'll use this to update our
-         * user account if/when they sign in.
-         * 
-         * If the token value is null, create a session
+        /* Every client must be assigned a token, we'll use this to update our
+          user account if/when they sign in.
+          
+          If the token value is null, create a session
          */
         if (!$this->token_value) $this->create_session();
 

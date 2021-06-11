@@ -1,9 +1,22 @@
 <?php
 
+
+/**
+ * Database Driver - Wraps all calls to MongoDB
+ * 
+ * Meant to provide a way for other developers to build out an SQL backend for 
+ * Cobalt Engine since SQL sucks and we currently only support Mongo.
+ * 
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @license https://github.com/heavyelementinc/cobalt-core/license
+ * @copyright 2021 - Heavy Element, Inc.
+ */
+
+
 namespace Drivers;
 
 use MongoDB\BSON\ObjectId;
-use MongoDB\BSON\UTCDateTime;
+use Drivers\UTCDateTime;
 use Validation\Exceptions\ValidationFailed;
 
 abstract class Database {
@@ -23,27 +36,9 @@ abstract class Database {
         return new ObjectId($id);
     }
 
-    final function __date($date = null) {
-        if ($date === null) return new UTCDateTime();
-        switch (gettype($date)) {
-            case "string":
-                return $this->date_string_parse($date);
-                break;
-            case "integer":
-            case "double":
-                return new UTCDateTime($date);
-                break;
-            case "object":
-                if ($date instanceof UTCDateTime) return $date;
-                break;
-        }
-        throw new ValidationFailed("Invalid date parameter");
-    }
-
-    final function date_string_parse($date) {
-        $timestamp = strtotime($date);
-        if ($timestamp) return new UTCDateTime($timestamp * 1000);
-        throw new ValidationFailed("Invalid date parameter");
+    final function __date($value) {
+        $date = new UTCDateTime($value);
+        return $date->timestamp;
     }
 
     /* CREATE */

@@ -13,6 +13,11 @@ html {
     /* 2 */
 }
 
+body.scroll-locked {
+    /* height:100%; */
+    overflow: hidden;
+}
+
 body {
     margin: 0;
     font-family: var(--project-body-family);
@@ -432,7 +437,7 @@ footer .social-media a:hover{
   #nav-menu-spawn {
     display: flex;
   }
-  header {
+  body > header {
     transform: translateX(200%);
     transition: transform .6s;
   }

@@ -45,7 +45,7 @@ class Modal {
         dismiss_on_router_event = true, // ADD THIS FUNCTIONALITY
         clickoutCallback = async () => false, // Callback used when clicking outside modal window (black space). Return TRUE to close the window.
         animations = true, // Allow or deny spawn in/out animations
-        immediate = true, // You can wait to spawn the modal by setting this to false
+        immediate = false, // You can wait to spawn the modal by setting this to false
     }) {
         this.id = id;
         this.classes = classes;
@@ -84,11 +84,11 @@ class Modal {
         this.window_transform_end = "";
         this.set_animation_state();
 
-        if (immediate) this.make_modal()
+        if (immediate) this.draw()
     }
 
     /** Render the container and modal box */
-    async make_modal() {
+    async draw() {
         // Create our container
         this.container = document.createElement("modal-container");
         this.container.classList = this.parentClass;

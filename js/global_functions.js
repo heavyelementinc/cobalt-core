@@ -58,10 +58,11 @@ async function logInModal() {
     }
     const modal = new Modal({
         id: "login-modal",
-        body: login_body.body,
+        url: app("Auth_login_page"),
         chrome: false,
     });
-    new LoginFormRequest(modal.dialog.querySelector("form"), {});
+    await modal.draw();
+    // new LoginFormRequest(modal.dialog.querySelector("form"), {});
 }
 
 async function logOutConfirm() {
@@ -72,6 +73,7 @@ async function logOutConfirm() {
 
 async function confirmModal(message, yes = "Okay", no = "Cancel") {
     const modal = new Modal({});
+    modal.draw();
 }
 
 async function removeLoadingSpinner(spinner) {
@@ -112,6 +114,7 @@ function lightbox(imageUrl) {
         chrome: null,
         clickoutCallback: e => true,
     });
+    modal.draw();
     return modal;
 }
 
@@ -149,6 +152,7 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous
             },
             close_btn: false
         });
+        modal.draw();
     });
 }
 
@@ -179,6 +183,7 @@ async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern =
                 }
             }
         });
+        modal.draw();
     })
 }
 

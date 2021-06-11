@@ -51,6 +51,7 @@ use \Validation\Exceptions\ValidationFailed;
 use \Validation\Exceptions\ValidationIssue;
 
 abstract class Validate {
+    protected $mode = "partial";
     private $failed = [];
 
     function __construct() {
@@ -83,6 +84,23 @@ abstract class Validate {
     abstract protected function __get_schema();
 
     /**
+     * Change the validation mode.
+     * 
+     * If $mode = "partial" (the default) then the $to_validate data will
+     * determine a subset of $schema fields to be validated.
+     * 
+     * If $mode = "required" then all fields in schema will be required to be
+     * included in the validation process.
+     * 
+     * @param string $mode *"partial"* "required"
+     * @return void 
+     */
+    final public function setMode($mode = "partial") {
+        if (!in_array($mode, ['partial', 'required'])) throw new \Exception('Invalid validation mode.');
+        $this->mode = $mode;
+    }
+
+    /**
      * Returns a subset (possibly all) of $to_validate with their values having
      * been validated by the routine.
      * 
@@ -102,11 +120,10 @@ abstract class Validate {
         $mutant = []; // Establish our mutant
         $problems = []; // Establish our problems container
 
-        /** We have a $problems container so that we can run through our entire
-         * list of items to be validated, find _all_ issues, then send those 
-         * issues back to the client so they can be fixed.
+        /* We have a $problems container so that we can run through our entire
+           list of items to be validated, find _all_ issues, then send those 
+           issues back to the client so they can be fixed.
          */
-
         foreach ($subset as $fieldname => $value) {
             if (key_exists("object_array", $schema[$fieldname])) {
                 $mutant[$fieldname] = $this->handle_object_arrays($value, $schema[$fieldname]['object_array'], $fieldname);
@@ -201,11 +218,12 @@ abstract class Validate {
 
         return $value;
     }
-    
+
     /** @todo implement this */
-    // final protected function date_converter($value) {
-        
-    // }
+    final protected function make_date($value) {
+        $date = new \Drivers\UTCDateTime($value);
+        return $date->timestamp;
+    }
 
     /**
      * Fails if most falsey values are found
@@ -272,13 +290,21 @@ abstract class Validate {
      * @throws Exception 
      */
     private function get_subset($schema) {
+
         // Get the schema from the abstract class and do type checking
         if (gettype($schema) !== "array") throw new \Exception("Invalid");
 
         // Create a subset of allowed fields from $this->__to_validate
         $subset = [];
         foreach ($schema as $key => $validate) {
-            if (key_exists($key, $this->__to_validate)) $subset[$key] = $this->__to_validate[$key];
+            $found = false;
+            if (key_exists($key, $this->__to_validate)) {
+                $subset[$key] = $this->__to_validate[$key];
+                $found = true;
+            }
+            if (!$found && $this->mode === "required") {
+                throw new \Validation\Exceptions\ValidationFailed("For this form, all fields are required.");
+            }
         }
 
         return $subset;

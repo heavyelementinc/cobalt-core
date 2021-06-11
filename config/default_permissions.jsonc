@@ -8,6 +8,14 @@
         "dangerous": true,
         "default": false
     },
+    "Auth_allow_creating_users": {
+        "groups": {
+            "Users": true
+        },
+        "label": "Able to create new user accounts.",
+        "dangerous": true,
+        "default": false
+    },
     "Auth_allow_editing_users": {
         "groups": {
             "Users": true

@@ -10,6 +10,8 @@ class FormRequest {
         this.method = this.form.getAttribute("method");
         this.format = this.form.getAttribute("format") || "application/json; charset=utf-8";
         this.token = this.form.getAttribute("token") || "";
+        this.update = this.form.getAttribute("update-on-success") || "true";
+        this.revert = this.form.getAttribute("revert-on-failure") || "true";
         this.headers = {
             'X-Mitigation': this.token
         };
@@ -85,6 +87,8 @@ class FormRequest {
             throw new Error(error);
         }
 
+        if (this.update) this.update_fields(result);
+        if (this.revert) this.revert_fields();
 
         this.form.dispatchEvent(this.onsuccess);
     }
@@ -125,6 +129,15 @@ class FormRequest {
     }
 
     update_fields(data) {
+        for (const i in data) {
+            if (i in this.el_list) {
+                this.el_list[i].value(data[i]);
+            }
+        }
+    }
+
+    /** @todo finish revert on failure */
+    revert_fields() {
 
     }
 
@@ -137,13 +150,12 @@ class FormRequest {
 }
 
 class LoginFormRequest extends FormRequest {
-    async submit(e) {
+    async send() {
         if (this.asJSON === false) return;
-        e.preventDefault();
         let error_container = this.form.querySelector(".error");
         error_container.innerText = "";
-        let formdata = new FormData(this.form);
-        let data = Object.fromEntries(formdata);
+
+        let data = this.build_query();
         let headers = { ...this.headers, "Authentication": btoa(`${data.username}:${data.password}`) }
         delete data.username;
         delete data.password;

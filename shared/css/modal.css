@@ -53,6 +53,8 @@ modal-box {
     min-width: 20%;
     opacity: 0;
     transition: transform .5s, opacity .5s;
+    overflow:hidden;
+    border-radius: 4px;
 }
 
   modal-box.modal-window--input input {

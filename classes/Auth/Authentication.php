@@ -10,10 +10,12 @@ namespace Auth;
 class Authentication {
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
+
+
         $this->session = new CurrentSession();
-        if (isset($this->session->session->user_id)) $ua = new UserAccount($this->session->session->user_id);
+        if (isset($this->session->session->user_id)) $ua = new UserCRUD();
         else return $this;
-        $this->user = $ua->get_user_by_id($this->session->session->user_id);
+        $this->user = $ua->getUserById($this->session->session->user_id);
         $this->permissions = new Permissions();
         if (!$this->user) {
             $GLOBALS['session'] = null;
@@ -28,8 +30,8 @@ class Authentication {
     function login_user($username, $password, $stay_logged_in = false) {
         $stock_message = "Invalid credentials.";
         /** Get our user by their username or email address */
-        $ua = new UserAccount();
-        $user = $ua->get_user_by_uname_or_email($username);
+        $ua = new UserCRUD();
+        $user = $ua->getUserByUnameOrEmail($username);
 
         /** If we don't have a user account after our query has run, then the client
          * submitted a username/email address that hasn't been registered, yet. */

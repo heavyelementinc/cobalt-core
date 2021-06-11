@@ -1,39 +1,40 @@
 
-form-request {
+:is(form-request,login-form-request) {
   display:block;
   position:relative;
+  overflow:hidden;
 }
 
-form-request > section{
+:is(form-request,login-form-request) > section{
   position:absolute;
   height:100%;
   width:100%;
   transition: transform .5s, opacity .5s;
 }
 
-form-request > section.form-request--actual{
+:is(form-request,login-form-request) > section.form-request--actual{
   position: relative;
 }
 
-form-request > .form-request--processing {
+:is(form-request,login-form-request) > .form-request--processing {
   top:0;
 }
 
-form-request > .form-request--complete {
+:is(form-request,login-form-request) > .form-request--complete {
   top:0;
 }
 
-form-request > section.current.current{
+:is(form-request,login-form-request) > section.current.current{
   transform: translateX(0);
   opacity: 1;
 }
 
-form-request > section.next{
+:is(form-request,login-form-request) > section.next{
   transform: translateX(100%);
   opacity: 0;
 }
 
-form-request > section.previous{
+:is(form-request,login-form-request) > section.previous{
   transform: translateX(-100%);
   opacity: 0;
 }

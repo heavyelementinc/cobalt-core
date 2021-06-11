@@ -493,11 +493,12 @@ function is_child_dir($base_dir, $path) {
  * 
  * @param string $directory_group the name of the key
  */
-function get_route_group($directory_group, $with_icon = false, $classes = "", $id = "") {
-    if ($with_icon) $classes .= " directory--icon-group";
-    if ($id) $id = "id='$id' ";
-    if ($classes) $classes = " $classes";
-    $ul = "<ul $id" . "class='directory--group$classes'>";
+function get_route_group($directory_group, $misc = []) {
+    $misc = array_merge([$misc['width_icon'] => false, 'prefix' => "", 'classes' => "", 'id' => ""], $misc);
+    if ($misc['width_icon']) $misc['classes'] .= " directory--icon-group";
+    if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
+    if ($misc['classes']) $misc['classes'] = " $misc[classes]";
+    $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
 
     foreach ($GLOBALS['router']->routes['get'] as $route) {
         $groups = $route['navigation'] ?? false;
@@ -509,17 +510,18 @@ function get_route_group($directory_group, $with_icon = false, $classes = "", $i
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
 
         $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
-        $ul .= build_directory_item($info, $with_icon);
+        $ul .= build_directory_item($info, $misc['width_icon'], $misc['prefix']);
     }
 
     return $ul . "</ul>";
 }
 
-function build_directory_item($item, $icon = false) {
+function build_directory_item($item, $icon = false, $prefix = "") {
     if ($icon) $icon = "<ion-icon name='$item[icon]'></ion-icon>";
     else $icon = "";
     $attributes = $item["attributes"] ?? '';
-    return "<li><a href='$item[href]' $attributes>$icon" . "$item[name]</a></li>";
+    if (!empty($prefix) && $prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
+    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a></li>";
 }
 
 /** Convert cents to dollars with decimal fomatting (not prepended by a "$" dollar sign)

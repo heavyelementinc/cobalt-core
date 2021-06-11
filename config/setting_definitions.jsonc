@@ -204,7 +204,10 @@
             "calendar-cell-other-bg": "#EFEFEF",
             "calendar-cell-txt": "#000",
             "calendar-header-color": "var(--project-color-button-init)",
-            "calendar-header-text": "var(--project-color-button-text)"
+            "calendar-header-text": "var(--project-color-button-text)",
+            "action-menu-background": "var(--project-color-input-disabled)",
+            "action-menu-border": "var(--project-color-table-border)",
+            "action-menu-hover": "var(--project-color-inactive)"
         },
         "$merge": true,
         "$style": true
@@ -226,7 +229,8 @@
             "FormRequest.js",
             "ApiFetch.js",
             "InputComponents.js",
-            "UserMenu.js"
+            "UserMenu.js",
+            "ActionMenu.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -242,6 +246,7 @@
             "inputs.css",
             "loading-spinner.css",
             "modal.css",
+            "action-menu.css",
             "login-form.css",
             "form-request.css",
             "modal.css",
