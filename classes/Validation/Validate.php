@@ -92,11 +92,11 @@ abstract class Validate {
      * If $mode = "required" then all fields in schema will be required to be
      * included in the validation process.
      * 
-     * @param string $mode *"partial"* "required"
+     * @param string $mode *"partial"* "require"
      * @return void 
      */
     final public function setMode($mode = "partial") {
-        if (!in_array($mode, ['partial', 'required'])) throw new \Exception('Invalid validation mode.');
+        if (!in_array($mode, ['partial', 'require'])) throw new \Exception('Invalid validation mode.');
         $this->mode = $mode;
     }
 

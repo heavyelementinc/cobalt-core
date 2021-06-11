@@ -191,11 +191,20 @@ function cobalt_autoload($class) {
     }
 }
 
-/** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter
+/** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
+ * @deprecated use new *set_template("/path/to/template.html")*
  * @param string $path The path name relative to TEMPLATE_PATHS
  * @return void
  */
 function add_template($path) {
+    set_template($path);
+}
+
+/** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
+ * @param string $path The path name relative to TEMPLATE_PATHS
+ * @return void
+ */
+function set_template($path) {
     $GLOBALS['web_processor_template'] = $path;
 }
 

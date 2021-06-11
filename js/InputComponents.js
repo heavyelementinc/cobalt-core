@@ -19,15 +19,18 @@ class FormRequestElement extends HTMLElement {
         this.setup_content();
         this.getRequest();
         if (this.request.autosave === false) {
-            let searchForButtons = this;
+            // let searchForButtons = this;
             let queries = "button[type='submit'],input[type='submit']";
             // if (this.getAttribute("submit")) {
             //     searchForButtons = this.closest("modal-container");
             //     queries = "button.modal-button-okay";
             // }
-            searchForButtons.querySelector(queries).addEventListener('click', (e) => {
-                this.send(e.shiftKey);
-            });
+            let elements = this.querySelector(queries);
+            if (elements) {
+                elements.addEventListener('click', (e) => {
+                    this.send(e.shiftKey);
+                });
+            }
         }
         let error = this.querySelector(".error");
         if (!error) {
@@ -61,12 +64,14 @@ class FormRequestElement extends HTMLElement {
         } catch (error) {
             await this.regress();
             has_error = true;
+            return has_error;
         }
 
         this.mode = this.getAttribute("display-mode") ?? "edit";
         if (this.mode === "edit" && allow_final_stage) {
             await this.regress();
             this.error.innerText = this.getAttribute("success-message") || "Success";
+            allow_final_stage = false;
         }
 
         if (!allow_final_stage) return has_error;
@@ -148,7 +153,6 @@ class LoginForm extends HTMLElement {
     connectedCallback() {
         // super.connectedCallback();
         this.button = this.querySelector("button[type='submit']");
-        console.log(this, this.button)
         this.getRequest();
         this.button.addEventListener('click', e => this.request.send(e));
     }
@@ -319,7 +323,6 @@ class LoadingSpinner extends HTMLElement {
 
     connectedCallback() {
         let mode = app("loading_spinner");
-        console.log(mode);
         this.classList.add(`mode--${mode}`);
         this.innerHTML = `${this[mode]()}`;
 
@@ -576,7 +579,6 @@ class InputArray extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         const callable = `change_handler_${name.replace("-", "_")}`;
-        console.log(callable, callable in this)
         if (callable in this) {
             this[callable](newValue, oldValue);
         }
@@ -601,7 +603,6 @@ class InputArray extends HTMLElement {
 
     change_handler_value(newValue, oldValue) {
         try {
-            console.log(newValue);
             const val = JSON.parse(newValue);
             this.value = val;
             this.initSelectedValues();
@@ -738,7 +739,6 @@ class InputObjectArray extends HTMLElement {
         if (this.withAdditional === "true") this.addFieldset(); // Start with an empty one
         else if (this.values.length < 1) this.addFieldset();
 
-        console.log(this.fieldItems);
     }
 
     style() {
@@ -789,7 +789,6 @@ class InputObjectArray extends HTMLElement {
         this.button.innerText = "+";
         this.button.addEventListener("click", (e) => {
             this.addFieldset();
-            console.log(this.fieldItems);
         })
         this.shadow.appendChild(this.button);
 
@@ -820,12 +819,10 @@ class InputObjectArray extends HTMLElement {
         button.classList.add("input-fieldset--delete-button");
         button.innerText = "✖";
         button.addEventListener("click", (e) => {
-            console.log(field)
             const index = [...field.children].indexOf(field)
             field.parentNode.removeChild(field);
             delete this.fieldItems[index];
             this.fieldItems = [...Object.values(this.fieldItems)];
-            console.log(this.fieldItems);
         });
         field.appendChild(button);
     }

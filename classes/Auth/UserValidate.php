@@ -27,6 +27,7 @@ class UserValidate extends \Validation\Validate {
 
     /** Functions are called via the \Auth\CRUDUser class with the following arguments: [$value, $field, $submitted_user_info] */
     function fname($value) {
+        $this->required_field($value);
         /** Let's *not* allow the user to have whitespace prefixing of suffixing their name. */
         return trim($value);
     }
@@ -38,6 +39,7 @@ class UserValidate extends \Validation\Validate {
 
     /** Validate the username */
     function uname($value) {
+        $this->required_field($value);
         $v = trim($value);
         if ($v !== $value) throw new ValidationIssue("Your username cannot begin or end with spaces.");
         /** Count the number of users with the supplied username */

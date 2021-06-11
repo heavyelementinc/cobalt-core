@@ -22,6 +22,17 @@ class Router {
         });
     }
 
+    get location() {
+        return this.current_route;
+    }
+
+    set location(value) {
+        console.log(value);
+        /** @todo Make the router handle smooth transitioning and change this! */
+        if (e === false) window.location = url;
+        this.navigation_event(false, value);
+    }
+
     discover_route(route = null) {
         if (route === null) route = location.pathname;
         for (const regex in router_table) {

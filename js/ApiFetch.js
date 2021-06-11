@@ -28,6 +28,7 @@ class ApiFetch {
         }
         if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
         let result = await fetch(this.uri, send);
+        if ("Location" in result.headers) router.location = result.headers.Location;
         if (result.ok === false) result = await this.handleErrors(result)
         return await result.json();
     }
@@ -42,9 +43,12 @@ class ApiFetch {
                 let confirm = new FetchConfirm(await result.json(), this);
                 result = await confirm.draw();
                 if (result.json().error !== "Aborted") break;
+            case 301:
+                console.log(result);
+                router.location = result.data.message;
+                break;
             default:
                 throw new FetchError("HTTP Error", result, await result.json());
-                break;
         }
         return result;
     }

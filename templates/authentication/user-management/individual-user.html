@@ -60,7 +60,9 @@
         </section>
         <section id="manage" class="drawer-list--item">
             <h2>Manage</h2>
-            <button>Delete</button>
+            <form-request id="delete-user" method="DELETE" action="/api/v1/delete-user/{{user_account._id}}">
+                <button type="submit">Delete</button>
+            </form-request>
         </section>
     </div>
     <script src="/core-content/js/protected/UserManager.js?{{app.version}}"></script>

@@ -32,7 +32,7 @@
         "dangerous": true,
         "default": false
     },
-    "Auth_delete_user_accounts": {
+    "Auth_allow_deleting_users": {
         "groups": {
             "Users": true
         },

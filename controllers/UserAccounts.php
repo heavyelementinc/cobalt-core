@@ -22,4 +22,19 @@ class UserAccounts extends \Controllers\Pages {
         $validated = $ua->createUser($_POST);
         return $validated;
     }
+
+    function delete_user($id) {
+        $ua = new \Auth\UserCRUD();
+        $user = $ua->getUserById($id);
+        $username = "$user[fname] $user[lname] ($user[uname])";
+        $username = str_replace("  ", " ", $username);
+        confirm("Are you sure you want to delete $username?", $_POST);
+        try {
+            $result = $ua->deleteUserById($id);
+            // return $result;
+        } catch (Exception $e) {
+            throw new \Exceptions\HTTP\Error($e->getMessage());
+        }
+        throw new \Exceptions\HTTP\Moved("/admin/users/", $result);
+    }
 }

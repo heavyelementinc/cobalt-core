@@ -1,3 +1,9 @@
+/** 
+ * @event requestSuccess Will return results in e.detail
+ * @event requestFail Will return error messages in e.detail
+ * 
+ * @param
+ */
 class FormRequest {
     constructor(form, { asJSON = true, errorField = null }) {
         this.onsuccess = new Event("requestSuccess");
@@ -73,7 +79,6 @@ class FormRequest {
 
         let result = await this.send(data);
 
-        console.log(result);
     }
 
     async send(data) {
@@ -90,12 +95,12 @@ class FormRequest {
         if (this.update) this.update_fields(result);
         if (this.revert) this.revert_fields();
 
+        this.onsuccess = new CustomEvent("requestSuccess", { detail: result });
         this.form.dispatchEvent(this.onsuccess);
     }
 
     /** Autosave handler */
     autosave_handler(element, event) {
-        // console.log(element, element.value())
         let data = this.build_query([element]);
         this.send(data);
     }
@@ -112,7 +117,6 @@ class FormRequest {
     }
 
     errorHandler(error, result = null, post = null) {
-        console.log(error);
         if (error.result.code === 422) this.handleFieldIssues(error.result);
         let field = this.errorField;
         if (!field) field = this.form.querySelector(".error")
@@ -121,7 +125,6 @@ class FormRequest {
     }
 
     reset_errors() {
-        console.log("reset_errors")
         if (this.errorField) this.errorField.innerText = "";
         for (const i in this.el_list) {
             this.el_list[i].dismiss_error();

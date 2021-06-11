@@ -13,6 +13,7 @@ Route::get("/?", "CoreAdmin@index", [
 if (app('Auth_logins_enabled')) {
     /** User management interface */
     Route::get("/create-user", "CoreAdmin@create_user", [
+        'handler' => 'core/create_user.js',
         'permission' => 'Auth_allow_creating_users'
     ]);
     Route::get("/users/", "CoreAdmin@manage_users", [

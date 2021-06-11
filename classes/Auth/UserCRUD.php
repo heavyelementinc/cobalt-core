@@ -72,16 +72,23 @@ class UserCRUD extends \Drivers\Database {
             'tokens' => [],
             'verified' => false,
         ];
-
-        $result = $this->insertOne(array_merge(
+        $request = array_merge(
             $default,
             $request,
             ['_id' => $this->__id(), 'since' => $val->since()]
-        ));
+        );
+        $result = $this->insertOne($request);
 
-        if ($result->getInsertedCount() !== 1) throw new \Exceptions\HTTP\Error("Failed to create user.");
+        if ($result->getInsertedCount() !== 1) throw new \Exception("Failed to create user.");
 
+        unset($request['pword']); // Clean up
         return $request;
+    }
+
+    final function deleteUserById($id) {
+        $result = $this->deleteOne(['_id' => $this->__id($id)]);
+        if ($result->getDeletedCount() !== 1) throw new \Exception("Failed to delete user.");
+        return $result->getDeletedCount();
     }
 
 
