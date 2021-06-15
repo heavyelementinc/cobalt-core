@@ -64,8 +64,8 @@ if (app("enable_debug_routes")) {
 /** If authentications are enabled, these routes should be added to the table */
 if (app("Auth_logins_enabled")) {
     /** Basic login page */
-    Route::get(app("Auth_login_page"), "UserAccounts@login");
-
+    Route::get(app("Auth_login_page"), "CoreController@login");
+    // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
 }

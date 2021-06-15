@@ -10,13 +10,29 @@ class UserValidate extends \Validation\Validate {
         $this->collection = \db_cursor('users');
     }
 
-    protected function __get_schema() {
+    function __get_schema() {
         return [
-            "fname" => [],
-            "lname" => [],
-            "uname" => [],
-            "pword" => [],
-            "email" => [],
+            'fname' => [],
+            'lname' => [],
+            'uname' => [],
+            'pword' => [],
+            'email' => [],
+            'flags.verified' => [
+                'methods' => ['boolean_helper'],
+                'groups' => ['flags'],
+                'tag' => 'input-switch',
+                'attributes' => [],
+                'label' => 'Is user verified'
+
+            ],
+            'flags.password_reset_required' => [
+                'methods' => ['boolean_helper'],
+                'groups' => ['flags'],
+                'tag' => 'input-switch',
+                'attributes' => [],
+                'label' => 'Require password reset on next login'
+
+            ],
             // "prefs" => [],
             // "since" => [],
             // "verified" => [],
@@ -65,6 +81,10 @@ class UserValidate extends \Validation\Validate {
         if (ctype_alnum($value)) $password_fail .= "Password must contain at least one special character.\n";
 
         if (!empty($password_fail)) throw new ValidationIssue($password_fail);
+
+        $this->set("flags.password_reset_required", false);
+        $this->set("flags.password_last_changed_by", session("_id"));
+        $this->set("flags.password_last_changed_on", $this->make_date());
 
         /** Finally, we have a valid password. */
         return password_hash($value, PASSWORD_DEFAULT);

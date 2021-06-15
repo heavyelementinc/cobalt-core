@@ -352,19 +352,20 @@ class WebHandler implements RequestHandler {
 
     /** @todo restore .session.html functionality */
     function load_template($template_name) {
-        // $ext = pathinfo($template_name, PATHINFO_EXTENSION);
-        // $session_template_name = str_replace($ext, "session.$ext", $template_name);
+        $ext = pathinfo($template_name, PATHINFO_EXTENSION);
+        $session_template_name = str_replace($ext, "session.$ext", $template_name);
         $templates = [
             // __APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
             // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",
             ...$GLOBALS['TEMPLATE_PATHS']
         ];
-        // $session = session_exists();
-        // if (!$session) {
-        //     array_shift($templates);
-        //     array_shift($templates);
-        // }
-        $candidates = \find_one_file($templates, $template_name);
+
+        $round_one = $template_name;
+        if (session_exists()) {
+            $round_one = $session_template_name;
+        }
+        $candidates = \find_one_file($templates, $round_one);
+        if (!$candidates) $candidates = \find_one_file($templates, $template_name);
 
         if (!$candidates) throw new NotFound("Cannot find that file");
 

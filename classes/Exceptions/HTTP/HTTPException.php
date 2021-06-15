@@ -15,15 +15,15 @@ class HTTPException extends \Exception {
     public $data = [];
 
     function __construct($message, $data = null, $exit = true) {
-        $this->mode = $GLOBALS['route_context'];
-        $this->exit = $GLOBALS['allowed_to_exit_on_exception'];
+        $this->mode = $GLOBALS['route_context'] ?? "cli";
+        $this->exit = $GLOBALS['allowed_to_exit_on_exception'] ?? false;
         $this->data = $data;
 
         // Default to web
         $exe = "web";
-        if ($this->mode !== "web") { // If not in the web context
+        if ($this->mode !== "web" && $this->mode !== "cli") { // If not in the web context
             // Get the app settings
-            $mode = __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['exception_mode'] ?? null;
+            $mode = __APP_SETTINGS__['context_prefixes'][$this->mode]['exception_mode'] ?? null;
             if (isset($mode)) $exe = $mode;
             else $exe = "api";
         }

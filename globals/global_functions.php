@@ -69,8 +69,8 @@ function session_exists() {
  *                      Can be null.
  * @return bool true if the user has permission, false otherwise
  */
-function has_permission($perm_name, $group = null) {
-    return $GLOBALS['auth']->has_permission($perm_name, $group);
+function has_permission($perm_name, $group = null, $user = null) {
+    return $GLOBALS['auth']->has_permission($perm_name, $group, $user);
 }
 
 /** This function will return a merged array of decoded JSON files that are 
@@ -503,8 +503,8 @@ function is_child_dir($base_dir, $path) {
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
-    $misc = array_merge([$misc['width_icon'] => false, 'prefix' => "", 'classes' => "", 'id' => ""], $misc);
-    if ($misc['width_icon']) $misc['classes'] .= " directory--icon-group";
+    $misc = array_merge(['with_icon' => false, 'prefix' => "", 'classes' => "", 'id' => ""], $misc);
+    if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
@@ -519,7 +519,7 @@ function get_route_group($directory_group, $misc = []) {
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
 
         $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
-        $ul .= build_directory_item($info, $misc['width_icon'], $misc['prefix']);
+        $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
     }
 
     return $ul . "</ul>";
@@ -531,6 +531,30 @@ function build_directory_item($item, $icon = false, $prefix = "") {
     $attributes = $item["attributes"] ?? '';
     if (!empty($prefix) && $prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
     return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a></li>";
+}
+
+function get_schema_group_names(string $group_name, array $schema) {
+    $elements = [];
+    foreach ($schema as $field => $value) {
+        if (isset($value['groups']) && in_array($group_name, $value['groups'])) $elements += [$field => $value];
+    }
+    return $elements;
+}
+
+function get_schema_group_elements($group_name, $schema) {
+}
+
+function schema_group_element($tag, $attributes, $label = "") {
+    $closures = [
+        'input' => "",
+        'default' => "</$tag>"
+    ];
+    $attrs = "";
+    foreach ($attributes as $key => $value) {
+        if (is_callable(($value))) $value = $value($key, $attributes, $label);
+        $attrs = " $key=\"" . htmlspecialchars($value) . "\"";
+    }
+    return "<$tag$attributes>";
 }
 
 /** Convert cents to dollars with decimal fomatting (not prepended by a "$" dollar sign)

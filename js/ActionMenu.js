@@ -46,7 +46,7 @@ class ActionMenu {
     draw() {
         this.menu = document.createElement("action-menu")
         let header = document.createElement("header")
-        header.innerHTML = `<h1>${this.title}</h1><button>✖️</button>`
+        header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
         this.menu.appendChild(header);
         header.querySelector("button").addEventListener("click", (e) => this.closeMenu())
         for (const i of this.actions) {

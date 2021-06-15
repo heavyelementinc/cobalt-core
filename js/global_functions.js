@@ -1,3 +1,5 @@
+window.closeGlyph = "&#10006;"; // "✖️";
+
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
     if (setting === null) return document.GLOBAL_SETTINGS;
@@ -578,4 +580,15 @@ function get_form_input(el, form) {
     }
     if (type in classMap === false) type = "default";
     return new classMap[type](el, { form: form });
+}
+
+/** Must have a class name provided and that class name should have an animation. */
+async function wait_for_animation(element, animationClass, maxDuration = 2000) {
+    return new Promise((resolve, reject) => {
+        if (element.classList.contains(animationClass)) console.warn(`Element already has ${animationClass} as a class.`);
+        element.addEventListener("animationend", e => resolve(), { once: true });
+        element.classList.add(animationClass);
+        if (element.style.animationPlayState !== "running") element.style.animationPlayState = "running";
+        setTimeout(() => resolve(), maxDuration);
+    });
 }

@@ -18,6 +18,7 @@ class InputClass_default {
         this.name = element.name || "";
         this.form = form || this.get_form();
         this.error = false;
+        this.was = this.element.value;
         try {
             this.update = (this.element.getAttribute("for")) ? document.querySelectorAll(this.element.getAttribute("for")) : false;
         } catch (error) {
@@ -28,8 +29,12 @@ class InputClass_default {
         this.callbacks();
     }
 
-    value(set = null) {
-        if (set === null) return this.element.value;
+    get value() {
+        return this.element.value;
+    }
+
+    set value(set = null) {
+        this.was = this.value;
         this.element.value = set;
         return set;
     }
@@ -46,7 +51,7 @@ class InputClass_default {
         if (this.update) {
             this.form.addEventListener("requestSuccess", e => {
                 for (const i of this.update) {
-                    i.innerText = this.value();
+                    i.innerText = this.value;
                 }
             });
         }
@@ -95,16 +100,20 @@ class InputClass_default {
 }
 
 class InputClass_date extends InputClass_default {
-    value(set = null) {
-        if (set === null) return this.element.value;
+
+    set value(set = null) {
+        this.was = this.value;
         if (typeof set === "string") return this.element.value = set;
         if ("$date" in set && "$numberLong" in set.$date) return this.element.value = mongoDate(set.$date.$numberLong)
     }
 }
 
 class InputClass_checkbox extends InputClass_default {
-    value(set = null) {
-        if (set === null) return this.element.checked
+    get value() {
+        return this.element.checked
+    }
+    set value(set) {
+        this.was = this.value;
         this.element.checked = set;
         return set;
     }
@@ -116,26 +125,31 @@ class InputClass_checkbox extends InputClass_default {
 }
 
 class InputClass_switch extends InputClass_default {
-    value(set = null) {
-        if (set === null) return this.element.querySelector("input[type='checkbox']").checked;
+    get value() {
+        return this.element.querySelector("input[type='checkbox']").checked;
+    }
+
+    set value(set) {
+        this.was = this.value;
         this.element.querySelector("input[type='checkbox']").checked = set;
         return set;
     }
 }
 
 class InputClass_radio extends InputClass_default {
-    value(set = null) {
-        if (set === null) return this.get()
-        this.set(set);
-    }
+    // value(set = null) {
+    //     if (set === null) return this.get()
+    //     this.set(set);
+    // }
 
-    get() {
+    get value() {
         const element = this.form.querySelector(`[name="${this.name}"]:checked`);
         if (!element) return null;
         return element.value;
     }
 
-    set(set) {
+    set value(set) {
+        this.was = this.value;
         if (!set) return;
         let candidate = this.form.querySelector(`[name="${this.name}"][value="${set}"]`);
         if (candidate !== null) candidate.checked = true;
@@ -163,19 +177,24 @@ class InputClass_button extends InputClass_default {
 }
 
 class InputClass_number extends InputClass_default {
-    value(set = null) {
-        if (set === null) return Number(this.element.value);
+    get value() {
+        return Number(this.element.value);
+    }
+
+    set value(set) {
+        this.was = this.value;
         this.element.value = set;
         return Number(set);
     }
 }
 
 class InputClass_array extends InputClass_default {
-    value(set = null) {
-        if (set === null) return this.collectArrayElements();
-        else {
-            this.setArrayElements();
-        }
+    get value() {
+        return this.collectArrayElements();
+    }
+    set value(set = null) {
+        this.was = this.value;
+        this.setArrayElements();
     }
 
     collectArrayElements() {
@@ -189,8 +208,9 @@ class InputClass_array extends InputClass_default {
 }
 
 class InputClass_select extends InputClass_default {
-    value(set = null) {
-        if (set === null) return this.element.value
+
+    set value(set = null) {
+        this.was = this.value;
         // Query for the matching option
         let options = this.element.querySelector(`option[value='${set}']`);
         let found = false;

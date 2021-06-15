@@ -10,7 +10,7 @@
         <section id="basics" class="drawer-list--item drawer-list--active">
             <div>
                 <h2>Basic Info</h2>
-                <form-request id="basic-info-form" method='PUT' action="/api/v1/user_update/basics/{{user_account._id}}"
+                <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{user_account._id}}/update"
                     autosave="autosave">
                     <fieldset>
                         <label>Name</label>
@@ -27,28 +27,34 @@
                     </fieldset>
                 </form-request>
             </div>
-            <hr>
             <div>
                 <h2>Change Password</h2>
-                <form-request id="password-reset" method="PUT"
-                    action="/api/v1/user_update/password/{{user_account._id}}">
+                <form-request id="password-reset" method="PUT" action="/api/v1/user/{{user_account._id}}/password">
                     <fieldset>
                         <input type="password" name="pword" placeholder="Password" required="required">
                     </fieldset>
-                    <button>Change Password</button>
+                    <input type='submit' value="Change Password">
+                </form-request>
+            </div>
+            <div>
+                <h2>Account Flags</h2>
+                <form-request id="account-flags" method="PUT" action="/api/v1/user/{{user_account._id}}/update"
+                    autosave="autosave">
+                    {{!account_flags}}
                 </form-request>
             </div>
         </section>
         <section id="permissions" class="drawer-list--item">
-            <form-request id="permissions-form" method="PUT"
-                action="/api/v1/user_update/permissions/{{user_account._id}}" autosave="autosave">
+            <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{user_account._id}}/permissions"
+                autosave="autosave">
                 <div style="flex-grow:1">
                     <h1>Permissions</h1>
                     {{!permission_table.permissions}}
                 </div>
                 <div style="min-width:35%; padding: 0 0 1rem 1rem;">
                     <h1>Group Membership<help-span
-                            value="Group membership grants the user *all* permissions for that group."></help-span>
+                            value="Group membership grants the user *all* permissions for that group. However, any permissions the user has been granded/denied will be preserved.">
+                        </help-span>
                     </h1>
                     {{!permission_table.groups}}
                 </div>
@@ -60,7 +66,7 @@
         </section>
         <section id="manage" class="drawer-list--item">
             <h2>Manage</h2>
-            <form-request id="delete-user" method="DELETE" action="/api/v1/delete-user/{{user_account._id}}">
+            <form-request id="delete-user" method="DELETE" action="/api/v1/user/{{user_account._id}}/delete">
                 <button type="submit">Delete</button>
             </form-request>
         </section>
@@ -70,34 +76,6 @@
     <style>
         #basics.drawer-list--active {
             display: flex;
-        }
-
-        #permissions ul {
-            list-style: none;
-            padding: 0;
-            margin-top: .5rem;
-        }
-
-        #permissions h2 {
-            margin-bottom: 0;
-        }
-
-        #permissions li,
-        #permissions h2 {
-            display: flex;
-            align-items: center;
-        }
-
-        #permissions li {
-            padding: 1rem 0;
-        }
-
-        #permissions li:nth-of-type(odd) {
-            background: rgba(0, 0, 0, .1);
-        }
-
-        #permissions input-switch {
-            margin: 0 1rem 0 1rem;
         }
 
         #permissions-form .form-request--actual {

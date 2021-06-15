@@ -230,7 +230,8 @@
             "ApiFetch.js",
             "InputComponents.js",
             "UserMenu.js",
-            "ActionMenu.js"
+            "ActionMenu.js",
+            "StatusMessage.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -247,6 +248,7 @@
             "loading-spinner.css",
             "modal.css",
             "action-menu.css",
+            "status-message.css",
             "login-form.css",
             "form-request.css",
             "modal.css",
@@ -314,6 +316,9 @@
     that requires privileges, has to do with user accounts, or sessions should
     "$required": {"Auth_user_accounts_enabled": true} */
     "Auth_user_accounts_enabled": {
+        "default": true
+    },
+    "Auth_require_verified_status": {
         "default": true
     },
     "Admin_panel_prefix": {

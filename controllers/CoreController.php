@@ -11,6 +11,6 @@ class CoreController extends \Controllers\Pages {
         if (app("Auth_account_creation_enabled"))
             add_vars(['create_account' => "<hr>\n<a href='" . app("Auth_onboading_url") . "'>Sign up</a>"]);
 
-        add_template($login);
+        set_template($login);
     }
 }

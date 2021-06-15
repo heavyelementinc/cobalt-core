@@ -49,33 +49,38 @@ class UserCRUD extends \Drivers\Database {
         ]);
     }
 
-    final function updateUser($id) {
+    final function updateUser($id, $request) {
         $val = new UserValidate();
-        $mutant = $val->validate($_POST);
-        $this->updateOne(
+        $mutant = $val->validate($request);
+        $result = $this->updateOne(
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
+        if ($result->getModifiedCount() !== 1) throw new \Exception("Failed to update fields");
         return $mutant;
     }
 
-    final function createUser() {
+    final function createUser($request) {
         $val = new UserValidate();
 
         $val->setMode("require");
-        $request = $val->validate($_POST);
+        $mutant = $val->validate($request);
 
         $default = [
-            'prefs' => [],
+            'prefs' => json_decode("{}"),
             'groups' => [],
-            'permissions' => [],
+            'permissions' => json_decode("{}"),
             'tokens' => [],
-            'verified' => false,
+            'since' => $this->__date(null),
+            'flags' => [
+                'verified' => false,
+                'update_password' => false,
+            ]
         ];
         $request = array_merge(
             $default,
-            $request,
-            ['_id' => $this->__id(), 'since' => $val->since()]
+            $mutant,
+            ['_id' => $this->__id()]
         );
         $result = $this->insertOne($request);
 
@@ -124,5 +129,18 @@ class UserCRUD extends \Drivers\Database {
         }
 
         return $options;
+    }
+
+    final function getUserFlags($values) {
+        $val = new UserValidate();
+        $flags = \get_schema_group_names('flags', $val->__get_schema());
+        $el = "";
+        foreach ($flags as $name => $elements) {
+            $checked = "";
+            $n = str_replace("flags.", "", $name);
+            if (isset($values['flags'][$n]) && $values['flags'][$n]) $checked = " checked='true'";
+            $el .= "<li><input-switch name='$name'$checked></input-switch><label>$elements[label]</label></li>";
+        }
+        return "<ul class='list-panel'>$el</ul>";
     }
 }

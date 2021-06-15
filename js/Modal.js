@@ -250,7 +250,7 @@ class Modal {
         if (!this.close_btn) return;
         let btn = document.createElement("button");
         btn.classList.add("modal-close-button");
-        btn.innerHTML = "&#10006;";
+        btn.innerHTML = window.closeGlyph;
         this.container.appendChild(btn);
         btn.addEventListener("click", e => this.close());
     }

@@ -23,7 +23,10 @@
 // the not-insane array syntax and the spread "..." syntax)
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
-// ENV_ROOT defines the root of the core files (the dir this file resides in)
+/* Cobalt Version Number */
+define("__COBALT_VERSION", "0.1");
+
+/* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
 
 // Establish our app root
@@ -69,7 +72,8 @@ $app = $application;
  * */
 define("__APP_SETTINGS__", $application->get_settings());
 
-
+$depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
+if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");
 
 /** If we're NOT in a CLI environment, we should import the context processor */
 if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";

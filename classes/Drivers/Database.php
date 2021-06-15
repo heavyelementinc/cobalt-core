@@ -26,7 +26,8 @@ abstract class Database {
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
 
-    function __construct() {
+    function __construct($database = null) {
+        if ($database !== null) $this->db = $database;
         $this->collection = db_cursor($this->get_collection_name(), $this->db);
     }
 
@@ -36,7 +37,7 @@ abstract class Database {
         return new ObjectId($id);
     }
 
-    final function __date($value) {
+    final function __date($value = null) {
         $date = new UTCDateTime($value);
         return $date->timestamp;
     }
@@ -58,6 +59,10 @@ abstract class Database {
 
     final function find($filter = [], array $options = []) {
         return $this->collection->find($filter, $options);
+    }
+
+    final function count($filter, $options = []) {
+        return $this->collection->count($filter, $options);
     }
 
 

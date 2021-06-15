@@ -217,6 +217,7 @@ class InputSwitch extends HTMLElement {
         this.checkbox.checked = !this.checkbox.checked;
         const change = new Event("change");
         this.checkbox.dispatchEvent(change);
+        this.dispatchEvent(change);
     }
 
     clearIntermediateState(e) {
@@ -807,7 +808,7 @@ class InputObjectArray extends HTMLElement {
         for (const i in values) {
             const field = fieldset.querySelector(`[name='${i}']`);
             if (!field) continue;
-            this.fieldItems[index][i].value(values[i]);
+            this.fieldItems[index][i].value = values[i];
         }
 
         this.addFieldsetButton(fieldset)
@@ -834,7 +835,7 @@ class InputObjectArray extends HTMLElement {
             data[i] = {}
             const fieldElements = get_form_elements(e);
             fieldElements.forEach(e => {
-                data[i][e.name] = e.value();
+                data[i][e.name] = e.value;
             })
         })
         return data;
@@ -846,3 +847,80 @@ class InputObjectArray extends HTMLElement {
 }
 
 customElements.define("input-object-array", InputObjectArray);
+
+class HelpSpan extends HTMLElement {
+
+    constructor() {
+        super();
+        this.message = document.createElement("article");
+        this.message.classList.add("help-span-article");
+        this.trunkatingContainer = this.closest("form-request") || document.body;
+        this.justifyRightClass = "help-span-article--right-justified";
+    }
+
+    connectedCallback() {
+        this.articleShown = "help-span-article--shown";
+
+        this.message.innerText = this.value || this.getAttribute("value");
+        this.appendChild(this.message);
+
+        this.message.classList.remove(this.articleShown);
+        this.addEventListener("mouseover", e => {
+            this.message.classList.add(this.articleShown);
+            this.justifyRight();
+        })
+
+        this.addEventListener("mouseout", e => {
+            this.message.classList.remove(this.articleShown);
+        })
+    }
+
+    get value() {
+        return this.val;
+    }
+
+    set value(val) {
+        this.setAttribute("value", val);
+    }
+
+    static get observedAttributes() {
+        return ['value'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_value(val) {
+        this.val = val;
+        this.message.innerText = val;
+    }
+
+    justifyRight() {
+        this.message.classList.remove(this.justifyRightClass)
+
+        let container = this.getOffsets(this.trunkatingContainer);
+        let message = this.getOffsets(this.message);
+
+        let rightmostEdgeContainer = container.w;
+        let rightmostEdgeMessage = message.xPrime + message.w;
+        if (rightmostEdgeContainer <= rightmostEdgeMessage) this.message.classList.add(this.justifyRightClass)
+    }
+
+    getOffsets(element) {
+        let offsets = {
+            x: element.offsetLeft,
+            y: element.offsetTop,
+            xPrime: element.parentNode.offsetLeft + element.offsetLeft,
+            yPrime: element.parentNode.offsetTop + element.offsetTop,
+            h: element.offsetHeight,
+            w: element.offsetWidth
+        }
+        return offsets;
+    }
+}
+
+customElements.define("help-span", HelpSpan);

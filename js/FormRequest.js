@@ -110,7 +110,7 @@ class FormRequest {
         if (list === null) list = this.el_list;
         let query = {};
         for (var i in list) {
-            query[list[i].element.getAttribute("name")] = list[i].value();
+            query[list[i].element.getAttribute("name")] = list[i].value;
         }
         if (this.autosave && this.include) query.include = this.include;
         return query;
@@ -134,7 +134,7 @@ class FormRequest {
     update_fields(data) {
         for (const i in data) {
             if (i in this.el_list) {
-                this.el_list[i].value(data[i]);
+                this.el_list[i].value = data[i];
             }
         }
     }
@@ -170,5 +170,6 @@ class LoginFormRequest extends FormRequest {
             return;
         }
         if (result.login === "successful") window.location.reload();
+        console.log(result)
     }
 }

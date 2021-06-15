@@ -6,17 +6,28 @@
 
 namespace Auth;
 
-class Permissions {
+use Drivers\Database;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\Unauthorized;
+
+class Permissions extends Database {
     private $permission_files = [
         __ENV_ROOT__ . "/config/default_permissions.jsonc",
         __APP_ROOT__ . "/private/config/app_permissions.jsonc",
         __APP_ROOT__ . "/private/config/app_permissions.json",
     ];
     public $valid = [];
+    public $groups = [];
+    public $group_rings = [];
 
     function __construct() {
+        parent::__construct();
         $this->load_permissions();
-        $this->collection = \db_cursor('users');
+        // $this->collection = \db_cursor('users');
+    }
+
+    function get_collection_name() {
+        return "users";
     }
 
     /** Load the permissions and create a list of valid groups*/
@@ -26,9 +37,11 @@ class Permissions {
 
         /** Create a list of groups */
         $this->groups = [];
+        if (app('Auth_enable_root_group')) $this->groups[0] = "root";
         foreach ($this->valid as $valid) {
             /** Merge the list of groups */
-            $this->groups = [...$this->groups, ...array_keys($valid['groups'])];
+            array_push($this->groups, $valid['group']);
+            $this->group_rings[$valid['group']] = $valid['ring'] ?? 1000;
         }
         /** Make the groups list unique */
         $this->groups = array_unique($this->groups);
@@ -56,30 +69,39 @@ class Permissions {
         foreach ($valid as $name => $item) {
 
             $dangerous = "";
+
             /** Check the user's permission status for this permission */
-            $checked = (isset($user['permissions'][$name]) && $user['permissions'][$name]) ? "true" : "false";
+            // $checked = (isset($user['permissions'][$name]) && $user['permissions'][$name]) ? "true" : "false";
+            $checked = json_encode(has_permission($name, $item['group'], $user));
             /** Get the current group */
-            $group = array_keys((array)$item['groups'])[0];
+            $group = $item['group'];
             $groupCheck = "false";
             /** Does the user belong to the current group? */
             if (in_array($group, (array)$user['groups'])) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
-                $table[$group] = "<h2>$group</h2>\n<ul>";
+                $table[$group] = "<h2>$group</h2>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
             /** Concat our current permission into the group */
             $table[$group] .= "<li><input-switch type='checkbox' checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
-        return ['permissions' => implode("</ul>\n", $table) . "</ul>\n", 'groups' => "<ul>$root_group $groups</ul>"];
+        return ['permissions' => implode("</ul>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$root_group $groups</ul>"];
     }
 
     function validate($id, $request) {
         $include = $id;
 
+        $ring = (app("Auth_enable_root_group") && in_array('root', (array)session('groups'))) ? 0 : 999;
+        foreach ($this->valid as $data) {
+            $r = ($data['ring'] ?? 999);
+            if ($r < $ring) $ring = $r;
+        }
+
         // Establish our perms
         $perms = [];
+        $level = 1000;
         foreach ($request as $name => $value) {
             // Our name
             $n = "";
@@ -87,64 +109,113 @@ class Permissions {
             if (strpos($name, "permissions.") !== false) {
                 $n = str_replace("permissions.", "", $name);
                 $type = "permissions";
+                $level = $this->valid[$n]['ring'] ?? 1000;
             } else if (strpos($name, "groups") !== false) {
                 $n = str_replace("groups.", "", $name);
                 $type = "groups";
+                $level = $this->group_rings[$n] ?? 1000;
+                if ($n === "root") $level = 0;
             }
             if (!key_exists($type, $perms)) $perms[$type] = [];
             $perms[$type][$n] = [$name, $value];
         }
-        $result = [null, null];
+
+        if ($ring > $level) throw new Unauthorized("You can't grant privilege levels higher than your own.");
+
+        $result = [[], []];
         if (isset($perms['permissions'])) $result[0] = $this->update_permissions($perms['permissions'], $include);
         if (isset($perms['groups'])) $result[1] = $this->update_groups($perms['groups'], $include);
-        return [...$result];
+        return array_merge($result[0], $result[1]);
     }
 
     /** @todo Migrate this over to \Auth\UserAccountValidation->validate_permissions */
     function update_permissions($permissions, $user_id) {
         $valid = [];
+
         foreach ($permissions as $name => $permission) {
-            if (!key_exists($name, $this->valid)) throw new \Exceptions\HTTP\BadRequest("Your request contained unexpected data.");
-            if (!is_bool($permission[1])) throw new \Exceptions\HTTP\BadRequest("Your request contained unexpected data.");
+            if (!key_exists($name, $this->valid)) throw new BadRequest("Your request contained unexpected data.");
+            if (!is_bool($permission[1])) throw new BadRequest("Your request contained unexpected data.");
 
             $valid += [$permission[0] => $permission[1]];
         }
-        $this->collection->updateOne(
-            ['_id' => new \MongoDB\BSON\ObjectId($user_id)],
-            ['$set' => $valid]
-        );
+        try {
+            $this->updateOne(
+                ['_id' => $this->__id($user_id)],
+                ['$set' => $valid]
+            );
+        } catch (\Exception $e) {
+            $this->updateOne(
+                ['_id' => $this->__id($user_id)],
+                [
+                    '$set' => [
+                        'permissions' => [str_replace("permissions.", "", $permission[0]) => $permission[1]]
+                    ]
+                ]
+            );
+        }
+
         return $valid;
     }
 
     /** @todo Migrate this over to \Auth\UserAccountValidation->validate_groups */
     function update_groups($groups, $user_id) {
-        $valid = [
+        $user = $this->findOne(['_id' => $this->__id($user_id)]);
+
+        if (isset($groups['root'])) {
+            if ($groups['root'][1] === true) {
+                \confirm(
+                    "<h1>Hold on...</h1>
+                    <p>You're about to grant $user[fname] $user[lname] total control over " . app("app_short_name") . "!</p>
+                    <p>This means they'd be allowed to remove your root privileges.</p> 
+                    <p>Are you <strong>sure</strong> you want to continue?</p>",
+                    $_POST,
+                    "I'm sure",
+                    true
+                );
+            } else if ((string)$user['_id'] === (string)session('_id')) {
+                $remaining = $this->count(['groups' => 'root']) - 1;
+                if ($remaining === 0) throw new Unauthorized("You're the only root user and therefore you cannot remove yourself from this group.");
+                \confirm(
+                    "<h1>Hold on...</h1>
+                    <p>You're about to revoke your own root privileges!</p>
+                    <p>If you do this, there will only be <strong>$remaining</strong> root users left and you'll have to have one of them restore you to this group!</p>
+                    <p>Are you <strong>sure</strong> you want to continue?</p>",
+                    $_POST,
+                    "I'm sure",
+                    true
+                );
+            }
+        }
+        $query = [
             '$addToSet' => ['groups' => ['$each' => []]],
-            '$pull' => ['groups' => []]
+            '$pull' => ['groups' => ['$in' => []]]
         ];
         $return = [];
         foreach ($groups as $group => $data) {
             $key = '$addToSet';
             if ($data[1] === false) $key = '$pull';
-            if (!in_array($group, $this->groups)) throw new \Exceptions\HTTP\BadRequest("Your request contained unexpected data.");
-            if ($key === '$addToSet') array_push($valid[$key]['groups']['$each'], $group);;
-            if ($key === '$pull') array_push($valid[$key]['groups'], $group);
-            array_push($return, [$data[0] => (bool)$data[1]]);
+            if (!in_array($group, $this->groups)) throw new BadRequest("Your request contained unexpected data.");
+            if ($key === '$addToSet') array_push($query[$key]['groups']['$each'], $group);;
+            if ($key === '$pull') array_push($query[$key]['groups']['$in'], $group);
+            $return[$data[0]] = (bool)$data[1];
+            foreach ($this->valid as $perm => $meta) {
+                if ($meta['group'] === $group) {
+                    $return["permissions.$perm"] = (isset($user['permissions'][$perm])) ? $user['permissions'][$perm] : (bool)$data[1];
+                }
+            }
         }
 
-        if (count($valid['$addToSet']['groups']['$each']) === 0) unset($valid['$addToSet']);
-        if (count($valid['$pull']['groups']) === 0) unset($valid['$pull']);
+        if (count($query['$addToSet']['groups']['$each']) === 0) unset($query['$addToSet']);
+        if (count($query['$pull']['groups']['$in']) === 0) unset($query['$pull']);
 
-        if (count($valid) === 0) throw new \Exceptions\HTTP\BadRequest("Your request contained unexpected data.");
+        if (count($query) === 0) throw new BadRequest("Your request contained unexpected data.");
 
-        $result = $this->collection->updateOne(
-            ['_id' => new \MongoDB\BSON\ObjectId($user_id)],
-            $valid
+        $result = $this->updateOne(
+            ['_id' => $this->__id($user_id)],
+            $query
         );
 
+        if ($result->getModifiedCount() !== 1) throw new BadRequest("Matched " . $result->getMatchedCount() . " and failed to update.");
         return $return;
-
-        // if($result->getModifiedCount() !== 1)
-
     }
 }

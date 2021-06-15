@@ -1,43 +1,45 @@
 /* Core permissions file. */
 {
-    "Admin_panel_access": {
-        "groups": {
-            "Admin": true
-        },
-        "label": "Access to the admin panel.",
+    "self": {
+        "group": "Self",
+        "label": "Able to modify basic info for their own account.<help-span value='This includes first/last, username, email address, and other info.'></help-span>",
         "dangerous": true,
-        "default": false
+        "default": true,
+        "ring": 3
+    },
+    "Admin_panel_access": {
+        "group": "Admin",
+        "label": "Access to the admin panel.<help-span value='Access to the /admin section of this Cobalt application.'></help-span>",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
     },
     "Auth_allow_creating_users": {
-        "groups": {
-            "Users": true
-        },
+        "group": "Users",
         "label": "Able to create new user accounts.",
         "dangerous": true,
-        "default": false
+        "default": false,
+        "ring": 2
     },
     "Auth_allow_editing_users": {
-        "groups": {
-            "Users": true
-        },
-        "label": "Access user editing features and change user account info.",
+        "group": "Users",
+        "label": "Access user editing features and change user account info.<help-span value='Modify any user account information besides permissions and groups'></help-span>",
         "dangerous": true,
-        "default": false
+        "default": false,
+        "ring": 2
     },
     "Auth_allow_modifying_user_permissions": {
-        "groups": {
-            "Users": true
-        },
+        "group": "Users",
         "label": "Modify user account permissions and add/remove users from groups.",
         "dangerous": true,
-        "default": false
+        "default": false,
+        "ring": 2
     },
     "Auth_allow_deleting_users": {
-        "groups": {
-            "Users": true
-        },
+        "group": "Users",
         "label": "Able to delete user accounts",
         "dangerous": true,
-        "default": false
+        "default": false,
+        "ring": 2
     }
 }

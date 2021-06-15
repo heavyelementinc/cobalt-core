@@ -53,6 +53,7 @@ use \Validation\Exceptions\ValidationIssue;
 abstract class Validate {
     protected $mode = "partial";
     private $failed = [];
+    protected $set_values = [];
 
     function __construct() {
     }
@@ -162,7 +163,7 @@ abstract class Validate {
         /** Check if we have an __merge_private_fields method and, if so,
          * array_merge $mutant with the results of __merge_private_fields;
          */
-        return array_merge($mutant, $this->__merge_private_fields($mutant));
+        return array_merge($mutant, $this->set_values, $this->__merge_private_fields($mutant));
     }
 
     /** After fields have been validated, the validate method will call __merge_private_fields
@@ -180,6 +181,32 @@ abstract class Validate {
     /* ============================== */
     /*        HELPER FUNCTIONS        */
     /* ============================== */
+
+    /** Set a field's value from within another function.
+     * 
+     * For example, if you want to validate a password AND change a flag that 
+     * the password has been changed.
+     * 
+     * @param string $field the field name
+     * @param mixed $value the value to be set
+     * @return void 
+     */
+    protected function set($field, $value) {
+        $this->set_values[$field] = $value;
+    }
+
+
+    /**
+     * Checks if value is a bool and throws a ValidationIssue if not.
+     * 
+     * @param mixed $value 
+     * @return bool 
+     * @throws ValidationIssue 
+     */
+    final protected function boolean_helper($value) {
+        if (!is_bool($value)) throw new ValidationIssue("Must be true or false");
+        return $value;
+    }
 
     /**
      * Validates an email address
@@ -220,7 +247,7 @@ abstract class Validate {
     }
 
     /** @todo implement this */
-    final protected function make_date($value) {
+    final protected function make_date($value = null) {
         $date = new \Drivers\UTCDateTime($value);
         return $date->timestamp;
     }
