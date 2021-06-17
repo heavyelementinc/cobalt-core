@@ -107,6 +107,7 @@ async function removeLoadingSpinner(spinner) {
  * @returns Modal object
  */
 function lightbox(imageUrl) {
+    if (typeof imageUrl === "object" && "src" in imageUrl) imageUrl = imageUrl.src;
     let lightbox_content = `<img src='${imageUrl}'>`;
     if (imageUrl.indexOf("youtube.com") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split("?v=")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     if (imageUrl.indexOf("youtu.be") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split(".be/")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
@@ -582,13 +583,26 @@ function get_form_input(el, form) {
     return new classMap[type](el, { form: form });
 }
 
-/** Must have a class name provided and that class name should have an animation. */
-async function wait_for_animation(element, animationClass, maxDuration = 2000) {
+/** Must have a class name provided and that class name should have all props
+ * needed for an animation to occur.
+ * @param element the element we want the animation to play on
+ * @param animationClass the class to be applied to the animation
+ * @param removeClass (true) determines if we want to clean up after animation
+ *        has been played
+ * @param maxDuration the maximum wait time before we cancel waiting
+ * */
+async function wait_for_animation(element, animationClass, removeClass = true, maxDuration = 2000) {
     return new Promise((resolve, reject) => {
-        if (element.classList.contains(animationClass)) console.warn(`Element already has ${animationClass} as a class.`);
-        element.addEventListener("animationend", e => resolve(), { once: true });
+        element.addEventListener("animationend", e => {
+            resolve();
+            if (removeClass) element.classList.remove(animationClass);
+            clearTimeout(timeout);
+        }, { once: true });
         element.classList.add(animationClass);
         if (element.style.animationPlayState !== "running") element.style.animationPlayState = "running";
-        setTimeout(() => resolve(), maxDuration);
+        let timeout = setTimeout(() => {
+            resolve();
+            if (removeClass) element.classList.remove(animationClass);
+        }, maxDuration);
     });
 }

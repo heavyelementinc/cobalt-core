@@ -41,5 +41,12 @@
         "dangerous": true,
         "default": false,
         "ring": 2
+    },
+    "Plugins_allow_management": {
+        "group": "Plugins",
+        "label": "Allows the user to manage plugins. This is VERY dangerous.",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
     }
 }

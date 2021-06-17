@@ -83,4 +83,10 @@ class CoreApi extends \Controllers\Pages {
         }
         return $mutant;
     }
+
+    function modify_plugin_state($name) {
+        if (!is_bool($_POST['enabled'])) throw new BadRequest("State must be boolean");
+        $GLOBALS['plugin_manager']->change_plugin_state($name, $_POST['enabled']);
+        return $_POST;
+    }
 }

@@ -11,7 +11,7 @@
  */
 try {
     $plugin_manager = new Plugins\Manager();
-    $GLOBALS['ACTIVE_PLUGINS'] = $plugin_manager->get_active();
+    $GLOBALS['ACTIVE_PLUGINS'] = $plugin_manager->instantiate_active_plugins();
 
     $TEMPLATE_PATHS = [
         __APP_ROOT__ . "/private/templates/",

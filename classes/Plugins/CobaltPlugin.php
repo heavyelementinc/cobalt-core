@@ -41,6 +41,10 @@ class CobaltPlugin {
         return "$dir/$context.php";
     }
 
+    public function register_classes() {
+        return $this->get_dir("class_dir", "/classes/");
+    }
+
     /** @return string this plugins CONTROLLER directory */
     public function register_controllers() {
         return $this->get_dir("controllers_dir", "/controllers/");
@@ -89,7 +93,7 @@ class CobaltPlugin {
     }
 
     /** @return string validated directory relative to this plugin's path */
-    private function get_dir($key, $default) {
+    protected function get_dir($key, $default) {
         $dir = $this->_config[$key] ?? $default;
         if (!is_dir($this->__PLUGIN_ROOT__ . $dir)) return null;
         return $this->__PLUGIN_ROOT__ . $dir;
@@ -100,12 +104,14 @@ class CobaltPlugin {
      * @todo implement this
      */
     public function register_web_variables() {
+        return [];
     }
 
-    /** Use add_vars() to register variables fro every admin context route
+    /** Use add_vars() to register variables for every admin context route
      * @return void use \add_vars($vars);
      * @todo implement this
      */
     public function register_admin_variables() {
+        return [];
     }
 }

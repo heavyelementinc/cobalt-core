@@ -8,7 +8,8 @@ Plugins are a simple way of providing portable, reusable functionality in Cobalt
 
 * A directory in `__APP_ROOT__/plugins/` which matches the name of the plugin.
 * A PHP file in the plugin's directory which matches the name of the plugin followed by `.php`
-  * This file must `implements Plugins\CobaltPlugin`
+  * This class must be in the `Plugins` namespace
+  * This class must `extends CobaltPlugin`
 * A file named `config.json` which specifies
   * The `name` of the plugin
   * A git `repo` where it can be downloaded
@@ -21,11 +22,11 @@ In this example, consider a plugin named `Sample` which defines a web route and 
 
 #### Directory Structure
 ```
-__APP_ROOT__/
+__APP_ROOT__/plugins/
   ∟ Sample/
     ⊢ routes/
       ∟ web.php
-    ⊢ controllers
+    ⊢ controllers/
       ∟ SamplePlugin.php
     ⊢ templates/
       ∟ SampleIndex.html
@@ -36,6 +37,31 @@ __APP_ROOT__/
 #### Sample.php
 ```php
 <?php
+namespace Plugins;
+class Sample extends CobaltPlugin{
+  /* Add any bespoke logic here */
+}
+```
+
+#### config.json
+```json
+{
+  "name": "Sample", // This must match the name of the class
+  "repo": "https://github.com/heavyelementinc/Sample", // The git repo
+  "settings": {
+    "some_setting": {
+      "default": true,
+    }
+  },
+  "permissions": {
+    "Sample_plugin_permission": {
+      "groups": "Sample",
+      "label": "Some flavor text to explain this permission",
+      "dangerous": true|false,
+      "default": false // Permissions may only be boolean true or false
+    }
+  }
+}
 ```
 
 #### routes/web.php
@@ -43,15 +69,22 @@ __APP_ROOT__/
 <?php
 use Routes\Route;
 Route::get("/sample","SamplePlugin@index");
+Route::get("/sample/protected","SamplePlugin@protected_area", [
+  'permission' => 'Sample_plugin_permission' // Protect area using plugin's permissions
+]);
 ```
 
 #### controllers/SamplePlugin.php
 ```php
 <?php
 class SamplePlugin{
-    function index(){
-        add_vars(['title' => "Hello World"]);
-        add_template('templates/SampleIndex.php')
+    function index() {
+      add_vars(['title' => "Hello World"]);
+      set_template('index.html')
+    }
+    function protected_area() {
+      add_vars(['title' => "Protected Area"]);
+      set_template('protected.html');
     }
 }
 ```

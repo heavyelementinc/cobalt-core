@@ -160,7 +160,7 @@ class Router {
 
         $controller_search = [
             __APP_ROOT__ . "/private/controllers",
-            ...$this->registered_plugin_controllers,
+            ...array_values($this->registered_plugin_controllers),
             __ENV_ROOT__ . "/controllers"
         ];
 

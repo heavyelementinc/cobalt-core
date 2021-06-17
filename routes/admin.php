@@ -29,3 +29,15 @@ if (app('Auth_logins_enabled')) {
         'permission' => "Auth_allow_editing_users"
     ]);
 }
+
+if (app('Plugin_enable_plugin_support')) {
+    Route::get("/plugins/", "CoreAdmin@plugin_manager", [
+        'permission' => 'Plugins_allow_management',
+        'anchor' => [
+            'name' => "Plugins",
+        ],
+        'navigation' => ['admin_panel']
+    ]);
+
+    Route::get("/plugins/{name}", "CoreAdmin@plugin_individual_manager", ['permission' => 'Plugins_allow_management']);
+}

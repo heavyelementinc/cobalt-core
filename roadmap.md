@@ -25,16 +25,28 @@
    - [ ] Include a user preferences panel in account manager
    - [ ] User stats implement in account manager
  - [ ] Add <async-button> which should use FormRequest to carry out async stuff
- - [ ] Fire requestFailed CustomEvent in FormRequest.js and test
  - [ ] Add widgets to admin dashboard
    - [ ] Plugins can add widgets
  - [ ] Create admin dashboard container class
  - [ ] Finish plugins system
    - [ ] Cobalt version checking for each plugin
-   - [ ] Plugins info/cache should be stored in the database
-   - [ ] Plugin management in admin panel
+   - [ ] Plugins info/cache should be stored in the database <!-- Not gonna happen -->
+   - [%] Plugin management in admin panel
+   - [ ] register_permissions
+   - [ ] register_classes
+   - [ ] register_templates
+   - [ ] register_shared_content_dir
+   - [ ] register_cli_commands
+   - [ ] register_dependencies
+   - [ ] register_javascript_dir
+   - [ ] register_css_dir
+   - [ ] register_web_variables
+   - [ ] register_admin_variables
  - [ ] Cobalt Settings (modified stored in database)
  - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
+ - [ ] Fire requestFailed CustomEvent in FormRequest.js and test
+ - [x] Make form-login-request listen for the enter key being pressed.
+ - [x] Make form-login-request reload the page when a login has occurred successfully
 
 
 # Version 0.3
@@ -51,6 +63,9 @@
  - [ ] Fix issue where router cache gets regenerated when on admin page and returns empty web cache.
  - [ ] Add CLI command to promote user to `root` group
  - [ ] Finish InputClass value reversion on error
+ - [ ] Events scheduler system
+ - [ ] Add template/renderer debugging!!!
+ - [ ] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
  
 
 # Todo

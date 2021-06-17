@@ -231,6 +231,7 @@ class Render {
             $replace[$i] = $this->lookup_value($name, $process_vars);
             if ($is_inline_json) $replace[$i] = json_encode($replace[$i], $is_pretty_print); // Convert to JSON
             if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i], $options); // < = &lt;
+            // if (gettype($replace[$i]) === "object") $replace[$i] = "[object]";
         }
         return str_replace($search, $replace, $subject);
     }

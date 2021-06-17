@@ -56,4 +56,24 @@ class CoreAdmin extends \Controllers\Pages {
         ]);
         set_template("/authentication/user-management/create_new_user_basic.html");
     }
+
+    function plugin_manager() {
+        $content = $GLOBALS['plugin_manager']->get_plugin_list("/admin/plugins/");
+
+        add_vars([
+            'title' => "Plugin Manager",
+            'main' => $content
+        ]);
+        set_template("parts/main.html");
+    }
+
+    function plugin_individual_manager($plugin_id) {
+        $plugin = $GLOBALS['plugin_manager']->get_plugin_by_name($plugin_id);
+        if ($plugin === null) throw new \Exceptions\HTTP\NotFound("That plugin does not exist.");
+        add_vars([
+            'title' => $plugin['name'],
+            'plugin' => $plugin
+        ]);
+        set_template("plugins/individual.html");
+    }
 }

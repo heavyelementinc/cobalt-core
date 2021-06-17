@@ -155,6 +155,15 @@ class LoginForm extends HTMLElement {
         this.button = this.querySelector("button[type='submit']");
         this.getRequest();
         this.button.addEventListener('click', e => this.request.send(e));
+        this.addEventListener('keyup', e => {
+            if (e.key === "Enter") this.request.send(e)
+        })
+        this.addEventListener("requestSuccess", e => {
+            window.location.reload();
+        })
+        this.addEventListener("requestFailure", async e => {
+            await wait_for_animation(this, "status-message--no")
+        })
     }
 
     getRequest() {

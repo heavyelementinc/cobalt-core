@@ -34,7 +34,6 @@ class Permissions extends Database {
     function load_permissions() {
         /** Load both the built-in permissions as well as the app-specific ones */
         $this->valid = \get_all_where_available($this->permission_files);
-
         /** Create a list of groups */
         $this->groups = [];
         if (app('Auth_enable_root_group')) $this->groups[0] = "root";
