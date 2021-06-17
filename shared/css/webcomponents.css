@@ -95,3 +95,52 @@ input-switch {
   input-switch[large] input:checked+span:after {
     left: 38px;
   }
+
+form-request{
+  overflow: hidden;
+}
+
+help-span{
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 1em;
+  width:  1em;
+  color:white;
+  background:var(--project-color-input-border-nofocus);
+  border-radius: 50%;
+  margin:0 .5ch;
+  font-family: sans-serif;
+  position: relative;
+}
+
+  help-span:before{
+    content: "?";
+    font-weight: bold;
+    font-size: .8em;
+    margin-top: .05em;
+  }
+
+  article.help-span-article {
+    visibility: hidden;
+    width: 270px;
+    font-size: 1rem;
+    font-weight: normal;
+    background: inherit;
+    top: 100%;
+    left: 0;
+    position: absolute;
+    padding: .2rem;
+    border-radius: 4px;
+    z-index: calc(var(--project-modal-z-index) + 1);
+  }
+
+  article.help-span-article--shown {
+    visibility: visible;
+  }
+
+  article.help-span-article.help-span-article--right-justified {
+    left: unset;
+    right: 0;
+  }

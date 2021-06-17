@@ -1,3 +1,15 @@
+div.calendar--headline {
+    display:flex;
+    justify-content: center;
+    align-items:center;
+    gap: 1em;
+}
+
+div.calendar--headline h2 {
+    min-width: 15ch;
+    text-align: center;
+}
+
 calendar-table{
     display:block;
 }

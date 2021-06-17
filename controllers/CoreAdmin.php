@@ -1,20 +1,59 @@
 <?php
 class CoreAdmin extends \Controllers\Pages {
-    function index(){
+    function index() {
         add_vars(['title' => "Admin Panel"]);
-        add_template("/authentication/admin-dashboard/index.html");
+        set_template("/authentication/admin-dashboard/index.html");
     }
-    function manage_users(){
+
+    function list_all_users($page = 0) {
         $collection = \db_cursor('users');
-        $list = "<ul>";
-        foreach($collection->find([]) as $user){
-            $list .= "<li><a href='/admin".app("Auth_user_manager_individual_page")."/$user[uname]'>@$user[uname] &mdash; $user[fname] $user[lname]</a></li>";
+        $list = "<flex-table><flex-row>
+            <flex-header>Name</flex-header>
+            <flex-header>Username</flex-header>
+            <flex-header>Email</flex-header>
+            <flex-header>Groups</flex-header>
+        </flex-row>";
+        foreach ($collection->find([]) as $user) {
+            $list .= "<flex-row><flex-cell><flex-cell>" . $this->user_link($user['_id']) . "$user[fname] $user[lname]</a></flex-cell>";
+            $list .= "<flex-cell>" . $this->user_link($user['_id']) . "@$user[uname]</a></flex-cell>";
+            $list .= "<flex-cell>$user[email]</flex-cell>";
+            $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
+            $list .= "<flex-cell>" . $this->user_link($user['_id'], "#permissions") . (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>") . "</a></flex-cell>";
+            // $list .= "<flex-cell>" . json_encode($user["verified"]) . "</flex-cell>";
+            $list .= "</flex-row>";
         }
-        $list .= "</ul>";
+        $list .= "</flex-table>";
         add_vars([
             'title' => "Manage users",
             "users" => $list
         ]);
-        add_template("/authentication/user-management/list-users.html");
+        set_template("/authentication/user-management/list-users.html");
+    }
+
+    private function user_link($id, $target = "#basics") {
+        $link = "<a href='/admin" . app("Auth_user_manager_individual_page") . "/" . (string)$id . "$target'>";
+        return $link;
+    }
+
+    function individual_user_management_panel($id) {
+        $ua = new \Auth\UserCRUD();
+        $user = (array)$ua->getUserById($id);
+        if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", ['template' => 'errors/404_invalid_user.html']);
+
+        add_vars([
+            'title' => "$user[fname] $user[lname]",
+            'user_account' => $user,
+            'user_id' => (string)$user['_id'],
+            'permission_table' => $GLOBALS['auth']->permissions->get_permission_table($user),
+            'account_flags' => $ua->getUserFlags($user),
+        ]);
+        set_template("/authentication/user-management/individual-user.html");
+    }
+
+    function create_user() {
+        add_vars([
+            'title' => "Create user"
+        ]);
+        set_template("/authentication/user-management/create_new_user_basic.html");
     }
 }

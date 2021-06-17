@@ -1,0 +1,45 @@
+<form-request method="POST" action="/api/v1/debug/validator" @csrf_attribute();>
+    <fieldset>
+        <label>Your Name</label>
+        <input type="name" name="name">
+    </fieldset>
+    <fieldset>
+        <label>Email</label>
+        <input type="email" name="email">
+    </fieldset>
+    <fieldset>
+        <label>Phone Number</label>
+        <input type="phone" name="phone">
+    </fieldset>
+    <fieldset>
+        <label>Region</label>
+        <input-array name="region">
+            <option value="us-east">US East</option>
+            <option value="us-west">US West</option>
+            <option value="uk-south">UK South</option>
+            <option value="invalid">Invalid Option</option>
+        </input-array>
+    </fieldset>
+    <fieldset>
+        <label>Number of items</label>
+        <input type="text" name="order_count">
+    </fieldset>
+    <fieldset>
+        <input-object-array name="test">
+            <template>
+                <fieldset>
+                    <label>Foo</label>
+                    <input name="foo">
+                    <label>Bar</label>
+                    <input name="bar">
+                </fieldset>
+            </template>
+        </input-object-array>
+    </fieldset>
+    <input type="submit" value="Submit">
+</form-request>
+
+<form-request method="POST" action="/api/v1/debug/confirm">
+    <input type="hidden" name="hidden" value="Some value">
+    <input type="submit" value="Confirm">
+</form-request>

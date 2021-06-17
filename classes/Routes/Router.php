@@ -14,6 +14,9 @@
  * @todo Add typing so that digit:{varname} would be typecast to a digit or,
  * throws an BadRequest error if its no a digit
  * 
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @license https://github.com/heavyelementinc/cobalt-core/license
+ * @copyright 2021 - Heavy Element, Inc.
  */
 
 namespace Routes;
@@ -22,6 +25,8 @@ class Router {
 
     public $current_route = null;
     private $route_cache_name = "config/routes.json";
+    public $router_table_list = [];
+    public $registered_plugin_controllers = [];
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -34,8 +39,19 @@ class Router {
         /** Export our route table to the global space, we use this to specify where
          * we should look for our routes.
          */
-        $GLOBALS['route_table_address'] = $this->route_context . "_routes";
-        if (!isset($GLOBALS[$GLOBALS['route_table_address']])) $GLOBALS[$GLOBALS['route_table_address']] = [];
+        $GLOBALS['ROUTE_TABLE_ADDRESS'] = $this->route_context . "_routes";
+        if (!isset($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']])) $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']] = [];
+        $this->router_table_list = [
+            __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
+        ];
+
+        foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
+            $result = $plugin->register_routes($this->route_context);
+            if ($result) array_push($this->router_table_list, $result);
+            $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
+        }
+
+        array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
     }
 
     function get_routes() {
@@ -47,11 +63,7 @@ class Router {
 
         try {
             /** Get a list of route tables that exist */
-            $route_tables = files_exist([
-                __ENV_ROOT__ . "/routes/core/" . $this->route_context . ".php", // "/"
-                __ENV_ROOT__ . "/routes/" . $this->route_context . ".php",
-                __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php", // "/"
-            ]);
+            $route_tables = files_exist($this->router_table_list);
         } catch (\Exception $e) {
             /** If there are no routes available, die with a nice message */
             die("Could not load route for context $GLOBALS[route_context]");
@@ -62,7 +74,7 @@ class Router {
             require_once $table;
         }
 
-        $this->routes = $GLOBALS[$GLOBALS['route_table_address']];
+        $this->routes = $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']];
     }
 
     /** @todo complete this */
@@ -84,18 +96,19 @@ class Router {
             $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);
         }
 
-        $route = null;
+        // $route = null;
         /** Search through our current routes and look for a match */
-        foreach ($this->routes[$this->method] as $route => $directives) {
+        foreach ($this->routes[$this->method] as $preg_pattern => $directives) {
             $match = [];
             /** Regular Expression against our uri, store any matches in $match */
-            if (preg_match($route, $this->uri, $match) === 1) {
-                if ($match !== null) $this->set_uri_vars($directives, $match, $route);
+            if (preg_match($preg_pattern, $this->uri, $match) === 1) {
+                if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern);
 
-                $this->current_route = $route;
-                $GLOBALS['current_route_meta'] = $directives;
-                return [$route, $directives];
-                break; // Just in case 😉
+                $this->current_route = $preg_pattern;
+                if ($route[strlen($route) - 1] === "/") {
+                    $GLOBALS['PATH'] = "../";
+                }
+                return [$preg_pattern, $directives];
             }
         }
 
@@ -145,20 +158,23 @@ class Router {
         $controller_name = $explode[0];
         $controller_method = $explode[1];
 
+        $controller_search = [
+            __APP_ROOT__ . "/private/controllers",
+            ...$this->registered_plugin_controllers,
+            __ENV_ROOT__ . "/controllers"
+        ];
+
         try {
             // We are doing these in reverse order because we want our app's 
             // controllers to override the core's controllers.
-            $controller_file = files_exist([
-                __APP_ROOT__ . "/private/controllers/$controller_name.php",
-                __ENV_ROOT__ . "/controllers/$controller_name.php"
-            ]);
+            $controller_file = find_one_file($controller_search, "$controller_name.php");
         } catch (\Exception $e) {
             die("Controller $controller_name not found.");
         }
 
         // We need to require this because the controllers folder is outside of our 
         // classes path and the developer is going to be able to create new controllers
-        require_once $controller_file[0];
+        require_once $controller_file;
 
         // Instantiate our controller and then execute it
         $ctrl = new $controller_name();
@@ -193,6 +209,7 @@ class Router {
                     __ENV_ROOT__ . "/controllers/client/$handler",
                 ]);
                 if ($prefix !== "" && $path[0] = "^") $path = substr($path, 2);
+                if ($path[strlen($path) - 1] === "%") $path = substr($path, 0, -1);
                 array_push($table, "\n'$prefix$path': " . file_get_contents($files[0]));
             }
         }

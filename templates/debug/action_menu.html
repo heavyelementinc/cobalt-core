@@ -1,0 +1,31 @@
+<button class="fixed">Spawn Fixed Menu</button>
+<pre class="context">Context-based action menu</pre>
+<section style="height:100vh;display:flex;flex-direction: column; justify-content: flex-end;">
+    <button class="context">Spawn Fixed Menu</button>
+    <pre class="context">Context-based action menu</pre>
+</section>
+<section style="height:50vh"></section>
+<script>
+    const fixed = document.querySelectorAll(".fixed");
+    const context = document.querySelectorAll(".context");
+    fixed.forEach(i => {
+        i.addEventListener("click", e => {
+            e.preventDefault();
+            const menu = new ActionMenu({ event: e, title: "Test", mode: "modal" });
+            menu.registerAction({ label: "Edit" });
+            menu.registerAction({ label: "Delete", dangerous: true });
+            menu.draw();
+        })
+    })
+
+    context.forEach(i => {
+        i.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            const menu = new ActionMenu({ event: e, title: "A different test" });
+            menu.registerAction({ label: "Won't close on click", callback: (e) => false })
+            menu.registerAction({ label: "Will close on click" })
+            menu.draw();
+        })
+    })
+
+</script>

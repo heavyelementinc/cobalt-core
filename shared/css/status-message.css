@@ -1,0 +1,127 @@
+message-container{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    box-sizing: border-box;
+    margin: 15px;
+    width: max(25vw, 30%);
+    z-index: calc(var(--project-modal-z-index) + 100);
+}
+
+message-container:empty{
+    display:none;
+}
+
+message-item{
+    display:flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    animation-play-state: running;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-duration: 800ms;
+    overflow: hidden;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 5px 0px 20px rgba(0,0,0,.3);
+    --height: 100px;
+    height: var(--height);
+    --margins: 15px;
+    margin: var(--margins);
+    /* padding: 15px; */
+}
+
+    message-item ion-icon{
+        height: var(--height);
+        font-size: 3rem;
+        white-space: nowrap;
+        width: 15%;
+        box-sizing: border-box;
+        padding: 0 calc(var(--margins) / 2);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    message-item article{
+        padding: calc(var(--margins) / 2) 0;
+        height: var(--height);
+        flex-grow: 1;
+    }
+
+    message-item button{
+        height: 100%;
+        width: 15%;
+        background: transparent;
+        border: none;
+    }
+
+    .status-message--opening {
+        animation-name: status-message--opening;
+    }
+
+    .status-message--closing {
+        animation-name: status-message--closing;
+    }
+    
+    
+
+
+@keyframes status-message--opening{
+    from {
+        height: 0;
+        padding: 0;
+        margin: 0 var(--margins);
+    }
+}
+
+@keyframes status-message--closing {
+    to {
+        height: 0px;
+        margin: 0 var(--margins);
+    }
+}
+
+    .status-message--no {
+        animation-name: status-message--no;
+        animation-timing-function: cubic-bezier(.36,.07,.19,.97);
+        animation-fill-mode: both;
+        backface-visibility: hidden;
+        perspective: 1000px;
+    }
+
+@keyframes status-message--no {
+    10%, 90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+    
+    20%, 80% {
+      transform: translate3d(2px, 0, 0);
+    }
+  
+    30%, 50%, 70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+  
+    40%, 60% {
+      transform: translate3d(4px, 0, 0);
+    }
+}
+
+    .status-message--update {
+        animation-name: status-message--update;
+        animation-duration: 300ms;
+        animation-timing-function: ease-in;
+    }
+
+@keyframes status-message--update {
+    from {
+        transform: scale(1.2);
+    }
+}
+
+/* status-item */

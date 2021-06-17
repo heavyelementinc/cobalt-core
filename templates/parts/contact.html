@@ -1,4 +1,4 @@
-<form-request method="POST" action="/api/v1/contact/">
+<form-request method="POST" action="/api/v1/contact/" @csrf_attribute();>
   <fieldset>
     <label>What's your name?</label>
     <input type="text" name="name" placeholder="Jane Doe">
@@ -24,5 +24,6 @@
     <label>What are you contacting us about?</label>
     <textarea name="additional" placeholder="Additional information"></textarea>
   </fieldset>
+  <div class="error" style="flex-grow:1"></div>
   <button type="submit">Submit</button>
 </form-request>

@@ -1,12 +1,22 @@
+/** Make this into a webcomponent? */
 class TabbedUI {
     constructor(tab_buttons, tabItemContainer = null) {
         this.tabItemContainer = tabItemContainer;
         this.tab_buttons = [];
         this.drawer_list = [];
+        let init = window.location.hash || location.hash;
+        if (init) init = init.substr(1);
         for (const i of tab_buttons) {
             this.tab_buttons.push(i);
             this.init_tab(i);
+            if (init && i.getAttribute('for') === init) {
+                this.select_current_tab(i);
+            }
         }
+        window.addEventListener("hashchange", e => {
+            this.select_current_tab(document.querySelector(`[for="${window.location.hash.substr(1)}"]`));
+        })
+        // this.tab_buttons[0];
     }
 
     init_tab(tab) {
@@ -29,6 +39,8 @@ class TabbedUI {
             el.classList.remove("tab-list--active");
         }
         tab.classList.add("tab-list--active");
+        window.location.hash = tab.getAttribute("for");
+        this.select_current_drawer(document.querySelector(window.location.hash));
     }
 
     select_current_drawer(drawer, tab, event) {

@@ -76,7 +76,7 @@
     "context_prefixes": {
         "default": {
             "admin": {
-                "processor": "Web\\AdminHandler",
+                "processor": "Handlers\\AdminHandler",
                 "prefix": "/admin/",
                 "exception_mode": "web",
                 "permission": "Admin_panel_access",
@@ -85,20 +85,24 @@
                 }
             },
             "init": {
-                "processor": "Web\\WebHandler",
+                "processor": "Handlers\\WebHandler",
                 "prefix": null
             },
             "shared": {
-                "processor": "Web\\SharedHandler",
+                "processor": "Handlers\\SharedHandler",
                 "prefix": "/core-content/"
             },
             "apiv1": {
-                "processor": "Api\\ApiHandler",
+                "processor": "Handlers\\ApiHandler",
                 "prefix": "/api/v1/"
             },
             "webhookv1": {
-                "processor": "Api\\ApiHandler",
+                "processor": "Handlers\\ApiHandler",
                 "prefix": "/webhook/v1/"
+            },
+            "web": {
+                "processor": "Handlers\\WebHandler",
+                "prefix": "/"
             }
         },
         "$merge": true
@@ -178,8 +182,17 @@
             "color-acknowledge": "#598B2C",
             "color-active": "#598B2C",
             "color-inactive": "#B1C1C0",
+            "color-input-border-nofocus": "#b1c3c3",
+            "color-input-border-focus": "#000",
+            "color-input-background": "#fff",
+            "color-input-invalid-border": "#BB4430",
+            "color-input-invalid-bg": "#F7E2DE",
+            "color-input-invalid-label-text": "#FFF",
             "color-input-disabled": "#F4F6F6",
             "color-disabled": "rgba(0,0,0,.2)",
+            "color-table-border": "1px solid var(--project-color-input-border-nofocus)",
+            "color-table-bg-odd": "var(--project-color-input-background)",
+            "color-table-bg-even": "var(--project-color-input-disabled)",
             "color-problem": "#FE5F55",
             "color-button-init": "#004BA8",
             "color-button-text": "#FFF",
@@ -191,7 +204,10 @@
             "calendar-cell-other-bg": "#EFEFEF",
             "calendar-cell-txt": "#000",
             "calendar-header-color": "var(--project-color-button-init)",
-            "calendar-header-text": "var(--project-color-button-text)"
+            "calendar-header-text": "var(--project-color-button-text)",
+            "action-menu-background": "var(--project-color-input-disabled)",
+            "action-menu-border": "var(--project-color-table-border)",
+            "action-menu-hover": "var(--project-color-inactive)"
         },
         "$merge": true,
         "$style": true
@@ -214,11 +230,11 @@
             "ApiFetch.js",
             "InputComponents.js",
             "UserMenu.js",
-            "Router.js",
-            "main.js",
-            "app.js"
+            "ActionMenu.js",
+            "StatusMessage.js"
         ],
-        "$merge": true // Prepend user packages (is that what we want to do?)
+        "$merge": true, // Prepend user packages (is that what we want to do?),
+        "$method": "set_packages"
     },
     /* A list of CSS files to be concatenated, minified, and sent to the client
     with every page.
@@ -231,6 +247,8 @@
             "inputs.css",
             "loading-spinner.css",
             "modal.css",
+            "action-menu.css",
+            "status-message.css",
             "login-form.css",
             "form-request.css",
             "modal.css",
@@ -268,6 +286,15 @@
     "csrf_seed": {
         "default": ""
     },
+    "Plugin_enable_plugin_support": {
+        "default": true
+    },
+    "Plugin_enabled_plugins": {
+        "default": []
+    },
+    "Plugin_blacklisted_plugins": {
+        "default": []
+    },
     /* If a route has not specified if it needs a CSRF token, this will be the
     default value supplied for its router table entry */
     "Router_csrf_required_default": {
@@ -289,6 +316,9 @@
     that requires privileges, has to do with user accounts, or sessions should
     "$required": {"Auth_user_accounts_enabled": true} */
     "Auth_user_accounts_enabled": {
+        "default": true
+    },
+    "Auth_require_verified_status": {
         "default": true
     },
     "Admin_panel_prefix": {
@@ -347,7 +377,7 @@
     "Auth_enable_root_group": {
         /* THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS 
         *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
-        "default": false
+        "default": true
     },
     "API_CORS_allowed_origins": {
         "default": [],

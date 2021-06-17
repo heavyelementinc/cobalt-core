@@ -1,0 +1,18 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "../cobalt-core"
+        }
+    ],
+    "settings": {
+        /** These settings ensures there are no erroneous Intelephense 1009
+        errors is project directories. */
+        "intelephense.environment.documentRoot": "./public/index.php",
+        "intelephense.environment.includePaths": [
+            "../cobalt-core"
+        ]
+    }
+}

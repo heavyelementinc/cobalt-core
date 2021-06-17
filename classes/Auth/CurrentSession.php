@@ -14,11 +14,11 @@
 namespace Auth;
 
 class CurrentSession {
-    /** The CurrentSession class takes the current request's validation cookie and looks
-     * up the token in the session database. It runs checks to see if the user's token is
-     * still valid.
-     * 
-     * TODO: Encrypt cookie values in database
+    /* The CurrentSession class takes the current request's validation cookie and looks
+      up the token in the session database. It runs checks to see if the user's token is
+      still valid.
+      
+      TODO: Encrypt cookie values in database
      */
     function __construct() {
         $this->cookie_name = app('session_cookie_name'); // Name of the cookie we send to the client
@@ -38,42 +38,38 @@ class CurrentSession {
             'secure' => app("session_secure_status"),
             'samesite' => true
         ];
-        $this->context = ($GLOBALS['route_context'] === "web") ? true : false;
-        /** Every client must be assigned a token, we'll use this to update our
-         * user account if/when they sign in.
-         * 
-         * If the token value is null, create a session
+        $this->context = ($GLOBALS['route_context'] === "web" || $GLOBALS['route_context'] === "admin") ? true : false;
+        /* Every client must be assigned a token, we'll use this to update our
+          user account if/when they sign in.
+          
+          If the token value is null, create a session
          */
-        if (!$this->token_value) $this->create_session();
+        if (!$this->token_value) $this->create_session_cookie();
 
         /** Find the user session token in the token database */
         $this->session = $this->collection->findOne([$this->cookie_name => $this->token_value]);
+
+        if ($this->session === null) return $this;
+
         /** If the token has expired, we need to update the token */
-        if ($this->is_expired()) $this->create_session();
+        if ($this->is_expired()) $this->create_session_cookie();
         if ($this->is_needing_refresh()) $this->update_token();
     }
 
-    function create_session() {
+    function create_session_cookie() {
         if (!$this->context) return false;
         $token = $this->get_unique_token();
-        try {
-            $result = $this->collection->insertOne(
-                [
-                    $this->cookie_name => $token,
-                    'user_id' => null, // You're not gonna be logged in at this point
-                    'refresh' => $this->default_token_refresh,
-                    'expires' => $this->default_token_expiration,
-                    'persist' => true
-                ]
-            );
-        } catch (\Exception $e) {
-        }
+
         $this->send_session_cookie($token);
     }
 
     function update_token() {
         if (!$this->context) return false;
-        $user_id = $this->session['_id'] ?? (string)session("_id");
+        try {
+            $user_id = $this->session['_id'] ?? (string)session("_id");
+        } catch (\Exception $e) {
+            return null;
+        }
         $token = $this->get_unique_token();
         try {
             $result = $this->collection->updateOne(
@@ -105,21 +101,28 @@ class CurrentSession {
     }
 
     function login_session($user_id, $stay_logged_in) {
-        $query = [
-            $this->cookie_name => $this->token_value,
-            'user_id' => null // We want to make sure we're only updating tokens that aren't logged in
-        ];
-        $count = $this->collection->count($query);
-        if ($count === 0) return true;
-        $result = $this->collection->updateOne(
-            $query,
-            [
-                '$set' => [
-                    'user_id' => (string)$user_id,
+        // $query = [
+        //     $this->cookie_name => $this->token_value,
+        //     'user_id' => null // We want to make sure we're only updating tokens that aren't logged in
+        // ];
+        // $count = $this->collection->count($query);
+        // if ($count === 0) return true;
+        if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("No token");
+        try {
+            $result = $this->collection->updateOne(
+                [$this->cookie_name => $this->token_value],
+                ['$set' => [
+                    $this->cookie_name => $this->token_value,
+                    'user_id' => $user_id,
+                    'refresh' => $this->default_token_refresh,
+                    'expires' => $this->default_token_expiration,
                     'persist' => filter_var($stay_logged_in, FILTER_VALIDATE_BOOLEAN)
-                ]
-            ]
-        );
+                ]],
+                ['upsert' => true]
+            );
+        } catch (\Exception $e) {
+            throw new \Exceptions\HTTP\Error("Failed to create session");
+        }
         if ($result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
         return true;
     }

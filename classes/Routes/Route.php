@@ -8,9 +8,18 @@ class Route {
 
     /** Register a GET route for the site
      * 
+     * $additional options include: 
+     *  
+     *  * handler - A JavaScript controller file in controllers/js
+     *  * permission - The name of a permission required to access route
+     *  * groups - The name of a group required to access route
+     *  * anchor - name, [href, icon, order, attributes] Anchor values when displayed in get_route_group list (web only)
+     *  * navigation - Either an indexed array of group names or an associative array with unique anchor values (web only)
+     *  * csrf_required => bool determines if CSRV tokens are required for the request (API only)
+     * 
      * @param string $path A REQUEST_URI to be matched against using Cobalt's route syntax
      * @param string $controller A controller/method pair in the "Controller@method" format
-     * @param array $additional An array of optional items for this
+     * @param array $additional An array of optional metadata ['handler','anchor','lists',]
      */
     static function get(String $path, $controller, array $additional = []) {
         Route::add_route($path, $controller, $additional, 'get');
@@ -55,7 +64,7 @@ class Route {
         $handler_data = null;
         if (!key_exists('handler', $additional)) $additional['handler'] = null;
         else $handler_data = Route::get_js_handler($additional['handler'], $regex, $controller);
-        $router_table_address = $GLOBALS['route_table_address'];
+        $router_table_address = $GLOBALS['ROUTE_TABLE_ADDRESS'];
         $context_permission = ($GLOBALS['permission_needed'] !== false) ? $GLOBALS['permission_needed'] : null;
 
         $file = null;
@@ -63,6 +72,11 @@ class Route {
             $backtrace = debug_backtrace();
             $file = $backtrace[1]['file'] . " - Line " . $backtrace[1]['line'];
             $file = str_replace([__APP_ROOT__, __ENV_ROOT__], ["__APP_ROOT__", "__ENV_ROOT__"], $file);
+        }
+
+        if (isset($additional['anchor']) && !isset($additional['anchor']['href'])) {
+            if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
+            $additional['anchor']['href'] = $path;
         }
 
         /** Store our route data in the full route table. */
@@ -83,7 +97,14 @@ class Route {
 
             // Permission for a page or API 
             'permission' => $additional['permission'] ?? $context_permission ?? null,
-            'group'      => $additional['group'] ?? null,
+            'groups'     => $additional['group'] ?? null,
+
+            // Directory stuff
+            'anchor' => $additional['anchor'] ?? [], // Keys: 'label', 'href', 'attributes'
+            'navigation' => $additional['navigation'] ?? [], // INDEXED array
+
+            // Header stuff -- May contain keys: 'label', 'href', 'attributes'
+            'header_nav' => $additional['header_nav'] ?? null,
 
             // Admin panel name
             'panel_name' => $additional['name'] ?? null,
@@ -111,7 +132,7 @@ class Route {
         $new_route = str_replace("/$regex_replace?", "/?$regex_replace?", $new_route);
 
         // Finally, we create our regex pattern
-        $new_route = "/^" . str_replace(["/", "..."], ["\/", "(.*)"], $new_route);
+        $new_route = "%^" . str_replace(["/", "..."], ["\/", "(.*)"], $new_route);
 
 
 
@@ -121,7 +142,7 @@ class Route {
         } else {
             $new_route .= "\/?";
         }
-        return "$new_route$/";
+        return "$new_route$%";
     }
 
     static function get_js_handler($handler, $path, $controller) {

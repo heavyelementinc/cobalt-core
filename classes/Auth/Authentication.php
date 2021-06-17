@@ -10,10 +10,12 @@ namespace Auth;
 class Authentication {
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
+
+
         $this->session = new CurrentSession();
-        if (isset($this->session->session->user_id)) $ua = new UserAccount($this->session->session->user_id);
+        if (isset($this->session->session->user_id)) $ua = new UserCRUD();
         else return $this;
-        $this->user = $ua->get_user_by_id($this->session->session->user_id);
+        $this->user = $ua->getUserById($this->session->session->user_id);
         $this->permissions = new Permissions();
         if (!$this->user) {
             $GLOBALS['session'] = null;
@@ -28,8 +30,8 @@ class Authentication {
     function login_user($username, $password, $stay_logged_in = false) {
         $stock_message = "Invalid credentials.";
         /** Get our user by their username or email address */
-        $ua = new UserAccount();
-        $user = $ua->get_user_by_uname_or_email($username);
+        $ua = new UserCRUD();
+        $user = $ua->getUserByUnameOrEmail($username);
 
         /** If we don't have a user account after our query has run, then the client
          * submitted a username/email address that hasn't been registered, yet. */
@@ -65,14 +67,19 @@ class Authentication {
      * @throws \Exceptions\HTTP\Unauthorized if not logged in
      * @throws Exception if the permission specified does not exist
      * 
-     * @param  string $perm_name the name of the permission to check for
-     * @param  string|array $group the group name or list of group names. 
+     * @param  string|true $perm_name the name of the permission to check for OR
+     *                     a boolean true to confirm an authenticated session
+     *                     exists
+     * @param  string|null $group the group name or list of group names. 
      *                      Can be null.
+     * @param  null|MongoDocument $user if null, the current session will be used
      * @return bool true if the user has permission, false otherwise
      */
-    function has_permission($permission, $group = null) {
+    function has_permission($permission, $group = null, $user = null) {
+        if ($user === null) $user = $this->user;
+        if ($group === null) $group = $this->permissions->valid[$permission]['group'];
         // If the user is not logged in, they obviously don't have permission
-        if (!$this->user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.", ['login' => true]);
+        if (!$user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.", ['login' => true]);
 
         // If the permission is a boolean true AND we've made it here, we're 
         // logged in, so we're good to go, right?
@@ -83,22 +90,31 @@ class Authentication {
 
         // If the app allows root users AND the user belongs to the root group, 
         // they have permission no matter what
-        if (app('Auth_enable_root_group') && in_array('root', (array)$this->user['groups'])) return true;
+        if (app('Auth_enable_root_group') && in_array('root', (array)$user['groups'])) return true;
 
-        // If the user account has the permission, we return that value, 
+        // If user account requires a password reset, a PasswordUpdateRequired
+        // error is thrown.
+        if (($user['flags']['password_reset_required'] ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("You must update your password.");
+
+        // app('Auth_require_verified_status') && 
+
+        // If the user account stores the permission, we return that value, 
         // whatever it may be
-        if (isset($this->user['permissions'][$permission])) return $this->user['permissions'][$permission];
+        if (isset($user['permissions'][$permission])) return $user['permissions'][$permission];
+
+        // If the permission's default value is true, we return true.
+        if ($this->permissions->valid[$permission]['default']) return true;
 
         // If NO group is specified, return the permission's default value
         if ($group === null) return $this->permissions->valid[$permission]['default'];
 
-        // Check if the user DOES NOT have the group in their groups
-        if (!in_array($group, (array)$this->user['groups'])) return false;
+        // Check if the user HAS the group in their groups
+        if (in_array($group, (array)$user['groups'])) return true;
 
         // Check if this permission belongs to the group specified
-        if (isset($this->permissions->valid[$permission]['group'][$group])) return $this->permissions->valid[$permission]['groups'][$group];
+        if (isset($this->permissions->valid[$permission]['group'][$group])) return $this->permissions->valid[$permission]['group'][$group];
 
-        // Return false? (Shouldn't this be returning TRUE?)
+        // If we've made it here, we *probably* don't have the permission.
         return false;
     }
 }
