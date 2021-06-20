@@ -46,3 +46,9 @@ main {
     margin-left: var(--admin-panel-width);
     padding: 20px;
 }
+
+.cobalt-admin--fieldset{
+    border: 1px solid var(--project-color-input-border-nofocus);
+    padding: 4px 8px;
+    border-radius: 4px;
+}

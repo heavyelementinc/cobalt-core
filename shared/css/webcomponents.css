@@ -33,14 +33,15 @@ input-switch {
   }
 
   input-switch span:before {
-    content: "ON";
+    content: "✓";
     position: absolute;
-    top: 6px;
-    left: 5px;
-    font-family: 'Arial Narrow', 'Arial', sans-serif;
+    top: -7px;
+    left: 8px;
+    font-family: monospace;
     font-weight: bolder;
-    font-size: 10pt;
+    font-size: 20pt;
     color: white;
+
   }
 
   input-switch span:after {
@@ -78,14 +79,19 @@ input-switch {
     left: 15px;
   }
 
+  input-switch[large] input:indeterminate+span:after {
+    left: 19px;
+  }
+
   input-switch[large] {
     width: 83px;
     height: 32px;
   }
 
   input-switch[large] span:before {
-    font-size: 13pt;
+    font-size: 32pt;
     left: 8px;
+    top: -14px;
   }
 
   input-switch[large] span:after {
@@ -128,8 +134,8 @@ help-span{
     font-size: 1rem;
     font-weight: normal;
     background: inherit;
-    top: 100%;
-    left: 0;
+    /* top: 50%; */
+    left: 100%;
     position: absolute;
     padding: .2rem;
     border-radius: 4px;
@@ -142,5 +148,5 @@ help-span{
 
   article.help-span-article.help-span-article--right-justified {
     left: unset;
-    right: 0;
+    right: 100%;
   }

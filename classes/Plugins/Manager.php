@@ -154,7 +154,7 @@ class Manager {
         $result = [];
         foreach ($enabled as $item) {
             if (isset($this->directory[$item])) $result[$item] = $this->directory[$item];
-            else throw new MissingPlugin("Cannot find active plugin: $item");
+            // else throw new MissingPlugin("Cannot find active plugin: $item");
         }
         return $result;
     }

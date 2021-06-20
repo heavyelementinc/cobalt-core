@@ -32,21 +32,20 @@
    - [ ] Cobalt version checking for each plugin
    - [ ] Plugins info/cache should be stored in the database <!-- Not gonna happen -->
    - [%] Plugin management in admin panel
-   - [ ] register_permissions
-   - [ ] register_classes
-   - [ ] register_templates
-   - [ ] register_shared_content_dir
+   - [x] register_permissions
+   - [x] register_templates
+   - [x] register_shared_content_dir
    - [ ] register_cli_commands
-   - [ ] register_dependencies
-   - [ ] register_javascript_dir
-   - [ ] register_css_dir
-   - [ ] register_web_variables
-   - [ ] register_admin_variables
+   - [x] register_dependencies
+   - [x] register_public_dir
+   - [x] register_packages
+   - [x] register_variables
  - [ ] Cobalt Settings (modified stored in database)
  - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
- - [ ] Fire requestFailed CustomEvent in FormRequest.js and test
+ - [x] Fire requestFailed CustomEvent in FormRequest.js and test
  - [x] Make form-login-request listen for the enter key being pressed.
  - [x] Make form-login-request reload the page when a login has occurred successfully
+ - [ ] Track down WSOD (white screen of death)
 
 
 # Version 0.3
@@ -66,6 +65,8 @@
  - [ ] Events scheduler system
  - [ ] Add template/renderer debugging!!!
  - [ ] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
+ - [ ] Track down WSOD (white screen of death)
+ - [ ] <replicator-button> contains internal <template>
  
 
 # Todo

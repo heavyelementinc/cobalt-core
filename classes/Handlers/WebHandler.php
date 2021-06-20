@@ -21,6 +21,7 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
 
@@ -185,7 +186,7 @@ class WebHandler implements RequestHandler {
     }
 
     function header_nav() {
-        return get_route_group("main_navigation", false, "navigation--main");
+        return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
         // $links = "";
         // foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
         //     if (!isset($route['header_nav'])) continue;
@@ -261,7 +262,8 @@ class WebHandler implements RequestHandler {
 
     var $route_table_cache = "js-precomp/router-table.js";
     function router_table() {
-        $cache = new CacheManager($this->route_table_cache);
+        $table_name = str_replace(".js", ".$this->context_mode.js", $this->route_table_cache);
+        $cache = new CacheManager($table_name);
         $table_content = "";
         if ($GLOBALS['time_to_update'] || !$cache->cache_exists()) {
             $table_content = $GLOBALS['router']->get_js_route_table();
@@ -286,6 +288,16 @@ class WebHandler implements RequestHandler {
                 $compiled .= "\n\n" . file_get_contents($files[0]);
             }
         }
+
+        foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
+            if (!file_exists($private)) continue;
+            if ($debug) {
+                $script_tags .= "<script src='$public?{{app.version}}'></script>";
+            } else {
+                $compiled .= "\n\n" . file_get_contents($private);
+            }
+        }
+
         if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
 
         if ($compiled !== "") {
@@ -314,6 +326,16 @@ class WebHandler implements RequestHandler {
                 $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
             } else {
                 $compiled .= "\n\n" . file_get_contents($files[0]);
+            }
+        }
+
+        foreach ($GLOBALS['PACKAGES']['css'] as $public => $private) {
+            $file = file_exists($private);
+            if (!$file) continue;
+            if ($debug === true) {
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
+            } else {
+                $compiled .= "\n\n" . file_get_contents($file);
             }
         }
         if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
@@ -354,11 +376,10 @@ class WebHandler implements RequestHandler {
     function load_template($template_name) {
         $ext = pathinfo($template_name, PATHINFO_EXTENSION);
         $session_template_name = str_replace($ext, "session.$ext", $template_name);
-        $templates = [
-            // __APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
-            // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",
-            ...$GLOBALS['TEMPLATE_PATHS']
-        ];
+        $templates = $GLOBALS['TEMPLATE_PATHS'];
+        // [__APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
+        // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",]
+
 
         $round_one = $template_name;
         if (session_exists()) {

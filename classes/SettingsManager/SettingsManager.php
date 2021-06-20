@@ -153,8 +153,6 @@ class SettingsManager {
 
         // Import our settings definitions
         $json = file_get_contents($this->path_to_settings_definitions_file);
-        // // Strip all comments from the settings
-        // $json = preg_replace( '/\s*(?!<\")\/\*[^\*]+\*\/(?!\")\s*/m' , '' , $json);
 
         try {
             // Try to decode our settings definitions.

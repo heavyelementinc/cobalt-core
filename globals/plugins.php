@@ -18,18 +18,23 @@ try {
     ];
 
     $PERMISSIONS = [];
+    $GLOBALS['SHARED_CONTENT'] = [];
+    $PACKAGES = ['js' => [], 'css' => []];
 
-    $i = 0;
     foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
         array_push($TEMPLATE_PATHS, $plugin->register_templates());
         $PERMISSIONS = array_merge($PERMISSIONS, $plugin->register_permissions());
         array_push($GLOBALS['CLASSES_DIR'], $plugin->register_dependencies());
-    }
-    $i += 1;
+        array_push($GLOBALS['SHARED_CONTENT'], $plugin->register_shared_content_dir());
+        $PACKAGES['js']  = array_merge($PACKAGES['js'],  $plugin->register_packages('js'));
+        $PACKAGES['css'] = array_merge($PACKAGES['css'], $plugin->register_packages('css'));
 
-    $TEMPLATE_PATHS[$i] = __ENV_ROOT__ . "/templates/";
+        // Register variables
+        add_vars([$i => $plugin->register_variables()]);
+    }
+
+    array_push($TEMPLATE_PATHS, __ENV_ROOT__ . "/templates/");
 } catch (Exception $e) {
-    if (app("debug")) die("Plugin error: " . $e->getMessage());
-    else die("Error initializing plugins");
+    die("Plugin error: " . $e->getMessage());
     exit;
 }

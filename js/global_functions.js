@@ -507,6 +507,10 @@ function relativeTime(prev, current = null, mode = "string", limit = "day") {
     return result;
 }
 
+/** @param str string */
+function string_to_bool(str) {
+    return (['on', 'true', 'y', 'yes'].includes(str.toLowerCase())) ? true : false;
+}
 
 // function relativeTime(prev, current = null) {
 //     if (current === null) current = new Date();

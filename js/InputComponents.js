@@ -655,8 +655,21 @@ customElements.define("input-array-item", InputArrayItem)
 class DisplayDate extends HTMLElement {
     constructor() {
         super();
+        this.formatKeywords = {
+            default: "m/d/Y",
+            long: "l, F jS Y g:i A",
+            verbose: "l, F jS Y",
+            "12-hour": "g:i a",
+            "24-hour": "H:i",
+            "seconds": "g:i:s A"
+        };
+    }
+
+    connectedCallback() {
         this.date = this.getValue();
-        this.format = this.getAttribute("format") || "m/d/Y";
+        // this.format = this.getAttribute("format") || this.formatKeywords.default;
+        if ((this.getAttribute("format") || "default") in this.formatKeywords) this.format = this.formatKeywords[this.format];
+        else this.format = this.getAttribute("format");
         this.relative = this.getAttribute("relative") || "false";
 
         if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
@@ -685,7 +698,7 @@ class DisplayDate extends HTMLElement {
             return;
         }
         this.innerText = result.result;
-        let date = new DateConverter(this.date, "l, F jS Y g:i A");
+        let date = new DateConverter(this.date, this.longFormat);
         this.setAttribute("title", date.format());
 
         // if (!["second", "moment"].includes(result.unit)) return;
@@ -712,6 +725,7 @@ class DisplayDate extends HTMLElement {
 
     change_handler_format(newValue) {
         this.format = newValue;
+        if ((newValue || "default") in this.formatKeywords) this.format = this.formatKeywords[newValue];
         this.execute();
     }
 
@@ -876,6 +890,7 @@ class HelpSpan extends HTMLElement {
         this.message.classList.remove(this.articleShown);
         this.addEventListener("mouseover", e => {
             this.message.classList.add(this.articleShown);
+            // this.message.style.top = this.top();
             this.justifyRight();
         })
 
@@ -930,6 +945,115 @@ class HelpSpan extends HTMLElement {
         }
         return offsets;
     }
+
+    top() {
+        const offsets = this.getOffsets().height;
+        let height = offsets.height;
+        let span = this.element.offsetHeight / 2;
+
+        return `${(height / 2) - span}px`;
+    }
 }
 
 customElements.define("help-span", HelpSpan);
+
+class CopySpan extends HTMLElement {
+
+    constructor() {
+        super();
+        this.val = document.createElement("input");
+        this.val.readOnly = true;
+        this.appendChild(this.val);
+
+        this.button = document.createElement("button");
+        this.button.innerHTML = this.clipboard();
+        this.button.addEventListener("click", e => {
+            this.copy();
+        })
+        this.appendChild(this.button);
+    }
+
+    connectedCallback() {
+
+    }
+
+    get value() {
+        return this.val.value;
+    }
+
+    set value(val) {
+        this.setAttribute("value", val);
+    }
+
+    static get observedAttributes() {
+        return ['value'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_value(val) {
+        this.val.value = val;
+    }
+
+    clipboard(size = 1.8) {
+        return `<svg
+        width="${size}em"
+        height="${size}em"
+        viewBox="0 0 30 30"
+        version="1.1"
+        id="svg5"
+        inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+        sodipodi:docname="clipboard.svg"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:svg="http://www.w3.org/2000/svg"
+        >
+        <path
+         id="path1525"
+         style="fill:none;stroke:currentColor;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+         d="M 27.685547 13.644531 C 24.79831 13.644531 22.474609 15.968232 22.474609 18.855469 L 22.474609 78.603516 C 22.474609 81.490753 24.79831 83.814453 27.685547 83.814453 L 42.724609 83.814453 L 42.724609 35.332031 C 42.724609 35.241805 42.727936 35.151573 42.732422 35.0625 C 42.736908 34.973427 42.743089 34.886641 42.751953 34.798828 C 42.760818 34.711016 42.772021 34.623554 42.785156 34.537109 C 42.798292 34.450665 42.812779 34.364266 42.830078 34.279297 C 42.847377 34.194328 42.867317 34.110729 42.888672 34.027344 C 42.910027 33.943958 42.933681 33.860992 42.958984 33.779297 C 42.984288 33.697602 43.011871 33.617006 43.041016 33.537109 C 43.07016 33.457213 43.101888 33.378772 43.134766 33.300781 C 43.167644 33.22279 43.201777 33.144337 43.238281 33.068359 C 43.274785 32.992382 43.313493 32.917607 43.353516 32.84375 C 43.393538 32.769893 43.435082 32.696629 43.478516 32.625 C 43.521949 32.553371 43.566545 32.483356 43.613281 32.414062 C 43.660018 32.344769 43.70788 32.277787 43.757812 32.210938 C 43.807745 32.144088 43.859089 32.077971 43.912109 32.013672 C 43.96513 31.949373 44.02017 31.88586 44.076172 31.824219 C 44.132174 31.762578 44.189172 31.703406 44.248047 31.644531 C 44.306922 31.585656 44.368047 31.526705 44.429688 31.470703 C 44.491328 31.414701 44.554842 31.361615 44.619141 31.308594 C 44.68344 31.255573 44.747603 31.204229 44.814453 31.154297 C 44.881303 31.104364 44.950238 31.054549 45.019531 31.007812 C 45.088824 30.961076 45.15884 30.91648 45.230469 30.873047 C 45.302098 30.829614 45.375362 30.788069 45.449219 30.748047 C 45.523076 30.708025 45.59785 30.669316 45.673828 30.632812 C 45.749806 30.596309 45.826306 30.562175 45.904297 30.529297 C 45.982288 30.496419 46.062681 30.464691 46.142578 30.435547 C 46.222475 30.406402 46.303071 30.378819 46.384766 30.353516 C 46.466461 30.328212 46.547474 30.306511 46.630859 30.285156 C 46.714245 30.263801 46.799797 30.243862 46.884766 30.226562 C 46.969734 30.209263 47.054181 30.192823 47.140625 30.179688 C 47.227069 30.166552 47.314531 30.157302 47.402344 30.148438 C 47.490156 30.139573 47.578896 30.131439 47.667969 30.126953 C 47.757042 30.122467 47.847274 30.121094 47.9375 30.121094 L 75.023438 30.121094 L 75.023438 18.855469 C 75.023438 15.968232 72.697784 13.644531 69.810547 13.644531 L 27.685547 13.644531 z "
+         transform="scale(0.26458333)" />
+      <rect
+         style="fill:none;stroke:currentColor;stroke-width:2.64583333;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect1371-3"
+         width="13.903321"
+         height="18.565735"
+         x="11.304461"
+         y="7.9694405"
+         ry="1.3789077" />
+        
+        </svg>`;
+    }
+
+    copy() {
+        this.val.select();
+        this.val.setSelectionRange(0, this.val.value.length);
+        document.execCommand("copy");
+        this.addConfirmMessage();
+    }
+
+    async addConfirmMessage() {
+        clearTimeout(this.timeout);
+        if (this.confirm && this.confirm.parentNode == this) this.removeChild(this.confirm);
+        this.confirm = document.createElement("div");
+        this.confirm.classList.add("copy-span--confirm");
+        this.confirm.innerText = "Copied to clipboard.";
+        this.appendChild(this.confirm);
+        this.confirm.addEventListener("click", e => {
+            this.removeChild(this.confirm);
+        });
+        await wait_for_animation(this.confirm, "copy-span--spawn");
+        this.timeout = setTimeout(async () => {
+            await wait_for_animation(this.confirm, "copy-span--disappear");
+            this.removeChild(this.confirm);
+        }, 2000);
+    }
+}
+
+customElements.define("copy-span", CopySpan);

@@ -55,6 +55,21 @@ require_once $composer;
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload", true);
 
+/** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
+$GLOBALS['time_to_update'] = false;
+// $update_list = [
+//     __APP_ROOT__ . "/private/config/settings.json",
+//     __APP_ROOT__ . "/private/config/settings.jsonc",
+//     __ENV_ROOT__ . "/config/settings.json",
+// ];
+
+// foreach($update_list as $file) {
+//     if(file_exists($file) && filemtime($file)) {
+//         $GLOBALS['time_to_update'] = true;
+//         break;
+//     }
+// }
+
 // Load our ACTIVE plugins.
 require_once __ENV_ROOT__ . "/globals/plugins.php";
 

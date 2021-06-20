@@ -1,95 +1,263 @@
-<fieldset>
-    <label for="">
-        Date
-        <date-span value="1622152662471"></date-span> &mdash;
-        <date-span value="1621807671000" format="l, F jS Y"></date-span>
-    </label>
-    <label for="">
-        Time
-        <date-span value="1622152662471" format="h:i a"></date-span> &mdash;
-        <date-span value="1622152662471" format="H:i"></date-span> &mdash;
-        <date-span value="1622152662471" format="g:i:s A"></date-span>
-    </label>
-    <label for="">
-        From JSON
-        <date-span value="{&quot;$date&quot;:{&quot;$numberLong&quot;:&quot;1622152662471&quot;}}"></date-span>
-    </label>
-    <label>
-        Relative
-        <date-span value="@time();000" relative="true"></date-span>
-    </label>
-</fieldset>
-<fieldset>
-    <label>Standard Text Input</label>
-    <input type="text" placeholder="Placeholder"> <input type="number" placeholder="1">
-    <label>Disabled</label>
-    <input type="text" placeholder="Disabled" disabled="disabled">
-</fieldset>
+<container id="container">
+    <section id="display">
+        <fieldset>
+            <h3>&lt;date-span/&gt;</h3>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <td>
+                        <date-span value="1622152662471"></date-span>
+                        <help-span value="format: default"></help-span>
+                    </td>
+                    <td>
+                        <date-span value="1622152662471" format="Y/m/d"></date-span>
+                        <help-span value="format: Y/m/d"></help-span>
+                    </td>
+                    <td>
+                        <date-span value="1621807671000" format="verbose"></date-span>
+                        <help-span value="format: verbose"></help-span>
+                    </td>
+                </tr>
 
-<fieldset>
-    <label>Inactive switch</label>
-    <input-switch name="element1"></input-switch>
-    <input-switch name="element2" disabled="true"></input-switch>
-    <label>Active switch</label>
-    <input-switch name="element3" checked="true"></input-switch>
-    <input-switch name="element4" disabled="true" checked="true"></input-switch>
-    <label>Indeterminate Switch</label>
-    <input-switch name="element5" checked="unknown"></input-switch>
-</fieldset>
+                <tr>
+                    <th>Time</th>
+                    <td>
+                        <date-span value="1622152662471" format="12-hour"></date-span>
+                        <help-span value="format: 12-hour"></help-span>
+                    </td>
+                    <td>
+                        <date-span value="1622152662471" format="24-hour"></date-span>
+                        <help-span value="format: 24-hour"></help-span>
+                    </td>
+                    <td>
+                        <date-span value="1622152662471" format="seconds"></date-span>
+                        <help-span value="format: seconds"></help-span>
+                    </td>
+                </tr>
 
-<fieldset>
-    <label>Large Inactive Switch</label>
-    <input-switch name="element2" large></input-switch>
-    <label>Large Active switch</label>
-    <input-switch name="element3" checked="true" large></input-switch>
-</fieldset>
+                <tr>
+                    <th>From JSON</th>
+                    <td colspan="3">
+                        <date-span value="{&quot;$date&quot;:{&quot;$numberLong&quot;:&quot;1622152662471&quot;}}">
+                        </date-span>
+                    </td>
+                </tr>
 
-<fieldset>
-    <label>Standard Toggles</label>
-    <input type="checkbox">
-</fieldset>
+                <tr>
+                    <th>Relative</th>
+                    <td colspan="3">
+                        <date-span value="@time();000" relative="true"></date-span>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <h3>&lt;copy-span/&gt;</h3>
+            <copy-span value="Copy some arbitrary value"></copy-span>
+        </fieldset>
 
-<fieldset>
-    <label>Array test</label>
-    <input-array id="mod" name="array" multiselect="true" allow-custom="true" value='["php","javascript"]'
-        placeholder="Favorite Programming Languages">
-        <option value="actionscript">ActionScript</option>
-        <option value="applescript">AppleScript</option>
-        <option value="asp">Asp</option>
-        <option value="basic">BASIC</option>
-        <option value="c">C</option>
-        <option value="c++">C++</option>
-        <option value="objective c">Objective C</option>
-        <option value="clojure">Clojure</option>
-        <option value="cobol">COBOL</option>
-        <option value="coldfusion">ColdFusion</option>
-        <option value="dart">Dart</option>
-        <option value="erlang">Erlang</option>
-        <option value="fortran">Fortran</option>
-        <option value="go">Go</option>
-        <option value="groovy">Groovy</option>
-        <option value="haskell">Haskell</option>
-        <option value="java">Java</option>
-        <option value="javascript">JavaScript</option>
-        <option value="kotlin">Kotlin</option>
-        <option value="lisp">Lisp</option>
-        <option value="matlab">MATLAB</option>
-        <option value="perl">Perl</option>
-        <option value="php">PHP</option>
-        <option value="python">Python</option>
-        <option value="ruby">Ruby</option>
-        <option value="rust">Rust</option>
-        <option value="scala">Scala</option>
-        <option value="schem">Schem</option>
-        <option value="swift">Swift</option>
-        <option value="vala">Vala</option>
-        <option value="something"><code style="background:black;color:white">something</code></option>
-    </input-array>
-</fieldset>
-<button id="update">Update</button>
-<button id="readonly">Readonly</button>
-<button id="custom">Custom</button>
-<button id="multi">Multi</button>
+    </section>
+
+
+    <section id="built-ins">
+        <fieldset>
+            <h3>&lt;input type="text"/&gt;</h3>
+            <input type="text" placeholder="Placeholder"> <input type="text" placeholder="Disabled" disabled="disabled">
+            <h3>&lt;input type="number"/&gt;</h3>
+            <input type="number" placeholder="100"> <input type="date" value="2021-04-04">
+        </fieldset>
+        <div style="display:flex; justify-content: space-evenly;">
+            <fieldset>
+                <h3>&lt;input type="checkbox"/&gt;</h3>
+                <div>
+                    <label><input type="checkbox" checked="checked"> Checked</label>
+                    <label><input type="checkbox"> Unchecked</label>
+                    <label><input type="checkbox" disabled="disabled"> Disabled</label>
+                </div>
+            </fieldset>
+            <fieldset>
+                <h3>&lt;input type="radio"/&gt;</h3>
+                <label><input type="radio" name="some" value="1" checked="checked"> Checked</label>
+                <label><input type="radio" name="some" value="2" checked="checked"> Unchecked</label>
+                <label><input type="radio" name="some" value="3" disabled="disabled"> Disabled</label>
+            </fieldset>
+            <fieldset>
+                <h3>&lt;radio-group/&gt; <help-span
+                        value="Assign a 'value' attribute to the radio-group container and it will automatically select the correct radio button for you.">
+                    </help-span>
+                </h3>
+                <radio-group name="one" selected="three" style="border: 1px solid var(--project-color-input-border-nofocus);
+                display: inline-block;
+                padding: 3px;">
+                    <label><input type="radio" name="one" value="one"> One</label>
+                    <label><input type="radio" name="one" value="two"> Two</label>
+                    <label><input type="radio" name="one" value="three"> Three</label>
+                </radio-group>
+            </fieldset>
+        </div>
+    </section>
+
+    <section id="custom-elements">
+        <div id="input-switch">
+            <fieldset>
+                <h3>&lt;input-switch/&gt;</h3>
+                <input-switch name="element1"></input-switch>
+                <input-switch name="element3" checked="true"></input-switch>
+                <input-switch name="element5" checked="unknown"></input-switch>
+                <input-switch name="element2" disabled="true"></input-switch>
+                <input-switch name="element4" disabled="true" checked="true"></input-switch>
+            </fieldset>
+            <fieldset>
+                <h3>&lt;input-switch large/&gt;</h3>
+                <input-switch name="element2" large></input-switch>
+                <input-switch name="element3" checked="true" large></input-switch>
+                <input-switch name="element3" checked="indeterminate" large></input-switch>
+                <input-switch name="element3" large disabled="true"></input-switch>
+            </fieldset>
+        </div>
+
+
+        <fieldset id="input-array">
+            <h3>&lt;input-array/&gt; <help-span
+                    value="This component allows you to build, restore, and submit an array.">
+                </help-span>
+            </h3>
+            <input-array id="mod" name="array" multiselect="true" allow-custom="true" value='["php","javascript"]'
+                placeholder="Favorite Programming Languages">
+                <option value="actionscript">ActionScript</option>
+                <option value="applescript">AppleScript</option>
+                <option value="asp">Asp</option>
+                <option value="basic">BASIC</option>
+                <option value="c">C</option>
+                <option value="c++">C++</option>
+                <option value="objective c">Objective C</option>
+                <option value="clojure">Clojure</option>
+                <option value="cobol">COBOL</option>
+                <option value="coldfusion">ColdFusion</option>
+                <option value="dart">Dart</option>
+                <option value="erlang">Erlang</option>
+                <option value="fortran">Fortran</option>
+                <option value="go">Go</option>
+                <option value="groovy">Groovy</option>
+                <option value="haskell">Haskell</option>
+                <option value="java">Java</option>
+                <option value="javascript">JavaScript</option>
+                <option value="kotlin">Kotlin</option>
+                <option value="lisp">Lisp</option>
+                <option value="matlab">MATLAB</option>
+                <option value="perl">Perl</option>
+                <option value="php">PHP</option>
+                <option value="python">Python</option>
+                <option value="ruby">Ruby</option>
+                <option value="rust">Rust</option>
+                <option value="scala">Scala</option>
+                <option value="schem">Schem</option>
+                <option value="swift">Swift</option>
+                <option value="vala">Vala</option>
+                <option value="something"><code style="background:black;color:white">something</code></option>
+            </input-array>
+            <div>
+                <button id="update">Update</button>
+                <button id="readonly">Readonly</button>
+                <button id="custom">Custom</button>
+                <button id="multi">Multi</button>
+            </div>
+        </fieldset>
+
+        <fieldset id="input-object-array">
+            <h3>&lt;input-object-array/&gt; <help-span value="Currently not working, yet."></help-span>
+            </h3>
+            <input-object-array field="field">
+                <var>
+                    [
+                    {"foo":"value","bar":400,"baz":true,"boo":"one"},
+                    {"foo":"Another","bar":-100,"baz":false,"boo":"two"}
+                    ]
+                </var>
+                <template>
+                    <fieldset>
+                        <label>Foo</label>
+                        <input name="foo">
+                        <label>Bar</label>
+                        <input type="number" name="bar">
+                        <label>Baz</label>
+                        <input type="checkbox" name="baz">
+                        <radio-group>
+                            <label><input type="radio" name="boo" value="one"> One</label>
+                            <label><input type="radio" name="boo" value="two"> Two</label>
+                        </radio-group>
+                    </fieldset>
+                </template>
+            </input-object-array>
+
+        </fieldset>
+    </section>
+</container>
+
+<style>
+    #container {
+        --pad: .4rem;
+        display: grid;
+        padding: var(--pad);
+        grid-template-columns: 2;
+        grid-template-rows: auto;
+        gap: var(--pad);
+    }
+
+    #container h3 {
+        margin-bottom: 0;
+        font-family: monospace;
+    }
+
+    #display table :is(th, td) {
+        padding: calc(var(--pad) / 3) var(--pad);
+    }
+
+    #display,
+    #built-ins,
+    #custom-elements {
+        padding: var(--pad);
+        border: 1px solid gray;
+    }
+
+    #display {
+        grid-column: 1 / span 1;
+        grid-row: 1 / span 1;
+
+
+    }
+
+    #built-ins {
+        grid-column: 2 / span 1;
+        grid-row: 1 / span 1;
+
+    }
+
+    #custom-elements {
+        grid-column: 1 / span 2;
+        grid-row: 2 / span 2;
+        display: grid;
+        grid-template-columns: 2;
+        grid-template-rows: 2;
+    }
+
+    #input-switch {
+        grid-column: 1 / span 1;
+        grid-row: 1 / span 1;
+    }
+
+    #input-array {
+        grid-column: 2 / span 1;
+        grid-row: 1 / span 1;
+    }
+
+    #input-object-array {
+        grid-column: 1 / span 2;
+        grid-row: 2 / span 1;
+    }
+</style>
+
+
 
 <script>
     var button = document.querySelector("#update")
@@ -117,30 +285,3 @@
         array.setAttribute('multiselect', set);
     });
 </script>
-
-
-
-<fieldset>
-    <label>Object Array test</label>
-    <input-object-array field="field">
-        <var>[
-            {"foo":"value","bar":400,"baz":true,"boo":"one"},
-            {"foo":"Another","bar":-100,"baz":false,"boo":"two"}
-            ]</var>
-        <template>
-            <fieldset>
-                <label>Foo</label>
-                <input name="foo">
-                <label>Bar</label>
-                <input type="number" name="bar">
-                <label>Baz</label>
-                <input type="checkbox" name="baz">
-                <radio-group>
-                    <label><input type="radio" name="boo" value="one"> One</label>
-                    <label><input type="radio" name="boo" value="two"> Two</label>
-                </radio-group>
-            </fieldset>
-        </template>
-    </input-object-array>
-
-</fieldset>

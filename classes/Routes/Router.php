@@ -136,7 +136,7 @@ class Router {
         if (isset($exe['permission'])) {
             $permission = true;
             try {
-                $permission = $GLOBALS['auth']->has_permission($exe['permission'], $exe['group']);
+                $permission = $GLOBALS['auth']->has_permission($exe['permission']);
             } catch (\Exceptions\HTTP\Unauthorized $e) {
                 $permission = false;
             }

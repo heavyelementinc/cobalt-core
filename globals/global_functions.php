@@ -23,6 +23,10 @@ use Exceptions\HTTP\Confirm;
  * @return mixed The value of the setting
  */
 function app($setting = null) {
+    if (!defined("__APP_SETTINGS__")) {
+        trigger_error("It's too early to be looking for settings. Returning NULL!", E_USER_WARNING);
+        return null;
+    }
     if ($setting === null) return __APP_SETTINGS__;
     if (key_exists($setting, __APP_SETTINGS__)) return __APP_SETTINGS__[$setting];
     try {
@@ -209,16 +213,51 @@ function set_template($path) {
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
+ * 
+ * A few template vars for quick reference:
+ * title      - The title of the page
+ * main_id    - the main element's id
+ * body_id    - the body element's id
+ * body_class - the body element's class list
+ * 
  * @param array $vars MUST BE ASSOCIATIVE ARRAY
  * @return void
  */
 function add_vars($vars) {
+
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
         return;
     }
 
     $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
+}
+
+$GLOBALS['TEMPLATE_BINDINGS'] = [
+    "html_head_binding", "noscript_binding_after", "header_binding_before",
+    "header_binding_middle", "header_binding_after", "main_content_binding_before",
+    "main_content_binding_after", "footer_binding_before", "footer_binding_after"
+];
+
+/**
+ * Append a value to a particular template binding
+ * 
+ * Valid bindings: html_head_binding, noscript_binding_after, header_binding_before, 
+ * header_binding_middle, header_binding_after, main_content_binding_before, 
+ * main_content_binding_after, footer_binding_before, footer_binding_after
+ * 
+ * @param string $binding_name the name of the binding
+ * @param string $value the value to be bound
+ * @return void
+ */
+function bind($binding_name, $value) {
+
+
+    if (!in_array($binding_name, $GLOBALS['TEMPLATE_BINDINGS'])) throw new Exception("Invalid binding");
+
+    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'][$binding_name]))
+        $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] = $value;
+    else $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] .= $value;
 }
 
 /** 
@@ -270,7 +309,7 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
      * appending to the $looked_up string when we successfully find the object
      */
     if ($looked_up === "$path_map.") return $mutant;
-    else if ($throw_on_fail == "warn") \trigger_error("Could not find `$path_map`");
+    else if ($throw_on_fail == "warn") throw new Exception("Could not find `$path_map`");
     else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
     else return; // Return undefined
 }
@@ -417,7 +456,7 @@ function jsonc_decode($json, $assoc = false, $depth = 512, $flags = 0) {
     return json_decode($json, $assoc, $depth, $flags);
 }
 
-/** Build Object */
+/** Used with the '...' route path symbol, provide the string as $path amd */
 function build_array_from_path(&$arr, $path, $value, $delimiter = ".") {
     $keys = explode($delimiter, $path);
     foreach ($keys as $key) {
@@ -442,6 +481,30 @@ function is_secure() {
         || $_SERVER['SERVER_PORT'] == 443;
 }
 
+/** Used with the '...' route path symbol, provide the string as $path and valid
+ * keys as $keys
+ * 
+ * If the path equals `/some/path/key/value` and $keys equals ['key']
+ * 
+ * The return value will be ['key' => 'value']
+ * 
+ * All other info in the string will be ignored.
+ * 
+ * @param string $path
+ * @param array $keys a list of valid keys to parse for
+ * @return array the processed associative array
+ */
+function associative_array_helper(string $path, array $keys) {
+    $exploded = explode("/", $path);
+    $array = array_fill_keys($keys, null);
+    for ($i = 0; $i < count($exploded); $i++) {
+        if (in_array($exploded[$i], $keys)) {
+            $array[$exploded[$i]] = $exploded[$i + 1];
+            $i++;
+        }
+    }
+    return $array;
+}
 
 /**
  * A shorthand way of rendering a template and getting the results. This is
@@ -573,6 +636,7 @@ function cents_to_dollars($cents) {
  * @return string formated date
  */
 function mongo_date($date, $fmt = "Y-m-d") {
+    if ($date === null) return "";
     $date = (string)$date / 1000;
     return date($fmt, $date);
 }
@@ -622,4 +686,10 @@ function confirm($message, $data, $okay = "Continue", $dangerous = true) {
     $headers = apache_request_headers();
     if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
     throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
+}
+
+
+function plugin($name) {
+    if (isset($GLOBALS['ACTIVE_PLUGINS'][$name])) return $GLOBALS['ACTIVE_PLUGINS'][$name];
+    throw new Exception('Plugin is not active!');
 }
