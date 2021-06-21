@@ -34,8 +34,8 @@ class Manager {
         // if (!file_exists($this->plugins_available)) $this->init_available_file();
         // if ($GLOBALS['time_to_update']) 
         $this->update_plugin_database();
-        $this->directory = get_json($this->plugin_directory) ?? [];
-        $this->enabled_names = array_unique(get_json($this->enabled_plugins));
+        if (!file_exists($this->plugin_directory)) $this->directory = get_json($this->plugin_directory) ?? [];
+        if (file_exists($this->enabled_plugins)) $this->enabled_names = array_unique(get_json($this->enabled_plugins));
         $this->active = $this->get_enabled_plugins();
     }
 

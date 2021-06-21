@@ -27,10 +27,10 @@
  - [ ] Add <async-button> which should use FormRequest to carry out async stuff
  - [ ] Add widgets to admin dashboard
    - [ ] Plugins can add widgets
- - [ ] Create admin dashboard container class
+ - [x] Create admin dashboard container class `.cobalt-admin--fieldset`
  - [ ] Finish plugins system
    - [ ] Cobalt version checking for each plugin
-   - [ ] Plugins info/cache should be stored in the database <!-- Not gonna happen -->
+   <!-- - [ ] Plugins info/cache should be stored in the database // Not gonna happen -->
    - [%] Plugin management in admin panel
    - [x] register_permissions
    - [x] register_templates
@@ -54,20 +54,26 @@
    - [x] Add settings to require verification before authenticated actions can be carried out
    - [ ] Add user account verification email process
  - [ ] Add password reset process
+   - [ ] Add setting to enable/disable this
  - [ ] Add user preferences
  - [ ] Cron system & CLI interface
  - [ ] Add customizable user account icons
  - [x] Add ring privilege checks--no promoting accounts to higher access levels than your own
- - [ ] Make main navigation permission-sensitive
+ - [ ] Make navigation permission-sensitive
  - [ ] Fix issue where router cache gets regenerated when on admin page and returns empty web cache.
- - [ ] Add CLI command to promote user to `root` group
+   - [ ] Add a `cache_version.json` file which increments when a cache update needs to take place.
+ - [x] Add CLI command to promote user to `root` group
+   - [ ] Also added 'demote' command
  - [ ] Finish InputClass value reversion on error
  - [ ] Events scheduler system
  - [ ] Add template/renderer debugging!!!
  - [ ] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
  - [ ] Track down WSOD (white screen of death)
  - [ ] <replicator-button> contains internal <template>
- 
+
+# Version 0.4
+- [ ] Upgrade to version 0.4
+- [ ] 
 
 # Todo
  - [ ] Update the Settings Manager so it instantiates Settings class (interface of iterable)

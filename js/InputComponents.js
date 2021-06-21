@@ -1057,3 +1057,39 @@ class CopySpan extends HTMLElement {
 }
 
 customElements.define("copy-span", CopySpan);
+
+class FlexTable extends HTMLElement {
+    connectedCallback() {
+        let max = 0;
+        let same = 0;
+        let columns = this.querySelectorAll("flex-row");
+
+
+        for (const i of columns) {
+            if (i.childElementCount > max) max = i.childElementCount;
+            if (i.childElement === max) {
+                same += 1;
+                if (same >= 3) break;
+            }
+        }
+
+        this.style.setProperty("--column-count", max);
+    }
+
+    // static get observedAttributes() {
+    //     return ['columns'];
+    // }
+
+    // attributeChangedCallback(name, oldValue, newValue) {
+    //     const callable = `change_handler_${name.replace("-", "_")}`;
+    //     if (callable in this) {
+    //         this[callable](newValue, oldValue);
+    //     }
+    // }
+
+    // change_handler_columns(val) {
+    //     this.style.setProperty("--column-count", val);
+    // }
+}
+
+customElements.define("flex-table", FlexTable);

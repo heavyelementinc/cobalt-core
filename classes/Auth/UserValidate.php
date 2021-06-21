@@ -83,7 +83,7 @@ class UserValidate extends \Validation\Validate {
         if (!empty($password_fail)) throw new ValidationIssue($password_fail);
 
         $this->set("flags.password_reset_required", false);
-        $this->set("flags.password_last_changed_by", session("_id"));
+        $this->set("flags.password_last_changed_by", session("_id") ?? "CLI");
         $this->set("flags.password_last_changed_on", $this->make_date());
 
         /** Finally, we have a valid password. */

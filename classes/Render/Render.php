@@ -138,7 +138,15 @@ class Render {
      */
     function from_template(string $template_path) {
         if (!\property_exists($this, "template_cache")) $this->template_cache = [];
-        if (!key_exists($template_path, $this->template_cache)) {
+        if ($template_path[0] === "_") {
+            $template_path = str_replace(
+                ["__CORE__", "__APP__"],
+                [__ENV_ROOT__ . "/templates/", __APP_ROOT__ . "/private/templates/"],
+                $template_path
+            );
+            if (!file_exists($template_path)) throw new \Exceptions\HTTP\NotFound("That template was not found");
+            $this->template_cache[$template_path] = file_get_contents($template_path);
+        } else if (!key_exists($template_path, $this->template_cache)) {
             $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
             $this->template_cache[$template_path] = file_get_contents($contenders);
         }

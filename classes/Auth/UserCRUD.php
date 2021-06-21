@@ -65,6 +65,16 @@ class UserCRUD extends \Drivers\Database {
 
         $val->setMode("require");
         $mutant = $val->validate($request);
+        $flags = [];
+        $flag = "flags.";
+        $len = strlen($flag);
+        foreach ($mutant as $field => $value) {
+            if (substr($field, 0, $len) === $flag) {
+                $flags[str_replace($flag, "", $field)] = $value;
+                unset($mutant[$field]);
+            }
+        }
+        $mutant['flags'] = $flags;
 
         $default = [
             'prefs' => json_decode("{}"),
@@ -74,7 +84,7 @@ class UserCRUD extends \Drivers\Database {
             'since' => $this->__date(null),
             'flags' => [
                 'verified' => false,
-                'update_password' => false,
+                'password_reset_required' => false,
             ]
         ];
         $request = array_merge(

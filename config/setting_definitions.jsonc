@@ -251,6 +251,7 @@
             "status-message.css",
             "login-form.css",
             "form-request.css",
+            "flex-table.css",
             "modal.css",
             "tabs-drawer.css",
             "calendar.css",

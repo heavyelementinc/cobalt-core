@@ -47,6 +47,7 @@ function app($setting = null) {
  *               exist
  */
 function session($info = null) {
+    if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
     if (key_exists($info, $GLOBALS['session'])) return $GLOBALS['session'][$info];
     throw new Exception("Field $info does not exist");
@@ -439,6 +440,10 @@ function csrf_attribute() {
  * @return mixed
  */
 function get_json($file_name, $array = true) {
+    if (!file_exists($file_name)) {
+        if ($array) return [];
+        else return false;
+    }
     $json = file_get_contents($file_name);
     return json_decode($json, $array);
 }
@@ -504,6 +509,14 @@ function associative_array_helper(string $path, array $keys) {
         }
     }
     return $array;
+}
+
+function associative_to_path(array $arr) {
+    $path = "/";
+    foreach ($arr as $name => $val) {
+        $path .= "$name/$val/";
+    }
+    return $path;
 }
 
 /**
