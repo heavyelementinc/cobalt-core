@@ -67,23 +67,18 @@ class Debug extends \Controllers\Pages {
     function debug_calendar($date = null) {
         if ($date === null) $date = time();
         $calendar = new \Calendar\Calendar($date);
+        $show_debug_info = function($calendar) {
+            return "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
+            "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
+            "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
+            "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>";
+        };
         add_vars([
             'title' => 'Calendar test',
-            'main' =>   $calendar->render("day") .
-                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
-                $calendar->render("week") .
-                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
-                $calendar->render() .
-                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>"
+            'main' => $calendar->render("day") . $show_debug_info($calendar) .
+                $calendar->render("week") . $show_debug_info($calendar) .
+                $calendar->render() . $show_debug_info($calendar) .
+                $calendar->render("rolling") . $show_debug_info($calendar)
         ]);
         set_template("/parts/main.html");
     }
