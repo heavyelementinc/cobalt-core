@@ -509,7 +509,7 @@ function relativeTime(prev, current = null, mode = "string", limit = "day") {
 
 /** @param str string */
 function string_to_bool(str) {
-    return (['on', 'true', 'y', 'yes'].includes(str.toLowerCase())) ? true : false;
+    return (['on', 'true', 'y', 'yes', 'checked'].includes(str.toLowerCase())) ? true : false;
 }
 
 // function relativeTime(prev, current = null) {

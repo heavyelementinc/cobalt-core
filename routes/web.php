@@ -58,6 +58,10 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Action Menu"]
     ]);
+    Route::get("/debug/async-wizard", "Debug@async_wizard", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Async Wizard"]
+    ]);
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
 }
 

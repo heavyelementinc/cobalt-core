@@ -25,13 +25,11 @@
    - [ ] Include a user preferences panel in account manager
    - [ ] User stats implement in account manager
  - [ ] Add <async-button> which should use FormRequest to carry out async stuff
- - [ ] Add widgets to admin dashboard
-   - [ ] Plugins can add widgets
  - [x] Create admin dashboard container class `.cobalt-admin--fieldset`
  - [ ] Finish plugins system
    - [ ] Cobalt version checking for each plugin
    <!-- - [ ] Plugins info/cache should be stored in the database // Not gonna happen -->
-   - [%] Plugin management in admin panel
+   - [x] Plugin management in admin panel
    - [x] register_permissions
    - [x] register_templates
    - [x] register_shared_content_dir
@@ -40,12 +38,12 @@
    - [x] register_public_dir
    - [x] register_packages
    - [x] register_variables
- - [ ] Cobalt Settings (modified stored in database)
+ <!-- - [ ] Cobalt Settings (modified stored in database) -->
  - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
  - [x] Fire requestFailed CustomEvent in FormRequest.js and test
  - [x] Make form-login-request listen for the enter key being pressed.
  - [x] Make form-login-request reload the page when a login has occurred successfully
- - [ ] Track down WSOD (white screen of death)
+ - [ ] Track down WSOD (white screen of death) <!-- This is happening because the plugins weren't loading correctly and the catch routine wasn't handling correctly. >
 
 
 # Version 0.3
@@ -63,19 +61,24 @@
  - [ ] Fix issue where router cache gets regenerated when on admin page and returns empty web cache.
    - [ ] Add a `cache_version.json` file which increments when a cache update needs to take place.
  - [x] Add CLI command to promote user to `root` group
-   - [ ] Also added 'demote' command
+   - [x] Also added 'demote' command
  - [ ] Finish InputClass value reversion on error
  - [ ] Events scheduler system
  - [ ] Add template/renderer debugging!!!
  - [ ] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
- - [ ] Track down WSOD (white screen of death)
  - [ ] <replicator-button> contains internal <template>
 
 # Version 0.4
 - [ ] Upgrade to version 0.4
-- [ ] 
+- [ ] Finish &lt;async-wizard&gt;
+- [ ] Allow plugins to display their own panel when you click on their name.
+- [ ] Add widgets to admin dashboard
+   - [ ] Plugins can add widgets
+ - [ ] Finish autocomplete
+   - [ ] Fire event on autocomplete found
+   - [ ] Replace the search element in input-array with auto-complete
 
 # Todo
+ - [ ] Make duotone icon set a plugin
  - [ ] Update the Settings Manager so it instantiates Settings class (interface of iterable)
    - [ ] Settings class contains every default value as a method
- - [ ] 

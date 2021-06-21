@@ -99,6 +99,9 @@ class WebHandler implements RequestHandler {
     }
 
     public function _public_exception_handler($e) {
+        // Prevent trying to load a template that might not exist already.
+        unset($GLOBALS['web_processor_template']);
+
         // Get the message string and data
         $message = $e->getMessage();
         $data = $e->data;
@@ -135,6 +138,7 @@ class WebHandler implements RequestHandler {
 
         // Add the error template as the main content
         $this->main_content_from_template($template);
+        $this->_stage_output();
     }
 
     /** END INTERFACE REQUIREMENTS */
@@ -144,12 +148,12 @@ class WebHandler implements RequestHandler {
         $this->results_sent_to_client = true;
     }
 
-    function __destruct() {
-        // Check if we have sent the output yet and return
-        if ($this->results_sent_to_client === true) return;
-        // If we HAVEN'T sent the output, we run _stage_output
-        $this->_stage_output();
-    }
+    // function __destruct() {
+    //     // Check if we have sent the output yet and return
+    //     if ($this->results_sent_to_client === true) return;
+    //     // If we HAVEN'T sent the output, we run _stage_output
+    //     $this->_stage_output();
+    // }
 
     /** Here we're searching our base template for any additional template stuff we might want
      * to include. We do this because we want to provide a base HTML framework along with public

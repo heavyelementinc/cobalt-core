@@ -3,7 +3,7 @@ class Debug extends \Controllers\Pages {
 
     function debug_directory() {
         add_vars(['title' => "Debug Directories"]);
-        add_template("/debug/debug.html");
+        set_template("/debug/debug.html");
     }
     function debug_renderer() {
         add_vars([
@@ -14,7 +14,7 @@ class Debug extends \Controllers\Pages {
             'lookup' => ['field' => "LOOKUP"],
             'object' => json_decode('{"property":"value"}'),
         ]);
-        add_template("debug/renderer.html");
+        set_template("debug/renderer.html");
     }
 
     function debug_router() {
@@ -36,17 +36,17 @@ class Debug extends \Controllers\Pages {
             'title' => 'Router',
             'main' => $routes . "<style>main>section{display:flex;flex-wrap:wrap;}</style>"
         ]);
-        add_template("/parts/main.html");
+        set_template("/parts/main.html");
     }
 
     function debug_slideshow() {
         add_vars(['title' => 'Slideshow Test']);
-        add_template('/debug/slideshow.html');
+        set_template('/debug/slideshow.html');
     }
 
     function debug_inputs() {
         add_vars(['title' => 'Input Test']);
-        add_template("/debug/inputs.html");
+        set_template("/debug/inputs.html");
     }
 
     function debug_parallax() {
@@ -54,14 +54,14 @@ class Debug extends \Controllers\Pages {
             'title' => 'Parallax Test',
             'body_class' => "cobalt-parallax--container"
         ]);
-        add_template("/debug/parallax.html");
+        set_template("/debug/parallax.html");
     }
 
     function debug_loading() {
         add_vars([
             'title' => 'Loading test'
         ]);
-        add_template("/debug/loading.html");
+        set_template("/debug/loading.html");
     }
 
     function debug_calendar($date = null) {
@@ -85,14 +85,14 @@ class Debug extends \Controllers\Pages {
                 "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
                 "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>"
         ]);
-        add_template("/parts/main.html");
+        set_template("/parts/main.html");
     }
 
     function flex_table() {
         add_vars([
             'title' => 'Flex Table Test',
         ]);
-        add_template("/debug/flex-table.html");
+        set_template("/debug/flex-table.html");
     }
 
     function relative_path_test() {
@@ -102,14 +102,14 @@ class Debug extends \Controllers\Pages {
                 'anchor' => "<a href='$GLOBALS[PATH]test'>Test<a>"
             ]
         );
-        add_template("/debug/relative_path_test.html");
+        set_template("/debug/relative_path_test.html");
     }
 
     function form_test() {
         add_vars([
             'title' => 'Form Validation Test',
         ]);
-        add_template(("/debug/validator.html"));
+        set_template(("/debug/validator.html"));
     }
 
     function validate_test_form() {
@@ -131,7 +131,7 @@ class Debug extends \Controllers\Pages {
             'title' => 'Modal Test'
         ]);
 
-        add_template("/debug/modal-template.html");
+        set_template("/debug/modal-template.html");
     }
 
     function slow_response($delay = 10) {
@@ -143,13 +143,20 @@ class Debug extends \Controllers\Pages {
             'title' => 'Slow Response Simulation',
             'delay' => $delay
         ]);
-        add_template("/debug/slow-response.html");
+        set_template("/debug/slow-response.html");
     }
 
     function action_menu() {
         add_vars([
             'title' => "Action Menu test"
         ]);
-        add_template("/debug/action_menu.html");
+        set_template("/debug/action_menu.html");
+    }
+
+    function async_wizard() {
+        add_vars([
+            'title' => "Async Wizard test"
+        ]);
+        set_template("/debug/async-wizard.html");
     }
 }

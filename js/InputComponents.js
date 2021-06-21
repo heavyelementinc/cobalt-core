@@ -1093,3 +1093,17 @@ class FlexTable extends HTMLElement {
 }
 
 customElements.define("flex-table", FlexTable);
+
+class AutoComplete extends HTMLElement {
+    constructor() {
+
+    }
+
+    connectedCallback() {
+        this.getOptions();
+    }
+
+    getOptions() {
+        this.querySelectorAll("elements")
+    }
+}
