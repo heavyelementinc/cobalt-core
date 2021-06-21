@@ -205,6 +205,7 @@ class Calendar {
         $anchors = ["", ""];
         if ($month_changes) {
             $type = strtolower($type);
+            if ($type === "rolling") $type = "week";
 
             //Establish the targets.
             $last_date = date("Y-m-d", strtotime("-1 $type", $this->timestamp_input));
