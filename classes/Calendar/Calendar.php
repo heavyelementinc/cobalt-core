@@ -133,6 +133,7 @@ class Calendar {
         } else if ($type === "month" && date("Y-m", $this->timestamp_input) === date("Y-m", time())) {
             $class_attribute = "calendar--current";
         }
+
         $output = $this->make_title_headline_html($type, $month_changes) .
             "<calendar-table class='$class_attribute'>";
 
@@ -164,8 +165,9 @@ class Calendar {
      * @return bool TRUE if valid unix timestamp | FALSE if not valid unix timestamp.
      */
     private function is_timestamp($timestamp) {
-        return ((string)(int)$timestamp === $timestamp) &&
-            ($timestamp <= PHP_INT_MAX) && ($timestamp >= ~PHP_INT_MAX);
+        return ((int) $timestamp === $timestamp)
+                && ($timestamp <= PHP_INT_MAX)
+                && ($timestamp >= ~PHP_INT_MAX);
     }
 
     /**

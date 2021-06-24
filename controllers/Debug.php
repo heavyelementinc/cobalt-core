@@ -80,7 +80,7 @@ class Debug extends \Controllers\Pages {
                 $calendar->render() . $show_debug_info($calendar) .
                 $calendar->render("rolling") . $show_debug_info($calendar)
         ]);
-        set_template("/parts/main.html");
+        set_template("/debug/calendar.html");
     }
 
     function flex_table() {
