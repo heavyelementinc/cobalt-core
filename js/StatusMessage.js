@@ -1,5 +1,5 @@
 class StatusMessage {
-    constructor({ message, id = null, icon = "", duration = 2000, action = e => e, close = true }) {
+    constructor({ message, id = null, icon = "", duration = 2000, action = e => true, close = true }) {
         this.message = message;
         this.icon = icon || "information-circle-outline";
         this.id = id || random_string();
@@ -21,7 +21,7 @@ class StatusMessage {
 }
 
 class StatusError extends StatusMessage {
-    constructor({ message, id, icon = null, action = e => e }) {
+    constructor({ message, id, icon = null, action = e => true }) {
         super({ message, id, icon: icon || `warning-outline` });
     }
 }
@@ -61,7 +61,7 @@ class MessageHandler {
         let element = this.messageQueue[details.id];
         if (!element) return;
         try {
-            if (withAction) await details.action(); s
+            if (withAction) await details.action(event, details);
         } catch (error) {
             await this.no(element);
             return;

@@ -102,6 +102,23 @@ input-switch {
     left: 38px;
   }
 
+  input-switch[tiny] {
+    width: 42px;
+    height: 16px;
+  }
+
+  input-switch[tiny] span::after{
+    height: 10px;
+  }
+
+  input-switch[tiny] input:checked + span::after {
+    left: 18px;
+  }
+
+  input-switch[tiny] span::before{
+    content: "";
+  }
+
 form-request{
   overflow: hidden;
 }

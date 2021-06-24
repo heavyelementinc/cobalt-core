@@ -35,11 +35,17 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
-    final function getUsersByPermission($permissions) {
+    final function getUsersByPermission($permissions, $value = true) {
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        return $this->find([
-            'permission' => $permissions
-        ]);
+        $perms = array_fill_keys($permissions,$value);
+        return $this->find(
+            [
+                '$or' => [
+                    ['permissions' => $perms],
+                    ['groups' => 'root']
+                ]
+            ]
+        );
     }
 
     final function getUsersByGroup($groups) {

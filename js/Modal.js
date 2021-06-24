@@ -58,6 +58,7 @@ class Modal {
         this.clickoutCallback = clickoutCallback;
         this.animations = animations;
         this.dialog = document.createElement("modal-box");
+        this.buttonResult = {};
 
         // Our default button configuration will be merged with whatever the
         // user provided
@@ -132,6 +133,7 @@ class Modal {
         this.buttons();
 
         if (this.url) window.router.navigation_event(null, this.url);
+        return this.dialog;
     }
 
     loading_spinner_start() {
@@ -201,7 +203,7 @@ class Modal {
 
             element.addEventListener("click", (e) => {
                 // Listen for button interactions and use the button handler method
-                this.button_event(i, e);
+                this.buttonResult = this.button_event(i, e);
             })
         }
     }
@@ -211,14 +213,22 @@ class Modal {
     */
     async button_event(btn, event) {
         let result = await this.chrome[btn].callback(this.container, event, btn); // Await a promise resolution
-        const modalButton = new CustomEvent("modalButtonPress", { detail: { type: "", result: result } })
+        const modalButton = new CustomEvent("modalButtonPress", { detail: { type: btn, result: result } })
         this.dialog.dispatchEvent(modalButton);
         if (result === false) return result; // If the return value is false, we do not close the modal
         this.close(); // Otherwise we close the modal
         return result;
     }
 
-    /** Assign a callback to a button after spawning a modal button */
+    /** Assign a callback to a button after spawning a modal button,
+     *      Callback recieved:
+     *         *container*
+     *         *event*
+     *         *button*
+     * 
+     * @param button the name of the button
+     * @param callback the callback to be fired when that button is clicked
+     */
     async on(button, callback) {
         if (button in this.chrome) this.chrome[button].callback = callback;
         else if (button in this.defaults) this.defaults[button].callback = callback;

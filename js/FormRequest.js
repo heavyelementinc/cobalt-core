@@ -110,6 +110,7 @@ class FormRequest {
         if (list === null) list = this.el_list;
         let query = {};
         for (var i in list) {
+            // if(!list[i].validity_check()) 
             query[list[i].element.getAttribute("name")] = list[i].value;
         }
         if (this.autosave && this.include) query.include = this.include;

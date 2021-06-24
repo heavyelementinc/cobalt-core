@@ -39,6 +39,16 @@ class InputClass_default {
         return set;
     }
 
+    validity_check() {
+        if ("validity" in this === false) return true;
+        const check = Object.values(this.validity).reduce((a, b) => {
+            return a + b;
+        });
+
+        if (check !== 0) return false;
+        return true;
+    }
+
     get_form() {
         if (this.form === null) this.form = this.element.closest("form-request");
         if (this.form === null) throw new Error("Can't find reference <form-request>");

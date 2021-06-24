@@ -1,4 +1,5 @@
 window.closeGlyph = "&#10006;"; // "✖️";
+var universal_input_element_query = "input[name], select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name]";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -202,6 +203,14 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 
+function float_pad(number, pad = 2, padWith = 0) {
+    let num = String(number).split(".");
+    if (!num[1]) return `${num[0]}.`.padEnd(num[0].length + pad + 1, padWith);
+    if (num[1].length >= pad) return `${num[0]}.${num[1].substr(0, pad)}`;
+    const toAdd = String(number).length + pad - 1;
+    return `${num[0]}.${num[1]}`.padEnd(toAdd, padWith);
+}
+
 /**
  * Supports dates and (will ultimately) support the exact same date formatting
  * string as https://www.php.net/manual/en/datetime.format.php
@@ -277,6 +286,9 @@ class DateConverter {
         }
 
         this.date = new Date(date);
+        // let offset = d.getTimezoneOffset();
+
+        // this.date = new Date(d.getTime() + offset * 60 * 1000);
         this.output = output;
     }
 
@@ -341,7 +353,7 @@ class DateConverter {
 
     getMeridiem() {
         const time = this.date.getHours();
-        return (time > 11) ? "am" : "pm";
+        return (time < 12) ? "am" : "pm";
     }
 
     getMeridiemUppercase() {
@@ -553,7 +565,6 @@ function plurality(number, returnValue = "s") {
     return returnValue;
 }
 
-var universal_input_element_query = "input[name], select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name]";
 
 function get_form_elements(form) {
     const elements = form.querySelectorAll(window.universal_input_element_query);

@@ -123,3 +123,19 @@ flex-table{
                 background: inherit
             }
 }
+
+table, tr, td, th {
+    border: var(--project-color-table-border);
+}
+
+td, th{
+    padding: .2rem;
+}
+
+table{
+    background: var(--project-color-table-bg-odd);
+}
+
+tr:nth-of-type(even) {
+    background: var(--project-color-table-bg-even);
+}

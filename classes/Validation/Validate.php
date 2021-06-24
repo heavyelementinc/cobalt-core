@@ -146,7 +146,7 @@ abstract class Validate {
             foreach ($schema[$fieldname]['methods'] as $index => $callable) {
                 try {
                     // Execute the method
-                    $mutant[$fieldname] = $this->execute_method($callable, $mutant[$fieldname], $fieldname, $index);
+                    $mutant[$fieldname] = $this->execute_method($callable, $mutant[$fieldname], $fieldname, $mutant, $index);
                 } catch (ValidationIssue $e) {
                     // Add fieldnames to the $problems array
                     if (!isset($problems[$fieldname])) $problems[$fieldname] = $e->getMessage();
@@ -346,11 +346,12 @@ abstract class Validate {
      * @param mixed $index the index into the 'methods' array
      * @return mixed a validated (and maybe mutated) version of $value
      */
-    private function execute_method($callable, $value, $fieldname, $index) {
+    private function execute_method($callable, $value, $fieldname, $mutant, $index) {
+
         // Covers methods in $this class and extensions
-        if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $index);
+        if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $mutant, $index);
         // Covers strings that match the name of a callable and anonymous functions
-        if (is_callable($callable)) return $callable($value, $fieldname, $index);
+        if (is_callable($callable)) return $callable($value, $fieldname, $mutant, $index);
     }
 
     private function handle_object_arrays($value, $schema, $field) {

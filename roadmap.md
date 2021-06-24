@@ -77,6 +77,7 @@
  - [ ] Finish autocomplete
    - [ ] Fire event on autocomplete found
    - [ ] Replace the search element in input-array with auto-complete
+- [ ] Define criteria for ring privileges
 
 # Todo
  - [ ] Make duotone icon set a plugin
