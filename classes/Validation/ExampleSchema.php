@@ -73,10 +73,18 @@ class ExampleSchema extends Normalize {
             'email' => [],
             'phone' => [
                 'get' => function ($val, $ct) {
-                    return $ct->format_phone($val);
+                    return $this->format_phone($val);
                 }
             ],
-            'region' => [],
+            'region' => [
+                'valid' => function ($val, $ct, $name) {
+                    return [
+                        'us-east' => "US East",
+                        'us-west' => "US West",
+                        'uk-south' => "UK South"
+                    ];
+                }
+            ],
             'order_count' => [
                 'set' => 'example_of_using_set_method'
             ],

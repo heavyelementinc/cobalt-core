@@ -101,17 +101,31 @@ class Debug extends \Controllers\Pages {
     }
 
     function form_test() {
+        $document = new \Validation\ExampleSchema([
+            'name' => "Terry Testalot",
+            'email' => "terry_t@heavyelement.io",
+            'phone' => '5554041122',
+            'region' => ['us-west'],
+            'order_count' => 5,
+            'test' => [
+                ['foo' => 'Test Data',],
+                ['foo' => 'Test Number 2',],
+                ['bar' => 'Baz test',]
+            ]
+        ]);
         add_vars([
             'title' => 'Form Validation Test',
+            'document' => $document
         ]);
         set_template(("/debug/validator.html"));
     }
 
     function validate_test_form() {
         $validator = new \Validation\ExampleSchema();
+
         $result = $validator->__validate($_POST);
 
-        return iterator_to_array($validator);
+        return $result;
     }
 
     function confirm_test_form() {

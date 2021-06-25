@@ -70,6 +70,7 @@ abstract class Normalize extends NormalizationHelpers {
     protected $__dataset = [];
     protected $__index = [];
     protected $__normalize_out = true;
+    protected $__prototypes = ['valid', 'options', 'restore'];
 
     // We set up our schema and store it
     function __construct($data = null, $normalize_get = true) {
@@ -136,8 +137,11 @@ abstract class Normalize extends NormalizationHelpers {
      * Finally if no getter is found, return the value from the dataset
      * 
      */
-    public function __get($name) { // Returns normalized user input
+    public function __get($n) { // Returns normalized user input
+        $name = $n;
         $value = null;
+        $proto = $this->__get_prototype($name);
+        if ($proto !== false) $name = $proto[0];
 
         // Step one: get the value from the __dataset so we can operate on it
 
@@ -151,6 +155,8 @@ abstract class Normalize extends NormalizationHelpers {
                 return;
             }
         }
+
+        if ($n !== $name && $proto !== false) return $this->__execute_prototype($value, $name, $proto[1]);
 
         // If we don't want normalizing, just return the value we already have
         if (!$this->__normalize_out) return $value;
@@ -203,7 +209,14 @@ abstract class Normalize extends NormalizationHelpers {
      * @param mixed $name 
      * @return bool 
      */
-    public function __isset($name) {
+    public function __isset($n) {
+        $name = $n;
+        $proto = $this->__get_prototype($name);
+        if ($proto !== false) {
+            $name = $proto[0];
+            if (isset($this->__schema[$name]) && in_array($proto[1], $this->__prototypes)) return true;
+        }
+
         if (isset($this->__dataset[$name])) return true;
         try {
             lookup_js_notation($name, $this->__dataset);
@@ -242,5 +255,47 @@ abstract class Normalize extends NormalizationHelpers {
         if (isset($this->__schema[$fieldname][$type])) return;
         $method_name = "$type" . "_" . str_replace(".", "__", $fieldname);
         if (method_exists($this, $method_name)) $this->__schema[$fieldname][$type] = $method_name;
+    }
+
+
+
+
+    private function __get_prototype($name) {
+        // Get the last instance of a "."
+        $pos = strripos($name, ".");
+        // If $pos is false we know there's no prototype
+        if ($pos === false) return false;
+        $proto = substr($name, $pos += 1);
+        if (!in_array($proto, $this->__prototypes)) return false;
+        return [substr($name, 0, $pos - 1), $proto];
+    }
+
+
+    private function __execute_prototype($value, $fieldname, $prototype) {
+        $method_name = "__proto_$prototype";
+        if (method_exists($this, $method_name)) return $this->{$method_name}($value, $fieldname);
+        return "";
+        // if (isset($this->__schema[$fieldname][$prototype])) {
+        //     return $this->__schema[$fieldname][$prototype]($value, $fieldname);
+        // }
+    }
+
+    private function __proto_valid($val, $field) {
+        if (isset($this->__schema[$field]['valid'])) {
+            return $this->__schema[$field]['valid']($val, $this, $field);
+        }
+        return [];
+    }
+
+    private function __proto_options($val, $field) {
+        $valid = $this->__proto_valid($val, $field);
+        $options = "";
+        foreach ($valid as $k => $v) {
+            $options .= "<option value='$k'>$v</option>";
+        }
+        return $options;
+    }
+
+    private function __proto_restore($val, $field) {
     }
 }
