@@ -1,11 +1,71 @@
 <?php
 
+/**
+ * Normalize.php - The Cobalt Normalization Class
+ * 
+ * This class provides a consistent means of sanitizing, validating, and/or
+ * rejecting client input.
+ * 
+ * It also provides a way of normalizing input/output.
+ *
+ * # Write a `schema` class
+ * We want to make sure ti extend \Validation\Normalize.
+ * 
+ * To see a working example, check \Validator\ExampleSchema.
+ *  
+ * # Use case 1: Returning data to client via API
+ *
+ * ```php
+ *  function some_update_controller($id) {
+ *      $normalize = new \SomeNamespace\ExtendsNormalize();
+ *      $validated = $normalize->validate($_POST); // Returns normalized data
+ *      $result = $this->updateOne(['_id' => $id], ['$set' => $validated]);
+ *
+ *      // Returns normalized data to client
+ *      return iterator_to_array($normalize);
+ *  }
+ * ```
+ * 
+ * **or**
+ * 
+ * ```php
+ *  function some_get_controller($id) {
+ *      $instance = new \SomeNamespace\GetFromDb();
+ *      $dbDocument = $instance->getById($id)
+ *      $toClient = new \SomeNamespace\ExetndsNormalize($dbDocument);
+ *      
+ *      // Return a normalized version of the database document to client
+ *      return iterator_to_array($toClient);
+ *  }
+ * ```
+ * 
+ * # Use case 2: Easy integration with templates
+ * 
+ * ```php
+ *  function some_web_controller($id){
+ *      $instance = new \SomeNamespace\GetFromDb();
+ *      $dbDocument = $instance->getById($id)
+ *      $toClient = new \SomeNamespace\ExetndsNormalize($dbDocument);
+ * 
+ *      add_vars([
+ *          'title' => $toClient->document_title,
+ *          'document' => $toClient
+ *      ]);
+ *      
+ *      set_template("path/to/template.html");
+ *  }
+ * ```
+ * 
+ * @license cobalt-core/license
+ * @author Gardiner Bryant <gardiner@heavyelement.io>
+ * @copyright 2021 Heavy Element, Inc.
+ */
+
 namespace Validation;
 
 use \Validation\Exceptions\NoValue;
 
 abstract class Normalize extends NormalizationHelpers {
-    /** Accessable with any class which extends it */
     protected $__schema = [];
     protected $__dataset = [];
     protected $__index = [];
@@ -16,7 +76,7 @@ abstract class Normalize extends NormalizationHelpers {
         $this->__dataset = $data ?? [];
         $this->__normalize($normalize_get);
 
-        $this->update_data($data);
+        $this->init_schema($data);
     }
 
     /**
@@ -24,12 +84,12 @@ abstract class Normalize extends NormalizationHelpers {
      * 
      * Each key may have a `get` and `set` key. 
      * 
-     * `set` values must be either:
+     * `get` or `set` values must be either:
      *    * An anonymous function
      *    * A string equal the name of a callable within $this context
      * 
-     * NOTE: if no `set` is specified, a function named `set_[key_name]` will
-     * be checked for and executed if found.
+     * NOTE: if no field is specified, a default value will be specified:
+     *  * `get_[name]` or `set_[name]` respectively.
      * 
      * These functions recieve the following parameters:
      *    * $value   -> the unprocessed value
@@ -57,7 +117,7 @@ abstract class Normalize extends NormalizationHelpers {
     }
 
     /**
-     * Get the raw data from the method
+     * Get the raw data from this schema class
      * 
      * @return mixed raw dataset
      */
@@ -79,18 +139,23 @@ abstract class Normalize extends NormalizationHelpers {
     public function __get($name) { // Returns normalized user input
         $value = null;
 
-        if (!key_exists($name, $this->__schema)) throw new NoValue("$name does not exist");
+        // Step one: get the value from the __dataset so we can operate on it
 
-        // If the key doesn't exist, throw a custom NoValue exception.
-        if (!key_exists($name, $this->__dataset)) throw new NoValue("$name does not exist in dataset");
-
-        $value = $this->__dataset[$name]; // Get the value from the dataset
+        // Check if $name is in the dataset
+        if (isset($this->__dataset[$name])) $value = $this->__dataset[$name]; // Get the value from the dataset
+        else {
+            // It's _not_ in the dataset, so let's try to get it with js lookups
+            try {
+                $value = lookup_js_notation($name, $this->__dataset);
+            } catch (\Exception $e) {
+                return;
+            }
+        }
 
         // If we don't want normalizing, just return the value we already have
         if (!$this->__normalize_out) return $value;
 
-        $method_name = "get_" . str_replace(".", "__", $name);
-        if (key_exists('get', $this->__schema[$name])) $method_name = $this->__schema[$name]['get'];
+        $method_name = $this->__schema[$name]['get'] ?? "get_" . str_replace(".", "__", $name);
 
         if (is_callable($method_name)) {
             // Run the value through the getter function
@@ -115,7 +180,7 @@ abstract class Normalize extends NormalizationHelpers {
 
         // Check if a method named set_$name exists and execute it
         $method_name = "set_" . str_replace(".", "__", $name);
-        if (key_exists('set', $this->__schema[$name])) $method_name = $this->__schema[$name]['set'];
+        if (isset($this->__schema[$name]['set'])) $method_name = $this->__schema[$name]['set'];
 
         // Check if $method_name is either the name of a funciton or a function
         if (is_callable($method_name)) {
@@ -132,18 +197,50 @@ abstract class Normalize extends NormalizationHelpers {
         return $this->__dataset[$name];
     }
 
-
+    /**
+     * Magic function to determine if inaccessible properties exist.
+     * 
+     * @param mixed $name 
+     * @return bool 
+     */
     public function __isset($name) {
-        return key_exists($name, $this->__schema) && key_exists($name, $this->__dataset);
+        if (isset($this->__dataset[$name])) return true;
+        try {
+            lookup_js_notation($name, $this->__dataset);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+        return false;
     }
 
 
+    /**
+     * Magic function to unset inaccessible properties.
+     * @param mixed $name 
+     * @return void 
+     */
     public function __unset($name) {
         unset($this->__dataset[$name]);
     }
 
-    protected function update_data() {
+    final protected function init_schema() {
         $this->__schema = $this->__get_schema();
+        $this->initialize_schema();
         $this->__index = array_keys($this->__schema);
+    }
+
+    private function initialize_schema() {
+        $schema = $this->__get_schema();
+        foreach ($schema as $fieldname => $methods) {
+            $this->find_method($fieldname, "get");
+            $this->find_method($fieldname, "set");
+        }
+    }
+
+    private function find_method($fieldname, $type) {
+        if (isset($this->__schema[$fieldname][$type])) return;
+        $method_name = "$type" . "_" . str_replace(".", "__", $fieldname);
+        if (method_exists($this, $method_name)) $this->__schema[$fieldname][$type] = $method_name;
     }
 }

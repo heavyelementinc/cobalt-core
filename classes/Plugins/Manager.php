@@ -138,6 +138,7 @@ class Manager {
     // }
 
     private function rebuild_database() {
+        if (!file_exists(__PLG_ROOT__)) mkdir(__PLG_ROOT__, 0777, true);
         $database = [];
         $contents = scandir(__PLG_ROOT__);
         foreach ($contents as $plugin) {

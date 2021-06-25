@@ -294,7 +294,12 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
         /** If it's an object, we'll check if the key exists and set the value
          * of $mutant to the found property */
         if ($type === "object") {
-            if (!property_exists($mutant, $key)) break; // Break if we can't find the property
+            if (is_a($mutant, "\Validation\Normalize")) {
+                $temp_path = get_temp_path($path_map, $key);
+                if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+                return $mutant;
+            }
+            if (!isset($mutant->{$key})) break; // Break if we can't find the property
             $mutant = $mutant->{$key};
             $break = false;
         }
@@ -313,6 +318,12 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
     else if ($throw_on_fail == "warn") throw new Exception("Could not find `$path_map`");
     else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
     else return; // Return undefined
+}
+
+function get_temp_path($path, $key) {
+    $index = strpos($path, $key);
+    $substr = substr($path, $index);
+    return $substr;
 }
 
 /** Give this function a string and it will parse it as Markdown. $untrusted 
