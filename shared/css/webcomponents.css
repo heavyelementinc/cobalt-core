@@ -167,3 +167,7 @@ help-span{
     left: unset;
     right: 100%;
   }
+
+markdown-div {
+  white-space: pre-wrap;
+}

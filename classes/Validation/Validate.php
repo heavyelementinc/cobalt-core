@@ -50,6 +50,11 @@ use \Exceptions\HTTP\BadRequest;
 use \Validation\Exceptions\ValidationFailed;
 use \Validation\Exceptions\ValidationIssue;
 
+/**
+ * 
+ * @package Validation
+ * @deprecated use Normalize instead!
+ */
 abstract class Validate {
     protected $mode = "partial";
     private $failed = [];
@@ -134,8 +139,9 @@ abstract class Validate {
 
             // Check if methods are specified for this fieldname
             if (!key_exists("methods", $schema[$fieldname])) {
-                if (!method_exists($this, $fieldname)) throw new \Exception("\"$fieldname\" does not have a validator method");
-                $schema[$fieldname]['methods'] = [str_replace(".", "__", $fieldname)];
+                $method_name = str_replace(".", "__", $fieldname);
+                if (!method_exists($this, $method_name)) throw new \Exception("\"$fieldname\" does not have a validator method");
+                $schema[$fieldname]['methods'] = [$method_name];
             }
 
             // Add the $value to the $mutant so we can update it through each
@@ -294,6 +300,16 @@ abstract class Validate {
             throw new ValidationIssue($message);
 
         return $value;
+    }
+
+    final protected function dollars_to_cents($val) {
+        if (gettype($val) === "string" && $val[0] === '$') $val = substr($val, 1);
+        if (!is_numeric($val)) throw new ValidationIssue("Must be a dollar value");
+        return $val * 100;
+    }
+
+    final protected function cents_to_dollars($val) {
+        return cents_to_dollars($val);
     }
 
     /**

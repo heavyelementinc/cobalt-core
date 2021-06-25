@@ -521,6 +521,7 @@ function relativeTime(prev, current = null, mode = "string", limit = "day") {
 
 /** @param str string */
 function string_to_bool(str) {
+    if (str === null) return null;
     return (['on', 'true', 'y', 'yes', 'checked'].includes(str.toLowerCase())) ? true : false;
 }
 

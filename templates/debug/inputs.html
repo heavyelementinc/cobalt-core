@@ -120,7 +120,7 @@
         <fieldset id="input-array">
             <div>
                 <h3>&lt;input-autocomplete/&gt;</h3>
-                <input-autocomplete placeholder="No attributes" value="vala">
+                <input-autocomplete placeholder="No attributes">
                     <option value="actionscript">ActionScript</option>
                     <option value="applescript">AppleScript</option>
                     <option value="asp">Asp</option>
@@ -235,13 +235,25 @@
         <fieldset id="input-object-array">
             <h3>&lt;input-object-array/&gt; <help-span value="Currently not working, yet."></help-span>
             </h3>
-            <input-object-array field="field">
-                <var>
-                    [
-                    {"foo":"value","bar":400,"baz":true,"boo":"one"},
-                    {"foo":"Another","bar":-100,"baz":false,"boo":"two"}
-                    ]
-                </var>
+            <input-object-array field="field"
+                value='[{"foo":"value","bar":400,"baz":true,"boo":"one"},{"foo":"Another","bar":-100,"baz":false,"boo":"two"}]'>
+                <template>
+                    <fieldset>
+                        <label>Foo</label>
+                        <input name="foo">
+                        <label>Bar</label>
+                        <input type="number" name="bar">
+                        <label>Baz</label>
+                        <input type="checkbox" name="baz">
+                        <radio-group>
+                            <label><input type="radio" name="boo" value="one"> One</label>
+                            <label><input type="radio" name="boo" value="two"> Two</label>
+                        </radio-group>
+                    </fieldset>
+                </template>
+            </input-object-array>
+
+            <input-object-array value=''>
                 <template>
                     <fieldset>
                         <label>Foo</label>

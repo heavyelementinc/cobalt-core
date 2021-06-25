@@ -188,6 +188,12 @@ class InputSwitch extends HTMLElement {
         this.tabIndex = "0"; // We want this element to be tab-able
         this.checked = this.getAttribute("checked"); // Let's also get 
         this.disabled = ["true", "disabled"];
+        this.checkbox = document.createElement("input");
+        this.checkbox.type = "checkbox";
+        this.checkbox.checked = this.checked;
+
+        this.thumb = document.createElement("span");
+
     }
 
     get value() {
@@ -205,9 +211,9 @@ class InputSwitch extends HTMLElement {
         // Let's figure out if our switch is checked or not and prepare for appending
         // the legit checkbox in the proper state
         let checked = (["true", "checked"].includes(this.checked)) ? " checked=\"checked\"" : "";
-        this.innerHTML = `<!-- <input type='hidden' name="${this.getAttribute("name")}"> -->
-        <input type="checkbox" name="${this.getAttribute("name")}"${checked}>
-        <span aria-hidden="true">`;
+        this.appendChild(this.checkbox);
+        this.appendChild(this.thumb);
+
         // Now let's find our checkbox
         this.checkbox = this.querySelector("input[type='checkbox']");
         // Check if our checkbox is "indeterminate". This is useful since there's no
@@ -760,29 +766,34 @@ class InputObjectArray extends HTMLElement {
         super();
         this.shadow = this.attachShadow({ mode: 'open' });
         this.template = this.querySelector("template").innerHTML;
-        this.withAdditional = this.getAttribute("with-additional") || "false";
-        if (this.hasAttribute("with-additional")) this.withAdditional = "true";
-        let json = this.querySelector("var");
+        this.withAdditional = string_to_bool(this.getAttribute("with-additional")) || false;
         this.values = [];
-        if (this.getAttribute("value")) {
-            this.values = JSON.parse(this.getAttribute("value"));
-        } else if (json && "innerText" in json) {
-            try { this.values = JSON.parse(json.innerText); } catch (error) { }
-        }
+
         this.fieldItems = [];
-        this.initInterface();
+        // this.initInterface();
+    }
+
+    connectedCallback() {
+        let json = this.querySelector("var");
+        if (this.hasAttribute("value")) {
+            this.value = JSON.parse(this.getAttribute("value")) || [];
+        } else if (json && "innerText" in json) {
+            try { this.value = JSON.parse(json.innerText) || [] } catch (error) { }
+        } else {
+            this.value = [];
+        }
     }
 
     initInterface() {
+        this.shadow.innerHTML = "";
         this.style();
         this.addButton();
         let index = -1;
         for (const i of this.values) {
             this.addFieldset(i, index++);
         }
-        if (this.withAdditional === "true") this.addFieldset(); // Start with an empty one
+        if (this.withAdditional === true) this.addFieldset(); // Start with an empty one
         else if (this.values.length < 1) this.addFieldset();
-
     }
 
     style() {
@@ -885,7 +896,9 @@ class InputObjectArray extends HTMLElement {
     }
 
     set value(value) {
+        if (!value) return;
         this.values = value;
+        this.initInterface();
     }
 
     static get observedAttributes() {
@@ -900,7 +913,11 @@ class InputObjectArray extends HTMLElement {
     }
 
     change_handler_value(newValue) {
-        this.value = JSON.parse(newValue);
+        if (!newValue) {
+            this.values = [];
+            return;
+        }
+        this.values = JSON.parse(newValue);
     }
 }
 
@@ -1305,6 +1322,11 @@ class AutoComplete extends HTMLElement {
                 this.selectFromEnter();
                 return;
             case "ArrowDown":
+                console.log(this.searchField.value)
+                if (this.searchField.value === "") {
+                    console.log("in")
+                    this.drawSearchResults({ ...this.options }, "", false);
+                }
             case "ArrowUp":
                 e.preventDefault();
                 this.selectFromArrows(e.key);

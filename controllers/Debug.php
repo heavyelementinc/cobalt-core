@@ -67,11 +67,11 @@ class Debug extends \Controllers\Pages {
     function debug_calendar($date = null) {
         if ($date === null) $date = time();
         $calendar = new \Calendar\Calendar($date);
-        $show_debug_info = function($calendar) {
+        $show_debug_info = function ($calendar) {
             return "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-            "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-            "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-            "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>";
+                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
+                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
+                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>";
         };
         add_vars([
             'title' => 'Calendar test',
@@ -109,9 +109,9 @@ class Debug extends \Controllers\Pages {
 
     function validate_test_form() {
         $validator = new \Validation\ExampleValidator();
-        $result = $validator->validate($_POST);
+        $result = $validator->__validate($_POST);
 
-        return $result;
+        return iterator_to_array($validator);
     }
 
     function confirm_test_form() {

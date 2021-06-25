@@ -576,6 +576,8 @@ function is_child_dir($base_dir, $path) {
 
 /** Create a directory listing from existing web GET routes
  * 
+ * with_icon, prefix, classes, id
+ * 
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
@@ -668,11 +670,11 @@ function phone_number_format($number, $format = "(ddd) ddd-dddd") {
                 $formatted .= "n";
                 continue;
             }
-            $format .= $number[$num_index];
+            $formatted .= $number[$num_index];
             $num_index++;
-            continue;
+        } else {
+            $formatted .= $format[$i];
         }
-        $formatted .= $format[$i];
     }
     return $formatted;
 }

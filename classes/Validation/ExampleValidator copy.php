@@ -38,11 +38,11 @@ namespace Validation; // Make sure you use the appropriate namespace for your va
 // containing whatever failed messages as the data argument.
 use \Validation\Exceptions\ValidationIssue;
 
-class ExampleValidator extends Normalize {
+class ExampleValidator extends Validate {
 
 
     // A list of names that are allowed as part of the final dataset.
-    function __get_schema(): array {
+    function __get_schema() {
         return [
             'name' => [/* 
                 If you do not provide an explicit list of methods then the
@@ -53,22 +53,18 @@ class ExampleValidator extends Normalize {
                 'methods' => ['name']
             */],
             'email' => [],
-            'phone' => [
-                'get' => function ($val, $ct) {
-                    return $ct->format_phone($val);
-                }
-            ],
+            'phone' => [],
             'region' => [],
             'order_count' => [
-                'set' => 'example_of_using_set_method'
+                "methods" => [
+                    'example_of_using_method_list'
+                ],
             ],
             "test" => [
-                'set' => function ($val, $ct) {
-                    return $this->subdocument($val, [
-                        'foo' => [],
-                        'bar' => []
-                    ]);
-                }
+                "object_array" => [
+                    'foo' => [],
+                    'bar' => []
+                ]
             ],
         ];
         /**
@@ -104,19 +100,19 @@ class ExampleValidator extends Normalize {
      *  * The $index is where you are in the list of callables for this field
      * 
      */
-    function set_name($value, $fieldname, $index) {
+    function name($value, $fieldname, $index) {
         return filter_var(trim($value), FILTER_SANITIZE_STRING); // Returning a value set the field name 
     }
 
-    function set_email($value) {
+    function email($value) {
         return $this->validate_email($value);
     }
 
-    function set_phone($value) {
+    function phone($value) {
         return $this->validate_phone($value);
     }
 
-    function set_region($value) {
+    function region($value) {
         if (empty($value)) throw new ValidationIssue("Cannot be empty");
         $valid_regions = ['us-east', 'uk-south', 'us-west'];
         foreach ($value as $val) {
@@ -125,22 +121,18 @@ class ExampleValidator extends Normalize {
         return $value;
     }
 
-    function get_region($value) {
-        return array_unique($value);
-    }
-
-    function set_example_of_using_set_method($value) {
+    function example_of_using_method_list($value) {
         if (!ctype_digit($value)) throw new ValidationIssue("Must be a digit");
         $value = (int)$value;
         return $value;
     }
 
-    function set_foo($value) {
+    function foo($value) {
         $this->required_field($value);
         return $value;
     }
 
-    function set_bar($value) {
+    function bar($value) {
         return $value;
     }
 }
