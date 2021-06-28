@@ -64,20 +64,29 @@
 namespace Validation;
 
 use \Validation\Exceptions\NoValue;
+use \Validation\Exceptions\ValidationIssue;
+use \Validation\Exceptions\ValidationFailed;
 
 abstract class Normalize extends NormalizationHelpers {
     protected $__schema = [];
     protected $__dataset = [];
     protected $__index = [];
+    protected $__to_validate = [];
     protected $__normalize_out = true;
-    protected $__prototypes = ['valid', 'options', 'restore'];
+    protected $__prototypes = [
+        'raw', // Returns the un-normalized value for the field
+        'valid', // 
+        'options',
+        'restore',
+        // 'display',
+    ];
 
     // We set up our schema and store it
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
         $this->__normalize($normalize_get);
 
-        $this->init_schema($data);
+        $this->init_schema();
     }
 
     /**
@@ -112,6 +121,35 @@ abstract class Normalize extends NormalizationHelpers {
      * @return array returns an associative array
      */
     abstract function __get_schema(): array;
+
+
+    /** Validation routine
+     * 
+     * @param array $data the data to be validated
+     * @return array Validated data
+     * @throws ValidationFailed 
+     */
+    final public function __validate($data) {
+        $this->__to_validate = $data;
+        $schema = $this->get_schema_subset(array_keys($data));
+        $issues = [];
+        foreach ($this->__schema as $name => $value) {
+            if (!isset($data[$name])) continue;
+            try {
+                // Run the setter function by assigning value which can throw issues
+                $this->{$name} = $data[$name];
+            } catch (ValidationIssue $e) { // Handle issues
+                if (!isset($issues[$name])) $issues[$name] = $e->getMessage();
+                else $issues[$name] .= "\n" . $e->getMessage();
+            } catch (ValidationFailed $e) { // Handle subdoc failure
+                $issues = array_merge($e->data);
+            }
+        }
+
+        if (count($issues) !== 0) throw new ValidationFailed("Validation failed.", $issues);
+
+        return array_merge($this->__dataset, $this->__merge_private_fields($this->__dataset));
+    }
 
     public function __normalize($value) {
         $this->__normalize_out = $value;
@@ -183,6 +221,9 @@ abstract class Normalize extends NormalizationHelpers {
     public function __set($name, $value) { // Normalizes stored values
 
         if (!key_exists($name, $this->__schema)) return;
+        // Ensure we want to save our $value to the dataset (in other words, if
+        // set === false, ignore this field)
+        if (isset($this->__schema[$name]['set']) && $this->__schema[$name]['set'] === false) return;
 
         // Check if a method named set_$name exists and execute it
         $method_name = "set_" . str_replace(".", "__", $name);
@@ -191,11 +232,11 @@ abstract class Normalize extends NormalizationHelpers {
         // Check if $method_name is either the name of a funciton or a function
         if (is_callable($method_name)) {
             // If the method is callable, call it and store its return value!
-            $value = $method_name($value, $this, $name);
+            $value = $method_name($value, $name);
         } else if (method_exists($this, $method_name)) {
             // Check if method exists. This allows us to write a shared method
             // in the normalizer and use it between fields.
-            $value = $this->{$method_name}($value, $this, $name);
+            $value = $this->{$method_name}($value, $name);
         }
 
         // Update the value with what we've validated.
@@ -237,13 +278,27 @@ abstract class Normalize extends NormalizationHelpers {
         unset($this->__dataset[$name]);
     }
 
-    final protected function init_schema() {
-        $this->__schema = $this->__get_schema();
+
+
+
+    protected function subdocument($value, $schema) {
+        $doc = new Subdocument($value, $schema);
+        $mutant = [];
+        foreach ($value as $i => $val) {
+            $mutant[$i] = $doc->__validate($val);
+        }
+        return $mutant;
+    }
+
+
+
+    final protected function init_schema($schema = []) {
+        $this->__schema = array_merge($this->__get_schema(), (array)$schema);
         $this->initialize_schema();
         $this->__index = array_keys($this->__schema);
     }
 
-    private function initialize_schema() {
+    final private function initialize_schema() {
         $schema = $this->__get_schema();
         foreach ($schema as $fieldname => $methods) {
             $this->find_method($fieldname, "get");
@@ -251,7 +306,18 @@ abstract class Normalize extends NormalizationHelpers {
         }
     }
 
-    private function find_method($fieldname, $type) {
+
+
+    final private function get_schema_subset($keys) {
+        $result = [];
+        foreach ($this->__schema as $key => $val) {
+            if (in_array($key, $keys)) $result[$key] = $val;
+        }
+        return $result;
+    }
+
+
+    final private function find_method($fieldname, $type) {
         if (isset($this->__schema[$fieldname][$type])) return;
         $method_name = "$type" . "_" . str_replace(".", "__", $fieldname);
         if (method_exists($this, $method_name)) $this->__schema[$fieldname][$type] = $method_name;
@@ -260,18 +326,19 @@ abstract class Normalize extends NormalizationHelpers {
 
 
 
-    private function __get_prototype($name) {
+    final private function __get_prototype($name) {
+        // $name = "value.options"
         // Get the last instance of a "."
         $pos = strripos($name, ".");
         // If $pos is false we know there's no prototype
         if ($pos === false) return false;
-        $proto = substr($name, $pos += 1);
+        $proto = substr($name, $pos += 1); // $proto = "options"
         if (!in_array($proto, $this->__prototypes)) return false;
-        return [substr($name, 0, $pos - 1), $proto];
+        return [substr($name, 0, $pos - 1), $proto]; // ['value', 'options']
     }
 
 
-    private function __execute_prototype($value, $fieldname, $prototype) {
+    final private function __execute_prototype($value, $fieldname, $prototype) {
         $method_name = "__proto_$prototype";
         if (method_exists($this, $method_name)) return $this->{$method_name}($value, $fieldname);
         return "";
@@ -280,22 +347,54 @@ abstract class Normalize extends NormalizationHelpers {
         // }
     }
 
-    private function __proto_valid($val, $field) {
+    /** Returns the raw value rather than the `get`ted value, useful when 
+     * handling markdown if the `get` result is parsed as HTML.
+     */
+    final private function __proto_raw($val, $field) {
+        if (isset($this->__dataset[$field])) {
+            return $this->__dataset[$field];
+        }
+        return '';
+    }
+
+    /** Allows us to specify in the schema an alternate display method */
+    final private function __proto_display($val, $field) {
+        if (isset($this->__schema[$field]['display'])) {
+            return $this->__schema[$field]['display']($val, $field);
+        }
+        return '';
+    }
+
+    /** Executes the 'valid' method defined in the schema and returns results */
+    final private function __proto_valid($val, $field) {
         if (isset($this->__schema[$field]['valid'])) {
-            return $this->__schema[$field]['valid']($val, $this, $field);
+            if (is_callable($this->__schema[$field]['valid'])) return $this->__schema[$field]['valid']($val, $this, $field);
+            return $this->__schema[$field]['valid'];
         }
         return [];
     }
 
-    private function __proto_options($val, $field) {
+    /** Returns a list of HTML options */
+    final private function __proto_options($val, $field) {
         $valid = $this->__proto_valid($val, $field);
         $options = "";
         foreach ($valid as $k => $v) {
-            $options .= "<option value='$k'>$v</option>";
+            $value = $v;
+            $data = "";
+            if (gettype($v) === "array") {
+                $value = $v['value'];
+                unset($v['value']);
+                foreach ($v as $attr => $value) {
+                    $data .= " data-$attr=\"$value\"";
+                }
+            }
+            $options .= "<option value='$k'$data>$v</option>";
         }
         return $options;
     }
 
-    private function __proto_restore($val, $field) {
+    /** Unused prototype?? */
+    final private function __proto_restore($val, $field) {
+        return "";
     }
 }

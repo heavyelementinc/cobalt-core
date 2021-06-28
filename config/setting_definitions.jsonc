@@ -231,7 +231,8 @@
             "InputComponents.js",
             "UserMenu.js",
             "ActionMenu.js",
-            "StatusMessage.js"
+            "StatusMessage.js",
+            "Events.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -245,6 +246,7 @@
         "default": [
             "normalize.css",
             "inputs.css",
+            "cobalt-events.css",
             "loading-spinner.css",
             "modal.css",
             "action-menu.css",
@@ -394,6 +396,13 @@
     },
     "API_contact_form_recipient": {
         "default": ""
+    },
+    "CobaltEvents_enabled": {
+        "default": true,
+        "$public": true
+    },
+    "CobaltEvents_database_collection": {
+        "default": "CobaltEvents"
     },
     /* The id attribute of the body tag when errors happen in a web context. */
     "HTTP_error_body_id": {

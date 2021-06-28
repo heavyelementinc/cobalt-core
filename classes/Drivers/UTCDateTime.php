@@ -17,12 +17,16 @@ use Drivers\Exceptions\DateFailed;
 
 class UTCDateTime {
 
-    /**  */
+    /**
+     * @var MongoDB\BSON\UTCDateTime the timestamp object
+     */
+    public $timestamp;
+
     function __construct($date) {
         $this->timestamp = new \MongoDB\BSON\UTCDateTime($this->date($date));
     }
 
-    function date($date = null) {
+    final private function date($date = null) {
         if ($date === null) return microtime(true) * 1000;
         switch (gettype($date)) {
             case "string":
@@ -40,7 +44,7 @@ class UTCDateTime {
     }
 
 
-    final function date_string_parse($date) {
+    final private function date_string_parse($date) {
         $timestamp = strtotime($date);
         if ($timestamp) return $timestamp * 1000;
         throw new DateFailed("Invalid date parameter");

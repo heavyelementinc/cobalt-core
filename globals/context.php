@@ -106,4 +106,8 @@ try {
     // if (app("debug")) die($e->getMessage());
     // else die("An unknown error has occurred.");
     // exit;
+} catch (Error $e) {
+    ob_clean();
+    $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+    exit;
 }

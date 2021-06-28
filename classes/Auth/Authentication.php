@@ -75,10 +75,12 @@ class Authentication {
      * @param  null|MongoDocument $user if null, the current session will be used
      * @return bool true if the user has permission, false otherwise
      */
-    function has_permission($permission, $group = null, $user = null) {
+    function has_permission($permission, $group = null, $user = null, $throw_no_session = true) {
         if ($user === null) $user = $this->user;
         if ($group === null) $group = $this->permissions->valid[$permission]['group'];
+
         // If the user is not logged in, they obviously don't have permission
+        if ($throw_no_session === false && !$user) return false;
         if (!$user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.", ['login' => true]);
 
         // If the permission is a boolean true AND we've made it here, we're 

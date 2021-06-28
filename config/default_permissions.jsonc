@@ -42,6 +42,12 @@
         "default": false,
         "ring": 2
     },
+    "CobaltEvents_crud_events": {
+        "group": "Admin",
+        "label": "Create, delete, or modify Cobalt Events.",
+        "dangerous": true,
+        "default": false
+    },
     "Plugins_allow_management": {
         "group": "Plugins",
         "label": "Allows the user to manage plugins. This is VERY dangerous.",

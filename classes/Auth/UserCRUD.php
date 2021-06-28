@@ -37,7 +37,7 @@ class UserCRUD extends \Drivers\Database {
 
     final function getUsersByPermission($permissions, $value = true) {
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        $perms = array_fill_keys($permissions,$value);
+        $perms = array_fill_keys($permissions, $value);
         return $this->find(
             [
                 '$or' => [
@@ -138,10 +138,10 @@ class UserCRUD extends \Drivers\Database {
             },
         ];
         $result = $this->getUsersByPermission($permissions);
-        $options = "";
+        $options = [];
         $callable = (key_exists($display, $display_table)) ? $display_table[$display] : $display_table['name'];
         foreach ($result as $user) {
-            $options .= "<option value='" . (string)$user['_id'] . "'>" . $callable($user) . "</option>";
+            $options[(string)$user['_id']] = $callable($user);
         }
 
         return $options;

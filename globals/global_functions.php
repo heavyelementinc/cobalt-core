@@ -74,8 +74,8 @@ function session_exists() {
  *                      Can be null.
  * @return bool true if the user has permission, false otherwise
  */
-function has_permission($perm_name, $group = null, $user = null) {
-    return $GLOBALS['auth']->has_permission($perm_name, $group, $user);
+function has_permission($perm_name, $group = null, $user = null, $throw_no_session = true) {
+    return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 
 /** This function will return a merged array of decoded JSON files that are 
@@ -606,6 +606,7 @@ function get_route_group($directory_group, $misc = []) {
         // Now we check if the directory group is in $groups or the key exists
         // If both are FALSE, then we skip list assembly.
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
+        if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
 
         $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
         $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
@@ -697,6 +698,24 @@ function phone_number_normalize($number) {
     // Strip the junk characters out of the string
     $value = str_replace($junk, "", $number);
     return $value;
+}
+
+function flex_table($docs, $table, $schema) {
+    $result = [];
+    $index = 1;
+    foreach ($docs as $doc) {
+        $event = new $schema($doc);
+        $result[0] = "<flex-row>";
+        $result[$index] = "<flex-row>";
+        foreach ($table as $key => $cell) {
+            $result[0] .= "<flex-header>$cell[header]</flex-header>";
+            $result[$index] .= "<flex-cell>" . (isset($cell['display']) ? $cell['display']($event, $key) : $event->{$key}) . "</flex-cell>";
+        }
+        $result[0] .= "</flex-row>";
+        $result[$index] .= "</flex-row>";
+        $index++;
+    }
+    return "<flex-table>" . implode("", $result) . "</flex-table>";
 }
 
 /**

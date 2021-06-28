@@ -5,6 +5,7 @@ class ActionMenu {
             window.menu_instance.closeMenu();
             window.menu_instance = null;
         }
+        event.preventDefault();
         this.event = event;
         this.title = title;
         this.mode = mode || (window.matchMedia("only screen and (max-width: 900px)").matches) ? "modal" : "element";
@@ -43,12 +44,16 @@ class ActionMenu {
         document.addEventListener("click", this.handleClickOut);
     }
 
-    draw() {
+    async draw() {
         this.menu = document.createElement("action-menu")
         let header = document.createElement("header")
         header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
         this.menu.appendChild(header);
         header.querySelector("button").addEventListener("click", (e) => this.closeMenu())
+        // await wait_for_animation("action-menu--deploy");
+        // const api = new ApiFetch("", "GET");
+        // const options = await api.send("");
+
         for (const i of this.actions) {
             this.renderAction(i);
         }

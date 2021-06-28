@@ -130,7 +130,7 @@ class WebHandler implements RequestHandler {
         if (!\template_exists($template)) $template = "errors/default.html";
 
         // This will let us display an error page if we've already loaded a template
-        if ($this->_stage_bootstrap['_stage_output']) {
+        if ($this->_stage_bootstrap['_stage_execute'] || $this->_stage_bootstrap['_stage_output']) {
             // Flush whatever body template we might have already loaded
             $this->flush_body_template();
             $this->_stage_init(null);
@@ -184,7 +184,7 @@ class WebHandler implements RequestHandler {
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
         $header = $this->load_template("parts/header.html");
-        $this->add_vars(['header_nav' => $this->cache_handler($this->header_nav_cache_name, "header_nav")]);
+        $this->add_vars(['header_nav' => $this->header_nav()]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
     }

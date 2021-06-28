@@ -30,6 +30,18 @@ if (app('Auth_logins_enabled')) {
     ]);
 }
 
+if (app("CobaltEvents_enabled")) {
+    Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", ['permission' => "CobaltEvents_crud_events"]);
+    Route::get("/cobalt-events/?...?", "EventsController@list_events", [
+        'permission' => "CobaltEvents_crud_events",
+        'anchor' => [
+            'name' => 'Event Manager',
+            'href' => '/cobalt-events/'
+        ],
+        'navigation' => ['admin_panel']
+    ]);
+}
+
 if (app('Plugin_enable_plugin_support')) {
     Route::get("/plugins/", "CoreAdmin@plugin_manager", [
         'permission' => 'Plugins_allow_management',

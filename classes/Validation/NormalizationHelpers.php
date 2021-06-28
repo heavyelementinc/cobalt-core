@@ -8,33 +8,6 @@ use Validation\Exceptions\ValidationFailed;
 
 abstract class NormalizationHelpers implements Iterator {
 
-    /** Validation routine
-     * 
-     * @param array $data the data to be validated
-     * @return array Validated data
-     * @throws ValidationFailed 
-     */
-    final public function __validate($data) {
-        $schema = $this->get_schema_subset(array_keys($data));
-        $issues = [];
-        foreach ($this->__schema as $name => $value) {
-            if (!isset($data[$name])) continue;
-            try {
-                // Run the setter function by assigning value which can throw issues
-                $this->{$name} = $data[$name];
-            } catch (ValidationIssue $e) { // Handle issues
-                if (!isset($issues[$name])) $issues[$name] = $e->getMessage();
-                else $issues[$name] .= "\n" . $e->getMessage();
-            } catch (ValidationFailed $e) { // Handle subdoc failure
-                $issues = array_merge($e->data);
-            }
-        }
-
-        if (count($issues) !== 0) throw new ValidationFailed("Validation failed.", $issues);
-
-        return array_merge($this->__dataset, $this->__merge_private_fields($this->__dataset));
-    }
-
     /**
      * After validation, private fields will be merged to the result.
      * 
@@ -56,11 +29,6 @@ abstract class NormalizationHelpers implements Iterator {
      */
     protected function __modify($field, $value) {
         $this->__dataset[$field] = $value;
-    }
-
-    protected function subdocument($value, $schema) {
-        $doc = new Subdocument($value, $schema);
-        return $doc->__validate($value);
     }
 
     /**
@@ -103,6 +71,7 @@ abstract class NormalizationHelpers implements Iterator {
      * @throws ValidationIssue 
      */
     final protected function validate_phone($value, $min_length = 10) {
+        if (!$value) return "";
         $value = phone_number_normalize($value);
 
         // Check if the phone number is only digits and if not throw an exception.
@@ -117,10 +86,68 @@ abstract class NormalizationHelpers implements Iterator {
         return phone_number_format($value, $fmt);
     }
 
-    /** @todo implement this */
+    /**
+     * Make a microsecond timestamp from a date string. E.g. "2021-12-31 21:40"
+     * 
+     * If null is passed, the current time will be used.
+     * 
+     * If an integer is provided, it will be assumed to be a Unix timestamp in
+     * seconds.
+     * 
+     * @param string|int $value the date string
+     * @return object database driver's timestamp
+     */
     final protected function make_date($value = null) {
         $date = new \Drivers\UTCDateTime($value);
         return $date->timestamp;
+    }
+
+
+    /**
+     * Use this in your `set` method to store the timestamp as a single value in
+     * one field.
+     * 
+     * ```php
+     * 'date' => [
+     *      'set' => false
+     * ],
+     * 'time' => [
+     *      'set' => fn ($val) => $this->set_date_time('date',$val)
+     * ]
+     * ```
+     * 
+     * @param string $date the key to look up the correct date string
+     * @param mixed $time the actual time value
+     * @return object 
+     * @throws ValidationIssue 
+     */
+    final protected function set_date_time($date, $time) {
+        if (!key_exists($date, $this->__to_validate)) throw new ValidationIssue("Missing field $date");
+        $str = $this->__to_validate[$date] . " $time";
+        return $this->make_date($str);
+    }
+
+    /**
+     * Date comparison and sanity check.
+     * 
+     * Determines if the start and end times happen in chronological order,
+     * throws an Issue if not so.
+     * 
+     * @param string $date The submitted data's key to use as date/time  
+     * @param string $start_time The submitted data's key to use as date/time  
+     * @param string $end_time The submitted data's key to use as date/time  
+     * @param string|null $end_date The submitted data's key to use as date/time  
+     * @return string $value 
+     * @throws ValidationIssue 
+     */
+    final protected function date_sanity_check($value, $date, $start_time, $end_time, $end_date = null) {
+        if ($end_date === null) $end_date = $date;
+        $start = $this->make_date($this->__to_validate[$date] . " " . $this->__to_validate[$start_time]);
+        $end = $this->make_date($this->__to_validate[$end_date] . " " . $this->__to_validate[$end_time]);
+        if ($end < $start) {
+            throw new ValidationIssue("This event must start before it ends.");
+        }
+        return $value;
     }
 
     /**
@@ -149,7 +176,6 @@ abstract class NormalizationHelpers implements Iterator {
      * For example, if a form has a phone number or email and one is required.
      * If both fields are empty then a ValidationIssue will be thrown.
      * 
-     * > Note that a 0 value 
      * 
      * @param mixed $value the value of the current field
      * @param mixed $other_field the other field name to test
@@ -160,19 +186,33 @@ abstract class NormalizationHelpers implements Iterator {
      * @throws ValidationIssue if both values are considered empty
      */
     final protected function one_required($value, $other_field, $message = "One of these fields needs to be specified", $allow_false = true) {
-        if (!isset($this->__to_validate[$other_field])) throw new \Exception("Error with your validator. Field '$other_field' does not exist");
+        if (!isset($this->__to_validate[$other_field])) throw new \Exception("Field '$other_field' does not exist");
         if (empty($value) && empty($this->__to_validate[$other_field]))
             throw new ValidationIssue($message);
 
         return $value;
     }
 
+
+    /**
+     * Convert dollars to cents
+     * 
+     * @param int|float|string $val the value to be converted
+     * @return int|float 
+     * @throws ValidationIssue 
+     */
     final protected function dollars_to_cents($val) {
         if (gettype($val) === "string" && $val[0] === '$') $val = substr($val, 1);
         if (!is_numeric($val)) throw new ValidationIssue("Must be a dollar value");
         return $val * 100;
     }
 
+    /**
+     * Convert cents to dollars
+     * 
+     * @param int|string $val 
+     * @return string 
+     */
     final protected function cents_to_dollars($val) {
         return cents_to_dollars($val);
     }
@@ -188,13 +228,8 @@ abstract class NormalizationHelpers implements Iterator {
     }
 
 
-    final private function get_schema_subset($keys) {
-        $result = [];
-        foreach ($this->__schema as $key => $val) {
-            if (in_array($key, $keys)) $result[$key] = $val;
-        }
-        return $result;
-    }
+
+
 
     /* =================
         ITERATOR METHODS
