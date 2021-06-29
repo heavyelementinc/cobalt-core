@@ -12,7 +12,9 @@ class CoreApi extends \Controllers\Pages {
         $headers = apache_request_headers();
         if (!key_exists('Authentication', $headers)) throw new BadRequest("Request is missing Authentication");
         $credentials = explode(":", base64_decode($headers['Authentication']));
-        return $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
+        $result = $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
+        header("X-Redirect: " . $_SERVER['REQUEST_URI']);
+        return $result;
     }
 
     function logout() {
