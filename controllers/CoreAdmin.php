@@ -1,7 +1,11 @@
 <?php
 class CoreAdmin extends \Controllers\Pages {
     function index() {
-        add_vars(['title' => "Admin Panel"]);
+        add_vars([
+            'title' => "Admin Panel",
+            'user_accounts' => (new \Auth\UserCRUD())->count([]),
+            'plugin_count' => count($GLOBALS['ACTIVE_PLUGINS'])
+        ]);
         set_template("/authentication/admin-dashboard/index.html");
     }
 
@@ -64,7 +68,7 @@ class CoreAdmin extends \Controllers\Pages {
             'title' => "Plugin Manager",
             'main' => $content
         ]);
-        set_template("parts/main.html");
+        set_template("plugins/index.html");
     }
 
     function plugin_individual_manager($plugin_id) {

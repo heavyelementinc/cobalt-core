@@ -123,7 +123,7 @@ class CurrentSession {
         } catch (\Exception $e) {
             throw new \Exceptions\HTTP\Error("Failed to create session");
         }
-        if ($result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
+        if ($result->getUpsertedCount() === 0 && $result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
         return true;
     }
 

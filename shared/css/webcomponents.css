@@ -33,7 +33,7 @@ input-switch {
   }
 
   input-switch span:before {
-    content: "✓";
+    /* content: "✓"; */
     position: absolute;
     top: -7px;
     left: 8px;
@@ -48,7 +48,7 @@ input-switch {
     content: "";
     display: block;
     height: 20px;
-    width: 50%;
+    width: 35%;
     background: rgb(255, 255, 255);
     /* background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 6%, rgba(214, 214, 214, 1) 10%, rgba(255, 255, 255, 1) 10%, rgba(255, 255, 255, 1) 100%); */
     border-radius: 20px;
@@ -64,7 +64,7 @@ input-switch {
   }
 
   input-switch input:checked+span:after {
-    left: 28px;
+    left: 37px;
   }
 
   input-switch input:indeterminate+span {
@@ -76,11 +76,11 @@ input-switch {
   }
 
   input-switch input:indeterminate+span:after {
-    left: 15px;
+    left: 21px;
   }
 
   input-switch[large] input:indeterminate+span:after {
-    left: 19px;
+    left: 27px;
   }
 
   input-switch[large] {
@@ -99,7 +99,7 @@ input-switch {
   }
 
   input-switch[large] input:checked+span:after {
-    left: 38px;
+    left: 49px;
   }
 
   input-switch[tiny] {
@@ -112,7 +112,11 @@ input-switch {
   }
 
   input-switch[tiny] input:checked + span::after {
-    left: 18px;
+    left: 22px;
+  }
+
+  input-switch[tiny] input:indeterminate + span::after {
+    left: 14px;
   }
 
   input-switch[tiny] span::before{
@@ -136,6 +140,13 @@ help-span{
   margin:0 .5ch;
   font-family: sans-serif;
   position: relative;
+}
+
+help-span[warning]{
+  background-color: var(--project-color-problem);
+}
+help-span[warning]:before{
+  content: "!";
 }
 
   help-span:before{

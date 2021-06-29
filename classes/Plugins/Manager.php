@@ -122,6 +122,7 @@ class Manager {
         $data = $this->rebuild_database();
         $result = [];
         foreach ($data as $plugin) {
+            if (!isset($plugin['plugin'])) continue;
             $result[$plugin['plugin']] = $plugin;
         }
         $this->write_directory($result);

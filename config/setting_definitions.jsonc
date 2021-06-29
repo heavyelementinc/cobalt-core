@@ -179,6 +179,8 @@
             "body-background": "#efefef",
             "color-header-branding": "#004BA8",
             "color-user-panel-button": "#342A21",
+            "color-admin-panel-background": "var(--project-color-header-branding)",
+            "color-admin-panel-font": "white",
             "color-acknowledge": "#598B2C",
             "color-active": "#598B2C",
             "color-inactive": "#B1C1C0",

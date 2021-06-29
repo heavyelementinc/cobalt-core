@@ -1,1 +1,46 @@
 <h1>{{app.app_name}} Dashboard</h1>
+<div id="grid">
+    <div class='admin-dashboard--widget'>
+        <h2>Registered Users</h2>
+        <div>{{user_accounts}}</div>
+        <a href="users/">Manage users</a>
+    </div>
+    <div class='admin-dashboard--widget'>
+        <h2>Active Plugins</h2>
+        <div>{{plugin_count}}</div>
+        <a href="plugins/">Manage plugins</a>
+    </div>
+</div>
+
+<style>
+    #grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .admin-dashboard--widget {
+        border: 1px solid var(--project-color-input-border-nofocus);
+        padding: .4rem;
+        display: block;
+        text-align: center;
+        flex-direction: column;
+        background: var(--project-color-input-background);
+        border-radius: 4px;
+        width: 40%;
+        height: 40%;
+    }
+
+    .admin-dashboard--widget>div {
+        font-size: 3em;
+    }
+
+    .admin-dashboard--widget>:is(div, h2, h1, a) {
+        margin: 1rem;
+    }
+
+    .admin-dashboard--widget>a {
+        text-align: right;
+    }
+</style>

@@ -212,7 +212,9 @@ class Modal {
      * returns a truth-y value, the modal will close automatically!
     */
     async button_event(btn, event) {
+
         let result = await this.chrome[btn].callback(this.container, event, btn); // Await a promise resolution
+
         const modalButton = new CustomEvent("modalButtonPress", { detail: { type: btn, result: result } })
         this.dialog.dispatchEvent(modalButton);
         if (result === false) return result; // If the return value is false, we do not close the modal

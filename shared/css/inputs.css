@@ -390,9 +390,13 @@ copy-span {
   border-radius: 50%;
 }
 
+a.floater--new-item{
+  text-decoration: none;
+}
+
   .floater--new-item:hover{
     background:var(--project-color-button-hover);
-    color:var(--project-color-button-hover-text);
+    /* color:var(--project-color-button-hover-text); */
   }
 
   .floater--new-item:focus{

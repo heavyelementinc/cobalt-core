@@ -43,6 +43,10 @@ class FormRequestElement extends HTMLElement {
         this.request.errorField = error;
     }
 
+    disconnectedCallback() {
+        if (this.request.statusMessage) this.request.statusMessage.close();
+    }
+
     getRequest() {
         // Basically, we want to attach the FormRequest to the <form-request> element.
         // This WebComponent should allow us to make form bots a thing of the past.

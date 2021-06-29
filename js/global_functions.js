@@ -219,7 +219,8 @@ function float_pad(number, pad = 2, padWith = 0) {
  * @param output The string which will be used to format the date
  */
 class DateConverter {
-    constructor(date, output = "Y-m-d") {
+    constructor(date, output = "Y-m-d", tz = "America/New_York") {
+        this.tz = tz;
         this.tokens = {
             // DAY
             "d": "getDateWithLeadingZero",
@@ -286,6 +287,7 @@ class DateConverter {
         }
 
         this.date = new Date(date);
+
         // let offset = d.getTimezoneOffset();
 
         // this.date = new Date(d.getTime() + offset * 60 * 1000);

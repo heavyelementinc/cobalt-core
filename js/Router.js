@@ -26,10 +26,9 @@ class Router {
         return this.current_route;
     }
 
+    /** @todo Make the router handle smooth transitioning and change this! */
     set location(value) {
-        console.log(value);
-        /** @todo Make the router handle smooth transitioning and change this! */
-        if (e === false) window.location = url;
+        window.location = value;
         this.navigation_event(false, value);
     }
 

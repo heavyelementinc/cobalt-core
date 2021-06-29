@@ -216,7 +216,23 @@ table, tr, td {
    ================== */
 .hbox, .vbox{
     display:flex;
+    justify-content: space-between;
 }
+
+.hbox {
+    align-items:center;
+}
+
+:is(.hbox,.vbox)[middle]{
+    justify-content: center;
+    align-items: center;
+}
+
+:is(.hbox,.vbox)[end]{
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+:is(.hbox.vbox)
 
 .vbox{
     flex-direction: column;

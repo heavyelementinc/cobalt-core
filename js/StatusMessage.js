@@ -18,6 +18,10 @@ class StatusMessage {
         await wait_for_animation(this.element, animClass);
         this.element.classList.remove(animClass);
     }
+
+    async close() {
+        window.messageHandler.dismiss({ id: this.id }, {}, false);
+    }
 }
 
 class StatusError extends StatusMessage {
@@ -71,6 +75,8 @@ class MessageHandler {
         element.parentNode.removeChild(element);
         delete this.messageQueue[details.id];
     }
+
+
 
     async timeout(details) {
         setTimeout(() => {

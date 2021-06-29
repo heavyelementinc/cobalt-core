@@ -52,11 +52,11 @@ class EventsController {
         }
 
         add_vars([
-            'title' => "Cobalt events",
-            'main' => "<flex-table>" . implode("", $result) . "</flex-table><a class='floater--new-item' href='edit/'></a>"
+            'title' => "Cobalt Events",
+            'main' => implode("", $result)
         ]);
 
-        set_template("/parts/main.html");
+        set_template("/cobalt_events/index.html");
     }
 
     function edit_event($id = null) {
