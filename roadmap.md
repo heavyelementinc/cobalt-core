@@ -18,7 +18,7 @@
 
 # Version 0.2
  - [ ] Upgrade to version number 0.2
- - [ ] Finish <input-object-array> & validation
+ - [x] Finish <input-object-array> & validation
    <!-- Is there a better way to do input-object-array? -->
  - [ ] User's personal dashboard
    - [ ] Allow account management
@@ -26,24 +26,20 @@
    - [ ] User stats implement in account manager
  - [ ] Add <async-button> which should use FormRequest to carry out async stuff
  - [x] Create admin dashboard container class `.cobalt-admin--fieldset`
- - [ ] Finish plugins system
-   - [ ] Cobalt version checking for each plugin
-   <!-- - [ ] Plugins info/cache should be stored in the database // Not gonna happen -->
+ - [x] Finish plugins system
    - [x] Plugin management in admin panel
    - [x] register_permissions
    - [x] register_templates
    - [x] register_shared_content_dir
-   - [ ] register_cli_commands
    - [x] register_dependencies
    - [x] register_public_dir
    - [x] register_packages
    - [x] register_variables
- <!-- - [ ] Cobalt Settings (modified stored in database) -->
  - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
  - [x] Fire requestFailed CustomEvent in FormRequest.js and test
  - [x] Make form-login-request listen for the enter key being pressed.
  - [x] Make form-login-request reload the page when a login has occurred successfully
- - [ ] Track down WSOD (white screen of death) <!-- This is happening because the plugins weren't loading correctly and the catch routine wasn't handling correctly. >
+ - [x] Track down WSOD (white screen of death) <!-- This is happening because the plugins weren't loading correctly and the catch routine wasn't handling correctly. >
 
 
 # Version 0.3
@@ -65,17 +61,22 @@
  - [ ] Finish InputClass value reversion on error
  - [ ] Events scheduler system
  - [ ] Add template/renderer debugging!!!
- - [ ] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
+ - [x] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
  - [ ] <replicator-button> contains internal <template>
+ - [ ] Cobalt plugins
+   - [ ] Cobalt version checking for each plugin
+   - [ ] register_cli_commands
+
 
 # Version 0.4
 - [ ] Upgrade to version 0.4
 - [ ] Finish &lt;async-wizard&gt;
 - [ ] Allow plugins to display their own panel when you click on their name.
-- [ ] Add widgets to admin dashboard
+- [x] Add widgets to admin dashboard
+   - [ ] Apps can add their own widgets
    - [ ] Plugins can add widgets
  - [ ] Finish autocomplete
-   - [ ] Fire event on autocomplete found
+   - [ ] Fire event on autocomplete found - This should be a CHANGE event.
    - [ ] Replace the search element in input-array with auto-complete
 - [ ] Define criteria for ring privileges
 

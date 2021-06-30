@@ -177,6 +177,7 @@
         "default": {
             "modal-z-index": 2000,
             "body-background": "#efefef",
+            "box-shadow": "0 4px 10px rgba(0, 0, 0, .2)",
             "color-header-branding": "#004BA8",
             "color-user-panel-button": "#342A21",
             "color-admin-panel-background": "var(--project-color-header-branding)",
@@ -224,6 +225,7 @@
     "packages": {
         "default": [
             "global_functions.js",
+            "DateConverter.js",
             "Modal.js",
             "TabbedUI.js",
             "Slideshow.js",

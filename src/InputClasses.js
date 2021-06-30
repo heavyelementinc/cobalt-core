@@ -8,8 +8,8 @@
  * 
  *  * name     - the field's variable name
  *  * for      - Use the `for` attribute to update the innerText of any element
- *               in the page with the value of the field after it's successfully
- *               saved. Value of attr must be a valid CSS selector.
+ * in the page with the value of the field after it's successfully saved. Value 
+ * of attr must be a valid CSS selector.
  */
 class InputClass_default {
     constructor(element, { form = null }) {
@@ -69,22 +69,28 @@ class InputClass_default {
 
     set_error(message) {
         this.message = message;
-        this.create_error(this.insert_before_element(), this.insert_after_element())
+        this.create_error(this.insert_before_element())
     }
 
-    create_error(before, after) {
+    async create_error(before) {
         let el = document.createElement("pre");
         el.classList.add("form-request--field-issue-message");
         el.innerText = this.message;
         el.setAttribute('for', this.name);
         el.addEventListener("click", e => {
-            el.parentNode.removeChild(el);
+            this.dismiss_error();
             this.store_error(false);
         })
         this.store_error(el);
 
-        before.parentNode.insertBefore(el, after);
+        const offsets = get_offset(before);
+        el.style.top = `${offsets.bottom}px`;
+        el.style.left = `${offsets.x}px`;
+        el.style.width = `${offsets.w}px`;
+        console.log({ element: this.element, el, offsets });
+        document.body.appendChild(el);
         this.element.setAttribute("invalid", "invalid");
+        await wait_for_animation(el, "form-request--issue-fade-in");
     }
 
     insert_before_element() {
@@ -99,11 +105,12 @@ class InputClass_default {
         this.error = element;
     }
 
-    dismiss_error() {
+    async dismiss_error() {
         this.element.invalid = false;
         this.element.removeAttribute("invalid");
         if (!this.error) return;
         if (!this.error.parentNode) return;
+        await wait_for_animation(this.error, "form-request--issue-fade-out");
         this.error.parentNode.removeChild(this.error);
         this.error = false;
     }
@@ -254,11 +261,16 @@ class InputClass_select extends InputClass_default {
 class InputClass_object_array extends InputClass_default {
     set_error(message) {
         this.message = message;
+        const fields = this.element.shadow.querySelectorAll("input-fieldset")
+        console.log(message);
+        for (const e in message) {
+            const split = e.split(".");
+            console.log({ fields, split, f: fields[split[0]] })
+            if (!fields[split[0]]) return;
+            const el = fields[split[0]].querySelector(`[name="${split[1]}"]`);
+            const instance = get_form_input(el, null);
+            instance.set_error(message[e])
 
-        for (let i in message) {
-            for (let e of messages[i]) {
-
-            }
         }
     }
 

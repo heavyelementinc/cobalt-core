@@ -933,26 +933,56 @@ class HelpSpan extends HTMLElement {
         super();
         this.message = document.createElement("article");
         this.message.classList.add("help-span-article");
-        this.trunkatingContainer = this.closest("form-request") || document.body;
+        this.trunkatingContainer = document.body;
         this.justifyRightClass = "help-span-article--right-justified";
+        this.warning = this.hasAttribute("warning");
+        if (this.warning) this.message.setAttribute("warning", "");
     }
 
     connectedCallback() {
         this.articleShown = "help-span-article--shown";
 
         this.message.innerText = this.value || this.getAttribute("value");
-        this.appendChild(this.message);
 
         this.message.classList.remove(this.articleShown);
         this.addEventListener("mouseover", e => {
-            this.message.classList.add(this.articleShown);
-            // this.message.style.top = this.top();
-            this.justifyRight();
+            this.attach();
         })
 
         this.addEventListener("mouseout", e => {
-            this.message.classList.remove(this.articleShown);
+            this.detatch();
         })
+    }
+
+    attach() {
+        document.body.appendChild(this.message);
+        this.message.classList.add(this.articleShown);
+        const offsets = this.getOffsets(this);
+        this.message.style.top = `${offsets.y + offsets.h + 2}px`;
+        this.message.style.left = `${offsets.x + (offsets.w / 2) - (this.getOffsets(this.message).w / 2)}px`
+        // this.message.style.top = this.top();
+        this.justify(offsets);
+    }
+
+    justify(offsets) {
+        this.message.classList.remove(this.justifyRightClass)
+
+        let container = get_offset(this.trunkatingContainer);
+        let message = get_offset(this.message);
+        let diff = Math.abs(container.right - message.right);
+        console.log(container.right, message.right, container.right < message.right, diff);
+
+        if (message.x < 0) {
+            this.message.style.left = 0;
+            return;
+        } else if (container.right <= message.right) {
+            this.message.style.left = `${message.x - diff}px`
+        }
+    }
+
+    detatch() {
+        this.message.classList.remove(this.articleShown);
+        document.body.removeChild(this.message);
     }
 
     get value() {
@@ -979,18 +1009,8 @@ class HelpSpan extends HTMLElement {
         this.message.innerText = val;
     }
 
-    justifyRight() {
-        this.message.classList.remove(this.justifyRightClass)
-
-        let container = this.getOffsets(this.trunkatingContainer);
-        let message = this.getOffsets(this.message);
-
-        let rightmostEdgeContainer = container.w;
-        let rightmostEdgeMessage = message.xPrime + message.w;
-        if (rightmostEdgeContainer <= rightmostEdgeMessage) this.message.classList.add(this.justifyRightClass)
-    }
-
     getOffsets(element) {
+        return get_offset(element);
         let offsets = {
             x: element.offsetLeft,
             y: element.offsetTop,

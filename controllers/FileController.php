@@ -29,8 +29,8 @@ class FileController extends \Controllers\FileController {
             $file = $cache->file_path;
         } else {
             $files = files_exist([
-                __APP_ROOT__ . "/private/js/$match",
-                __ENV_ROOT__ . "/js/$match"
+                __APP_ROOT__ . "/src/$match",
+                __ENV_ROOT__ . "/src/$match"
             ], false);
             if (!count($files))  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
             $file = $files[0];

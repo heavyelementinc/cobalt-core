@@ -72,12 +72,12 @@ class ExampleSchema extends Normalize {
             */],
             'email' => [],
             'phone' => [
-                'get' => function ($val, $ct) {
+                'get' => function ($val) {
                     return $this->format_phone($val);
                 }
             ],
             'region' => [
-                'valid' => function ($val, $ct, $name) {
+                'valid' => function ($val, $name) {
                     return [
                         'us-east' => "US East",
                         'us-west' => "US West",
@@ -89,10 +89,14 @@ class ExampleSchema extends Normalize {
                 'set' => 'example_of_using_set_method'
             ],
             "test" => [
-                'set' => function ($val, $ct) {
+                'set' => function ($val) {
                     return $this->subdocument($val, [
-                        'foo' => [],
-                        'bar' => []
+                        'foo' => [
+                            'set' => fn ($val) => $this->required_field($val)
+                        ],
+                        'bar' => [
+                            'set' => 'boolean_helper'
+                        ]
                     ]);
                 }
             ],
@@ -107,7 +111,7 @@ class ExampleSchema extends Normalize {
      *  * The $index is where you are in the list of callables for this field
      * 
      */
-    public function set_name($value, $fieldname, $index) {
+    public function set_name($value, $fieldname) {
         return filter_var(trim($value), FILTER_SANITIZE_STRING); // Returning a value set the field name 
     }
 

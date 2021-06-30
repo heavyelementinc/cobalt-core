@@ -22,6 +22,27 @@ input, textarea {
     font-size: .9rem;
     padding: .2rem;
     white-space: pre-line;
+    box-shadow: var(--project-box-shadow);
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  
+  .form-request--issue-fade-in {
+    opacity:0;
+    transform:translateX(-20%);
+    animation: issueFadeIn 250ms 1 forwards ease-out running 300ms;
+  }
+
+  .form-request--issue-fade-out {
+    animation: issueFadeIn 500ms 1 forwards ease-out running reverse;
+  }
+
+  @keyframes issueFadeIn{
+    to{
+      opacity: 1;
+      transform: none;
+    }
   }
 
   input:focus{

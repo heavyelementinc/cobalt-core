@@ -123,7 +123,7 @@ class UserCRUD extends \Drivers\Database {
      * 
      * @param array|string $permissions the permission/permissions to filter by
      * @param string $display the inner text of option *"name"*, "first", "user"
-     * @return string rendered options
+     * @return array rendered options
      */
     final function getUserOptions($permissions, $display = "name") {
         $display_table = [

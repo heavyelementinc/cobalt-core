@@ -286,8 +286,8 @@ class WebHandler implements RequestHandler {
                 $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
             } else {
                 $files = files_exist([
-                    __APP_ROOT__ . "/private/js/$package",
-                    __ENV_ROOT__ . "/js/$package"
+                    __APP_ROOT__ . "/src/$package",
+                    __ENV_ROOT__ . "/src/$package"
                 ]);
                 $compiled .= "\n\n" . file_get_contents($files[0]);
             }

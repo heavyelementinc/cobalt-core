@@ -129,7 +129,7 @@ abstract class Normalize extends NormalizationHelpers {
      * @return array Validated data
      * @throws ValidationFailed 
      */
-    final public function __validate($data) {
+    public function __validate($data) {
         $this->__to_validate = $data;
         $schema = $this->get_schema_subset(array_keys($data));
         $issues = [];
@@ -142,7 +142,7 @@ abstract class Normalize extends NormalizationHelpers {
                 if (!isset($issues[$name])) $issues[$name] = $e->getMessage();
                 else $issues[$name] .= "\n" . $e->getMessage();
             } catch (ValidationFailed $e) { // Handle subdoc failure
-                $issues = array_merge($e->data);
+                $issues[$name] = $e->data;
             }
         }
 
