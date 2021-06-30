@@ -467,7 +467,7 @@ class InputArray extends HTMLElement {
         let tempOpts = this.options;
         for (const i of this.value) {
             /** Check if we allow custom values */
-            if (this.allowCustomInputs === "true" && i in tempOpts === false) tempOpts[i] = i;
+            if (this.allowCustomInputs === true && i in tempOpts === false) tempOpts[i] = i;
             if (i in tempOpts === false) continue;
 
             tags += this.addTag(i, tempOpts[i].label, this.readonly);

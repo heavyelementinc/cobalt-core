@@ -102,6 +102,20 @@ abstract class NormalizationHelpers implements Iterator {
         return $date->timestamp;
     }
 
+    /**
+     * Checks if a numeric value is between a specific range.
+     * 
+     * @param int $val The value to be considered
+     * @param int $min The minimum value
+     * @param int $max The maximum value
+     * @return int the original value
+     * @throws ValidationIssue 
+     */
+    final protected function min_max($val, $min, $max) {
+        if ($val < $min) throw new ValidationIssue("Value must be greater than $min");
+        if ($val > $max) throw new ValidationIssue("Value must be less than $max");
+        return $val;
+    }
 
     /**
      * Use this in your `set` method to store the timestamp as a single value in

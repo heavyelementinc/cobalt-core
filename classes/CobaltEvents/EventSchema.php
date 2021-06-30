@@ -102,6 +102,22 @@ class EventSchema extends \Validation\Normalize {
             'end_time' => [
                 'get' => 'get_time',
                 'set' => fn ($val) => $this->set_time($val, 'end')
+            ],
+            'advanced.included_paths' => [
+                'set' => 'sanitize_elements',
+                'valid' => fn ($val) => $this->filled($val)
+            ],
+            'advanced.excluded_paths' => [
+                'set' => 'sanitize_elements',
+                'valid' => fn ($val) => $this->filled($val)
+            ],
+            'advanced.exclusive' => [
+                'get' => fn ($val) => $val ?? true,
+                'set' => 'boolean_helper'
+            ],
+            "advanced.delay" => [
+                'get' => fn ($val) => $val ?? 10,
+                'set' => fn ($val) => $this->min_max($val, 0, 90)
             ]
         ];
     }
@@ -126,5 +142,21 @@ class EventSchema extends \Validation\Normalize {
 
     function get_time($val) {
         return mongo_date($this->__dataset['start_date'], 'H:i');
+    }
+
+    function sanitize_elements($val) {
+        $mutant = [];
+        foreach ($val as $i => $v) {
+            $mutant[$i] = $this->sanitize($v);
+        }
+        return $mutant;
+    }
+
+    function filled($val) {
+        $options = [];
+        foreach ($val as $v) {
+            $options[$v] = $v;
+        }
+        return $options;
     }
 }

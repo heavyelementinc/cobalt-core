@@ -1,39 +1,65 @@
-<h1 id="internal_name">{{title}}</h1>
-<form-request method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
-    <fieldset>
-        <h2>Basic Info</h2>
-        <label>Internal Name</label>
-        <input name="name" value="{{event.name}}" for="#internal_name">
-        <label>Container ID</label>
-        <input name="container_id" value="{{event.container_id}}">
-        <label>Type</label>
-        <input-autocomplete name="type" value="{{event.type}}">
-            {{!event.type.options}}
-        </input-autocomplete>
-        <input-autocomplete name="session_policy" value="{{event.session_policy}}">
-            {{!event.session_policy.options}}
-        </input-autocomplete>
-        <label>Event Starts</label>
-        <input type="date" name="start_date" value="{{event.start_date}}">
-        <input type="time" name="start_time" value="{{event.start_time}}">
-        <label>Event Ends</label>
-        <input type="date" name="end_date" value="{{event.end_date}}">
-        <input type="time" name="end_time" value="{{event.end_time}}">
-        <label>
-            <input-switch name="published" checked="{{event.published}}"></input-switch> Published
-        </label>
-    </fieldset>
-    <fieldset>
-        <h2>Content</h2>
-        <label>Headline</label>
-        <input name="headline" value="{{event.headline}}">
-        <label>Body</label>
-        <textarea name="body">{{event.body.raw}}</textarea>
-        <label>Call to action</label>
-        <input name="call_to_action_prompt" value="{{event.call_to_action_prompt}}">
-        <label>CTA Anchor</label>
-        <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
+<div class="admin-panel--container">
+    <h1 id="internal_name">{{title}}</h1>
+    <form-request method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
+        <fieldset>
+            <h2>Basic Info</h2>
+            <label>Internal Name</label>
+            <input name="name" value="{{event.name}}" for="#internal_name">
+            <label>Container ID</label>
+            <input name="container_id" value="{{event.container_id}}">
+            <label>Type</label>
+            <input-autocomplete name="type" value="{{event.type}}">
+                {{!event.type.options}}
+            </input-autocomplete>
+            <input-autocomplete name="session_policy" value="{{event.session_policy}}">
+                {{!event.session_policy.options}}
+            </input-autocomplete>
+            <label>Event Starts</label>
+            <input type="date" name="start_date" value="{{event.start_date}}">
+            <input type="time" name="start_time" value="{{event.start_time}}">
+            <label>Event Ends</label>
+            <input type="date" name="end_date" value="{{event.end_date}}">
+            <input type="time" name="end_time" value="{{event.end_time}}">
+            <label>
+                <input-switch name="published" checked="{{event.published}}"></input-switch> Published
+            </label>
+        </fieldset>
+        <fieldset>
+            <h2>Content</h2>
+            <label>Headline</label>
+            <input name="headline" value="{{event.headline}}">
+            <label>Body</label>
+            <textarea name="body">{{event.body.raw}}</textarea>
+            <label>Call to action</label>
+            <input name="call_to_action_prompt" value="{{event.call_to_action_prompt}}">
+            <label>CTA Anchor</label>
+            <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
 
-    </fieldset>
-    <input type="submit" value="Save">
-</form-request>
+        </fieldset>
+        <fieldset>
+            <h2>Advanced</h2>
+            <label>Included paths <help-span
+                    value="If the user has navigated to a path which matches one of the entries on this list, this event will be considered 'showable'. Leave blank to ignore.">
+                </help-span></label>
+            <input-array name="advanced.included_paths" value="{{@event.advanced.included_paths}}" allow-custom="true">
+                {{!event.advanced.included_paths.options}}
+            </input-array>
+            <label>Excluded paths <help-span
+                    value="If the URL path name matches an entry in this list, then the path will be considered excluded and the event will not be shown. Leave blank to ignore.">
+                </help-span></label>
+            <input-array name="advanced.excluded_paths" value="{{@event.advanced.excluded_paths}}" allow-custom="true">
+                {{!event.advanced.excluded_paths.options}}
+            </input-array>
+            <label>
+                <input-switch name="advanced.exclusive" checked="{{event.advanced.exclusive}}"></input-switch> Exclusive
+                <help-span value="An exclusive event will prevent other events from displaying."></help-span>
+            </label>
+            <label>
+                <label>Delay time <help-span value="Number of seconds to wait until this event gets showed. Max is 90">
+                    </help-span></label>
+                <input type="number" name="advanced.delay" value="{{event.advanced.delay}}">
+            </label>
+        </fieldset>
+        <input type="submit" value="Save">
+    </form-request>
+</div>
