@@ -787,6 +787,7 @@ class InputObjectArray extends HTMLElement {
         } else {
             this.value = [];
         }
+        this.dispatchEvent(new CustomEvent("ObjectArrayReady"));
     }
 
     initInterface() {

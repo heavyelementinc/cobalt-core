@@ -7,8 +7,10 @@ use Validation\Exceptions\ValidationFailed;
 
 class Subdocument extends Normalize {
 
-    function __construct($values, $schema) {
-        parent::__construct($values);
+    function __construct($values, $schema, &$parent) {
+        $this->parent = $parent;
+        parent::__construct([]);
+        $this->__dataset = [...$values];
         $this->init_schema($schema);
     }
 
@@ -31,5 +33,13 @@ class Subdocument extends Normalize {
         }
         if (count($issues)) throw new SubdocumentValidationFailed($issues);
         return $mutant;
+    }
+
+    protected function __modify($field, $value) {
+        // Update the original, hopefully.
+        $this->parent->__dataset[$field] = $value;
+
+        // So we can access these later from within this context if need be
+        $this->__dataset[$field] = $value;
     }
 }

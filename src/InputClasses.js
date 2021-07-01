@@ -55,8 +55,8 @@ class InputClass_default {
     }
 
     callbacks() {
-        this.element.addEventListener('focusout', e => {
-            this.dismiss_error();
+        this.element.addEventListener('focusout', async e => {
+            await this.dismiss_error();
         })
         if (this.update) {
             this.form.addEventListener("requestSuccess", e => {
@@ -74,11 +74,17 @@ class InputClass_default {
 
     async create_error(before) {
         let el = document.createElement("pre");
+        el.addEventListener('click', () => {
+            if (el) {
+                el.parentNode.removeChild(el);
+                this.error = false;
+            }
+        });
         el.classList.add("form-request--field-issue-message");
         el.innerText = this.message;
         el.setAttribute('for', this.name);
         el.addEventListener("click", e => {
-            this.dismiss_error();
+            this.dismiss_error(e);
             this.store_error(false);
         })
         this.store_error(el);
@@ -87,7 +93,6 @@ class InputClass_default {
         el.style.top = `${offsets.bottom}px`;
         el.style.left = `${offsets.x}px`;
         el.style.width = `${offsets.w}px`;
-        console.log({ element: this.element, el, offsets });
         document.body.appendChild(el);
         this.element.setAttribute("invalid", "invalid");
         await wait_for_animation(el, "form-request--issue-fade-in");
@@ -108,16 +113,16 @@ class InputClass_default {
     async dismiss_error() {
         this.element.invalid = false;
         this.element.removeAttribute("invalid");
-        if (!this.error) return;
-        if (!this.error.parentNode) return;
+        if (!this.error === false) return;
         await wait_for_animation(this.error, "form-request--issue-fade-out");
+        if (!this.error.parentNode) return;
+
         this.error.parentNode.removeChild(this.error);
         this.error = false;
     }
 }
 
 class InputClass_date extends InputClass_default {
-
     set value(set = null) {
         this.was = this.value;
         if (typeof set === "string") return this.element.value = set;
@@ -259,28 +264,43 @@ class InputClass_select extends InputClass_default {
 }
 
 class InputClass_object_array extends InputClass_default {
-    set_error(message) {
-        this.message = message;
-        const fields = this.element.shadow.querySelectorAll("input-fieldset")
-        console.log(message);
-        for (const e in message) {
-            const split = e.split(".");
-            console.log({ fields, split, f: fields[split[0]] })
-            if (!fields[split[0]]) return;
-            const el = fields[split[0]].querySelector(`[name="${split[1]}"]`);
-            const instance = get_form_input(el, null);
-            instance.set_error(message[e])
 
+    constructor(element, { form = null }) {
+        super(element, { form });
+        this.members = [];
+    }
+
+    initMembers() {
+        const fields = this.element.shadow.querySelectorAll("input-fieldset");
+        for (const f of fields) {
+            this.members.push(get_form_elements(f));
         }
     }
 
-    dismiss_error() {
+    set_error(message) {
+        this.message = message;
+        this.initMembers();
+        for (const e in message) {
+            const split = e.split(".");
+            if (!this.members[split[0]]) return;
+            const el = this.members[split[0]][split[1]];
+            el.set_error(message[e])
+        }
+    }
+
+    async dismiss_error(e = null) {
         this.element.invalid = false;
         this.element.removeAttribute("invalid");
-        if (!this.error) return;
-        if (!this.error.parentNode) return;
-        this.error.parentNode.removeChild(this.error);
-        this.error = false;
+
+        for (const field of this.members) {
+            for (const el of field) {
+                el.dismiss_error();
+            }
+        }
+    }
+
+    store_error(element) {
+        this.error.push(element);
     }
 }
 

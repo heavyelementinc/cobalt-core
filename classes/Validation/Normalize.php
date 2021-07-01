@@ -133,7 +133,7 @@ abstract class Normalize extends NormalizationHelpers {
         $this->__to_validate = $data;
         $schema = $this->get_schema_subset(array_keys($data));
         $issues = [];
-        foreach ($this->__schema as $name => $value) {
+        foreach ($schema as $name => $value) {
             if (!isset($data[$name])) continue;
             try {
                 // Run the setter function by assigning value which can throw issues
@@ -286,7 +286,7 @@ abstract class Normalize extends NormalizationHelpers {
 
 
     protected function subdocument($value, $schema) {
-        $doc = new Subdocument($value, $schema);
+        $doc = new Subdocument($value, $schema, $context);
         return $doc->__validate($value);
     }
 
