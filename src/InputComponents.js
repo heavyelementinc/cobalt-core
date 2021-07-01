@@ -190,7 +190,7 @@ class InputSwitch extends HTMLElement {
     constructor() {
         super();
         this.tabIndex = "0"; // We want this element to be tab-able
-        this.checked = this.getAttribute("checked"); // Let's also get 
+        this.checked = string_to_bool(this.getAttribute("checked")); // Let's also get 
         this.disabled = ["true", "disabled"];
         this.checkbox = document.createElement("input");
         this.checkbox.type = "checkbox";
@@ -201,11 +201,12 @@ class InputSwitch extends HTMLElement {
     }
 
     get value() {
-        return this.checkbox.checked;
+        return this.checked;
     }
 
     set value(val) {
         this.checkbox.checked = val;
+        this.checked = val;
     }
 
     /** The CONNECTED CALLBACK is the function that is executed when the element
@@ -892,6 +893,7 @@ class InputObjectArray extends HTMLElement {
         objects.forEach((e, i) => {
             data[i] = {}
             const fieldElements = get_form_elements(e);
+
             Object.values(fieldElements).forEach(el => {
                 data[i][el.name] = el.value;
             })
@@ -970,7 +972,6 @@ class HelpSpan extends HTMLElement {
         let container = get_offset(this.trunkatingContainer);
         let message = get_offset(this.message);
         let diff = Math.abs(container.right - message.right);
-        console.log(container.right, message.right, container.right < message.right, diff);
 
         if (message.x < 0) {
             this.message.style.left = 0;
@@ -1346,9 +1347,7 @@ class AutoComplete extends HTMLElement {
                 this.selectFromEnter();
                 return;
             case "ArrowDown":
-                console.log(this.searchField.value)
                 if (this.searchField.value === "") {
-                    console.log("in")
                     this.drawSearchResults({ ...this.options }, "", false);
                 }
             case "ArrowUp":

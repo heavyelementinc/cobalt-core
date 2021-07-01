@@ -221,6 +221,10 @@ abstract class Normalize extends NormalizationHelpers {
     public function __set($name, $value) { // Normalizes stored values
 
         if (!key_exists($name, $this->__schema)) return;
+        if (key_exists('each', $this->__schema[$name])) {
+            $this->__dataset[$name] = $this->subdocument($value, $this->__schema[$name]['each']);
+            return $this->__dataset[$name];
+        }
         // Ensure we want to save our $value to the dataset (in other words, if
         // set === false, ignore this field)
         if (isset($this->__schema[$name]['set']) && $this->__schema[$name]['set'] === false) return;
@@ -283,11 +287,7 @@ abstract class Normalize extends NormalizationHelpers {
 
     protected function subdocument($value, $schema) {
         $doc = new Subdocument($value, $schema);
-        $mutant = [];
-        foreach ($value as $i => $val) {
-            $mutant[$i] = $doc->__validate($val);
-        }
-        return $mutant;
+        return $doc->__validate($value);
     }
 
 

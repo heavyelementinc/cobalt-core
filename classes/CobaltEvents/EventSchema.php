@@ -19,6 +19,7 @@ class EventSchema extends \Validation\Normalize {
     public function __get_schema(): array {
         return [
             'name' =>  [ // An name for internal purposes
+                'get' => fn ($val) => $val,
                 'set' => function ($val) {
                     $val = $this->sanitize($val);
                     $val = $this->required_field($val);
@@ -53,7 +54,6 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             'session_policy' => [
-                'get' => fn ($val) => $val ?? 'half_date',
                 'set' => function ($val) {
                     $valid = array_keys($this->__schema['session_policy']['valid']());
                     if (!in_array($val, $valid)) throw new ValidationIssue("Invalid session policy");

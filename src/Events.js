@@ -22,13 +22,14 @@ class CobaltEvents {
         this.currentEvents = await this.api.get();
     }
 
-    initializeEvent(evt) {
+    async initializeEvent(evt) {
         let type = "default";
         if (evt.type in this.eventTypes) type = evt.type;
         const event = new this.eventTypes[type](evt);
         if (!event.isElligibleForDisplay()) return false;
         if (this.hasAnotherEventBeenShown) return false;
         this.hasAnotherEventBeenShown = true;
+        await this.timeout(event.advanced?.delay || 0);
         event.draw();
         event.element.addEventListener("cobaltEventsClosed", e => this.eventClosure(e));
         this.eventQueue[evt._id.$oid] = event;
@@ -39,6 +40,13 @@ class CobaltEvents {
         console.log(e.detail)
     }
 
+    async timeout(length) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve()
+            }, length * 1000)
+        })
+    }
 }
 
 class CobaltEvent_default {
@@ -63,7 +71,7 @@ class CobaltEvent_default {
         for (let p of paths) {
             p = (p[0] !== "^") ? `^${p}` : p;
             const regex = new RegExp(p);
-            match = regex.match(window.location.pathname);
+            match = window.location.pathname.match(regex);
             if (match) return match
         }
         return match;
@@ -76,7 +84,7 @@ class CobaltEvent_default {
         this.innerContent();
         this.insert();
 
-        this.handleCloseButton();
+        this.closeButton();
     }
 
     get classes() {
@@ -90,7 +98,6 @@ class CobaltEvent_default {
         }));
         this.dismiss();
     }
-
 
     get storageMedium() {
         const mediums = {
@@ -120,14 +127,6 @@ class CobaltEvent_default {
         window[type].setItem(id, JSON.stringify(value));
     }
 
-    async timeout(length) {
-        return new Promise(res, rej => {
-            setTimeout(() => {
-                res()
-            }, length * 1000)
-        })
-    }
-
 
     /** Specified by new derivatives */
 
@@ -145,13 +144,6 @@ class CobaltEvent_default {
             cta.addEventListener("click", e => this.closeItem(), { once: true })
             this.element.appendChild(cta);
         }
-
-        // Dismiss button
-        const close = document.createElement("button");
-        close.classList.add("cobalt-events--banner-close")
-        close.innerHTML = window.closeGlyph;
-        close.addEventListener("click", e => this.closeItem(), { once: true })
-        this.element.appendChild(close);
     }
 
     /** Insert element into page */
@@ -165,6 +157,14 @@ class CobaltEvent_default {
         this.element.parentNode.removeChild(this.element);
     }
 
+    closeButton() {
+        // Dismiss button
+        const close = document.createElement("button");
+        close.classList.add("cobalt-events--banner-close")
+        close.innerHTML = window.closeGlyph;
+        close.addEventListener("click", e => this.closeItem(), { once: true })
+        this.element.appendChild(close);
+    }
 }
 
 
@@ -183,32 +183,16 @@ class CobaltEvent_modal extends CobaltEvent_default {
             cta.addEventListener("click", e => this.closeItem(), { once: true })
             this.element.appendChild(cta);
         }
-
-        // Dismiss button
-        const close = document.createElement("button");
-        close.classList.add("cobalt-events--banner-close")
-        close.innerHTML = window.closeGlyph;
-        close.addEventListener("click", e => this.closeItem(), { once: true })
-        this.element.appendChild(close);
     }
 
     /** Insert element into page */
     async insert() {
-        // await this.timeout(10);
         this.modal = new Modal({
             close_btn: false,
-            chrome: {
-                okay: {
-                    draw: false
-                },
-                close: {
-                    draw: false
-                }
-            }
+            chrome: false
         });
-        console.log(this.modal)
-        const container = this.modal.draw();
-        container.appendChild(this.element);
+        const container = await this.modal.draw();
+        container.querySelector(".modal-body").appendChild(this.element);
     }
 
 

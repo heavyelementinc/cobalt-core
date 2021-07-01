@@ -15,7 +15,7 @@ class InputClass_default {
     constructor(element, { form = null }) {
         this.element = element;
         this.type = element.type || "text";
-        this.name = element.name || "";
+        this.name = element.name || element.getAttribute("name") || "";
         this.form = form || this.get_form();
         this.error = false;
         this.was = this.element.value;
@@ -143,12 +143,12 @@ class InputClass_checkbox extends InputClass_default {
 
 class InputClass_switch extends InputClass_default {
     get value() {
-        return this.element.querySelector("input[type='checkbox']").checked;
+        return this.element.value;
     }
 
     set value(set) {
         this.was = this.value;
-        this.element.querySelector("input[type='checkbox']").checked = set;
+        this.element.value = set;
         return set;
     }
 }

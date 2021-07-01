@@ -10,19 +10,18 @@ class Subdocument extends Normalize {
     function __construct($values, $schema) {
         parent::__construct($values);
         $this->init_schema($schema);
-        return $this->subdoc_validate($values);
     }
 
     public function __get_schema(): array {
         return [];
     }
 
-    public function subdoc_validate($data) {
+    public function __validate($data) {
         $mutant = [];
         $issues = [];
         foreach ($data as $index => $val) {
             try {
-                $result = $this->__validate($val);
+                $result = parent::__validate($val);
                 $mutant[$index] = $result;
             } catch (ValidationFailed $e) {
                 foreach ($e->data as $key => $value) {
