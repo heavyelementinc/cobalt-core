@@ -388,7 +388,8 @@ abstract class Normalize extends NormalizationHelpers {
                     $data .= " data-$attr=\"$value\"";
                 }
             }
-            $options .= "<option value='$k'$data>$v</option>";
+            $selected = ($val === $k) ? "selected='selected'" : "";
+            $options .= "<option value='$k'$data $selected>$v</option>";
         }
         return $options;
     }

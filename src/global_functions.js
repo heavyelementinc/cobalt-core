@@ -311,7 +311,8 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
             if (removeClass) element.classList.remove(animationClass);
             clearTimeout(timeout);
         }, { once: true });
-        element.classList.add(animationClass);
+        if (typeof animationClass === "string") animationClass = [animationClass];
+        element.classList.add(...animationClass);
         if (element.style.animationPlayState !== "running") element.style.animationPlayState = "running";
         let timeout = setTimeout(() => {
             resolve();

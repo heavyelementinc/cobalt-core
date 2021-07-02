@@ -216,7 +216,7 @@ abstract class NormalizationHelpers implements Iterator {
      * @throws ValidationIssue 
      */
     final protected function dollars_to_cents($val) {
-        if (gettype($val) === "string" && $val[0] === '$') $val = substr($val, 1);
+        if (gettype($val) === "string") $val = str_replace(['$', ','], "", $val);
         if (!is_numeric($val)) throw new ValidationIssue("Must be a dollar value");
         return $val * 100;
     }

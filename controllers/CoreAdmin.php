@@ -1,5 +1,8 @@
 <?php
-class CoreAdmin extends \Controllers\Pages {
+
+use \Auth\UserSchema;
+
+class CoreAdmin {
     function index() {
         add_vars([
             'title' => "Admin Panel",
@@ -41,16 +44,31 @@ class CoreAdmin extends \Controllers\Pages {
 
     function individual_user_management_panel($id) {
         $ua = new \Auth\UserCRUD();
-        $user = (array)$ua->getUserById($id);
+        $user = new UserSchema($ua->getUserById($id));
         if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", ['template' => 'errors/404_invalid_user.html']);
 
         add_vars([
-            'title' => "$user[fname] $user[lname]",
+            'title' => "$user->fname $user->lname",
             'user_account' => $user,
-            'user_id' => (string)$user['_id'],
+            'user_id' => (string)$user->_id,
             'permission_table' => $GLOBALS['auth']->permissions->get_permission_table($user),
             'account_flags' => $ua->getUserFlags($user),
         ]);
+
+        try {
+            $auth = new \Auth\AdditionalUserFields();
+            $additional = maybe_with($auth->__get_additional_user_tab());
+        } catch (\Exception $e) {
+            $additional = "";
+        }
+
+        if ($additional) {
+            add_vars([
+                'additional_button' => "<li><button for='additional-panel'>Other</button></li>",
+                'additional_panel' => "<section id='additional-panel' class='drawer-list--item'>$additional</section>",
+            ]);
+        }
+
         set_template("/authentication/user-management/individual-user.html");
     }
 

@@ -1,17 +1,38 @@
 <?php
 
+/** UserSchema - The user account normalization routines
+ * 
+ * To specify additional user fields in your project, you can add the class
+ * \Auth\AdditionalUserFields to your project and specify:
+ * 
+ * ```php
+ * public function __get_additional_schema():array // In schema format
+ * public function __get_additional_user_tab():string // Path to template
+ * 
+ * 
+ */
+
 namespace Auth;
 
 use \Validation\Exceptions\ValidationIssue;
+use \Auth\AdditionalUserFields;
 
-class UserValidate extends \Validation\Validate {
+class UserSchema extends \Validation\Normalize {
 
-    function __construct() {
+    function __construct($doc = null, $normalize_get = true) {
         $this->collection = \db_cursor('users');
+        parent::__construct($doc, $normalize_get);
     }
 
-    function __get_schema() {
-        return [
+    function __get_schema(): array {
+        $integrate = [];
+        try {
+            $additional = new AdditionalUserFields();
+        } catch (\Exception $e) {
+            $additional = null;
+        }
+        if ($additional) $integrate = $additional->__get_additional_schema();
+        return array_merge([
             'fname' => [],
             'lname' => [],
             'uname' => [],
@@ -37,7 +58,7 @@ class UserValidate extends \Validation\Validate {
             // "verified" => [],
             // "groups" => [],
             // "permissions" => [],
-        ];
+        ], $integrate);
     }
 
     /** Functions are called via the \Auth\CRUDUser class with the following arguments: [$value, $field, $submitted_user_info] */
@@ -81,9 +102,9 @@ class UserValidate extends \Validation\Validate {
 
         if (!empty($password_fail)) throw new ValidationIssue($password_fail);
 
-        $this->set("flags.password_reset_required", false);
-        $this->set("flags.password_last_changed_by", session("_id") ?? "CLI");
-        $this->set("flags.password_last_changed_on", $this->make_date());
+        $this->__modify("flags.password_reset_required", false);
+        $this->__modify("flags.password_last_changed_by", session("_id") ?? "CLI");
+        $this->__modify("flags.password_last_changed_on", $this->make_date());
 
         /** Finally, we have a valid password. */
         return password_hash($value, PASSWORD_DEFAULT);

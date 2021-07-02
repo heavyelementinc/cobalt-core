@@ -13,6 +13,8 @@
 namespace Auth;
 
 use Auth\UserValidate;
+use Auth\UserSchema;
+
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {
@@ -56,14 +58,14 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function updateUser($id, $request) {
-        $val = new UserValidate();
-        $mutant = $val->validate($request);
+        $val = new UserSchema();
+        $mutant = $val->__validate($request);
         $result = $this->updateOne(
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
         if ($result->getModifiedCount() !== 1) throw new \Exception("Failed to update fields");
-        return $mutant;
+        return new UserSchema($mutant);
     }
 
     final function createUser($request) {
@@ -154,7 +156,7 @@ class UserCRUD extends \Drivers\Database {
         foreach ($flags as $name => $elements) {
             $checked = "";
             $n = str_replace("flags.", "", $name);
-            if (isset($values['flags'][$n]) && $values['flags'][$n]) $checked = " checked='true'";
+            if (isset($values->flags[$n]) && $values->flags[$n]) $checked = " checked='true'";
             $el .= "<li><input-switch name='$name'$checked></input-switch><label>$elements[label]</label></li>";
         }
         return "<ul class='list-panel'>$el</ul>";

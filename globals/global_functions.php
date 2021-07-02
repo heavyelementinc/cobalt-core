@@ -541,6 +541,7 @@ function associative_to_path(array $arr) {
  */
 function with(string $template, $vars = []) {
     $render = new \Render\Render();
+    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'];
     $render->set_vars($vars);
     $render->from_template($template);
     return $render->execute();
@@ -553,7 +554,7 @@ function with(string $template, $vars = []) {
  * @param mixed   $vars     Variables to include
  * @return string The processed template OR an empty string on error
  */
-function maybe_with($template, $vars) {
+function maybe_with($template, $vars = []) {
     if (!$template) return "";
     if (!is_string($template)) return "";
     try {

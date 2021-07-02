@@ -60,7 +60,7 @@ class Permissions extends Database {
         /** If the app has enabled the `root` user group, add it to the root user */
         if (app("Auth_enable_root_group")) {
             $checked = "false";
-            if (in_array("root", (array)$user['groups'])) $checked = "true";
+            if (in_array("root", (array)$user->groups)) $checked = "true";
             $root_group =  "<li><input-switch name='groups.root' checked='$checked'></input-switch> Root <help-span
             value=\"WARNING: Root membership gives this user TOTAL CONTROL over this application.\"></help-span></li>";
         }
@@ -76,7 +76,7 @@ class Permissions extends Database {
             $group = $item['group'];
             $groupCheck = "false";
             /** Does the user belong to the current group? */
-            if (in_array($group, (array)$user['groups'])) $groupCheck = "true";
+            if (in_array($group, (array)$user->groups)) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
                 $table[$group] = "<h2>$group</h2>\n<ul class='list-panel'>";

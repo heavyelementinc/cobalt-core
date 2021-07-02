@@ -27,14 +27,14 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     a2enmod rewrite
 
 # Copy the core files
-COPY core /var/www/core/
+COPY cobalt-core /var/www/cobalt-core/
 
 # Copy the app-specific files
 ##### MAKE SURE YOU SPECIFY YOUR APPLICATION'S NAME HERE! #####
 COPY mercury /var/www/app/
 
 # Copy the apache configuration
-COPY config/apache/app.conf /etc/apache2/sites-enabled/000-default.conf
+COPY mercury/private/config/apache/mercury.conf /etc/apache2/sites-enabled/000-default.conf
 
 # Give Apache read permissions for our application
 RUN chown www-data:www-data -R /var/www

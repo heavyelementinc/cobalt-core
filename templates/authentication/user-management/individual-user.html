@@ -4,6 +4,7 @@
         <ul class="tab-list--tab-row">
             <li><button for="basics" class="tab-list--active">Basics</button></li>
             <li><button for="permissions">Permissions</button></li>
+            {{!additional_button}}
             <li><button for="statistics">Stats</button></li>
             <li><button for="manage">Manage</button></li>
         </ul>
@@ -60,6 +61,7 @@
                 </div>
             </form-request>
         </section>
+        {{!additional_panel}}
         <section id="statistics" class="drawer-list--item">
             <h2>Statistics</h2>
             <p>Placeholder section for {{user_account.uname}}'s statistics</p>

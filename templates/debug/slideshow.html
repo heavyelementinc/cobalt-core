@@ -1,54 +1,9 @@
-<section id='slideshow-container'>
-    <div id='image0' class='slideshow-item' style='background-image:url(/core-content/img/default_poster_image.jpg)'>
+<slideshow-container controls="true" play-state="false">
+    <div id='image0' style='background-image:url(/core-content/img/default_poster_image.jpg)'>
+        <div></div>
     </div>
-    <div id='image1' class='slideshow-item'
-        style='background-image:url(/core-content/img/pexels-mikael-blomkvist-6476573.jpg)'>
+    <div id='image1' style='background-image:url(/core-content/img/pexels-mikael-blomkvist-6476573.jpg)'>
     </div>
-    <div id='image2' class='slideshow-item' style='background-image:url(/core-content/img/pexels-photo-267350.webp)'>
+    <div id='image2' style='background-image:url(/core-content/img/pexels-photo-267350.webp)'>
     </div>
-</section>
-<div id='slideshow-controls'>
-    <!-- <fieldset>
-        <button onclick='slideshow.start()'>
-            <ion-icon name='play'></ion-icon>
-        </button>
-        <button onclick='slideshow.stop()'>
-            <ion-icon name='stop'></ion-icon>
-        </button>
-        <button onclick='slideshow.next()'>
-            <ion-icon name='play-skip-forward'></ion-icon>
-        </button>
-    </fieldset> -->
-    <fieldset>
-        <input id='timeout-adjust' type='number' value='2000'> <label>Milliseconds</label>
-    </fieldset>
-</div>
-<style>
-    #slideshow-container {
-        width: 100%;
-        position: relative;
-        height: 40vh;
-    }
-
-    .slideshow-item {
-        height: 100%;
-        width: 100%;
-        background-size: cover;
-    }
-
-    #controls {
-        display: flex;
-        justify-content: space-evenly;
-    }
-</style>
-<script>
-    var slideshow;
-    window.addEventListener("load", (e) => {
-        slideshow = new Slideshow({ elements: ['.slideshow-container .slideshow-item'], timeout: 2000, controls: true });
-    })
-    document.querySelector("#timeout-adjust").addEventListener("change", e => {
-        slideshow.timeout = e.target.value;
-        slideshow.stop();
-        slideshow.start();
-    })
-</script>
+</slideshow-container>
