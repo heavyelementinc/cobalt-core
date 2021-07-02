@@ -10,7 +10,7 @@ class Subdocument extends Normalize {
     function __construct($values, $schema, &$parent) {
         $this->parent = $parent;
         parent::__construct([]);
-        $this->__dataset = [...$values];
+        $this->__dataset = array_merge($this->__dataset, $values);
         $this->init_schema($schema);
     }
 
