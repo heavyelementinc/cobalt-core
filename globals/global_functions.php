@@ -664,7 +664,7 @@ function cents_to_dollars($cents) {
  * @return string formated date
  */
 function mongo_date($date, $fmt = "Y-m-d") {
-    if ($date === null) return "";
+    if (!$date) return "";
     $date = (string)$date / 1000;
     return date($fmt, $date);
 }

@@ -201,7 +201,7 @@ class InputSwitch extends HTMLElement {
     }
 
     get value() {
-        return this.checked;
+        return this.checkbox.checked;
     }
 
     set value(val) {
