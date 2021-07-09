@@ -223,7 +223,6 @@ class SettingsManager {
      * @return null
      */
     function load_settings() {
-
         foreach ($this->app_paths_settings as $path) {
             if (!file_exists($path)) continue; // Skip this file, it doesn't exist.
             // Load JSON file and decode it

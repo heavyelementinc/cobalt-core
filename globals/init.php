@@ -101,8 +101,10 @@ function __cobalt_initialize_create_user($root_user) {
 
     // Let's create a new user
     $crud = new \Auth\UserCRUD();
+
     $result = $crud->createUser($root_user);
     $crud->updateOne(['_id' => $result['_id']], ['$set' => ['groups' => ['root']]]);
+
     // Redact the password field
     $root_user['pword'] = "###############";
 
