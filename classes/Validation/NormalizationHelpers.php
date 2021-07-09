@@ -44,6 +44,16 @@ abstract class NormalizationHelpers implements Iterator {
     }
 
     /**
+     * Hex color validation
+     */
+    final protected function hex_color($val) {
+        if (strlen($val) > 8) throw new ValidationIssue("Not a hex color.");
+        $pattern = "/^#[0-9A-Fa-f]{3,6}$/";
+        if (!preg_match($pattern, $val)) throw new ValidationIssue("Not a hex color.");
+        return $val;
+    }
+
+    /**
      * Validates an email address
      * 
      * Trims and email and validates its formatting using filter_var

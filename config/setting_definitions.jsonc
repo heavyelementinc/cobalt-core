@@ -198,8 +198,8 @@
             "color-table-bg-even": "var(--project-color-input-disabled)",
             "color-problem": "#FE5F55",
             "color-button-init": "#004BA8",
-            "color-button-text": "#FFF",
             "color-button-hover": "#9DD1F1",
+            "color-button-text": "#FFF",
             "color-button-hover-text": "#000",
             "color-button-pressed": "#00377A",
             "calendar-borders": "1px solid var(--project-color-button-init)",
@@ -210,7 +210,13 @@
             "calendar-header-text": "var(--project-color-button-text)",
             "action-menu-background": "var(--project-color-input-disabled)",
             "action-menu-border": "var(--project-color-table-border)",
-            "action-menu-hover": "var(--project-color-inactive)"
+            "action-menu-hover": "var(--project-color-inactive)",
+            "events-banner-background": "var(--project-body-background)",
+            "events-banner-text": "black",
+            "events-button-color": "var(--project-color-button-init)",
+            "events-button-color-hover": "var(--project-color-button-hover)",
+            "events-button-text": "var(--project-color-button-text)",
+            "events-button-text-hover": "var(--project-color-button-hover-text)"
         },
         "$merge": true,
         "$style": true
@@ -250,6 +256,7 @@
     "css_packages": {
         "default": [
             "normalize.css",
+            "header.css",
             "slideshow.css",
             "inputs.css",
             "cobalt-events.css",

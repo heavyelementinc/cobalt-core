@@ -168,4 +168,13 @@ class Debug extends \Controllers\Pages {
         ]);
         set_template("/debug/async-wizard.html");
     }
+
+    function environment() {
+        add_vars([
+            'title' => "Docker Debug",
+            'main' => "<pre>" . var_export(getenv(), true) . "\n" . var_export($_SERVER, true) . "</pre>"
+        ]);
+
+        set_template("/parts/main.html");
+    }
 }

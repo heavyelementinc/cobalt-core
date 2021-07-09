@@ -1,16 +1,16 @@
-<div class="admin-panel--container">
-    <h1 id="internal_name">{{title}}</h1>
-    <form-request method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
-        <fieldset>
+<h1 id="internal_name">{{title}}</h1>
+<form-request method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
+    <div id="event-edit">
+        <fieldset class="admin-panel--container">
             <h2>Basic Info</h2>
             <label>Internal Name</label>
             <input name="name" value="{{event.name}}" for="#internal_name">
-            <label>Container ID</label>
-            <input name="container_id" value="{{event.container_id}}">
-            <label>Type</label>
+            <label>Event Type</label>
             <input-autocomplete name="type" value="{{event.type}}">
                 {{!event.type.options}}
             </input-autocomplete>
+            <label>"Display Again" Policy <help-span value="When to display the event again after closure."></help-span>
+            </label>
             <input-autocomplete name="session_policy" value="{{event.session_policy}}">
                 {{!event.session_policy.options}}
             </input-autocomplete>
@@ -22,21 +22,29 @@
             <input type="time" name="end_time" value="{{event.end_time}}">
             <label>
                 <input-switch name="published" checked="{{event.published}}"></input-switch> Published
-            </label>
+                <help-span value="In order for an event to be displayed, this switch must be 'on'." </label>
         </fieldset>
-        <fieldset>
+        <fieldset class="admin-panel--container">
             <h2>Content</h2>
-            <label>Headline</label>
+            <label id="charlimit">Headline</label>
             <input name="headline" value="{{event.headline}}">
+            <!-- oninput="charlimit(120,'#charlimit')" -->
             <label>Body</label>
             <textarea name="body">{{event.body.raw}}</textarea>
-            <label>Call to action</label>
+            <label>Call to Action Text <help-span
+                    value="The user will be presented with a button. This is the text of that button."></help-span>
+            </label>
             <input name="call_to_action_prompt" value="{{event.call_to_action_prompt}}">
-            <label>CTA Anchor</label>
+            <label>CTA Link <help-span
+                    value="When the user clicks the Call to Action button, this is where they'll be taken. May be a relative link or another URL.">
+                </help-span></label>
             <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
-
+            <label>Background Color <helps-span
+                    value="Choose the background color of your event. Note that a contrasting text color will be automatically assigned.">
+                </helps-span></label>
+            <input type="color" name="bgColor" value="{{event.bgColor}}">
         </fieldset>
-        <fieldset>
+        <fieldset id="fieldset" class="admin-panel--container">
             <h2>Advanced</h2>
             <label>Included paths <help-span
                     value="If the user has navigated to a path which matches one of the entries on this list, this event will be considered 'showable'. Leave blank to ignore.">
@@ -59,7 +67,28 @@
                     </help-span></label>
                 <input type="number" name="advanced.delay" value="{{event.advanced.delay}}">
             </label>
+            <label>Container ID <help-span
+                    value="The container of this event will be given this ID. (Useful if you want to bind CSS to this event)">
+                </help-span></label>
+            <input name="container_id" value="{{event.container_id}}">
         </fieldset>
-        <input type="submit" value="Save">
-    </form-request>
-</div>
+    </div>
+    <input type="submit" value="Save">
+</form-request>
+
+<style>
+    fieldset :is(h1, h2, h3) {
+        margin-top: 0;
+    }
+
+    #event-edit {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .admin-panel--container {
+        padding: .2rem .4rem;
+        border: 1px solid var(--project-color-input-border-nofocus);
+        border-radius: 4px;
+    }
+</style>

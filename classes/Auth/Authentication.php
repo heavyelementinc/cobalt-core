@@ -11,7 +11,6 @@ class Authentication {
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
 
-
         $this->session = new CurrentSession();
         if (isset($this->session->session->user_id)) $ua = new UserCRUD();
         else return $this;

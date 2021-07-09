@@ -1,0 +1,119 @@
+.cobalt-events--banner {
+    display:flex;
+    flex-direction: row;
+    padding: 1em 5em;
+    justify-content: space-between;
+    position: sticky;
+    top:0;
+    background: var(--project-events-banner-background);
+    z-index: calc(var(--project-modal-z-index) - 1);
+}
+
+.cobalt-events--banner :is(h1, h1:first-of-type){
+    margin: 0;
+    font-size: 1.5em;
+}
+
+
+a.cobalt-events--cta-button {
+    display: inline-block;
+    background: var(--project-events-button-color);
+    color: var(--project-events-button-text);
+    /* border: 3px solid; */
+    padding: .3rem .6rem;
+    text-decoration: none;
+    justify-self: flex-end;
+    align-self: center;
+    text-align: center;
+    width: max-content;
+    font-weight: bold;
+    border-radius: 3px;
+    font-size: 1.1em;
+    font-family: var(--project-body-family);
+}
+
+
+a.cobalt-events--cta-button:hover {
+    background: var(--project-events-button-color-hover);
+    color: var(--project-events-button-text-hover);
+}
+
+
+.cobalt-events--banner-close {
+    border: none;
+    background:transparent;
+    position: absolute;
+    color: var(--project-events-banner-text);
+    right: 1em;
+}
+
+
+/* Modal-specific styles */
+    
+#cobalt-events--modal-window{
+    padding:0;
+}
+
+#cobalt-events--modal-window section.modal-body{
+    display:flex;
+    flex-grow:1;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+}
+
+.cobalt-events--modal {
+    display:flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1rem;
+}
+
+.cobalt-events--modal .cobalt-events--banner-close{
+    position:absolute;
+    top:0;
+    right:0;
+
+}
+
+.cobalt-events--modal h1:first-of-type {
+    margin-top: 0;
+    font-size: 2.5em;
+}
+
+
+.cobalt-events--modal a.cobalt-events--cta-button{
+    margin-top: auto;
+    font-size: 1.4em;
+}
+
+/** Handle Animation Types **/
+.cobalt-events--default.cobalt-events--banner {
+    --animation: CobaltEventsDefaultIn;
+    animation: 1s 1 forwards running;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.cobalt-events--default.cobalt-events--banner.cobalt-events--dismiss {
+    --animation: CobaltEventsDefaultIn;
+    animation: 1s 2 reverse running;
+}
+
+@keyframes CobaltEventsDefaultIn {
+    from {
+        padding: 0 5em;
+        height: 0px;
+    }
+    to {
+        padding: 1em 5em;
+        height: var(--height);
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .cobalt-events--banner {
+        padding: 1rem;
+        flex-direction: column;
+    }
+}

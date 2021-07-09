@@ -62,7 +62,7 @@ class EventsController {
     function edit_event($id = null) {
         $doc = $this->events->getEventById($id);
         $event = new EventSchema($doc);
-        $event->name = "value";
+
 
         add_vars([
             'title' => $event->name ?? "Create Event",
@@ -72,8 +72,8 @@ class EventsController {
         set_template("/cobalt_events/edit.html");
     }
 
-    function update_event($id = null) {
-        $id = $this->events->__id($id);
+    function update_event($ident = null) {
+        $id = $this->events->__id($ident);
         $event = new EventSchema();
         $valid = $event->__validate($_POST);
         $result = $this->events->updateOne(
@@ -82,6 +82,7 @@ class EventsController {
             ['upsert' => true]
         );
         // if($result->getModifiedCount() !== 1 && $result->getUpsertedCount() !== 1)
+        if (!$ident) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
         return array_merge($valid, ['_id' => $id]);
     }
 }

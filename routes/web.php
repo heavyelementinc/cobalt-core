@@ -62,6 +62,13 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Async Wizard"]
     ]);
+
+    if (app("debug")) {
+        Route::get("/debug/env/", "Debug@environment", [
+            'navigation' => ['debug'],
+            'anchor' => ['name' => "Async Wizard"]
+        ]);
+    }
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
 }
 

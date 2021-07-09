@@ -117,6 +117,7 @@ class SettingsManager {
     /** Possible files containing app settings */
     private $app_paths_settings = [
         __APP_ROOT__ . "/private/config/settings.json",  // App's settings
+        __APP_ROOT__ . "/private/config/settings.jsonc",  // App's settings
         __APP_ROOT__ . "/ignored/config/settings.json", // .gitignored file can override APP settings
     ];
 
@@ -228,7 +229,7 @@ class SettingsManager {
             // Load JSON file and decode it
             // Shuld this be jsonc_decode?
             if (!$raw = file_get_contents($path)) continue;
-            $json = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+            $json = jsonc_decode($raw, true, 512, JSON_THROW_ON_ERROR);
             // Check if the app settings file exists and decode it (it should be
             // okay if the app settings don't exist)
             $this->tmp_app_setting_values = array_merge($this->tmp_app_setting_values, $json);

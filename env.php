@@ -70,17 +70,21 @@ $GLOBALS['time_to_update'] = false;
 //     }
 // }
 
-// Load our ACTIVE plugins.
-require_once __ENV_ROOT__ . "/globals/plugins.php";
+try {
+    // Load our ACTIVE plugins.
+    require_once __ENV_ROOT__ . "/globals/plugins.php";
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 // Instantiate our settings (`true` for loading settings from cache)
 try {
     $application = new SettingsManager(true);
+    /** @global $app How we set up and process our settings */
+    $app = $application;
 } catch (Exception $e) {
     die($e->getMessage());
 }
-/** @global $app How we set up and process our settings */
-$app = $application;
 
 /** @global __APP_SETTINGS__ The __APP_SETTINGS__ constant is an array of app 
  *                           settings 

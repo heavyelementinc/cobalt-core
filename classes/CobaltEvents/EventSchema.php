@@ -8,10 +8,10 @@ class EventSchema extends \Validation\Normalize {
 
     protected $allowed_event_types = ['modal' => "Modal pop-up", 'banner' => "Banner"];
     protected $allowed_session_policies = [
-        'nag' => 'On every page',
-        'with_session' => 'After closing tab',
+        'nag' => 'On every page (not recommended)',
+        'with_session' => 'After closing tab (session)',
         '24_hours' => 'After 24+ hours',
-        'half_date' => 'Half time between now and end',
+        'half_date' => 'Event end - closed time / 2',
         'never' => 'Never show event again'
     ];
 
@@ -54,6 +54,7 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             'session_policy' => [
+                'get' => fn ($val) => $val ?? '24_hours',
                 'set' => function ($val) {
                     $valid = array_keys($this->__schema['session_policy']['valid']());
                     if (!in_array($val, $valid)) throw new ValidationIssue("Invalid session policy");
@@ -72,6 +73,10 @@ class EventSchema extends \Validation\Normalize {
                     }
                     return $val;
                 }
+            ],
+            "bgColor" => [
+                'get' => fn ($val) => $val ?? app("css-vars.events-banner-background"),
+                'set' => 'hex_color'
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],
@@ -108,6 +113,7 @@ class EventSchema extends \Validation\Normalize {
                 'valid' => fn ($val) => $this->filled($val)
             ],
             'advanced.excluded_paths' => [
+                'get' => fn ($val = null) => $val ?? ['/admin'],
                 'set' => 'sanitize_elements',
                 'valid' => fn ($val) => $this->filled($val)
             ],
@@ -140,8 +146,8 @@ class EventSchema extends \Validation\Normalize {
         return $this->set_date_time($date, $val);
     }
 
-    function get_time($val) {
-        return mongo_date($this->__dataset['start_date'], 'H:i');
+    function get_time($val, $name) {
+        return mongo_date($val, 'H:i');
     }
 
     function sanitize_elements($val) {
@@ -152,7 +158,8 @@ class EventSchema extends \Validation\Normalize {
         return $mutant;
     }
 
-    function filled($val) {
+    function filled($val = null) {
+        if (!$val) $val = ['/admin'];
         $options = [];
         foreach ($val as $v) {
             $options[$v] = $v;

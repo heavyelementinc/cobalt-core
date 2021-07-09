@@ -9,11 +9,27 @@ use \Mail\SendMail;
 class CoreApi extends \Controllers\Pages {
 
     function login() {
+        // Get the headers
         $headers = apache_request_headers();
+        // Check if the authentication values exist
         if (!key_exists('Authentication', $headers)) throw new BadRequest("Request is missing Authentication");
+
+        // Decode and split the credentials
         $credentials = explode(":", base64_decode($headers['Authentication']));
+
+        // Log in the user using the credentials provided. If invalid credentials
+        // then login_user will throw an exception.
         $result = $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
-        header("X-Redirect: " . $_SERVER['REQUEST_URI']);
+
+        // If we're here, we've been logged in successfully. Now it's time to
+        // determine what we should be doing. If we're on the login page, 
+        // redirect the user to "/admin" otherwise refresh the page
+        $redirect = $_SERVER['REQUEST_URI'];
+        if ($_SERVER['REQUEST_URI'] === app("Auth_login_page") && has_permission('Admin_panel_access')) {
+            // If the user has admin panel privs, we redirect them there
+            $redirect = app("Admin_panel_prefix") . "/";
+        }
+        header("X-Redirect: $redirect");
         return $result;
     }
 

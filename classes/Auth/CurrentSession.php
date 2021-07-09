@@ -31,11 +31,12 @@ class CurrentSession {
         $this->default_token_expiration = $this->now + $this->month;
         $this->default_token_refresh = $this->now + $this->day;
         $this->collection = \db_cursor('sessions');
+        $headers = apache_request_headers();
         $this->cookie_options = [
             'expires' => $this->default_cookie_expiration,
             'path' => '/',
-            'domain' => $_SERVER['SERVER_NAME'],
-            'secure' => app("session_secure_status"),
+            'domain' => $_SERVER['HTTP_X_FORWARDED_SERVER'] ?? $_SERVER['SERVER_NAME'],
+            'secure' => $headers['X-Forwarded-Proto'] ?? app("session_secure_status"),
             'samesite' => true
         ];
         $this->context = ($GLOBALS['route_context'] === "web" || $GLOBALS['route_context'] === "admin") ? true : false;

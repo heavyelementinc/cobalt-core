@@ -218,41 +218,6 @@ function string_to_bool(str) {
     return (['on', 'true', 'y', 'yes', 'checked'].includes(str.toLowerCase())) ? true : false;
 }
 
-// function relativeTime(prev, current = null) {
-//     if (current === null) current = new Date();
-
-//     const units = {
-//         min: { value: 60 * 1000 },
-//         hour: { value: min * 60 },
-//         day: { value: hour * 24 },
-//         month: { value: day * 30 },
-//         year: { value: day * 365 }
-//     }
-
-//     let diff = current - prev;
-
-//     let plural = "s";
-//     let quantity = 0;
-//     let unit = "second";
-
-//     switch (true) {
-//         case (diff < min):
-//             // return `${Math.round(diff / 1000)} second ago'`;
-//             break;
-//         case (diff < hour):
-//             // return `${Math.round(diff / min)} minute ago`;
-//             quantity = Math.round(diff / min);
-//             break;
-//         case (diff < day):
-//             return `${Math.round(diff / hour)} hour ago`;
-//         case (diff < month):
-//             return `${Math.round(diff / day)} day ago`;
-//         case (diff < year):
-//             return `About ${Math.round(diff / month)} months ago`;
-//     }
-
-//     return false;
-// }
 
 function plurality(number, returnValue = "s") {
     if (number == 1) return "";
@@ -357,4 +322,22 @@ function get_offset(element) {
         bottom = y + h;
 
     return { x, y, w, h, right, bottom, xPrime, yPrime, zIndex }
+}
+
+/** Binary Contrast */
+function colorMathBlackOrWhite(bgColor, lightColor = "#FFFFFF", darkColor = "#000000") {
+    var color = bgColor.replace("#", '');
+    // Parse out our color values
+    var r = parseInt(color.substring(0, 2), 16);
+    var g = parseInt(color.substring(2, 4), 16);
+    var b = parseInt(color.substring(4, 6), 16);
+    var uicolors = [r / 255, g / 255, b / 255];
+    var c = uicolors.map((col) => {
+        if (col <= 0.03928) {
+            return col / 12.92;
+        }
+        return Math.pow((col + 0.055) / 1.055, 2.4);
+    });
+    var L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
+    return (L > 0.179) ? darkColor : lightColor;
 }

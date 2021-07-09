@@ -6,7 +6,7 @@ class EventManager extends \Drivers\Database {
 
     private $sort = [
         'start_time' => -1,
-        'end_time' => -1
+        'end_time' => 1
     ];
 
     public function get_collection_name() {

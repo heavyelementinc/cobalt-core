@@ -1,13 +1,18 @@
 <article>
-  <h1>Welcome to {{app.app_name}}</h1>
+  <h1>{{app.app_name}} First Run Set-up</h1>
   <p><strong>Powered by <a href="https://heavyelement.io/">Cobalt Engine</a></strong></p>
-  <p>Before you can continue, you'll need to create a user account.</p>
+  <p>We'll get you to the page you're looking for in a second, but you'll need
+    to create a user account, first.</p>
   <p>Please fill out the form below and we'll get everything set up for you!</p>
   <pre class="error">{{error}}</pre>
   <form method="POST">
     {{!prompts}}
     <button type="submit">Get started</button>
   </form>
+  <p>Alternatively, if you don't want user accounts enabled, modify your
+    <code>/app/private/config/settings.json</code> file and set
+    <code>Auth_user_accounts_enabled</code> to <code>false</code>.
+  </p>
 </article>
 
 <style>
