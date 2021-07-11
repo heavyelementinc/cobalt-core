@@ -113,6 +113,7 @@ class ApiHandler implements RequestHandler {
         $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
     }
 
+    // This might need some refactoring. Is HTTP_ORIGIN where we want to be 
     function cors_management() {
         /** Set our allowed origin to be our app's domain name */
         $allowed_origin = app("domain_name");
