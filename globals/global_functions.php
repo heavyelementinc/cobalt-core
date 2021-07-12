@@ -739,3 +739,18 @@ function plugin($name) {
     if (isset($GLOBALS['ACTIVE_PLUGINS'][$name])) return $GLOBALS['ACTIVE_PLUGINS'][$name];
     throw new Exception('Plugin is not active!');
 }
+
+/**
+ * 
+ * @param iterator $results the results of a Mongo query
+ * @param string $schema_name the name of the schema class
+ * @return array every instance of the mongo query as a Cobalt schema
+ */
+function results_to_schema($results, string $schema_name): array {
+    $array  = [];
+    // if ($schema_name instanceof \Validation\Normalize === false) throw new Exception("$schema_name is not an instance of \Validation\Normalize");
+    foreach ($results as $i => $doc) {
+        $array[$i] = new $schema_name($doc);
+    }
+    return $array;
+}

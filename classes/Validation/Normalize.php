@@ -78,6 +78,7 @@ abstract class Normalize extends NormalizationHelpers {
         'valid', // 
         'options',
         'restore',
+        'json'
         // 'display',
     ];
 
@@ -397,5 +398,9 @@ abstract class Normalize extends NormalizationHelpers {
     /** Unused prototype?? */
     final private function __proto_restore($val, $field) {
         return "";
+    }
+
+    final private function __proto_json($val, $field) {
+        return json_encode($val);
     }
 }
