@@ -341,3 +341,11 @@ function colorMathBlackOrWhite(bgColor, lightColor = "#FFFFFF", darkColor = "#00
     var L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
     return (L > 0.179) ? darkColor : lightColor;
 }
+
+function normalize_all($schema, $data) {
+    if ($data instanceof Iterator) $data = iterator_to_array($data);
+    return array_map(
+        function ($doc) { return new $schema($doc); },
+        $data
+    );
+}

@@ -231,6 +231,7 @@
     "packages": {
         "default": [
             "global_functions.js",
+            "components/autocomplete.js",
             "DateConverter.js",
             "Modal.js",
             "TabbedUI.js",
@@ -255,6 +256,7 @@
     files for use there. */
     "css_packages": {
         "default": [
+            "components/autocomplete.css",
             "normalize.css",
             "header.css",
             "slideshow.css",

@@ -564,6 +564,14 @@ function maybe_with($template, $vars = []) {
     }
 }
 
+function with_each($docs, string $template, $var_name = 'doc') {
+    $rendered = "";
+    foreach ($docs as $doc) {
+        $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
+    }
+    return $rendered;
+}
+
 /** Compare two pathnames
  * 
  * $base_dir is used to substr $path after they have both been canonincalized.

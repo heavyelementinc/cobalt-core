@@ -275,14 +275,6 @@ input-array-item{
     height: 100%;
   }
 
-input-autocomplete.invalid > input[type='search'] {
-  background: var(--project-color-input-invalid-bg);
-  border: 1px solid var(--project-color-input-invalid-border);
-}  
-  input-autocomplete option {
-    display: none;
-  }
-
 input-object-array {
   display: flex;
   flex-wrap: wrap;

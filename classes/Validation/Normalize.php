@@ -179,7 +179,7 @@ abstract class Normalize extends NormalizationHelpers {
     public function __get($n) { // Returns normalized user input
         $name = $n;
         $value = null;
-        $proto = $this->__get_prototype($name);
+        $proto = $this->__get_prototype($name); // $n = "name.raw"; $proto = ['name','raw']
         if ($proto !== false) $name = $proto[0];
 
         // Step one: get the value from the __dataset so we can operate on it
@@ -189,6 +189,7 @@ abstract class Normalize extends NormalizationHelpers {
         else {
             // It's _not_ in the dataset, so let's try to get it with js lookups
             try {
+                // Example might be $n = "contacts.0.name"
                 $value = lookup_js_notation($name, $this->__dataset);
             } catch (\Exception $e) {
                 return;
@@ -204,9 +205,9 @@ abstract class Normalize extends NormalizationHelpers {
 
         if (is_callable($method_name)) {
             // Run the value through the getter function
-            $value = $method_name($value, $this, $name);
+            $value = $method_name($value, $name);
         } else if (method_exists($this, $method_name)) {
-            $value = $this->{$method_name}($value, $this, $name);
+            $value = $this->{$method_name}($value, $name);
         }
 
         return $value; // Return the value

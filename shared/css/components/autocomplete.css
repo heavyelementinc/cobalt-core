@@ -1,0 +1,15 @@
+
+input-autocomplete.invalid > input[type='search'] {
+    background: var(--project-color-input-invalid-bg);
+    border: 1px solid var(--project-color-input-invalid-border);
+  }  
+    input-autocomplete option {
+      display: none;
+    }
+/* 
+    input-autocomplete:focus-within {
+        border: 1px solid var(--project-color-input-border-focus);
+    } */
+    /* input-autocomplete input[type='search']:focus {
+        border: 2px transparent;
+    } */
