@@ -64,6 +64,7 @@ abstract class NormalizationHelpers implements Iterator {
      * @throws ValidationIssue upon failed validation
      */
     final protected function validate_email(string $value) {
+        if (!$value) return "";
         $value = trim($value);
         if (!\filter_var($value, FILTER_VALIDATE_EMAIL)) throw new ValidationIssue("Malformed email");
         return strtolower($value); // We can return here because we know we have a valid email
