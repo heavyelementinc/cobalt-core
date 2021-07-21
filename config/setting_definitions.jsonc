@@ -397,6 +397,9 @@
         *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
         "default": true
     },
+    "Auth_session_days_until_expiration": {
+        "default": 90
+    },
     "API_CORS_allowed_origins": {
         "default": [],
         "$push": [

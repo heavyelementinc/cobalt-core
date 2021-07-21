@@ -1,0 +1,11 @@
+[
+    {
+        "type": "DefaultType",
+        "name": "Expire Sessions",
+        "class": "\\Auth\\SessionManager",
+        "class_args": [],
+        "method": "destroy_expired_sessions",
+        "method_args": [],
+        "interval": 3600
+    }
+]

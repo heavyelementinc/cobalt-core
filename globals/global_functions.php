@@ -564,6 +564,7 @@ function maybe_with($template, $vars = []) {
     }
 }
 
+/** A  */
 function with_each($docs, string $template, $var_name = 'doc') {
     $rendered = "";
     foreach ($docs as $doc) {

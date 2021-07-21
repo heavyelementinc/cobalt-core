@@ -45,16 +45,19 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 COPY cobalt-core /var/www/cobalt-core/
 
 # Copy the app-specific files
-# Change "app" to your app's name
+# Change "$APP" to your app's name
 COPY $APP /var/www/cobalt-app/
 
 # Add the Cobalt CLI to PATH
 RUN ln -s /var/www/cobalt-app/cobalt.sh /bin/cobalt && \
     chmod +X /bin/cobalt
 
-# Clear cached stuff so environment variables can be caught
+# Clear cached stuff so environment variables can be generated
 RUN rm -rf /var/www/cobalt-app/cache/config
 RUN rm /var/www/cobalt-app/ignored/init.json.set
+
+# Set up crontab
+RUN echo "*/15 * * * /var/www/cobalt-app/cobalt.sh cron exec" >> /var/spool/cron/crontabs
 
 # Copy the apache configuration
 COPY $APP/private/config/apache/apache.conf /etc/apache2/sites-enabled/000-default.conf

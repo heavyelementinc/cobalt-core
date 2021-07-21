@@ -1,0 +1,23 @@
+@each(foo.bar)
+<div id="{{bar.id}}">
+    <a href="{{bar.href}}"></a>
+</div>
+endeach@
+
+
+<script>
+    variables_in_scope = {
+        foo: { // Root
+            bar: [ // Loop through bar
+                {
+                    id: "SomeID",
+                    href: "SomeHref"
+                }
+            ]
+        },
+        bar: {
+            id: "SomeID",
+            href: "SomeHref"
+        }
+    }
+</script>

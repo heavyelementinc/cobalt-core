@@ -23,6 +23,10 @@
 // the not-insane array syntax and the spread "..." syntax)
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
+// Let's ensure that the ignored config directory exists
+$ignored_config_dir = __APP_ROOT__ . "/ignored/config/";
+if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
+
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "0.1");
 
