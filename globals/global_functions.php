@@ -564,8 +564,12 @@ function maybe_with($template, $vars = []) {
     }
 }
 
-/** A  */
-function with_each($docs, string $template, $var_name = 'doc') {
+function conditional_addition(string $template, bool $is_shown, $vars = []) {
+    if (!$is_shown) return "";
+    return with($template, $vars);
+}
+
+function with_each(string $template, $docs, $var_name = 'doc') {
     $rendered = "";
     foreach ($docs as $doc) {
         $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
