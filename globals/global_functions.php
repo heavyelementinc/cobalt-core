@@ -687,6 +687,7 @@ function date_instance($date) {
 }
 
 function phone_number_format($number, $format = "(ddd) ddd-dddd") {
+    if (!$number) return "";
     $num_index = 0;
     $num_max = strlen($number);
     $formatted = "";

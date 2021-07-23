@@ -78,8 +78,8 @@ abstract class Normalize extends NormalizationHelpers {
         'valid', // 
         'options',
         'restore',
-        'json'
-        // 'display',
+        'json',
+        'display',
     ];
 
     // We set up our schema and store it
@@ -201,6 +201,8 @@ abstract class Normalize extends NormalizationHelpers {
         // If we don't want normalizing, just return the value we already have
         if (!$this->__normalize_out) return $value;
 
+        if (isset($this->__schema[$name]['each']))
+            return new Subdocument($value, $this->__schema[$name]['each'], $this);
         $method_name = $this->__schema[$name]['get'] ?? "get_" . str_replace(".", "__", $name);
 
         if (is_callable($method_name)) {
