@@ -17,14 +17,9 @@
 
 
 # Version 0.2
- - [ ] Upgrade to version number 0.2
+ - [x] Upgrade to version number 0.2
  - [x] Finish <input-object-array> & validation
    <!-- Is there a better way to do input-object-array? -->
- - [ ] User's personal dashboard
-   - [ ] Allow account management
-   - [ ] Include a user preferences panel in account manager
-   - [ ] User stats implement in account manager
- - [ ] Add <async-button> which should use FormRequest to carry out async stuff
  - [x] Create admin dashboard container class `.cobalt-admin--fieldset`
  - [x] Finish plugins system
    - [x] Plugin management in admin panel
@@ -35,7 +30,6 @@
    - [x] register_public_dir
    - [x] register_packages
    - [x] register_variables
- - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
  - [x] Fire requestFailed CustomEvent in FormRequest.js and test
  - [x] Make form-login-request listen for the enter key being pressed.
  - [x] Make form-login-request reload the page when a login has occurred successfully
@@ -79,6 +73,13 @@
    - [ ] Fire event on autocomplete found - This should be a CHANGE event.
    - [ ] Replace the search element in input-array with auto-complete
 - [ ] Define criteria for ring privileges
+ - [ ] User's personal dashboard
+   - [ ] Allow account management
+   - [ ] Include a user preferences panel in account manager
+   - [ ] User stats implement in account manager
+ - [ ] Add <async-button> which should use FormRequest to carry out async stuff
+ - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
+
 
 # Todo
  - [ ] Make duotone icon set a plugin
