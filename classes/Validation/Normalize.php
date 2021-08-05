@@ -78,8 +78,8 @@ abstract class Normalize extends NormalizationHelpers {
         'valid', // 
         'options',
         'restore',
-        'json'
-        // 'display',
+        'json',
+        'display',
     ];
 
     // We set up our schema and store it

@@ -767,3 +767,15 @@ function results_to_schema($results, string $schema_name): array {
     }
     return $array;
 }
+
+function fetch($url, $method = "GET", $headers = false) {
+    $client = new \GuzzleHttp\Client();
+    $request = $client->request($method, $url);
+    $html = $request->getBody()->getContents();
+    if (!$headers) return $html;
+    return ['body' => $html, 'headers' => $request->getHeaders()];
+}
+
+function fetch_and_save($url) {
+    
+}

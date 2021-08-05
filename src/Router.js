@@ -32,6 +32,17 @@ class Router {
         this.navigation_event(false, value);
     }
 
+    /**
+     * @param location The location we're heading to
+     */
+    go() {
+        let location = arguments.pop(),
+            args = arguments;
+
+        if (this.route_args) args = [...this.route_args, ...args];
+        // this.location = location.replace(this.route_args, args);
+    }
+
     discover_route(route = null) {
         if (route === null) route = location.pathname;
         for (const regex in router_table) {

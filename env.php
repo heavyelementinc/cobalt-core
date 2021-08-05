@@ -23,9 +23,6 @@
 // the not-insane array syntax and the spread "..." syntax)
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
-// Let's ensure that the ignored config directory exists
-$ignored_config_dir = __APP_ROOT__ . "/ignored/config/";
-if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
 
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "0.1");
@@ -44,6 +41,10 @@ else die("Cannot establish absolute path to app root"); // Die.
 define("__APP_ROOT__", realpath($app_root));
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
+// Let's ensure that the ignored config directory exists
+$ignored_config_dir = __APP_ROOT__ . "/ignored/config/";
+if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
+
 // Define a few values that we will use to handle writing output during an exception
 $allowed_to_exit_on_exception = true;
 $write_to_buffer_handled = false;
@@ -55,6 +56,9 @@ require_once __DIR__ . "/globals/global_functions.php";
 $composer = __DIR__ . "/vendor/autoload.php";
 if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the cobalt-core directory as your webserver user");
 require_once $composer;
+
+$app_env = __APP_ROOT__ . "/private/app_env.php";
+if (file_exists($app_env)) require_once $app_env;
 
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload", true);

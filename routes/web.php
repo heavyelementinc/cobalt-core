@@ -79,4 +79,6 @@ if (app("Auth_logins_enabled")) {
     // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
+
+    Route::get("/user/menu", "UserAccounts@get_user_menu");
 }

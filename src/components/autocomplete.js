@@ -177,6 +177,10 @@ class AutoComplete extends HTMLElement {
      */
     initSearchField() {
         if (!this.searchField) return;
+        this.searchField.addEventListener("change", e => {
+            e.preventDefault();
+            e.stopPropagation();
+        })
         this.searchField.addEventListener("keyup", e => this.handleSearchKeyUp(e));
 
         this.addEventListener("focusin", e => {
@@ -337,6 +341,7 @@ class AutoComplete extends HTMLElement {
         this.value = val;
         // this.searchField.value = label;
         this.focusOutHandler(target);
+        this.dispatchEvent(new Event("change"));
     }
 
     /** Handles enter button events */
