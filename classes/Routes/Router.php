@@ -136,7 +136,7 @@ class Router {
         if (isset($exe['permission'])) {
             $permission = true;
             try {
-                $permission = $GLOBALS['auth']->has_permission($exe['permission'], $exe['group']);
+                $permission = $GLOBALS['auth']->has_permission($exe['permission']);
             } catch (\Exceptions\HTTP\Unauthorized $e) {
                 $permission = false;
             }
@@ -160,7 +160,7 @@ class Router {
 
         $controller_search = [
             __APP_ROOT__ . "/private/controllers",
-            ...$this->registered_plugin_controllers,
+            ...array_values($this->registered_plugin_controllers),
             __ENV_ROOT__ . "/controllers"
         ];
 

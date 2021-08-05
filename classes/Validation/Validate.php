@@ -50,6 +50,11 @@ use \Exceptions\HTTP\BadRequest;
 use \Validation\Exceptions\ValidationFailed;
 use \Validation\Exceptions\ValidationIssue;
 
+/**
+ * 
+ * @package Validation
+ * @deprecated use Normalize instead!
+ */
 abstract class Validate {
     protected $mode = "partial";
     private $failed = [];
@@ -134,8 +139,9 @@ abstract class Validate {
 
             // Check if methods are specified for this fieldname
             if (!key_exists("methods", $schema[$fieldname])) {
-                if (!method_exists($this, $fieldname)) throw new \Exception("\"$fieldname\" does not have a validator method");
-                $schema[$fieldname]['methods'] = [str_replace(".", "__", $fieldname)];
+                $method_name = str_replace(".", "__", $fieldname);
+                if (!method_exists($this, $method_name)) throw new \Exception("\"$fieldname\" does not have a validator method");
+                $schema[$fieldname]['methods'] = [$method_name];
             }
 
             // Add the $value to the $mutant so we can update it through each
@@ -146,7 +152,7 @@ abstract class Validate {
             foreach ($schema[$fieldname]['methods'] as $index => $callable) {
                 try {
                     // Execute the method
-                    $mutant[$fieldname] = $this->execute_method($callable, $mutant[$fieldname], $fieldname, $index);
+                    $mutant[$fieldname] = $this->execute_method($callable, $mutant[$fieldname], $fieldname, $mutant, $index);
                 } catch (ValidationIssue $e) {
                     // Add fieldnames to the $problems array
                     if (!isset($problems[$fieldname])) $problems[$fieldname] = $e->getMessage();
@@ -296,6 +302,16 @@ abstract class Validate {
         return $value;
     }
 
+    final protected function dollars_to_cents($val) {
+        if (gettype($val) === "string" && $val[0] === '$') $val = substr($val, 1);
+        if (!is_numeric($val)) throw new ValidationIssue("Must be a dollar value");
+        return $val * 100;
+    }
+
+    final protected function cents_to_dollars($val) {
+        return cents_to_dollars($val);
+    }
+
     /**
      * Escape HTML and trim whitespace
      * 
@@ -346,11 +362,12 @@ abstract class Validate {
      * @param mixed $index the index into the 'methods' array
      * @return mixed a validated (and maybe mutated) version of $value
      */
-    private function execute_method($callable, $value, $fieldname, $index) {
+    private function execute_method($callable, $value, $fieldname, $mutant, $index) {
+
         // Covers methods in $this class and extensions
-        if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $index);
+        if (method_exists($this, $callable)) return $this->{$callable}($value, $fieldname, $mutant, $index);
         // Covers strings that match the name of a callable and anonymous functions
-        if (is_callable($callable)) return $callable($value, $fieldname, $index);
+        if (is_callable($callable)) return $callable($value, $fieldname, $mutant, $index);
     }
 
     private function handle_object_arrays($value, $schema, $field) {

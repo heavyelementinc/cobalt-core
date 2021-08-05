@@ -30,6 +30,10 @@ class AdminHandler extends WebHandler {
         //     $path = substr($route['original_path'], 1);
         //     $panel .= "<li><a href='$admin_prefix$path'>$route[panel_name]</a></li>";
         // }
+        if (app("Plugin_enable_plugin_support")) {
+            $panel .= "<h3 style='background:transparent; color:inherit'>Plugins</h3>";
+            $panel .= get_route_group("admin_plugins", ['prefix' => app("context_prefixes")['admin']['prefix']]);
+        }
         $panel .= "</nav>";
         return $panel;
     }

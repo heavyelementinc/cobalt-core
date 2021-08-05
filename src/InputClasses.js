@@ -8,14 +8,14 @@
  * 
  *  * name     - the field's variable name
  *  * for      - Use the `for` attribute to update the innerText of any element
- *               in the page with the value of the field after it's successfully
- *               saved. Value of attr must be a valid CSS selector.
+ * in the page with the value of the field after it's successfully saved. Value 
+ * of attr must be a valid CSS selector.
  */
 class InputClass_default {
     constructor(element, { form = null }) {
         this.element = element;
         this.type = element.type || "text";
-        this.name = element.name || "";
+        this.name = element.name || element.getAttribute("name") || "";
         this.form = form || this.get_form();
         this.error = false;
         this.was = this.element.value;
@@ -39,14 +39,24 @@ class InputClass_default {
         return set;
     }
 
+    validity_check() {
+        if ("validity" in this === false) return true;
+        const check = Object.values(this.validity).reduce((a, b) => {
+            return a + b;
+        });
+
+        if (check !== 0) return false;
+        return true;
+    }
+
     get_form() {
         if (this.form === null) this.form = this.element.closest("form-request");
         if (this.form === null) throw new Error("Can't find reference <form-request>");
     }
 
     callbacks() {
-        this.element.addEventListener('focusout', e => {
-            this.dismiss_error();
+        this.element.addEventListener('focusout', async e => {
+            await this.dismiss_error();
         })
         if (this.update) {
             this.form.addEventListener("requestSuccess", e => {
@@ -59,22 +69,33 @@ class InputClass_default {
 
     set_error(message) {
         this.message = message;
-        this.create_error(this.insert_before_element(), this.insert_after_element())
+        this.create_error(this.insert_before_element())
     }
 
-    create_error(before, after) {
+    async create_error(before) {
         let el = document.createElement("pre");
+        el.addEventListener('click', () => {
+            if (el) {
+                el.parentNode.removeChild(el);
+                this.error = false;
+            }
+        });
         el.classList.add("form-request--field-issue-message");
         el.innerText = this.message;
         el.setAttribute('for', this.name);
         el.addEventListener("click", e => {
-            el.parentNode.removeChild(el);
+            this.dismiss_error(e);
             this.store_error(false);
         })
         this.store_error(el);
 
-        before.parentNode.insertBefore(el, after);
+        const offsets = get_offset(before);
+        el.style.top = `${offsets.bottom}px`;
+        el.style.left = `${offsets.x}px`;
+        el.style.width = `${offsets.w}px`;
+        document.body.appendChild(el);
         this.element.setAttribute("invalid", "invalid");
+        await wait_for_animation(el, "form-request--issue-fade-in");
     }
 
     insert_before_element() {
@@ -89,18 +110,19 @@ class InputClass_default {
         this.error = element;
     }
 
-    dismiss_error() {
+    async dismiss_error() {
         this.element.invalid = false;
         this.element.removeAttribute("invalid");
-        if (!this.error) return;
+        if (!this.error === false) return;
+        await wait_for_animation(this.error, "form-request--issue-fade-out");
         if (!this.error.parentNode) return;
+
         this.error.parentNode.removeChild(this.error);
         this.error = false;
     }
 }
 
 class InputClass_date extends InputClass_default {
-
     set value(set = null) {
         this.was = this.value;
         if (typeof set === "string") return this.element.value = set;
@@ -126,12 +148,12 @@ class InputClass_checkbox extends InputClass_default {
 
 class InputClass_switch extends InputClass_default {
     get value() {
-        return this.element.querySelector("input[type='checkbox']").checked;
+        return this.element.value;
     }
 
     set value(set) {
         this.was = this.value;
-        this.element.querySelector("input[type='checkbox']").checked = set;
+        this.element.value = set;
         return set;
     }
 }
@@ -242,23 +264,43 @@ class InputClass_select extends InputClass_default {
 }
 
 class InputClass_object_array extends InputClass_default {
+
+    constructor(element, { form = null }) {
+        super(element, { form });
+        this.members = [];
+    }
+
+    initMembers() {
+        const fields = this.element.shadow.querySelectorAll("input-fieldset");
+        for (const f of fields) {
+            this.members.push(get_form_elements(f));
+        }
+    }
+
     set_error(message) {
         this.message = message;
+        this.initMembers();
+        for (const e in message) {
+            const split = e.split(".");
+            if (!this.members[split[0]]) return;
+            const el = this.members[split[0]][split[1]];
+            el.set_error(message[e])
+        }
+    }
 
-        for (let i in message) {
-            for (let e of messages[i]) {
+    async dismiss_error(e = null) {
+        this.element.invalid = false;
+        this.element.removeAttribute("invalid");
 
+        for (const field of this.members) {
+            for (const el of field) {
+                el.dismiss_error();
             }
         }
     }
 
-    dismiss_error() {
-        this.element.invalid = false;
-        this.element.removeAttribute("invalid");
-        if (!this.error) return;
-        if (!this.error.parentNode) return;
-        this.error.parentNode.removeChild(this.error);
-        this.error = false;
+    store_error(element) {
+        this.error.push(element);
     }
 }
 

@@ -113,22 +113,25 @@ class ApiHandler implements RequestHandler {
         $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
     }
 
+    // This might need some refactoring. Is HTTP_ORIGIN where we want to be 
     function cors_management() {
         /** Set our allowed origin to be our app's domain name */
         $allowed_origin = app("domain_name");
         $allowed_methods = "GET, POST, PUT, PATCH, DELETE";
+        $current_origin = $_SERVER['HTTP_ORIGIN'];
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) $current_origin = $this->url_to_current_mode($_SERVER['HTTP_X_FORWARDED_HOST']);
 
         /** Check if our route allows us to ignore CORS */
         if (isset($GLOBALS['current_route_meta']['cors_disabled']) && $GLOBALS['current_route_meta']['cors_disabled']) {
             /** If it does, we send the origin back to as the allowed origin */
-            $allowed_origin = $_SERVER['HTTP_ORIGIN'];
+            $allowed_origin = $current_origin;
             /** TODO: Send the current route's method back, too. */
-        } else if (app("API_CORS_enable_other_origins") && isset($_SERVER['HTTP_ORIGIN'])) {
+        } else if (app("API_CORS_enable_other_origins") && isset($current_origin)) {
             /** If HTTP_ORIGIN is set, we'll check if the origin is in our allowed origins and if not,
              * throw an unauthorized error */
-            if (!in_array($_SERVER['HTTP_ORIGIN'], $this->allowed_origins)) $this->cors_error();
+            if (!in_array($current_origin, $this->allowed_origins)) $this->cors_error();
             /** Otherwise, we'll set our to the server origin, since its allowed */
-            $allowed_origin = $_SERVER['HTTP_ORIGIN'];
+            $allowed_origin = $current_origin;
         }
 
         $allowed_origin = $this->url_to_current_mode($allowed_origin);

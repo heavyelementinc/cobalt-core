@@ -24,6 +24,17 @@ if (app('API_contact_form_enabled')) {
     Route::post("/contact", "CoreApi@contact");
 }
 
+if (app("CobaltEvents_enabled")) {
+    Route::get("/cobalt-events/current", "EventsController@current");
+    Route::put("/cobalt-events/update/{id}?", "EventsController@update_event", [
+        'permission' => 'CobaltEvents_crud_events'
+    ]);
+}
+
+if (app("Plugin_enable_plugin_support")) {
+    Route::post("/plugin/enable/{plugin}", "CoreApi@modify_plugin_state", ['permission' => 'Plugins_allow_management']);
+}
+
 if (app('debug')) {
     Route::get("/hello_world/{something}/{machina}?", "HelloWorld@do_it", [ // Hello World test route
         'requires_csrf' => false,

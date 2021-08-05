@@ -43,6 +43,10 @@ class FormRequestElement extends HTMLElement {
         this.request.errorField = error;
     }
 
+    disconnectedCallback() {
+        if (this.request.statusMessage) this.request.statusMessage.close();
+    }
+
     getRequest() {
         // Basically, we want to attach the FormRequest to the <form-request> element.
         // This WebComponent should allow us to make form bots a thing of the past.
@@ -83,6 +87,10 @@ class FormRequestElement extends HTMLElement {
         }
 
         return has_error;
+    }
+
+    async submit(allowDangerous = false) {
+        return this.send(allowDangerous);
     }
 
     setup_content() {
@@ -155,6 +163,15 @@ class LoginForm extends HTMLElement {
         this.button = this.querySelector("button[type='submit']");
         this.getRequest();
         this.button.addEventListener('click', e => this.request.send(e));
+        this.addEventListener('keyup', e => {
+            if (e.key === "Enter") this.request.send(e)
+        })
+        this.addEventListener("requestSuccess", e => {
+            window.location.reload();
+        })
+        this.addEventListener("requestFailure", async e => {
+            await wait_for_animation(this, "status-message--no")
+        })
     }
 
     getRequest() {
@@ -173,8 +190,23 @@ class InputSwitch extends HTMLElement {
     constructor() {
         super();
         this.tabIndex = "0"; // We want this element to be tab-able
-        this.checked = this.getAttribute("checked"); // Let's also get 
+        this.checked = string_to_bool(this.getAttribute("checked")); // Let's also get 
         this.disabled = ["true", "disabled"];
+        this.checkbox = document.createElement("input");
+        this.checkbox.type = "checkbox";
+        this.checkbox.checked = this.checked;
+
+        this.thumb = document.createElement("span");
+
+    }
+
+    get value() {
+        return this.checkbox.checked;
+    }
+
+    set value(val) {
+        this.checkbox.checked = val;
+        this.checked = val;
     }
 
     /** The CONNECTED CALLBACK is the function that is executed when the element
@@ -184,9 +216,9 @@ class InputSwitch extends HTMLElement {
         // Let's figure out if our switch is checked or not and prepare for appending
         // the legit checkbox in the proper state
         let checked = (["true", "checked"].includes(this.checked)) ? " checked=\"checked\"" : "";
-        this.innerHTML = `<!-- <input type='hidden' name="${this.getAttribute("name")}"> -->
-        <input type="checkbox" name="${this.getAttribute("name")}"${checked}>
-        <span aria-hidden="true">`;
+        this.appendChild(this.checkbox);
+        this.appendChild(this.thumb);
+
         // Now let's find our checkbox
         this.checkbox = this.querySelector("input[type='checkbox']");
         // Check if our checkbox is "indeterminate". This is useful since there's no
@@ -436,7 +468,7 @@ class InputArray extends HTMLElement {
         let tempOpts = this.options;
         for (const i of this.value) {
             /** Check if we allow custom values */
-            if (this.allowCustomInputs === "true" && i in tempOpts === false) tempOpts[i] = i;
+            if (this.allowCustomInputs === true && i in tempOpts === false) tempOpts[i] = i;
             if (i in tempOpts === false) continue;
 
             tags += this.addTag(i, tempOpts[i].label, this.readonly);
@@ -503,7 +535,11 @@ class InputArray extends HTMLElement {
         })
 
         this.searchField.addEventListener("focusout", e => {
-            // this.focusOutTimeout = setTimeout(() => this.focusOutHandler(e), 600);
+            this.focusOutTimeout = setTimeout(() => this.focusOutHandler(e), 600);
+        })
+
+        this.searchField.addEventListener("focus", e => {
+            clearTimeout(this.focusOutTimeout)
         })
     }
 
@@ -578,6 +614,8 @@ class InputArray extends HTMLElement {
         nodes[index].classList.add(selectOnEnter)
     }
 
+
+
     attributeChangedCallback(name, oldValue, newValue) {
         const callable = `change_handler_${name.replace("-", "_")}`;
         if (callable in this) {
@@ -646,8 +684,21 @@ customElements.define("input-array-item", InputArrayItem)
 class DisplayDate extends HTMLElement {
     constructor() {
         super();
+        this.formatKeywords = {
+            default: "m/d/Y",
+            long: "l, F jS Y g:i A",
+            verbose: "l, F jS Y",
+            "12-hour": "g:i a",
+            "24-hour": "H:i",
+            "seconds": "g:i:s A"
+        };
+    }
+
+    connectedCallback() {
         this.date = this.getValue();
-        this.format = this.getAttribute("format") || "m/d/Y";
+        // this.format = this.getAttribute("format") || this.formatKeywords.default;
+        if ((this.getAttribute("format") || "default") in this.formatKeywords) this.format = this.formatKeywords[this.format];
+        else this.format = this.getAttribute("format");
         this.relative = this.getAttribute("relative") || "false";
 
         if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
@@ -676,7 +727,7 @@ class DisplayDate extends HTMLElement {
             return;
         }
         this.innerText = result.result;
-        let date = new DateConverter(this.date, "l, F jS Y g:i A");
+        let date = new DateConverter(this.date, this.longFormat);
         this.setAttribute("title", date.format());
 
         // if (!["second", "moment"].includes(result.unit)) return;
@@ -703,6 +754,7 @@ class DisplayDate extends HTMLElement {
 
     change_handler_format(newValue) {
         this.format = newValue;
+        if ((newValue || "default") in this.formatKeywords) this.format = this.formatKeywords[newValue];
         this.execute();
     }
 
@@ -719,27 +771,35 @@ class InputObjectArray extends HTMLElement {
         super();
         this.shadow = this.attachShadow({ mode: 'open' });
         this.template = this.querySelector("template").innerHTML;
-        this.withAdditional = this.getAttribute("with-additional") || "false";
-        if (this.hasAttribute("with-additional")) this.withAdditional = "true";
-        let json = this.querySelector("var");
+        this.withAdditional = string_to_bool(this.getAttribute("with-additional")) || false;
         this.values = [];
-        if (json && "innerText" in json) {
-            try { this.values = JSON.parse(json.innerText); } catch (error) { }
-        }
+
         this.fieldItems = [];
-        this.initInterface();
+        // this.initInterface();
+    }
+
+    connectedCallback() {
+        let json = this.querySelector("var");
+        if (this.hasAttribute("value")) {
+            this.value = JSON.parse(this.getAttribute("value")) || [];
+        } else if (json && "innerText" in json) {
+            try { this.value = JSON.parse(json.innerText) || [] } catch (error) { }
+        } else {
+            this.value = [];
+        }
+        this.dispatchEvent(new CustomEvent("ObjectArrayReady"));
     }
 
     initInterface() {
+        this.shadow.innerHTML = "";
         this.style();
         this.addButton();
         let index = -1;
         for (const i of this.values) {
             this.addFieldset(i, index++);
         }
-        if (this.withAdditional === "true") this.addFieldset(); // Start with an empty one
+        if (this.withAdditional === true) this.addFieldset(); // Start with an empty one
         else if (this.values.length < 1) this.addFieldset();
-
     }
 
     style() {
@@ -834,15 +894,37 @@ class InputObjectArray extends HTMLElement {
         objects.forEach((e, i) => {
             data[i] = {}
             const fieldElements = get_form_elements(e);
-            fieldElements.forEach(e => {
-                data[i][e.name] = e.value;
+
+            Object.values(fieldElements).forEach(el => {
+                data[i][el.name] = el.value;
             })
         })
         return data;
     }
 
     set value(value) {
+        if (!value) return;
         this.values = value;
+        this.initInterface();
+    }
+
+    static get observedAttributes() {
+        return ['value'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_value(newValue) {
+        if (!newValue) {
+            this.values = [];
+            return;
+        }
+        this.values = JSON.parse(newValue);
     }
 }
 
@@ -854,25 +936,55 @@ class HelpSpan extends HTMLElement {
         super();
         this.message = document.createElement("article");
         this.message.classList.add("help-span-article");
-        this.trunkatingContainer = this.closest("form-request") || document.body;
+        this.trunkatingContainer = document.body;
         this.justifyRightClass = "help-span-article--right-justified";
+        this.warning = this.hasAttribute("warning");
+        if (this.warning) this.message.setAttribute("warning", "");
     }
 
     connectedCallback() {
         this.articleShown = "help-span-article--shown";
 
         this.message.innerText = this.value || this.getAttribute("value");
-        this.appendChild(this.message);
 
         this.message.classList.remove(this.articleShown);
         this.addEventListener("mouseover", e => {
-            this.message.classList.add(this.articleShown);
-            this.justifyRight();
+            this.attach();
         })
 
         this.addEventListener("mouseout", e => {
-            this.message.classList.remove(this.articleShown);
+            this.detatch();
         })
+    }
+
+    attach() {
+        document.body.appendChild(this.message);
+        this.message.classList.add(this.articleShown);
+        const offsets = this.getOffsets(this);
+        this.message.style.top = `${offsets.y + offsets.h + 2}px`;
+        this.message.style.left = `${offsets.x + (offsets.w / 2) - (this.getOffsets(this.message).w / 2)}px`
+        // this.message.style.top = this.top();
+        this.justify(offsets);
+    }
+
+    justify(offsets) {
+        this.message.classList.remove(this.justifyRightClass)
+
+        let container = get_offset(this.trunkatingContainer);
+        let message = get_offset(this.message);
+        let diff = Math.abs(container.right - message.right);
+
+        if (message.x < 0) {
+            this.message.style.left = 0;
+            return;
+        } else if (container.right <= message.right) {
+            this.message.style.left = `${message.x - diff}px`
+        }
+    }
+
+    detatch() {
+        this.message.classList.remove(this.articleShown);
+        document.body.removeChild(this.message);
     }
 
     get value() {
@@ -899,18 +1011,8 @@ class HelpSpan extends HTMLElement {
         this.message.innerText = val;
     }
 
-    justifyRight() {
-        this.message.classList.remove(this.justifyRightClass)
-
-        let container = this.getOffsets(this.trunkatingContainer);
-        let message = this.getOffsets(this.message);
-
-        let rightmostEdgeContainer = container.w;
-        let rightmostEdgeMessage = message.xPrime + message.w;
-        if (rightmostEdgeContainer <= rightmostEdgeMessage) this.message.classList.add(this.justifyRightClass)
-    }
-
     getOffsets(element) {
+        return get_offset(element);
         let offsets = {
             x: element.offsetLeft,
             y: element.offsetTop,
@@ -921,6 +1023,150 @@ class HelpSpan extends HTMLElement {
         }
         return offsets;
     }
+
+    top() {
+        const offsets = this.getOffsets().height;
+        let height = offsets.height;
+        let span = this.element.offsetHeight / 2;
+
+        return `${(height / 2) - span}px`;
+    }
 }
 
 customElements.define("help-span", HelpSpan);
+
+class CopySpan extends HTMLElement {
+
+    constructor() {
+        super();
+        this.val = document.createElement("input");
+        this.val.readOnly = true;
+        this.appendChild(this.val);
+
+        this.button = document.createElement("button");
+        this.button.innerHTML = this.clipboard();
+        this.button.addEventListener("click", e => {
+            this.copy();
+        })
+        this.appendChild(this.button);
+    }
+
+    connectedCallback() {
+
+    }
+
+    get value() {
+        return this.val.value;
+    }
+
+    set value(val) {
+        this.setAttribute("value", val);
+    }
+
+    static get observedAttributes() {
+        return ['value'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_value(val) {
+        this.val.value = val;
+    }
+
+    clipboard(size = 1.8) {
+        return `<svg
+        width="${size}em"
+        height="${size}em"
+        viewBox="0 0 30 30"
+        version="1.1"
+        id="svg5"
+        inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+        sodipodi:docname="clipboard.svg"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:svg="http://www.w3.org/2000/svg"
+        >
+        <path
+         id="path1525"
+         style="fill:none;stroke:currentColor;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+         d="M 27.685547 13.644531 C 24.79831 13.644531 22.474609 15.968232 22.474609 18.855469 L 22.474609 78.603516 C 22.474609 81.490753 24.79831 83.814453 27.685547 83.814453 L 42.724609 83.814453 L 42.724609 35.332031 C 42.724609 35.241805 42.727936 35.151573 42.732422 35.0625 C 42.736908 34.973427 42.743089 34.886641 42.751953 34.798828 C 42.760818 34.711016 42.772021 34.623554 42.785156 34.537109 C 42.798292 34.450665 42.812779 34.364266 42.830078 34.279297 C 42.847377 34.194328 42.867317 34.110729 42.888672 34.027344 C 42.910027 33.943958 42.933681 33.860992 42.958984 33.779297 C 42.984288 33.697602 43.011871 33.617006 43.041016 33.537109 C 43.07016 33.457213 43.101888 33.378772 43.134766 33.300781 C 43.167644 33.22279 43.201777 33.144337 43.238281 33.068359 C 43.274785 32.992382 43.313493 32.917607 43.353516 32.84375 C 43.393538 32.769893 43.435082 32.696629 43.478516 32.625 C 43.521949 32.553371 43.566545 32.483356 43.613281 32.414062 C 43.660018 32.344769 43.70788 32.277787 43.757812 32.210938 C 43.807745 32.144088 43.859089 32.077971 43.912109 32.013672 C 43.96513 31.949373 44.02017 31.88586 44.076172 31.824219 C 44.132174 31.762578 44.189172 31.703406 44.248047 31.644531 C 44.306922 31.585656 44.368047 31.526705 44.429688 31.470703 C 44.491328 31.414701 44.554842 31.361615 44.619141 31.308594 C 44.68344 31.255573 44.747603 31.204229 44.814453 31.154297 C 44.881303 31.104364 44.950238 31.054549 45.019531 31.007812 C 45.088824 30.961076 45.15884 30.91648 45.230469 30.873047 C 45.302098 30.829614 45.375362 30.788069 45.449219 30.748047 C 45.523076 30.708025 45.59785 30.669316 45.673828 30.632812 C 45.749806 30.596309 45.826306 30.562175 45.904297 30.529297 C 45.982288 30.496419 46.062681 30.464691 46.142578 30.435547 C 46.222475 30.406402 46.303071 30.378819 46.384766 30.353516 C 46.466461 30.328212 46.547474 30.306511 46.630859 30.285156 C 46.714245 30.263801 46.799797 30.243862 46.884766 30.226562 C 46.969734 30.209263 47.054181 30.192823 47.140625 30.179688 C 47.227069 30.166552 47.314531 30.157302 47.402344 30.148438 C 47.490156 30.139573 47.578896 30.131439 47.667969 30.126953 C 47.757042 30.122467 47.847274 30.121094 47.9375 30.121094 L 75.023438 30.121094 L 75.023438 18.855469 C 75.023438 15.968232 72.697784 13.644531 69.810547 13.644531 L 27.685547 13.644531 z "
+         transform="scale(0.26458333)" />
+      <rect
+         style="fill:none;stroke:currentColor;stroke-width:2.64583333;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+         id="rect1371-3"
+         width="13.903321"
+         height="18.565735"
+         x="11.304461"
+         y="7.9694405"
+         ry="1.3789077" />
+        
+        </svg>`;
+    }
+
+    copy() {
+        this.val.select();
+        this.val.setSelectionRange(0, this.val.value.length);
+        document.execCommand("copy");
+        this.addConfirmMessage();
+    }
+
+    async addConfirmMessage() {
+        clearTimeout(this.timeout);
+        if (this.confirm && this.confirm.parentNode == this) this.removeChild(this.confirm);
+        this.confirm = document.createElement("div");
+        this.confirm.classList.add("copy-span--confirm");
+        this.confirm.innerText = "Copied to clipboard.";
+        this.appendChild(this.confirm);
+        this.confirm.addEventListener("click", e => {
+            this.removeChild(this.confirm);
+        });
+        await wait_for_animation(this.confirm, "copy-span--spawn");
+        this.timeout = setTimeout(async () => {
+            await wait_for_animation(this.confirm, "copy-span--disappear");
+            this.removeChild(this.confirm);
+        }, 2000);
+    }
+}
+
+customElements.define("copy-span", CopySpan);
+
+class FlexTable extends HTMLElement {
+    connectedCallback() {
+        let max = 0;
+        let same = 0;
+        let columns = this.querySelectorAll("flex-row");
+
+        for (const i of columns) {
+            if (i.childElementCount > max) max = i.childElementCount;
+            if (i.childElement === max) {
+                same += 1;
+                if (same >= 3) break;
+            }
+        }
+
+        this.style.setProperty("--column-count", max);
+    }
+
+    // static get observedAttributes() {
+    //     return ['columns'];
+    // }
+
+    // attributeChangedCallback(name, oldValue, newValue) {
+    //     const callable = `change_handler_${name.replace("-", "_")}`;
+    //     if (callable in this) {
+    //         this[callable](newValue, oldValue);
+    //     }
+    // }
+
+    // change_handler_columns(val) {
+    //     this.style.setProperty("--column-count", val);
+    // }
+}
+
+customElements.define("flex-table", FlexTable);

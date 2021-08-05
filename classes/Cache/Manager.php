@@ -9,9 +9,12 @@
  * @todo Provide a mongo-based cache alternative
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @license https://github.com/heavyelementinc/cobalt-core/license
+ * @copyright 2021 Heavy Element, Inc.
  */
 
 namespace Cache;
+
+use Exception;
 
 class Manager {
 
@@ -25,9 +28,14 @@ class Manager {
         $this->last_modified = $this->modified();
     }
 
-    /** Retrieve a file by it's common reference (for example, "config/settings.json") and retrieve the
-     * latest file name. An argument of false will just return the pathname */
-    function get($load = true) {
+    /** Retrieve a file by it's common reference for example:
+     * "config/settings.json" 
+     * 
+     * That filename will be parsed and retrieved from the cache.
+     * 
+     * @param bool $load [true] false will return the pathname */
+    public function get($load = true) {
+        if ($load == false) return $this->file_path;
         $path = $this->file_path;
         if (!$this->exists) throw new \Exception("File `$this->reference` does not exist in cache");
         if ($load === "json") return get_json($path);
@@ -35,18 +43,31 @@ class Manager {
         return $this->reference;
     }
 
-    function set($contents, $json = true) {
+    /**
+     * Set a cache item
+     * 
+     * @param string|json-able $contents string
+     * @param bool $json [true] json_encode the contents
+     * @return mixed 
+     * @throws Exception 
+     */
+    public function set($contents, $json = true) {
         $path = $this->file_path;
         $info = pathinfo($path, PATHINFO_DIRNAME);
         $mkdir = true;
-        if (!is_dir($info)) $make_dir = mkdir($info, 0777, true);
+        if (!is_dir($info)) $mkdir = mkdir($info, 0777, true);
         if (!$mkdir) throw new \Exception("Could not make the directory path for $this->reference");
         if ($json) $contents = json_encode($contents);
         if (@file_put_contents($path, $contents) === false) throw new \Exception("Could not write to $this->reference.");
         return $path;
     }
 
-    function cache_exists() {
+    /**
+     * Checks if a cached version of the common reference exists.
+     * 
+     * @return bool 
+     */
+    public function cache_exists() {
         return file_exists($this->file_path);
     }
 
@@ -64,7 +85,7 @@ class Manager {
         return 0;
     }
 
-    function cache_name($reference) {
+    private function cache_name($reference) {
         $info = pathinfo($reference);
         $version = (isset($GLOBALS['app']) && property_exists($GLOBALS['app'], 'version')) ? $GLOBALS['app']->version : "000";
         $path = $this->cache_dir . "/$info[dirname]/$info[filename].$version.$info[extension]";

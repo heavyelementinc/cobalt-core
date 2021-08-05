@@ -22,6 +22,27 @@ input, textarea {
     font-size: .9rem;
     padding: .2rem;
     white-space: pre-line;
+    box-shadow: var(--project-box-shadow);
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  
+  .form-request--issue-fade-in {
+    opacity:0;
+    transform:translateX(-20%);
+    animation: issueFadeIn 250ms 1 forwards ease-out running 300ms;
+  }
+
+  .form-request--issue-fade-out {
+    animation: issueFadeIn 500ms 1 forwards ease-out running reverse;
+  }
+
+  @keyframes issueFadeIn{
+    to{
+      opacity: 1;
+      transform: none;
+    }
   }
 
   input:focus{
@@ -206,15 +227,15 @@ input-array {
     color:black;
   }
 
-  .input-array--search-results li.input-array--list-custom{
+  li.input-array--list-custom{
     font-weight: bold;
   }
 
-  .input-array--search-results li.input-array--list-custom:not(.input-array--will-select-on-enter){
+  li.input-array--list-custom:not(.input-array--will-select-on-enter){
     color:var(--project-color-input-border-nofocus);
   }
 
-   .input-array--search-results li.input-array--list-custom:before{
+   li.input-array--list-custom:before{
     content: "+";
     margin: 0 0.4rem 0 .2rem;
     font-weight: bold;
@@ -254,71 +275,6 @@ input-array-item{
     height: 100%;
   }
 
-  
-flex-table{
-  display: flex;
-  width: 100%;
-  background: var(--project-color-table-bg-odd);
-  flex-wrap: wrap;
-  border: var(--project-color-table-border);
-}
-
-flex-table[scroll-x]{
-  display:table;
-  overflow-x: scroll;
-}
-
-  flex-row{
-    display: flex;
-    box-sizing: border-box;
-    width: 100%;
-    flex-grow: 0;
-    flex-wrap: wrap;
-  }
-
-  [scroll-x] flex-row{
-    display: table-row;
-    flex-wrap: nowrap;
-  }
-
-  flex-row:nth-of-type(even){
-    background: var(--project-color-table-bg-even);
-  }
-
-  flex-fixed + flex-fixed,
-  flex-fixed + flex-cell,
-  flex-fixed + flex-header,
-  flex-cell + flex-cell,
-  flex-header + flex-header{
-    border-left: var(--project-color-table-border);
-  }
-
-  flex-cell,flex-header,flex-fixed{
-    display: flex;
-    flex-grow: 1;
-    padding: .3rem;
-    width: 80px;
-  }
-  
-  [scroll-x] flex-cell, [scroll-x] flex-header, [scroll-x] flex-fixed{
-    display: table-cell;
-    width: auto;
-  }
-
-  flex-header, flex-row:first-of-type flex-fixed{
-    font-weight: bold;
-    text-align: center;
-    justify-content: center;
-    align-items:center;
-    border-bottom: var(--project-color-table-border);
-  }
-
-  /** flex-fixed items should only be the left-most column OR the first row*/
-  flex-fixed{
-    position:sticky;
-    /* left: 0; */
-  }
-
 input-object-array {
   display: flex;
   flex-wrap: wrap;
@@ -338,4 +294,130 @@ input-object-array {
 
   input-object-array .input-object-array--add-button{
     margin-left:auto;
+  }
+
+copy-span {
+  display: inline-block;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  border-radius: 4px;
+  background: var(--project-color-input-background);
+  position: relative;
+  box-sizing: border-box;
+}
+
+  copy-span input {
+    display: inline-block;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: calc(.4rem - 2px);
+    box-sizing: border-box;
+    width:100%;
+  }
+
+  copy-span input:focus{
+    outline: 1px solid transparent;
+    border: 1px solid transparent;
+    background: transparent;
+  }
+
+  copy-span:focus-within{
+    border: 1px solid var(--project-color-input-border-focus);
+  }
+
+  :is(copy-span:focus-within) :is(button){
+    border-left-color: var(--project-color-input-border-focus);
+    color:black;
+  }
+
+  copy-span button{
+    border: none;
+    background: var(--project-color-input-background);
+    border-left: 1px solid var(--project-color-input-border-nofocus);
+    border-radius: 0 4px 4px 0;
+    color:var(--project-color-input-border-nofocus);
+    height: 100%;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  copy-span button:hover{
+    color: black;
+  }
+
+  copy-span .copy-span--confirm{
+    position: absolute;
+    width: 100%;
+    top: calc(100% - 4px);
+    animation: 800ms ease forwards 1;
+    text-align: center;
+    border: inherit;
+    background: inherit;
+    box-shadow: 0 3px 5px rgba(0,0,0,.3);
+    border-radius: 0 0 4px 4px;
+    box-sizing: inherit;
+    /* color: var(--project-color-input-border-nofocus); */
+    cursor: normal;
+  }
+
+  copy-spawn .copy-span--spawn{
+    animation-name: MessageSpawnIn;
+  }
+
+  copy-spawn .copy-span--disappear{
+    animation-name: MessageDespawn;
+  }
+
+  @keyframes MessageSpawnIn{
+    from{
+      opacity: 0;
+    }
+    to{
+      opacity: 1;
+    }
+  }
+
+  @keyframes MessageDespawn{
+    from {
+      opacity: 1
+    }
+    to{
+      opacity: 0;
+    }
+  }
+
+.floater--new-item{
+  position:fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  bottom: 2rem;
+  right: 2rem;
+  box-sizing: border-box;
+  border: none;
+  background: var(--project-color-button-init);
+  color: var(--project-color-button-text);
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+a.floater--new-item{
+  text-decoration: none;
+}
+
+  .floater--new-item:hover{
+    background:var(--project-color-button-hover);
+    /* color:var(--project-color-button-hover-text); */
+  }
+
+  .floater--new-item:focus{
+    background: var(--project-color-button-pressed);
+  }
+
+  .floater--new-item::before{
+    content: "+";
+    font-weight: bolder;
+    font-size: 2.5rem;
   }

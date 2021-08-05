@@ -23,6 +23,7 @@
 // the not-insane array syntax and the spread "..." syntax)
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
+
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "0.1");
 
@@ -40,6 +41,10 @@ else die("Cannot establish absolute path to app root"); // Die.
 define("__APP_ROOT__", realpath($app_root));
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
+// Let's ensure that the ignored config directory exists
+$ignored_config_dir = __APP_ROOT__ . "/ignored/config/";
+if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
+
 // Define a few values that we will use to handle writing output during an exception
 $allowed_to_exit_on_exception = true;
 $write_to_buffer_handled = false;
@@ -52,20 +57,42 @@ $composer = __DIR__ . "/vendor/autoload.php";
 if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the cobalt-core directory as your webserver user");
 require_once $composer;
 
+$app_env = __APP_ROOT__ . "/private/app_env.php";
+if (file_exists($app_env)) require_once $app_env;
+
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload", true);
 
-// Load our ACTIVE plugins.
-require_once __ENV_ROOT__ . "/globals/plugins.php";
+/** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
+$GLOBALS['time_to_update'] = false;
+// $update_list = [
+//     __APP_ROOT__ . "/private/config/settings.json",
+//     __APP_ROOT__ . "/private/config/settings.jsonc",
+//     __ENV_ROOT__ . "/config/settings.json",
+// ];
+
+// foreach($update_list as $file) {
+//     if(file_exists($file) && filemtime($file)) {
+//         $GLOBALS['time_to_update'] = true;
+//         break;
+//     }
+// }
+
+try {
+    // Load our ACTIVE plugins.
+    require_once __ENV_ROOT__ . "/globals/plugins.php";
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 // Instantiate our settings (`true` for loading settings from cache)
 try {
     $application = new SettingsManager(true);
+    /** @global $app How we set up and process our settings */
+    $app = $application;
 } catch (Exception $e) {
     die($e->getMessage());
 }
-/** @global $app How we set up and process our settings */
-$app = $application;
 
 /** @global __APP_SETTINGS__ The __APP_SETTINGS__ constant is an array of app 
  *                           settings 

@@ -13,6 +13,8 @@
 namespace Auth;
 
 use Auth\UserValidate;
+use Auth\UserSchema;
+
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {
@@ -35,11 +37,17 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
-    final function getUsersByPermission($permissions) {
+    final function getUsersByPermission($permissions, $value = true) {
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        return $this->find([
-            'permission' => $permissions
-        ]);
+        $perms = array_fill_keys($permissions, $value);
+        return $this->find(
+            [
+                '$or' => [
+                    ['permissions' => $perms],
+                    ['groups' => 'root']
+                ]
+            ]
+        );
     }
 
     final function getUsersByGroup($groups) {
@@ -50,14 +58,14 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function updateUser($id, $request) {
-        $val = new UserValidate();
-        $mutant = $val->validate($request);
+        $val = new UserSchema();
+        $mutant = $val->__validate($request);
         $result = $this->updateOne(
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
         if ($result->getModifiedCount() !== 1) throw new \Exception("Failed to update fields");
-        return $mutant;
+        return new UserSchema($mutant);
     }
 
     final function createUser($request) {
@@ -65,6 +73,16 @@ class UserCRUD extends \Drivers\Database {
 
         $val->setMode("require");
         $mutant = $val->validate($request);
+        $flags = [];
+        $flag = "flags.";
+        $len = strlen($flag);
+        foreach ($mutant as $field => $value) {
+            if (substr($field, 0, $len) === $flag) {
+                $flags[str_replace($flag, "", $field)] = $value;
+                unset($mutant[$field]);
+            }
+        }
+        $mutant['flags'] = $flags;
 
         $default = [
             'prefs' => json_decode("{}"),
@@ -74,7 +92,7 @@ class UserCRUD extends \Drivers\Database {
             'since' => $this->__date(null),
             'flags' => [
                 'verified' => false,
-                'update_password' => false,
+                'password_reset_required' => false,
             ]
         ];
         $request = array_merge(
@@ -107,7 +125,7 @@ class UserCRUD extends \Drivers\Database {
      * 
      * @param array|string $permissions the permission/permissions to filter by
      * @param string $display the inner text of option *"name"*, "first", "user"
-     * @return string rendered options
+     * @return array rendered options
      */
     final function getUserOptions($permissions, $display = "name") {
         $display_table = [
@@ -122,10 +140,10 @@ class UserCRUD extends \Drivers\Database {
             },
         ];
         $result = $this->getUsersByPermission($permissions);
-        $options = "";
+        $options = [];
         $callable = (key_exists($display, $display_table)) ? $display_table[$display] : $display_table['name'];
         foreach ($result as $user) {
-            $options .= "<option value='" . (string)$user['_id'] . "'>" . $callable($user) . "</option>";
+            $options[(string)$user['_id']] = $callable($user);
         }
 
         return $options;
@@ -138,7 +156,7 @@ class UserCRUD extends \Drivers\Database {
         foreach ($flags as $name => $elements) {
             $checked = "";
             $n = str_replace("flags.", "", $name);
-            if (isset($values['flags'][$n]) && $values['flags'][$n]) $checked = " checked='true'";
+            if (isset($values->flags[$n]) && $values->flags[$n]) $checked = " checked='true'";
             $el .= "<li><input-switch name='$name'$checked></input-switch><label>$elements[label]</label></li>";
         }
         return "<ul class='list-panel'>$el</ul>";

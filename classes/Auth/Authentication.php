@@ -11,7 +11,6 @@ class Authentication {
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
 
-
         $this->session = new CurrentSession();
         if (isset($this->session->session->user_id)) $ua = new UserCRUD();
         else return $this;
@@ -75,10 +74,12 @@ class Authentication {
      * @param  null|MongoDocument $user if null, the current session will be used
      * @return bool true if the user has permission, false otherwise
      */
-    function has_permission($permission, $group = null, $user = null) {
+    function has_permission($permission, $group = null, $user = null, $throw_no_session = true) {
         if ($user === null) $user = $this->user;
         if ($group === null) $group = $this->permissions->valid[$permission]['group'];
+
         // If the user is not logged in, they obviously don't have permission
+        if ($throw_no_session === false && !$user) return false;
         if (!$user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.", ['login' => true]);
 
         // If the permission is a boolean true AND we've made it here, we're 
@@ -90,17 +91,17 @@ class Authentication {
 
         // If the app allows root users AND the user belongs to the root group, 
         // they have permission no matter what
-        if (app('Auth_enable_root_group') && in_array('root', (array)$user['groups'])) return true;
+        if (app('Auth_enable_root_group') && in_array('root', (array)$user->groups)) return true;
 
         // If user account requires a password reset, a PasswordUpdateRequired
         // error is thrown.
-        if (($user['flags']['password_reset_required'] ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("You must update your password.");
+        if (($user->flags['password_reset_required'] ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("You must update your password.");
 
         // app('Auth_require_verified_status') && 
 
         // If the user account stores the permission, we return that value, 
         // whatever it may be
-        if (isset($user['permissions'][$permission])) return $user['permissions'][$permission];
+        if (isset($user->permissions->{$permission})) return $user->permissions->{$permission};
 
         // If the permission's default value is true, we return true.
         if ($this->permissions->valid[$permission]['default']) return true;
@@ -109,7 +110,7 @@ class Authentication {
         if ($group === null) return $this->permissions->valid[$permission]['default'];
 
         // Check if the user HAS the group in their groups
-        if (in_array($group, (array)$user['groups'])) return true;
+        if (in_array($group, (array)$user->groups)) return true;
 
         // Check if this permission belongs to the group specified
         if (isset($this->permissions->valid[$permission]['group'][$group])) return $this->permissions->valid[$permission]['group'][$group];

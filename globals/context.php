@@ -19,9 +19,12 @@ ob_start();
  */
 $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
 
-
-/** @global $auth Access the Authentication class */
-$auth = new Auth\Authentication();
+try {
+    /** @global $auth Access the Authentication class */
+    $auth = new Auth\Authentication();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
 $processor = "Handlers\WebHandler";
@@ -106,4 +109,8 @@ try {
     // if (app("debug")) die($e->getMessage());
     // else die("An unknown error has occurred.");
     // exit;
+} catch (Error $e) {
+    ob_clean();
+    $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+    exit;
 }

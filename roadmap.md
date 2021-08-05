@@ -17,24 +17,23 @@
 
 
 # Version 0.2
- - [ ] Upgrade to version number 0.2
- - [ ] Finish <input-object-array> & validation
+ - [x] Upgrade to version number 0.2
+ - [x] Finish <input-object-array> & validation
    <!-- Is there a better way to do input-object-array? -->
- - [ ] User's personal dashboard
-   - [ ] Allow account management
-   - [ ] Include a user preferences panel in account manager
-   - [ ] User stats implement in account manager
- - [ ] Add <async-button> which should use FormRequest to carry out async stuff
- - [ ] Fire requestFailed CustomEvent in FormRequest.js and test
- - [ ] Add widgets to admin dashboard
-   - [ ] Plugins can add widgets
- - [ ] Create admin dashboard container class
- - [ ] Finish plugins system
-   - [ ] Cobalt version checking for each plugin
-   - [ ] Plugins info/cache should be stored in the database
-   - [ ] Plugin management in admin panel
- - [ ] Cobalt Settings (modified stored in database)
- - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
+ - [x] Create admin dashboard container class `.cobalt-admin--fieldset`
+ - [x] Finish plugins system
+   - [x] Plugin management in admin panel
+   - [x] register_permissions
+   - [x] register_templates
+   - [x] register_shared_content_dir
+   - [x] register_dependencies
+   - [x] register_public_dir
+   - [x] register_packages
+   - [x] register_variables
+ - [x] Fire requestFailed CustomEvent in FormRequest.js and test
+ - [x] Make form-login-request listen for the enter key being pressed.
+ - [x] Make form-login-request reload the page when a login has occurred successfully
+ - [x] Track down WSOD (white screen of death) <!-- This is happening because the plugins weren't loading correctly and the catch routine wasn't handling correctly. >
 
 
 # Version 0.3
@@ -43,17 +42,46 @@
    - [x] Add settings to require verification before authenticated actions can be carried out
    - [ ] Add user account verification email process
  - [ ] Add password reset process
+   - [ ] Add setting to enable/disable this
  - [ ] Add user preferences
  - [ ] Cron system & CLI interface
  - [ ] Add customizable user account icons
  - [x] Add ring privilege checks--no promoting accounts to higher access levels than your own
- - [ ] Make main navigation permission-sensitive
+ - [ ] Make navigation permission-sensitive
  - [ ] Fix issue where router cache gets regenerated when on admin page and returns empty web cache.
- - [ ] Add CLI command to promote user to `root` group
+   - [ ] Add a `cache_version.json` file which increments when a cache update needs to take place.
+ - [x] Add CLI command to promote user to `root` group
+   - [x] Also added 'demote' command
  - [ ] Finish InputClass value reversion on error
- 
+ - [ ] Events scheduler system
+ - [ ] Add template/renderer debugging!!!
+ - [x] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
+ - [ ] <replicator-button> contains internal <template>
+ - [ ] Cobalt plugins
+   - [ ] Cobalt version checking for each plugin
+   - [ ] register_cli_commands
+
+
+# Version 0.4
+- [ ] Upgrade to version 0.4
+- [ ] Finish &lt;async-wizard&gt;
+- [ ] Allow plugins to display their own panel when you click on their name.
+- [x] Add widgets to admin dashboard
+   - [ ] Apps can add their own widgets
+   - [ ] Plugins can add widgets
+ - [ ] Finish autocomplete
+   - [ ] Fire event on autocomplete found - This should be a CHANGE event.
+   - [ ] Replace the search element in input-array with auto-complete
+- [ ] Define criteria for ring privileges
+ - [ ] User's personal dashboard
+   - [ ] Allow account management
+   - [ ] Include a user preferences panel in account manager
+   - [ ] User stats implement in account manager
+ - [ ] Add <async-button> which should use FormRequest to carry out async stuff
+ - [ ] Finish the 301 Moved Permanently exception and how it connects to ApiFetch
+
 
 # Todo
+ - [ ] Make duotone icon set a plugin
  - [ ] Update the Settings Manager so it instantiates Settings class (interface of iterable)
    - [ ] Settings class contains every default value as a method
- - [ ] 

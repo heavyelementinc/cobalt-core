@@ -28,7 +28,7 @@ class ApiFetch {
         }
         if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
         let result = await fetch(this.uri, send);
-        if ("Location" in result.headers) router.location = result.headers.Location;
+        if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
         if (result.ok === false) result = await this.handleErrors(result)
         return await result.json();
     }

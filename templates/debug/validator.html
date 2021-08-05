@@ -1,31 +1,29 @@
 <form-request method="POST" action="/api/v1/debug/validator" @csrf_attribute();>
     <fieldset>
         <label>Your Name</label>
-        <input type="name" name="name">
+        <input type="name" name="name" value="{{document.name}}">
     </fieldset>
     <fieldset>
         <label>Email</label>
-        <input type="email" name="email">
+        <input type="email" name="email" value="{{document.email}}">
     </fieldset>
     <fieldset>
         <label>Phone Number</label>
-        <input type="phone" name="phone">
+        <input type="phone" name="phone" value="{{document.phone}}">
     </fieldset>
     <fieldset>
         <label>Region</label>
-        <input-array name="region">
-            <option value="us-east">US East</option>
-            <option value="us-west">US West</option>
-            <option value="uk-south">UK South</option>
+        <input-array name="region" multiselect="true" value="{{document.region}}">
+            {{!document.region.options}}
             <option value="invalid">Invalid Option</option>
         </input-array>
     </fieldset>
     <fieldset>
         <label>Number of items</label>
-        <input type="text" name="order_count">
+        <input type="text" name="order_count" value="{{document.order_count}}">
     </fieldset>
     <fieldset>
-        <input-object-array name="test">
+        <input-object-array name="test" value="{{document.test}}">
             <template>
                 <fieldset>
                     <label>Foo</label>

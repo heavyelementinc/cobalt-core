@@ -1,7 +1,7 @@
 message-container{
     display: flex;
     flex-direction: column;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     box-sizing: border-box;
@@ -90,6 +90,8 @@ message-item{
         animation-name: status-message--no;
         animation-timing-function: cubic-bezier(.36,.07,.19,.97);
         animation-fill-mode: both;
+        animation-duration: 500ms;
+        animation-iteration-count: 1;
         backface-visibility: hidden;
         perspective: 1000px;
     }

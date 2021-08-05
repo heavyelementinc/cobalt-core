@@ -100,8 +100,10 @@ function __cobalt_initialize_create_user($root_user) {
     $root_user['groups'] = ["root"];
 
     // Let's create a new user
-    $crud = new \Auth\CRUDUser();
-    $crud->add_user($root_user);
+    $crud = new \Auth\UserCRUD();
+
+    $result = $crud->createUser($root_user);
+    $crud->updateOne(['_id' => $result['_id']], ['$set' => ['groups' => ['root']]]);
 
     // Redact the password field
     $root_user['pword'] = "###############";
@@ -110,7 +112,7 @@ function __cobalt_initialize_create_user($root_user) {
     $err = "ERROR: Could not redact sensitive fields in config file! Please remove <code>__APP_ROOT__/ignored/init.json</code> from your app directory!";
 
     // If we fail to overwrite the contents of the init file, die with an error.
-    if (!file_put_contents($GLOBALS['init_file'], json_encode($root_user))) {
+    if (!file_put_contents($GLOBALS['init_file'], json_encode([]))) {
         die($err);
     }
 

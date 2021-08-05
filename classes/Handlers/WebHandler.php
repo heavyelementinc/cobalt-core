@@ -21,6 +21,7 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
 
@@ -98,6 +99,9 @@ class WebHandler implements RequestHandler {
     }
 
     public function _public_exception_handler($e) {
+        // Prevent trying to load a template that might not exist already.
+        unset($GLOBALS['web_processor_template']);
+
         // Get the message string and data
         $message = $e->getMessage();
         $data = $e->data;
@@ -126,7 +130,7 @@ class WebHandler implements RequestHandler {
         if (!\template_exists($template)) $template = "errors/default.html";
 
         // This will let us display an error page if we've already loaded a template
-        if ($this->_stage_bootstrap['_stage_output']) {
+        if ($this->_stage_bootstrap['_stage_execute'] || $this->_stage_bootstrap['_stage_output']) {
             // Flush whatever body template we might have already loaded
             $this->flush_body_template();
             $this->_stage_init(null);
@@ -134,6 +138,7 @@ class WebHandler implements RequestHandler {
 
         // Add the error template as the main content
         $this->main_content_from_template($template);
+        $this->_stage_output();
     }
 
     /** END INTERFACE REQUIREMENTS */
@@ -143,12 +148,12 @@ class WebHandler implements RequestHandler {
         $this->results_sent_to_client = true;
     }
 
-    function __destruct() {
-        // Check if we have sent the output yet and return
-        if ($this->results_sent_to_client === true) return;
-        // If we HAVEN'T sent the output, we run _stage_output
-        $this->_stage_output();
-    }
+    // function __destruct() {
+    //     // Check if we have sent the output yet and return
+    //     if ($this->results_sent_to_client === true) return;
+    //     // If we HAVEN'T sent the output, we run _stage_output
+    //     $this->_stage_output();
+    // }
 
     /** Here we're searching our base template for any additional template stuff we might want
      * to include. We do this because we want to provide a base HTML framework along with public
@@ -179,13 +184,13 @@ class WebHandler implements RequestHandler {
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
         $header = $this->load_template("parts/header.html");
-        $this->add_vars(['header_nav' => $this->cache_handler($this->header_nav_cache_name, "header_nav")]);
+        $this->add_vars(['header_nav' => $this->header_nav()]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
     }
 
     function header_nav() {
-        return get_route_group("main_navigation", false, "navigation--main");
+        return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
         // $links = "";
         // foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
         //     if (!isset($route['header_nav'])) continue;
@@ -261,7 +266,8 @@ class WebHandler implements RequestHandler {
 
     var $route_table_cache = "js-precomp/router-table.js";
     function router_table() {
-        $cache = new CacheManager($this->route_table_cache);
+        $table_name = str_replace(".js", ".$this->context_mode.js", $this->route_table_cache);
+        $cache = new CacheManager($table_name);
         $table_content = "";
         if ($GLOBALS['time_to_update'] || !$cache->cache_exists()) {
             $table_content = $GLOBALS['router']->get_js_route_table();
@@ -280,12 +286,22 @@ class WebHandler implements RequestHandler {
                 $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
             } else {
                 $files = files_exist([
-                    __APP_ROOT__ . "/private/js/$package",
-                    __ENV_ROOT__ . "/js/$package"
+                    __APP_ROOT__ . "/src/$package",
+                    __ENV_ROOT__ . "/src/$package"
                 ]);
                 $compiled .= "\n\n" . file_get_contents($files[0]);
             }
         }
+
+        foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
+            if (!file_exists($private)) continue;
+            if ($debug) {
+                $script_tags .= "<script src='$public?{{app.version}}'></script>";
+            } else {
+                $compiled .= "\n\n" . file_get_contents($private);
+            }
+        }
+
         if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
 
         if ($compiled !== "") {
@@ -314,6 +330,16 @@ class WebHandler implements RequestHandler {
                 $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
             } else {
                 $compiled .= "\n\n" . file_get_contents($files[0]);
+            }
+        }
+
+        foreach ($GLOBALS['PACKAGES']['css'] as $public => $private) {
+            $file = file_exists($private);
+            if (!$file) continue;
+            if ($debug === true) {
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
+            } else {
+                $compiled .= "\n\n" . file_get_contents($file);
             }
         }
         if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
@@ -354,11 +380,10 @@ class WebHandler implements RequestHandler {
     function load_template($template_name) {
         $ext = pathinfo($template_name, PATHINFO_EXTENSION);
         $session_template_name = str_replace($ext, "session.$ext", $template_name);
-        $templates = [
-            // __APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
-            // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",
-            ...$GLOBALS['TEMPLATE_PATHS']
-        ];
+        $templates = $GLOBALS['TEMPLATE_PATHS'];
+        // [__APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
+        // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",]
+
 
         $round_one = $template_name;
         if (session_exists()) {

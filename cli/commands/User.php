@@ -6,20 +6,32 @@ class User {
             'description' => "[firstname [username [password [email]]]] - Create new user. Password cannot contain spaces if called as single command.",
             'context_required' => true
         ],
-        'password' => [
-            'description' => "username|email - Change a user's password",
-            'context_required' => true
-        ],
-        'password_reset' => [
-            'description' => "username|email true|false - require the user to reset their password on next login",
-            'context_required' => true
-        ],
         'delete' => [
             'description' => 'username ["force"] - Delete a user account',
             'context_required' => true
         ],
         'find' => [
             'description' => '"uname"|"email" value - Query for a user account',
+            'context_required' => true
+        ],
+        'list' => [
+            'description' => 'limit [skip] - List registered user accounts',
+            'context_required' => true
+        ],
+        'password' => [
+            'description' => "username|email - Change a user's password",
+            'context_required' => true
+        ],
+        'require_reset' => [
+            'description' => "username|email true|false - require the user to reset their password on next login",
+            'context_required' => true
+        ],
+        'promote' => [
+            'description' => "username|email grant the user root privileges",
+            'context_required' => true
+        ],
+        'demote' => [
+            'description' => "username|email revoke the user's root privileges",
             'context_required' => true
         ]
     ];
@@ -69,7 +81,7 @@ class User {
         throw new Exception("An unknown error ocurred.");
     }
 
-    function password_reset($uname, $status) {
+    function require_reset($uname, $status) {
         $new_status = cli_to_bool($status);
         $ua = new Auth\UserCRUD();
         $user = $ua->getUserByUnameOrEmail($uname);
@@ -109,6 +121,36 @@ class User {
     function find($type, $value) {
         if (!app("Auth_user_accounts_enabled")) throw new Exception("User accounts are not enabled");
         return fmt("This has not been implemented yet", "e");
+    }
+
+    function list($limit = 50, $skip = 0) {
+        $ua = new Auth\UserCRUD();
+        $list = $ua->find([], ['limit' => (int)$limit, 'skip' => (int)$skip]);
+        foreach ($list as $user) {
+            say("$user[uname]  .... $user[email]\n", 'i');
+        }
+        return fmt(" There are " . $ua->count([]) . " registered user(s).");
+    }
+
+    function promote($user_or_email) {
+        return $this->root_status($user_or_email, '$addToSet', '$each', $message = "Granted " . fmt($user_or_email, 'i') . " root permissions");
+    }
+
+    function demote($user_or_email) {
+        return $this->root_status($user_or_email, '$pull', '$in', "Revoked " . fmt("$user_or_email", "i") . "'s root permissions");
+    }
+
+    private function root_status($u, $operator, $from, $success_message) {
+        $ua = new Auth\UserCRUD();
+        $user = $ua->getUserByUnameOrEmail($u);
+        if ($user === null) throw new Exception("No user found");
+        $result = $ua->updateOne(
+            ['_id' => $user['_id']],
+            [$operator => ['groups' => [$from => ['root']]]]
+        );
+        $message = $success_message;
+        if ($result->getMatchedCount() !== 1) $message = "No user account found";
+        return fmt($message);
     }
 
     // function enable_accounts($bool){

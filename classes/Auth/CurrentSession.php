@@ -31,11 +31,12 @@ class CurrentSession {
         $this->default_token_expiration = $this->now + $this->month;
         $this->default_token_refresh = $this->now + $this->day;
         $this->collection = \db_cursor('sessions');
+        $headers = apache_request_headers();
         $this->cookie_options = [
             'expires' => $this->default_cookie_expiration,
             'path' => '/',
-            'domain' => $_SERVER['SERVER_NAME'],
-            'secure' => app("session_secure_status"),
+            'domain' => $_SERVER['HTTP_X_FORWARDED_SERVER'] ?? $_SERVER['SERVER_NAME'],
+            'secure' => $headers['X-Forwarded-Proto'] ?? app("session_secure_status"),
             'samesite' => true
         ];
         $this->context = ($GLOBALS['route_context'] === "web" || $GLOBALS['route_context'] === "admin") ? true : false;
@@ -123,7 +124,7 @@ class CurrentSession {
         } catch (\Exception $e) {
             throw new \Exceptions\HTTP\Error("Failed to create session");
         }
-        if ($result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
+        if ($result->getUpsertedCount() === 0 && $result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
         return true;
     }
 

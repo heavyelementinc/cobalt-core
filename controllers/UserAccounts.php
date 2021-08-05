@@ -52,4 +52,29 @@ class UserAccounts extends \Controllers\Pages {
 
         return "Success";
     }
+
+    function get_user_menu() {
+        $html = "";
+        $logged_in = false;
+        $html = get_route_group("user_menu", ['with_icon' => true]);
+        try {
+            if (has_permission("Admin_panel_access")) {
+                $html += "<li><a href='/admin/'><ion-icon name='settings'></ion-icon>Admin</a></li>";
+            }
+            $logged_in = true;
+        } catch (\Exceptions\HTTP\Unauthorized $e) {
+            $html = '<li id="main-menu-SignIn" name="SignIn"><div class="user-menu-option SignIn"><ion-icon name="log-in" role="img" class="md hydrated" aria-label="log in"></ion-icon><span class="user-menu-text">Log in</span></div></li>';
+        }
+
+        if ($logged_in) {
+            $html = '<li id="main-menu-SignOut" name="SignOut"><div class="user-menu-option SignOut"><ion-icon name="log-out" role="img" class="md hydrated" aria-label="log out"></ion-icon><span class="user-menu-text">Log out</span></div></li>';
+        }
+
+        add_vars([
+            'title' => 'User Menu',
+            'main' => str_replace("</ul>", "", $html) . "</ul>"
+        ]);
+
+        set_template("parts/main.html");
+    }
 }

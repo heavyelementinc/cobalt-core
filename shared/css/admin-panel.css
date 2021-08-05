@@ -12,7 +12,7 @@ nav#admin-panel {
 }
 
 #admin-panel ul {
-    background: var(--project-color-header-branding);
+    background: var(--project-color-admin-panel-background);
     flex-grow: 1;
     height: 100%;
 }
@@ -25,7 +25,7 @@ nav#admin-panel {
     padding: 10px;
     height: 50px;
     box-sizing: border-box;
-    color: white;
+    color: var(--project-color-admin-panel-font);
     text-decoration: none;
     transition: background-color .3s, color .2s, padding-left .5s;
 }
@@ -42,7 +42,17 @@ nav#admin-panel {
     padding-left: 20px;
 }
 
+#admin-panel + main {
+    min-height: 80vh;
+}
+
 main {
     margin-left: var(--admin-panel-width);
     padding: 20px;
+}
+
+.cobalt-admin--fieldset{
+    border: 1px solid var(--project-color-input-border-nofocus);
+    padding: 4px 8px;
+    border-radius: 4px;
 }

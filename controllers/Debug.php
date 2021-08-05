@@ -3,7 +3,7 @@ class Debug extends \Controllers\Pages {
 
     function debug_directory() {
         add_vars(['title' => "Debug Directories"]);
-        add_template("/debug/debug.html");
+        set_template("/debug/debug.html");
     }
     function debug_renderer() {
         add_vars([
@@ -14,7 +14,7 @@ class Debug extends \Controllers\Pages {
             'lookup' => ['field' => "LOOKUP"],
             'object' => json_decode('{"property":"value"}'),
         ]);
-        add_template("debug/renderer.html");
+        set_template("debug/renderer.html");
     }
 
     function debug_router() {
@@ -36,17 +36,17 @@ class Debug extends \Controllers\Pages {
             'title' => 'Router',
             'main' => $routes . "<style>main>section{display:flex;flex-wrap:wrap;}</style>"
         ]);
-        add_template("/parts/main.html");
+        set_template("/parts/main.html");
     }
 
     function debug_slideshow() {
         add_vars(['title' => 'Slideshow Test']);
-        add_template('/debug/slideshow.html');
+        set_template('/debug/slideshow.html');
     }
 
     function debug_inputs() {
         add_vars(['title' => 'Input Test']);
-        add_template("/debug/inputs.html");
+        set_template("/debug/inputs.html");
     }
 
     function debug_parallax() {
@@ -54,45 +54,40 @@ class Debug extends \Controllers\Pages {
             'title' => 'Parallax Test',
             'body_class' => "cobalt-parallax--container"
         ]);
-        add_template("/debug/parallax.html");
+        set_template("/debug/parallax.html");
     }
 
     function debug_loading() {
         add_vars([
             'title' => 'Loading test'
         ]);
-        add_template("/debug/loading.html");
+        set_template("/debug/loading.html");
     }
 
     function debug_calendar($date = null) {
         if ($date === null) $date = time();
         $calendar = new \Calendar\Calendar($date);
+        $show_debug_info = function ($calendar) {
+            return "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
+                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
+                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
+                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>";
+        };
         add_vars([
             'title' => 'Calendar test',
-            'main' =>   $calendar->render("day") .
-                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
-                $calendar->render("week") .
-                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>" .
-                $calendar->render() .
-                "Calendar type: <b>" . $calendar->get_calendar_type() . "</b> | " .
-                "First cell: <b>" . date("Y-m-d", $calendar->get_first_cell_timestamp()) . "</b> | " .
-                "Target cell: <b>" . date("Y-m-d", $calendar->get_timestamp()) . "</b> | " .
-                "Last cell: <b>" . date("Y-m-d", $calendar->get_last_cell_timestamp()) . "</b>"
+            'main' => $calendar->render("day") . $show_debug_info($calendar) .
+                $calendar->render("week") . $show_debug_info($calendar) .
+                $calendar->render() . $show_debug_info($calendar) .
+                $calendar->render("rolling") . $show_debug_info($calendar)
         ]);
-        add_template("/parts/main.html");
+        set_template("/debug/calendar.html");
     }
 
     function flex_table() {
         add_vars([
             'title' => 'Flex Table Test',
         ]);
-        add_template("/debug/flex-table.html");
+        set_template("/debug/flex-table.html");
     }
 
     function relative_path_test() {
@@ -102,19 +97,33 @@ class Debug extends \Controllers\Pages {
                 'anchor' => "<a href='$GLOBALS[PATH]test'>Test<a>"
             ]
         );
-        add_template("/debug/relative_path_test.html");
+        set_template("/debug/relative_path_test.html");
     }
 
     function form_test() {
+        $document = new \Validation\ExampleSchema([
+            'name' => "Terry Testalot",
+            'email' => "terry_t@heavyelement.io",
+            'phone' => '5554041122',
+            'region' => ['us-west'],
+            'order_count' => 5,
+            'test' => [
+                ['foo' => 'Test Data',],
+                ['foo' => 'Test Number 2',],
+                ['bar' => 'Baz test',]
+            ]
+        ]);
         add_vars([
             'title' => 'Form Validation Test',
+            'document' => $document
         ]);
-        add_template(("/debug/validator.html"));
+        set_template(("/debug/validator.html"));
     }
 
     function validate_test_form() {
-        $validator = new \Validation\ExampleValidator();
-        $result = $validator->validate($_POST);
+        $validator = new \Validation\ExampleSchema();
+
+        $result = $validator->__validate($_POST);
 
         return $result;
     }
@@ -131,7 +140,7 @@ class Debug extends \Controllers\Pages {
             'title' => 'Modal Test'
         ]);
 
-        add_template("/debug/modal-template.html");
+        set_template("/debug/modal-template.html");
     }
 
     function slow_response($delay = 10) {
@@ -143,13 +152,29 @@ class Debug extends \Controllers\Pages {
             'title' => 'Slow Response Simulation',
             'delay' => $delay
         ]);
-        add_template("/debug/slow-response.html");
+        set_template("/debug/slow-response.html");
     }
 
     function action_menu() {
         add_vars([
             'title' => "Action Menu test"
         ]);
-        add_template("/debug/action_menu.html");
+        set_template("/debug/action_menu.html");
+    }
+
+    function async_wizard() {
+        add_vars([
+            'title' => "Async Wizard test"
+        ]);
+        set_template("/debug/async-wizard.html");
+    }
+
+    function environment() {
+        add_vars([
+            'title' => "Docker Debug",
+            'main' => "<pre>" . var_export(getenv(), true) . "\n" . var_export($_SERVER, true) . "</pre>"
+        ]);
+
+        set_template("/parts/main.html");
     }
 }

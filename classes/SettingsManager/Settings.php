@@ -1,9 +1,11 @@
 <?php
-/** This should be where settings are actually stored. */
-namespace SettingsManager;
-class Settings implements \Iterator{
-    function __construct(){
 
+/** This should be where settings are actually stored. */
+
+namespace SettingsManager;
+
+class Settings implements \Iterator {
+    function __construct() {
     }
     /** ==============
      *  Iterator Stuff 
@@ -11,27 +13,28 @@ class Settings implements \Iterator{
      */
     private $pointer = 0;
     private $index = [];
-    public function set_index($index){
+    public function set_index($index) {
         $this->index = $index;
     }
 
-    public function current(){
+    public function current() {
+        if (!isset($this->{$this->index[$this->pointer]})) die("Setting `" . $this->index[$this->pointer] . "` is not defined");
         return $this->{$this->index[$this->pointer]};
     }
 
-    public function key(){
+    public function key() {
         return $this->index[$this->pointer];
     }
 
-    public function next(){
+    public function next() {
         $this->pointer++;
     }
 
-    public function rewind(){
+    public function rewind() {
         $this->pointer = 0;
     }
 
-    public function valid(){
+    public function valid() {
         return isset($this->index[$this->pointer]);
     }
 }

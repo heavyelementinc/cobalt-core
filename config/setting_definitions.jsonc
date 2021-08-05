@@ -177,8 +177,11 @@
         "default": {
             "modal-z-index": 2000,
             "body-background": "#efefef",
+            "box-shadow": "0 4px 10px rgba(0, 0, 0, .2)",
             "color-header-branding": "#004BA8",
             "color-user-panel-button": "#342A21",
+            "color-admin-panel-background": "var(--project-color-header-branding)",
+            "color-admin-panel-font": "white",
             "color-acknowledge": "#598B2C",
             "color-active": "#598B2C",
             "color-inactive": "#B1C1C0",
@@ -195,8 +198,8 @@
             "color-table-bg-even": "var(--project-color-input-disabled)",
             "color-problem": "#FE5F55",
             "color-button-init": "#004BA8",
-            "color-button-text": "#FFF",
             "color-button-hover": "#9DD1F1",
+            "color-button-text": "#FFF",
             "color-button-hover-text": "#000",
             "color-button-pressed": "#00377A",
             "calendar-borders": "1px solid var(--project-color-button-init)",
@@ -207,7 +210,13 @@
             "calendar-header-text": "var(--project-color-button-text)",
             "action-menu-background": "var(--project-color-input-disabled)",
             "action-menu-border": "var(--project-color-table-border)",
-            "action-menu-hover": "var(--project-color-inactive)"
+            "action-menu-hover": "var(--project-color-inactive)",
+            "events-banner-background": "var(--project-body-background)",
+            "events-banner-text": "black",
+            "events-button-color": "var(--project-color-button-init)",
+            "events-button-color-hover": "var(--project-color-button-hover)",
+            "events-button-text": "var(--project-color-button-text)",
+            "events-button-text-hover": "var(--project-color-button-hover-text)"
         },
         "$merge": true,
         "$style": true
@@ -222,16 +231,20 @@
     "packages": {
         "default": [
             "global_functions.js",
+            "components/autocomplete.js",
+            "DateConverter.js",
             "Modal.js",
             "TabbedUI.js",
             "Slideshow.js",
+            "Slideshow2.js",
             "InputClasses.js",
             "FormRequest.js",
             "ApiFetch.js",
             "InputComponents.js",
             "UserMenu.js",
             "ActionMenu.js",
-            "StatusMessage.js"
+            "StatusMessage.js",
+            "Events.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -243,14 +256,19 @@
     files for use there. */
     "css_packages": {
         "default": [
+            "components/autocomplete.css",
             "normalize.css",
+            "header.css",
+            "slideshow.css",
             "inputs.css",
+            "cobalt-events.css",
             "loading-spinner.css",
             "modal.css",
             "action-menu.css",
             "status-message.css",
             "login-form.css",
             "form-request.css",
+            "flex-table.css",
             "modal.css",
             "tabs-drawer.css",
             "calendar.css",
@@ -379,6 +397,9 @@
         *ALL* PERMISSIONS CHECKS FOR ROOT MEMBERS!!! */
         "default": true
     },
+    "Auth_session_days_until_expiration": {
+        "default": 90
+    },
     "API_CORS_allowed_origins": {
         "default": [],
         "$push": [
@@ -393,6 +414,13 @@
     },
     "API_contact_form_recipient": {
         "default": ""
+    },
+    "CobaltEvents_enabled": {
+        "default": true,
+        "$public": true
+    },
+    "CobaltEvents_database_collection": {
+        "default": "CobaltEvents"
     },
     /* The id attribute of the body tag when errors happen in a web context. */
     "HTTP_error_body_id": {

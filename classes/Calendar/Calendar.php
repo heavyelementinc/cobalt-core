@@ -4,14 +4,17 @@ namespace Calendar;
 
 /**
  * This class is a representation of a Gregorian calendar. It can display a day,
- * week, or month focused around a specified day.
+ * week, month, or rolling focused around a specified day.
  * 
  * @author Ethan <ethan@heavyelement.io>
  */
 class Calendar {
+    /** @var int $rolling_count The number of rows drawn by the rolling calendar. */
+    public static $rolling_count = 6;
+
     /** @var int $timestamp_input The target timestamp this calendar renders itself around. */
     private $timestamp_input;
-    /** @var string $calendar_type The type of calendar rendered as "day" | "week" | "month". */
+    /** @var string $calendar_type The type of calendar rendered as "day" | "week" | "month" | "rolling". */
     private $calendar_type;
 
     /**
@@ -49,7 +52,7 @@ class Calendar {
     }
 
     /**
-     * Get the type of calendar currently rendered. Either "day" | "week" | "month".
+     * Get the type of calendar currently rendered. Either "day" | "week" | "month" | "rolling".
      * 
      * @return string A string representing the type of calendar rendered.
      */
@@ -60,7 +63,7 @@ class Calendar {
     /**
      * Get the first cell for the type of calendar currently rendered.
      * 
-     * @param string $type "month" | "week" | "day" defaults to "month" unless the calendar has
+     * @param string $type "day" | "week" | "month" | "rolling". Defaults to "month" unless the calendar has
      *               already been rendered in which case that type is used. Specify to override.
      * @return int A timestamp for the date of the first drawn cell of the calendar.
      */
@@ -70,7 +73,7 @@ class Calendar {
 
         if ($type === "day") return $this->timestamp_input;
 
-        if ($type === "week") {
+        if ($type === "week" || $type === "rolling") {
             if (date("w", $this->timestamp_input) === "0") return $this->timestamp_input;
             return strtotime("last Sunday", $this->timestamp_input);
         }
@@ -83,7 +86,7 @@ class Calendar {
     /**
      * Get the last cell for the type of calendar currently rendered.
      * 
-     * @param string $type "month" | "week" | "day" defaults to "month" unless the calendar has
+     * @param string $type "day" | "week" | "month" | "rolling". Defaults to "month" unless the calendar has
      *               already been rendered in which case that type is used. Specify to override.
      * @return int A timestamp for the date of the last drawn cell of the calendar.
      */
@@ -98,6 +101,11 @@ class Calendar {
             return strtotime("next Saturday", $this->timestamp_input);
         }
 
+        if ($type === "rolling") {
+            $weeks = (date("w", $this->timestamp_input) === "6") ? self::$rolling_count-- : self::$rolling_count;
+            return strtotime("+$weeks Saturdays", $this->timestamp_input);
+        }
+
         $last_day_of_month = strtotime(date("Y-m-t", $this->timestamp_input));
         $end_offset = (6 - date("w", $last_day_of_month));
         return strtotime("+$end_offset days", $last_day_of_month);
@@ -105,9 +113,9 @@ class Calendar {
 
     /**
      * Renders a calander with the correct number of cells to represent a day,
-     * week, or month.
+     * week, month, or rolling.
      * 
-     * @param string $type Type of calendar to render as "day" | "week" | "month".
+     * @param string $type Type of calendar to render as "day" | "week" | "month" | "rolling".
      * @param bool $month_changes TRUE if month can be changed | FALSE if not.
      * 
      * @return string A string of html representing a calendar.
@@ -119,11 +127,13 @@ class Calendar {
         $class_attribute = "calendar--other";
         if ($this->timestamp_input === $this->make_timestamp_uniform(time())) {
             $class_attribute = "calendar--current";
-        } else if ($type === "week" && $this->week_number($this->timestamp_input) === $this->week_number(time())) {
-            $class_attribute = "calendar--current";
+        } else if ($type === "week" || "rolling") {
+            if ($this->week_number($this->timestamp_input) === $this->week_number(time()))
+                $class_attribute = "calendar--current";
         } else if ($type === "month" && date("Y-m", $this->timestamp_input) === date("Y-m", time())) {
             $class_attribute = "calendar--current";
         }
+
         $output = $this->make_title_headline_html($type, $month_changes) .
             "<calendar-table class='$class_attribute'>";
 
@@ -142,6 +152,10 @@ class Calendar {
             return $output . $this->make_week_html($this->timestamp_input) . "</calendar-table>";
         }
 
+        if ($type === "rolling") {
+            return $output . $this->make_rolling_html($this->timestamp_input) . "</calendar-table>";
+        }
+
         return $output . $this->make_month_html($this->timestamp_input) . "</calendar-table>";
     }
 
@@ -151,8 +165,9 @@ class Calendar {
      * @return bool TRUE if valid unix timestamp | FALSE if not valid unix timestamp.
      */
     private function is_timestamp($timestamp) {
-        return ((string)(int)$timestamp === $timestamp) &&
-            ($timestamp <= PHP_INT_MAX) && ($timestamp >= ~PHP_INT_MAX);
+        return ((int) $timestamp === $timestamp)
+                && ($timestamp <= PHP_INT_MAX)
+                && ($timestamp >= ~PHP_INT_MAX);
     }
 
     /**
@@ -183,7 +198,7 @@ class Calendar {
     }
 
     /**
-     * @param string $type The string "day" | "week" | "month".
+     * @param string $type The string "day" | "week" | "month" | "rolling".
      * @param bool $month_changes TRUE if month can be changed | FALSE if not.
      * 
      * @return string A string of html representing the headline of the calendar.
@@ -192,6 +207,7 @@ class Calendar {
         $anchors = ["", ""];
         if ($month_changes) {
             $type = strtolower($type);
+            if ($type === "rolling") $type = "week";
 
             //Establish the targets.
             $last_date = date("Y-m-d", strtotime("-1 $type", $this->timestamp_input));
@@ -248,9 +264,9 @@ class Calendar {
     }
 
     /**
-     * @param string $timestamp The target days timestamp.
+     * @param string $timestamp The timestamp for the target day.
      * 
-     * @return string A string of html representing the given day.
+     * @return string A string of html representing the day.
      */
     private function make_day_html($timestamp) {
         $id = date("M-d", $timestamp);
@@ -300,9 +316,9 @@ class Calendar {
     }
 
     /**
-     * @param string $timestamp The target days timestamp.
+     * @param string $timestamp The timestamp for the target day.
      * 
-     * @return string A string of html representing the given week.
+     * @return string A string of html representing the week.
      */
     private function make_week_html($timestamp) {
         $week_start_offset = 0 - date("w", $timestamp);
@@ -318,9 +334,9 @@ class Calendar {
     }
 
     /**
-     * @param string $timestamp The target days timestamp.
+     * @param string $timestamp The timestamp for the target day.
      * 
-     * @return string A string of html representing the given month.
+     * @return string A string of html representing the month.
      */
     private function make_month_html($timestamp) {
         $week_to_draw = $timestamp;
@@ -347,5 +363,18 @@ class Calendar {
         }
 
         return $month_rows;
+    }
+
+    /**
+     * @param string $timestamp The timestamp for the target day.
+     * 
+     * @return string A string of html representing the rolling calendar.
+     */
+    private function make_rolling_html($timestamp) {
+        $rolling_rows = "";
+        for ($i = 0; $i < self::$rolling_count; $i++) {
+            $rolling_rows .= $this->make_week_html(strtotime("+$i weeks", $timestamp));
+        }
+        return $rolling_rows;
     }
 }

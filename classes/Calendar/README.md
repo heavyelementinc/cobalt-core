@@ -3,17 +3,20 @@
 This calendar class is designed to be a simple and effective representation of the
 Gregorian calendar. Upon instantiation the user can specify a target date for the
 calendar to render itself around. If no date is given, the curent date is used as 
-a default. The user can then call the "render()" function to display the calendar.
-The size of the calendar can be set to a single day, a week, or an entire month.
-Additionally the user can choose to display buttons that allow the calendar to 
-switch to the previous or next set of days. If the target day of the calendar needs
-to be changed the user can do so by calling the "set_timestamp($date)" function.
-They will then have to re-render the calendar to show the new results of the date
-change.
+a default. The user can then call the "render()" method to display the calendar.
+The size of the calendar can be set to a single day, a week, an entire month, or
+rolling (6 weeks). Additionally the user can choose to display buttons that allow
+the calendar to switch to the previous or next set of days. If the target day of
+the calendar needs to be changed the user can do so by calling the "set_timestamp($date)"
+method. They will then have to re-render the calendar to show the new results of
+the date change.
 
 ---
 
-## Public Functions
+## Public Attributes
+* static $rolling_count = 6;
+
+## Public Methods
 * __construct($date)
 * get_timestamp()
 * set_timestamp($date)
@@ -60,11 +63,14 @@ $calendar->get_last_cell_timestamp()
 //Display a month calendar that can switch to a different month.
 $calendar->render();
 
-//Display a day calendar that can not switch to a different month.
+//Display a day calendar that can NOT switch to a different day.
 $calendar->render("day", FALSE);
 
-//Display a week calendar that can switch to a different month.
+//Display a week calendar that can switch to a different week.
 $calendar->render("week");
+
+//Display a rolling calendar that can switch to a different roll.
+$calendar->render("rolling");
 ```
 
 ---

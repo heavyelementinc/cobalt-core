@@ -21,8 +21,15 @@ if (empty($cmd)) {
 
 $cmd_file = __CLI_ROOT__ . "/commands/$cmd.php";
 if (!file_exists($cmd_file)) {
-    say("Unrecognized command", "e");
-    exit;
+    if (!defined("__APP_ROOT__")) {
+        say("Unrecognized command", "e");
+        exit;
+    }
+    $cmd_file = __APP_ROOT__ . "/cli/commands/$cmd.php";
+    if (!file_exists($cmd_file)) {
+        say("Unrecognized command", "e");
+        exit;
+    }
 }
 
 log_item("Loading command dependency");

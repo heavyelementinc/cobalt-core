@@ -58,6 +58,17 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Action Menu"]
     ]);
+    Route::get("/debug/async-wizard", "Debug@async_wizard", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Async Wizard"]
+    ]);
+
+    if (app("debug")) {
+        Route::get("/debug/env/", "Debug@environment", [
+            'navigation' => ['debug'],
+            'anchor' => ['name' => "Async Wizard"]
+        ]);
+    }
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
 }
 
@@ -68,4 +79,6 @@ if (app("Auth_logins_enabled")) {
     // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
+
+    Route::get("/user/menu", "UserAccounts@get_user_menu");
 }

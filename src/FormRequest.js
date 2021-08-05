@@ -7,7 +7,7 @@
 class FormRequest {
     constructor(form, { asJSON = true, errorField = null }) {
         this.onsuccess = new Event("requestSuccess");
-        this.onfail = new Event("requestFail");
+        this.onfail = new Event("requestFailure");
         this.asJSON = asJSON;
         if (typeof form === "string") this.form = document.querySelector(form);
         else this.form = form;
@@ -110,6 +110,7 @@ class FormRequest {
         if (list === null) list = this.el_list;
         let query = {};
         for (var i in list) {
+            // if(!list[i].validity_check()) 
             query[list[i].element.getAttribute("name")] = list[i].value;
         }
         if (this.autosave && this.include) query.include = this.include;
@@ -118,9 +119,17 @@ class FormRequest {
 
     errorHandler(error, result = null, post = null) {
         if (error.result.code === 422) this.handleFieldIssues(error.result);
-        let field = this.errorField;
-        if (!field) field = this.form.querySelector(".error")
-        if (field) field.innerText = error.result.error
+        // let field = this.errorField;
+        // if (!field) field = this.form.querySelector(".error")
+        // if (field) field.innerText = error.result.error
+        if (!this.statusMessage) {
+            this.statusMessage = new StatusError({
+                id: this.form.getAttribute("action"),
+                message: error.result.error,
+            })
+        } else {
+            this.statusMessage.update(error.result.error);
+        }
         this.form.dispatchEvent(this.onfail);
     }
 
@@ -166,10 +175,14 @@ class LoginFormRequest extends FormRequest {
         try {
             var result = await post.send(data, {});
         } catch (error) {
-            error_container.innerText = error.result.error
+            // error_container.innerText = error.result.error
+            this.errorHandler(error);
             return;
         }
-        if (result.login === "successful") window.location.reload();
-        console.log(result)
+
+        this.onsuccess = new CustomEvent("requestSuccess", { detail: result });
+        this.form.dispatchEvent(this.onsuccess);
+        // if (result.login === "successful") window.location.reload();
+        // console.log(result)
     }
 }

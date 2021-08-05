@@ -25,7 +25,6 @@ class CobaltPlugin {
 
     /** Returns an array of Cobalt permissions
      * @return array Cobalt permissions
-     * @todo implement this
      */
     public function register_permissions() {
         return $this->_config['permissions'] ?? [];
@@ -36,9 +35,13 @@ class CobaltPlugin {
      * @return string "/routes/$context.php"
      */
     public function register_routes($context) {
-        $dir = $this->get_dir('routes_dir', "/routes");
+        $dir = $this->get_dir('routes_dir', "/routes/");
         if ($dir === null) return null;
         return "$dir/$context.php";
+    }
+
+    public function register_classes() {
+        return $this->get_dir("class_dir", "/classes/");
     }
 
     /** @return string this plugins CONTROLLER directory */
@@ -47,14 +50,12 @@ class CobaltPlugin {
     }
 
     /** @return string this plugins TEMPLATE directory
-     * @todo implement this
      */
     public function register_templates() {
         return $this->get_dir("template_dir", "/templates/");
     }
 
     /** @return string this plugins SHARED CONTENT directory 
-     * @todo implement this
      */
     public function register_shared_content_dir() {
         return $this->get_dir("shared_dir", "/shared/");
@@ -67,45 +68,42 @@ class CobaltPlugin {
         return $this->get_dir('cli_dir', "/cli/commands/");
     }
 
-    /** Handles manually loading this plugins dependencies.
+    /** Handles manually loading this plugin's classes.
      * @return void 
-     * @todo implement this
      * */
     public function register_dependencies() {
+        return $this->get_dir('classes_dir', "/classes/");
     }
 
-    /** @return string this plugins JAVASCRIPT directory
-     * @todo implement this
-     */
-    public function register_javascript_dir() {
-        return $this->get_dir('js_dir', "/js/");
+    /** @return string this plugin's public directory */
+    public function register_public_content_dir() {
+        return $this->get_dir('public_dir', "/public/");
     }
 
-    /** @return string this plugins CSS directory
-     * @todo implement this
+    public function register_packages($type = 'js') {
+        $elements = $this->_config["$type-packages"] ?? [];
+        if (empty($elements)) return [];
+        $private = $this->register_public_content_dir();
+        $final = [];
+        foreach ($elements as $element) {
+            $el = "$type/$element";
+            $key = "/core-content/plugins/" . $this->_config['plugin'] . "/$el";
+            $final[$key] = "$private/$el";
+        }
+        return $final;
+    }
+
+    /** Use add_vars() to register variables for all route contexts
+     * @return void use \add_vars($vars);
      */
-    public function register_css_dir() {
-        return $this->get_dir('css_dir', "/shared/css/");
+    public function register_variables() {
+        return [];
     }
 
     /** @return string validated directory relative to this plugin's path */
-    private function get_dir($key, $default) {
+    protected function get_dir($key, $default) {
         $dir = $this->_config[$key] ?? $default;
         if (!is_dir($this->__PLUGIN_ROOT__ . $dir)) return null;
         return $this->__PLUGIN_ROOT__ . $dir;
-    }
-
-    /** Use add_vars() to register variables for every web context route
-     * @return void use \add_vars($vars);
-     * @todo implement this
-     */
-    public function register_web_variables() {
-    }
-
-    /** Use add_vars() to register variables fro every admin context route
-     * @return void use \add_vars($vars);
-     * @todo implement this
-     */
-    public function register_admin_variables() {
     }
 }

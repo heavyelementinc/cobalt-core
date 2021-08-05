@@ -21,7 +21,7 @@ use Validation\Exceptions\ValidationFailed;
 
 abstract class Database {
     public $db = __APP_SETTINGS__['database'];
-    private $collection;
+    public $collection;
 
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
@@ -65,6 +65,9 @@ abstract class Database {
         return $this->collection->count($filter, $options);
     }
 
+    final function distinct($field) {
+        return $this->collection->distinct($field);
+    }
 
     /* UPDATE */
     final function updateOne($filter, $fields, array $options = []) {
@@ -83,5 +86,9 @@ abstract class Database {
 
     final function deleteMany($filter, array $options = []) {
         return $this->collection->deleteMany($filter, $options);
+    }
+
+    final function aggregate($pipeline, $options = []) {
+        return $this->collection->aggregate($pipeline, $options);
     }
 }

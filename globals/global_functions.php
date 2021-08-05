@@ -23,6 +23,10 @@ use Exceptions\HTTP\Confirm;
  * @return mixed The value of the setting
  */
 function app($setting = null) {
+    if (!defined("__APP_SETTINGS__")) {
+        trigger_error("It's too early to be looking for settings. Returning NULL!", E_USER_WARNING);
+        return null;
+    }
     if ($setting === null) return __APP_SETTINGS__;
     if (key_exists($setting, __APP_SETTINGS__)) return __APP_SETTINGS__[$setting];
     try {
@@ -43,6 +47,7 @@ function app($setting = null) {
  *               exist
  */
 function session($info = null) {
+    if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
     if (key_exists($info, $GLOBALS['session'])) return $GLOBALS['session'][$info];
     throw new Exception("Field $info does not exist");
@@ -69,8 +74,8 @@ function session_exists() {
  *                      Can be null.
  * @return bool true if the user has permission, false otherwise
  */
-function has_permission($perm_name, $group = null, $user = null) {
-    return $GLOBALS['auth']->has_permission($perm_name, $group, $user);
+function has_permission($perm_name, $group = null, $user = null, $throw_no_session = true) {
+    return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 
 /** This function will return a merged array of decoded JSON files that are 
@@ -209,16 +214,51 @@ function set_template($path) {
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
+ * 
+ * A few template vars for quick reference:
+ * title      - The title of the page
+ * main_id    - the main element's id
+ * body_id    - the body element's id
+ * body_class - the body element's class list
+ * 
  * @param array $vars MUST BE ASSOCIATIVE ARRAY
  * @return void
  */
 function add_vars($vars) {
+
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
         return;
     }
 
     $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
+}
+
+$GLOBALS['TEMPLATE_BINDINGS'] = [
+    "html_head_binding", "noscript_binding_after", "header_binding_before",
+    "header_binding_middle", "header_binding_after", "main_content_binding_before",
+    "main_content_binding_after", "footer_binding_before", "footer_binding_after"
+];
+
+/**
+ * Append a value to a particular template binding
+ * 
+ * Valid bindings: html_head_binding, noscript_binding_after, header_binding_before, 
+ * header_binding_middle, header_binding_after, main_content_binding_before, 
+ * main_content_binding_after, footer_binding_before, footer_binding_after
+ * 
+ * @param string $binding_name the name of the binding
+ * @param string $value the value to be bound
+ * @return void
+ */
+function bind($binding_name, $value) {
+
+
+    if (!in_array($binding_name, $GLOBALS['TEMPLATE_BINDINGS'])) throw new Exception("Invalid binding");
+
+    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'][$binding_name]))
+        $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] = $value;
+    else $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] .= $value;
 }
 
 /** 
@@ -254,7 +294,12 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
         /** If it's an object, we'll check if the key exists and set the value
          * of $mutant to the found property */
         if ($type === "object") {
-            if (!property_exists($mutant, $key)) break; // Break if we can't find the property
+            if (is_a($mutant, "\Validation\Normalize")) {
+                $temp_path = get_temp_path($path_map, $key);
+                if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+                return $mutant;
+            }
+            if (!isset($mutant->{$key})) break; // Break if we can't find the property
             $mutant = $mutant->{$key};
             $break = false;
         }
@@ -270,9 +315,15 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
      * appending to the $looked_up string when we successfully find the object
      */
     if ($looked_up === "$path_map.") return $mutant;
-    else if ($throw_on_fail == "warn") \trigger_error("Could not find `$path_map`");
+    else if ($throw_on_fail == "warn") throw new Exception("Could not find `$path_map`");
     else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
     else return; // Return undefined
+}
+
+function get_temp_path($path, $key) {
+    $index = strpos($path, $key);
+    $substr = substr($path, $index);
+    return $substr;
 }
 
 /** Give this function a string and it will parse it as Markdown. $untrusted 
@@ -400,6 +451,10 @@ function csrf_attribute() {
  * @return mixed
  */
 function get_json($file_name, $array = true) {
+    if (!file_exists($file_name)) {
+        if ($array) return [];
+        else return false;
+    }
     $json = file_get_contents($file_name);
     return json_decode($json, $array);
 }
@@ -417,7 +472,7 @@ function jsonc_decode($json, $assoc = false, $depth = 512, $flags = 0) {
     return json_decode($json, $assoc, $depth, $flags);
 }
 
-/** Build Object */
+/** Used with the '...' route path symbol, provide the string as $path amd */
 function build_array_from_path(&$arr, $path, $value, $delimiter = ".") {
     $keys = explode($delimiter, $path);
     foreach ($keys as $key) {
@@ -442,6 +497,38 @@ function is_secure() {
         || $_SERVER['SERVER_PORT'] == 443;
 }
 
+/** Used with the '...' route path symbol, provide the string as $path and valid
+ * keys as $keys
+ * 
+ * If the path equals `/some/path/key/value` and $keys equals ['key']
+ * 
+ * The return value will be ['key' => 'value']
+ * 
+ * All other info in the string will be ignored.
+ * 
+ * @param string $path
+ * @param array $keys a list of valid keys to parse for
+ * @return array the processed associative array
+ */
+function associative_array_helper(string $path, array $keys) {
+    $exploded = explode("/", $path);
+    $array = array_fill_keys($keys, null);
+    for ($i = 0; $i < count($exploded); $i++) {
+        if (in_array($exploded[$i], $keys)) {
+            $array[$exploded[$i]] = $exploded[$i + 1];
+            $i++;
+        }
+    }
+    return $array;
+}
+
+function associative_to_path(array $arr) {
+    $path = "/";
+    foreach ($arr as $name => $val) {
+        $path .= "$name/$val/";
+    }
+    return $path;
+}
 
 /**
  * A shorthand way of rendering a template and getting the results. This is
@@ -454,6 +541,7 @@ function is_secure() {
  */
 function with(string $template, $vars = []) {
     $render = new \Render\Render();
+    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'];
     $render->set_vars($vars);
     $render->from_template($template);
     return $render->execute();
@@ -466,7 +554,7 @@ function with(string $template, $vars = []) {
  * @param mixed   $vars     Variables to include
  * @return string The processed template OR an empty string on error
  */
-function maybe_with($template, $vars) {
+function maybe_with($template, $vars = []) {
     if (!$template) return "";
     if (!is_string($template)) return "";
     try {
@@ -474,6 +562,19 @@ function maybe_with($template, $vars) {
     } catch (Exception $e) {
         return "";
     }
+}
+
+function conditional_addition(string $template, bool $is_shown, $vars = []) {
+    if (!$is_shown) return "";
+    return with($template, $vars);
+}
+
+function with_each(string $template, $docs, $var_name = 'doc') {
+    $rendered = "";
+    foreach ($docs as $doc) {
+        $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
+    }
+    return $rendered;
 }
 
 /** Compare two pathnames
@@ -500,6 +601,8 @@ function is_child_dir($base_dir, $path) {
 
 /** Create a directory listing from existing web GET routes
  * 
+ * with_icon, prefix, classes, id
+ * 
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
@@ -517,6 +620,7 @@ function get_route_group($directory_group, $misc = []) {
         // Now we check if the directory group is in $groups or the key exists
         // If both are FALSE, then we skip list assembly.
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
+        if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
 
         $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
         $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
@@ -573,6 +677,7 @@ function cents_to_dollars($cents) {
  * @return string formated date
  */
 function mongo_date($date, $fmt = "Y-m-d") {
+    if (!$date) return "";
     $date = (string)$date / 1000;
     return date($fmt, $date);
 }
@@ -582,6 +687,7 @@ function date_instance($date) {
 }
 
 function phone_number_format($number, $format = "(ddd) ddd-dddd") {
+    if (!$number) return "";
     $num_index = 0;
     $num_max = strlen($number);
     $formatted = "";
@@ -591,11 +697,11 @@ function phone_number_format($number, $format = "(ddd) ddd-dddd") {
                 $formatted .= "n";
                 continue;
             }
-            $format .= $number[$num_index];
+            $formatted .= $number[$num_index];
             $num_index++;
-            continue;
+        } else {
+            $formatted .= $format[$i];
         }
-        $formatted .= $format[$i];
     }
     return $formatted;
 }
@@ -607,6 +713,24 @@ function phone_number_normalize($number) {
     // Strip the junk characters out of the string
     $value = str_replace($junk, "", $number);
     return $value;
+}
+
+function flex_table($docs, $table, $schema) {
+    $result = [];
+    $index = 1;
+    foreach ($docs as $doc) {
+        $event = new $schema($doc);
+        $result[0] = "<flex-row>";
+        $result[$index] = "<flex-row>";
+        foreach ($table as $key => $cell) {
+            $result[0] .= "<flex-header>$cell[header]</flex-header>";
+            $result[$index] .= "<flex-cell>" . (isset($cell['display']) ? $cell['display']($event, $key) : $event->{$key}) . "</flex-cell>";
+        }
+        $result[0] .= "</flex-row>";
+        $result[$index] .= "</flex-row>";
+        $index++;
+    }
+    return "<flex-table>" . implode("", $result) . "</flex-table>";
 }
 
 /**
@@ -622,4 +746,37 @@ function confirm($message, $data, $okay = "Continue", $dangerous = true) {
     $headers = apache_request_headers();
     if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
     throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
+}
+
+
+function plugin($name) {
+    if (isset($GLOBALS['ACTIVE_PLUGINS'][$name])) return $GLOBALS['ACTIVE_PLUGINS'][$name];
+    throw new Exception('Plugin is not active!');
+}
+
+/**
+ * 
+ * @param iterator $results the results of a Mongo query
+ * @param string $schema_name the name of the schema class
+ * @return array every instance of the mongo query as a Cobalt schema
+ */
+function results_to_schema($results, string $schema_name): array {
+    $array  = [];
+    // if ($schema_name instanceof \Validation\Normalize === false) throw new Exception("$schema_name is not an instance of \Validation\Normalize");
+    foreach ($results as $i => $doc) {
+        $array[$i] = new $schema_name($doc);
+    }
+    return $array;
+}
+
+function fetch($url, $method = "GET", $headers = false) {
+    $client = new \GuzzleHttp\Client();
+    $request = $client->request($method, $url);
+    $html = $request->getBody()->getContents();
+    if (!$headers) return $html;
+    return ['body' => $html, 'headers' => $request->getHeaders()];
+}
+
+function fetch_and_save($url) {
+    
 }

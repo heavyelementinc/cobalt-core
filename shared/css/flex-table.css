@@ -1,0 +1,141 @@
+/**
+USING FLEX TABLES
+=================
+
+Flex tables will automatically scale their content responsively.
+
+Flex-tables are WebComponents and when they're connected to the DOM, the child
+flex-rows are checked for how many columns they contain and the flex-table is
+assigned a custom property called --column-count. This is equal to the number
+of columns (or <flex-cell>, <flex-header>, and/or <flex-sticky>) elements are
+directly descended from the flex-rows.
+
+The maximum number of columns found is then applied to --column-count
+
+This is useful since, if the screen is too small to safely render the content,
+we switch to a display: grid and specify the number of columns based on the
+items.
+
+*/
+
+flex-table{
+    display: flex;
+    width: 100%;
+    background: var(--project-color-table-bg-odd);
+    flex-wrap: wrap;
+    border: var(--project-color-table-border);
+}
+  
+    flex-table[scroll-x]{
+        display:table;
+        overflow-x: scroll;
+    }
+  
+        flex-row{
+            display: flex;
+            box-sizing: border-box;
+            width: 100%;
+            flex-grow: 0;
+            flex-wrap: wrap;
+            background: var(--project-color-table-bg-odd);
+        }
+    
+        [scroll-x] flex-row{
+            display: table-row;
+            flex-wrap: nowrap;
+        }
+    
+        flex-row:nth-of-type(even){
+            background: var(--project-color-table-bg-even);
+        }
+    
+        flex-sticky + flex-sticky,
+        flex-sticky + flex-cell,
+        flex-sticky + flex-header,
+        flex-cell + flex-cell,
+        flex-header + flex-cell,
+        flex-header + flex-header{
+            border-left: var(--project-color-table-border);
+        }
+    
+        flex-cell,flex-header,flex-sticky{
+            display: flex;
+            flex-grow: 1;
+            padding: .3rem;
+            width: 80px;
+        }
+        
+        [scroll-x] flex-cell, [scroll-x] flex-header, [scroll-x] flex-sticky{
+            display: table-cell;
+            width: auto;
+        }
+    
+        flex-header, flex-row:first-of-type flex-sticky{
+            font-weight: bold;
+            text-align: center;
+            justify-content: center;
+            align-items:center;
+            border-bottom: var(--project-color-table-border);
+        }
+    
+        /** flex-sticky items should only be the left-most column OR the first row*/
+        flex-sticky{
+            position:sticky;
+        /* left: 0; */
+        }
+        
+        flex-header:only-of-type, flex-sticky:only-of-type{
+            border: none;
+        }
+    
+        flex-header:only-of-type:only-child,flex-sticky:only-of-type:only-child{
+            border-top: var(--project-color-table-border);
+            border-bottom: var(--project-color-table-border);
+            width:100%;
+            grid-column: 1 / span all;
+        }
+
+@media only screen and (max-width:900px) {
+    flex-table {
+        width: 100%;
+        overflow-x: scroll;
+        display: block;
+    }
+
+        flex-row {
+            display: grid;
+            grid-template-columns: repeat(var(--column-count), 140px);
+            width: max-content;
+        }
+
+            flex-cell,
+            flex-header,
+            flex-sticky {
+                grid-column: auto;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            flex-sticky {
+                position: sticky;
+                left: 0;
+                font-weight: bold;
+                background: inherit
+            }
+}
+
+table, tr, td, th {
+    border: var(--project-color-table-border);
+}
+
+td, th{
+    padding: .2rem;
+}
+
+table{
+    background: var(--project-color-table-bg-odd);
+}
+
+tr:nth-of-type(even) {
+    background: var(--project-color-table-bg-even);
+}
