@@ -205,6 +205,13 @@ class DateConverter {
 
     getDateOrdinalSuffix() {
         let date = String(this.date.getDate());
+        // Handle special cases
+        switch (String(date).substr(date.length - 2)) {
+            case "11":
+            case "12":
+            case "13":
+                return "th";
+        }
         date = date[date.length - 1];
         return this.ordinals[Number(date)];
     }

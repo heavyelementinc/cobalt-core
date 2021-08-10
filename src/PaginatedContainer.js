@@ -128,6 +128,7 @@ class PaginatedContainer {
         if (key in this._steps !== true) throw new Error("No valid entry");
         let step = this._steps[key];
         this.initSlide(step, this._current);
+        step.onAdvance();
         this.go(key, true);
     }
 
