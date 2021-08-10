@@ -76,6 +76,7 @@ class PaginatedContainer {
             init: (step, thisReference) => { }, // Executed when either selector is matched OR url is downloaded
             onEnter: (step, thisReference) => { }, // Get things ready when entering the slide
             onLeave: (step, thisReference) => { }, // Housekeeping exiting the current slide
+            onAdvance: (step, thisReference) => { },
 
             ...step, // Include the steps
 
@@ -128,7 +129,7 @@ class PaginatedContainer {
         if (key in this._steps !== true) throw new Error("No valid entry");
         let step = this._steps[key];
         this.initSlide(step, this._current);
-        step.onAdvance();
+        step.onAdvance(step, this);
         this.go(key, true);
     }
 
