@@ -244,7 +244,8 @@
             "UserMenu.js",
             "ActionMenu.js",
             "StatusMessage.js",
-            "Events.js"
+            "Events.js",
+            "PaginatedContainer.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -273,6 +274,7 @@
             "tabs-drawer.css",
             "calendar.css",
             "webcomponents.css",
+            "paginated-container.css",
             "main.css"
         ],
         "$merge": true // User's packages should come second.

@@ -268,11 +268,12 @@ function get_form_input(el, form) {
  *        has been played
  * @param maxDuration the maximum wait time before we cancel waiting
  * */
-async function wait_for_animation(element, animationClass, removeClass = true, maxDuration = 2000) {
+async function wait_for_animation(element, animationClass, removeClass = true, maxDuration = 2000, callback = (element) => { }) {
     if (!element) return;
     return new Promise((resolve, reject) => {
         element.addEventListener("animationend", e => {
             resolve();
+            callback(element);
             if (removeClass) element.classList.remove(animationClass);
             clearTimeout(timeout);
         }, { once: true });
