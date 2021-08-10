@@ -1,0 +1,105 @@
+.paginated-container--parent{
+    /* height: 100%;
+    width: 100%; */
+    position: relative;
+    transition: height 800ms;
+    overflow:hidden;
+    --button-row-height: 60px;
+}
+
+.paginated-container--step{
+    position: absolute;
+    top: 0;
+    left: 0;
+    display:none;
+}
+
+.paginated-container--slides {
+}
+
+.paginated-container--next,
+.paginated-container--prev,
+.paginated-container--current {
+    /* height: 100%; */
+    width: 100%;
+    display: block;
+}
+
+.paginated-container--next,
+.paginated-container--prev{
+}
+
+.paginated-container--next {
+    --direction: translateX(100%);
+    animation: paginatedContainer--previous 1 800ms forwards running;
+}
+
+.paginated-container--prev{
+    --direction: translateX(-100%);
+    animation: paginatedContainer--previous 1 800ms forwards running;
+}
+
+.paginated-container--current {
+    animation: paginatedContainer--current 1 800ms forwards running;
+}
+
+@keyframes paginatedContainer--current {
+    from{
+        opacity: 0;
+        transform: var(--direction);
+    }
+    to{
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes paginatedContainer--previous {
+    from{
+        /* display: block; */
+        opacity: 1;
+        transform: none;
+    }
+    to{
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+.paginated-container--button-row {
+    height: var(--button-row-height);
+    display:flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.paginated-container--button{
+    min-width: 100px;
+    border: none;
+    border-radius: 5px;
+    font-family: var(--project-head-family);
+    text-transform: uppercase;
+    padding: unset;
+    transition: opacity 200ms;
+}
+
+.paginated-container--button:disabled {
+    opacity: .2;
+}
+
+.paginated-button--back {
+    background: var(--project-color-button-hover);
+    color:var(--project-color-button-hover-text);
+}
+.paginated-button--next {
+    background: var(--project-color-button-init);
+    color: var(--project-button-text);
+}
+
+.paginated-container--button:hover{
+    background: var(--project-color-button-hover);
+    color: var(--project-color-button-hover-text);
+}
+

@@ -414,6 +414,7 @@ class WebHandler implements RequestHandler {
     function process() {
         if (isset($GLOBALS['web_processor_template'])) $this->main_content_from_template($GLOBALS['web_processor_template']);
         if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
+        if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['main_id' => get_main_id()]);
         $this->renderer->set_body($this->template_body);
         $this->renderer->set_vars($this->template_vars);
         return $this->renderer->execute();

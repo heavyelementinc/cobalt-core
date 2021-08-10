@@ -147,6 +147,27 @@ $GLOBALS['CLASSES_DIR'] = [
     __ENV_ROOT__ . "/classes/"
 ];
 
+/**
+ * Uses the controller's `title` to generate an ID. This is automatically applied
+ * to a page if no `main_id` is specified.
+ * 
+ * This function does not guarantee the ID generated is unique in your DOM and
+ * two pages with the same .
+ * 
+ * @return string[]|string|null 
+ */
+function get_main_id($prepend = true) {
+    if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['title'])) return "main-cobalt";
+    $final = str_to_id($GLOBALS['WEB_PROCESSOR_VARS']['title']);
+    if ($prepend) return "main-$final";
+    return $final;
+}
+
+function str_to_id($str) {
+    $replace = preg_replace("/([^\w])/", "-", $str);
+    return strtolower(preg_replace("/(-{2,})/", "-", $replace));
+}
+
 /** The autoload routine for our classes.
  * @throws Exception if $class could not be loaded
  * @todo do we *want* this class to 
@@ -778,5 +799,4 @@ function fetch($url, $method = "GET", $headers = false) {
 }
 
 function fetch_and_save($url) {
-    
 }
