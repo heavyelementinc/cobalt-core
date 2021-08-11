@@ -46,6 +46,7 @@ class Modal {
         clickoutCallback = async () => false, // Callback used when clicking outside modal window (black space). Return TRUE to close the window.
         animations = true, // Allow or deny spawn in/out animations
         immediate = false, // You can wait to spawn the modal by setting this to false
+        lockViewport = true,
     }) {
         this.id = id;
         this.classes = classes;
@@ -59,6 +60,8 @@ class Modal {
         this.animations = animations;
         this.dialog = document.createElement("modal-box");
         this.buttonResult = {};
+        this.shouldLockViewport = lockViewport
+        this.lockedViewportClass = "scroll-locked";
 
         // Our default button configuration will be merged with whatever the
         // user provided
@@ -90,6 +93,9 @@ class Modal {
 
     /** Render the container and modal box */
     async draw() {
+        if (this.shouldLockViewport) {
+            this.lockViewport()
+        }
         // Create our container
         this.container = document.createElement("modal-container");
         this.container.classList = this.parentClass;
@@ -134,6 +140,17 @@ class Modal {
 
         if (this.url) window.router.navigation_event(null, this.url);
         return this.dialog;
+    }
+
+    lockViewport() {
+        let width = get_offset(document.body).w;
+        document.body.style.overflow = "hidden";
+        document.body.style.width = `${width}px`;
+    }
+
+    unlockViewport() {
+        document.body.style.overflow = "unset";
+        document.body.style.width = "unset";
     }
 
     loading_spinner_start() {
@@ -245,6 +262,8 @@ class Modal {
 
     /** The close handler. Call this method to close a modal programatically. */
     close() {
+        this.unlockViewport();
+
         /** Handle in case of no animations */
         if (!this.animations) this.container.parentNode.removeChild(this.container);
         /** Handle despawning if animations run */

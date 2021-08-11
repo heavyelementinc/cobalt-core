@@ -76,6 +76,7 @@ class PaginatedContainer {
             init: (step, thisReference) => { }, // Executed when either selector is matched OR url is downloaded
             onEnter: (step, thisReference) => { }, // Get things ready when entering the slide
             onLeave: (step, thisReference) => { }, // Housekeeping exiting the current slide
+            onAdvance: (step, thisReference) => { },
 
             ...step, // Include the steps
 
@@ -146,9 +147,13 @@ class PaginatedContainer {
         // if (!forwards) newClass = "next";
         this._steps[current].onLeave(this._steps[current], this);
 
+        if (forwards === true) {
+            this._steps[current].onAdvance(this._steps[current], this);
+        }
+
         this._steps[current]._container.classList.remove(this.classes.current);
         wait_for_animation(this._steps[current]._container, newClass, true);
-        console.log(newClass);
+        // console.log(newClass);
 
         this._steps[next]._container.classList.add(newClass);
         this.heights(next);
