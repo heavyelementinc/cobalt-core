@@ -1,6 +1,8 @@
 .paginated-container--parent{
     /* height: 100%;
     width: 100%; */
+    display:flex;
+    flex-direction: column;
     position: relative;
     transition: height 800ms;
     overflow:hidden;
@@ -92,7 +94,14 @@
 .paginated-button--back {
     background: var(--project-color-button-hover);
     color:var(--project-color-button-hover-text);
+    transition: opacity 300ms, transform 400ms;
+    
 }
+.paginated-button--back:disabled {
+    opacity: 0;
+    transform: translateX(-25%);
+}
+
 .paginated-button--next {
     background: var(--project-color-button-init);
     color: var(--project-button-text);

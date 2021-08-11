@@ -129,7 +129,6 @@ class PaginatedContainer {
         if (key in this._steps !== true) throw new Error("No valid entry");
         let step = this._steps[key];
         this.initSlide(step, this._current);
-        step.onAdvance(step, this);
         this.go(key, true);
     }
 
@@ -148,9 +147,13 @@ class PaginatedContainer {
         // if (!forwards) newClass = "next";
         this._steps[current].onLeave(this._steps[current], this);
 
+        if (forwards === true) {
+            this._steps[current].onAdvance(this._steps[current], this);
+        }
+
         this._steps[current]._container.classList.remove(this.classes.current);
         wait_for_animation(this._steps[current]._container, newClass, true);
-        console.log(newClass);
+        // console.log(newClass);
 
         this._steps[next]._container.classList.add(newClass);
         this.heights(next);
