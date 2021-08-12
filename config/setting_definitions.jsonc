@@ -211,8 +211,9 @@
             "action-menu-background": "var(--project-color-input-disabled)",
             "action-menu-border": "var(--project-color-table-border)",
             "action-menu-hover": "var(--project-color-inactive)",
-            "events-banner-background": "var(--project-body-background)",
-            "events-banner-text": "black",
+            /** Events banner colors should be the full sextet */
+            "events-banner-background": "#efefef",
+            "events-banner-text": "#000000",
             "events-button-color": "var(--project-color-button-init)",
             "events-button-color-hover": "var(--project-color-button-hover)",
             "events-button-text": "var(--project-color-button-text)",

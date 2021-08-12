@@ -326,7 +326,7 @@ function get_offset(element) {
 }
 
 /** Binary Contrast */
-function colorMathBlackOrWhite(bgColor, lightColor = "#FFFFFF", darkColor = "#000000") {
+function colorMathBlackOrWhiteOld(bgColor, lightColor = "#FFFFFF", darkColor = "#000000") {
     var color = bgColor.replace("#", '');
     // Parse out our color values
     var r = parseInt(color.substring(0, 2), 16);
@@ -342,6 +342,27 @@ function colorMathBlackOrWhite(bgColor, lightColor = "#FFFFFF", darkColor = "#00
     var L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
     return (L > 0.179) ? darkColor : lightColor;
 }
+
+/** Binary Contrast */
+function colorMathBlackOrWhite(bgColor, lightColor = "#FFFFFF", darkColor = "#000000") {
+    var color = bgColor.replace("#", "");
+    var r = parseInt(color.substring(0, 2), 16);
+    var g = parseInt(color.substring(2, 4), 16);
+    var b = parseInt(color.substring(4, 6), 16);
+
+    var L1 = Math.pow(0.2126 * r / 255 +
+        0.7152 * g / 255 +
+        0.0722 * b / 255, 2.2);
+
+    if (L1 + 0.05 >= 0.5) {
+        return darkColor;
+    } else {
+        return lightColor;
+    }
+}
+
+
+
 
 function normalize_all($schema, $data) {
     if ($data instanceof Iterator) $data = iterator_to_array($data);

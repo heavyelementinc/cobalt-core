@@ -25,8 +25,9 @@ function user_menu() {
 user_menu();
 
 function navigation_menu() {
-    const spawner = document.querySelector("#nav-menu-spawn"),
+    const header = document.querySelector("#nav-menu-spawn-nojs + header"),
         visibilityController = document.querySelector("#nav-menu-spawn-nojs"),
+        spawner = document.querySelector("#nav-menu-spawn"),
         name = "js-nav-spawned",
         functs = {
             menuHidden: () => {
@@ -43,6 +44,14 @@ function navigation_menu() {
             handle: () => {
                 if (!visibilityController.checked) functs.menuVisible();
                 else functs.menuHidden();
+            },
+            accessibility: (state = true) => {
+                console.log(state);
+                if (visibilityController.style.display !== "none") {
+                    spawner.checked = state;
+                    spawner.dispatchEvent(new Event("change"));
+                    functs.handle();
+                }
             }
         };
     // Handle when the menu is already open when loading the page.
@@ -52,6 +61,10 @@ function navigation_menu() {
 
     // When the button's clicked
     spawner.addEventListener("click", e => functs.handle());
+
+    // header.addEventListener("focusin", e => functs.accessibility())
+
+    // header.addEventListener("focusout", e => functs.accessibility(false))
 }
 
 navigation_menu();

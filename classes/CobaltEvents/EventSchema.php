@@ -75,8 +75,23 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             "bgColor" => [
-                'get' => fn ($val) => $val ?? app("css-vars.events-banner-background"),
-                'set' => 'hex_color'
+                'get' => fn ($val) => ($val) ? $val : app("css-vars.events-banner-background"),
+                'set' => 'hex_color',
+                'display' => fn ($val) => $this->hex_color($val, app("css-vars.events-banner-background")),
+            ],
+            "txtColor" =>  [
+                'get' => fn ($val) => ($val) ? $val : app("css-vars.events-banner-text"),
+                'set' => function ($val) {
+                    return $this->contrast_color($val, $this->__dataset['bgColor']);
+                },
+                'display' => fn ($val) => $this->hex_color($val ?? app("css-vars.events-banner-text"), app("css-vars.events-banner-text")),
+            ],
+            'btnColor' =>  [
+                'get' => fn ($val) => ($val) ? $val : app("css-vars.events-banner-text"),
+                'set' => function ($val) {
+                    return $this->contrast_color($val, $this->__dataset['bgColor'], 1.2);
+                },
+                'display' => fn ($val) => $this->hex_color($val ?? app("css-vars.color-button-init"), app("css-vars.color-button-init")),
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],
@@ -109,12 +124,12 @@ class EventSchema extends \Validation\Normalize {
                 'set' => fn ($val) => $this->set_time($val, 'end')
             ],
             'advanced.included_paths' => [
-                'set' => 'sanitize_elements',
+                'set' => 'relative_pathnames',
                 'valid' => fn ($val) => $this->filled($val)
             ],
             'advanced.excluded_paths' => [
                 'get' => fn ($val = null) => $val ?? ['/admin'],
-                'set' => 'sanitize_elements',
+                'set' => 'relative_pathnames',
                 'valid' => fn ($val) => $this->filled($val)
             ],
             'advanced.exclusive' => [
@@ -156,6 +171,20 @@ class EventSchema extends \Validation\Normalize {
             $mutant[$i] = $this->sanitize($v);
         }
         return $mutant;
+    }
+
+    function relative_pathnames($val) {
+        $mutant = [];
+        foreach ($val as $i => $v) {
+            $mutant[$i] = $this->remove_junk($v);
+        }
+        return $mutant;
+    }
+
+    private function remove_junk($v) {
+        $m = preg_replace("/^(https?:\/\/)/", "", $v);
+        $m = str_replace(app("domain_name"), "", $m);
+        return $this->sanitize($m);
     }
 
     function filled($val = null) {

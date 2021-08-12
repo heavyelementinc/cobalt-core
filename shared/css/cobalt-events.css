@@ -34,8 +34,7 @@ a.cobalt-events--cta-button {
 
 
 a.cobalt-events--cta-button:hover {
-    background: var(--project-events-button-color-hover);
-    color: var(--project-events-button-text-hover);
+    filter: brightness(120%);
 }
 
 
@@ -81,6 +80,17 @@ a.cobalt-events--cta-button:hover {
     font-size: 2.5em;
 }
 
+.cobalt-events--default :is(h1,h2,h3,h4,h5) {
+    color: var(--project-events-banner-text);
+}
+
+.cobalt-events--default article{
+    background: transparent;
+    width: 100%;
+    margin: 10px;
+    padding: 0;
+}
+
 
 .cobalt-events--modal a.cobalt-events--cta-button{
     margin-top: auto;
@@ -89,18 +99,28 @@ a.cobalt-events--cta-button:hover {
 
 /** Handle Animation Types **/
 .cobalt-events--default.cobalt-events--banner {
-    --animation: CobaltEventsDefaultIn;
-    animation: 1s 1 forwards running;
+    --animation: CobaltEventsBannerIn;
     overflow: hidden;
     box-sizing: border-box;
 }
 
-.cobalt-events--default.cobalt-events--banner.cobalt-events--dismiss {
-    --animation: CobaltEventsDefaultIn;
-    animation: 1s 2 reverse running;
+.cobalt-events--animation {
+    animation-name: var(--animation);
+    animation-duration: 1s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
-@keyframes CobaltEventsDefaultIn {
+.cobalt-events--banner.cobalt-events--banner-stablestate {
+    padding: 1em 5em;
+    height: var(--height);
+}
+
+.cobalt-events--default.cobalt-events--banner.cobalt-events--dismiss {
+    animation-direction: reverse;
+}
+
+@keyframes CobaltEventsBannerIn {
     from {
         padding: 0 5em;
         height: 0px;

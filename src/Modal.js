@@ -47,6 +47,7 @@ class Modal {
         animations = true, // Allow or deny spawn in/out animations
         immediate = false, // You can wait to spawn the modal by setting this to false
         lockViewport = true,
+        pageTitle = null,
     }) {
         this.id = id;
         this.classes = classes;
@@ -79,7 +80,8 @@ class Modal {
             },
         }
 
-        this.pageTitle = null;
+        this.pageTitle = document.title;
+        this.modalTitle = pageTitle;
 
         // Animation stuff
         this.container_opacity_start = 0; // Starts RELATIVE to spawning
@@ -96,6 +98,9 @@ class Modal {
         if (this.shouldLockViewport) {
             this.lockViewport()
         }
+
+        if (this.modalTitle) document.title = this.modalTitle;
+
         // Create our container
         this.container = document.createElement("modal-container");
         this.container.classList = this.parentClass;

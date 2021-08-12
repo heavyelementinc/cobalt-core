@@ -30,7 +30,7 @@ function app($setting = null) {
     if ($setting === null) return __APP_SETTINGS__;
     if (key_exists($setting, __APP_SETTINGS__)) return __APP_SETTINGS__[$setting];
     try {
-        lookup_js_notation($setting, __APP_SETTINGS__, true);
+        return lookup_js_notation($setting, __APP_SETTINGS__, true);
     } catch (Exception $e) {
         throw new Exception("Setting $setting does not exist");
     }
