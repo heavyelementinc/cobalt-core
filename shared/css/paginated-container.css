@@ -89,6 +89,7 @@
 
 .paginated-container--button:disabled {
     opacity: .2;
+    pointer-events: none;
 }
 
 .paginated-button--back {
@@ -106,9 +107,12 @@
     background: var(--project-color-button-init);
     color: var(--project-button-text);
 }
+.paginated-button--next:hover {
+    background: var(--project-color-button-init);
+}
 
 .paginated-container--button:hover{
-    background: var(--project-color-button-hover);
     color: var(--project-color-button-hover-text);
+    filter: brightness(120%);
 }
 

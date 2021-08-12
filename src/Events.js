@@ -57,15 +57,18 @@ class CobaltEvent_default {
     isElligibleForDisplay() {
         const hasBeenClosed = this[this.storageMedium](this.data._id.$oid)?.closed ?? null;
         const includePathnameMatch = this.pathname(this.data.advanced.included_paths);
-        const excludePathnameMatch = this.pathname(this.data.advanced.excluded_paths);
+
+        // Let's get a malliable version of our pathnames
+        let excludedPathnames = [...this.data.advanced.excluded_paths];
+        // Check if an pathname has been specified. If it has, push it to the excluded list
+        if (this.data.call_to_action_href) excludedPathnames.push(this.data.call_to_action_href);
+        const excludePathnameMatch = this.pathname(excludedPathnames);
 
         if (hasBeenClosed === true) {
-            // console.log(`Rejecting ${this.data.type} ${this.data._id.$oid || this.data._id} because it's been closed.`)
             return false
         };
         if (includePathnameMatch) return true;
         if (excludePathnameMatch) {
-            // console.log(`Rejecting ${this.data.type} ${this.data._id.$oid || this.data._id} because the pathname is excluded.`)
             return false;
         }
         return true;
@@ -87,8 +90,9 @@ class CobaltEvent_default {
         this.element = document.createElement("div");
         this.element.id = this.data.id || random_string();
         this.element.classList.add("cobalt-events--default", this.classes);
-        this.element.style.background = this.data.bgColor ?? "#FFF";
-        this.element.style.color = colorMathBlackOrWhite(this.data.bgColor ?? "#FFFFFF");
+        this.element.style.background = this.data.bgColor ?? "var(--project-events-banner-background)";
+        this.element.style.color = colorMathBlackOrWhite(this.data.bgColor ?? "");
+        this.element.style.color = this.data.txtColor ?? "var(--project-events-banner-text)";
         this.element.style.setProperty("--project-events-banner-text", this.element.style.color);
 
         this.innerContent();
@@ -126,6 +130,8 @@ class CobaltEvent_default {
             now = new Date().getTime();
         let date;
         switch (this.data.session_policy) {
+            case "nag":
+                return now;
             case "with_session":
             case "24_hours":
                 date = now + (1000 * 60 * 60 * 24);
@@ -139,8 +145,6 @@ class CobaltEvent_default {
                 date = end + 1;
                 break;
         }
-
-        // console.log(date);
 
         return new DateConverter(date).date;
     }
@@ -182,8 +186,10 @@ class CobaltEvent_default {
             cta.classList.add("cobalt-events--cta-button");
             cta.href = this.data.call_to_action_href;
             cta.innerText = this.data.call_to_action_prompt;
-            cta.addEventListener("click", e => this.closeItem(), { once: true })
+            cta.addEventListener("click", e => this.closeItem(), { once: true });
+            cta.style.backgroundColor = this.data.btnColor;
             this.element.appendChild(cta);
+            cta.style.color = colorMathBlackOrWhite(getComputedStyle(cta)['background-color']);
         }
     }
 
@@ -191,12 +197,16 @@ class CobaltEvent_default {
     async insert() {
         document.body.parentNode.insertBefore(this.element, document.body);
         this.element.style.setProperty('--height', getComputedStyle(this.element).height);
-        this.element.style.animationName = getComputedStyle(this.element).getPropertyValue("--animation");
+        await wait_for_animation(this.element, "cobalt-events--animation");
+        // this.element.style.animationName = getComputedStyle(this.element).getPropertyValue("--animation");
+        this.element.classList.add("cobalt-events--banner-stablestate");
     }
 
     /** Remove element from page */
     async dismiss() {
-        await wait_for_animation(this.element, "cobalt-events--dismiss");
+        this.element.classList.remove("cobalt-events--banner-stablestate");
+        this.element.classList.add("cobalt-events--dismiss");
+        await wait_for_animation(this.element, "cobalt-events--animation");
         this.element.parentNode.removeChild(this.element);
     }
 
@@ -228,7 +238,8 @@ class CobaltEvent_modal extends CobaltEvent_default {
         this.modal = new Modal({
             id: "cobalt-events--modal-window",
             close_btn: false,
-            chrome: false
+            chrome: false,
+            pageTitle: this.data.headline
         });
         const container = await this.modal.draw();
         container.querySelector(".modal-body").appendChild(this.element);

@@ -232,8 +232,6 @@ table, tr, td {
     justify-content: flex-end;
     align-items: flex-end;
 }
-:is(.hbox.vbox)
-
 .vbox{
     flex-direction: column;
 }

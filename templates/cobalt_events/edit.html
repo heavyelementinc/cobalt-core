@@ -6,14 +6,14 @@
             <label>Internal Name</label>
             <input name="name" value="{{event.name}}" for="#internal_name">
             <label>Event Type</label>
-            <input-autocomplete name="type" value="{{event.type}}">
+            <select name="type" value="{{event.type}}">
                 {{!event.type.options}}
-            </input-autocomplete>
+            </select>
             <label>"Display Again" Policy <help-span value="When to display the event again after closure."></help-span>
             </label>
-            <input-autocomplete name="session_policy" value="{{event.session_policy}}">
+            <select name="session_policy" value="{{event.session_policy}}">
                 {{!event.session_policy.options}}
-            </input-autocomplete>
+            </select>
             <label>Event Starts</label>
             <input type="date" name="start_date" value="{{event.start_date}}">
             <input type="time" name="start_time" value="{{event.start_time}}">
@@ -39,10 +39,35 @@
                     value="When the user clicks the Call to Action button, this is where they'll be taken. May be a relative link or another URL.">
                 </help-span></label>
             <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
-            <label>Background Color <helps-span
-                    value="Choose the background color of your event. Note that a contrasting text color will be automatically assigned.">
-                </helps-span></label>
-            <input type="color" name="bgColor" value="{{event.bgColor}}">
+            <label>Background Color <help-span value="Choose the background color of your event.">
+                </help-span></label>
+            <div class="hbox">
+                <input type="color" name="bgColor" value="{{event.bgColor.display}}"
+                    default="{{app.css-vars.events-banner-background}}">
+                <button onclick="resetToDefault('bgColor')" style="margin-left:10px;">
+                    <ion-icon name='refresh'></ion-icon>
+                </button>
+            </div>
+            <label>Text Color <help-span value="Choose the text color for your event.">
+                </help-span></label>
+            <div class="hbox">
+                <input type="color" name="txtColor" value="{{event.txtColor.display}}"
+                    default="{{app.css-vars.events-banner-text}}">
+                <button onclick="resetToDefault('txtColor')" style="margin-left:10px;">
+                    <ion-icon name='refresh'></ion-icon>
+                </button>
+            </div>
+            <label>CTA Button Color <help-span
+                    value="Choose the background color of the 'Call To Action' button. A contrasting color will be automatically assigned.">
+                </help-span></label>
+            <div class="hbox">
+                <input type="color" name="btnColor" value="{{event.btnColor.display}}"
+                    default="{{app.css-vars.color-button-init}}">
+                <button onclick="resetToDefault('btnColor')" style="margin-left:10px;">
+                    <ion-icon name='refresh'></ion-icon>
+                </button>
+            </div>
+
         </fieldset>
         <fieldset id="fieldset" class="admin-panel--container">
             <h2>Advanced</h2>
@@ -91,4 +116,17 @@
         border: 1px solid var(--project-color-input-border-nofocus);
         border-radius: 4px;
     }
+
+    input[type='color'] {
+        width: 100%;
+        height: 36px;
+    }
 </style>
+
+<script>
+    function resetToDefault(target) {
+        target = document.querySelector(`[name='${target}']`)
+        const reset = target.getAttribute("default");
+        target.value = reset;
+    }
+</script>
