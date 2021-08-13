@@ -111,6 +111,11 @@ class Modal {
 
         this.close_button(); // Add our close button
 
+        // Set a window 
+        history.pushState({ page: 1 }, this.modalTitle || document.title, "");
+        window.addEventListener("popstate", e => { if (this.container.parentNode !== null) this.close(e) }, { once: true })
+
+
         // Handle animation stuff
         setTimeout(() => {
             this.handle_container_click();
@@ -144,6 +149,7 @@ class Modal {
         this.buttons();
 
         if (this.url) window.router.navigation_event(null, this.url);
+
         return this.dialog;
     }
 
@@ -266,8 +272,12 @@ class Modal {
     }
 
     /** The close handler. Call this method to close a modal programatically. */
-    close() {
+    close(e = null) {
         this.unlockViewport();
+
+        // Unset popstate listener. We return if e is null because this function
+        // will be called again. Probably really hacky, but it works.
+        if (e === null) return history.back();
 
         /** Handle in case of no animations */
         if (!this.animations) this.container.parentNode.removeChild(this.container);
