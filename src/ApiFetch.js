@@ -54,6 +54,84 @@ class ApiFetch {
     }
 }
 
+class ApiFile extends ApiFetch {
+    constructor(uri, method = "POST", {
+        format = "multipart/form-data; charset=utf-8",
+        cache = "default",
+        asJSON = true,
+        credentials = true,
+        headers = {},
+        progressBar = null,
+    }) {
+        super(uri, method, { format, cache, asJSON, credentials, headers });
+        this.progressBar = progressBar;
+    }
+
+    async send(post = "") {
+        return new Promise((resolve, reject) => {
+            const data = new FormData();
+
+            data.append("json_payload", JSON.stringify(post));
+
+            const fileFields = document.querySelectorAll("[type='file'],[type='files']");
+
+            let file_size = 0;
+
+            for (const i of fileFields) {
+                for (const l of i.files) {
+                    data.append(`${i.name}[]` || 'files[]', l);
+                    file_size += parseFloat(l.size);
+                }
+            }
+
+            let request = new XMLHttpRequest();
+            if (this.credentials) request.withCredentials = true;
+            request.open(this.method, this.uri);
+
+            request.upload.addEventListener("progress", (e) => {
+                let percent_complete = (e.loaded / e.total) * 100;
+                if (this.progressBar) this.progressBar.percent = percent_complete;
+            });
+
+            request.addEventListener("load", (e) => {
+                if (this.progressBar) {
+                    this.progressBar.percent = 100;
+                    this.progressBar.complete = "complete";
+                }
+
+
+                var headers = request.getAllResponseHeaders();
+
+                var arr = headers.trim().split(/[\r\n]+/);
+
+                var headerMap = {};
+                arr.forEach(function (line) {
+                    var parts = line.split(': ');
+                    var header = parts.shift();
+                    var value = parts.join(': ');
+                    headerMap[header] = value;
+                });
+
+                if ("x-redirect" in headerMap && headerMap["x-redirect"]) router.location = headerMap['x-redirect'];
+                resolve(e);
+            });
+
+            request.addEventListener("error", (e) => {
+                reject(e);
+            })
+
+            for (const i in this.headers) {
+                request.setRequestHeader(i, this.headers[i]);
+            }
+
+            request.setRequestHeader("X-Total-Upload-Size", file_size);
+
+            request.send(data);
+        })
+    }
+
+}
+
 class FetchError extends Error {
     constructor(message, data, result) {
         super();

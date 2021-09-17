@@ -177,4 +177,38 @@ class Debug extends \Controllers\Pages {
 
         set_template("/parts/main.html");
     }
+
+    function event_stream() {
+        add_vars([
+            'title' => "Server-Sent Events"
+        ]);
+
+        set_template("/debug/server-events.html");
+    }
+
+    function file_upload_demo() {
+        add_vars([
+            'title' => "File Upload Demo"
+        ]);
+
+        set_template("/debug/file-upload.html");
+    }
+
+    function upload_test() {
+        $_POST['file_count'] = count($_FILES);
+        return $_POST;
+    }
+
+    function image_test() {
+        //https://www.milmike.com/run-php-asynchronously-in-own-threads
+        $manager = new \Files\UploadManager($_FILES);
+        $dir = __APP_ROOT__ . "/ignored/tmp/cobalt-debug/";
+        // $dir = "/tmp/cobalt-debug/";
+        // unlink($dir . "*");
+        mkdir($dir, 0777, true);
+        $manager->move_all_files_to_dir($dir);
+
+        $manager->generate_thumbnails_exec();
+        return "success";
+    }
 }

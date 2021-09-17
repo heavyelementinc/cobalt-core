@@ -5,21 +5,21 @@
 namespace Render;
 
 class FlexTable {
+    public $action = null;
 
-    function __construct($id = "", $classes = "") {
+    function __construct($id = "", $classes = "", $action = null) {
         $this->set_id($id);
         $this->set_classes($classes);
         $this->layout = $this->table_layout();
+        $this->action = $action;
     }
 
     private function table_layout(): array {
         return [
             'name' => [
                 'label' => 'Name',
-                'sort' => [
-                    'default' => 1,
-                    'action' => '/r'
-                ],
+                'sort' => 1,
+                'state' => 'default',
                 'value' => fn ($discount) => "<a href='$GLOBALS[PATH]add/$discount->_id'>$discount->name</a>"
             ]
         ];
@@ -28,7 +28,8 @@ class FlexTable {
     public function render($data = null, $schema = null) {
         if ($data !== null) $this->set_data($data);
         if ($this->data === null) throw new \Exception("Table has no data.");
-        $table = "<flex-table id='$this->id' class='$this->classes'>";
+        $action = ($this->action) ? " action=\"$this->action\"" : "";
+        $table = "<flex-table id='$this->id' class='$this->classes'$action>";
         $table .= $this->get_columns();
         foreach ($this->data as $document) {
             if ($schema) $document = new $schema($document);
@@ -61,11 +62,18 @@ class FlexTable {
         $head = "<flex-row>";
         // Loop through our layout meta
         foreach ($this->layout as $column => $meta) {
+            $data = "";
+            if ($element === "header") {
+                $data = " data-column-fieldname=\"$column\"";
+                $data .= (isset($meta['default'])) ? " data-default-sort='$meta[default]'" : "";
+                $data .= (isset($meta['sort'])) ? " data-sort-start='$meta[sort]'" : "";
+            }
+            $style = (isset($meta['style'])) ? " style=\"$meta[style]\"" : "";
             // Start building our cell
-            $cell = "<flex-$element class='$this->header_name" . "$column'>";
+            $cell = "<flex-$element class='$this->header_name" . "$column'$data" . "$style>";
             // Check if the column label is callable
             if (is_callable($meta[$index])) {
-                $result = $meta[$index](); // "<flex-cell id=''>$something</flex-cell>"
+                $result = $meta[$index]($doc->{$column}, $doc); // "<flex-cell id=''>$something</flex-cell>"
                 // Check if the result starts with <flex-header
                 if (preg_match("/^<flex-$element/", $result)) {
                     // If it does, overwrite $cell
@@ -87,5 +95,16 @@ class FlexTable {
             $head .= $cell;
         }
         return "$head</flex-row>";
+    }
+
+    public function get_row_dataset($doc) {
+        $dataset = [];
+        foreach ($this->layout as $column => $meta) {
+            $dataset[$column] = $doc[$column];
+            if (is_callable($meta['value'])) {
+                $dataset[$column] = $meta['value']($doc, $doc[$column]);
+            }
+        }
+        return $dataset;
     }
 }

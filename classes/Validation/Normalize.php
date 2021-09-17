@@ -56,6 +56,10 @@
  *  }
  * ```
  * 
+ * Words of warning
+ * > If a subdocument also has a `get`ter defined, then the get method will be
+ * > executed when calling that field.
+ * 
  * @license cobalt-core/license
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @copyright 2021 Heavy Element, Inc.
@@ -63,11 +67,13 @@
 
 namespace Validation;
 
+use Iterator;
+use JsonSerializable;
 use \Validation\Exceptions\NoValue;
 use \Validation\Exceptions\ValidationIssue;
 use \Validation\Exceptions\ValidationFailed;
 
-abstract class Normalize extends NormalizationHelpers {
+abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator {
     protected $__schema = [];
     protected $__dataset = [];
     protected $__index = [];
@@ -80,6 +86,7 @@ abstract class Normalize extends NormalizationHelpers {
         'restore',
         'json',
         'display',
+        'md',
     ];
 
     // We set up our schema and store it
@@ -130,15 +137,16 @@ abstract class Normalize extends NormalizationHelpers {
      * @return array Validated data
      * @throws ValidationFailed 
      */
-    public function __validate($data) {
+    public function __validate($data, $createSubset = true) {
         $this->__to_validate = $data;
-        $schema = $this->get_schema_subset(array_keys($data));
+        if ($createSubset) $schema = $this->get_schema_subset(array_keys($data));
+        else $schema = $this->__get_schema();
         $issues = [];
         foreach ($schema as $name => $value) {
-            if (!isset($data[$name])) continue;
+            if (!isset($data[$name]) && $createSubset === true) continue;
             try {
                 // Run the setter function by assigning value which can throw issues
-                $this->{$name} = $data[$name];
+                $this->{$name} = (isset($data[$name])) ? $data[$name] : null;
             } catch (ValidationIssue $e) { // Handle issues
                 if (!isset($issues[$name])) $issues[$name] = $e->getMessage();
                 else $issues[$name] .= "\n" . $e->getMessage();
@@ -196,13 +204,17 @@ abstract class Normalize extends NormalizationHelpers {
             }
         }
 
+
+
         if ($n !== $name && $proto !== false) return $this->__execute_prototype($value, $name, $proto[1]);
 
         // If we don't want normalizing, just return the value we already have
         if (!$this->__normalize_out) return $value;
 
-        if (isset($this->__schema[$name]['each']))
-            return new Subdocument($value, $this->__schema[$name]['each'], $this);
+        if (isset($this->__schema[$name]['each']) && !isset($this->__schema[$name]['get'])) {
+            $subdoc = new Subdocument($value, $this->__schema[$name]['each'], $this);
+            return iterator_to_array($subdoc);
+        }
         $method_name = $this->__schema[$name]['get'] ?? "get_" . str_replace(".", "__", $name);
 
         if (is_callable($method_name)) {
@@ -405,5 +417,47 @@ abstract class Normalize extends NormalizationHelpers {
 
     final private function __proto_json($val, $field) {
         return json_encode($val);
+    }
+
+    final private function __proto_md($val, $field) {
+        return from_markdown($val);
+    }
+
+    public function jsonSerialize() {
+        if (!$this->__dataset) throw new \Exception("This normalizer has not been supplied with iterable data");
+
+        $mutant = [];
+        foreach ($this->__dataset as $name => $value) {
+            $mutant[$name] = $this->__get($name);
+        }
+
+        return $mutant;
+    }
+
+
+    /* =================
+        ITERATOR METHODS
+       ================= */
+    private $__position = 0;
+
+    public function rewind() {
+        $this->__position = 0;
+    }
+
+    public function current() {
+        return $this->{$this->__index[$this->__position]};
+    }
+
+    public function key() {
+        return $this->__index[$this->__position];
+    }
+
+    public function next() {
+        ++$this->__position;
+    }
+
+    public function valid() {
+        if (!isset($this->__index[$this->__position])) return false;
+        return isset($this->__dataset[$this->__index[$this->__position]]);
     }
 }

@@ -25,6 +25,7 @@ class FormRequest {
         this.include = this.form.getAttribute("include") ?? null;
         this.form_elements();
         this.errorField = errorField;
+        this.files();
     }
 
     /** Add all the form elements to this instance's list of elements */
@@ -76,14 +77,24 @@ class FormRequest {
         // let data = Object.fromEntries(formdata);
 
         let data = this.build_query();
+        this.files();
 
         let result = await this.send(data);
 
     }
 
+    files() {
+        this.hasFiles = this.form.querySelectorAll("[type='file'],[type='files']");
+    }
+
     async send(data) {
         this.reset_errors();
-        const post = new ApiFetch(this.action, this.method, { headers: this.headers });
+        this.files();
+        let post;
+        if (this.hasFiles.length === 0) post = new ApiFetch(this.action, this.method, { headers: this.headers });
+        else {
+            post = new ApiFile(this.action, this.method, { headers: this.headers, progressBar: this.progressBar });
+        }
         let result;
         try {
             result = await post.send(data, {});

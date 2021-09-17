@@ -9,7 +9,8 @@ class Subdocument extends Normalize {
 
     function __construct($values, $schema, &$parent) {
         $this->parent = $parent;
-        parent::__construct([]);
+        if ($values instanceof \MongoDB\Model\BSONArray) $values = json_decode(json_encode($values), true);
+        parent::__construct($values);
         //if (gettype($values) === "object") $values = json_decode(json_encode($values));
         $this->__original_dataset = array_merge($this->__dataset, $values);
         $this->init_schema($schema);

@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 /**
  * env.php - The Cobalt Environment Bootstrapper
  * 

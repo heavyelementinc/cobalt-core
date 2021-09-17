@@ -1,4 +1,4 @@
-window.closeGlyph = "&#10006;"; // "✖️";
+window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
 var universal_input_element_query = "input[name], select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name]";
 
 function app(setting = null) {

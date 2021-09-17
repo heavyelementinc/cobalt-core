@@ -63,10 +63,19 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => "Async Wizard"]
     ]);
 
+
     if (app("debug")) {
+        Route::get("/debug/stream/", "Debug@event_stream", [
+            'navigation' => ['debug'],
+            'anchor' => ['name' => "Server-Sent Events"]
+        ]);
+        Route::get("/debug/file-upload/", "Debug@file_upload_demo", [
+            'navigation' => ['debug'],
+            'anchor' => ['name' => "File Upload Test"]
+        ]);
         Route::get("/debug/env/", "Debug@environment", [
             'navigation' => ['debug'],
-            'anchor' => ['name' => "Async Wizard"]
+            'anchor' => ['name' => "Environment"]
         ]);
     }
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
@@ -81,4 +90,5 @@ if (app("Auth_logins_enabled")) {
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
 
     Route::get("/user/menu", "UserAccounts@get_user_menu");
+    Route::get("/admin", "CoreController@admin_redirect");
 }
