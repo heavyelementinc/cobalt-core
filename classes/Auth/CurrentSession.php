@@ -114,7 +114,7 @@ class CurrentSession {
                 [$this->cookie_name => $this->token_value],
                 ['$set' => [
                     $this->cookie_name => $this->token_value,
-                    'user_id' => $user_id,
+                    'user_id' => new \MongoDB\BSON\ObjectId($user_id),
                     'refresh' => $this->default_token_refresh,
                     'expires' => $this->default_token_expiration,
                     'persist' => filter_var($stay_logged_in, FILTER_VALIDATE_BOOLEAN)

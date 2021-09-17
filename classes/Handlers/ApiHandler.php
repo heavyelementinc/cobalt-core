@@ -74,11 +74,10 @@ class ApiHandler implements RequestHandler {
     }
 
     function request_validation($directives) {
-        // if(!isset($GLOBALS['current_route_meta'])) throw new \Exceptions\HTTP\NotFound("404 Not Found");
 
         /** Handle Cross-Origin Resource Sharing validation */
         $this->cors_management();
-
+        $file_upload = false;
         # Check if we need to search for CSRF token in the header.
         if ($this->method !== "GET" && isset($directives) && $directives['csrf_required']) {
             # Check if the X-CSRF-Mitigation token is specified
@@ -92,25 +91,32 @@ class ApiHandler implements RequestHandler {
         if (!in_array($this->method, $this->methods_from_stdin)) return;
 
         $incoming_content_type = isset($_SERVER['CONTENT_TYPE']) ? trim($_SERVER['CONTENT_TYPE']) : '';
-        $form_data = "multipart/form-data;";
 
         /** Check if our content is in JSON format and get it if it is. */
         if ($incoming_content_type === $this->content_type) {
             $incoming_stream = trim(file_get_contents("php://input"));
         }
 
+        $multipart_form_data = "multipart/form-data;";
+        // $form_data = "Content-Disposition: form-data;";
+
         /** Now we check if we're getting a file upload and handle it appropriately
          * since we can't use php://input while we're doing this. */
-        if (empty($incoming_stream) && strcasecmp(substr($incoming_content_type, 0, strlen($form_data)), $form_data) === 0) {
-            $incoming_stream = $_POST['json_payload'];
+        if (empty($incoming_stream)) {
+            $max_upload = getMaximumFileUploadSize();
+            if ($this->headers['Content-Length'] > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
+            if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0) {
+                $incoming_stream = $_POST['json_payload'];
+                $file_upload = true;
+            }
         }
 
         /** Throw an error if we haven't recieved any usable data. Do we need
          * to do this? Not sure. */
-        if (empty($incoming_stream)) throw new \Exceptions\HTTP\BadRequest("No data was specified.");
+        if (empty($incoming_stream) && !$file_upload) throw new \Exceptions\HTTP\BadRequest("No data was specified.");
 
         /** Set the $_POST superglobal to equal our incoming JSON. */
-        $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
+        if (!empty($incoming_stream)) $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
     }
 
     // This might need some refactoring. Is HTTP_ORIGIN where we want to be 

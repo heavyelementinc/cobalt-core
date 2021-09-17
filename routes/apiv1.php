@@ -42,6 +42,9 @@ if (app('debug')) {
         'permission' => 'Auth_allow_editing_users'
     ]);
 
+    Route::post("/debug/upload/", "Debug@upload_test");
+    Route::post("/debug/upload-and-watch/", "Debug@image_test");
+
     Route::post("/debug/validator", "Debug@validate_test_form");
     Route::post("/debug/confirm", "Debug@confirm_test_form");
 }

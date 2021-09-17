@@ -2,12 +2,10 @@
 
 namespace Validation;
 
-use Iterator;
 use Validation\Exceptions\ValidationIssue;
 use Validation\Exceptions\ValidationFailed;
 
-abstract class NormalizationHelpers implements Iterator {
-
+abstract class NormalizationHelpers {
     /**
      * After validation, private fields will be merged to the result.
      * 
@@ -310,33 +308,20 @@ abstract class NormalizationHelpers implements Iterator {
         return trim(htmlspecialchars($value));
     }
 
+    final protected function url_fragment_sanitize($value) {
+        $mutant = strtolower($value);
+        // Remove any character that isn't alphanumerical and replace it with a dash
+        $mutant = preg_replace("/([^a-z0-9])/", "-", $mutant);
+        // Remove any consecutive dash
+        $mutant = preg_replace("/(-){2,}/", "", $mutant);
 
+        if (!$mutant || $mutant === "-") throw new ValidationIssue("\"$value\" is not suitable to transform into a URL fragment");
 
-
-
-    /* =================
-        ITERATOR METHODS
-       ================= */
-    private $__position = 0;
-
-    public function rewind() {
-        $this->__position = 0;
+        return $mutant;
     }
 
-    public function current() {
-        return $this->{$this->__index[$this->__position]};
-    }
-
-    public function key() {
-        return $this->__index[$this->__position];
-    }
-
-    public function next() {
-        ++$this->__position;
-    }
-
-    public function valid() {
-        if (!isset($this->__index[$this->__position])) return false;
-        return isset($this->__dataset[$this->__index[$this->__position]]);
+    final protected function valid_url($url) {
+        if (filter_var($url, FILTER_VALIDATE_URL)) return $url;
+        throw new ValidationIssue("Must be a valid url");
     }
 }

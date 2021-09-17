@@ -100,6 +100,10 @@
                 "processor": "Handlers\\ApiHandler",
                 "prefix": "/webhook/v1/"
             },
+            "streams": {
+                "processor": "Handlers\\ApiHandler",
+                "prefix": "/streams/"
+            },
             "web": {
                 "processor": "Handlers\\WebHandler",
                 "prefix": "/"

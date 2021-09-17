@@ -61,10 +61,14 @@ class InputClass_default {
         if (this.update) {
             this.form.addEventListener("requestSuccess", e => {
                 for (const i of this.update) {
-                    i.innerText = this.value;
+                    this.perform_update(i, this.value);
                 }
             });
         }
+    }
+
+    perform_update(target, value) {
+        target.innerText = value;
     }
 
     set_error(message) {
@@ -301,6 +305,12 @@ class InputClass_object_array extends InputClass_default {
 
     store_error(element) {
         this.error.push(element);
+    }
+}
+
+class InputClass_file extends InputClass_default {
+    perform_update(target, value) {
+        target.innerText = value;
     }
 }
 

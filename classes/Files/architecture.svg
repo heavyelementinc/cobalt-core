@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+   sodipodi:docname="architecture.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.0998546"
+     inkscape:cx="13.183561"
+     inkscape:cy="529.61546"
+     inkscape:window-width="2560"
+     inkscape:window-height="1371"
+     inkscape:window-x="2560"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#e6e6e6;stroke-width:1;stroke-linecap:round;stroke-linejoin:round"
+       id="rect846"
+       width="76.767906"
+       height="35.400986"
+       x="-94.714943"
+       y="11.431293" />
+    <rect
+       style="fill:#e6e6e6;stroke-width:1;stroke-linecap:round;stroke-linejoin:round"
+       id="rect846-3"
+       width="76.767906"
+       height="35.400986"
+       x="76.333389"
+       y="83.223465" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="-90.637451"
+       y="11.491035"
+       id="text2588"><tspan
+         sodipodi:role="line"
+         id="tspan2586"
+         style="stroke-width:0.264583"
+         x="-90.637451"
+         y="11.491035">API Request</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="-90.637451"
+         y="18.546585"
+         id="tspan2590">$_POST data</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="-90.637451"
+         y="25.602137"
+         id="tspan13164">-&gt;generate_thumbnails_exec</tspan></text>
+    <rect
+       style="fill:#e6e6e6;stroke-width:1;stroke-linecap:round;stroke-linejoin:round"
+       id="rect5870"
+       width="76.292564"
+       height="38.228897"
+       x="-19.958044"
+       y="65.903061" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="-14.092144"
+       y="78.035454"
+       id="text8572"><tspan
+         sodipodi:role="line"
+         id="tspan8570"
+         style="stroke-width:0.264583"
+         x="-14.092144"
+         y="78.035454" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="-17.643156"
+       y="65.462318"
+       id="text18660"><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="-17.643156"
+         y="65.462318"
+         id="tspan18662">generate_thumnails_exec()</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="-17.643156"
+         y="72.517868"
+         id="tspan18666">queues task</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="-17.643156"
+         y="79.573418"
+         id="tspan18668">executes asynchronously</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 45.22463,78.645735 31.108759,4.57773"
+       id="path24452"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m -20.656313,38.506246 0.698269,27.396815"
+       id="path24454"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M -16.911368,71.566783 -37.848499,71.458682"
+       id="path24824" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="-144.09589"
+       y="73.534882"
+       id="text26778"><tspan
+         sodipodi:role="line"
+         id="tspan26776"
+         style="stroke-width:0.264583"
+         x="-144.09589"
+         y="73.534882">returns X-Subscribe header to client</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="76.333389"
+       y="83.223465"
+       id="text31692"><tspan
+         sodipodi:role="line"
+         id="tspan31690"
+         style="stroke-width:0.264583"
+         x="76.333389"
+         y="83.223465">CLI Files command</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="80.233978"
+       y="91.380257"
+       id="text41735"><tspan
+         sodipodi:role="line"
+         id="tspan41733"
+         style="stroke-width:0.264583"
+         x="80.233978"
+         y="91.380257">loads task</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="80.233978"
+         y="98.435806"
+         id="tspan41739">executes task</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="80.233978"
+         y="105.49136"
+         id="tspan44093">updates task record in db</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m -116.57602,78.309694 0.45607,76.855656"
+       id="path46188" />
+    <rect
+       style="fill:#e6e6e6;stroke-width:1;stroke-linecap:round;stroke-linejoin:round"
+       id="rect846-6"
+       width="76.767906"
+       height="35.400986"
+       x="-96.307716"
+       y="155.99031" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="-96.779724"
+       y="153.17761"
+       id="text48551"><tspan
+         sodipodi:role="line"
+         id="tspan48549"
+         style="stroke-width:0.264583"
+         x="-96.779724"
+         y="153.17761">client EventSource(eventId)</tspan></text>
+  </g>
+</svg>

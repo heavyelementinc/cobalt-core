@@ -50,7 +50,12 @@ function session($info = null) {
     if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
     if (key_exists($info, $GLOBALS['session'])) return $GLOBALS['session'][$info];
+    return lookup_js_notation($info, $GLOBALS['session'], true);
     throw new Exception("Field $info does not exist");
+}
+
+function session_refresh() {
+    $GLOBALS['auth'] = new \Auth\Authentication();
 }
 
 /**
@@ -60,7 +65,7 @@ function session($info = null) {
  */
 function session_exists() {
     if (isset($GLOBALS['session']) && $GLOBALS['session'] === null) return false;
-    if (isset($GLOBALS['session']) && !empty($GLOBALS['session']['pword'])) return true;
+    if (isset($GLOBALS['session'])) return true;
     return false;
 }
 
@@ -790,13 +795,79 @@ function results_to_schema($results, string $schema_name): array {
     return $array;
 }
 
-function fetch($url, $method = "GET", $headers = false) {
+function fetch($url, $method = "GET", $headers = [], $return_headers = false) {
     $client = new \GuzzleHttp\Client();
-    $request = $client->request($method, $url);
+    $request = $client->request($method, $url, [
+        'headers' => $headers
+    ]);
+    $headers = $request->getHeaders();
     $html = $request->getBody()->getContents();
-    if (!$headers) return $html;
-    return ['body' => $html, 'headers' => $request->getHeaders()];
+    if (strpos($headers['Content-Type'][0], 'json')) $html = json_decode($html, true);
+    if (!$return_headers) return $html;
+    return ['body' => $html, 'headers' => $headers];
+}
+
+function post_fetch($url, $data, $headers = [], $return_headers = false) {
+    $client = new \GuzzleHttp\Client();
+    $request = $client->request('POST', $url, [
+        'headers' => $headers,
+        'form_params' => $data
+    ]);
+    $html = $request->getBody()->getContents();
+    $headers = $request->getHeaders();
+    if (strpos($headers['Content-Type'][0], 'json')) $html = json_decode($html, true);
+    if (!$return_headers) return $html;
+    return ['body' => $html, 'headers' => $headers];
 }
 
 function fetch_and_save($url) {
+}
+
+/**
+ * This function returns the maximum files size that can be uploaded 
+ * in PHP
+ * @return int File size in bytes
+ **/
+function getMaximumFileUploadSize() {
+    return min(convertPHPSizeToBytes(ini_get('post_max_size')), convertPHPSizeToBytes(ini_get('upload_max_filesize')));
+}
+
+/**
+ * This function transforms the php.ini notation for numbers (like '2M') to an integer (2*1024*1024 in this case)
+ * 
+ * @param string $sSize
+ * @return integer The value in bytes
+ */
+function convertPHPSizeToBytes($sSize) {
+    //
+    $sSuffix = strtoupper(substr($sSize, -1));
+    if (!in_array($sSuffix, array('P', 'T', 'G', 'M', 'K'))) {
+        return (int)$sSize;
+    }
+    $iValue = substr($sSize, 0, -1);
+    switch ($sSuffix) {
+        case 'P':
+            $iValue *= 1024;
+            // Fallthrough intended
+        case 'T':
+            $iValue *= 1024;
+            // Fallthrough intended
+        case 'G':
+            $iValue *= 1024;
+            // Fallthrough intended
+        case 'M':
+            $iValue *= 1024;
+            // Fallthrough intended
+        case 'K':
+            $iValue *= 1024;
+            break;
+    }
+    return (int)$iValue;
+}
+
+function async_cobalt_command($command, $context = true, $log = "/dev/null") {
+    $shell = __ENV_ROOT__ . "/core.sh";
+    if ($context) $shell = __APP_ROOT__ . "/cobalt.sh";
+    $pid = shell_exec("nohup nice -n 10 sh $shell $command > $log & printf \"%u\" $!");
+    return $pid;
 }

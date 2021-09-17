@@ -54,8 +54,17 @@ class FormRequestElement extends HTMLElement {
     }
 
     async send(allowDangerous = false) {
+        if (this.request.statusMessage) this.request.statusMessage.close();
+
         let allow_final_stage = false;
         let has_error = false;
+
+        if (this.request.hasFiles.length !== 0 && !this.request.progressBar) {
+            const ref = document.createElement("progress-bar");
+            this.stages[1].appendChild(ref);
+            this.request.progressBar = ref;
+            this.request.progressBar.message = `Uploading ${this.request.hasFiles.length} files (1/2)`;
+        }
 
         await this.advance();
         this.request.reset_errors();
@@ -63,7 +72,7 @@ class FormRequestElement extends HTMLElement {
         else delete this.request.headers['X-Confirm-Dangerous'];
 
         try {
-            await this.request.send(this.request.build_query());
+            await this.send_and_subscribe();
             allow_final_stage = true;
         } catch (error) {
             await this.regress();
@@ -87,6 +96,41 @@ class FormRequestElement extends HTMLElement {
         }
 
         return has_error;
+    }
+
+    async send_and_subscribe() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                var request = await this.request.send(this.request.build_query());
+            } catch (e) {
+                reject(e);
+            }
+
+            if (this.hasAttribute("watch")) {
+                let subscription = new EventSource(this.getAttribute("watch"), { withCredentials: true });
+                subscription.addEventListener("completed", e => {
+                    subscription.close();
+                    this.request.progressBar.percent = 100;
+                    setTimeout(e => {
+                        resolve(request);
+                    }, 1000)
+                });
+                subscription.addEventListener("update", async e => {
+                    if (!e.data) return;
+                    let value = await JSON.parse(e.data.trim());
+                    this.request.progressBar.percent = value.percent;
+                    if (value.message) this.request.progressBar.message = value.message;
+                });
+                subscription.addEventListener("error", e => {
+                    new StatusError("There was an error");
+                    console.log(e);
+                    subscription.close();
+                    reject(request);
+                });
+            } else {
+                resolve(request);
+            }
+        });
     }
 
     async submit(allowDangerous = false) {
@@ -781,7 +825,11 @@ class InputObjectArray extends HTMLElement {
     connectedCallback() {
         let json = this.querySelector("var");
         if (this.hasAttribute("value")) {
-            this.value = JSON.parse(this.getAttribute("value")) || [];
+            try {
+                this.value = JSON.parse(this.getAttribute("value")) || [];
+            } catch (e) {
+                console.warn("Field has invalid parse data", this);
+            }
         } else if (json && "innerText" in json) {
             try { this.value = JSON.parse(json.innerText) || [] } catch (error) { }
         } else {
@@ -1170,3 +1218,61 @@ class FlexTable extends HTMLElement {
 }
 
 customElements.define("flex-table", FlexTable);
+
+class ProgressBar extends HTMLElement {
+    connectedCallback() {
+        this.bar = document.createElement("div");
+        this.bar.classList.add("progress-bar--indicator");
+        this.appendChild(this.bar);
+        this.dimensions = get_offset(this);
+        this.messageContainer = document.createElement("div");
+        this.messageContainer.innerHTML = "&nbsp;";
+        this.parentNode.insertBefore(this.messageContainer, this.nextSibling);
+    }
+
+    /**
+     * @param {string} value
+     */
+    set percent(value) {
+        this.setAttribute("percent", value);
+    }
+    set complete(value) {
+        this.setAttribute("complete", value);
+    }
+
+    set message(value) {
+        this.messageContainer.innerText = value;
+    }
+
+    static get observedAttributes() {
+        return ['percent'];
+    }
+
+    show() {
+        this.style.height = `${this.dimensions.h}px`
+    }
+
+    hide() {
+        this.style.height = 0;
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        const callable = `change_handler_${name.replace("-", "_")}`;
+        if (callable in this) {
+            this[callable](newValue, oldValue);
+        }
+    }
+
+    change_handler_percent(newValue, oldValue) {
+        this.bar.style.width = `${newValue}%`;
+    }
+
+    change_handler_complete(newValue, oldValue) {
+        this.isComplete = newValue;
+        const truthy = ["complete", "true", true, "done"];
+        if (truthy.indexOf(newValue) === -1) this.show();
+        else this.hide()
+    }
+}
+
+customElements.define("progress-bar", ProgressBar);

@@ -57,6 +57,10 @@ abstract class Database {
         return $this->collection->findOne($filter, $options);
     }
 
+    final function findOneAndUpdate($filter, $update, array $options = []) {
+        return $this->collection->findOneAndUpdate($filter, $update, $options);
+    }
+
     final function find($filter = [], array $options = []) {
         return $this->collection->find($filter, $options);
     }

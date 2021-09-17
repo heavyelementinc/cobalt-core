@@ -1,0 +1,38 @@
+<h1>File upload testing</h1>
+<div class="hbox">
+    <div></div>
+    <form-request action="/api/v1/debug/upload/" method="POST">
+        <h2>Single file upload</h2>
+        <fieldset>
+            <label>Attributes</label>
+            <input type="text" name="attribute">
+        </fieldset>
+        <fieldset>
+            <label>File</label>
+            <input type="file" name="file">
+        </fieldset>
+        <button type="submit">Upload</button>
+    </form-request>
+    <form-request action="/api/v1/debug/upload/" method="POST">
+        <h2>Multiple file upload</h2>
+        <fieldset>
+            <label>Attributes</label>
+            <input type="text" name="attribute">
+        </fieldset>
+        <fieldset>
+            <label>File</label>
+            <input type="file" name="file" multiple>
+        </fieldset>
+        <button type="submit">Upload</button>
+    </form-request>
+
+    <form-request action="/api/v1/debug/upload-and-watch/" method="POST" watch="/streams/watch/">
+        <h2>Image upload & thumbnail generation progress</h2>
+        <fieldset>
+            <label>File</label>
+            <input type="file" name="file" accept="image/png, image/jpeg, image/gif, image/webp" multiple>
+        </fieldset>
+        <button type="submit">Upload</button>
+    </form-request>
+    <div></div>
+</div>

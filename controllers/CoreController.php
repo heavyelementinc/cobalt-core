@@ -13,4 +13,10 @@ class CoreController extends \Controllers\Pages {
 
         set_template($login);
     }
+
+    function admin_redirect() {
+        // Redirect to the admin panel
+        header("Location: /admin/");
+        exit;
+    }
 }
