@@ -871,3 +871,25 @@ function async_cobalt_command($command, $context = true, $log = "/dev/null") {
     $pid = shell_exec("nohup nice -n 10 sh $shell $command > $log & printf \"%u\" $!");
     return $pid;
 }
+
+function plural($number, string $suffix = "s") {
+    if ($number == 1) return "";
+    return $suffix;
+}
+
+/**
+ * @param MongoDB\BSON\Document|mixed $it The Mongo document to be converted
+ * @return array returns an array representation of the document
+ */
+function doc_to_array($it): array {
+    if (is_array($it)) return $it;
+    $result = [];
+    foreach ($it as $key => $value) {
+        if ($value instanceof \Traversable) {
+            $result[$key] = doc_to_array($value);
+        } else {
+            $result[$key] = $value;
+        }
+    }
+    return $result;
+}

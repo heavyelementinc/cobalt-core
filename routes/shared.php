@@ -9,5 +9,5 @@ Route::get("/plugins/{plugin}/...", "FileController@plugin_resources");
 
 if (app('enable_core_content')) {
     /** Core content includes stuff in the __ENV_ROOT__/shared/ directory */
-    Route::get("/...", "FileController@locate");
+    Route::get("/...", "FileController@core_content_shared");
 }

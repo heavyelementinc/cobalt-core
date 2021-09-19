@@ -5,7 +5,7 @@ class FileController extends \Controllers\FileController {
         if (!app("enable_core_content")) throw new Exceptions\HTTP\NotFound("Shared files are not enabled.");
     }
 
-    function locate() {
+    function core_content_shared() {
         $path = $GLOBALS['router']->uri;
         // $file = __ENV_ROOT__ . "/shared/$path";
         $file = find_one_file([__ENV_ROOT__ . "/shared/", ...$GLOBALS['SHARED_CONTENT']], $path);

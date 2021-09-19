@@ -80,32 +80,39 @@
                 "prefix": "/admin/",
                 "exception_mode": "web",
                 "permission": "Admin_panel_access",
+                "session_refresh": true,
                 "vars": {
                     "html_class": "admin-panel"
                 }
             },
             "init": {
                 "processor": "Handlers\\WebHandler",
+                "session_refresh": false,
                 "prefix": null
             },
             "shared": {
                 "processor": "Handlers\\SharedHandler",
+                "session_refresh": false,
                 "prefix": "/core-content/"
             },
             "apiv1": {
                 "processor": "Handlers\\ApiHandler",
+                "session_refresh": false,
                 "prefix": "/api/v1/"
             },
             "webhookv1": {
                 "processor": "Handlers\\ApiHandler",
+                "session_refresh": false,
                 "prefix": "/webhook/v1/"
             },
             "streams": {
                 "processor": "Handlers\\ApiHandler",
+                "session_refresh": false,
                 "prefix": "/streams/"
             },
             "web": {
                 "processor": "Handlers\\WebHandler",
+                "session_refresh": true,
                 "prefix": "/"
             }
         },
