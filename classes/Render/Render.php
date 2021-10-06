@@ -80,6 +80,7 @@ class Render {
     public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
     public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
+    public $multiline_function = "/@(\w+)\((.*[\w\[\]\"',\r\n]*)\);/mU";
     protected $enable_strict_mustache_syntax = false; // Use use_alt_syntax(true) to swap
 
     public $allow_stock_variable_access = true; // Controls whether app, get, and post are accessible during execution
@@ -87,6 +88,10 @@ class Render {
     function __construct() {
         if (app('Render_strict_variable_parsing')) $this->strict_variable_parsing(true);
         $http = (\is_secure()) ? "https" : "http";
+
+        // Check if we need to parse for multiline function calls in scripts.
+        // $this->function = (app("Renderer_parse_for_multiline_functions")) ? $this->multiline_function : $this->function;
+
         $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
         $this->stock_vars = [
             'app'  => __APP_SETTINGS__,

@@ -23,15 +23,18 @@ class CurrentSession extends \Drivers\Database {
       TODO: Encrypt cookie values in database
      */
     function __construct() {
+        parent::__construct();
         $this->cookie_name = app('session_cookie_name'); // Name of the cookie we send to the client
 
         $this->token_value = (key_exists($this->cookie_name, $_COOKIE)) ? $_COOKIE[$this->cookie_name] : null;
         $this->now = time();
         $this->day = 60 * 60 * 24;
         $this->month = $this->day * 30;
+
         $this->default_cookie_expiration = $this->now + $this->month;
         $this->default_token_expiration = $this->now + $this->month;
         $this->default_token_refresh = $this->now + $this->day;
+
         $headers = apache_request_headers();
         $this->cookie_options = [
             'expires' => $this->default_cookie_expiration,
@@ -76,20 +79,21 @@ class CurrentSession extends \Drivers\Database {
 
     function update_token() {
         if (!$this->context) return false;
-        try {
-            $user_id = $this->session['_id'] ?? (string)session("_id");
-        } catch (\Exception $e) {
-            return null;
-        }
+
         $token = $this->get_unique_token();
+        $extend = [];
+        if ($this->session->persist) {
+            $extend = ['expires' => $this->default_cookie_expiration];
+        }
+
         try {
             $result = $this->updateOne(
                 [$this->cookie_name => $this->token_value],
                 [
-                    '$set' => [
+                    '$set' => array_merge([
                         $this->cookie_name => $token,
                         'refresh' => $this->default_token_refresh,
-                    ]
+                    ], $extend)
                 ]
                 // We DO NOT want to upsert, here. The session should exist;
             );

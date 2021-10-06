@@ -59,39 +59,50 @@ class Watch extends Database {
                 $this->schema,
                 $total,
                 $data,
-                ['created' => $this->__date()]
+                [
+                    'created' => $this->__date(),
+                    'timeout' => 30,
+                    'backgroundable' => false
+                ]
             )],
             ['upsert' => true]
         );
     }
 
+    public function backgroundable(bool $background) {
+        $this->set_field('backgroundable', $background);
+    }
+
+    public function timeout(int $seconds = 30) {
+        $this->set_field('timeout', $seconds);
+    }
+
     public function set($data) {
-        $result = $this->findOneAndUpdate(['_id' => $this->watchId], ['$set' => ['data' => $data]]);
-        if ($result === null || $result->status === "aborted") throw new Exception("Task was aborted");
+        $this->set_field('data', $data);
     }
 
     public function message($msg) {
-        $result = $this->findOneAndUpdate(['_id' => $this->watchId], ['$set' => ['message' => $msg]]);
-        if ($result === null || $result->status === "aborted") throw new Exception("Task was aborted");
+        $this->set_field('message', $msg);
     }
 
     public function inc($num = 1) {
-        $result = $this->findOneAndUpdate(['_id' => $this->watchId], ['$inc' => ['current' => $num]]);
-        if ($result === null || $result->status === "aborted") throw new Exception("Task was aborted");
+        $this->set_field('current', $num, '$inc');
     }
 
     public function dec($num = 1) {
-        $result = $this->findOneAndUpdate(['_id' => $this->watchId], ['$dec' => ['current' => $num]]);
-        if ($result === null || $result->status === "aborted") throw new Exception("Task was aborted");
+        $this->set_field('current', $num, '$dec');
     }
 
     public function reset() {
-        $result = $this->findOneAndUpdate(['_id' => $this->watchId], ['$set' => ['current' => 0]]);
-        if ($result === null || $result->status === "aborted") throw new Exception("Task was aborted");
+        $this->set_field('current', 0);
     }
 
     public function total($total) {
-        $result = $this->findOneAndUpdate(['_id' => $this->watchId], ['$set' => ['total' => $total]]);
+        $this->set_field('total', $total);
+    }
+
+    protected function set_field($field, $value, $operation = '$set') {
+        $result = $this->findOneAndUpdate(['_id' => $this->watchId], [$operation => [$field => $value]]);
         if ($result === null || $result->status === "aborted") throw new Exception("Task was aborted");
     }
 

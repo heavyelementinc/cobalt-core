@@ -59,11 +59,11 @@ class FormRequestElement extends HTMLElement {
         let allow_final_stage = false;
         let has_error = false;
 
-        if (this.request.hasFiles.length !== 0 && !this.request.progressBar) {
+        if (this.request.hasFiles.length !== 0 && !this.request.progressBar || this.hasAttribute('watch') && !this.request.progressBar) {
             const ref = document.createElement("progress-bar");
             this.stages[1].appendChild(ref);
             this.request.progressBar = ref;
-            this.request.progressBar.message = `Uploading ${this.request.hasFiles.length} files (1/2)`;
+            this.request.progressBar.message = `Working`;
         }
 
         await this.advance();

@@ -1,7 +1,7 @@
 <?php
 
-class Pages extends \Controllers\Pages{
-    function index(){
+class Pages extends \Controllers\Pages {
+    function index() {
         add_vars([
             'title' => "Welcome to Cobalt!",
             'test' => "<b>This is a test</b>",
@@ -9,6 +9,6 @@ class Pages extends \Controllers\Pages{
             'lookup' => ['field' => "LOOKUP"],
             'object' => json_decode('{"object":"value"}'),
         ]);
-        add_template("parts/index.html");
+        set_template("parts/index.html");
     }
 }

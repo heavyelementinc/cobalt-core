@@ -56,6 +56,7 @@ class ApiFetch {
     }
 
     async execPlugins(type, result, request) {
+        if (!window.ApiFetchPlugins) return;
         if (!window.ApiFetchPlugins[type]) return;
         for (const callback in window.ApiFetchPlugins[type]) {
             callback(result, request); 0

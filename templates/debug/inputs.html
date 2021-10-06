@@ -287,6 +287,13 @@
 
         </fieldset>
     </section>
+    <section>
+        <fieldset>
+            <async-button action="/api/v1/debug/slow-response">Slow Response</async-button>
+            <async-button action="/api/v1/debug/slow-error">Error</async-button>
+            <async-button action="/api/v1/debug/slow-response" once='true'>Once</async-button>
+        </fieldset>
+    </section>
 </container>
 
 <style>

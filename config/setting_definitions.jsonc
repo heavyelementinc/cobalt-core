@@ -253,6 +253,7 @@
             "FormRequest.js",
             "ApiFetch.js",
             "InputComponents.js",
+            "AsyncButton.js",
             "UserMenu.js",
             "ActionMenu.js",
             "StatusMessage.js",
@@ -274,14 +275,14 @@
             "header.css",
             "slideshow.css",
             "inputs.css",
-            "cobalt-events.css",
             "loading-spinner.css",
-            "modal.css",
+            "buttons.css",
             "action-menu.css",
             "status-message.css",
             "login-form.css",
             "form-request.css",
             "flex-table.css",
+            "cobalt-events.css",
             "modal.css",
             "tabs-drawer.css",
             "calendar.css",
@@ -479,5 +480,9 @@
     "Mail_port": {
         "default": 587,
         "$env": "MAIL_PORT"
+    },
+    "Renderer_parse_for_multiline_functions": {
+        // When true, the trailing semicolon is REQUIRED.
+        "default": false
     }
 }

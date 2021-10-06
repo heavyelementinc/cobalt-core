@@ -95,6 +95,12 @@ class AutoComplete extends HTMLElement {
         this.value = this.getAttribute("value");
     }
 
+    disconnectedCallback() {
+        const search = this.querySelector("input[type='search']");
+        console.log(search);
+        if (!search) search.parentNode.removeChild(search);
+    }
+
     getOptions() {
         const opts = this.querySelectorAll("option");
         for (const i of opts) {
@@ -152,6 +158,7 @@ class AutoComplete extends HTMLElement {
      * which gets updated on every input as well as the search field.
      * */
     searchElements() {
+        if (this.querySelector("input[type='search']")) return;
         if (this.readonly === true) return "";
         let placeholder = this.placeholder;
         let pattern = "";
@@ -176,7 +183,10 @@ class AutoComplete extends HTMLElement {
      * and can disappear the searchResults container on focusout
      */
     initSearchField() {
-        if (!this.searchField) return;
+        if (!this.searchField) {
+            this.searchField = this.querySelector("input[type='search']");
+            if (!this.searchField) return;
+        }
         this.searchField.addEventListener("change", e => {
             e.preventDefault();
             e.stopPropagation();

@@ -1,0 +1,92 @@
+async-button{
+    transition: padding 1s;
+}
+async-button:not(.link, [link]) {
+    appearance: initial;
+    border-radius: 5px;
+    background-color: #e9e9ed;
+    border: 1px solid #8f8f9d;
+    color: black;
+    padding: .2em .4em;
+    cursor: default;
+}
+
+async-button:not(.link, [link]):hover {
+    border: 1px solid #676774;
+    background-color: #d0d0d7;
+}
+
+async-button:not(.link, [link]):active {
+    border: 1px solid #484851;
+    background-color: #b1b1b9;
+}
+
+async-button:not(.link, [link]) {
+    display: inline-flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    padding: .2em 1.2em .2em 0.2em;
+}
+
+async-button.link, async-button[link]{
+    cursor: pointer;
+}
+
+async-button.working {
+    padding: .2em .4em .2em .6em;
+    pointer-events: none;
+}
+
+async-button.working > svg {
+    margin-right: .5em;
+    visibility: visible;
+    opacity: 1;
+}
+
+async-button > svg {
+    display: inline-block;
+    visibility: hidden;
+    opacity: 0;
+    /* box-sizing: border-box; */
+    border-radius: 50%;
+    height: 1em;
+    width: 1em;
+    animation: asyncButtonWorking 2s;
+    stroke-dasharray: 68%;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    transition: margin 1s, opacity 1s;
+}
+
+@keyframes asyncButtonWorking {
+    0%{
+        stroke-dasharray: 68%;
+        transform: rotate(0deg);
+    }
+      
+    50%{
+        stroke-dasharray: 160%;
+    }
+    99%{
+        stroke-dasharray: 68%;
+    }
+    100% {
+        transform: rotate(360deg);
+        stroke-dasharray: 68%;
+        animation-timing-function: step-end;
+    }
+}
+
+async-button.error {
+    border: 1px solid red;
+}
+
+async-button.done {
+    padding: .2em .7em .2em .7em;
+}
+
+async-button.final{
+    pointer-events: none;
+    opacity: .8;
+}

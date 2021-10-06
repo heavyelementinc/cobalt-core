@@ -47,4 +47,6 @@ if (app('debug')) {
 
     Route::post("/debug/validator", "Debug@validate_test_form");
     Route::post("/debug/confirm", "Debug@confirm_test_form");
+    Route::get("/debug/slow-response", "Debug@slow_response");
+    Route::get("/debug/slow-error", "Debug@slow_error");
 }

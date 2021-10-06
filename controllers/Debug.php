@@ -1,4 +1,7 @@
 <?php
+
+use Exceptions\HTTP\BadRequest;
+
 class Debug extends \Controllers\Pages {
 
     function debug_directory() {
@@ -210,5 +213,10 @@ class Debug extends \Controllers\Pages {
 
         $manager->generate_thumbnails_exec();
         return "success";
+    }
+
+    function slow_error() {
+        sleep(3);
+        throw new BadRequest("You requested an error, you got one.");
     }
 }
