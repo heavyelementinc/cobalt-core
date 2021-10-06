@@ -4,7 +4,7 @@ class StatusMessage {
         this.icon = icon || "information-circle-outline";
         this.id = id || random_string();
         this.action = action;
-        this.close = close;
+        this.closeable = close;
         this.element = window.messageHandler.message(this);
     }
 
@@ -26,7 +26,7 @@ class StatusMessage {
 
 class StatusError extends StatusMessage {
     constructor({ message, id, icon = null, action = e => true }) {
-        super({ message, id, icon: icon || `warning-outline` });
+        super({ message, id, icon: icon || `warning-outline`, action });
     }
 }
 
@@ -43,7 +43,7 @@ class MessageHandler {
         let close_btn = document.createElement("button");
         close_btn.innerHTML = window.closeGlyph;
         // close_btn.addEventListener()
-        if (details.close) message.appendChild(close_btn);
+        if (details.closeable) message.appendChild(close_btn);
 
         message.addEventListener("click", event => this.dismiss(details, event, true));
         close_btn.addEventListener("click", event => {

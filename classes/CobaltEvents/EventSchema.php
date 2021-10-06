@@ -91,7 +91,7 @@ class EventSchema extends \Validation\Normalize {
                 'set' => function ($val) {
                     return $this->contrast_color($val, $this->__dataset['bgColor'], 1.2);
                 },
-                'display' => fn ($val) => $this->hex_color($val ?? app("css-vars.color-button-init"), app("css-vars.color-button-init")),
+                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? app("css-vars.color-button-init"), app("css-vars.color-button-init")) : "",
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],

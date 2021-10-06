@@ -14,13 +14,13 @@ class FlexTable {
         $this->action = $action;
     }
 
-    private function table_layout(): array {
+    function table_layout(): array {
         return [
             'name' => [
                 'label' => 'Name',
                 'sort' => 1,
                 'state' => 'default',
-                'value' => fn ($discount) => "<a href='$GLOBALS[PATH]add/$discount->_id'>$discount->name</a>"
+                'value' => fn ($value, $discount) => "<a href='$GLOBALS[PATH]add/$discount->_id'>$discount->name</a>"
             ]
         ];
     }

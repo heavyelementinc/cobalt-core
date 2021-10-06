@@ -30,7 +30,9 @@ class ApiFetch {
         let result = await fetch(this.uri, send);
         if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
         if (result.ok === false) result = await this.handleErrors(result)
-        return await result.json();
+        let r = await result.json();
+        this.execPlugins("after", r, result);
+        return r;
     }
 
     async get() {
@@ -51,6 +53,14 @@ class ApiFetch {
                 throw new FetchError("HTTP Error", result, await result.json());
         }
         return result;
+    }
+
+    async execPlugins(type, result, request) {
+        if (!window.ApiFetchPlugins) return;
+        if (!window.ApiFetchPlugins[type]) return;
+        for (const callback in window.ApiFetchPlugins[type]) {
+            callback(result, request); 0
+        }
     }
 }
 

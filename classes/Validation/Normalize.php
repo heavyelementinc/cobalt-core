@@ -67,13 +67,14 @@
 
 namespace Validation;
 
+use ArrayAccess;
 use Iterator;
 use JsonSerializable;
 use \Validation\Exceptions\NoValue;
 use \Validation\Exceptions\ValidationIssue;
 use \Validation\Exceptions\ValidationFailed;
 
-abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator {
+abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator, ArrayAccess {
     protected $__schema = [];
     protected $__dataset = [];
     protected $__index = [];
@@ -393,6 +394,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     /** Returns a list of HTML options */
     final private function __proto_options($val, $field) {
         $valid = $this->__proto_valid($val, $field);
+        $gotten_value = $this->{$field};
         $options = "";
         foreach ($valid as $k => $v) {
             $value = $v;
@@ -404,7 +406,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                     $data .= " data-$attr=\"$value\"";
                 }
             }
-            $selected = ($val === $k) ? "selected='selected'" : "";
+            $selected = ($val === $k || $gotten_value === $k) ? "selected='selected'" : "";
             $options .= "<option value='$k'$data $selected>$v</option>";
         }
         return $options;
@@ -420,6 +422,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     final private function __proto_md($val, $field) {
+        if (!$val) return "";
         return from_markdown($val);
     }
 
@@ -459,5 +462,26 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     public function valid() {
         if (!isset($this->__index[$this->__position])) return false;
         return isset($this->__dataset[$this->__index[$this->__position]]);
+    }
+
+    /** ================
+     *    ARRAY ACCESS
+     *  ================
+     */
+
+    public function offsetExists($offset) {
+        return $this->__isset($offset);
+    }
+
+    public function offsetGet($offset) {
+        return $this->{$offset};
+    }
+
+    public function offsetSet($offset, $value) {
+        $this->{$offset} = $value;
+    }
+
+    public function offsetUnset($offset) {
+        unset($this->__dataset[$offset]);
     }
 }

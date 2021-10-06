@@ -60,19 +60,19 @@ class EventStream {
         $stream = new \ServerSentEvents\Stream();
         $watch = new \Drivers\Watch($watchId);
 
-        $iterations = 0;
+        $time = time();
         $lastProgress = 0;
 
         // Let's watch the changes in the database
         if (!$watch->validate_id()) throw new \Exceptions\HTTP\BadRequest("Malformed watch ID");
 
         while (true) {
-            if (connection_aborted()) {
+            // Let's check if we need to listen on the loop
+            $doc = $watch->findOne(['_id' => $watch->__id($watchId)]);
+            if (connection_aborted() && $doc->backgroundable == false) {
                 $watch->abort();
                 exit;
             }
-            // Let's check if we need to listen on the loop
-            $doc = $watch->findOne(['_id' => $watch->__id($watchId)]);
             if (!$doc || $doc->status === "aborted") {
                 $stream->error();
                 break;
@@ -80,13 +80,12 @@ class EventStream {
             if ($doc->status === "complete") break;
             if ($doc->status === "pending") {
                 $progress = floor($doc->current / $doc->total * 100);
-                $stream->updateProgressBar($progress, $doc->message ?? "Post-processing");
                 if ($lastProgress !== $progress) {
-                    $iterations = 0;
+                    $stream->updateProgressBar($progress, $doc->message ?? "Working");
+                    $time = time();
                     $lastProgress = $progress;
                 } else {
-                    $iterations++;
-                    if ($iterations >= 5000) {
+                    if ($doc->timeout && abs(time() - $time) > $doc->timeout) {
                         $watch->abort();
                         $stream->error();
                     }
@@ -98,6 +97,7 @@ class EventStream {
         }
         $stream->finish();
         sleep(1);
+        $watch->deleteOne(['_id' => $watch->__id($watchId)]);
         return;
     }
 }

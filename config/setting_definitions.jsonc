@@ -80,32 +80,39 @@
                 "prefix": "/admin/",
                 "exception_mode": "web",
                 "permission": "Admin_panel_access",
+                "session_refresh": true,
                 "vars": {
                     "html_class": "admin-panel"
                 }
             },
             "init": {
                 "processor": "Handlers\\WebHandler",
+                "session_refresh": false,
                 "prefix": null
             },
             "shared": {
                 "processor": "Handlers\\SharedHandler",
+                "session_refresh": false,
                 "prefix": "/core-content/"
             },
             "apiv1": {
                 "processor": "Handlers\\ApiHandler",
+                "session_refresh": false,
                 "prefix": "/api/v1/"
             },
             "webhookv1": {
                 "processor": "Handlers\\ApiHandler",
+                "session_refresh": false,
                 "prefix": "/webhook/v1/"
             },
             "streams": {
                 "processor": "Handlers\\ApiHandler",
+                "session_refresh": false,
                 "prefix": "/streams/"
             },
             "web": {
                 "processor": "Handlers\\WebHandler",
+                "session_refresh": true,
                 "prefix": "/"
             }
         },
@@ -246,6 +253,7 @@
             "FormRequest.js",
             "ApiFetch.js",
             "InputComponents.js",
+            "AsyncButton.js",
             "UserMenu.js",
             "ActionMenu.js",
             "StatusMessage.js",
@@ -267,14 +275,14 @@
             "header.css",
             "slideshow.css",
             "inputs.css",
-            "cobalt-events.css",
             "loading-spinner.css",
-            "modal.css",
+            "buttons.css",
             "action-menu.css",
             "status-message.css",
             "login-form.css",
             "form-request.css",
             "flex-table.css",
+            "cobalt-events.css",
             "modal.css",
             "tabs-drawer.css",
             "calendar.css",
@@ -472,5 +480,9 @@
     "Mail_port": {
         "default": 587,
         "$env": "MAIL_PORT"
+    },
+    "Renderer_parse_for_multiline_functions": {
+        // When true, the trailing semicolon is REQUIRED.
+        "default": false
     }
 }
