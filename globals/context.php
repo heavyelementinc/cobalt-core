@@ -86,6 +86,10 @@ try {
     $context_processor->_stage_route_discovered(...$current_route_meta);
     $context_processor->_stage_bootstrap['_stage_route_discovered'] = true;
 
+    // Assign some stuff to be done globally in your app.
+    $global_route = __APP_ROOT__ . "/private/global_route.php";
+    if (file_exists($global_route)) require_once $global_route;
+
     $router_result = $router->execute_route();
     $context_processor->_stage_execute($router_result);
     $context_processor->_stage_bootstrap['_stage_execute'] = true;

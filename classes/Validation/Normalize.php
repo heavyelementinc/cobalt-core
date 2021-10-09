@@ -374,10 +374,17 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return '';
     }
 
-    /** Allows us to specify in the schema an alternate display method */
+    /** Allows us to specify in the schema an alternate display method
+     *  If no 'display' proto is specified, this will automatically look for a
+     *  valid proto and, if found, will look up the name of $val
+     */
     final private function __proto_display($val, $field) {
         if (isset($this->__schema[$field]['display'])) {
             return $this->__schema[$field]['display']($val, $field);
+        } else if (isset($this->__schema[$field]['valid'])) {
+            $valid = $this->__schema[$field]['valid'];
+            if (is_callable($valid)) $valid = $valid($val, $field);
+            if (key_exists($val, $valid)) return $valid[$val];
         }
         return '';
     }
@@ -385,7 +392,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     /** Executes the 'valid' method defined in the schema and returns results */
     final private function __proto_valid($val, $field) {
         if (isset($this->__schema[$field]['valid'])) {
-            if (is_callable($this->__schema[$field]['valid'])) return $this->__schema[$field]['valid']($val, $this, $field);
+            if (is_callable($this->__schema[$field]['valid'])) return $this->__schema[$field]['valid']($val, $field);
             return $this->__schema[$field]['valid'];
         }
         return [];

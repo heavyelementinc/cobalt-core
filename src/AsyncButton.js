@@ -61,6 +61,7 @@ class AsyncButton extends HTMLButtonElement {
     }
 
     getMethod() {
+        if (this.getAttribute("method")) return this.getAttribute("method");
         if (this.data) return "POST";
         return "GET";
     }
