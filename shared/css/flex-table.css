@@ -77,6 +77,22 @@ flex-table{
             align-items:center;
             border-bottom: var(--project-color-table-border);
         }
+
+        flex-header [flex-table-current]:after{
+            content: "";
+            display: inline-block;
+            border-width: 0 3px 3px 0;
+            padding: 3px;
+            margin: 4px;
+            transform: rotate(45deg);
+            border-color: black;
+            border-style: solid;
+        }
+
+        flex-header [flex-table-current="-1"]:after{
+            margin: 0 4px;
+            transform: rotate(-135deg);
+        }
     
         /** flex-sticky items should only be the left-most column OR the first row*/
         flex-sticky{

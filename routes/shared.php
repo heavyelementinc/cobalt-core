@@ -6,6 +6,7 @@ use Routes\Route;
 Route::get("/js/...", "FileController@javascript");
 Route::get("/css/...", "FileController@css");
 Route::get("/plugins/{plugin}/...", "FileController@plugin_resources");
+Route::get("/site.webmanifest", "FileController@manifest");
 
 if (app('enable_core_content')) {
     /** Core content includes stuff in the __ENV_ROOT__/shared/ directory */

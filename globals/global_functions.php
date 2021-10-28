@@ -894,3 +894,15 @@ function doc_to_array($it): array {
     }
     return $result;
 }
+
+function cookie_consent_check() {
+    return isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === "all";
+}
+
+function sanitize_path_name($path) {
+    return str_replace(["../"], "", $path);
+}
+
+function relative_time($date, $now = null) {
+    if (!$now) $now = time();
+}

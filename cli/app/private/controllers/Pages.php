@@ -13,9 +13,9 @@ class Pages {
             'title' => "Hello World"
         ]);
 
-        /** Use the add_template function to specify which template you want the
+        /** Use the set_template function to specify which template you want the
          * renderer to load and parse.
          */
-        add_template("index.html");
+        set_template("index.html");
     }
 }

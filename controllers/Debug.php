@@ -1,6 +1,8 @@
 <?php
 
 use Exceptions\HTTP\BadRequest;
+use Render\Render;
+use MikeAlmond\Color;
 
 class Debug extends \Controllers\Pages {
 
@@ -218,5 +220,35 @@ class Debug extends \Controllers\Pages {
     function slow_error() {
         sleep(3);
         throw new BadRequest("You requested an error, you got one.");
+    }
+
+    function colors($color = "fe329e") {
+        $color = \MikeAlmond\Color\Color::fromHex($color);
+        $generator = new \MikeAlmond\Color\PaletteGenerator($color);
+        $luminance = $generator->monochromatic(10);
+        $adjacent = $generator->adjacent();
+        $palette = $generator->tetrad();
+
+        $html = $this->color_sample($luminance, 'l');
+        $html .= $this->color_sample($adjacent, 'a');
+        $html .= $this->color_sample($palette, 'p');
+
+
+        add_vars([
+            'main' => $html
+        ]);
+        set_template("/parts/main.html");
+    }
+
+    private function color_sample($colors, $label) {
+        $html = "<div class='hbox'>";
+        foreach ($colors as $i => $c) {
+            $color = $c->getHex();
+            $text = $c->getMatchingTextColor()->getHex();
+            $html .= "<div style='height:200px;width:200px;background:#$color'><span style='color:#$text'>$label</span></div>";
+        }
+
+        $html .= "</div>";
+        return $html;
     }
 }

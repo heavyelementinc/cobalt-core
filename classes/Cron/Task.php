@@ -12,11 +12,11 @@ class Task {
     }
 
     public function run() {
-        $class = $this->task->class;
-        $method = $this->task->method;
+        $class = $this->task['class'];
+        $method = $this->task['method'];
 
-        $instance = new $class(...array_values($this->task->class_args));
-        return $instance->{$method}(...array_values($this->task->method_args));
+        $instance = new $class(...array_values($this->task['class_args']));
+        return $instance->{$method}(...array_values($this->task['method_args']));
     }
 
     public function log_message() {
