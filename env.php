@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 /**
  * env.php - The Cobalt Environment Bootstrapper
  * 
@@ -52,16 +53,17 @@ $write_to_buffer_handled = false;
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
+
 // Import Composer's autoload
 $composer = __DIR__ . "/vendor/autoload.php";
 if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the cobalt-core directory as your webserver user");
 require_once $composer;
 
-$app_env = __APP_ROOT__ . "/private/app_env.php";
-if (file_exists($app_env)) require_once $app_env;
-
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload", true);
+
+$app_env = __APP_ROOT__ . "/private/app_env.php";
+if (file_exists($app_env)) require_once $app_env;
 
 /** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
 $GLOBALS['time_to_update'] = false;

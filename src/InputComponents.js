@@ -350,49 +350,6 @@ class RadioGroup extends HTMLElement {
 
 customElements.define("radio-group", RadioGroup)
 
-
-/**
- * @todo complete this.
- */
-class AudioPlayer extends HTMLElement {
-    constructor() {
-        super();
-    }
-    connectedCallback() {
-        this.innerHTML = `<audio preload="metadata" controls>${this.innerHTML}If you can see this, you need a better web browser.</audio>`;
-        // this.audio = this.querySelector("audio");
-        // this.progress = this.querySelector("[name='progress']");
-        // this.volume = this.querySelector("[name='volume']");
-        // this.duration = this.querySelector("[name='duration']");
-    }
-
-    controls() {
-        return `
-            <!--<button name="playpause"><ion-icon name="play"></ion-icon><ion-icon name="pause"></ion-icon></button>
-            <input type="range" name="progress" min="0" max="100">
-            <span name="duration">0:00</span>
-            <input type="range" name="volume" min="0" max="100">-->
-        `;
-    }
-
-    initListeners() {
-        this.audio.addEventListener('loadedmetadata', () => {
-            this.duration.textContent = this.calculateTime(this.audio.duration);
-        })
-        // this.
-    }
-
-    calculateTime(to_convert) {
-        const minutes = Math.floor(to_convert / 60);
-        const seconds = Math.floor(to_convert % 60);
-        const returnedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
-        return `${minutes}:${returnedSeconds}`;
-    }
-}
-
-customElements.define("audio-player", AudioPlayer)
-
-
 class LoadingSpinner extends HTMLElement {
     constructor() {
         super();

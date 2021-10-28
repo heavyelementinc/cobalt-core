@@ -62,6 +62,13 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Async Wizard"]
     ]);
+    Route::get("/debug/colors/{id}", "Debug@colors", [
+        'navigation' => ['debug'],
+        'anchor' => [
+            'href' => '/debug/colors/',
+            'name' => "Color Palette Generator"
+        ]
+    ]);
 
 
     if (app("debug")) {

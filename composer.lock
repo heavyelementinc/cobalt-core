@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f853466f07401df71c6400893279441",
+    "content-hash": "6836ae45a150869eba83f8574794ff38",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -419,6 +419,70 @@
                 "source": "https://github.com/matthiasmullie/path-converter/tree/1.1.3"
             },
             "time": "2019-02-05T23:41:09+00:00"
+        },
+        {
+            "name": "mikealmond/color",
+            "version": "v0.1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mikealmond/color.git",
+                "reference": "7840ce65e911a9ea46f188605e51cf38363e8ca3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mikealmond/color/zipball/7840ce65e911a9ea46f188605e51cf38363e8ca3",
+                "reference": "7840ce65e911a9ea46f188605e51cf38363e8ca3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-json": "*",
+                "php": "~7.0|~8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~6.0|~7.0|~8.0|~9.0",
+                "squizlabs/php_codesniffer": "^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MikeAlmond\\Color\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mike Almond",
+                    "email": "mike.almond@gmail.com",
+                    "homepage": "https://mikealmond.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A small library to manipulate and display colors",
+            "homepage": "https://github.com/mikealmond/color",
+            "keywords": [
+                "color",
+                "mikealmond"
+            ],
+            "support": {
+                "issues": "https://github.com/mikealmond/color/issues",
+                "source": "https://github.com/mikealmond/color/tree/v0.1.5"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/mikealmond",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-10-08T17:16:27+00:00"
         },
         {
             "name": "mongodb/mongodb",

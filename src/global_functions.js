@@ -381,3 +381,59 @@ function distanceInKM(lat1, lon1, lat2, lon2) {
 
     return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
 }
+
+function parse_params(param) {
+    let decoded = decodeURI(param);
+    let split = decoded.split("&");
+    let object = {};
+    for(const i of split) {
+        const keyVal = i.split("=");
+        object[keyVal[0]] = keyVal[1];
+    }
+    return object;
+}
+
+function encode_params(object) {
+    let string = "";
+
+    for(const i in object) {
+        if(typeof object[i] === "object") {
+            for(const key in object[i]) {
+                string += `${i}[${key}]=${object[i][key]}&`;
+            }
+        } else string += `${i}=${object[i]}&`;
+    }
+
+    return string.substr(0,string.length - 1);
+}
+
+function set_cookie(name, value, days = ""){
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function get_cookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function delete_cookie(name) {
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function consent_cookie(value){
+    set_cookie('cookie_consent',value,30);
+    const consent_cookie = document.querySelector("#cookie-consent");
+    consent_cookie.parentNode.removeChild(consent_cookie);
+}

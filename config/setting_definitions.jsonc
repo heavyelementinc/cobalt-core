@@ -116,7 +116,7 @@
                 "prefix": "/"
             }
         },
-        "$merge": true
+        "$prepend": true
     },
     /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
@@ -258,7 +258,8 @@
             "ActionMenu.js",
             "StatusMessage.js",
             "Events.js",
-            "PaginatedContainer.js"
+            "PaginatedContainer.js",
+            "AudioPlayer.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -287,6 +288,7 @@
             "tabs-drawer.css",
             "calendar.css",
             "webcomponents.css",
+            "audio-player.css",
             "paginated-container.css",
             "main.css"
         ],
@@ -301,6 +303,12 @@
             "description": "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io"
         },
         "$merge": true
+    },
+    "pwa": {
+        "default": {
+            "display": "standalone",
+            "background_color": "#000"
+        }
     },
     "session_cookie_name": {
         "default": "token_session" // Changing this in production will log everyone out.
@@ -483,6 +491,9 @@
     },
     "Renderer_parse_for_multiline_functions": {
         // When true, the trailing semicolon is REQUIRED.
+        "default": false
+    },
+    "Cookie_consent_prompt": {
         "default": false
     }
 }

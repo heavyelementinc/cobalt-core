@@ -52,6 +52,21 @@ function confirm_message($message, $default = false, $additional = "") {
     return cli_to_bool($question, $default_to_yes);
 }
 
+/**
+ * Available types:
+ *   * `b` - Bold
+ *   * `e` - Error
+ *   * `s` - Success
+ *   * `w` - Warning
+ *   * `i` - Information
+ *   * `white` - White
+ *   * `grey` - Grey
+ *   * `normal` - [default] default color
+ * @param mixed $str 
+ * @param string $type 
+ * @param bool $formatted 
+ * @return void 
+ */
 function say($str, $type = "normal", $formatted = false) {
     $fmt = fmt($str, $type);
 
@@ -59,11 +74,27 @@ function say($str, $type = "normal", $formatted = false) {
     print($fmt . " \n");
 }
 
+/**
+ * Available types:
+ *   * `b` - Bold
+ *   * `e` - Error
+ *   * `s` - Success
+ *   * `w` - Warning
+ *   * `i` - Information
+ *   * `white` - White
+ *   * `grey` - Grey
+ *   * `normal` - [default] default color
+ * @param mixed $str 
+ * @param string $type 
+ * @param bool $formatted 
+ * @return void 
+ */
 function fmt($str, $type = "normal", $back = "normal") {
     $fmt = "";
     $arr = [
         'b' => '1m'
     ];
+
 
     switch ($type) {
         case "b":
@@ -87,9 +118,12 @@ function fmt($str, $type = "normal", $back = "normal") {
         case 'grey':
             $fmt = "37m";
             break;
+        case "bblack":
+            $fmt = "1;30m\033[107m";
+            break;
         case "normal":
         default:
-            $fmt = "";
+            $fmt = "39m";
     }
     switch ($back) {
         case "red":

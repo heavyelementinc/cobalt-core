@@ -42,6 +42,7 @@ class WebHandler implements RequestHandler {
         "@router_table@"   => "",
         "@auth_panel@"     => "",
         "@header_content@" => "",
+        "@cookie_consent@" => "",
         "@footer_content@" => "",
         "@footer_credits@" => "",
         "@script_content@" => "",
@@ -205,6 +206,12 @@ class WebHandler implements RequestHandler {
 
     function auth_panel() {
         return "";
+    }
+
+    function cookie_consent() {
+        if (!app("Cookie_consent_prompt")) return "";
+        if (isset($_COOKIE['cookie_consent'])) return "";
+        return with("/parts/cookie-consent.html");
     }
 
     function footer_content() {

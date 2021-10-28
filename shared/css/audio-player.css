@@ -1,0 +1,151 @@
+audio-player {
+    --volume-bg: transparent;
+    --thumb-bg: #fff;
+    --thumb-track-bg: #007db5;
+    --thumb-track-bg-runnable: linear-gradient(to right, rgba(0, 125, 181, 0.6) var(--buffered-width), rgba(0, 125, 181, 0.2) var(--buffered-width));
+}
+    audio-player .hbox {
+        align-items: stretch;
+    }
+    audio-player button[name="playpause"] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        background: var(--project-color-button-init);
+        color: var(--project-color-button-text);
+        width: 50px;
+        font-size: 3em;
+        cursor: pointer;
+    }
+
+
+    audio-player button[name="playpause"]:hover {
+        background: var(--project-color-button-hover);
+        color: var(--project-color-button-hover-text);
+    }
+    audio-player svg {
+        width:100%;
+        flex-grow: 1;
+        cursor: pointer;
+        fill: var(--project-color-input-background)
+    }
+    audio-player svg rect {
+        fill: var(--project-body-background);
+    }
+    audio-player svg line {
+        stroke: var(--project-color-button-hover);
+        stroke-width: 8;
+        stroke-linecap: round;
+    }
+
+    audio-player .audio-player--underhang {
+        background: var(--project-color-button-init);
+        color: var(--project-color-button-text);
+        padding: 0 .7em;
+        font-size: 1em;
+        font-family: monospace;
+    }
+
+    audio-player .audio-player--underhang > div {
+        display: flex;
+        align-items: center;
+    }
+
+
+    audio-player input[type='range'] {
+        position: relative;
+        -webkit-appearance: none;
+        background: var(--volume-bg);
+        border: none;
+        width: 48%;
+        margin: 0;
+        padding: 0;
+        height: 19px;
+        outline: none;
+    }
+
+    audio-player input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 3px;
+        cursor: pointer;
+        background: var(--thumb-track-bg-runnable);
+    }
+    audio-player input[type="range"]::before {
+        position: absolute;
+        content: "";
+        top: 8px;
+        left: 0;
+        width: var(--seek-before-width);
+        height: 3px;
+        background: var(--thumb-track-bg);
+        cursor: pointer;
+    }
+    audio-player input[type="range"]::-webkit-slider-thumb {
+        position: relative;
+        -webkit-appearance: none;
+        box-sizing: content-box;
+        border: 1px solid var(--thumb-track-bg);
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+        background: var(--thumb-bg);
+        cursor: pointer;
+        margin: -7px 0 0 0;
+    }
+    audio-player input[type="range"]:active::-webkit-slider-thumb {
+        transform: scale(1.2);
+        background: var(--thumb-track-bg);
+    }
+    audio-player input[type="range"]::-moz-range-track {
+        width: 100%;
+        height: 3px;
+        cursor: pointer;
+        background: var(--thumb-track-bg-runnable);
+    }
+    audio-player input[type="range"]::-moz-range-progress {
+        background-color: var(--thumb-track-bg);
+    }
+    audio-player input[type="range"]::-moz-focus-outer {
+        border: 0;
+    }
+    audio-player input[type="range"]::-moz-range-thumb {
+        box-sizing: content-box;
+        border: 1px solid var(--thumb-track-bg);
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+        background-color: var(--thumb-bg);
+        cursor: pointer;
+    }
+    audio-player input[type="range"]:active::-moz-range-thumb {
+        transform: scale(1.2);
+        background: var(--thumb-track-bg);
+    }
+    audio-player input[type="range"]::-ms-track {
+        width: 100%;
+        height: 3px;
+        cursor: pointer;
+        background: transparent;
+        border: solid transparent;
+        color: transparent;
+    }
+    audio-player input[type="range"]::-ms-fill-lower {
+        background-color: var(--thumb-track-bg);
+    }
+    audio-player input[type="range"]::-ms-fill-upper {
+        background: var(--thumb-track-bg-runnable);
+    }
+    audio-player input[type="range"]::-ms-thumb {
+        box-sizing: content-box;
+        border: 1px solid var(--thumb-track-bg);
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+        background-color: var(--thumb-bg);
+        cursor: pointer;
+    }
+    audio-player input[type="range"]:active::-ms-thumb {
+        transform: scale(1.2);
+        background: var(--thumb-track-bg);
+    }

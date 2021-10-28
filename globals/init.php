@@ -16,7 +16,6 @@
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
 
-
 /**
  * __cobalt_initialize accepts an array of values (either decoded with a uname,
  * pword, and email key) and will take appropriate action to either prompt the

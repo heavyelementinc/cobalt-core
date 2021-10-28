@@ -360,11 +360,12 @@ class SettingsManager {
 
     function prepend($value, $directives, $setting_name) {
         $setting = $this->get($setting_name);
-        if ($directives['default'] === $setting) return; // If the arrays are the same, do nothing
+        // if ($directives['default'] === $setting) return; // If the arrays are the same, do nothing
+        if (!$setting) return $directives['default'];
 
         if (!is_array($setting)) throw new SettingsManagerException("The values provided by the app's $setting_name are not an array.");
         /** Merge the values of the APP (stored in $this->get($setting_name) ) with the default values */
-        $this->set($setting_name, array_unique(array_merge($setting, $this->meta['default'])));
+        $this->set($setting_name, array_merge($setting, $directives['default']));
     }
 
     function loadJSON($value, $directives, $setting_name) {

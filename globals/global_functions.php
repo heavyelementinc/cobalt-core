@@ -784,9 +784,10 @@ function plugin($name) {
  * 
  * @param iterator $results the results of a Mongo query
  * @param string $schema_name the name of the schema class
- * @return array every instance of the mongo query as a Cobalt schema
+ * @return array|null every instance of the mongo query as a Cobalt schema
  */
-function results_to_schema($results, string $schema_name): array {
+function results_to_schema($results, string $schema_name) {
+    if ($results === null) return null;
     $array  = [];
     // if ($schema_name instanceof \Validation\Normalize === false) throw new Exception("$schema_name is not an instance of \Validation\Normalize");
     foreach ($results as $i => $doc) {
@@ -892,4 +893,16 @@ function doc_to_array($it): array {
         }
     }
     return $result;
+}
+
+function cookie_consent_check() {
+    return isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === "all";
+}
+
+function sanitize_path_name($path) {
+    return str_replace(["../"], "", $path);
+}
+
+function relative_time($date, $now = null) {
+    if (!$now) $now = time();
 }

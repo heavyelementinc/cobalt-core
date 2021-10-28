@@ -3,27 +3,35 @@ class FileController extends \Controllers\FileController {
 
     function __construct() {
         if (!app("enable_core_content")) throw new Exceptions\HTTP\NotFound("Shared files are not enabled.");
+        $cacheControl = 'Cache-Control: private, ';
+        if (!app("debug")) $cacheControl .= "immutable, ";
+        $cacheControl .= "max-age=31536000";
+        header($cacheControl);
+        header('Pragma: private');
+        header('Last-Modified: Sat, 26 Oct 1985 08:15:00 GMT');
+        $expires = gmdate("D, d M Y H:i:s", strtotime("+30 days"));
+        header("Expires: $expires");
     }
 
     function core_content_shared() {
         $path = $GLOBALS['router']->uri;
         // $file = __ENV_ROOT__ . "/shared/$path";
-        $file = find_one_file([__ENV_ROOT__ . "/shared/", ...$GLOBALS['SHARED_CONTENT']], $path);
+        $file = find_one_file([__ENV_ROOT__ . "/shared/", ...$GLOBALS['SHARED_CONTENT']], sanitize_path_name($path));
         if (!file_exists($file)) throw new Exceptions\HTTP\NotFound("The resource could not be located");
         // header('Content-Description: File Transfer');
         // header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($file) . '"');
         // header('Expires: 0');
-        // header('Cache-Control: must-revalidate');
         $mime = mime_content_type($file);
         if (pathinfo($file, PATHINFO_EXTENSION) === "css") $mime = "text/css";
         header('Content-Type: ' . $mime);
         // header('Pragma: public');
-        header('Content-Length: ' . filesize($file));
+        $this->get_etag($file);
         readfile($file);
     }
 
     function javascript($match) {
+        $match = sanitize_path_name($match);
         $cache = new \Cache\Manager("js-precomp/$match");
         if ($cache->exists) {
             $file = $cache->file_path;
@@ -37,7 +45,7 @@ class FileController extends \Controllers\FileController {
         }
 
         header("Content-Type: application/javascript;charset=UTF-8");
-        header('Content-Length: ' . filesize($file));
+        $this->get_etag($file);
         readfile($file);
     }
 
@@ -52,7 +60,7 @@ class FileController extends \Controllers\FileController {
         }
 
         header("Content-Type: text/css;charset=UTF-8");
-        header('Content-Length: ' . filesize($file));
+        $this->get_etag($file);
         readfile($file);
     }
 
@@ -83,6 +91,24 @@ class FileController extends \Controllers\FileController {
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($file));
+        $this->get_etag($file);
         readfile($file);
+    }
+
+    function manifest() {
+        $content = with("/parts/manifest.site");
+        header('Content-Type: text/json');
+        header('Content-Length: ' . strlen($content) * 8);
+        echo $content;
+    }
+
+    function get_etag($path) {
+        $mbThreshold = 25600;
+        $filesize = filesize($path);
+        $header = "ETag: \"";
+        if ($filesize < $mbThreshold) $header .= md5_file($path);
+        $header .= app('version') . "\"";
+        header($header);
+        header('Content-Length: ' . $filesize);
     }
 }

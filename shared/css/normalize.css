@@ -244,6 +244,38 @@ table, tr, td {
     flex-direction: column-reverse;
 }
 
+#cookie-consent {
+    position: fixed;
+    background: var(--project-body-background);
+    box-shadow: 0 0 10px rgba(0,0,0,.3);
+    bottom: 0;
+    right: 0;
+    z-index: var(--project-modal-z-index);
+    max-width: 30vw;
+    padding: 1em;
+}
+
+#cookie-consent p:first-of-type {
+    margin-top:0;
+}
+
+#cookie-consent > .hrow {
+    justify-content: right;
+}
+#cookie-consent button {
+    border: none;
+}
+
+#cookie-consent a.cookie-consent-false {
+    color: gray;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#cookie-consent .cookie-consent-true {
+    cursor: pointer;
+}
 
 footer {
     display: flex;
@@ -364,3 +396,16 @@ ul.list-panel {
     margin: 0 1rem 0 0;
 }
 
+@media only screen and (max-width: 900px) {
+    #cookie-consent {
+        max-width: 100vw;
+        max-height: 100vh;
+    }
+    #cookie-consent > .hbox {
+        flex-direction: column;
+    }
+
+    #cookie-consent .cookie-consent-false {
+        padding: 0 0 2em;
+    }
+}

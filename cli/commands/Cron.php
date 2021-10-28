@@ -20,7 +20,24 @@ class Cron {
         if (!in_array($type, ['due', 'all'])) $type = 'due';
         say("Showing " . fmt($type, 'i') . " tasks.");
         $cron = new \Cron\Run();
-        // $tasks = 
+        $tasks = $cron->get_tasks($type);
+
+        $t = new \Render\CLITable();
+        $t->head([
+            'name' => ['title' => "Task Name"],
+            'last_ran' => ['title' => "Last Run"],
+            'microseconds' => ['title' => 'Last execution time', 'padding' => STR_PAD_BOTH]
+        ]);
+        foreach ($tasks as $task) {
+            $task = $task;
+            $stats = $cron->task_stats($task['name'], 'relative');
+            $t->row([
+                'name' => $task['name'],
+                'last_ran' => $stats['last_run'],
+                'microseconds' => $stats['microseconds']
+            ]);
+        }
+        $t->render();
     }
 
     public function exec() {
