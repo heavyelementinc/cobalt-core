@@ -16,8 +16,8 @@ class Cron {
         ]
     ];
 
-    public function list($type = "due") {
-        if (!in_array($type, ['due', 'all'])) $type = 'due';
+    public function list($type = "all") {
+        if (!in_array($type, ['due', 'all'])) $type = 'all';
         say("Showing " . fmt($type, 'i') . " tasks.");
         $cron = new \Cron\Run();
         $tasks = $cron->get_tasks($type);
@@ -25,14 +25,16 @@ class Cron {
         $t = new \Render\CLITable();
         $t->head([
             'name' => ['title' => "Task Name"],
+            'result' => ['title' => 'Last Run Result', 'max' => 50],
             'last_ran' => ['title' => "Last Run"],
-            'microseconds' => ['title' => 'Last execution time', 'padding' => STR_PAD_BOTH]
+            'microseconds' => ['title' => 'Last execution time', 'padding' => STR_PAD_BOTH],
         ]);
         foreach ($tasks as $task) {
             $task = $task;
             $stats = $cron->task_stats($task['name'], 'relative');
             $t->row([
                 'name' => $task['name'],
+                'result' => $stats['result'],
                 'last_ran' => $stats['last_run'],
                 'microseconds' => $stats['microseconds']
             ]);

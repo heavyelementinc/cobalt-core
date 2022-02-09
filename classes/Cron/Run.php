@@ -93,6 +93,7 @@ class Run extends \Drivers\Database {
         ];
         $timestamp = $record['last_run'];
         return [
+            'result' => $record->result,
             'last_run' => date("D, y/m/d h:i a", $timestamp),
             'microseconds' => round($record['microseconds'] / 1000, 4) . " seconds"
         ];
