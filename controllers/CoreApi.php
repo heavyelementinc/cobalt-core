@@ -88,6 +88,7 @@ class CoreApi extends \Controllers\Pages {
         $email = new SendMail();
         $email->set_vars(array_merge(
             $mutant,
+            ['POST' => $_POST],
             [
                 "ip" => $_SERVER['REMOTE_ADDR'],
                 "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"]

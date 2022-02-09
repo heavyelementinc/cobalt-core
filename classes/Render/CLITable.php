@@ -10,6 +10,7 @@ class CLITable {
             'title' => null,
             'padding' => 1,
             'function' => fn ($val) => $val,
+            'max' => false
         ];
     }
     private $header = [];
@@ -41,6 +42,8 @@ class CLITable {
         $index = count($this->rows);
         foreach ($row as $i => $c) {
             $this->rows[$index][$i] = $this->header[$i]['function']($c);
+            $max = $this->header[$i]['max'];
+            if ($max && strlen($c) > $max) $c = substr($c, 0, $max);
             $this->width($i, $c);
         }
 
@@ -55,6 +58,8 @@ class CLITable {
 
     function width($key, $c, $pad = 2) {
         $length = strlen($c) + $pad;
+        // $max = $this->header[$key]['max'];
+        // if ($max && $length > $max) $length = $max;
         if (!isset($this->row_widths[$key])) return $this->row_widths[$key] = $length;
         if ((strlen($c) + $pad) > $this->row_widths[$key]) $this->row_widths[$key] = $length;
     }
