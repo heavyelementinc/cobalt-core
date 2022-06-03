@@ -134,7 +134,7 @@ class FormRequestElement extends HTMLElement {
     }
 
     async submit(allowDangerous = false) {
-        return this.send(allowDangerous);
+        return await this.send(allowDangerous);
     }
 
     setup_content() {
