@@ -22,13 +22,19 @@ use Validation\Exceptions\ValidationFailed;
 abstract class Database {
     public $db = __APP_SETTINGS__['database'];
     public $collection;
+    public string $__schema;
 
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
+    
+    function get_schema_name() {
+        return "\\" . $this::class . "Schema";
+    }
 
     function __construct($database = null) {
         if ($database !== null) $this->db = $database;
         $this->collection = db_cursor($this->get_collection_name(), $this->db);
+        $this->__schema = $this->get_schema_name();
     }
 
     /* HELPERS */
@@ -71,6 +77,23 @@ abstract class Database {
 
     final function distinct($field) {
         return $this->collection->distinct($field);
+    }
+
+    final function findOneAsSchema($filter, array $options = [], $schema = null) {
+        if(!$schema) $schema = $this->__schema;
+        $result = $this->findOne($filter,$options);
+        if($result) return new $schema($result);
+        return null;
+    }
+
+    final function findAllAsSchema($filter, array $options = [], $schema = null) {
+        if(!$schema) $schema = $this->__schema;
+        $results = $this->find($filter, $options);
+        $processed = [];
+        foreach($results as $i => $result) {
+            $processed[$i] = new $schema($result);
+        }
+        return $processed;
     }
 
     /* UPDATE */

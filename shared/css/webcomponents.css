@@ -11,6 +11,7 @@ input-switch {
   border-radius: 25px;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
   input-switch[disabled="true"] span, input-switch[disabled="disabled"] span {
@@ -100,6 +101,29 @@ input-switch {
 
   input-switch[large] input:checked+span:after {
     left: 49px;
+  }
+
+  
+  input-switch[small] {
+    width: 42px;
+    height: 26px;
+  }
+
+  input-switch[small] span::after{
+    height: 16px;
+    top: 5px;
+  }
+
+  input-switch[small] input:checked + span::after {
+    left: 22px;
+  }
+
+  input-switch[small] input:indeterminate + span::after {
+    left: 14px;
+  }
+
+  input-switch[small] span::before{
+    content: "";
   }
 
   input-switch[tiny] {

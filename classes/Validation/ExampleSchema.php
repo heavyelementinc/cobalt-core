@@ -51,7 +51,7 @@ namespace Validation; // Make sure you use the appropriate namespace for your va
 // containing whatever failed messages as the data argument.
 use \Validation\Exceptions\ValidationIssue;
 
-class ExampleSchema extends Normalize {
+class ExampleSchema extends Normalize{
 
     function __construct($data = null, $mode = null) {
         parent::__construct($data, $mode);
@@ -85,6 +85,9 @@ class ExampleSchema extends Normalize {
                     ];
                 }
             ],
+            'pronoun_set' => [
+                // Inherited from Normalize constructor
+            ],
             'order_count' => [
                 'set' => 'example_of_using_set_method'
             ],
@@ -95,7 +98,7 @@ class ExampleSchema extends Normalize {
                             'set' => fn ($val) => $this->required_field($val)
                         ],
                         'bar' => [
-                            'set' => 'boolean_helper'
+                            'set' => 'sanitize'
                         ]
                     ]);
                 }

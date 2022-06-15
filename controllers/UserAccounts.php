@@ -30,6 +30,14 @@ class UserAccounts extends \Controllers\Pages {
         return $validated;
     }
 
+    function account_creation() {
+        $ua = new UserCRUD();
+
+        $validated = $ua->createUser($_POST, "partial");
+
+        return $validated;
+    }
+
     function delete_user($id) {
         $ua = new UserCRUD();
         $user = $ua->getUserById($id);
@@ -76,5 +84,13 @@ class UserAccounts extends \Controllers\Pages {
         ]);
 
         set_template("parts/main.html");
+    }
+
+    function onboarding() {
+        add_vars([
+            'title' => "Make an account"
+        ]);
+
+        set_template("authentication/account-creation/onboarding.html");
     }
 }

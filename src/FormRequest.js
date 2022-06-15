@@ -15,7 +15,7 @@ class FormRequest {
         this.action = this.form.getAttribute("action");
         this.method = this.form.getAttribute("method");
         this.format = this.form.getAttribute("format") || "application/json; charset=utf-8";
-        this.token = this.form.getAttribute("token") || "";
+        this.token  = this.form.getAttribute("token") || "";
         this.update = this.form.getAttribute("update-on-success") || "true";
         this.revert = this.form.getAttribute("revert-on-failure") || "true";
         this.headers = {
@@ -80,7 +80,8 @@ class FormRequest {
         this.files();
 
         let result = await this.send(data);
-
+        console.log("submit", result);
+        return result;
     }
 
     files() {
@@ -98,6 +99,7 @@ class FormRequest {
         let result;
         try {
             result = await post.send(data, {});
+            this.lastResult = result;
         } catch (error) {
             this.errorHandler(error, result, post);
             throw new Error(error);
@@ -108,6 +110,9 @@ class FormRequest {
 
         this.onsuccess = new CustomEvent("requestSuccess", { detail: result });
         this.form.dispatchEvent(this.onsuccess);
+
+        this.handleNextRequest(post.headers["X-Next-Request"]);
+        return result;
     }
 
     /** Autosave handler */
@@ -155,6 +160,11 @@ class FormRequest {
         for (const i in data) {
             if (i in this.el_list) {
                 this.el_list[i].value = data[i];
+            } else if (i[0] === "#" || i[0] === "." || i[0] === "[" && i[i.length - 1] === "]") { // Check if we want to query for an element in the form
+                var elements = this.form.querySelectorAll(i);
+                for(let l of elements) {
+                    l.outerHTML = data[i]; // Replace element
+                }
             }
         }
     }
@@ -169,6 +179,39 @@ class FormRequest {
             if (i in this.el_list === false) continue;
             this.el_list[i].set_error(data.data[i]);
         }
+    }
+
+    handleNextRequest(fields) {
+        var supported = [
+            "action",
+            "method",
+            "autosave",
+        ];
+        for(let i of supported) {
+            if(i in fields) {
+                this["supported_next_" + i](fields[i]);
+            }
+        }
+        console.log(fields,this)
+    }
+
+    supported_next_method(val) {
+        this.method = val.toUpperCase();
+        this.form.setAttribute('method',val);
+    }
+
+    supported_next_action(val) {
+        this.action = val;
+        this.form.setAttribute('action',val);
+    }
+    
+    supported_next_autosave(val) {
+        console.warn("Server-dictated auto-save is not implemented yet!");
+        // this.autosave = val;
+        // if (this.autosave) el.addEventListener("change", event => this.autosave_handler(this.el_list[name], event));
+        // if (!this.form.querySelector(["type='submit'"])) {
+        //     this.form.appendChild()
+        // }
     }
 }
 

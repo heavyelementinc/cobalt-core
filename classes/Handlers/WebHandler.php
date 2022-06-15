@@ -109,10 +109,12 @@ class WebHandler implements RequestHandler {
 
         // Get the default template for this error type:
         $template = "errors/" . $e->status_code . ".html";
-        if (key_exists('template', $data)) {
-            // Check if this error has a template specified.
-            $template = $data['template'];
-            unset($data['template']);
+        if (gettype($data) === 'array') {
+            if (key_exists('template', $data)) {
+                // Check if this error has a template specified.
+                $template = $data['template'];
+                unset($data['template']);
+            }
         }
 
         // If we're in debug mode, let's embed the actual error message

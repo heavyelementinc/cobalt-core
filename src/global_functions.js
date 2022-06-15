@@ -191,6 +191,36 @@ async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern =
     })
 }
 
+async function modalForm(url, {okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true }){
+    return new Promise((resolve,reject) => {
+        const modal = new Modal({
+            url: url,
+            chrome: {
+                cancel: {
+                    label: cancel,
+                    callback: async () => {
+                        reject("");
+                        return true;
+                    }
+                },
+                okay: {
+                    label: okay,
+                    callback: async (event) => {
+                        const form = modal.dialog.querySelector("form-request");
+
+                        let result = await form.submit(event);
+                        if(!additional_callback(result)) return false;
+
+                        resolve(form.request.lastResult);
+                        return true;
+                    }
+                }
+            }
+        })
+        modal.draw();
+    });
+}
+
 function escapeHtml(text) {
     var map = {
         '&': '&amp;',

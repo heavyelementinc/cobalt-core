@@ -183,42 +183,57 @@ function cobalt_autoload($class) {
 
     $file = find_one_file($GLOBALS['CLASSES_DIR'], $namespace_to_path) ?? "";
 
-    if ($file !== false) {
-        require_once $file;
-        return;
-    }
-
-    // Load class databases
-    if (!isset($GLOBALS['class_directory'])) $GLOBALS['class_directory'] = get_all_where_available([__ENV_ROOT__ . '/classes/class_directory.json', __APP_ROOT__ . '/private/classes/class_directory.json']);
-    $load = null;
-    // Check if the class we're trying to load exists in the classes property
-    if (key_exists($class, $GLOBALS['class_directory']['classes'])) {
-        $load = $GLOBALS['class_directory']['classes'][$class];
-    }
-    if ($class[0] === "\\") $class = substr($class, 1);
-    $explode = explode("\\", $class);
-    $match_pattern = "/(.*)\\(\w+$)/";
-    if (count($explode) === 2) {
-        $namespace = $explode[0];
-        $class_name = $explode[1];
-        if (key_exists($namespace, $GLOBALS['class_directory']['namespaces'])) {
-            $load = $GLOBALS['class_directory']['namespaces'][$namespace];
+    try {
+        if ($file !== false) {
+            require_once $file;
+            return;
         }
-    }
+        $controllers_special_case = '/Controllers/';
+        if (preg_match($controllers_special_case, $class)) {
+            $file = find_one_file([__APP_ROOT__ . "/private", __ENV_ROOT__], $class);
+            if ($file !== false) {
+                require_once $file;
 
-    // Throw an error if we don't have a load candidate
-    if ($load === null) throw new Exception("Could not load $class");
+                return;
+            }
+        }
 
-    // If the path key exists, process the strings and require the file
-    if (key_exists('path', $load)) {
-        $final_name = str_replace(
-            ['__ENV_CLASSES__', '__APP_CLASSES__'],
-            [__ENV_ROOT__ . "/classes/", __APP_ROOT__, "/private/classes/"],
-            $load['path']
-        );
-        if (pathinfo($final_name, PATHINFO_EXTENSION) !== "php") $final_name .= "$class_name.php";
-        require_once $final_name;
-        return;
+
+        // Load class databases
+        if (!isset($GLOBALS['class_directory'])) $GLOBALS['class_directory'] = get_all_where_available([__ENV_ROOT__ . '/classes/class_directory.json', __APP_ROOT__ . '/private/classes/class_directory.json']);
+        $load = null;
+        // Check if the class we're trying to load exists in the classes property
+        if (key_exists($class, $GLOBALS['class_directory']['classes'])) {
+            $load = $GLOBALS['class_directory']['classes'][$class];
+        }
+        if ($class[0] === "\\") $class = substr($class, 1);
+        $explode = explode("\\", $class);
+        $match_pattern = "/(.*)\\(\w+$)/";
+        if (count($explode) === 2) {
+            $namespace = $explode[0];
+            $class_name = $explode[1];
+            if (key_exists($namespace, $GLOBALS['class_directory']['namespaces'])) {
+                $load = $GLOBALS['class_directory']['namespaces'][$namespace];
+            }
+        }
+
+        // Throw an error if we don't have a load candidate
+        if ($load === null) throw new Exception("Could not load $class");
+
+        // If the path key exists, process the strings and require the file
+        if (key_exists('path', $load)) {
+            $final_name = str_replace(
+                ['__ENV_CLASSES__', '__APP_CLASSES__'],
+                [__ENV_ROOT__ . "/classes/", __APP_ROOT__, "/private/classes/"],
+                $load['path']
+            );
+            if (pathinfo($final_name, PATHINFO_EXTENSION) !== "php") $final_name .= "$class_name.php";
+            require_once $final_name;
+            return;
+        }
+    } catch (Exception $e) {
+        print($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+        exit;
     }
 }
 
@@ -265,6 +280,11 @@ $GLOBALS['TEMPLATE_BINDINGS'] = [
     "header_binding_middle", "header_binding_after", "main_content_binding_before",
     "main_content_binding_after", "footer_binding_before", "footer_binding_after"
 ];
+
+function set($name, $value) {
+    add_vars([$name => $value]);
+    return "";
+}
 
 /**
  * Append a value to a particular template binding
@@ -638,7 +658,7 @@ function get_route_group($directory_group, $misc = []) {
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
 
-    foreach ($GLOBALS['router']->routes['get'] as $route) {
+    foreach ($GLOBALS['router']->routes['get'] as $r => $route) {
         $groups = $route['navigation'] ?? false;
         if (!$groups) continue;
         // If we get here, we know we [probably] have an array
@@ -647,8 +667,9 @@ function get_route_group($directory_group, $misc = []) {
         // If both are FALSE, then we skip list assembly.
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
         if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-
+        $current_route = $GLOBALS['router']->current_route;
         $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
+        if ($r === $current_route) $info['attributes'] = 'class="current--route"';
         $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
     }
 
@@ -905,4 +926,10 @@ function sanitize_path_name($path) {
 
 function relative_time($date, $now = null) {
     if (!$now) $now = time();
+}
+
+function make_thumbnail($original, $directory, $dimensions = [200, null]) {
+}
+
+function get_image_function($filename) {
 }

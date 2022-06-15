@@ -324,4 +324,22 @@ abstract class NormalizationHelpers {
         if (filter_var($url, FILTER_VALIDATE_URL)) return $url;
         throw new ValidationIssue("Must be a valid url");
     }
+
+    public $pronouns_table = [
+        0 => ['they' => "it",   'them' => "it",   'their' => "it",    'theirs' => "its",    'themselves' => "itself",     'are' => "is"],
+        1 => ['they' => "he",   'them' => "him",  'their' => "his",   'theirs' => "his",    'themselves' => "himself",    'are' => "is"],
+        2 => ['they' => "she",  'them' => "her",  'their' => "her",   'theirs' => "hers",   'themselves' => "herself",    'are' => "is"],
+        3 => ['they' => "they", 'them' => "them", 'their' => "their", 'theirs' => "theirs", 'themselves' => "themselves", 'are' => "are"],
+    ];
+
+    function valid_pronouns() {
+        $valid = [];
+        foreach($this->pronouns_table as $key => $value) {
+            $display = "$value[they]/$value[them]";
+            $valid[(string)$key] = $display;
+        }
+        unset($valid["0"]);
+        $valid["0"] = "it/its";
+        return $valid;
+    }
 }

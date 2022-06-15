@@ -68,10 +68,10 @@ class UserCRUD extends \Drivers\Database {
         return new UserSchema($mutant);
     }
 
-    final function createUser($request) {
+    final function createUser($request, $mode = "require") {
         $val = new UserValidate();
 
-        $val->setMode("require");
+        $val->setMode($mode);
         $mutant = $val->validate($request);
         $flags = [];
         $flag = "flags.";

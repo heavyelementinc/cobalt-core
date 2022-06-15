@@ -7,6 +7,8 @@ use Exception;
 use Exceptions\HTTP\BadGateway;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\HTTPException;
+use Aws\S3\S3Client as S3Client;
+use Aws\Exception\AwsException;
 
 class UploadManager {
     // Prefix and suffix stuff
@@ -14,9 +16,14 @@ class UploadManager {
     public $thumbnail_suffix = "thumbnail";
     public $files = null;
 
-    function __construct($files = null) {
+    function __construct($files = null, $limit = null) {
+        $this->set_limit($limit);
         if ($files === null) $this->set_files($_FILES);
         else $this->set_files($files);
+    }
+
+    public function set_limit($limit) {
+        $this->limit = $limit;
     }
 
     /**
@@ -41,6 +48,8 @@ class UploadManager {
                     'size' => $f['size'][$i],
                 ];
             }
+
+            if(!is_null($this->limit) && $iteration >= $this->limit - 1) break;
         }
 
         if ($errors !== 0) throw new BadRequest("There was a problem with your uploaded files");
@@ -59,6 +68,36 @@ class UploadManager {
             $this->files[$i]['path'] = str_replace("//", "/", $filename);
             if (!move_uploaded_file($file['tmp_name'], $filename)) throw new Exception("Could not move file");
         }
+    }
+
+    public function move_to_bucket($file, $object_name, $bucket) {
+        $keys = __APP_ROOT__ . "/ignored/config/S3Token.json";
+        if(!file_exists($keys)) throw new Exception("No S3 token file specified!");
+        $config = get_json($keys);
+        $client = new S3Client($config);
+        $client->putObject([
+            'ACL' => "public-read",
+            'Bucket' => $bucket,
+            'Key' => $object_name,
+            'SourceFile' => $file
+        ]);
+        return $object_name;
+    }
+
+    public function remove_from_bucket($path, $bucket) {
+        $keys = __APP_ROOT__ . "/ignored/config/S3Token.json";
+        if(!file_exists($keys)) throw new Exception("No S3 token file specified!");
+        $config = get_json($keys);
+        $client = new S3Client($config);
+        
+        $object_key = parse_url($path, PHP_URL_PATH);
+
+        $client->deleteObject([
+            'Bucket' => $bucket,
+            'Key' => $object_key
+        ]);
+
+        return $object_key;
     }
 
     private function get_unique_filename($file, $directory, $original_filename = true, $depth = 0) {
@@ -84,13 +123,13 @@ class UploadManager {
     public function generate_thumbnails($constrain_by_max_dimension = 200, $watch = null) {
         if ($watch) {
             $watch->queue();
+            $watch->total(count($this->files));
         }
-        $watch->total(count($this->files));
         foreach ($this->files as $i => $file) {
             // Check if we've got a path to work with, otherwise use tmp names
             $path = (isset($file['path'])) ? $file['path'] : $file['tmp_name'];
             $pathinfo = pathinfo($path);
-            $extension = ($pathinfo['extension']) ? $pathinfo['extension'] : pathinfo($file['file_name'], PATHINFO_EXTENSION);
+            $extension = (isset($pathinfo['extension'])) ? $pathinfo['extension'] : pathinfo($file['file_name'], PATHINFO_EXTENSION);
             $filename = $pathinfo['dirname'] . "/$pathinfo[filename]_" . $this->thumbnail_suffix . ".$extension";
             $this->files[$i]['thumb'] = $filename;
 

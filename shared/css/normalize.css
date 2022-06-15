@@ -49,6 +49,22 @@ hr {
     border-top: var(--project-color-table-border)
 }
 
+.hbox hr {
+    width:100%;
+    border: 1px solid inherit;
+    --hr-offset: 1ch;
+    align-items:center;
+}
+
+.hbox hr:first-of-type {
+    margin-right: var(--hr-offset);
+}
+
+.hbox hr:last-of-type{ 
+    margin-left: var(--hr-offset);
+}
+
+
 pre {
     font-family: monospace, monospace;
     font-size: 1em;
@@ -305,7 +321,9 @@ footer .social-media a:hover{
     text-align: center;
 }
 
-
+.mobile-only {
+    display: none;
+}
 
 /** SLIDESHOW **/
 
@@ -407,5 +425,9 @@ ul.list-panel {
 
     #cookie-consent .cookie-consent-false {
         padding: 0 0 2em;
+    }
+
+    .mobile-only {
+        display: inherit;
     }
 }

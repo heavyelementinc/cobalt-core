@@ -2,6 +2,10 @@
 
 use Routes\Route;
 
+if(app("UGC_enable_user_generated_content")) {
+    Route::get(trim_trailing_slash(app("UGC_retrieval_endpoint")) . "/{file_id}", "UGC@retrieve");
+}
+
 Route::get("/", "Pages@index", [
     'anchor' => ['name' => 'Home'],
     'navigation' => ['main_navigation']
@@ -69,21 +73,34 @@ if (app("enable_debug_routes")) {
             'name' => "Color Palette Generator"
         ]
     ]);
+    Route::get("/debug/next-request", "Debug@next_request_page", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "API Next Request Test"]
+    ]);
 
+    Route::get("/debug/file-upload/", "Debug@file_upload_demo", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "File Upload Test"]
+    ]);
+    
+    Route::get("/debug/async-button/", "Debug@async_button", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Async Button Test"]
+    ]);
 
     if (app("debug")) {
         Route::get("/debug/stream/", "Debug@event_stream", [
             'navigation' => ['debug'],
             'anchor' => ['name' => "Server-Sent Events"]
         ]);
-        Route::get("/debug/file-upload/", "Debug@file_upload_demo", [
-            'navigation' => ['debug'],
-            'anchor' => ['name' => "File Upload Test"]
-        ]);
         Route::get("/debug/env/", "Debug@environment", [
             'navigation' => ['debug'],
             'anchor' => ['name' => "Environment"]
         ]);
+        // Route::get("/debug/dump", "Debug@dump", [
+        //     'navigation' => ['debug'],
+        //     'anchor' => ['name' => "Dump"]
+        // ]);
     }
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
 }
@@ -91,11 +108,15 @@ if (app("enable_debug_routes")) {
 /** If authentications are enabled, these routes should be added to the table */
 if (app("Auth_logins_enabled")) {
     /** Basic login page */
-    Route::get(app("Auth_login_page"), "CoreController@login");
+    Route::get(app("Auth_login_page"), "Login@login");
     // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
 
     Route::get("/user/menu", "UserAccounts@get_user_menu");
     Route::get("/admin", "CoreController@admin_redirect");
+}
+
+if (app("Auth_account_creation_enabled")) {
+    Route::get(app("Auth_onboading_url"), "UserAccounts@onboarding");
 }
