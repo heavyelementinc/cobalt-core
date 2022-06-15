@@ -90,7 +90,8 @@ class Help {
 
     private function class_table_all() {
         $command_files = scandir(__CLI_ROOT__ . "/commands/");
-        $app_commands = scandir(__APP_ROOT__ . "/cli/commands/");
+        $app_commands = false;
+        if(defined("__APP_ROOT__")) $app_commands = scandir(__APP_ROOT__ . "/cli/commands/");
         if ($app_commands !== false) $command_files = [...$command_files, ...$app_commands];
         foreach ($command_files as $file) {
             if ($file === "." || $file === "..") continue;

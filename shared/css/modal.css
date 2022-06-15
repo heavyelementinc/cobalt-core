@@ -47,7 +47,7 @@ modal-container {
 modal-box {
     display: flex;
     flex-direction: column;
-    background: white;
+    background: var(--project-body-background);
     position: relative;
     min-height: 20%;
     min-width: 20%;

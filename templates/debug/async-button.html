@@ -1,0 +1,27 @@
+@set("title","Async Button Test");
+
+<h1>{{title}}</h1>
+
+<div class="hr">
+    <h2>Slow Response</h2>
+    <async-button action="/api/v1/debug/slow-response" method="GET" value="something">Do it</async-button>
+    
+    <h2>Slow Error</h2>
+    <async-button action="/api/v1/debug/slow-error" method="GET" value="something">Oops!</async-button>
+    
+    <h2>One &amp; Done</h2>
+    <async-button action="/api/v1/debug/slow-response/1" method="GET" once="once">Disable</async-button>
+    
+</div>
+
+<h2>Next Request</h2>
+<async-button action="/api/v1/debug/next-request/" method="POST" value="something" >Again!</async-button>
+
+
+<h2>Modify Content</h2>
+<async-button action="/api/v1/page/?route=/" method="GET" target="#modify-target" key="body">Update</async-button>
+<div id="modify-target">
+    <h3>Replace this content</h3>
+</div>
+
+<textarea name="title" placeholder="Update"></textarea>

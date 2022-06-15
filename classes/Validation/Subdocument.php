@@ -20,7 +20,7 @@ class Subdocument extends Normalize {
         return [];
     }
 
-    public function __validate($data) {
+    public function __validate($data, $createSubset = false) {
         // Keep track of our mutated values
         $mutant = [];
         // Keep track of any issues with data

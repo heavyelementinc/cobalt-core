@@ -12,7 +12,11 @@ namespace Exceptions\HTTP;
 class HTTPException extends \Exception {
     private $mode;
     public $status_code = 500;
-    public $data = [];
+    public $data = [
+        /*
+         
+        */
+    ];
 
     function __construct($message, $data = null, $exit = true) {
         $this->mode = $GLOBALS['route_context'] ?? "cli";

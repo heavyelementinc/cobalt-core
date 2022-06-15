@@ -199,6 +199,8 @@
             "color-input-border-nofocus": "#b1c3c3",
             "color-input-border-focus": "#000",
             "color-input-background": "#fff",
+            "color-input-text-color": "#000",
+            "color-input-background-focus": "#FFF",
             "color-input-invalid-border": "#BB4430",
             "color-input-invalid-bg": "#F7E2DE",
             "color-input-invalid-label-text": "#FFF",
@@ -293,6 +295,9 @@
             "main.css"
         ],
         "$merge": true // User's packages should come second.
+    },
+    "default-color-scheme": {
+        "default": "light"
     },
     "opengraph": {
         "default": {
@@ -493,7 +498,24 @@
         // When true, the trailing semicolon is REQUIRED.
         "default": false
     },
+    "Mobile_nav_menu_closes_on_anchor_link_click": {
+        "default": true,
+        "$public": true
+    },
     "Cookie_consent_prompt": {
         "default": false
+    },
+    "UGC_enable_user_generated_content": {
+        "default": false
+    },
+    "UGC_retrieval_endpoint": {
+        "default": "/ugc",
+        "$public": true
+    },
+    "UCG_database_collection": {
+        "default": "ugc"
+    },
+    "UGC_directory": {
+        "default": "/ugc"
     }
 }

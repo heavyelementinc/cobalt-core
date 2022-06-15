@@ -73,6 +73,8 @@
 
 namespace Render;
 
+use Exceptions\HTTP\NotFound;
+
 class Render {
     public $body = "";
     public $vars = [];
@@ -153,6 +155,7 @@ class Render {
             $this->template_cache[$template_path] = file_get_contents($template_path);
         } else if (!key_exists($template_path, $this->template_cache)) {
             $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
+            if($contenders === false) throw new NotFound("The template ($template_path) was not found ");
             $this->template_cache[$template_path] = file_get_contents($contenders);
         }
         $this->set_body($this->template_cache[$template_path], $template_path);
@@ -174,11 +177,12 @@ class Render {
     /** Start the template parsing process. Will return the finished template. */
     function execute() {
         $this->add_stock_vars(); // Add stock variables so they're accessible
-        $matched_variables = $this->parse_for_vars();
-        $mutant = $this->replace_vars($this->body, $matched_variables);
-
+        
         $matched_functions = $this->parse_for_functions();
-        $mutant = $this->replace_functs($mutant, $matched_functions);
+        $mutant = $this->replace_functs($this->body, $matched_functions);
+
+        $matched_variables = $this->parse_for_vars();
+        $mutant = $this->replace_vars($mutant, $matched_variables);
 
         return $mutant;
     }
@@ -309,6 +313,7 @@ class Render {
             // from inside a template, so we add a special case. Fun.
             if (in_array($funct, ['maybe_with', 'with']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
             $result = $funct(...$mutant_vars);
+            if($funct === "set") $this->vars = array_merge($this->vars,$GLOBALS['WEB_PROCESSOR_VARS']);
             $mutant = \str_replace($functions[0][$i], $result, $mutant);
         }
         return $mutant;

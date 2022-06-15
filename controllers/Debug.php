@@ -111,6 +111,7 @@ class Debug extends \Controllers\Pages {
             'email' => "terry_t@heavyelement.io",
             'phone' => '5554041122',
             'region' => ['us-west'],
+            'pronoun_set' => "1",
             'order_count' => 5,
             'test' => [
                 ['foo' => 'Test Data',],
@@ -217,6 +218,16 @@ class Debug extends \Controllers\Pages {
         return "success";
     }
 
+    function s3_test() {
+        //https://www.milmike.com/run-php-asynchronously-in-own-threads
+        $manager = new \Files\UploadManager($_FILES);
+
+        $manager->move_to_bucket($_FILES['file']['tmp_name'][0],"test","subscribetome-cdn");
+
+        $manager->generate_thumbnails_exec();
+        return "success";
+    }
+
     function slow_error() {
         sleep(3);
         throw new BadRequest("You requested an error, you got one.");
@@ -250,5 +261,34 @@ class Debug extends \Controllers\Pages {
 
         $html .= "</div>";
         return $html;
+    }
+
+    function dump() {
+        var_dump($GLOBALS);
+        add_vars([
+            'main' => "This is a test"
+        ]);
+        set_template("/parts/main.html");
+    }
+
+    function next_request_post() {
+        return $this->next_request("put");
+    }
+
+    function next_request_put() {
+            return $this->next_request("post");
+    }
+
+    function next_request($next) {
+        header("X-Next-Request: " . json_encode(['method' => $next, 'action' => "/api/v1/debug/next-request"]));
+        return "Success";
+    }
+
+    function next_request_page() {
+        set_template("debug/next-request.html");
+    }
+
+    function async_button() {
+        set_template("debug/async-button.html");
     }
 }

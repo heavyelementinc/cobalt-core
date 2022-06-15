@@ -19,7 +19,7 @@ input, textarea {
   padding: .4rem;
   border-radius: 4px;
   font-size: 1.1rem;
-
+  color: var(--project-color-input-text-color);
 }
 
   input[invalid],
@@ -62,7 +62,7 @@ input, textarea {
     border: 1px solid var(--project-color-input-border-focus);
   }
 
-  input::placeholder, input + .placeholder {
+  input::placeholder, textarea::placeholder, input + .placeholder {
     color: var(--project-color-input-border-nofocus);
     background: transparent;
     position: absolute;
@@ -73,19 +73,23 @@ input, textarea {
   }
 
   :focus-within .placeholder,
-  input::not(:placeholder-shown) + .placeholder{
+  input::not(:placeholder-shown) + .placeholder,
+  textarea::not(:placeholder-shown) + .placeholder
+  {
     color: var(--project-color-input-border-focus);
     background: var(--project-color-input-background);
     font-weight: bold;
     top:5px;
     left:5px;
   }
+
+  textarea:focus::placeholder,
   input:focus::placeholder {
     color: var(--project-color-input-border-focus);
   }
 
 input:focus, textarea:focus {
-  background: var(--project-color-input-disabled);
+  background: var(--project-color-input-background-focus);
   box-shadow: none;
 }
 
@@ -95,7 +99,7 @@ input:disabled, textarea:disabled {
 
 /** BUTTON LINKS **/
 
-.button {
+.button, button {
   --btn-normal: var(--project-color-button-init);
   --btn-text: var(--project-color-button-text);
   --btn-hover: var(--project-color-button-hover);
@@ -109,6 +113,11 @@ input:disabled, textarea:disabled {
   font-size: 1.1rem;
   white-space: nowrap;
   box-sizing: border-box;
+}
+
+button {
+  border-radius: 0;
+  border: 1px solid var(--project-color-input-border-nofocus)
 }
 
 a.button {
@@ -131,7 +140,7 @@ a.button {
   border: 1px solid;
 }
 
-.button:hover {
+.button:hover,button:hover {
   background-color: var(--btn-hover);
   color: var(--btn-hover-text);
 }

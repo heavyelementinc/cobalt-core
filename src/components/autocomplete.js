@@ -185,12 +185,21 @@ class AutoComplete extends HTMLElement {
     initSearchField() {
         if (!this.searchField) {
             this.searchField = this.querySelector("input[type='search']");
-            if (!this.searchField) return;
+            if (!this.searchField) {
+                throw new Error("There's no search field for this autocomplete element");
+            }
         }
         this.searchField.addEventListener("change", e => {
+            this.dispatchEvent(new Event("change",e));
             e.preventDefault();
             e.stopPropagation();
         })
+
+        this.searchField.addEventListener("input", e => {
+            this.dispatchEvent(new Event("input",e));
+            if(this.searchField.value == "") this.searchElements();
+        });
+
         this.searchField.addEventListener("keyup", e => this.handleSearchKeyUp(e));
 
         this.addEventListener("focusin", e => {
@@ -232,6 +241,7 @@ class AutoComplete extends HTMLElement {
     }
 
     handleSearchKeyUp(e) {
+        e.preventDefault();
         let toSearch = e.target.value;
         let tempOpts = { ...this.options };
         if (this.allowCustomInputs === true && toSearch !== "") tempOpts[toSearch] = {

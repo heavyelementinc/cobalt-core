@@ -17,6 +17,7 @@ class AsyncButton extends HTMLButtonElement {
         this.data = null; // The "value" attribute
         this.once = false;
         this.statusMessage = null;
+        this.label = this.innerHTML;
     }
 
     connectedCallback() {
@@ -26,7 +27,7 @@ class AsyncButton extends HTMLButtonElement {
     }
 
     static get observedAttributes() {
-        return ['value', 'once', 'action'];
+        return ['value', 'once', 'action', 'method',];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -52,12 +53,13 @@ class AsyncButton extends HTMLButtonElement {
         this.requestStart();
         const action = this.getAttribute("action");
         this.request = new ApiFetch(action, this.getMethod(), {});
+        let result;
         try {
-            let result = await this.request.send(this.data);
-            this.requestSuccess();
+            result = await this.request.send(this.data);
         } catch (e) {
             this.requestFailure(e, action);
         }
+        this.requestSuccess(result);
     }
 
     getMethod() {
@@ -75,14 +77,65 @@ class AsyncButton extends HTMLButtonElement {
         this.classList.remove("error");
     }
 
-    requestSuccess() {
+    requestSuccess(result) {
         const dims = get_offset(this);
         this.classList.remove("working");
         this.style.width = `${dims.width}px`;
-        this.innerHTML = this.getAttribute("success") || "Success";
-        let classes = ["done"];
-        if (this.once) classes.push("final");
-        this.classList.add(...classes);
+        if (this.once) {
+            this.innerHTML = this.getAttribute("success") || "Success";
+            classes.push("final");
+            let classes = ["done"];
+            this.classList.add(...classes);
+        } else {
+            this.innerHTML = this.label;
+            // Add some visual confirmation the action has been taken.
+        }
+        
+
+        // Implement X-Location, X-Next-Request, & Updating Content
+        const headers = this.request.headers;
+        if("X-Location" in headers) window.location = headers['X-Location'];
+        if("X-Next-Request" in headers) this.handleNextRequest(headers['X-Next-Request']);
+        this.handleUpdatingContent(result);
+    }
+
+    handleNextRequest(headers) {
+        if(headers === null) return;
+        if(typeof headers !== "object") return;
+        if('action' in headers) this.setAttribute("action", headers['action']);
+        if('method' in headers) this.setAttribute('method', headers['method']);
+    }
+
+    handleUpdatingContent(result) {
+        if(typeof result !== "object") return;
+        
+        // Let's set up if we are trying to get a page from the API
+        const target = this.getAttribute("target"),
+            key = this.getAttribute("key") ?? "body";
+        // Add it to our results so that the following loop can do it for us
+        if(target && key in result) result[target] = result[key];
+
+        for(const i in result) {
+            let value_matches = document.querySelectorAll(`[name="${i}"]`);
+            if(value_matches) {
+                for(const v of value_matches) {
+                    v.value = result[i];
+                }
+            }
+            let matches = false;
+            switch(i[0]) {
+                case "[":
+                    if(i[i.length - 1] !== "]") break;
+                case "#":
+                case ".":
+                    matches = document.querySelectorAll(i);
+                break;
+            }
+            if(!matches) continue;
+            for(var l of matches) {
+                l.outerHTML = result[i];
+            }
+        }
     }
 
     requestFailure(e, action) {

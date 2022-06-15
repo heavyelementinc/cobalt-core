@@ -30,6 +30,10 @@ class ApiFetch {
         let result = await fetch(this.uri, send);
         if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
         if (result.ok === false) result = await this.handleErrors(result)
+
+        this.headers['X-Next-Request'] = result.headers.get("X-Next-Request");
+        if(this.headers['X-Next-Request']) this.headers['X-Next-Request'] = JSON.parse(this.headers['X-Next-Request']);
+        
         let r = await result.json();
         this.execPlugins("after", r, result);
         return r;
@@ -123,7 +127,7 @@ class ApiFile extends ApiFetch {
                 });
 
                 if ("x-redirect" in headerMap && headerMap["x-redirect"]) router.location = headerMap['x-redirect'];
-                resolve(e);
+                resolve(JSON.parse(request.response));
             });
 
             request.addEventListener("error", (e) => {

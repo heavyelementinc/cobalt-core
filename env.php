@@ -54,6 +54,9 @@ $write_to_buffer_handled = false;
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
 
+$app_env = __APP_ROOT__ . "/app_env.php";
+if(file_exists($app_env)) require_once $app_env;
+
 // Import Composer's autoload
 $composer = __DIR__ . "/vendor/autoload.php";
 if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the cobalt-core directory as your webserver user");

@@ -24,47 +24,77 @@ function user_menu() {
 
 user_menu();
 
-function navigation_menu() {
-    const header = document.querySelector("#nav-menu-spawn-nojs + header"),
-        visibilityController = document.querySelector("#nav-menu-spawn-nojs"),
-        spawner = document.querySelector("#nav-menu-spawn"),
-        name = "js-nav-spawned",
-        functs = {
-            menuHidden: () => {
-                document.body.classList.remove(name);
-                document.body.style.overflow = "unset";
-                document.body.style.width = "unset";
-            },
-            menuVisible: () => {
-                document.body.classList.add(name);
-                let width = get_offset(document.body).w;
-                document.body.style.overflow = "hidden";
-                document.body.style.width = `${width}px`
-            },
-            handle: () => {
-                if (!visibilityController.checked) functs.menuVisible();
-                else functs.menuHidden();
-            },
-            accessibility: (state = true) => {
-                console.log(state);
-                if (visibilityController.style.display !== "none") {
-                    spawner.checked = state;
-                    spawner.dispatchEvent(new Event("change"));
-                    functs.handle();
-                }
-            }
-        };
-    // Handle when the menu is already open when loading the page.
-    if (visibilityController.checked) {
-        functs.menuVisible();
+class MobileNavMenu{
+    constructor () {
+        this.header = document.querySelector("#nav-menu-spawn-nojs + header"),
+        this.checkbox = document.querySelector("#nav-menu-spawn-nojs"),
+        this.menuButton = document.querySelector("#nav-menu-spawn"),
+        this.name = "js-nav-spawned"
+        if (this.checkbox.checked) {
+            this.menuVisible();
+        }
+    
+        // When the button's clicked
+        this.checkbox.addEventListener("input", e => this.updateState());
+
+        if(app("Mobile_nav_menu_closes_on_anchor_link_click")) {
+            console.log("Anchor links in the header will close the mobile nav menu")
+            this.anchorLinkListeners();
+        }
     }
 
-    // When the button's clicked
-    spawner.addEventListener("click", e => functs.handle());
+    freezeBodyContent() {
+        // Add "nav spawned" class to document list.
+        document.body.classList.add(this.name);
+        let width = get_offset(document.body).w;
+        document.body.style.overflow = "hidden";
+        document.body.style.width = `${width}px`
+        console.warn("Body content frozen");
+    }
 
-    // header.addEventListener("focusin", e => functs.accessibility())
+    releaseBodyContent() {
+        document.body.classList.remove(this.name);
+        document.body.style.overflow = "unset";
+        document.body.style.width = "unset";
+        console.warn("Body content unfrozen");
+    }
 
-    // header.addEventListener("focusout", e => functs.accessibility(false))
+    updateState() {
+        console.log(this.checkbox.checked);
+        if (!this.checkbox.checked) this.releaseBodyContent();
+        else this.freezeBodyContent();
+    }
+
+    accessibility(state = true) {
+        console.log(state);
+        if (this.checkbox.style.display !== "none") {
+            this.menuButton.checked = state;
+            this.menuButton.dispatchEvent(new Event("change"));
+            this.updateState();
+        }
+    }
+
+    anchorLinkListeners() {
+        const headerLinks = this.header.querySelectorAll('a');
+
+        for(const i of headerLinks) {
+            console.log(i.href, i.href.indexOf("#"));
+
+            if(i.href.indexOf("#") === -1) continue;
+
+            i.addEventListener("click", () => this.close());
+        }
+    }
+
+    open() {
+        this.checkbox.checked = true;
+        this.updateState()
+    }
+
+    close() {
+        this.checkbox.checked = false;
+        this.updateState()
+    }
 }
 
-navigation_menu();
+mobile_nav = new MobileNavMenu();

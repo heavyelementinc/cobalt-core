@@ -12,6 +12,24 @@
         <input type="phone" name="phone" value="{{document.phone}}">
     </fieldset>
     <fieldset>
+        <label>Pronoun Set</label>
+        <select name="pronoun_set">{{!document.pronoun_set.options}}</select>
+        <ul>
+            <li>Pronoun_set Prototype</li>
+            <li>{{document.pronoun_set.they}}</li>
+            <li>{{document.pronoun_set.them}}</li>
+            <li>{{document.pronoun_set.their}}</li>
+            <li>{{document.pronoun_set.theirs}}</li>
+            <li>{{document.pronoun_set.themselves}}</li>
+            <li>Document Property</li>
+            <li>{{document.they}}</li>
+            <li>{{document.them}}</li>
+            <li>{{document.their}}</li>
+            <li>{{document.theirs}}</li>
+            <li>{{document.themselves}}</li>
+        </ul>
+    </fieldset>
+    <fieldset>
         <label>Region</label>
         <input-array name="region" multiselect="true" value="{{document.region}}">
             {{!document.region.options}}
