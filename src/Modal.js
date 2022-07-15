@@ -47,6 +47,8 @@ class Modal {
         animations = true, // Allow or deny spawn in/out animations
         immediate = false, // You can wait to spawn the modal by setting this to false
         lockViewport = true,
+        event = null,
+        zIndex = null,
         pageTitle = null,
     }) {
         this.id = id;
@@ -63,6 +65,8 @@ class Modal {
         this.buttonResult = {};
         this.shouldLockViewport = lockViewport
         this.lockedViewportClass = "scroll-locked";
+        this.zIndex = zIndex;
+        this.event = event;
 
         // Our default button configuration will be merged with whatever the
         // user provided
@@ -106,9 +110,14 @@ class Modal {
         this.container.classList = this.parentClass;
         this.container.style.opacity = this.container_opacity_start; // Animation stuff
 
+        if (this.zIndex) this.container.style.zIndex = this.zIndex;
+
         // Append our modal container and its children to the DOM
         document.querySelector("body").appendChild(this.container);
-
+        if (!this.zIndex && event) {
+            const spawnIndex = spawn_priority(event);
+            if (spawnIndex) this.container.style.zIndex = spawnIndex + 1;
+        }
         this.close_button(); // Add our close button
 
         // Set a window 

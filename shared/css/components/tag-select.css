@@ -1,0 +1,23 @@
+input-tag-select {
+    --radius: 4px;
+    background: var(--project-color-input-background);
+    border: 1px solid var(--project-color-input-border-nofocus);
+    border-radius: var(--radius);
+}
+
+input-tag-select option {
+    display: block;
+    border-radius: var(--radius);
+    padding: 2px 4px;
+    margin: 4px;
+    white-space: nowrap;
+    background-color: transparent;
+    color: rgba(0,0,0,.6);
+    transition: color .5s, background-color .5s;
+    pointer-events: all;
+}
+
+input-tag-select option[selected="selected"] {
+    color: white;
+    background-color: var(--project-color-active);
+}

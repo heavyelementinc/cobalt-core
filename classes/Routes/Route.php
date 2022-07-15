@@ -14,7 +14,7 @@ class Route {
      *  * permission - The name of a permission required to access route
      *  * groups - The name of a group required to access route
      *  * anchor - name, [href, icon, order, attributes] Anchor values when displayed in get_route_group list (web only)
-     *  * navigation - Either an indexed array of group names or an associative array with unique anchor values (web only)
+     *  * navigation - Either an indexed array of group names or an associative array with unique anchor values (header navigation group = "main_navigation") (web only)
      *  * csrf_required => bool determines if CSRV tokens are required for the request (API only)
      * 
      * @param string $path A REQUEST_URI to be matched against using Cobalt's route syntax

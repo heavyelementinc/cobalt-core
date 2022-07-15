@@ -78,6 +78,8 @@ class InputClass_default {
 
     async create_error(before) {
         let el = document.createElement("pre");
+        const spawnIndex = spawn_priority(before);
+        if (spawnIndex) el.style.zIndex = spawnIndex + 1;
         el.addEventListener('click', () => {
             if (el) {
                 el.parentNode.removeChild(el);
@@ -314,6 +316,10 @@ class InputClass_file extends InputClass_default {
     }
 }
 
+class InputClass_tag_select extends InputClass_default {
+
+}
+
 var classMap = {
     default: InputClass_default,
     check: InputClass_checkbox,
@@ -323,5 +329,6 @@ var classMap = {
     button: InputClass_button,
     number: InputClass_number,
     array: InputClass_array,
-    objectArray: InputClass_object_array
+    objectArray: InputClass_object_array,
+    tagSelect: InputClass_tag_select
 }

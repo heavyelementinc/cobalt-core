@@ -247,7 +247,6 @@
             "global_functions.js",
             "components/autocomplete.js",
             "components/tag-select.js",
-            "components/fs-listing.js",
             "DateConverter.js",
             "Modal.js",
             "TabbedUI.js",

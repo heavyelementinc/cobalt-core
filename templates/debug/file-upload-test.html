@@ -1,0 +1,40 @@
+<h1>File Upload Test</h1>
+<form-request method="POST" action="/api/v1/debug/file-upload/single">
+    <h2>Single File</h2>
+    <input type="file" name="test">
+    <input-switch name="thumbnail" checked="true"></input-switch><br>
+    <button type="submit">Submit</button>
+</form-request>
+
+<form-request method="POST" action="/api/v1/debug/file-upload/multi">
+    <h2>Multi File</h2>
+    <input type="file" name="test" multiple="multiple">
+    <input-switch name="thumbnail" checked="true"></input-switch><br>
+    <button type="submit">Submit</button>
+</form-request>
+
+<form-request method="POST" action="/api/v1/debug/file-upload/arbitrary-data">
+    <h2>Extra metadata</h2>
+    <input type="file" name="test">
+    <input name="arbitrary_data">
+    <input-switch name="thumbnail" checked="true"></input-switch><br>
+    <button type="submit">Submit</button>
+</form-request>
+
+<audio controls>
+    <source src="/debug/file-upload/download-test/Cockroach_On_Toast.mp3?nocache">
+</audio>
+
+
+<cobalt-listing delete-action="/api/v1/debug/file-upload/{id}">{{!database_file_links}}</cobalt-listing>
+
+<cobalt-listing delete-action="/api/v1/debug/file-upload/{id}">{{!gallery_file_links}}</cobalt-listing>
+
+<cobalt-listing delete-action="/api/v1/debug/file-upload/{id}">
+    <div class="cobalt--fs-directory-listing cfs--picture-gallery">
+        <picture
+            onclick="lightbox('/debug/file-upload/download-test/Screenshot_2021-03-16 https twitter com.png')">
+            <img src="/debug/file-upload/download-test/Screenshot_2021-03-16 https twitter com._thumb.png"
+                data-id="62cee4190a03dffd420e1454"></picture>
+    </div>
+</cobalt-listing>

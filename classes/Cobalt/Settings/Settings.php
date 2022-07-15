@@ -7,6 +7,7 @@ class Settings extends \Drivers\Database {
     const __SETTINGS__ = [
         __APP_ROOT__ . "private/config/settings.json",
         __APP_ROOT__ . "ignored/config/settings.json",
+        __ENV_ROOT__ . "config/default_settings.json",
     ];
 
     public function get_collection_name() {
@@ -55,11 +56,16 @@ class Settings extends \Drivers\Database {
     }
 
     /**
-     * This is the function we use if we detect that the compiled
+     * This is the method we call if we detect that the compiled
      * settings are outdated.
      * @return void 
      */
-    function bootstrap() {
+    private function bootstrap() {
+        return new \Cobalt\Settings\Manager();
+    }
+
+    public function refresh_settings() {
+        $this->settings = $this->bootstrap();
     }
 
     private $fields = [];

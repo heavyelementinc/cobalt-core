@@ -62,4 +62,15 @@ if (app('debug')) {
     
     Route::post("/debug/next-request", "Debug@next_request_post");
     Route::put("/debug/next-request", "Debug@next_request_put");
+    
+    
+    Route::post("/debug/file-upload/single","DebugFiles@simple_file_upload");
+    Route::post("/debug/file-upload/multi","DebugFiles@multi_file_upload");
+    Route::post("/debug/file-upload/arbitrary-data","DebugFiles@extra_metadata");
+    Route::delete("/debug/file-upload/{id}","DebugFiles@delete");
+
+
+    // Route::fs("/debug/file-upload/);
+
 }
+

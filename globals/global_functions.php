@@ -234,6 +234,17 @@ function cobalt_autoload($class) {
     } catch (Exception $e) {
         print($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
         exit;
+    } catch (Error $e) {
+        print("<pre>");
+        $file = $e->getFile() . ': ' . $e->getLine();
+        if (app('debug')) {
+            print("Fatal error when loading $file");
+            print("\n" . $e->getMessage());
+        } else {
+            print("A error was found. Please contact your system administrator with the following error code:\n");
+            print(base64_encode($e->getMessage() . ' ' . $file));
+        }
+        exit;
     }
 }
 
@@ -284,6 +295,10 @@ $GLOBALS['TEMPLATE_BINDINGS'] = [
 function set($name, $value) {
     add_vars([$name => $value]);
     return "";
+}
+
+function export($name,$value) {
+    return set($name,$value);
 }
 
 /**
@@ -587,7 +602,7 @@ function associative_to_path(array $arr) {
  */
 function with(string $template, $vars = []) {
     $render = new \Render\Render();
-    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'];
+    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
     $render->set_vars($vars);
     $render->from_template($template);
     return $render->execute();

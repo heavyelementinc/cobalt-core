@@ -101,7 +101,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $this->init_schema();
         // Only enable pronoun prototypes if the 'pronoun_set' key is in the schema.
         // Do we actually want this?
-        if(key_exists('pronoun_set',$this->__schema)) {
+        if (key_exists('pronoun_set', $this->__schema)) {
             $this->__init_pronoun_set();
         }
     }
@@ -398,7 +398,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     /** Executes the 'valid' method defined in the schema and returns results */
     private function __proto_valid($val, $field) {
-        if($field === "pronoun_set") return $this->valid_pronouns();
+        if ($field === "pronoun_set") return $this->valid_pronouns();
         if (isset($this->__schema[$field]['valid'])) {
             if (is_callable($this->__schema[$field]['valid'])) return $this->__schema[$field]['valid']($val, $field);
             return $this->__schema[$field]['valid'];
@@ -410,6 +410,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __proto_options($val, $field) {
         $valid = $this->__proto_valid($val, $field);
         $gotten_value = $this->{$field};
+
+        $type = gettype($val);
+
         $options = "";
         foreach ($valid as $k => $v) {
             $value = $v;
@@ -421,7 +424,20 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                     $data .= " data-$attr=\"$value\"";
                 }
             }
-            $selected = ($val == $k || $gotten_value == $k) ? "selected='selected'" : "";
+            $selected = "";
+            switch ($type) {
+                case "string":
+                    $selected = ($val == $k || $gotten_value == $k) ? "selected='selected'" : "";
+                    break;
+                case "object":
+                    if ($val instanceof \MongoDB\Model\BSONArray) {
+                        $selected = (in_array($k, $val->getArrayCopy())) ? "selected='selected'" : "";
+                    }
+                    break;
+                case "array":
+                    $selected = (in_array($k, $val) || in_array($k, $gotten_value)) ? "selected='selected'" : "";
+                    break;
+            }
             $options .= "<option value='$k'$data $selected>$v</option>";
         }
         return $options;
@@ -455,16 +471,16 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     function get_pronoun_table() {
         $index = null;
-        if(isset($this->__dataset['pronoun_set'])) $index = $this->__dataset['pronoun_set'];
-        if(is_null($index)) $index = "0";
-        if(key_exists($index, $this->pronouns_table)) return $this->pronouns_table[$index];
+        if (isset($this->__dataset['pronoun_set'])) $index = $this->__dataset['pronoun_set'];
+        if (is_null($index)) $index = "0";
+        if (key_exists($index, $this->pronouns_table)) return $this->pronouns_table[$index];
         throw new \Exception("The specified pronoun index is missing.");
     }
 
     function __proto_they() {
         return $this->get_pronoun_table()["they"];
     }
-    
+
     function __proto_them() {
         return $this->get_pronoun_table()["them"];
     }
@@ -496,7 +512,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $mutant;
     }
 
-    public function __init_pronoun_set():void {
+    public function __init_pronoun_set(): void {
         $pronoun_types = [
             'they' => [
                 'get' => fn () => $this->__proto_they(),
@@ -519,7 +535,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         ];
         $this->__prototypes = array_merge($this->__prototypes, array_keys($pronoun_types));
         $this->add_to_schema($pronoun_types);
-        
+
         // foreach($pronoun_types as $type => $data) {
         //     if(!isset($this->__dataset[$type])) $this->__dataset[$type] = $this->{"__proto_$type"}();
         // }
@@ -529,7 +545,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      * Does not override existing schema items
      */
     public function add_to_schema($to_add) {
-        $this->__schema = array_merge($to_add,$this->__schema);
+        $this->__schema = array_merge($to_add, $this->__schema);
         $this->__index = array_keys($this->__schema);
     }
 
@@ -539,7 +555,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
        ================= */
     private $__position = 0;
 
-    public function rewind():void {
+    public function rewind(): void {
         $this->__position = 0;
     }
 
@@ -565,7 +581,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      *  ================
      */
 
-    public function offsetExists($offset):bool {
+    public function offsetExists($offset): bool {
         return $this->__isset($offset);
     }
 
@@ -573,11 +589,22 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $this->{$offset};
     }
 
-    public function offsetSet($offset, $value):void {
+    public function offsetSet($offset, $value): void {
         $this->{$offset} = $value;
     }
 
-    public function offsetUnset($offset):void {
+    public function offsetUnset($offset): void {
         unset($this->__dataset[$offset]);
+    }
+
+    public function __all_fields() {
+        $mutant = [];
+
+        foreach ($this->__schema as $field => $value) {
+            if (is_array($value) && key_exists('set', $value) && $value['set'] === null) continue;
+            $mutant[$field] = $this->{$field};
+        }
+
+        return $mutant;
     }
 }

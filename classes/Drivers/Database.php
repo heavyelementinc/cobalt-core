@@ -75,8 +75,8 @@ abstract class Database {
         return $this->collection->count($filter, $options);
     }
 
-    final function distinct($field) {
-        return $this->collection->distinct($field);
+    final function distinct($field,$filter = []) {
+        return $this->collection->distinct($field,$filter);
     }
 
     final function findOneAsSchema($filter, array $options = [], $schema = null) {

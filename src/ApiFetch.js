@@ -29,14 +29,16 @@ class ApiFetch {
         if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
         let result = await fetch(this.uri, send);
         if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
-        if (result.ok === false) result = await this.handleErrors(result)
+        if (result.ok === false) await this.handleErrors(result)
+        else this.result = await result.json();
 
-        this.headers['X-Next-Request'] = result.headers.get("X-Next-Request");
-        if(this.headers['X-Next-Request']) this.headers['X-Next-Request'] = JSON.parse(this.headers['X-Next-Request']);
+        if("headers" in result) {
+            this.headers['X-Next-Request'] = result.headers.get("X-Next-Request") ?? null;
+            if(this.headers['X-Next-Request']) this.headers['X-Next-Request'] = JSON.parse(this.headers['X-Next-Request']) ?? null;
+        }
         
-        let r = await result.json();
-        this.execPlugins("after", r, result);
-        return r;
+        this.execPlugins("after", this.result, result);
+        return this.result;
     }
 
     async get() {
@@ -44,19 +46,20 @@ class ApiFetch {
     }
 
     async handleErrors(result) {
+        const json = await result.json();
+        this.result = json;
         switch (result.status) {
             case 300:
-                let confirm = new FetchConfirm(await result.json(), this);
+                let confirm = new FetchConfirm(json, this);
                 result = await confirm.draw();
-                if (result.json().error !== "Aborted") break;
+                if (json.error !== "Aborted") break;
             case 301:
-                console.log(result);
-                router.location = result.data.message;
+                router.location = json.message;
                 break;
             default:
-                throw new FetchError("HTTP Error", result, await result.json());
+                throw new FetchError("HTTP Error", result, json);
         }
-        return result;
+        return json;
     }
 
     async execPlugins(type, result, request) {

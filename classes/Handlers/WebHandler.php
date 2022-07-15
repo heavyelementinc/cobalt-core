@@ -41,6 +41,7 @@ class WebHandler implements RequestHandler {
         "@user_menu@"      => "",
         "@router_table@"   => "",
         "@auth_panel@"     => "",
+        "@post_header@"    => "",
         "@header_content@" => "",
         "@cookie_consent@" => "",
         "@footer_content@" => "",
@@ -210,10 +211,14 @@ class WebHandler implements RequestHandler {
         return "";
     }
 
+    function post_header() {
+        return $this->load_template("/parts/post-header.html");
+    }
+
     function cookie_consent() {
         if (!app("Cookie_consent_prompt")) return "";
         if (isset($_COOKIE['cookie_consent'])) return "";
-        return with("/parts/cookie-consent.html");
+        return $this->load_template("/parts/cookie-consent.html");
     }
 
     function footer_content() {
@@ -333,6 +338,7 @@ class WebHandler implements RequestHandler {
         $debug = app("debug");
         foreach (app('css_packages') as $package) {
             $files = files_exist([
+                // __APP_ROOT__ . "/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
             ]);

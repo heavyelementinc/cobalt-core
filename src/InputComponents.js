@@ -418,12 +418,22 @@ class InputArray extends HTMLElement {
         this.limit = 0;
 
         /** Start initializing things */
-        this.value = this.initValue() || [];
+        this.val = this.initValue() || [];
         this.options = this.initOptions();
 
         this.initUI();
 
         this.initSearchField();
+    }
+
+    get value() {
+        return this.val;
+    }
+
+    set value(value) {
+        if (typeof value === "string") {
+
+        }
     }
 
     /** Init the value of the current component */
@@ -1049,7 +1059,7 @@ class CopySpan extends HTMLElement {
         this.appendChild(this.val);
 
         this.button = document.createElement("button");
-        this.button.innerHTML = this.clipboard();
+
         this.button.addEventListener("click", e => {
             this.copy();
         })
@@ -1057,7 +1067,7 @@ class CopySpan extends HTMLElement {
     }
 
     connectedCallback() {
-
+        this.button.innerHTML = this.clipboard(window.getComputedStyle(this, null).getPropertyValue('font-size'));
     }
 
     get value() {
@@ -1085,8 +1095,8 @@ class CopySpan extends HTMLElement {
 
     clipboard(size = 1.8) {
         return `<svg
-        width="${size}em"
-        height="${size}em"
+        width="${size}"
+        height="${size}"
         viewBox="0 0 30 30"
         version="1.1"
         id="svg5"

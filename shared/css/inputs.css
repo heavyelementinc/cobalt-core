@@ -12,8 +12,11 @@
 }
 
 /** Inputs */
+input-wrapper {
+  display: inline-flex;
+}
 
-input, textarea {
+input-wrapper, input, textarea {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -21,6 +24,17 @@ input, textarea {
   font-size: 1.1rem;
   color: var(--project-color-input-text-color);
 }
+
+  input-wrapper input {
+    border: unset;
+    background: unset;
+    padding: 0;
+    border-radius: unset;
+  }
+
+  input-wrapper input:focus {
+    border: unset;
+  }
 
   input[invalid],
   textarea[invalid],
@@ -58,7 +72,7 @@ input, textarea {
     }
   }
 
-  input:focus{
+  input-wrapper:focus-within,input:focus{
     border: 1px solid var(--project-color-input-border-focus);
   }
 
