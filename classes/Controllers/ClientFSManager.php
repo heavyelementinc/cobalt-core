@@ -8,18 +8,25 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 
 trait ClientFSManager {
-    public $fs = null;
+    protected $fs = null;
+    protected $format_table = null;
     
-    function __construct() {
-        $this->fs = new FileSystem();
+    // function __construct() {
+    //     $this->initFS();
+    // }
+
+    function initFS(){
+        if($this->fs == null) $this->fs = new FileSystem();
+        if($this->format_table == null) $this->createFormatTable();
     }
 
-
     public function download($filename) {
+        $this->initFS();
         $this->fs->download($filename);
     }
 
     public function delete($id) {
+        $this->initFS();
         $_id = new \MongoDB\BSON\ObjectId($id);
         $result = $this->fs->findOne(["_id" => $_id]);
         if($result === null) throw new NotFound("That file was not found");
@@ -38,6 +45,7 @@ trait ClientFSManager {
      * @return array 
      */
     private function clientUploadFile($key, $index = null, $arbitrary_data = null, $files = null):array {
+        $this->initFS();
         if(!$files) $files = $_FILES;
         if(empty($files)) throw new BadRequest("No files were uploaded");
         
@@ -54,9 +62,9 @@ trait ClientFSManager {
             'tmp_name' => $file['tmp_name'][$index],
         ];
 
-        $thumb_id = (string)$this->fs->upload($file_array,$index,$arbitrary_data);
+        $thumb_id = $this->fs->upload($file_array,$index,$arbitrary_data);
 
-        return ['_id' => $thumb_id, 'name' => $file_array['name']];
+        return ['id' => $thumb_id, 'filename' => $file_array['name']];
     }
 
     private function clientUploadFiles($key, $arbitrary_data = null, $files = null) {
@@ -84,17 +92,19 @@ trait ClientFSManager {
      * @throws Exception 
      */
     private function clientUploadImageThumbnail($key, $index, $thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null) {
+        if($files === null) $files = $_FILES;
         $tmp_name = "/tmp/" . random_string(16);
-        $name           = pathinfo($_FILES[$key]['name'][$index],PATHINFO_FILENAME);
-        $extension      = pathinfo($_FILES[$key]['name'][$index],PATHINFO_EXTENSION);
+        $path           = pathinfo($files[$key]['name'][$index],PATHINFO_DIRNAME);
+        $path = ($path) ? "$path/" : "";
+        $name           = pathinfo($files[$key]['name'][$index],PATHINFO_FILENAME);
+        $extension      = pathinfo($files[$key]['name'][$index],PATHINFO_EXTENSION);
         $thumbnail_name = "$name.$this->thumbnail_suffix.$extension";
-        if(!$files) $files = $_FILES;
         
         $generationResult = createThumbnail($files[$key]['tmp_name'][$index],$tmp_name,$thumbnail_x, $thumbnail_y);
         if(!$generationResult) throw new BadRequest("Cannot generate a thumbnail for this file type.");
 
         // Prepare our data so we can upload them to GridFS
-        $clone = [
+        $toInsert = [
             $key => [
                 'name' => [
                     $files[$key]['name'][$index],
@@ -107,15 +117,15 @@ trait ClientFSManager {
             ]
         ];
 
-        $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true],$clone);
-        $thumb_id = array_keys($thumb)[0];
+        $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true],$toInsert);
+        $thumb_id = $thumb['_id'];
 
         $arbitrary_data = array_merge($arbitrary_data, [
             'thumbnail_id' => $thumb_id,
-            'thumbnail' => $clone[$key]['name'][1]]
+            'thumbnail' => $toInsert[$key]['name'][1]]
         );
 
-        return $this->clientUploadFile($key,0,$arbitrary_data,$clone);
+        return $this->clientUploadFile($key,0,$arbitrary_data,$toInsert);
 
     }
 
@@ -123,7 +133,7 @@ trait ClientFSManager {
         $ids = [];
         if(!$files) $files = $_FILES;
         foreach($files[$key]['tmp_name'] as $index => $file) {
-            $ids = array_merge($ids,$this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data));
+            array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data));
         }
         return $ids;
     }
@@ -139,8 +149,15 @@ trait ClientFSManager {
      * @param array $child 
      * @return string 
      */
-    final public function directoryListing(string $href = "", string $mode = "list", array $query = ['filter' => [], 'options' => []], $parent = [], $child = []){
+    final public function directoryListing(string $href = "", string $mode = "list", array $query = ['filter' => [], 'options' => []], array $options = []){
+        $options = array_merge([
+            'parent' => [],
+            'child' => [],
+            'lazy' => true],
+            $options
+        );
         
+        $this->initFS();
         $query['filter'] = array_merge(['isThumbnail' => ['$exists' => false]], $query['filter'] ?? []);
         
         $docs = $this->fs->find($query['filter'] ?? [],$query['options'] ?? []);
@@ -151,11 +168,11 @@ trait ClientFSManager {
         
         // Inherit default class names for container
         $string = "<$container[container]";
-        if(isset($parent['class'])) $parent['class'] = $container['class'] ." ". $parent['class'];
-        else $parent['class'] = $container['class'];
+        if(isset($options['parent']['class'])) $options['parent']['class'] = $container['class'] ." ". $options['parent']['class'];
+        else $options['parent']['class'] = $container['class'];
 
         // Add all HTML properties
-        foreach($parent as $property=>$value) {
+        foreach($options['parent'] as $property=>$value) {
             $string .= " $property='".htmlspecialchars($value)."'";
         }
 
@@ -164,8 +181,8 @@ trait ClientFSManager {
         // Loop through available docs
         foreach($docs as $doc) {
             // Execute the tag_start callback:
-            $string .= "<" . $container["tag_start"]($doc, $href) . " data-id='".(string)$doc->_id."'";
-            foreach($child as $property => $value) {
+            $string .= "<" . $container["tag_start"]($doc, $href, $options['lazy']) . " data-id='".(string)$doc->_id."'";
+            foreach($options['child'] as $property => $value) {
                 $string .= " $property='".htmlspecialchars($value)."'"; // Add properties
             }
             $string .= ">"; // Close HTML tag
@@ -195,10 +212,11 @@ trait ClientFSManager {
             'gallery' => [
                 'container' => 'div',
                 'class' => 'cobalt--fs-directory-listing cfs--picture-gallery',
-                'tag_start' => function ($value, $href) {
-                    return "picture onclick='lightbox(\"$href"."$value->filename\")'><img src='$href".($value->thumbnail ?? $value->filename)."'";
+                'tag_start' => function ($value, $href, $lazy = true) {
+                    $lazy = ($lazy) ? " loading='lazy'" : "";
+                    return "img src='$href".($value->thumbnail ?? $value->filename)."' onclick='lightbox(this)' full-resolution='$href"."$value->filename'$lazy";
                 },
-                'tag_end' => "picture",
+                'tag_end' => "",
                 'anchor' => fn () => ""
             ]
         ];

@@ -27,14 +27,21 @@ abstract class Database {
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
     
-    function get_schema_name() {
+    /**
+     * `get_schema_name` is called for every document found. It accepts an
+     * optional $doc parameter which can be used to determine an appropriate
+     * schema for each document.
+     * 
+     * @param array $doc 
+     * @return string
+     */
+    function get_schema_name($doc = []) {
         return "\\" . $this::class . "Schema";
     }
 
     function __construct($database = null) {
         if ($database !== null) $this->db = $database;
         $this->collection = db_cursor($this->get_collection_name(), $this->db);
-        $this->__schema = $this->get_schema_name();
     }
 
     /* HELPERS */
@@ -80,17 +87,17 @@ abstract class Database {
     }
 
     final function findOneAsSchema($filter, array $options = [], $schema = null) {
-        if(!$schema) $schema = $this->__schema;
+        if(!$schema) $schema = $this->get_schema_name();
         $result = $this->findOne($filter,$options);
         if($result) return new $schema($result);
         return null;
     }
 
     final function findAllAsSchema($filter, array $options = [], $schema = null) {
-        if(!$schema) $schema = $this->__schema;
         $results = $this->find($filter, $options);
         $processed = [];
         foreach($results as $i => $result) {
+            $schema = $schema ?? $this->get_schema_name($result);
             $processed[$i] = new $schema($result);
         }
         return $processed;

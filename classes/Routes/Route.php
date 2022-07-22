@@ -6,7 +6,10 @@ class Route {
 
     public static $preg_quote = "[^/?]+";
 
-    /** Register a GET route for the site
+    /** Register a GET route for the site. Valid tokens are {some_name}, ..., and ?
+     * optional parameters.
+     * 
+     * $path = "/some/path/{token}/..." which would match "/some/path/variable/other/path"
      * 
      * $additional options include: 
      *  

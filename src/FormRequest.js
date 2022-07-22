@@ -101,8 +101,8 @@ class FormRequest {
             result = await post.send(data, {});
             this.lastResult = result;
         } catch (error) {
-            this.errorHandler(error, result, post);
-            throw new Error(error);
+            this.errorHandler(post, result, post);
+            // throw new Error(error);
         }
 
         if (this.update) this.update_fields(result);
@@ -135,15 +135,15 @@ class FormRequest {
     }
 
     errorHandler(error, result = null, post = null) {
-        if (error.result.code === 422) this.handleFieldIssues(error.result);
+        if (post.result.code === 422) this.handleFieldIssues(post.result);
         // let field = this.errorField;
         // if (!field) field = this.form.querySelector(".error")
         // if (field) field.innerText = error.result.error
         if (!this.statusMessage) {
-            this.statusMessage = new StatusError({
-                id: this.form.getAttribute("action"),
-                message: error.result.error,
-            })
+            // this.statusMessage = new StatusError({
+            //     id: this.form.getAttribute("action"),
+            //     message: error.result.error,
+            // })
         } else {
             this.statusMessage.update(error.result.error);
         }

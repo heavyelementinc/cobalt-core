@@ -114,7 +114,7 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "File upload"]
     ]);
-    Route::get("/debug/file-upload/download-test/{filename}", "DebugFiles@download");
+    Route::get("/debug/file-upload/download-test/...", "DebugFiles@download");
 }
 
 /** If authentications are enabled, these routes should be added to the table */

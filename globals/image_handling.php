@@ -27,6 +27,10 @@ const IMAGE_HANDLERS = [
         'load' => 'imagecreatefromwebp',
         'save' => 'imagewebp',
     ],
+    // IMAGETYPE_AVIF => [
+    //     'load' => 'imagecreatefromavif',
+    //     'save' => 'imageavif'
+    // ],
 ];
 
 /**
@@ -59,6 +63,37 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
         return null;
     }
 
+    // Maintain orientation from EXIF data
+    $exif = exif_read_data($src);
+
+    $orientation = $exif['Orientation'];
+
+    # Manipulate image
+    switch ($orientation) {
+        case 2:
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 3:
+            $image = imagerotate($image, 180, 0);
+            break;
+        case 4:
+            imageflip($image, IMG_FLIP_VERTICAL);
+            break;
+        case 5:
+            $image = imagerotate($image, -90, 0);
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 6:
+            $image = imagerotate($image, -90, 0);
+            break;
+        case 7:
+            $image = imagerotate($image, 90, 0);
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 8:
+            $image = imagerotate($image, 90, 0); 
+            break;
+    }
 
     // 2. Create a thumbnail and resize the loaded $image
     // - get the image dimensions
@@ -123,6 +158,14 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
     // - call the correct save method
     // - set the correct quality level
 
+    
+    // Workaround for the odd imagegif function only accepting two parameters and no more.
+    if(IMAGE_HANDLERS[$type]['save'] === "imagegif") {
+        return call_user_func(
+            IMAGE_HANDLERS[$type]['save'],
+            $thumbnail,
+            $dest);
+    }
     // save the duplicate version of the image to disk
     return call_user_func(
         IMAGE_HANDLERS[$type]['save'],

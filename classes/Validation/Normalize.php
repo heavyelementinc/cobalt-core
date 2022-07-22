@@ -87,6 +87,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'restore',    // Unknown
         'json',       // Converts the data to JSON
         'display',    // Display lets us pretty-fy output in our schema
+        'length',     // The length of a string, the number of elements in an array
         'md',         // Parses markdown into HTML
         'capitalize', // Capitalizes the first letter of a string
         'uppercase',  // Upper cases the entire string
@@ -139,32 +140,47 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     abstract function __get_schema(): array;
 
+    /**
+     * Validation routine.
+     * 
+     * @alias __validate
+     * @param mixed $data 
+     * @param mixed $createSubset 
+     * @return array 
+     * @throws ValidationFailed 
+     */
+    public function validate($data, $createSubset) {
+        return $this->__validate($data,$createSubset);
+    }
+
+    public $issues = [];
 
     /** Validation routine
      * 
      * @param array $data the data to be validated
+     * @param bool $createSubset allow 
      * @return array Validated data
      * @throws ValidationFailed 
      */
     public function __validate($data, $createSubset = true) {
         $this->__to_validate = $data;
         if ($createSubset) $schema = $this->get_schema_subset(array_keys($data));
-        else $schema = $this->__get_schema();
-        $issues = [];
+        else $schema = $this->init_schema();
+        $this->issues = [];
         foreach ($schema as $name => $value) {
             if (!isset($data[$name]) && $createSubset === true) continue;
             try {
                 // Run the setter function by assigning value which can throw issues
                 $this->{$name} = (isset($data[$name])) ? $data[$name] : null;
             } catch (ValidationIssue $e) { // Handle issues
-                if (!isset($issues[$name])) $issues[$name] = $e->getMessage();
-                else $issues[$name] .= "\n" . $e->getMessage();
+                if (!isset($this->issues[$name])) $this->issues[$name] = $e->getMessage();
+                else $this->issues[$name] .= "\n" . $e->getMessage();
             } catch (ValidationFailed $e) { // Handle subdoc failure
-                $issues[$name] = $e->data;
+                $this->issues[$name] = $e->data;
             }
         }
 
-        if (count($issues) !== 0) throw new ValidationFailed("Validation failed.", $issues);
+        if (count($this->issues) !== 0) throw new ValidationFailed("Validation failed.", $this->issues);
 
         return array_merge($this->__dataset, $this->__merge_private_fields($this->__dataset));
     }
@@ -317,14 +333,15 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     final protected function init_schema($schema = []) {
+        // We write this schema to __schema
         $this->__schema = array_merge($this->__get_schema(), (array)$schema);
         $this->initialize_schema();
         $this->__index = array_keys($this->__schema);
+        return $this->__schema;
     }
 
     private function initialize_schema() {
-        $schema = $this->__get_schema();
-        foreach ($schema as $fieldname => $methods) {
+        foreach ($this->__schema as $fieldname => $methods) {
             $this->find_method($fieldname, "get");
             $this->find_method($fieldname, "set");
         }
@@ -384,6 +401,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     /** Allows us to specify in the schema an alternate display method
      *  If no 'display' proto is specified, this will automatically look for a
      *  valid proto and, if found, will look up the name of $val
+     * 
+     *  If $val is not in 'valid', $val will be returned
      */
     private function __proto_display($val, $field) {
         if (isset($this->__schema[$field]['display'])) {
@@ -393,7 +412,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             if (is_callable($valid)) $valid = $valid($val, $field);
             if (key_exists($val, $valid)) return $valid[$val];
         }
-        return '';
+        return $val;
     }
 
     /** Executes the 'valid' method defined in the schema and returns results */
@@ -455,6 +474,12 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __proto_md($val, $field) {
         if (!$val) return "";
         return from_markdown($val);
+    }
+
+    private function __proto_length($val, $field) {
+        if(gettype($val) == "string") return strlen($val);
+
+        return (is_countable($val)) ? count($val) : null;
     }
 
     private function __proto_capitalize($val, $field) {

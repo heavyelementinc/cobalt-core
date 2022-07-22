@@ -2,7 +2,7 @@
 :is(form-request,login-form-request) {
   display:block;
   position:relative;
-  overflow:hidden;
+  /* overflow:hidden; */
 }
 
 :is(form-request,login-form-request) > section{
@@ -11,10 +11,10 @@
   width:100%;
   transition: transform .5s, opacity .5s;
 }
-
+/* 
 :is(form-request,login-form-request) > section.form-request--actual{
   position: relative;
-}
+} */
 
 :is(form-request,login-form-request) > .form-request--processing {
   top:0;
@@ -41,4 +41,26 @@
 
 .current-to-previous{
   transform: translateX(100%);
+}
+
+form-request > .form-request--working-spinner {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,.5);
+  background-filter: blur(1px);
+  transition: opacity 500ms;
+  pointer-events: none;
+  opacity: 0;
+}
+
+form-request > .form-request--working-spinner.form-request--displayed {
+  opacity: 1;
+  pointer-events: all;
 }

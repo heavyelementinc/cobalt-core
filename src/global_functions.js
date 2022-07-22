@@ -109,8 +109,11 @@ async function removeLoadingSpinner(spinner) {
  * @param {string} imageUrl A URL to an image or a youtube.com/youtu.be video
  * @returns Modal object
  */
-function lightbox(imageUrl) {
-    if (typeof imageUrl === "object" && "src" in imageUrl) imageUrl = imageUrl.src;
+async function lightbox(origin, animate = true) {
+    let imageUrl = null;
+    if (typeof origin === "object") imageUrl = origin.getAttribute("full-resolution") ?? origin.src ?? null;
+    else imageUrl = origin;
+
     let lightbox_content = `<img src='${imageUrl}'>`;
     if (imageUrl.indexOf("youtube.com") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split("?v=")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     if (imageUrl.indexOf("youtu.be") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split(".be/")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
@@ -119,9 +122,11 @@ function lightbox(imageUrl) {
         body: lightbox_content,
         event: event,
         chrome: null,
+        animate: animate,
         clickoutCallback: e => true,
     });
     modal.draw();
+
     return modal;
 }
 
@@ -213,14 +218,18 @@ async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_c
                     label: okay,
                     callback: async (event) => {
                         const form = modal.dialog.querySelector("form-request");
-
-                        let result = await form.submit(event);
-                        if (!additional_callback(result)) return false;
-                        console.log(form.lastResult);
-                        if (String(result.status)[0] !== "2") return false;
-
-                        resolve(form.request.lastResult);
-                        return true;
+                        let result = null;
+                        try {
+                            result = await form.send(event);
+                            resolve(result);
+                            return true;
+                        } catch (error) {
+                            reject(result);
+                            throw new Error(result);
+                        }
+                        // if (!additional_callback(result)) return false;
+                        // console.log(form.lastResult);
+                        // if (String(result.status)[0] !== "2") return false;
                     }
                 }
             }
@@ -353,6 +362,22 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
  *   * yPrime - Top edge of the element
  *   * right  - The right edge of the element
  *   * bottom - The bottom edge of the element
+ */
+
+/**
+ * 
+ * @param HtmlElement element 
+ * @returns {
+ *   x, // element + parents offset
+ *   y, // element + parents offset
+ *   w, // element width,
+ *   h, // element height
+ *   right,  // 
+ *   bottom, // 
+ *   xPrime, // The element's initial offset
+ *   yPrime, // The element's initial offset
+ *   zIndex, // The element's zIndex
+ * }
  */
 function get_offset(element) {
     let parent = element.offsetParent,
@@ -497,6 +522,8 @@ function consent_cookie(value) {
 function spawn_priority(event) {
     let node = event;
     if ("originalTarget" in event) node = event.originalTarget;
+    if ("target" in event) node = event.target;
+    if ("parentNode" in node === false) return false;
 
     let zIndex = "auto";
     while (true) {

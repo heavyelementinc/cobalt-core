@@ -248,6 +248,7 @@
             "components/autocomplete.js",
             "components/tag-select.js",
             "components/fs-listing.js",
+            "components/fold-out.js",
             "DateConverter.js",
             "Modal.js",
             "TabbedUI.js",
@@ -255,6 +256,7 @@
             "Slideshow2.js",
             "InputClasses.js",
             "FormRequest.js",
+            "components/FormRequestSimplified.js",
             "ApiFetch.js",
             "InputComponents.js",
             "AsyncButton.js",
@@ -277,6 +279,7 @@
         "default": [
             "components/autocomplete.css",
             "components/tag-select.css",
+            "components/fold-out.css",
             "normalize.css",
             "header.css",
             "slideshow.css",

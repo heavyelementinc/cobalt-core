@@ -16,29 +16,37 @@ class ApiFetch {
     }
 
     async send(data = "") {
-        let send = {
-            method: this.method,
-            credentials: 'include',
-            cache: this.cache,
-            headers: {
-                "Content-Type": this.format,
-                // "X-Mitigation": document.querySelector("meta[name='token']").getAttribute("content"),
-                ...this.headers
-            },
-        }
-        if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
-        let result = await fetch(this.uri, send);
-        if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
-        if (result.ok === false) await this.handleErrors(result)
-        else this.result = await result.json();
-
-        if("headers" in result) {
-            this.headers['X-Next-Request'] = result.headers.get("X-Next-Request") ?? null;
-            if(this.headers['X-Next-Request']) this.headers['X-Next-Request'] = JSON.parse(this.headers['X-Next-Request']) ?? null;
-        }
-        
-        this.execPlugins("after", this.result, result);
-        return this.result;
+        return new Promise(async (resolve,reject) => {
+            let send = {
+                method: this.method,
+                credentials: 'include',
+                cache: this.cache,
+                headers: {
+                    "Content-Type": this.format,
+                    // "X-Mitigation": document.querySelector("meta[name='token']").getAttribute("content"),
+                    ...this.headers
+                },
+            }
+            if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
+            let result = null;
+            result = await fetch(this.uri, send);
+    
+            if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
+            if (result.ok === false) {
+                reject(result);
+                await this.handleErrors(result);
+            }
+            else this.result = await result.json();
+    
+            if("headers" in result) {
+                this.headers['X-Next-Request'] = result.headers.get("X-Next-Request") ?? null;
+                if(this.headers['X-Next-Request']) this.headers['X-Next-Request'] = JSON.parse(this.headers['X-Next-Request']) ?? null;
+            }
+            
+            this.execPlugins("after", this.result, result);
+            resolve(this.result);
+            return this.result;
+        })
     }
 
     async get() {
@@ -57,7 +65,7 @@ class ApiFetch {
                 router.location = json.message;
                 break;
             default:
-                throw new FetchError("HTTP Error", result, json);
+                throw new FetchError("HTTP Error", result, json, this.uri);
         }
         return json;
     }
@@ -150,11 +158,18 @@ class ApiFile extends ApiFetch {
 }
 
 class FetchError extends Error {
-    constructor(message, data, result) {
+    constructor(message, data, result, url) {
         super();
         this.message = message;
         this.request = data;
         this.result = result;
+        this.url = url;
+        this.statusMessage();
+    }
+
+    statusMessage() {
+        if("error" in this.result && this.result.error) new StatusError({message: this.result.error, id: this.url});
+        else new StatusError({message:"An unknown error occurred", id: this.url});
     }
 }
 

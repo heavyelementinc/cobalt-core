@@ -942,9 +942,3 @@ function sanitize_path_name($path) {
 function relative_time($date, $now = null) {
     if (!$now) $now = time();
 }
-
-function make_thumbnail($original, $directory, $dimensions = [200, null]) {
-}
-
-function get_image_function($filename) {
-}

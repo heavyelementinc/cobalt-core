@@ -1,5 +1,5 @@
 class ActionMenu {
-    constructor({ event, title = "", mode = null, withIcons = true }) {
+    constructor({ event, title = "", mode = null, withIcons = true, attachTo = null }) {
         // Only one instance of a menu is allowed on a single page
         if (window.menu_instance) {
             window.menu_instance.closeMenu();
@@ -11,6 +11,7 @@ class ActionMenu {
         this.mode = mode || (window.matchMedia("only screen and (max-width: 900px)").matches) ? "modal" : "element";
         this.withIcons = withIcons;
         this.toggle = false;
+        this.attachTo = attachTo;
         /** @property the list of actions to display in the menu */
         this.actions = [];
         /** @property the default properties of a single action */
@@ -89,12 +90,12 @@ class ActionMenu {
      * @param {event} event - The event that triggered the callback
      */
     async handleAction(action, event) {
-        let spinner = event.originalTarget.closest("button").querySelector("loading-spinner");
+        let spinner = event.target.closest("button").querySelector("loading-spinner");
         if (spinner == null) spinner = document.createElement("loading-spinner");
 
         action.loading = {
             start: () => {
-                event.originalTarget.closest("button").appendChild(spinner);
+                event.target.closest("button").appendChild(spinner);
             },
             end: () => {
                 spinner.parentElement.removeChild(spinner)
@@ -184,18 +185,35 @@ class ActionMenu {
             left: 'X',
             top: 'Y'
         }
-        if (this.event.target.tagName === "BUTTON" || this.mode === "spawn")
-            return this.getAbsolutePositionElement(type)
+        if (this.mode === "spawn" 
+            || this.attachTo) return this.getAbsolutePositionElement(type);
+
+
         return this.event['page' + translation[type]];
     }
 
     getAbsolutePositionElement(type) {
+        let target = this.event.target;
+
+        if(target.parentNode.tagName === "BUTTON") target = target.parentNode
+        if(this.attachTo) target = this.attachTo;
+
+        switch(type) {
+            case "left":
+                return get_offset(target).x
+            case "top":
+                return get_offset(target).bottom
+        }
+
         let translation = {
             left: 'Left',
             top: 'Top'
         }
-        let offset = this.event.target[`offset${translation[type]}`];
-        if (type === "top") offset += this.event.target.offsetHeight;
+        
+
+        let offset = target[`offset${translation[type]}`];
+
+        if (type === "top") offset += target.offsetHeight;
         return offset;
     }
 }
