@@ -1,10 +1,11 @@
 class StatusMessage {
-    constructor({ message, id = null, icon = "", duration = 2000, action = e => true, close = true }) {
+    constructor({ message, id = null, icon = "", duration = 2000, action = e => true, close = true, type = "status" }) {
         this.message = message;
         this.icon = icon || "information-circle-outline";
         this.id = id || random_string();
         this.action = action;
         this.closeable = close;
+        this.type = type;
         this.element = window.messageHandler.message(this);
     }
 
@@ -26,7 +27,7 @@ class StatusMessage {
 
 class StatusError extends StatusMessage {
     constructor({ message, id, icon = null, action = e => true }) {
-        super({ message, id, icon: icon || `warning-outline`, action });
+        super({ message, id, icon: icon || `warning-outline`, action, type: "error"});
     }
 }
 
@@ -39,6 +40,8 @@ class MessageHandler {
 
     message(details) {
         const message = document.createElement("message-item");
+        message.classList.add(`status-message--${details.type}`);
+        message.setAttribute("data-id",details.id);
         message.innerHTML = `<ion-icon name='${details.icon}'></ion-icon><article>${details.message}</article>`;
         let close_btn = document.createElement("button");
         close_btn.innerHTML = window.closeGlyph;
@@ -51,6 +54,9 @@ class MessageHandler {
             this.dismiss(details, event, false)
         });
 
+        if(details.id in this.messageQueue) {
+            return details.update({message: details.});
+        }
         this.messageQueue[details.id] = message;
         this.container.appendChild(message);
 
