@@ -118,7 +118,7 @@ if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php"
 
 
 function CobaltExit(){
-    // if($GLOBALS['context_processor']->_stage_bootstrap['_stage_output'])
-    ob_flush();
+    if(!$GLOBALS['context_processor']->_stage_bootstrap['_stage_output']) die("Nothing written");
+    
     return true;
 }
