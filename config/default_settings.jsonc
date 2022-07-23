@@ -519,5 +519,8 @@
     },
     "UGC_directory": {
         "default": "/ugc"
+    },
+    "ENV_allow_user_error_reporting": {
+        "default": false
     }
 }

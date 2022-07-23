@@ -24,8 +24,6 @@ session_start();
 // the not-insane array syntax and the spread "..." syntax)
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
-register_shutdown_function('CobaltExit');
-
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "0.2");
 
@@ -110,15 +108,14 @@ try {
  * */
 define("__APP_SETTINGS__", $application->get_settings());
 
+if(__APP_SETTINGS__['ENV_allow_user_error_reporting']) {
+    ini_set('display_errors', 1);
+    error_reporting(E_USER_ERROR);
+}
+
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
 if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");
 
 /** If we're NOT in a CLI environment, we should import the context processor */
 if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";
 
-
-function CobaltExit(){
-    if(!$GLOBALS['context_processor']->_stage_bootstrap['_stage_output']) die("Nothing written");
-    
-    return true;
-}
