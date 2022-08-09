@@ -51,6 +51,7 @@ $context_processor->_stage_bootstrap = [
     '_stage_init'    => false,  '_stage_route_discovered' => false,
     '_stage_execute' => false,  '_stage_output'           => false,
 ];
+$context_result = null;
 try {
     // Check if we need to initialize Cobalt and start initialization if needed.
     // When we init, we change the route_context to "init" so as to ignore all
@@ -94,22 +95,23 @@ try {
     $context_processor->_stage_execute($router_result);
     $context_processor->_stage_bootstrap['_stage_execute'] = true;
 
-    $context_processor->_stage_output();
+    $context_result = $context_processor->_stage_output();
     $context_processor->_stage_bootstrap['_stage_output'] = true;
     ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
     ob_clean(); // Clear the output buffer
-    $context_processor->_public_exception_handler($e);
-    ob_flush();
-    exit;
+    $context_result = $context_processor->_public_exception_handler($e);
 } catch (Exception $e) {
     ob_clean();
-    $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
-    ob_flush();
-    exit;
+    $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
 } catch (Error $e) {
     ob_clean();
-    $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+    $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+}
+
+// Let's finally output the result:
+if($context_result !== null) {
+    echo $context_result;
     ob_flush();
     exit;
 }

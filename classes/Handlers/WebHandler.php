@@ -93,7 +93,7 @@ class WebHandler implements RequestHandler {
         if ($this->context_mode === "web" || $this->context_mode === "admin") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
-            if (!$this->results_sent_to_client) echo $this->process();
+            if (!$this->results_sent_to_client) return $this->process();
 
             $this->results_sent_to_client = true;
         }
@@ -142,7 +142,7 @@ class WebHandler implements RequestHandler {
 
         // Add the error template as the main content
         $this->main_content_from_template($template);
-        $this->_stage_output();
+        return $this->_stage_output();
     }
 
     /** END INTERFACE REQUIREMENTS */

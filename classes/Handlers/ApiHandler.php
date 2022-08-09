@@ -61,7 +61,7 @@ class ApiHandler implements RequestHandler {
         ];
         else $return_value = $this->router_result;
         /** Echo the result to the output buffer */
-        echo json_encode($return_value);
+        return json_encode($return_value);
     }
 
     public function _public_exception_handler($e) {
@@ -70,7 +70,7 @@ class ApiHandler implements RequestHandler {
             'error' => $e->getMessage(),
             'data' => $e->data
         ];
-        if (!$this->_stage_bootstrap['_stage_output']) $this->_stage_output();
+        if (!$this->_stage_bootstrap['_stage_output']) return $this->_stage_output();
     }
 
     function request_validation($directives) {
