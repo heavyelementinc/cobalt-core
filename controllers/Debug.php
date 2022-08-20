@@ -303,4 +303,8 @@ class Debug extends \Controllers\Pages {
     function async_button() {
         set_template("debug/async-button.html");
     }
+
+    function drag_drop() {
+        set_template("debug/sortable.html");
+    }
 }

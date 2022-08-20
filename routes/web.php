@@ -115,6 +115,11 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => "File upload"]
     ]);
     Route::get("/debug/file-upload/download-test/...", "DebugFiles@download");
+
+    Route::get("/debug/draggable", "Debug@drag_drop", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Drag &amp; Drop Test"]
+    ]);
 }
 
 /** If authentications are enabled, these routes should be added to the table */

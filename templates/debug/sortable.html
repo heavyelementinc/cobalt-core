@@ -1,0 +1,48 @@
+<ul id="sortable">
+    <li>1 Sortable Guy</li>
+    <li>2 Lazy Walter</li>
+    <li>3 Silly Jimmy</li>
+    <li>4 Sortable Steve</li>
+    <li>5 Mutable Tony</li>
+    <li>6 Bald Curly</li>
+    <li>7 Curly Larry</li>
+    <li>8 Bowlcut Moe</li>
+</ul>
+
+<div id="landscape">
+<div class="sortable-block">1</div>
+<div class="sortable-block">2</div>
+<div class="sortable-block">3</div>
+<div class="sortable-block">4</div>
+<div class="sortable-block">5</div>
+<div class="sortable-block">6</div>
+<div class="sortable-block">7</div>
+<div class="sortable-block">8</div>
+<div class="sortable-block">9</div>
+</div>
+
+<script>
+    window.addEventListener("DOMContentLoaded",() => {
+        const list = document.querySelector("#sortable");
+        const sortable = new Sortable(list.children, list.children);
+        sortable.initialize();
+
+        const landscape = document.querySelector("#landscape");
+        const sortable2 = new Sortable(landscape.children, landscape.children);
+        sortable2.options({mode: 'landscape'});
+        sortable2.initialize();
+    });
+</script>
+
+<style>
+    .cobalt-sortable--valid-drop-target {
+        background: gray;
+    }
+    .sortable-block {
+        display:inline-block;
+        height: 50px;
+        width: 50px;
+        font-size: 1.2em;
+        border: 1px solid lightgray;
+    }
+</style>

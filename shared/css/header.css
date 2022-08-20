@@ -19,6 +19,29 @@ header nav ul li {
     padding: 1rem;
 }
 
+.directory--group li {
+    position: relative;
+}
+
+.directory--group .directory--submenu {
+    display: none;
+    z-index: calc(var(--project-modal-z-index) - 1);
+}
+
+header .directory--group li:hover .directory--submenu {
+    display: block;
+    position: absolute;
+    top: calc(100% - 5px);
+    left: 0;
+    background: white;
+    color: black;
+    box-shadow: 5px 0 20px rgba(0,0,0,.3);
+}
+
+.directory--submenu a {
+    color:inherit;
+}
+
 header nav a {
     text-decoration: none;
     color: white;

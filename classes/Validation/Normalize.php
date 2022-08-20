@@ -86,6 +86,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'options',    // Returns an HTML output of OPTIONS
         'restore',    // Unknown
         'json',       // Converts the data to JSON
+        'json_pretty',// Pretty prints JSON
         'display',    // Display lets us pretty-fy output in our schema
         'length',     // The length of a string, the number of elements in an array
         'md',         // Parses markdown into HTML
@@ -149,7 +150,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      * @return array 
      * @throws ValidationFailed 
      */
-    public function validate($data, $createSubset) {
+    public function validate($data, $createSubset = true) {
         return $this->__validate($data,$createSubset);
     }
 
@@ -171,7 +172,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             if (!isset($data[$name]) && $createSubset === true) continue;
             try {
                 // Run the setter function by assigning value which can throw issues
-                $this->{$name} = (isset($data[$name])) ? $data[$name] : null;
+                $this->{$name} = (isset($this->__to_validate[$name])) ? $this->__to_validate[$name] : null;
             } catch (ValidationIssue $e) { // Handle issues
                 if (!isset($this->issues[$name])) $this->issues[$name] = $e->getMessage();
                 else $this->issues[$name] .= "\n" . $e->getMessage();
@@ -432,6 +433,19 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
         $type = gettype($val);
 
+        switch($type) {
+            case $val instanceof \MongoDB\Model\BSONArray:
+                $val = $val->getArrayCopy();
+            case "array":
+                $v = [];
+                foreach($val as $o) {
+                    $v[$o] = $o;
+                }
+                $valid = array_merge($valid ?? [], $v ?? []);
+                $type = gettype($val);
+        }
+
+
         $options = "";
         foreach ($valid as $k => $v) {
             $value = $v;
@@ -469,6 +483,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     private function __proto_json($val, $field) {
         return json_encode($val);
+    }
+
+    private function __proto_json_pretty($val, $field) {
+        return json_encode($val, JSON_PRETTY_PRINT);
     }
 
     private function __proto_md($val, $field) {

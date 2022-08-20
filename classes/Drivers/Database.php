@@ -87,8 +87,8 @@ abstract class Database {
     }
 
     final function findOneAsSchema($filter, array $options = [], $schema = null) {
-        if(!$schema) $schema = $this->get_schema_name();
         $result = $this->findOne($filter,$options);
+        if(!$schema) $schema = $this->get_schema_name($result);
         if($result) return new $schema($result);
         return null;
     }

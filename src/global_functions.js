@@ -274,11 +274,18 @@ function float_pad(number, pad = 2, padWith = 0) {
 
 
 /** @param str string */
-function string_to_bool(str) {
+function string_to_bool(str, altName = true) {
     if (str === null) return null;
-    return (['on', 'true', 'y', 'yes', 'checked'].includes(str.toLowerCase())) ? true : false;
+    let truthy = ['on', 'true', 'y', 'yes', 'checked', 'selected'];
+    if(altName === true) truthy.push(str.toLowerCase);
+    else if(typeof altName === "string") truthy.push(altName.toLowerCase());
+    else if(Array.isArray(altName)) truthy = [...truthy, ...altName.forEach(value => value.toLowerCase())];
+    return (truthy.includes(str.toLowerCase())) ? true : false;
 }
 
+function compare_arrays(arr1, arr2) {
+    return JSON.stringify(arr1) === JSON.stringify(arr2);
+}
 
 function plurality(number, returnValue = "s") {
     if (number == 1) return "";

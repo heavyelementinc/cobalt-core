@@ -213,17 +213,34 @@ input-array {
     border: none;
     border-radius: unset;
     font-size: .9rem;
+    margin:0;
   }
 
   input-array input[type="search"]:focus{
     background: var(--project-color-input-background);
   }
 
+  .autocomplete--search-container {
+    display:flex;
+    flex-direction:row;
+    background: var(--project-color-input-background);
+    cursor: text;
+    padding:none;
+  }
+
+  .autocomplete--search-container:focus-within {
+    outline: 1px solid var(--project-color-input-border-focus);
+  }
+
+  .autocomplete--search-container input[type='search'] {
+    width:100%;
+  }
+
   input-array optgroup, input-array option{
     display: none;
   }
 
-   .input-array--search-results{
+   .input-array--search-results, autocomplete-results-container{
     display: block;
     font-size: .9rem;
     padding: .2rem;
@@ -240,38 +257,44 @@ input-array {
     box-sizing: border-box;
   }
 
-   .input-array--search-results:empty{
+  .input-array--search-results:empty, autocomplete-results-container:empty{
     display:none;
   }
 
-   .input-array--search-results li{
+   .input-array--search-results li, autocomplete-results-container li{
     padding: .2rem;
     border: 1px solid transparent;
     box-sizing: border-box;
   }
 
-   .input-array--search-results li+li{
+  .input-array--search-results li+li, autocomplete-results-container li+li{
     margin-top: .1rem;
   }
 
    .input-array--search-results li:hover,
    .input-array--search-results li:focus,
-   .input-array--search-results li.input-array--will-select-on-enter{
+   .input-array--search-results li.input-array--will-select-on-enter,
+   autocomplete-results-container li:hover,
+   autocomplete-results-container li:focus,
+   autocomplete-results-container li.input-array--will-select-on-enter {
     background: var(--project-color-input-disabled);
     border:1px solid var(--project-color-input-border-nofocus);
     cursor:pointer;
     color:black;
   }
 
-  li.input-array--list-custom{
+  li.input-array--list-custom,
+  li.autocomplete--list-custom{
     font-weight: bold;
   }
 
-  li.input-array--list-custom:not(.input-array--will-select-on-enter){
+  li.input-array--list-custom:not(.input-array--will-select-on-enter),
+  li.autocomplete--list-custom:not(.input-array--will-select-on-enter){
     color:var(--project-color-input-border-nofocus);
   }
 
-   li.input-array--list-custom:before{
+   li.input-array--list-custom:before,
+   li.autocomplete--list-custom:before{
     content: "+";
     margin: 0 0.4rem 0 .2rem;
     font-weight: bold;
@@ -286,7 +309,8 @@ input-array {
     align-items: center;
   }
 
-input-array-item{
+input-array-item,
+input-array-tag{
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
@@ -297,11 +321,13 @@ input-array-item{
   overflow: hidden;
 }
 
-  input-array-item span{
+  input-array-item span,
+  input-array-tag label{
     margin: 0 .3rem;
   }
 
-  input-array-item input[type='button']{
+  input-array-item input[type='button'],
+  input-array-tag input[type='button']{
     font-size: .8rem;
     color: var(--project-color-input-border-nofocus);
     border: none;
@@ -309,6 +335,11 @@ input-array-item{
     border-radius: unset;
     margin: 0;
     height: 100%;
+  }
+
+  input-array-tag input[type='button']:hover {
+    background-color:var(--project-color-problem);
+    color:white;
   }
 
 input-object-array {
@@ -517,4 +548,25 @@ progress-bar .progress-bar--indicator{
   100% {
     background-position: 50px 50px;
   }
+}
+
+form.cobalt-query-controls {
+  text-align: center;
+}
+
+form.cobalt-query-controls button {
+  border: none;
+  background-color: var(--project-calendar-cell-txt);
+  border-radius: 50%;
+  width: 50px;
+  height:50px;
+  color: var(--project-calendar-cell-bg);
+  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+form.cobalt-query-controls button:disabled {
+  opacity: .2;
 }

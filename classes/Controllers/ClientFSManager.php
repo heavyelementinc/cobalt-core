@@ -6,6 +6,7 @@ use Drivers\FileSystem;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 
 trait ClientFSManager {
     protected $fs = null;
@@ -20,8 +21,15 @@ trait ClientFSManager {
         if($this->format_table == null) $this->createFormatTable();
     }
 
+    function getFileMetadataById($id) {
+        $this->initFS();
+        $_id = new \MongoDB\BSON\ObjectId($id);
+        return $this->fs->findOne(['_id' => $_id]);
+    }
+
     public function download($filename) {
         $this->initFS();
+        header("Cache-Control: private, max-age=31536000, immutable");
         $this->fs->download($filename);
     }
 
@@ -36,6 +44,56 @@ trait ClientFSManager {
         $result = $this->fs->delete($_id);
 
         return (string)$_id;
+    }
+
+    public function deleteManyIds($ids) {
+        $_ids = [];
+        foreach($ids as $id) {
+            array_push($_ids, new \MongoDB\BSON\ObjectId($id));
+        }
+        $result = $this->fs->deleteMany(['_id' => ['$in' => $id]]);
+        return $result->getDeletedCount();
+    }
+
+    public function deleteAllBelongingToId($parent_id, $key = "for") {
+        $_id = new ObjectId($parent_id);
+        $result = $this->findMany([$key => $_id]);
+        $deleted = 0;
+        foreach($result as $doc) {
+            $r = $this->delete($doc['_id']);
+            $deleted += 1;
+        }
+        return $deleted;
+    }
+
+    public function updateSortOrder() {
+        if(!$_POST) throw new BadRequest("Malformed request.");
+        $data = $_POST;
+        if(gettype($data))
+        $validated_data = [];
+
+        foreach($data as $index => $value) {
+            if(!is_numeric($index)) {
+                throw new BadRequest("Malformed request.");
+            }
+            try{
+                $validated_data[$index] = [
+                    'filter' => ['_id' => new ObjectId($value)],
+                    'update' => ['$set' => ['order' => $index]],
+                ];
+            } catch (Exception $e) {
+                throw new BadRequest("Malformed identifier");
+            }
+        }
+
+        $this->initFS();
+        $count = 0;
+        foreach($validated_data as $query) {
+            $result = $this->fs->updateOne($query['filter'],$query['update']);
+            $count += $result->getModifiedCount();
+        }
+
+        return $count;
     }
 
     /**
@@ -143,8 +201,8 @@ trait ClientFSManager {
      * 
      * @todo add more display modes
      * @param string $href the href to access the files
-     * @param array $query 
      * @param string $mode ['list'] returns an unorganized list
+     * @param array $query 
      * @param array $parent 
      * @param array $child 
      * @return string 
@@ -159,6 +217,7 @@ trait ClientFSManager {
         
         $this->initFS();
         $query['filter'] = array_merge(['isThumbnail' => ['$exists' => false]], $query['filter'] ?? []);
+        $query['options'] = array_merge(['sort' => ['order' => 1]],$query['options'] ?? []);
         
         $docs = $this->fs->find($query['filter'] ?? [],$query['options'] ?? []);
 
@@ -218,7 +277,7 @@ trait ClientFSManager {
                 },
                 'tag_end' => "",
                 'anchor' => fn () => ""
-            ]
+            ],
         ];
     }
 

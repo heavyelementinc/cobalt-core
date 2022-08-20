@@ -245,6 +245,9 @@
     "packages": {
         "default": [
             "global_functions.js",
+            "sortable.js",
+            "components/autocomplete-interface.js",
+            "components/input-array.js",
             "components/autocomplete.js",
             "components/tag-select.js",
             "components/fs-listing.js",
@@ -302,6 +305,9 @@
         ],
         "$merge": true // User's packages should come second.
     },
+    "admin_css_packages": {
+        "default": []
+    },
     "default-color-scheme": {
         "default": "light"
     },
@@ -351,6 +357,10 @@
     default value supplied for its router table entry */
     "Router_csrf_required_default": {
         "default": true
+    },
+    "SPA": {
+        "default": false,
+        "$public": true
     },
     "Web_normally_open_pages": {
         "default": true

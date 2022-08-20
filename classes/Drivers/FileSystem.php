@@ -14,6 +14,7 @@ class FileSystem {
         $this->client = new \MongoDB\Client(app('server_address'));
         $this->database = $this->client->{$this->db};
         $this->bucket = $this->database->selectGridFSBucket();
+        $this->collection = $this->database->{'fs.files'};
     }
 
 
@@ -101,6 +102,7 @@ class FileSystem {
 
     final public function find($filter = [], array $options = [], $thumbnail = false) {
         if($thumbnail === false) array_merge(['isThumbnail' => ['$exists' => false]],$filter);
+        $options = array_merge(['sort' => ['order' => 1]],$options ?? []);
         return $this->bucket->find($filter,$options);
     }
 
@@ -119,8 +121,16 @@ class FileSystem {
         return $this->bucket->findOne($filter, $options);
     }
 
-    final public function updateOne($filter, array $options = []) {
+    final public function findMany($filter = [], array $options = []) {
+        return $this->bucket->findMany($filter, $options);
+    }
 
+    final public function updateOne($filter, array $options = []) {
+        return $this->collection->updateOne($filter, $options);
+    }
+
+    final public function updateMany($filter, array $options = []) {
+        return $this->collection->updateMany($filter, $options);
     }
 
     final public function rename($id, string $newName) {

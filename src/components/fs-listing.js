@@ -2,14 +2,22 @@ class CobaltListing extends HTMLElement {
     constructor() {
         super()
         this.listItems = [];
+        this.customMenuOptions = {};
     }
 
     connectedCallback() {
+        this.getCustomMenuOptions();
         this.listItems = this.querySelectorAll(".cobalt--fs-directory-listing [data-id]");
         this.change_handler_edit_action(this.getAttribute("edit-action"));
         this.change_handler_delete_action(this.getAttribute("delete-action"));
+        this.change_handler_sort_action(this.getAttribute("sort-action"));
 
         this.initListItemMenu();
+        this.initSorting();
+        this.observer = new MutationObserver(mutations => {
+            this.initListItemMenu();
+        });
+        this.observer.observe(this, {childList: true});
     }
 
     initListItemMenu() {
@@ -30,6 +38,25 @@ class CobaltListing extends HTMLElement {
                     request: {
                         method: "PUT",
                         action: this.actionUrl(this.editAction, el.dataset.id)
+                    },
+                    callback: () => {
+                        return true;
+                    }
+                });
+            }
+
+            for(const i in this.customMenuOptions) {
+                const element = this.customMenuOptions[i];
+                const test = ('label' in element && 'action' in element);
+                if(!test) {
+                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
+                    continue;
+                }
+                menu.registerAction({
+                    label: element.label,
+                    request: {
+                        method: element.method ?? "PUT",
+                        action: this.actionUrl(element.action, el.dataset.id)
                     },
                     callback: () => {
                         return true;
@@ -91,11 +118,49 @@ class CobaltListing extends HTMLElement {
         this.editAction = newValue;
     }
 
-    change_handler_delete_action(newValue, oldValue) {
+    change_handler_delete_action(newValue) {
         this.deleteAction = newValue;
     }
 
-    
+    change_handler_sort_action(newValue) {
+        this.sortAction = newValue;
+    }
+
+    getCustomMenuOptions() {
+        const attributes = this.attributes;
+        let attrs = {};
+        for(const attr of attributes) {
+            const name = attr.name;
+            const split = name.split("-");
+            if(split[0] !== "custom") continue;
+
+            // Check if index is not a number
+            let index = split[split.length - 1];
+            if(isNaN(index)) continue;
+            index = parseFloat(index);
+
+            if(typeof attrs[index] === 'undefined') attrs[index] = {};
+            attrs[index][split[1]] = attr.value;
+        }
+        if(attrs[0] === 'undefined') attrs[0].pop();
+        this.customMenuOptions = attrs;
+    }
+
+    initSorting() {
+        if(this.sortAction === null) return;
+        const container = this.querySelector(".cobalt--fs-directory-listing");
+        console.log(container.children)
+        this.sortable = new Sortable(container.children, container.children, container);
+        this.sortable.container.addEventListener("cobtaltsortcomplete",() => {
+            const fetch = new ApiFetch(this.sortAction, this.getAttribute("sort-method") ?? "POST", {});
+            let sortData = [];
+            for(const i of container.children) {
+                sortData.push(i.dataset.id);
+            }
+            fetch.send(sortData);
+        });
+        this.sortable.initialize();
+    }
 }
 
 customElements.define("cobalt-listing", CobaltListing);

@@ -43,6 +43,7 @@ nav#admin-panel {
 }
 
 #admin-panel + main {
+    display: block;
     min-height: 80vh;
 }
 
@@ -55,4 +56,9 @@ main {
     border: 1px solid var(--project-color-input-border-nofocus);
     padding: 4px 8px;
     border-radius: 4px;
+}
+
+#admin-panel form-request {
+    background: var(--project-calendar-cell-bg);
+    border: var(--project-action-menu-border);
 }

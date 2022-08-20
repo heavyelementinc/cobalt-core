@@ -82,6 +82,12 @@ class Route {
             $additional['anchor']['href'] = $path;
         }
 
+        $cache_control = [
+            'disallow' => false,
+            'max-age' => '604800',
+            'type' => 'private',
+        ];
+
         /** Store our route data in the full route table. */
         $GLOBALS[$router_table_address][$type][$regex] = [
             // Original pathname
@@ -114,6 +120,8 @@ class Route {
             'route_file' => $file,
             // API authentication stuff
             'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
+            // Cache Control stuff is only honored by API page requests
+            'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control)
         ];
     }
 

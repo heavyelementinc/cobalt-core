@@ -83,6 +83,17 @@ function has_permission($perm_name, $group = null, $user = null, $throw_no_sessi
     return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 
+/**
+ * Checks if the current user has root permission
+ * @return bool
+ */
+function is_root() {
+    $session = session();
+    if(!$session) return false;
+    if(!key_exists('groups',$session)) return false;
+    return in_array('root',$session['groups']->getArrayCopy());
+}
+
 /** This function will return a merged array of decoded JSON files that are 
  * found to exist. Later elements in the $paths argument will overwrite earlier 
  * elements of the same name.
@@ -277,6 +288,14 @@ function set_template($path) {
  * @return void
  */
 function add_vars($vars) {
+    $exportable = [];
+
+    foreach(array_merge($vars) as $var => $val) {
+        if($var[0] . $var[1] !== "__") continue;
+        $exportable += correct_exported_values($vars, $var, $val);
+    }
+
+    export_vars($exportable);
 
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
@@ -284,6 +303,27 @@ function add_vars($vars) {
     }
 
     $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
+}
+
+function correct_exported_values(&$vars, $var, $val) {
+    $correctedName = substr($var,2);
+    $vars[$correctedName] = $val;
+    unset($vars[$var]);
+    return [$correctedName => $val];
+}
+
+$GLOBALS['EXPORTED_PUBLIC_VARS'] = [];
+
+function export_vars($vars) {
+    $GLOBALS['EXPORTED_PUBLIC_VARS'] = array_merge($GLOBALS['EXPORTED_PUBLIC_VARS'], $vars);
+}
+
+function get_exportable_vars() {
+    return $GLOBALS['EXPORTED_PUBLIC_VARS'];
+}
+
+function get_exportables_as_json() {
+    return json_encode($GLOBALS['EXPORTED_PUBLIC_VARS']);
 }
 
 $GLOBALS['TEMPLATE_BINDINGS'] = [
@@ -298,6 +338,7 @@ function set($name, $value) {
 }
 
 function export($name,$value) {
+    // $GLOBAL['EXPORTED_PUBLIC_VARS'][$name] = $value;
     return set($name,$value);
 }
 
@@ -672,6 +713,8 @@ function get_route_group($directory_group, $misc = []) {
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
+    $current_route = $GLOBALS['router']->current_route;
+
 
     foreach ($GLOBALS['router']->routes['get'] as $r => $route) {
         $groups = $route['navigation'] ?? false;
@@ -682,10 +725,11 @@ function get_route_group($directory_group, $misc = []) {
         // If both are FALSE, then we skip list assembly.
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
         if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-        $current_route = $GLOBALS['router']->current_route;
-        $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
+        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
         if ($r === $current_route) $info['attributes'] = 'class="current--route"';
         $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
+
     }
 
     return $ul . "</ul>";
@@ -696,7 +740,15 @@ function build_directory_item($item, $icon = false, $prefix = "") {
     else $icon = "";
     $attributes = $item["attributes"] ?? '';
     if (!empty($prefix) && $prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
-    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a></li>";
+    $submenu = "";
+    if (isset($item['submenu_group'])) $submenu = get_route_group($item['submenu_group'], ['classes' => 'directory--submenu', 'icon' => $icon, 'prefix' => $prefix]);
+    if(strpos($submenu,'current--route')) {
+        $current_route_classes = 'current--route current--route--parent';
+        if(isset($item['attributes'])) {
+            $items['attributes'] = substr($item['attributes'],-1) . "$current_route_classes\"";
+        }
+    }
+    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a>$submenu</li>";
 }
 
 function get_schema_group_names(string $group_name, array $schema) {

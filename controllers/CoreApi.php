@@ -65,10 +65,13 @@ class CoreApi extends \Controllers\Pages {
         $processor->_stage_bootstrap['_stage_execute'] = true;
         $processor->_stage_bootstrap['_stage_output'] = true;
         $body = $processor->process();
-        return [
+        if($current_route_meta[1]['cache_control'] === false) {
+            header("Cache-Control: ");
+        }
+        return array_merge($GLOBALS['EXPORTED_PUBLIC_VARS'], [
             "title" => $processor->template_vars['title'],
             "body" => $body
-        ];
+        ]);
     }
 
     function contact() {

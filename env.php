@@ -108,11 +108,6 @@ try {
  * */
 define("__APP_SETTINGS__", $application->get_settings());
 
-if(__APP_SETTINGS__['ENV_allow_user_error_reporting']) {
-    ini_set('display_errors', 1);
-    error_reporting(E_USER_ERROR);
-}
-
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
 if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");
 

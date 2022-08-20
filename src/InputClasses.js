@@ -217,22 +217,24 @@ class InputClass_number extends InputClass_default {
 }
 
 class InputClass_array extends InputClass_default {
-    get value() {
-        return this.collectArrayElements();
-    }
-    set value(set = null) {
-        this.was = this.value;
-        this.setArrayElements();
-    }
+    // get value() {
+    //     return this.element.value
+    // }
+    // set value(set = null) {
+    //     this.was = this.element.value;
+    //     return this.element.value = set;
+    //     // this.was = this.value;
+    //     // this.setArrayElements();
+    // }
 
-    collectArrayElements() {
-        let elements = this.element.querySelectorAll('input-array-item');
-        let array = [];
-        for (var e of elements) {
-            array.push(e.getAttribute("value"));
-        }
-        return array;
-    }
+    // collectArrayElements() {
+    //     let elements = this.element.querySelectorAll('input-array-item');
+    //     let array = [];
+    //     for (var e of elements) {
+    //         array.push(e.getAttribute("value"));
+    //     }
+    //     return array;
+    // }
 }
 
 class InputClass_select extends InputClass_default {

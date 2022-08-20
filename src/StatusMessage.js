@@ -55,7 +55,7 @@ class MessageHandler {
         });
 
         if(details.id in this.messageQueue) {
-            return details.update({message: details.});
+            return details.update({message: details.id});
         }
         this.messageQueue[details.id] = message;
         this.container.appendChild(message);

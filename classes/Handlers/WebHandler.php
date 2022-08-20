@@ -185,9 +185,12 @@ class WebHandler implements RequestHandler {
         $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
         return $settings;
     }
+
+    var $header_template = "parts/header.html";
+
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
-        $header = $this->load_template("parts/header.html");
+        $header = $this->load_template($this->header_template);
         $this->add_vars(['header_nav' => $this->header_nav()]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
@@ -221,8 +224,10 @@ class WebHandler implements RequestHandler {
         return $this->load_template("/parts/cookie-consent.html");
     }
 
+    var $footer_template = "parts/footer.html";
+
     function footer_content() {
-        return $this->load_template("parts/footer.html");
+        return $this->load_template($this->footer_template);
     }
 
     function footer_credits() {
@@ -338,7 +343,7 @@ class WebHandler implements RequestHandler {
         $debug = app("debug");
         foreach (app('css_packages') as $package) {
             $files = files_exist([
-                // __APP_ROOT__ . "/css/$package",
+                __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
             ]);
