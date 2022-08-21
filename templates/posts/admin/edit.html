@@ -1,0 +1,45 @@
+<h1>Edit Post <span id="title"></span></h1>
+<form-request id="post-manager" method="PUT" action="{{update_action}}">
+    <fieldset>
+        <label>Title</label>
+        <input name='title' value="{{post.title}}" for="title">
+    </fieldset>
+    <fieldset>
+        <label>Body</label>
+        <textarea name='body'>{{post.body}}</textarea>
+    </fieldset>
+    <div class="post-meta">
+        <fieldset>
+            <label>Author</label>
+            <select name='author'>{{!post.name.options}}</select>
+        </fieldset>
+        <fieldset>
+            <label>Url Slug</label>
+            <input name='url_slug' value="{{post.url_slug}}">
+        </fieldset>
+        <fieldset>
+            <label>Published</label>
+            <input name='published' value="{{post.published}}">
+        </fieldset>
+        <fieldset>
+            <label>Publication Date</label>
+            <input name='publicationDate' value="{{post.publicationDate}}">
+        </fieldset>
+        <fieldset>
+            <label>Excerpt</label>
+            <textarea name='excerpt'>{{post.excerpt}}</textarea>
+        </fieldset>
+    </div>
+    <button type="submit">Update</button>
+</form-request>
+
+<form-request id="file-manager" method="POST" action="{{upload_action}}">
+    <fieldset id="attachments">
+        <label>Attachments</label>
+        <input type="file" name='attachments' multiple="multiple">
+    </fieldset>
+    <cobalt-gallery>
+        {{post.attachments.display}}
+    </cobalt-gallery>
+    <button type="submit">Upload</button>
+</form-request>

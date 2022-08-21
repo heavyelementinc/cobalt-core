@@ -237,7 +237,7 @@ class WebHandler implements RequestHandler {
         $credits .= '</section>';
         $login = "Login";
         if (session()) $login = "Panel";
-        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"{{app.context_prefixes.admin.prefix}}\"  class=\"footer-credits\">Administrator $login</a>";
+        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"{{app.context_prefixes.admin.prefix}}\"  class=\"footer-credits\" is=\"\">Administrator $login</a>";
         return $credits;
     }
 

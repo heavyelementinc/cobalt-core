@@ -43,10 +43,15 @@ class CoreApi extends \Controllers\Pages {
     function page() {
         $GLOBALS['write_to_buffer_handled'] = true;
         $route = $_GET['route'];
-        $processor = new WebHandler();
-        $context = "web";
+        $contextProcessor = "\Handlers\WebHandler";
+
+        $route_context = Routes\Route::get_router_context($_GET['route']);
+        $contextProcessor = app("context_prefixes")[$route_context]['processor'];
+        $processor = new $contextProcessor();
+        $context = $route_context;
         $processor->no_write_on_destruct();
         $router = new Router($context, "get");
+        $GLOBALS['api_router'] = $router;
 
         $router->init_route_table();
 

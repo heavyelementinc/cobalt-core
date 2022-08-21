@@ -10,6 +10,7 @@ class CobaltListing extends HTMLElement {
         this.listItems = this.querySelectorAll(".cobalt--fs-directory-listing [data-id]");
         this.change_handler_edit_action(this.getAttribute("edit-action"));
         this.change_handler_delete_action(this.getAttribute("delete-action"));
+        this.change_handler_rename_action(this.getAttribute("rename-action"));
         this.change_handler_sort_action(this.getAttribute("sort-action"));
 
         this.initListItemMenu();
@@ -45,22 +46,14 @@ class CobaltListing extends HTMLElement {
                 });
             }
 
-            for(const i in this.customMenuOptions) {
-                const element = this.customMenuOptions[i];
-                const test = ('label' in element && 'action' in element);
-                if(!test) {
-                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
-                    continue;
-                }
+            if(this.renameAction) {
                 menu.registerAction({
-                    label: element.label,
+                    label: 'Rename',
                     request: {
-                        method: element.method ?? "PUT",
-                        action: this.actionUrl(element.action, el.dataset.id)
+                        method: this.getAttribute('rename-method') ?? "PUT",
+                        action: this.renameAction
                     },
-                    callback: () => {
-                        return true;
-                    }
+                    
                 });
             }
 
@@ -90,6 +83,25 @@ class CobaltListing extends HTMLElement {
                 });
             }
 
+            for(const i in this.customMenuOptions) {
+                const element = this.customMenuOptions[i];
+                const test = ('label' in element && 'action' in element);
+                if(!test) {
+                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
+                    continue;
+                }
+                menu.registerAction({
+                    label: element.label,
+                    request: {
+                        method: element.method ?? "PUT",
+                        action: this.actionUrl(element.action, el.dataset.id)
+                    },
+                    callback: () => {
+                        return true;
+                    }
+                });
+            }
+
             menu.draw();
         })
     }
@@ -104,7 +116,7 @@ class CobaltListing extends HTMLElement {
     }
 
     observedAttributes() {
-        return ['edit-action', 'delete-action'];
+        return ['edit-action', 'delete-action', 'sort-action', 'rename-action'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -124,6 +136,10 @@ class CobaltListing extends HTMLElement {
 
     change_handler_sort_action(newValue) {
         this.sortAction = newValue;
+    }
+
+    change_handler_rename_action(newValue) {
+        this.renameAction = newValue;
     }
 
     getCustomMenuOptions() {

@@ -268,6 +268,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             $this->__dataset[$name] = $this->subdocument($value, $this->__schema[$name]['each']);
             return $this->__dataset[$name];
         }
+
+        if(key_exists("max_char_length",$this->__schema[$name]) && strlen($value) > $this->__schema[$name]['max_char_length']) {
+            throw new ValidationIssue("Maximum character length exceeded.");
+        }
+
         // Ensure we want to save our $value to the dataset (in other words, if
         // set === false, ignore this field)
         if (isset($this->__schema[$name]['set']) && $this->__schema[$name]['set'] === false) return;

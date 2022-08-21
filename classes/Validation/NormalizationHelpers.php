@@ -169,6 +169,10 @@ abstract class NormalizationHelpers {
         return $date->timestamp;
     }
 
+    final protected function get_date($value, $format = "Y-m-d") {
+        return date($format, $value / 1000);
+    }
+
     /**
      * Checks if a numeric value is between a specific range.
      * 

@@ -36,12 +36,17 @@ abstract class Database {
      * @return string
      */
     function get_schema_name($doc = []) {
-        return "\\" . $this::class . "Schema";
+        return $this->__schema ?? "\\" . $this::class . "Schema";
     }
 
-    function __construct($database = null) {
+    function set_schema($schema) {
+        $this->__schema = $schema;
+    }
+
+    function __construct($database = null, $collection = null) {
         if ($database !== null) $this->db = $database;
-        $this->collection = db_cursor($this->get_collection_name(), $this->db);
+        if ($collection !== null) $this->collectionSpecifiedAtConstruction = $collection;
+        $this->collection = db_cursor($collection ?? $this->get_collection_name(), $this->db);
     }
 
     /* HELPERS */

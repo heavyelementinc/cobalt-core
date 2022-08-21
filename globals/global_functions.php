@@ -13,6 +13,8 @@
  */
 
 use Exceptions\HTTP\Confirm;
+use Exceptions\HTTP\Error;
+use Exceptions\HTTP\HTTPException;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -699,6 +701,44 @@ function is_child_dir($base_dir, $path) {
     // if($path && strlen($base_dir) < strlen($path))
     $substr = substr(realpath($path), 0, $base_len);
     return ($substr === $base_dir); // return comparison operation.
+}
+
+/**
+ * Limitations: this will only return 
+ * @param string $class
+ * @param string $method
+ * @param array $args 
+ * @param mixed $args 
+ * 
+ * @return string 
+ */
+function get_path_from_route(string $class, string $method, array $args = [], string $routeMethod = "get", $context = null) {
+    if($context === null) $context = "web";
+    $controllerAlias = "$class@$method";
+    $router = $GLOBALS['router'];
+    if($context !== $router->route_context) {
+        if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
+        if($context !== $router->route_context) throw new Error("Could not establish proper context");
+    }
+    $routes = $router->routes[$routeMethod];
+    $route = null;
+    foreach($routes as $r => $data) {
+        if($data['controller'] !== $controllerAlias) continue;
+        $rt = $data['original_path'];
+        $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
+        
+        $replacement = [];
+        preg_match_all($regex,$rt,$replacement);
+
+        $mutant = $rt;
+        // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
+        foreach($replacement[0] as $i => $replace) {
+            $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
+        }
+
+        return preg_replace("/\/{2,}/","/",$router->context_prefix . $mutant);
+    }
+    return $route;
 }
 
 /** Create a directory listing from existing web GET routes

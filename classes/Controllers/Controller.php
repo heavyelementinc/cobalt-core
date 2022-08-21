@@ -1,6 +1,7 @@
 <?php
 namespace Controllers;
 
+use Drivers\Database;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 
@@ -35,6 +36,20 @@ class Controller{
     }
 
     /**
+     * Alias of parseFilterAndOptions
+     * @param Database $manager 
+     * @param array $filterOverride 
+     * @param array $allowedFilters 
+     * @param array $allowedOptions 
+     * @return array 
+     * @throws BadRequest 
+     * @throws Exception 
+     */
+    public function getParams(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = []): array {
+        return $this->parseFilterAndOptions($manager, $filterOverride, $allowedFilters, $allowedOptions);
+    }
+
+    /**
      * How to use:
      * 
      * ```
@@ -55,7 +70,7 @@ class Controller{
      * @throws BadRequest 
      * @throws Exception 
      */
-    final public function parseFilterAndOptions(\Drivers\Database &$manager, $filterOverride, array $allowedFilters = [], $allowedOptions = []): array {
+    final public function parseFilterAndOptions(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = []): array {
         $this->manager = $manager;
         $this->filter = $this->getFilters($allowedFilters);
         $this->options = $this->getOptions($allowedOptions);
