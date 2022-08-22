@@ -89,7 +89,7 @@ class Route {
         ];
 
         /** Store our route data in the full route table. */
-        $GLOBALS[$router_table_address][$type][$regex] = [
+        $GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex] = [
             // Original pathname
             'original_path' => $path,
 

@@ -716,11 +716,11 @@ function get_path_from_route(string $class, string $method, array $args = [], st
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
     $router = $GLOBALS['router'];
-    if($context !== $router->route_context) {
-        if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
-        if($context !== $router->route_context) throw new Error("Could not establish proper context");
-    }
-    $routes = $router->routes[$routeMethod];
+    // if($context !== $router->route_context) {
+    //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
+    //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
+    // }
+    $routes = $router->routes[$context][$routeMethod];
     $route = null;
     foreach($routes as $r => $data) {
         if($data['controller'] !== $controllerAlias) continue;
@@ -755,21 +755,24 @@ function get_route_group($directory_group, $misc = []) {
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
     $current_route = $GLOBALS['router']->current_route;
 
-
-    foreach ($GLOBALS['router']->routes['get'] as $r => $route) {
-        $groups = $route['navigation'] ?? false;
-        if (!$groups) continue;
-        // If we get here, we know we [probably] have an array
-
-        // Now we check if the directory group is in $groups or the key exists
-        // If both are FALSE, then we skip list assembly.
-        if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
-        if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
-        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
-        if ($r === $current_route) $info['attributes'] = 'class="current--route"';
-        $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
-
+    foreach($GLOBALS['router'] as $context => $methods) {
+        foreach($methods as $method => $routes) {
+            foreach ($routes as $r => $route) {
+                $groups = $route['navigation'] ?? false;
+                if (!$groups) continue;
+                // If we get here, we know we [probably] have an array
+        
+                // Now we check if the directory group is in $groups or the key exists
+                // If both are FALSE, then we skip list assembly.
+                if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
+                if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
+                $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+                if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
+                if ($r === $current_route) $info['attributes'] = 'class="current--route"';
+                $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
+        
+            }
+        }
     }
 
     return $ul . "</ul>";
