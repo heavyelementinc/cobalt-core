@@ -755,7 +755,7 @@ function get_route_group($directory_group, $misc = []) {
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
     $current_route = $GLOBALS['router']->current_route;
 
-    foreach($GLOBALS['router'] as $context => $methods) {
+    foreach($GLOBALS['router']->routes as $context => $methods) {
         foreach($methods as $method => $routes) {
             foreach ($routes as $r => $route) {
                 $groups = $route['navigation'] ?? false;
@@ -769,7 +769,7 @@ function get_route_group($directory_group, $misc = []) {
                 $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
                 if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
                 if ($r === $current_route) $info['attributes'] = 'class="current--route"';
-                $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
+                $ul .= build_directory_item($info, $misc['with_icon'], $context);
         
             }
         }
@@ -778,11 +778,15 @@ function get_route_group($directory_group, $misc = []) {
     return $ul . "</ul>";
 }
 
-function build_directory_item($item, $icon = false, $prefix = "") {
+function build_directory_item($item, $icon = false, $context = "") {
+    $prefix = "";
     if ($icon) $icon = "<ion-icon name='$item[icon]'></ion-icon>";
     else $icon = "";
     $attributes = $item["attributes"] ?? '';
-    if (!empty($prefix) && $prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
+    if ($context !== "web") {
+        $prefix = app('context_prefixes')[$context]['prefix'];
+        if($prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
+    }
     $submenu = "";
     if (isset($item['submenu_group'])) $submenu = get_route_group($item['submenu_group'], ['classes' => 'directory--submenu', 'icon' => $icon, 'prefix' => $prefix]);
     if(strpos($submenu,'current--route')) {

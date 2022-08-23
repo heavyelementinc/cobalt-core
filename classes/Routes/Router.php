@@ -28,6 +28,8 @@ class Router {
     public $router_table_list = [];
     public $route_context = "web";
     public $registered_plugin_controllers = [];
+    private $router_table_initialized = false;
+    private $router_table_loaded = false;
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -37,6 +39,7 @@ class Router {
     }
 
     function init_route_table() {
+        if($this->router_table_initialized) return;
         $contexts = app('context_prefixes');
         //  = array_fill_keys(array_keys($contexts), []);
 
@@ -61,6 +64,7 @@ class Router {
             }
         }
 
+        $this->router_table_initialized = true;
         // array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
 
     }
@@ -85,6 +89,10 @@ class Router {
     // }
 
     function get_routes() {
+        if($this->router_table_loaded) {
+            $this->routes = $GLOBALS['ROUTE_TABLE'];
+            return;
+        }
         foreach($this->router_table_list as $context => $value) {
             foreach($value as $table){
                 $GLOBALS['ROUTE_TABLE_ADDRESS'] = $context;
@@ -92,7 +100,7 @@ class Router {
             }
         }
         $this->routes = $GLOBALS['ROUTE_TABLE'];
-
+        $this->router_table_loaded = true;
     }
 
     // function get_routes() {
@@ -125,22 +133,23 @@ class Router {
     }
 
 
-    function discover_route($route = null, $query = null, $context = null) {
-        if ($route === null) $route = $_SERVER['REQUEST_URI'];
-        if ($query === null) $query = $_SERVER['QUERY_STRING'];
+    function discover_route($route = null, $query = null, $method = null, $context = null) {
+        if ($route   === null) $route   = $_SERVER['REQUEST_URI'];
+        if ($query   === null) $query   = $_SERVER['QUERY_STRING'];
+        if ($method  === null) $method  = $this->method;
         if ($context === null) $context = $this->route_context;
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
          */
         $this->uri = urldecode(str_replace(["?" . $query], "", $route));
-        if ($this->route_context !== "web") {
-            $this->context_prefix = app("context_prefixes")[$this->route_context]['prefix'];
-            $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);
+        if ($context !== "web") {
+            $this->context_prefix = app("context_prefixes")[$context]['prefix'];
+            $this->uri = substr($this->uri, strlen($context) - 1);
         }
 
         // $route = null;
         /** Search through our current routes and look for a match */
-        foreach ($this->routes[$context][$this->method] as $preg_pattern => $directives) {
+        foreach ($this->routes[$context][$method] as $preg_pattern => $directives) {
             $match = [];
             /** Regular Expression against our uri, store any matches in $match */
             if (preg_match($preg_pattern, $this->uri, $match) === 1) {
@@ -173,10 +182,14 @@ class Router {
         // $this->current_route = $route;
     }
 
-    function execute_route($context = null) {
+    function execute_route($route = null, $method = null, $context = null) {
+        // Allow executing arbitrary routes
+        if($route   === null) $route   = $this->current_route;
+        if($method  === null) $method  = $this->method;
         if($context === null) $context = $this->route_context;
+
         /** Store our route data for easy access */
-        $exe = $this->routes[$context][$this->method][$this->current_route];
+        $exe = $this->routes[$context][$method][$route];
         if (isset($exe['permission'])) {
             $permission = true;
             try {
@@ -245,7 +258,7 @@ class Router {
         if ($GLOBALS['route_context']) $prefix = "^" . app("context_prefixes")[$GLOBALS['route_context']]['prefix'];
         $prefix = substr($prefix, 0, -1);
         foreach($this->routes as $context => $methods) {
-            foreach ($method as $method => $routes) {
+            foreach ($methods as $method => $routes) {
                 foreach ($routes as $path => $route) {
                     $handler = $route['handler'];
                     if ($handler === null) continue;
