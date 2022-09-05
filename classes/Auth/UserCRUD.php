@@ -37,7 +37,10 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
-    final function getUsersByPermission($permissions, $value = true) {
+    final function getUsersByPermission($permissions, $value = true, $options = null) {
+        if(!$options) $options = [
+            'limit' => 50
+        ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
         $perms = array_fill_keys($permissions, $value);
         return $this->find(
@@ -46,15 +49,19 @@ class UserCRUD extends \Drivers\Database {
                     ['permissions' => $perms],
                     ['groups' => 'root']
                 ]
-            ]
+            ],
+            $options
         );
     }
 
-    final function getUsersByGroup($groups) {
+    final function getUsersByGroup($groups, $options = null) {
+        if(!$options) $options = [
+            'limit' => 50
+        ];
         if (gettype($groups) === "string") $groups = [$groups];
         return $this->find([
             'group' => $groups
-        ]);
+        ], $options);
     }
 
     final function updateUser($id, $request) {

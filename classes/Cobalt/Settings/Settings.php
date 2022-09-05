@@ -61,7 +61,27 @@ class Settings extends \Drivers\Database {
      * @return void 
      */
     private function bootstrap() {
-        return new \Cobalt\Settings\Manager();
+        $dirs = [
+            __ENV_ROOT__ . "/classes/Cobalt/Settings/Defintions/",
+            __APP_ROOT__ . "/classes/Cobalt/Settings/Defintions/"
+        ];
+
+        $files = files_exist([__APP_ROOT__ . "config/settings.json", __APP_ROOT__ . "/private/config/settings.json"]);
+        $settings = [];
+        foreach($files as $file) {
+            array_merge($settings, get_json($files));
+        }
+
+        $this->default_settings = $settings;
+
+        $classes = [];
+
+        foreach($dirs as $dir) {
+            $classes = [...$classes, ...$this->get_setting_classes($dir)];
+        }
+        
+
+        return new \Cobalt\Settings\Manager($classes);
     }
 
     public function refresh_settings() {
@@ -71,19 +91,21 @@ class Settings extends \Drivers\Database {
     private $fields = [];
     private $awaiting_dependencies = [];
 
-    function get_setting_classes() {
-        $classes = scandir(__ENV_ROOT__ . "classes/Cobalt/Settings/Definitions/");
-        // $classes += scandir(__APP_ROOT__ . "private/classes/Cobalt/Settings/Definitions/");
+    function get_setting_classes($dir) {
+        $classes = scandir($dir);
         
         foreach($classes as $c) {
+            if($classes[0] === ".") continue;
             $class_name = substr($c,0,-4);
-            $with_namespace = "\\Cobalt\\Settings\\Defintions\$class_name";
+            $with_namespace = "\\Cobalt\\Settings\\Defintions\\$class_name";
             $class = new $with_namespace();
             if(!empty($class->depends_on)) {
                 $this->awaiting_dependencies[$class_name] = ['object' => $class];
             }
             $this->get_settings_value($class_name,$class);
         }
+
+        return $classes;
 
     }
 

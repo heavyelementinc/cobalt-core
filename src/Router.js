@@ -50,7 +50,7 @@ class Router {
             this.navigation_event(false, value);
             return;
         }
-        this.handleSPANavigation(value);
+        this.handle_SPA_navigation(value);
     }
 
     /**
@@ -113,10 +113,19 @@ class Router {
         let links;
         let forms;
         if(allLinks) {
+            let url = location.toString();
+            history.replaceState({
+                title: document.title,
+                url: url
+            },'',url);
             links = document.querySelectorAll(this.linkSelector);
+            window.addEventListener("hashchange",(event) => {
+                console.info("Hashchange triggered", event);
+            });
             window.addEventListener("popstate",(event) => {
                 console.info("Popstate firing");
-                this.handle_SPA_navigation(event.state.url, event);
+                if(event.state && "url" in event.state) this.handle_SPA_navigation(event.state.url, event);
+                else console.log(event);
             });
             forms = document.querySelectorAll(this.formSelector);
         } else {
@@ -190,9 +199,12 @@ class Router {
         }
         document.title = await result.title ?? "";
 
-        document.dispatchEvent(new CustomEvent("navigationEvent"));
-        
+        this.mainContent.id = result.main_id ?? "main";
         this.mainContent.innerHTML = result.body;
+        document.dispatchEvent(new CustomEvent("navigationEvent"));
+
+        mobile_nav.close();
+
         this.initialize_SPA_navigation(false);
     }
 

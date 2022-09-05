@@ -1,5 +1,7 @@
 <?php
 
+use Cobalt\Requests\Remote\Twitter;
+use Cobalt\Requests\Remote\YouTube;
 use Exceptions\HTTP\BadRequest;
 use Render\Render;
 use MikeAlmond\Color;
@@ -306,5 +308,39 @@ class Debug extends \Controllers\Pages {
 
     function drag_drop() {
         set_template("debug/sortable.html");
+    }
+
+    function twitter() {
+        
+        add_vars([
+            'title' => 'Twitter',
+            'user_result' => json_encode((new Twitter())->getSingleUserPublicDataById('2789614097'),JSON_PRETTY_PRINT),
+            'tweet_result' => json_encode((new Twitter())->getTweetPublicData(['1546477868506652673']),JSON_PRETTY_PRINT),
+            // 'api_result' => json_encode((new Twitter())->getManyUserDataByUsername(['gardiner_bryant']),JSON_PRETTY_PRINT),
+        ]);
+        set_template('debug/api/twitter.html');
+    }
+
+    function youtube() {
+        add_vars([
+            'title' => 'YouTube',
+            'user_result'   => json_encode((new YouTube())->getChannelDataById('UCv1Kcz-CuGM6mxzL3B1_Eiw'),JSON_PRETTY_PRINT),
+            'tweet_result'  => json_encode((new YouTube())->getChannelDataById('UCf8uu3IE42b6hRUusufEH8g'),JSON_PRETTY_PRINT), //   UCnuvP0behGQMR5Wd3l80IWg
+            // 'tweet_result'  => json_encode((new YouTube())->getTweetPublicData(['1546477868506652673']),JSON_PRETTY_PRINT),
+            // 'api_result' => json_encode((new YouTube())->getManyUserDataByUsername(['gardiner_bryant']),JSON_PRETTY_PRINT),
+        ]);
+        set_template('debug/api/twitter.html');
+    }
+
+
+
+
+
+
+
+    function phpinfo() {
+        if(!is_root()) die("You don't have permisison.");
+        phpinfo();
+        exit;
     }
 }

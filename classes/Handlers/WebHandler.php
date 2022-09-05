@@ -271,7 +271,7 @@ class WebHandler implements RequestHandler {
         $cache = new CacheManager($cache_name);
         $script_content = "";
         // if($cache->outdated(__APP_ROOT__ . "/cache/config/settings.000.json",5)) {
-        if ($GLOBALS['time_to_update']) {
+        if (app('cached_content_disabled') || $GLOBALS['time_to_update']) {
             $script_content = $this->{$callable}($cache_name);
             $cache->set($script_content, false);
         } else {
@@ -291,7 +291,7 @@ class WebHandler implements RequestHandler {
         $table_name = str_replace(".js", ".$this->context_mode.js", $this->route_table_cache);
         $cache = new CacheManager($table_name);
         $table_content = "";
-        if ($GLOBALS['time_to_update'] || !$cache->cache_exists()) {
+        if (app('route_cache_disabled') === false || $GLOBALS['time_to_update'] || !$cache->cache_exists()) {
             $table_content = $GLOBALS['router']->get_js_route_table();
             $cache->set($table_content, false);
         } else $table_content = $cache->get();
@@ -431,13 +431,22 @@ class WebHandler implements RequestHandler {
     }
 
     function add_vars($vars) {
+        $exportable = [];
+
+        foreach(array_merge($vars) as $var => $val) {
+            if($var[0] . $var[1] !== "__") continue;
+            $exportable += correct_exported_values($vars, $var, $val);
+        }
+    
+        export_vars($exportable);
+    
         $this->template_vars = array_merge($this->template_vars, $vars);
     }
 
     function process() {
         if (isset($GLOBALS['web_processor_template'])) $this->main_content_from_template($GLOBALS['web_processor_template']);
         if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
-        if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['main_id' => get_main_id()]);
+        if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
         $this->renderer->set_body($this->template_body);
         $this->renderer->set_vars($this->template_vars);
         return $this->renderer->execute();

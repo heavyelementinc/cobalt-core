@@ -21,6 +21,9 @@
 
 namespace Routes;
 
+use Exception;
+use Exceptions\HTTP\NotFound;
+
 class Router {
 
     public $current_route = null;
@@ -144,7 +147,7 @@ class Router {
         $this->uri = urldecode(str_replace(["?" . $query], "", $route));
         if ($context !== "web") {
             $this->context_prefix = app("context_prefixes")[$context]['prefix'];
-            $this->uri = substr($this->uri, strlen($context) - 1);
+            $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);
         }
 
         // $route = null;
@@ -190,6 +193,7 @@ class Router {
 
         /** Store our route data for easy access */
         $exe = $this->routes[$context][$method][$route];
+        if(!$exe) throw new NotFound("Route controller not found");
         if (isset($exe['permission'])) {
             $permission = true;
             try {
@@ -261,14 +265,31 @@ class Router {
             foreach ($methods as $method => $routes) {
                 foreach ($routes as $path => $route) {
                     $handler = $route['handler'];
-                    if ($handler === null) continue;
+                    $hasHandler = false;
+                    if($handler) $hasHandler = true;
+                    if($hasHandler === false) {
+                        $handlerByControllerName = "$route[controller].js";
+                        $handler = $handlerByControllerName;
+                        $hasHandler = true;
+                    }
+                    if($hasHandler === false) continue;
+
                     $files = \files_exist([
                         __APP_ROOT__ . "/private/controllers/client/$handler",
                         __ENV_ROOT__ . "/controllers/client/$handler",
-                    ]);
-                    if ($prefix !== "" && $path[0] = "^") $path = substr($path, 2);
-                    if ($path[strlen($path) - 1] === "%") $path = substr($path, 0, -1);
-                    array_push($table, "\n'$prefix$path': " . file_get_contents($files[0]));
+                    ], false);
+                    if(empty($files)){
+                        if(isset($route['handler'])) throw new Exception("The router table specfied a client controller but the file was not found");
+                        else continue;
+                    }
+                    $real_regex = $route['real_regex'];
+                    // if ($prefix !== "" && $path[0] == "^") $real_regex = substr($real_regex, 2);
+                    $index1 = 0;
+                    $index2 = 0;
+                    if ($real_regex[0] === "%") $index1 = 1;
+                    if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
+                    $real_regex = substr($real_regex, $index1, $index2);
+                    array_push($table, "\n'$real_regex': " . file_get_contents($files[0]));
                 }
             }
         }

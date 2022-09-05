@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL && ~E_WARNING && ~E_NOTICE);
 
 // core.sh project init --something -something-else 
 // ["core.sh","project","init","--something"]

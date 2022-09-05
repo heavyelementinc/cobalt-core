@@ -8,20 +8,23 @@
  */
 namespace Controllers;
 
-use Posts\PostManager;
+use Cobalt\Posts\PostManager;
+use Cobalt\Posts\PostSchema as PostSchema;
 use Exception;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\PostNotFound;
 use Exceptions\HTTP\Unauthorized;
 use Exceptions\HTTP\UnknownError;
 
 abstract class PostController extends Controller {
+
     public $postMan = null;
     protected $permission = "Post_manage_posts";
     protected $publishPermission = "Post_publish_posts";
     protected $permissionGroup = "Post";
 
     public function initialize($collection, $schemaName = null, $permission_suffix = "") {
-        if($schemaName === null) $schemaName =  "\\Posts\\PostSchema";
+        if($schemaName === null) $schemaName =  "\\Cobalt\\Posts\\PostSchema";
         $this->init_permission($permission_suffix);
         
         // Initialize our Post controller
@@ -65,6 +68,7 @@ abstract class PostController extends Controller {
         add_vars([
             'title' => "Edit",
             'post' => $post,
+            'href' => $this->path('post',[]),
             'update_action' => $this->path('update',[$id],'put',   'apiv1'),
             'upload_action' => $this->path('upload',[$id],'post',  'apiv1'),
             'delete_action' => $this->path('delete',[$id],'delete','apiv1')
@@ -84,7 +88,7 @@ abstract class PostController extends Controller {
         }
         // Let's run our schema
         $schema = $this->postMan->__schema;
-        $validation = $schema();
+        $validation = new $schema();
         $mutant = $validation->validate($_POST);
         $_id = $this->postMan->__id($id);
         // Find our post
@@ -94,10 +98,10 @@ abstract class PostController extends Controller {
 
         // We want to redirect new entries to the appropriate page
         if($id === null) header("X-Redirect: " . $this->path('update',[(string)$_id]),"get","admin");
-        return $mutant;
+        return new $schema($mutant);
     }
 
-    public function delete($id) {
+    public function deletePost($id) {
         if(!$this->postMan) throw new Exception("You must manually initialize the PostController");
         if(!has_permission($this->permission,$this->permissionGroup)) throw new Unauthorized("You're not authorized to manage Post posts.");
         $_id = $this->postMan->__id($id);
@@ -110,21 +114,69 @@ abstract class PostController extends Controller {
     }
 
     public function index() {
+        if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
+        $query = $this->getParams($this->postMan, ['published' => true]);
+        $docs = $this->postMan->findAllAsSchema(...$query);
 
+        $posts = "";
+
+        foreach($docs as $doc) {
+            $posts .= with($doc->getTemplate('blurb'), [
+                'post' => $doc,
+                'href' => $this->path('post',[(string)$doc['url_slug']])
+            ]);
+        }
+        // if($docs === null) $doc = new ;
+
+        add_vars([
+            'title' => $this->postMan->get_public_name(),
+            'posts' => $posts,
+        ]);
+
+        set_template((new PostManager())->getTemplate('public'));
+    }
+
+    public function post($slug) {
+        if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
+        $query = ['url_slug' => $slug, 'published' => true];
+        if(has_permission($this->permission)) unset($query['published']);
+
+        $post = $this->postMan->findOneAsSchema($query);
+
+        if(!$post) throw new PostNotFound("That post doesn't exist");
+
+        $edit = "";
+        if(has_permission($this->permission)) {
+            $route = $this->path('edit',[$post->_id],'get','admin');
+            $edit = "<a href='$route' is>Edit this post</a>";
+        }
+
+        $unpubilshed = "";
+        if(!$post['published']) $unpublished = "<div class='cobalt-post--unpublished-preview'>This post is unpublished. $edit when you're ready.</div>";
+
+        add_vars([
+            'title' => htmlspecialchars($post->title),
+            'unpublished' => $unpublished,
+            'post' => $post,
+            'edit' => $edit
+        ]);
+
+        set_template((new PostManager())->getTemplate('post'));
     }
 
     public function init_permission($suffix) {
-        $this->permission = "Post_manage_posts";
-        $this->permissionGroup = "Post";
-        $this->publishPermission = "Post_publish_posts";
+        $this->permission = "Posts_manage_posts";
+        $this->permissionGroup = "Posts";
+        $this->publishPermission = "Posts_publish_posts";
         if($suffix) {
             $this->permission .= "_$suffix";
             $this->publishPermission .= "_$suffix";
             $this->permissionGroup .= " $suffix";
         }
+        $GLOBALS['POST_PERMISSIONS'] = $this->permission;
     }
 
-    public function path(string $methodName, array $args = [], string $method = "get", $context = "web") {
+    private function path(string $methodName, array $args = [], string $method = "get", $context = "web") {
         $className = $this::class;
         $path = get_path_from_route($className, $methodName, $args, $method, $context);
         if(!$path) {

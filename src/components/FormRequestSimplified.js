@@ -73,7 +73,7 @@
             } catch (error) {
                 this.working_spinner_off();
                 reject(result);
-                throw new Error("Bad news!");
+                // throw new Error("Bad news!");
             }
             this.working_spinner_off();
         });
@@ -138,6 +138,9 @@
     async working_spinner_on() {
         console.log("Transitioning");
         return new Promise((resolve,reject) => {
+            setTimeout(() => {
+                this.additionalContent.dispatchEvent(new Event("transitionend"));
+            },1500);
             this.additionalContent.addEventListener("transitionend", () => {
                 console.log("Transition Ended")
                 resolve();

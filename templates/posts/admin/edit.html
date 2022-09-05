@@ -1,45 +1,175 @@
 <h1>Edit Post <span id="title"></span></h1>
-<form-request id="post-manager" method="PUT" action="{{update_action}}">
-    <fieldset>
-        <label>Title</label>
-        <input name='title' value="{{post.title}}" for="title">
-    </fieldset>
-    <fieldset>
-        <label>Body</label>
-        <textarea name='body'>{{post.body}}</textarea>
-    </fieldset>
-    <div class="post-meta">
+<div class="vbox" id="container">
+    <form-request method="PUT" action="{{update_action}}" id="post-manager">
         <fieldset>
-            <label>Author</label>
-            <select name='author'>{{!post.name.options}}</select>
+            <legend>Primary Content</legend>
+            <label>Title</label>
+            <div class="hbox"><input name='title' value="{{post.title}}" for="title"></div>
+            <div id="slug">
+                <!-- <span>Link: </span> -->
+                <a href="{{post.public_link}}" is>http://{{app.domain_name}}{{href}}</a>
+                <input name="url_slug" value="{{post.url_slug}}">
+            </div>
+            <textarea name='body' placeholder="Share your thoughts...">{{post.body}}</textarea>
         </fieldset>
-        <fieldset>
-            <label>Url Slug</label>
-            <input name='url_slug' value="{{post.url_slug}}">
-        </fieldset>
-        <fieldset>
-            <label>Published</label>
-            <input name='published' value="{{post.published}}">
-        </fieldset>
-        <fieldset>
-            <label>Publication Date</label>
-            <input name='publicationDate' value="{{post.publicationDate}}">
-        </fieldset>
-        <fieldset>
-            <label>Excerpt</label>
-            <textarea name='excerpt'>{{post.excerpt}}</textarea>
-        </fieldset>
-    </div>
-    <button type="submit">Update</button>
-</form-request>
 
-<form-request id="file-manager" method="POST" action="{{upload_action}}">
-    <fieldset id="attachments">
-        <label>Attachments</label>
-        <input type="file" name='attachments' multiple="multiple">
-    </fieldset>
-    <cobalt-gallery>
-        {{post.attachments.display}}
-    </cobalt-gallery>
-    <button type="submit">Upload</button>
-</form-request>
+        <fieldset id="post-meta">
+            <legend>Post Metadata</legend>
+            <label>
+                Published <input-switch name='published' checked="{{post.published}}"></input-switch>
+            </label>
+            <div>
+                <label>Author</label>
+                <select name='author'>{{!post.author.options}}</select>
+            </div>
+            <div>
+                <label>Publication Date</label>
+                <input type="date" name='publicationDate' value="{{post.publicationDate}}">
+            </div>
+            <div id="excerpt">
+                <label>Excerpt</label>
+                <textarea name='excerpt'>{{post.excerpt}}</textarea>
+            </div>
+            <div id="default_image" {{!post.default_image.display}}>
+                <radio-group name="alignment.position" value="{{post.alignment.position}}">
+                    <div>
+                        <input type="radio" name="alignemnt.position" value="top left">
+                        <input type="radio" name="alignemnt.position" value="top center">
+                        <input type="radio" name="alignemnt.position" value="top right">
+                    </div>
+                    <div>
+                        <input type="radio" name="alignemnt.position" value="center left">
+                        <input type="radio" name="alignemnt.position" value="center center">
+                        <input type="radio" name="alignemnt.position" value="center right">
+                    </div>
+                    <div>
+                        <input type="radio" name="alignemnt.position" value="bottom left">
+                        <input type="radio" name="alignemnt.position" value="bottom center">
+                        <input type="radio" name="alignemnt.position" value="bottom right">
+                    </div>
+                </radio-group>
+            </div>
+
+            <button type="submit">Update</button>
+        </fieldset>
+    </form-request>
+    
+    <form-request id="file-manager" method="POST" action="{{upload_action}}">
+        <fieldset id="attachments">
+            <label>Attachments</label>
+            <input type="file" name='attachments' multiple="multiple">
+            <button type="submit">Upload</button>
+        </fieldset>
+    </form-request>
+    {{!post.attachments.display}}
+</div>
+
+<style>
+    form-request {
+        overflow:visible;
+    }
+
+    fieldset {
+        border: var(--project-calendar-borders);
+        background: var(--project-calendar-cell-bg);
+    }
+    
+    #container {
+        gap: 10px;
+    }
+
+    #post-manager {
+        width:100%;
+        display:grid;
+        grid-template-columns: 1fr .2fr;
+        grid-template-rows: 100%;
+        gap: inherit;
+    }
+    
+    input[name="title"] {
+        width:100%;
+        box-sizing: border-box;
+    }
+
+    #slug a {
+        color:rgba(0,0,0,.3);
+        
+    }
+    #slug {
+        display: flex;
+        margin: 1ch 0;
+        align-items: center;
+    }
+    #slug input {
+        flex-grow:1;
+    }
+    
+    textarea[name='body']{
+        display: block;
+        height: 30ch;
+        width: 100%;
+        padding: 2ch 2ch;
+        box-sizing: border-box;
+        resize: vertical;
+    }
+
+    #post-meta {
+        display:flex;
+        flex-direction: column;
+        gap: inherit;
+    }
+
+    #excerpt {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    textarea[name="excerpt"] {
+        flex-grow: 1;
+    }
+
+    #default_image {
+        background-image: url();
+        background-color: rgba(0,0,0,.2);
+        height:200px;
+        width: 200px;
+        background-size: cover;
+    }
+    
+    [name="alignment.position"] {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        width: 100%;
+        height: 100%;
+        overflow:hidden;
+    }
+    
+    #default_image input {
+        opacity: .1;
+        transition: opacity .4s;
+        box-shadow: 0 0 15px black;
+    }
+
+    #default_image:hover input {
+        opacity: .9;
+    }
+
+    #default_image input:hover{
+        opacity: 1;
+    }
+
+    [name="alignment.position"] > div {
+        display: flex;
+        width:100%;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    [name="alignment.position"] > div:first-of-type {
+        align-items: flex-start;
+    }
+    [name="alignment.position"] > div:last-of-type {
+        align-items: flex-end;
+    }
+</style>

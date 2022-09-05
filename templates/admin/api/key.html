@@ -1,0 +1,43 @@
+
+<form-request method="PUT" action="/api/v1/api/key/{{id}}">
+    <fieldset>
+        <label>Key</label>
+        <input type="string" name="key" value="{{token.key}}">
+    </fieldset>
+    <fieldset>
+        <label>Secret</label>
+        <input type="password" name="secret" value="{{token.secret}}">
+    </fieldset>
+    <fieldset>
+        <label>Token</label>
+        <input type="password" name="token" value="{{token.token}}">
+    </fieldset>
+    <fieldset>
+        <label>Type</label>
+        <input-autocomplete value="{{token.type}}" name="type">
+            <option value="Authorization">Authorization</option>
+            <option value="Parameter">Parameter</option>
+        </input-autocomplete>
+    </fieldset>
+    <fieldset>
+        <label>Prefix: {{token.prefix}}</label>
+        <input type="string" name="prefix" value="{{token.prefix}}">
+    </fieldset>
+    <fieldset>    
+        <label>Expiration</label>
+        <input type="date" name="expiration" value="{{token.expiration}}">
+    </fieldset>
+    <button type="submit">Submit</button>
+</form-request>
+
+OR
+
+<form-request method="POST" action="/api/v1/api/key/raw/{{id}}">
+    <fieldset>
+        <label>Raw Data from Issuer</label>
+        <textarea name="raw"></textarea>
+    </fieldset>
+    <button type="submit">Submit</button>
+</form-request>
+
+<!-- <async-button action=""></async-button> -->

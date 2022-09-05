@@ -56,15 +56,20 @@ class CoreApi extends \Controllers\Pages {
         $processor = new $contextProcessor();
         $processor->no_write_on_destruct();
 
+        // Initialize the processor
         $processor->_stage_init(app("context_prefixes")[$route_context]);
         $processor->_stage_bootstrap['_stage_init'] = true;
 
+        // Get the current route
         $current_route_meta = $GLOBALS['router']->discover_route($route, null, $method, $route_context);
         if($current_route_meta === null) throw new NotFound("Route not found");
+
+        // Set up route meta in the processor
         $processor->_stage_route_discovered(...$current_route_meta);
         $processor->_stage_bootstrap['_stage_route_discovered'] = true;
 
-        $router_result = $GLOBALS['router']->execute_route($route, $method, $route_context);
+        // Allow
+        $router_result = $GLOBALS['router']->execute_route($current_route_meta[0], $method, $route_context);
         $processor->_stage_execute($router_result);
         $processor->_stage_bootstrap['_stage_execute'] = true;
         $processor->_stage_bootstrap['_stage_output'] = true;
