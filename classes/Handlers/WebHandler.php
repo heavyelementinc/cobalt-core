@@ -41,6 +41,7 @@ class WebHandler implements RequestHandler {
         "@user_menu@"      => "",
         "@router_table@"   => "",
         "@auth_panel@"     => "",
+        "@post_header@"    => "",
         "@header_content@" => "",
         "@cookie_consent@" => "",
         "@footer_content@" => "",
@@ -92,7 +93,7 @@ class WebHandler implements RequestHandler {
         if ($this->context_mode === "web" || $this->context_mode === "admin") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
-            if (!$this->results_sent_to_client) echo $this->process();
+            if (!$this->results_sent_to_client) return $this->process();
 
             $this->results_sent_to_client = true;
         }
@@ -141,7 +142,7 @@ class WebHandler implements RequestHandler {
 
         // Add the error template as the main content
         $this->main_content_from_template($template);
-        $this->_stage_output();
+        return $this->_stage_output();
     }
 
     /** END INTERFACE REQUIREMENTS */
@@ -184,9 +185,12 @@ class WebHandler implements RequestHandler {
         $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
         return $settings;
     }
+
+    var $header_template = "parts/header.html";
+
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
-        $header = $this->load_template("parts/header.html");
+        $header = $this->load_template($this->header_template);
         $this->add_vars(['header_nav' => $this->header_nav()]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
@@ -210,14 +214,20 @@ class WebHandler implements RequestHandler {
         return "";
     }
 
+    function post_header() {
+        return $this->load_template("/parts/post-header.html");
+    }
+
     function cookie_consent() {
         if (!app("Cookie_consent_prompt")) return "";
         if (isset($_COOKIE['cookie_consent'])) return "";
-        return with("/parts/cookie-consent.html");
+        return $this->load_template("/parts/cookie-consent.html");
     }
 
+    var $footer_template = "parts/footer.html";
+
     function footer_content() {
-        return $this->load_template("parts/footer.html");
+        return $this->load_template($this->footer_template);
     }
 
     function footer_credits() {
@@ -227,7 +237,7 @@ class WebHandler implements RequestHandler {
         $credits .= '</section>';
         $login = "Login";
         if (session()) $login = "Panel";
-        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"{{app.context_prefixes.admin.prefix}}\"  class=\"footer-credits\">Administrator $login</a>";
+        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"{{app.context_prefixes.admin.prefix}}\"  class=\"footer-credits\" is=\"\">Administrator $login</a>";
         return $credits;
     }
 
@@ -333,6 +343,7 @@ class WebHandler implements RequestHandler {
         $debug = app("debug");
         foreach (app('css_packages') as $package) {
             $files = files_exist([
+                __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
             ]);

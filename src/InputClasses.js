@@ -78,6 +78,8 @@ class InputClass_default {
 
     async create_error(before) {
         let el = document.createElement("pre");
+        const spawnIndex = spawn_priority(before);
+        if (spawnIndex) el.style.zIndex = spawnIndex + 1;
         el.addEventListener('click', () => {
             if (el) {
                 el.parentNode.removeChild(el);
@@ -215,22 +217,24 @@ class InputClass_number extends InputClass_default {
 }
 
 class InputClass_array extends InputClass_default {
-    get value() {
-        return this.collectArrayElements();
-    }
-    set value(set = null) {
-        this.was = this.value;
-        this.setArrayElements();
-    }
+    // get value() {
+    //     return this.element.value
+    // }
+    // set value(set = null) {
+    //     this.was = this.element.value;
+    //     return this.element.value = set;
+    //     // this.was = this.value;
+    //     // this.setArrayElements();
+    // }
 
-    collectArrayElements() {
-        let elements = this.element.querySelectorAll('input-array-item');
-        let array = [];
-        for (var e of elements) {
-            array.push(e.getAttribute("value"));
-        }
-        return array;
-    }
+    // collectArrayElements() {
+    //     let elements = this.element.querySelectorAll('input-array-item');
+    //     let array = [];
+    //     for (var e of elements) {
+    //         array.push(e.getAttribute("value"));
+    //     }
+    //     return array;
+    // }
 }
 
 class InputClass_select extends InputClass_default {
@@ -314,6 +318,10 @@ class InputClass_file extends InputClass_default {
     }
 }
 
+class InputClass_tag_select extends InputClass_default {
+
+}
+
 var classMap = {
     default: InputClass_default,
     check: InputClass_checkbox,
@@ -323,5 +331,6 @@ var classMap = {
     button: InputClass_button,
     number: InputClass_number,
     array: InputClass_array,
-    objectArray: InputClass_object_array
+    objectArray: InputClass_object_array,
+    tagSelect: InputClass_tag_select
 }

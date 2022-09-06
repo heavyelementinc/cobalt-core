@@ -102,7 +102,24 @@ if (app("enable_debug_routes")) {
         //     'anchor' => ['name' => "Dump"]
         // ]);
     }
+    Route::get("/debug/style-test/", "Debug@style_test", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Style Test"]
+    ]);
+
+    
     Route::get("/debug/slow-response/{delay}", "Debug@slow_response");
+    
+    Route::get("/debug/file-upload", "DebugFiles@file_upload_page", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "File upload"]
+    ]);
+    Route::get("/debug/file-upload/download-test/...", "DebugFiles@download");
+
+    Route::get("/debug/draggable", "Debug@drag_drop", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Drag &amp; Drop Test"]
+    ]);
 }
 
 /** If authentications are enabled, these routes should be added to the table */

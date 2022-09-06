@@ -43,10 +43,15 @@ class CoreApi extends \Controllers\Pages {
     function page() {
         $GLOBALS['write_to_buffer_handled'] = true;
         $route = $_GET['route'];
-        $processor = new WebHandler();
-        $context = "web";
+        $contextProcessor = "\Handlers\WebHandler";
+
+        $route_context = Routes\Route::get_router_context($_GET['route']);
+        $contextProcessor = app("context_prefixes")[$route_context]['processor'];
+        $processor = new $contextProcessor();
+        $context = $route_context;
         $processor->no_write_on_destruct();
         $router = new Router($context, "get");
+        $GLOBALS['api_router'] = $router;
 
         $router->init_route_table();
 
@@ -65,10 +70,13 @@ class CoreApi extends \Controllers\Pages {
         $processor->_stage_bootstrap['_stage_execute'] = true;
         $processor->_stage_bootstrap['_stage_output'] = true;
         $body = $processor->process();
-        return [
+        if($current_route_meta[1]['cache_control'] === false) {
+            header("Cache-Control: ");
+        }
+        return array_merge($GLOBALS['EXPORTED_PUBLIC_VARS'], [
             "title" => $processor->template_vars['title'],
             "body" => $body
-        ];
+        ]);
     }
 
     function contact() {

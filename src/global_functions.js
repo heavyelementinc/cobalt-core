@@ -1,5 +1,5 @@
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name], select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name]";
+var universal_input_element_query = "input[name], select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-tag-select[name]";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -75,7 +75,9 @@ async function logOutConfirm() {
 }
 
 async function confirmModal(message, yes = "Okay", no = "Cancel") {
-    const modal = new Modal({});
+    const modal = new Modal({
+        event: event
+    });
     modal.draw();
 }
 
@@ -107,18 +109,24 @@ async function removeLoadingSpinner(spinner) {
  * @param {string} imageUrl A URL to an image or a youtube.com/youtu.be video
  * @returns Modal object
  */
-function lightbox(imageUrl) {
-    if (typeof imageUrl === "object" && "src" in imageUrl) imageUrl = imageUrl.src;
+async function lightbox(origin, animate = true) {
+    let imageUrl = null;
+    if (typeof origin === "object") imageUrl = origin.getAttribute("full-resolution") ?? origin.src ?? null;
+    else imageUrl = origin;
+
     let lightbox_content = `<img src='${imageUrl}'>`;
     if (imageUrl.indexOf("youtube.com") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split("?v=")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     if (imageUrl.indexOf("youtu.be") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split(".be/")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     const modal = new Modal({
         parentClass: "lightbox",
         body: lightbox_content,
+        event: event,
         chrome: null,
+        animate: animate,
         clickoutCallback: e => true,
     });
     modal.draw();
+
     return modal;
 }
 
@@ -133,10 +141,11 @@ function lightbox(imageUrl) {
  * @param {string} cancel Button label for the FALSE option
  * @returns Promise which resolves to either true or false. Cannot reject.
  */
-async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous = false) {
+async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous = false, event = null) {
     return new Promise((resolve, reject) => {
         const modal = new Modal({
             body: message,
+            event: event,
             chrome: {
                 cancel: {
                     label: cancel,
@@ -160,13 +169,14 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous
     });
 }
 
-async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "" }) {
+async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "", event = null }) {
     if (pattern) pattern = ` pattern="${pattern}" required`;
     if (value) value = ` value="${value.replace("\"", "&quot;")}"`;
     return new Promise((resolve, reject) => {
         const modal = new Modal({
             body: `<p>${message}</p><input type="text" name="modalInputField"${pattern}${value}>`,
             classes: "modal-window--input",
+            event: event,
             chrome: {
                 cancel: {
                     label: cancel,
@@ -191,10 +201,11 @@ async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern =
     })
 }
 
-async function modalForm(url, {okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true }){
-    return new Promise((resolve,reject) => {
+async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true, event = null }) {
+    return new Promise((resolve, reject) => {
         const modal = new Modal({
             url: url,
+            event: event,
             chrome: {
                 cancel: {
                     label: cancel,
@@ -207,17 +218,37 @@ async function modalForm(url, {okay = "Submit", cancel = "Cancel", additional_ca
                     label: okay,
                     callback: async (event) => {
                         const form = modal.dialog.querySelector("form-request");
-
-                        let result = await form.submit(event);
-                        if(!additional_callback(result)) return false;
-
-                        resolve(form.request.lastResult);
-                        return true;
+                        let result = null;
+                        try {
+                            result = await form.send(event);
+                            resolve(result);
+                            return true;
+                        } catch (error) {
+                            reject(result);
+                            throw new Error(result);
+                        }
+                        // if (!additional_callback(result)) return false;
+                        // console.log(form.lastResult);
+                        // if (String(result.status)[0] !== "2") return false;
                     }
                 }
             }
         })
         modal.draw();
+    });
+}
+
+async function quickRequest(url, { data = {}, method = "POST", }) {
+    return await new Promise((resolve, reject) => {
+        const api = new ApiFetch(url, method, {});
+        let result;
+        try {
+            result = api.send(data);
+            resolve(result);
+        } catch (Error) {
+            reject(Error);
+        }
+        return result;
     });
 }
 
@@ -243,11 +274,18 @@ function float_pad(number, pad = 2, padWith = 0) {
 
 
 /** @param str string */
-function string_to_bool(str) {
+function string_to_bool(str, altName = true) {
     if (str === null) return null;
-    return (['on', 'true', 'y', 'yes', 'checked'].includes(str.toLowerCase())) ? true : false;
+    let truthy = ['on', 'true', 'y', 'yes', 'checked', 'selected'];
+    if(altName === true) truthy.push(str.toLowerCase);
+    else if(typeof altName === "string") truthy.push(altName.toLowerCase());
+    else if(Array.isArray(altName)) truthy = [...truthy, ...altName.forEach(value => value.toLowerCase())];
+    return (truthy.includes(str.toLowerCase())) ? true : false;
 }
 
+function compare_arrays(arr1, arr2) {
+    return JSON.stringify(arr1) === JSON.stringify(arr2);
+}
 
 function plurality(number, returnValue = "s") {
     if (number == 1) return "";
@@ -269,6 +307,7 @@ function get_form_input(el, form) {
     const name = el.getAttribute("name");
     if (!name) return false;
     let type = el.getAttribute("type") || "default";
+
     switch (el.tagName) {
         case "TEXTAREA":
             type = 'textarea';
@@ -284,6 +323,9 @@ function get_form_input(el, form) {
             break;
         case "INPUT-OBJECT-ARRAY":
             type = "objectArray";
+            break;
+        case "INPUT-TAG-SELECT":
+            type = "tagSelect";
             break;
     }
     if (type in classMap === false) type = "default";
@@ -327,6 +369,22 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
  *   * yPrime - Top edge of the element
  *   * right  - The right edge of the element
  *   * bottom - The bottom edge of the element
+ */
+
+/**
+ * 
+ * @param HtmlElement element 
+ * @returns {
+ *   x, // element + parents offset
+ *   y, // element + parents offset
+ *   w, // element width,
+ *   h, // element height
+ *   right,  // 
+ *   bottom, // 
+ *   xPrime, // The element's initial offset
+ *   yPrime, // The element's initial offset
+ *   zIndex, // The element's zIndex
+ * }
  */
 function get_offset(element) {
     let parent = element.offsetParent,
@@ -416,7 +474,7 @@ function parse_params(param) {
     let decoded = decodeURI(param);
     let split = decoded.split("&");
     let object = {};
-    for(const i of split) {
+    for (const i of split) {
         const keyVal = i.split("=");
         object[keyVal[0]] = keyVal[1];
     }
@@ -426,44 +484,74 @@ function parse_params(param) {
 function encode_params(object) {
     let string = "";
 
-    for(const i in object) {
-        if(typeof object[i] === "object") {
-            for(const key in object[i]) {
+    for (const i in object) {
+        if (typeof object[i] === "object") {
+            for (const key in object[i]) {
                 string += `${i}[${key}]=${object[i][key]}&`;
             }
         } else string += `${i}=${object[i]}&`;
     }
 
-    return string.substr(0,string.length - 1);
+    return string.substr(0, string.length - 1);
 }
 
-function set_cookie(name, value, days = ""){
+function set_cookie(name, value, days = "") {
     var expires = "";
     if (days) {
         var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 
 function get_cookie(name) {
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
+    for (var i = 0; i < ca.length; i++) {
         var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
 }
 
 function delete_cookie(name) {
-    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-function consent_cookie(value){
-    set_cookie('cookie_consent',value,30);
+function consent_cookie(value) {
+    set_cookie('cookie_consent', value, 30);
     const consent_cookie = document.querySelector("#cookie-consent");
     consent_cookie.parentNode.removeChild(consent_cookie);
+}
+
+function spawn_priority(event) {
+    let node = event;
+    if ("originalTarget" in event) node = event.originalTarget;
+    if ("target" in event) node = event.target;
+    if ("parentNode" in node === false) return false;
+
+    let zIndex = "auto";
+    while (true) {
+        if (node === null) break;
+        try {
+            zIndex = window.getComputedStyle(node).zIndex
+        } catch (Error) {
+            zIndex = "auto";
+        }
+        if (zIndex === "auto") {
+            if ("parentNode" in node) node = node.parentNode;
+        } else break;
+    }
+
+    console.log(zIndex);
+
+    return (zIndex === "auto") ? false : zIndex;
+}
+
+function reflow() {
+    return new Promise((resolve) => {
+        return resolve(window.scrollX);
+    });
 }

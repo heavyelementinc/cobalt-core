@@ -13,6 +13,8 @@
  */
 
 use Exceptions\HTTP\Confirm;
+use Exceptions\HTTP\Error;
+use Exceptions\HTTP\HTTPException;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -81,6 +83,17 @@ function session_exists() {
  */
 function has_permission($perm_name, $group = null, $user = null, $throw_no_session = true) {
     return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
+}
+
+/**
+ * Checks if the current user has root permission
+ * @return bool
+ */
+function is_root() {
+    $session = session();
+    if(!$session) return false;
+    if(!key_exists('groups',$session)) return false;
+    return in_array('root',$session['groups']->getArrayCopy());
 }
 
 /** This function will return a merged array of decoded JSON files that are 
@@ -234,6 +247,17 @@ function cobalt_autoload($class) {
     } catch (Exception $e) {
         print($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
         exit;
+    } catch (Error $e) {
+        print("<pre>");
+        $file = $e->getFile() . ': ' . $e->getLine();
+        if (app('debug')) {
+            print("Fatal error when loading $file");
+            print("\n" . $e->getMessage());
+        } else {
+            print("A error was found. Please contact your system administrator with the following error code:\n");
+            print(base64_encode($e->getMessage() . ' ' . $file));
+        }
+        exit;
     }
 }
 
@@ -266,6 +290,14 @@ function set_template($path) {
  * @return void
  */
 function add_vars($vars) {
+    $exportable = [];
+
+    foreach(array_merge($vars) as $var => $val) {
+        if($var[0] . $var[1] !== "__") continue;
+        $exportable += correct_exported_values($vars, $var, $val);
+    }
+
+    export_vars($exportable);
 
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
@@ -273,6 +305,27 @@ function add_vars($vars) {
     }
 
     $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
+}
+
+function correct_exported_values(&$vars, $var, $val) {
+    $correctedName = substr($var,2);
+    $vars[$correctedName] = $val;
+    unset($vars[$var]);
+    return [$correctedName => $val];
+}
+
+$GLOBALS['EXPORTED_PUBLIC_VARS'] = [];
+
+function export_vars($vars) {
+    $GLOBALS['EXPORTED_PUBLIC_VARS'] = array_merge($GLOBALS['EXPORTED_PUBLIC_VARS'], $vars);
+}
+
+function get_exportable_vars() {
+    return $GLOBALS['EXPORTED_PUBLIC_VARS'];
+}
+
+function get_exportables_as_json() {
+    return json_encode($GLOBALS['EXPORTED_PUBLIC_VARS']);
 }
 
 $GLOBALS['TEMPLATE_BINDINGS'] = [
@@ -284,6 +337,11 @@ $GLOBALS['TEMPLATE_BINDINGS'] = [
 function set($name, $value) {
     add_vars([$name => $value]);
     return "";
+}
+
+function export($name,$value) {
+    // $GLOBAL['EXPORTED_PUBLIC_VARS'][$name] = $value;
+    return set($name,$value);
 }
 
 /**
@@ -587,7 +645,7 @@ function associative_to_path(array $arr) {
  */
 function with(string $template, $vars = []) {
     $render = new \Render\Render();
-    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'];
+    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
     $render->set_vars($vars);
     $render->from_template($template);
     return $render->execute();
@@ -645,6 +703,44 @@ function is_child_dir($base_dir, $path) {
     return ($substr === $base_dir); // return comparison operation.
 }
 
+/**
+ * Limitations: this will only return 
+ * @param string $class
+ * @param string $method
+ * @param array $args 
+ * @param mixed $args 
+ * 
+ * @return string 
+ */
+function get_path_from_route(string $class, string $method, array $args = [], string $routeMethod = "get", $context = null) {
+    if($context === null) $context = "web";
+    $controllerAlias = "$class@$method";
+    $router = $GLOBALS['router'];
+    if($context !== $router->route_context) {
+        if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
+        if($context !== $router->route_context) throw new Error("Could not establish proper context");
+    }
+    $routes = $router->routes[$routeMethod];
+    $route = null;
+    foreach($routes as $r => $data) {
+        if($data['controller'] !== $controllerAlias) continue;
+        $rt = $data['original_path'];
+        $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
+        
+        $replacement = [];
+        preg_match_all($regex,$rt,$replacement);
+
+        $mutant = $rt;
+        // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
+        foreach($replacement[0] as $i => $replace) {
+            $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
+        }
+
+        return preg_replace("/\/{2,}/","/",$router->context_prefix . $mutant);
+    }
+    return $route;
+}
+
 /** Create a directory listing from existing web GET routes
  * 
  * with_icon, prefix, classes, id
@@ -657,6 +753,8 @@ function get_route_group($directory_group, $misc = []) {
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
+    $current_route = $GLOBALS['router']->current_route;
+
 
     foreach ($GLOBALS['router']->routes['get'] as $r => $route) {
         $groups = $route['navigation'] ?? false;
@@ -667,10 +765,11 @@ function get_route_group($directory_group, $misc = []) {
         // If both are FALSE, then we skip list assembly.
         if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
         if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-        $current_route = $GLOBALS['router']->current_route;
-        $info = $groups[$directory_group] ?? $route['anchor'] ?? false;
+        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
         if ($r === $current_route) $info['attributes'] = 'class="current--route"';
         $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
+
     }
 
     return $ul . "</ul>";
@@ -681,7 +780,15 @@ function build_directory_item($item, $icon = false, $prefix = "") {
     else $icon = "";
     $attributes = $item["attributes"] ?? '';
     if (!empty($prefix) && $prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
-    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a></li>";
+    $submenu = "";
+    if (isset($item['submenu_group'])) $submenu = get_route_group($item['submenu_group'], ['classes' => 'directory--submenu', 'icon' => $icon, 'prefix' => $prefix]);
+    if(strpos($submenu,'current--route')) {
+        $current_route_classes = 'current--route current--route--parent';
+        if(isset($item['attributes'])) {
+            $items['attributes'] = substr($item['attributes'],-1) . "$current_route_classes\"";
+        }
+    }
+    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a>$submenu</li>";
 }
 
 function get_schema_group_names(string $group_name, array $schema) {
@@ -926,10 +1033,4 @@ function sanitize_path_name($path) {
 
 function relative_time($date, $now = null) {
     if (!$now) $now = time();
-}
-
-function make_thumbnail($original, $directory, $dimensions = [200, null]) {
-}
-
-function get_image_function($filename) {
 }

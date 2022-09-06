@@ -37,4 +37,54 @@ class AdminHandler extends WebHandler {
         $panel .= "</nav>";
         return $panel;
     }
+
+    var $header_template = "/parts/admin-header.html";
+    var $footer_template = "/parts/admin-footer.html";
+
+    // function generate_style_meta() {
+    //     $link_tags = "";
+    //     $compiled = "";
+    //     $debug = app("debug");
+
+    //     $default_settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"),true);
+    //     $app_packages = app('admin_css_packages');
+    //     if(!$app_packages) $app_packages = [];
+
+    //     $packages = array_merge($default_settings['css_packages']['default'],  $app_packages);
+
+    //     foreach ($packages as $package) {
+    //         $files = files_exist([
+    //             __APP_ROOT__ . "/shared/css/$package",
+    //             __ENV_ROOT__ . "/shared/css/$package"
+    //         ]);
+    //         if ($debug === true) {
+    //             $path = "/res/css/";
+    //             if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
+    //             $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
+    //         } else {
+    //             $compiled .= "\n\n" . file_get_contents($files[0]);
+    //         }
+    //     }
+
+    //     foreach ($GLOBALS['PACKAGES']['css'] as $public => $private) {
+    //         $file = file_exists($private);
+    //         if (!$file) continue;
+    //         if ($debug === true) {
+    //             $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
+    //         } else {
+    //             $compiled .= "\n\n" . file_get_contents($file);
+    //         }
+    //     }
+    //     if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/admin-package.css?{{app.version}}\">";
+
+    //     if ($compiled !== "") {
+    //         $minifier = new \MatthiasMullie\Minify\CSS();
+    //         $minifier->add($compiled);
+    //         $compiled = $minifier->minify();
+
+    //         $cache = new CacheManager("css-precomp/admin-package.css");
+    //         $cache->set($compiled, false);
+    //     }
+    //     return $link_tags;
+    // }
 }

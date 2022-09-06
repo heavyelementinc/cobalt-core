@@ -1,0 +1,44 @@
+<style>
+    :root {
+        --accent: {{accent}};
+        --project-color-input-border-nofocus: {{border}};
+    }
+    pre li div {
+        display: inline-block;
+        height:20px;
+        width: 20px;
+    }
+</style>
+<pre>
+    <ul>
+        <li>
+            <div style="background:var(--accent)"></div> Accent Color
+        </li>
+        <li>
+            <div style="background:var(--project-color-input-border-nofocus)"></div> Border Color
+        </li>
+    </ul>
+</pre>
+
+<form-request>
+    <fieldset>
+        <label>Form label</label>
+        <input>
+        <button type="submit">Submit Button</button>
+    </fieldset>
+</form-request>
+
+<a href="." class="button">Button Test</a>
+
+<p>Lorem ipsum dolor sit <a href=".">amet consectetur adipisicing elit</a>. Vel exercitationem odit ea pariatur, distinctio deserunt. Sed fuga ducimus sit, error nisi exercitationem sint commodi, enim accusantium atque asperiores tenetur molestiae.</p>
+
+<flex-table scroll-x="800px">
+    <flex-row>
+        <flex-fixed>Some Header</flex-fixed>
+        <flex-header>Another One</flex-header>
+        <flex-header>Testing Headers</flex-header>
+        <flex-header>Fourth Header</flex-header>
+        <flex-header>Foo Bar</flex-header>
+        <flex-header>Bar Baz</flex-header>
+    </flex-row>
+</flex-table>

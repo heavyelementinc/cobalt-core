@@ -73,48 +73,51 @@ class FormRequestElement extends HTMLElement {
     }
 
     async send(allowDangerous = false) {
-        if (this.request.statusMessage) this.request.statusMessage.close();
-
-        let allow_final_stage = false;
-        let has_error = false;
-
-        if (this.request.hasFiles.length !== 0 && !this.request.progressBar || this.hasAttribute('watch') && !this.request.progressBar) {
-            const ref = document.createElement("progress-bar");
-            this.stages[1].appendChild(ref);
-            this.request.progressBar = ref;
-            this.request.progressBar.message = `Working`;
-        }
-
-        await this.advance();
-        this.request.reset_errors();
-        if (allowDangerous) this.request.headers['X-Confirm-Dangerous'] = "true";
-        else delete this.request.headers['X-Confirm-Dangerous'];
-
-        try {
-            await this.send_and_subscribe();
-            allow_final_stage = true;
-        } catch (error) {
-            await this.regress();
-            has_error = true;
-            return has_error;
-        }
-
-        this.mode = this.getAttribute("display-mode") ?? "edit";
-        if (this.mode === "edit" && allow_final_stage) {
-            await this.regress();
-            this.error.innerText = this.getAttribute("success-message") || "Success";
-            allow_final_stage = false;
-        }
-
-        if (!allow_final_stage) return has_error;
-        try {
-            await this.confirm_stage();
+        return new Promise(async (resolve,reject) => {
+            if (this.request.statusMessage) this.request.statusMessage.close();
+    
+            let allow_final_stage = false;
+            let has_error = false;
+    
+            if (this.request.hasFiles.length !== 0 && !this.request.progressBar || this.hasAttribute('watch') && !this.request.progressBar) {
+                const ref = document.createElement("progress-bar");
+                this.stages[1].appendChild(ref);
+                this.request.progressBar = ref;
+                this.request.progressBar.message = `Working`;
+            }
+    
             await this.advance();
-        } catch (error) {
-            this.stages[1].innerHTML("Your data was submitted.");
-        }
-
-        return has_error;
+            this.request.reset_errors();
+            if (allowDangerous) this.request.headers['X-Confirm-Dangerous'] = "true";
+            else delete this.request.headers['X-Confirm-Dangerous'];
+    
+            try {
+                const result = await this.send_and_subscribe();
+                resolve(result);
+                allow_final_stage = true;
+            } catch (error) {
+                await this.regress();
+                has_error = true;
+                reject(has_error);
+            }
+    
+            this.mode = this.getAttribute("display-mode") ?? "edit";
+            if (this.mode === "edit" && allow_final_stage) {
+                await this.regress();
+                this.error.innerText = this.getAttribute("success-message") || "Success";
+                allow_final_stage = false;
+            }
+    
+            if (!allow_final_stage) reject(has_error);
+            try {
+                await this.confirm_stage();
+                await this.advance();
+            } catch (error) {
+                this.stages[1].innerHTML("Your data was submitted.");
+            }
+    
+            reject(has_error);
+        })
     }
 
     async send_and_subscribe() {
@@ -153,7 +156,7 @@ class FormRequestElement extends HTMLElement {
     }
 
     async submit(allowDangerous = false) {
-        return this.send(allowDangerous);
+        return await this.send(allowDangerous);
     }
 
     setup_content_simple() {

@@ -27,14 +27,26 @@ abstract class Database {
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
     
-    function get_schema_name() {
-        return "\\" . $this::class . "Schema";
+    /**
+     * `get_schema_name` is called for every document found. It accepts an
+     * optional $doc parameter which can be used to determine an appropriate
+     * schema for each document.
+     * 
+     * @param array $doc 
+     * @return string
+     */
+    function get_schema_name($doc = []) {
+        return $this->__schema ?? "\\" . $this::class . "Schema";
     }
 
-    function __construct($database = null) {
+    function set_schema($schema) {
+        $this->__schema = $schema;
+    }
+
+    function __construct($database = null, $collection = null) {
         if ($database !== null) $this->db = $database;
-        $this->collection = db_cursor($this->get_collection_name(), $this->db);
-        $this->__schema = $this->get_schema_name();
+        if ($collection !== null) $this->collectionSpecifiedAtConstruction = $collection;
+        $this->collection = db_cursor($collection ?? $this->get_collection_name(), $this->db);
     }
 
     /* HELPERS */
@@ -75,22 +87,22 @@ abstract class Database {
         return $this->collection->count($filter, $options);
     }
 
-    final function distinct($field) {
-        return $this->collection->distinct($field);
+    final function distinct($field,$filter = []) {
+        return $this->collection->distinct($field,$filter);
     }
 
     final function findOneAsSchema($filter, array $options = [], $schema = null) {
-        if(!$schema) $schema = $this->__schema;
         $result = $this->findOne($filter,$options);
+        if(!$schema) $schema = $this->get_schema_name($result);
         if($result) return new $schema($result);
         return null;
     }
 
     final function findAllAsSchema($filter, array $options = [], $schema = null) {
-        if(!$schema) $schema = $this->__schema;
         $results = $this->find($filter, $options);
         $processed = [];
         foreach($results as $i => $result) {
+            $schema = $schema ?? $this->get_schema_name($result);
             $processed[$i] = new $schema($result);
         }
         return $processed;

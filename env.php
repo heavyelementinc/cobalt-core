@@ -24,9 +24,8 @@ session_start();
 // the not-insane array syntax and the spread "..." syntax)
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
-
 /* Cobalt Version Number */
-define("__COBALT_VERSION", "0.1");
+define("__COBALT_VERSION", "0.2");
 
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
@@ -67,6 +66,11 @@ spl_autoload_register("cobalt_autoload", true);
 
 $app_env = __APP_ROOT__ . "/private/app_env.php";
 if (file_exists($app_env)) require_once $app_env;
+
+
+/** We will now instantiate our database connection */
+// require_once __ENV_ROOT__ . "/globals/settings.php";
+
 
 /** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
 $GLOBALS['time_to_update'] = false;
@@ -109,3 +113,4 @@ if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on
 
 /** If we're NOT in a CLI environment, we should import the context processor */
 if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";
+

@@ -1,0 +1,39 @@
+fold-out {
+    display: block;
+    transition: height .8s;
+    height: var(--height);
+    overflow: hidden;
+}
+
+fold-out.fold-out--closed {
+    height: var(--closed-height);
+}
+
+fold-out > h1:first-of-type {
+    display: flex;
+    background: var(--project-color-table-bg-even);
+    border: var(--project-color-table-border);
+    margin-bottom: 2px;
+    cursor: pointer;
+    justify-content: space-between;
+    padding: .2em .4em;
+}
+
+fold-out > h1:first-of-type:hover {
+    background-color: var(--project-color-table-bg-odd);
+}
+
+fold-out > h1 i:before {
+    content: '\25B2';
+    font-size: .8em;
+    color: rgba(0,0,0,.6)
+}
+
+fold-out > h1 i {
+    transition: transform .8s;
+    line-height: 28px;
+}
+
+fold-out.fold-out--closed > h1 i {
+    transform: rotate(180deg);
+}

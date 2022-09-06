@@ -20,6 +20,10 @@ ul.tab-list--tab-row button {
   border: none;
 }
 
+button.tab-list--item {
+  color:black;
+}
+
 ul.tab-list--tab-row button.tab-list--active {
   background: white;
   position: relative;

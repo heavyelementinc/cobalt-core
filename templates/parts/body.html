@@ -21,6 +21,9 @@
     {{!html_head_binding}}
     @router_table@
     <link rel="apple-touch-icon" href="/icon.png?{{app.version}}">
+    <script>
+        window.__ = JSON.parse('@get_exportables_as_json()');
+    </script>
 </head>
 
 <body id="{{body_id}}" class="{{body_class}}">
@@ -40,6 +43,7 @@
         @user_menu@
         {{!header_binding_after}}
     </header>
+    @post_header@
     @auth_panel@
     <main id="{{main_id}}">
         {{!main_content_binding_before}}
@@ -56,5 +60,4 @@
     @cookie_consent@
     @script_content@
 </body>
-
 </html>

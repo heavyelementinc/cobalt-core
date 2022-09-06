@@ -25,6 +25,7 @@ class AutoComplete extends HTMLElement {
             notAvailableError: false
         };
 
+        this.withClearButton = true;
         this.errorState = true;
         this.selectOnEnter = "input-array--will-select-on-enter";
         this.placeholder = "Start typing...";
@@ -90,6 +91,7 @@ class AutoComplete extends HTMLElement {
 
     connectedCallback() {
         this.getOptions();
+        this.initClearButton();
         this.searchElements();
         this.initSearchField();
         this.value = this.getAttribute("value");
@@ -115,7 +117,7 @@ class AutoComplete extends HTMLElement {
 
     /*** Handle attribute changes ***/
     static get observedAttributes() {
-        return ['value', 'allow-custom', 'url', 'min', 'readonly', 'placeholder'];
+        return ['value', 'allow-custom', 'url', 'min', 'readonly', 'placeholder', 'clear-button'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -127,6 +129,10 @@ class AutoComplete extends HTMLElement {
 
     change_handler_allow_custom(newValue) {
         this.allowCustomInputs = string_to_bool(newValue);
+    }
+
+    change_handler_clear_button(newValue) {
+        this.withClearButton = newValue;
     }
 
     change_handler_placeholder(newValue) {
@@ -176,6 +182,7 @@ class AutoComplete extends HTMLElement {
             // e.stopPropagation();
             // e.preventDefault();
         });
+        // if(this.searchResults.)
         this.appendChild(this.searchField);
     }
 
@@ -190,14 +197,14 @@ class AutoComplete extends HTMLElement {
             }
         }
         this.searchField.addEventListener("change", e => {
-            this.dispatchEvent(new Event("change",e));
+            this.dispatchEvent(new Event("change", e));
             e.preventDefault();
             e.stopPropagation();
         })
 
         this.searchField.addEventListener("input", e => {
-            this.dispatchEvent(new Event("input",e));
-            if(this.searchField.value == "") this.searchElements();
+            this.dispatchEvent(new Event("input", e));
+            if (this.searchField.value == "") this.searchElements();
         });
 
         this.searchField.addEventListener("keyup", e => this.handleSearchKeyUp(e));
@@ -238,6 +245,28 @@ class AutoComplete extends HTMLElement {
 
             // if(!this.updated && !this.valueInOptions(this.searchField.value)) this.setValidity("incompleteEntry", true);
         });
+    }
+
+    initClearButton() {
+        if (!this.withClearButton) return;
+        const btn = document.createElement("button");
+        btn.innerHTML = window.closeGlyph;
+        btn.addEventListener("click", () => {
+            this.value = "";
+        });
+        this.clearButton = btn;
+        this.addEventListener('input', () => {
+            if (!this.value) this.clearButtonHide();
+            else this.clearButtonShow();
+        });
+    }
+
+    clearButtonShow() {
+        this.clearButton.style.display = "inline-block";
+    }
+
+    clearButtonHide() {
+        this.clearButton.style.display = "none";
     }
 
     handleSearchKeyUp(e) {
@@ -361,6 +390,7 @@ class AutoComplete extends HTMLElement {
         this.value = val;
         // this.searchField.value = label;
         this.focusOutHandler(target);
+        this.dispatchEvent(new Event("input"));
         this.dispatchEvent(new Event("change"));
     }
 

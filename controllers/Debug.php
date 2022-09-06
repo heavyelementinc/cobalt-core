@@ -263,6 +263,18 @@ class Debug extends \Controllers\Pages {
         return $html;
     }
 
+    function style_test($c = null) {
+        $color = new \Cobalt\Style\Color($c ?? "#EF0D1A");
+        $color->set_mode("light");
+        add_vars([
+            'title' => 'Style Test',
+            'accent' => $color->get_color_hex(),
+            'border' => $color->derive_border_color(),
+        ]);
+
+        set_template("/debug/style-test.html");
+    }
+
     function dump() {
         var_dump($GLOBALS);
         add_vars([
@@ -290,5 +302,9 @@ class Debug extends \Controllers\Pages {
 
     function async_button() {
         set_template("debug/async-button.html");
+    }
+
+    function drag_drop() {
+        set_template("debug/sortable.html");
     }
 }

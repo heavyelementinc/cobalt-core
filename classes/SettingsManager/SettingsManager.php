@@ -463,7 +463,7 @@ class SettingsManager {
 
     function set_packages($value, $directives, $setting_name) {
         // Hard code Router.js, main.js, and app.js
-        return array_merge($this->get($setting_name), ['Router.js', 'main.js', 'app.js']);
+        return array_merge($this->get($setting_name), ['main.js', 'app.js', 'Router.js']);
     }
 
     /** Gets the entire list of settings for the app. */

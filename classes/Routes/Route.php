@@ -6,7 +6,10 @@ class Route {
 
     public static $preg_quote = "[^/?]+";
 
-    /** Register a GET route for the site
+    /** Register a GET route for the site. Valid tokens are {some_name}, ..., and ?
+     * optional parameters.
+     * 
+     * $path = "/some/path/{token}/..." which would match "/some/path/variable/other/path"
      * 
      * $additional options include: 
      *  
@@ -14,7 +17,7 @@ class Route {
      *  * permission - The name of a permission required to access route
      *  * groups - The name of a group required to access route
      *  * anchor - name, [href, icon, order, attributes] Anchor values when displayed in get_route_group list (web only)
-     *  * navigation - Either an indexed array of group names or an associative array with unique anchor values (web only)
+     *  * navigation - Either an indexed array of group names or an associative array with unique anchor values (header navigation group = "main_navigation") (web only)
      *  * csrf_required => bool determines if CSRV tokens are required for the request (API only)
      * 
      * @param string $path A REQUEST_URI to be matched against using Cobalt's route syntax
@@ -79,6 +82,12 @@ class Route {
             $additional['anchor']['href'] = $path;
         }
 
+        $cache_control = [
+            'disallow' => false,
+            'max-age' => '604800',
+            'type' => 'private',
+        ];
+
         /** Store our route data in the full route table. */
         $GLOBALS[$router_table_address][$type][$regex] = [
             // Original pathname
@@ -111,6 +120,8 @@ class Route {
             'route_file' => $file,
             // API authentication stuff
             'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
+            // Cache Control stuff is only honored by API page requests
+            'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control)
         ];
     }
 

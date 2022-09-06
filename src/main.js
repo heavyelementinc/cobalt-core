@@ -38,7 +38,6 @@ class MobileNavMenu{
         this.checkbox.addEventListener("input", e => this.updateState());
 
         if(app("Mobile_nav_menu_closes_on_anchor_link_click")) {
-            console.log("Anchor links in the header will close the mobile nav menu")
             this.anchorLinkListeners();
         }
     }
@@ -60,13 +59,11 @@ class MobileNavMenu{
     }
 
     updateState() {
-        console.log(this.checkbox.checked);
         if (!this.checkbox.checked) this.releaseBodyContent();
         else this.freezeBodyContent();
     }
 
     accessibility(state = true) {
-        console.log(state);
         if (this.checkbox.style.display !== "none") {
             this.menuButton.checked = state;
             this.menuButton.dispatchEvent(new Event("change"));
@@ -78,7 +75,6 @@ class MobileNavMenu{
         const headerLinks = this.header.querySelectorAll('a');
 
         for(const i of headerLinks) {
-            console.log(i.href, i.href.indexOf("#"));
 
             if(i.href.indexOf("#") === -1) continue;
 

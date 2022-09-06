@@ -47,6 +47,8 @@ class Modal {
         animations = true, // Allow or deny spawn in/out animations
         immediate = false, // You can wait to spawn the modal by setting this to false
         lockViewport = true,
+        event = null,
+        zIndex = null,
         pageTitle = null,
     }) {
         this.id = id;
@@ -63,6 +65,8 @@ class Modal {
         this.buttonResult = {};
         this.shouldLockViewport = lockViewport
         this.lockedViewportClass = "scroll-locked";
+        this.zIndex = zIndex;
+        this.event = event;
 
         // Our default button configuration will be merged with whatever the
         // user provided
@@ -106,9 +110,14 @@ class Modal {
         this.container.classList = this.parentClass;
         this.container.style.opacity = this.container_opacity_start; // Animation stuff
 
+        if (this.zIndex) this.container.style.zIndex = this.zIndex;
+
         // Append our modal container and its children to the DOM
         document.querySelector("body").appendChild(this.container);
-
+        if (!this.zIndex && event) {
+            const spawnIndex = spawn_priority(event);
+            if (spawnIndex) this.container.style.zIndex = spawnIndex + 1;
+        }
         this.close_button(); // Add our close button
 
         // Set a window 
@@ -147,6 +156,8 @@ class Modal {
 
         // Generate our buttons
         this.buttons();
+
+        this.handleLightboxGallery()
 
         if (this.url) window.router.navigation_event(null, this.url);
 
@@ -306,8 +317,12 @@ class Modal {
         this.container.addEventListener('click', async e => {
             let callbackResult = true;
             if (e.target === this.container && typeof this.clickoutCallback === "function") {
-                callbackResult = await this.clickoutCallback(e)
-                if (callbackResult) this.close();
+                try {
+                    callbackResult = await this.clickoutCallback(e)
+                    if (callbackResult) this.close();
+                } catch (error) {
+                    
+                }
             }
         })
     }
@@ -322,6 +337,48 @@ class Modal {
         this.container_opacity_end = 1;
         this.window_transform_start = ""; // No transformation
         this.window_transform_end = "";
+    }
+
+    /**
+     * @todo fix the jank
+     * @returns 
+     */
+    handleLightboxGallery() {
+        if(this.parentClass !== "lightbox") return;
+        // if("originalTarget" in this.event === false) return;
+
+        let currentLightboxUrl = this.container.querySelector("img");
+        const fullRes = `[full-resolution="${currentLightboxUrl.getAttribute("src")}"]`,
+            src = `[src="${currentLightboxUrl.getAttribute("src")}"]`
+        
+        const node = document.querySelector(fullRes) ?? document.querySelector(src);
+        let nextSibling = node.nextSibling ?? node.parentNode.childNodes[0] ?? null;
+        let prevSibling = node.previousSibling ?? node.parentNode.childNodes[node.parentNode.childNodes.length - 1] ?? null
+
+        if(nextSibling === node) return;
+        if(prevSibling === node) return;
+
+        const next = document.createElement("button"),
+            prev = document.createElement("button");
+        next.tabIndex = 0;
+        prev.tabIndex = 0;
+
+        next.addEventListener('click', e => {
+            this.container.parentNode.removeChild(this.container);
+            // @todo launch new lightbox where we have control over animations
+            lightbox(nextSibling,false);
+            // nextSibling.dispatchEvent(new Event("click"));
+        });
+
+        prev.addEventListener('click', e => {
+            this.container.parentNode.removeChild(this.container);
+            lightbox(prevSibling,false);
+
+            // prevSibling.dispatchEvent(new Event("click"));
+        });
+
+        this.container.prepend(prev);
+        this.container.append(next);
     }
 
 

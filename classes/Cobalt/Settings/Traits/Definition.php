@@ -3,6 +3,11 @@
 namespace Cobalt\Settings;
 
 abstract class DefaultDefinition {
+    
+    function __construct($value,$settings) {
+        $this->value = $value;
+        $this->settings = $settings;
+    }
 
     /**
      * The default value of this setting
@@ -16,5 +21,6 @@ abstract class DefaultDefinition {
      */
     public $depends_on = [];
 
-    abstract function get_value($value, $defaults);
+    abstract function determine_value();
+
 }

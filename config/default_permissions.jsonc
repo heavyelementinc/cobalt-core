@@ -54,5 +54,19 @@
         "dangerous": true,
         "default": false,
         "ring": 1
+    },
+    "Blog_manage_posts": {
+        "group": "Blog",
+        "label": "Allows the user to manage blog posts (but not publish them).",
+        "dangerous": false,
+        "default": false,
+        "ring": 3
+    },
+    "Blog_publish_posts": {
+        "group": "Blog",
+        "label": "Allows the user to publish posts (but not edit them).",
+        "dangerous": true,
+        "default": false,
+        "ring": 3
     }
 }

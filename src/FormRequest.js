@@ -15,13 +15,13 @@ class FormRequest {
         this.action = this.form.getAttribute("action");
         this.method = this.form.getAttribute("method");
         this.format = this.form.getAttribute("format") || "application/json; charset=utf-8";
-        this.token  = this.form.getAttribute("token") || "";
+        this.token = this.form.getAttribute("token") || "";
         this.update = this.form.getAttribute("update-on-success") || "true";
         this.revert = this.form.getAttribute("revert-on-failure") || "true";
         this.headers = {
             'X-Mitigation': this.token
         };
-        this.autosave = (["true", "autosave"].includes(this.form.getAttribute("autosave"))) ? true : false;
+        this.autosave = (["true", "autosave", "form"].includes(this.form.getAttribute("autosave"))) ? true : false;
         this.include = this.form.getAttribute("include") ?? null;
         this.form_elements();
         this.errorField = errorField;
@@ -101,8 +101,8 @@ class FormRequest {
             result = await post.send(data, {});
             this.lastResult = result;
         } catch (error) {
-            this.errorHandler(error, result, post);
-            throw new Error(error);
+            this.errorHandler(post, result, post);
+            // throw new Error(error);
         }
 
         if (this.update) this.update_fields(result);
@@ -117,7 +117,8 @@ class FormRequest {
 
     /** Autosave handler */
     autosave_handler(element, event) {
-        let data = this.build_query([element]);
+        let data = this.build_query([element]);;
+        if (this.form.getAttribute("autosave") == "form") data = this.build_query();
         this.send(data);
     }
 
@@ -134,15 +135,15 @@ class FormRequest {
     }
 
     errorHandler(error, result = null, post = null) {
-        if (error.result.code === 422) this.handleFieldIssues(error.result);
+        if (post.result.code === 422) this.handleFieldIssues(post.result);
         // let field = this.errorField;
         // if (!field) field = this.form.querySelector(".error")
         // if (field) field.innerText = error.result.error
         if (!this.statusMessage) {
-            this.statusMessage = new StatusError({
-                id: this.form.getAttribute("action"),
-                message: error.result.error,
-            })
+            // this.statusMessage = new StatusError({
+            //     id: this.form.getAttribute("action"),
+            //     message: error.result.error,
+            // })
         } else {
             this.statusMessage.update(error.result.error);
         }
@@ -162,7 +163,7 @@ class FormRequest {
                 this.el_list[i].value = data[i];
             } else if (i[0] === "#" || i[0] === "." || i[0] === "[" && i[i.length - 1] === "]") { // Check if we want to query for an element in the form
                 var elements = this.form.querySelectorAll(i);
-                for(let l of elements) {
+                for (let l of elements) {
                     l.outerHTML = data[i]; // Replace element
                 }
             }
@@ -187,24 +188,24 @@ class FormRequest {
             "method",
             "autosave",
         ];
-        for(let i of supported) {
-            if(i in fields) {
+        for (let i of supported) {
+            if (fields && i in fields) {
                 this["supported_next_" + i](fields[i]);
             }
         }
-        console.log(fields,this)
+        console.log(fields, this)
     }
 
     supported_next_method(val) {
         this.method = val.toUpperCase();
-        this.form.setAttribute('method',val);
+        this.form.setAttribute('method', val);
     }
 
     supported_next_action(val) {
         this.action = val;
-        this.form.setAttribute('action',val);
+        this.form.setAttribute('action', val);
     }
-    
+
     supported_next_autosave(val) {
         console.warn("Server-dictated auto-save is not implemented yet!");
         // this.autosave = val;
