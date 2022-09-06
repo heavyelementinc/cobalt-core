@@ -285,6 +285,7 @@
             "Events.js",
             "PaginatedContainer.js",
             "AudioPlayer.js",
+            "protected/Posts.js",
             "protected/UserPanel.js",
             "protected/UserManager.js"
         ],

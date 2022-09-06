@@ -62,7 +62,7 @@ abstract class API extends \Drivers\Database implements APICall {
         $iface = $this->getInterface();
         
         $tmp = new $iface($this->findOne($query));
-        $result= $this->refreshTokenCallback();
+        $result= $this->refreshTokenCallback($tmp);
         
         $token = new $iface($result);
 
@@ -177,6 +177,15 @@ abstract class API extends \Drivers\Database implements APICall {
         if (!$id) $id = session("_id");
 
         return ["for" => $id, "token_name" => $this::class];
+    }
+
+    public function updateToken(array $token_data) {
+        $query = $this->getDefaultTokenQuery();
+        $result = $this->updateOne($query,
+            ['$set' => $token_data],
+            ['upsert' => true]
+        );
+        return $result->getModifiedCount();
     }
 
     function get_collection_name() {

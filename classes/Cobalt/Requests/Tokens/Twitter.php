@@ -10,15 +10,15 @@ class Twitter extends TokenInterface {
     public function setRefresh(): string {
         return "";
     }
-
+    
     function getKey():string{
-        return "";
+        return $this->__token['key'] ?? "";
     }
     function getSecret():string{
-        return "";
+        return $this->__token['secret'] ?? "";
     }
     function getToken():string{
-        return "";
+        return $this->__token['token'] ?? "";
     }
     function getTokenType():string{
         return "Authorization";

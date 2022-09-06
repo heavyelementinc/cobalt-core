@@ -333,7 +333,64 @@ class Debug extends \Controllers\Pages {
     }
 
 
+    function assoc_test(){
+        $array = [
+            "alpha",
+            "beta",
+            "zeta",
+            "delta",
+            "alpha",
+            "beta",
+            "zeta",
+            "delta"
+        ];
+        
+        $assoc = [
+            "alpha" => "alpha",
+            "beta"  => "beta",
+            "zeta"  => "zeta",
+            "delta" => "delta",
+            "gamma" => "alpha",
+            "omicron"  => "beta",
+            "upsilon"  => "zeta",
+            "omega" => "delta"
+        ];
 
+        $mixed = [
+            "alpha" => "alpha",
+            "beta"  => "beta",
+            "zeta"  => "zeta",
+            "delta" => "delta",
+            "0" => "alpha",
+            "1"  => "beta",
+            "2"  => "zeta",
+            3 => "delta"
+        ];
+
+        $nonSequential = [
+            1 => "alpha",
+            2  => "beta",
+            3  => "zeta",
+            5 => "delta",
+            8 => "alpha",
+            9  => "beta",
+            10  => "zeta",
+            12 => "delta"
+        ];
+        
+        echo "Array <code>(should be false)</code>";
+        var_dump(is_associative_array($array));
+        
+        echo "Associative <code>(should be true)</code>";
+        var_dump(is_associative_array($assoc));
+        
+        echo "Mixed <code>(should be true)</code>";
+        var_dump(is_associative_array($mixed));
+        
+        echo "Non-sequential <code>(should be false)</code>";
+        var_dump(is_associative_array($nonSequential));
+        exit;
+    }
 
 
 

@@ -18,7 +18,7 @@ class YouTube extends TokenInterface {
     }
 
     public function getToken(): string {
-        return "";
+        return $this->__token['token'] ?? "";
     }
 
     public function getTokenType(): string {

@@ -1,7 +1,7 @@
 <h1>Edit Post <span id="title"></span></h1>
 <div class="vbox" id="container">
     <form-request method="PUT" action="{{update_action}}" id="post-manager">
-        <fieldset>
+        <fieldset id="primary-content">
             <legend>Primary Content</legend>
             <label>Title</label>
             <div class="hbox"><input name='title' value="{{post.title}}" for="title"></div>
@@ -73,7 +73,12 @@
         border: var(--project-calendar-borders);
         background: var(--project-calendar-cell-bg);
     }
-    
+
+    #primary-content {
+        display:flex;
+        flex-direction: column;
+    }
+
     #container {
         gap: 10px;
     }
@@ -111,6 +116,7 @@
         padding: 2ch 2ch;
         box-sizing: border-box;
         resize: vertical;
+        flex-grow:1;
     }
 
     #post-meta {

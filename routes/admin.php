@@ -73,5 +73,7 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
         'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
         'navigation' => ['admin_panel'],
     ]);
-    Route::get("/posts/{id}?", "Posts@edit");
+    Route::get("/posts/{id}?", "Posts@edit",[
+        'handler' => "core/posts.js",
+    ]);
 }

@@ -3,6 +3,9 @@
 use Exceptions\HTTP\NotFound;
 
 class APIManagement {
+
+    var $__namespace = "\\Cobalt\\Requests\\Remote";
+
     function index(){
         $apis = $this->load_files();
         $index = "";
@@ -53,7 +56,7 @@ class APIManagement {
     function get_supported_apis($dir, array &$array, array $exclude = []) {
         if(!is_dir($dir)) return false;
         $exclude = [".","..", "API.php", "APICall.php", ...$exclude];
-        $namespace = "\\Cobalt\\Requests\\Remote";
+        $namespace = $this->__namespace;
         $listing = scandir($dir);
         foreach($listing as $li) {
             if(in_array($li,$exclude)) continue;
@@ -66,5 +69,25 @@ class APIManagement {
             );
         }
         return true;
+    }
+
+    function update($type) {
+        $supported_apis = $this->load_files();
+        if(!key_exists($type,$supported_apis)) throw new NotFound("That is not a supported API");
+        $name = $supported_apis[$type]["namespace"] . "\\" . $type;
+        $manager = new $name();
+
+        $mutant = [
+            'key'    => $_POST['key'],
+            'secret' => $_POST['secret'],
+            'token'    => $_POST['token'],
+            'type'   => $_POST['authorization'],
+            'prefix' => $_POST['prefix'],
+            'expiration' => $_POST['expiration'],
+        ];
+
+        $result = $manager->updateToken($mutant);
+        
+        return $result;
     }
 }

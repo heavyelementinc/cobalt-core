@@ -129,8 +129,7 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => "YouTube"]
     ]);
 
-
-
+    Route::get("/debug/assoc", "Debug@assoc_test");
 
     if(is_root()) {
         Route::get("/debug/php", "Debug@phpinfo");

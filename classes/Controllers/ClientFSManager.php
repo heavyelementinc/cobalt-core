@@ -190,8 +190,10 @@ trait ClientFSManager {
 
     private function clientUploadImagesAndThumbnails($key,$thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null) {
         $ids = [];
+        $assoc = is_associative_array($files);
         if(!$files) $files = $_FILES;
         foreach($files[$key]['tmp_name'] as $index => $file) {
+            
             array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data));
         }
         return $ids;

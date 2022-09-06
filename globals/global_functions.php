@@ -628,6 +628,16 @@ function associative_to_path(array $arr) {
 }
 
 /**
+ * Will determine if an array has string keys
+ * @param mixed $array 
+ * @return bool 
+ */
+function is_associative_array(mixed $array) {
+    if (array() === $array) return false;
+    return array_keys($array) !== range(0, count($array) - 1);
+}
+
+/**
  * A shorthand way of rendering a template and getting the results. This is
  * included so you can include a template inside another template. This has the
  * potential to cause some recursive crap... so use caution!
@@ -662,7 +672,7 @@ function maybe_with($template, $vars = []) {
  * @param  mixed  $vars     Variables to include
  * @return string Processed template
  */
-function view(string $template, array $vars):string {
+function view(string $template, array $vars = []):string {
     $render = new \Render\Render();
     if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
     $render->set_vars($vars);
@@ -677,7 +687,7 @@ function view(string $template, array $vars):string {
  * @param mixed   $vars     Variables to include
  * @return string The processed template OR an empty string on error
  */
-function maybe_view(string $template, array $vars):string {
+function maybe_view(string $template, array $vars = []):string {
     if (!$template) return "";
     if (!is_string($template)) return "";
     try {

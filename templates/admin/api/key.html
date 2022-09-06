@@ -23,7 +23,7 @@
         <label>Prefix: {{token.prefix}}</label>
         <input type="string" name="prefix" value="{{token.prefix}}">
     </fieldset>
-    <fieldset>    
+    <fieldset>
         <label>Expiration</label>
         <input type="date" name="expiration" value="{{token.expiration}}">
     </fieldset>
@@ -32,7 +32,7 @@
 
 OR
 
-<form-request method="POST" action="/api/v1/api/key/raw/{{id}}">
+<form-request method="POST" action="/api/v1/api/key/{{id}}">
     <fieldset>
         <label>Raw Data from Issuer</label>
         <textarea name="raw"></textarea>

@@ -38,7 +38,7 @@ abstract class PostController extends Controller {
         $result = $this->postMan->findAllAsSchema(...$this->getParams($this->postMan, []));
         $posts = "";
         foreach($result as $post) {
-            $posts .= with($post->getTemplate("table"),[
+            $posts .= view($post->getTemplate("table"),[
                 'post' => $post,
                 'editor_route' => $this->path('edit',[(string)$post['_id']],"get","admin"),
             ]);
@@ -121,16 +121,17 @@ abstract class PostController extends Controller {
         $posts = "";
 
         foreach($docs as $doc) {
-            $posts .= with($doc->getTemplate('blurb'), [
+            $posts .= view($doc->getTemplate('blurb'), [
                 'post' => $doc,
                 'href' => $this->path('post',[(string)$doc['url_slug']])
             ]);
         }
         // if($docs === null) $doc = new ;
-
+        if(!$posts) $posts = view('/posts/parts/no-posts.html',[]);
         add_vars([
             'title' => $this->postMan->get_public_name(),
             'posts' => $posts,
+            'controls' => $this->getPaginationControls(true),
         ]);
 
         set_template((new PostManager())->getTemplate('public'));
@@ -151,7 +152,7 @@ abstract class PostController extends Controller {
             $edit = "<a href='$route' is>Edit this post</a>";
         }
 
-        $unpubilshed = "";
+        $unpublished = "";
         if(!$post['published']) $unpublished = "<div class='cobalt-post--unpublished-preview'>This post is unpublished. $edit when you're ready.</div>";
 
         add_vars([
