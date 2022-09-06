@@ -1,6 +1,8 @@
 <?php
 
+use CobaltEvents\EventManager;
 use CobaltEvents\EventSchema;
+use Exceptions\HTTP\NotFound;
 
 class EventsController {
     function __construct() {
@@ -85,5 +87,13 @@ class EventsController {
         // if($result->getModifiedCount() !== 1 && $result->getUpsertedCount() !== 1)
         if (!$ident) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
         return $this->events->findOneAsSchema(['_id' => $id]);
+    }
+
+    function delete_event($id) {
+        $event = $this->events->getEventById($id);
+        if(!$event) throw new NotFound("That event does not exist");
+        if(!confirm("Are you sure you want to delete this event?",[])) return;
+        header("X-Redirect: /admin/cobalt-events/");
+        return $this->events->deleteEvent($id);
     }
 }

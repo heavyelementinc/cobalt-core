@@ -64,3 +64,15 @@
   opacity: 1;
   pointer-events: all;
 }
+
+form-request fieldset label > :is(input, select, textarea, input-*) {
+  display:block;
+}
+
+form-request label:has(input-switch) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  gap: 1ch;
+}

@@ -38,6 +38,9 @@ if (app("CobaltEvents_enabled")) {
     Route::put("/cobalt-events/update/{id}?", "EventsController@update_event", [
         'permission' => 'CobaltEvents_crud_events'
     ]);
+    Route::delete("/cobalt-events/{id}", "EventsController@delete_event", [
+        'permission' => 'CobaltEvents_crud_events'
+    ]);
 }
 
 if (app("Plugin_enable_plugin_support")) {

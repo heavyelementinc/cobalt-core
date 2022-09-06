@@ -39,6 +39,10 @@ class EventManager extends \Drivers\Database {
         return $this->findOne(['_id' => $this->__id($id)]);
     }
 
+    public function deleteEvent($id) {
+        return $this->deleteOne(['_id' => $this->__id($id)])->getDeletedCount();
+    }
+
     private function public_query() {
         return [
             'published' => true,
