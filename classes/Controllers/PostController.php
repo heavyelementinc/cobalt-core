@@ -4,7 +4,8 @@
  * In your controller constructor, call $this->initialize("<the Post's DB collection>", "the Post's schema");
  * Once you've done that, you only need to set up your routes to call `YourPostController@update`, etc.
  * 
- * HOWEVER, do note that in order to create a Post, you'll need to create a Post
+ * HOWEVER, do note that in order to create a Post, you'll need to either enable the default posts in your settings.json
+ * OR extend this controller with one of your own.
  */
 namespace Controllers;
 

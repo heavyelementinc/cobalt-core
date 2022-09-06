@@ -31,7 +31,10 @@ if (app('Auth_logins_enabled')) {
 }
 
 if (app("CobaltEvents_enabled")) {
-    Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", ['permission' => "CobaltEvents_crud_events"]);
+    Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
+        'handler' => 'core/events.js',
+        'permission' => "CobaltEvents_crud_events"
+    ]);
     Route::get("/cobalt-events/?...?", "EventsController@list_events", [
         'permission' => "CobaltEvents_crud_events",
         'anchor' => [

@@ -2,45 +2,55 @@
 <form-request method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
     <div id="event-edit">
         <fieldset class="admin-panel--container">
-            <h2>Basic Info</h2>
-            <label>Internal Name</label>
-            <input name="name" value="{{event.name}}" for="#internal_name">
-            <label>Event Type</label>
-            <select name="type" value="{{event.type}}">
-                {{!event.type.options}}
-            </select>
-            <label>"Display Again" Policy <help-span value="When to display the event again after closure."></help-span>
+            <legend>Basic Info</legend>
+
+            <label>Internal Name
+                <input name="name" value="{{event.name}}" for="#internal_name">
             </label>
-            <select name="session_policy" value="{{event.session_policy}}">
-                {{!event.session_policy.options}}
-            </select>
+            <label>Event Type
+                <select name="type" value="{{event.type}}">
+                    {{!event.type.options}}
+                </select>
+            </label>
+            <label>"Display Again" Policy <help-span value="When to display the event again after closure."></help-span>
+                <select name="session_policy" value="{{event.session_policy}}">
+                    {{!event.session_policy.options}}
+                </select>
+            </label>
             <label>Event Starts</label>
             <input type="date" name="start_date" value="{{event.start_date}}">
             <input type="time" name="start_time" value="{{event.start_time}}">
             <label>Event Ends</label>
             <input type="date" name="end_date" value="{{event.end_date}}">
             <input type="time" name="end_time" value="{{event.end_time}}">
-            <label>
+            <label class="hbox" style="justify-content:left;gap:1ch;">
                 <input-switch name="published" checked="{{event.published}}"></input-switch> Published
-                <help-span value="In order for an event to be displayed, this switch must be 'on'."></help-span></label>
+                <help-span value="In order for an event to be displayed, this switch must be 'on'."></help-span>
+            </label>
+            <async-button method="DELETE" action="/api/v1/cobalt-events/{{event._id}}">Delete</async-button>
         </fieldset>
+        
         <fieldset class="admin-panel--container">
-            <h2>Content</h2>
-            <label id="charlimit">Headline</label>
-            <input name="headline" value="{{event.headline}}">
+            <legend>Content</legend>
+            <label id="charlimit">Headline
+                <input name="headline" value="{{event.headline}}">
+            </label>
             <!-- oninput="charlimit(120,'#charlimit')" -->
-            <label>Body</label>
-            <textarea name="body">{{event.body.raw}}</textarea>
+            <label>Body
+                <textarea name="body">{{event.body.raw}}</textarea>
+            </label>
             <label>Call to Action Text <help-span
                     value="The user will be presented with a button. This is the text of that button."></help-span>
+                    <input name="call_to_action_prompt" value="{{event.call_to_action_prompt}}">
             </label>
-            <input name="call_to_action_prompt" value="{{event.call_to_action_prompt}}">
             <label>CTA Link <help-span
                     value="When the user clicks the Call to Action button, this is where they'll be taken. May be a relative link or another URL.">
-                </help-span></label>
-            <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
+                </help-span>
+                <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
+            </label>
             <label>Background Color <help-span value="Choose the background color of your event.">
-                </help-span></label>
+                </help-span>
+            </label>
             <div class="hbox">
                 <input type="color" name="bgColor" value="{{event.bgColor.display}}"
                     default="{{app.css-vars.events-banner-background}}">
@@ -70,16 +80,18 @@
 
         </fieldset>
         <fieldset id="fieldset" class="admin-panel--container">
-            <h2>Advanced</h2>
+            <legend>Advanced</legend>
             <label>Included paths <help-span
                     value="If the user has navigated to a path which matches one of the entries on this list, this event will be considered 'showable'. Leave blank to ignore.">
-                </help-span></label>
+                </help-span>
+            </label>
             <input-array name="advanced.included_paths" value="{{@event.advanced.included_paths}}" allow-custom="true">
                 {{!event.advanced.included_paths.options}}
             </input-array>
             <label>Excluded paths <help-span
                     value="If the URL path name matches an entry in this list, then the path will be considered excluded and the event will not be shown. Leave blank to ignore.">
-                </help-span></label>
+                </help-span>
+            </label>
             <input-array name="advanced.excluded_paths" value="{{@event.advanced.excluded_paths}}" allow-custom="true">
                 {{!event.advanced.excluded_paths.options}}
             </input-array>
@@ -94,8 +106,9 @@
             </label>
             <label>Container ID <help-span
                     value="The container of this event will be given this ID. (Useful if you want to bind CSS to this event)">
-                </help-span></label>
-            <input name="container_id" value="{{event.container_id}}">
+                </help-span>
+                <input name="container_id" value="{{event.container_id}}">
+            </label>
         </fieldset>
     </div>
     <input type="submit" value="Save">

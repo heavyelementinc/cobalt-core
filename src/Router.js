@@ -189,18 +189,29 @@ class Router {
             console.info("Firing exit callback");
             this.route_directives.exit_callback(...this.route_args, result);
         }
+
+        // history.replaceState({
+        //     title: result.title ?? "",
+        //     url: url,
+        //     scrollY: window.scrollY,
+        //     scrollX: window.scrollX
+        // });
+
         window.__ = result;
 
-        if("type" in event && event.type !== "popstate") {
+        if("type" in event === false || "type" in event && event.type !== "popstate") {
             history.pushState({
                 title: result.title ?? "",
-                url: url
+                url: url,
+                scrollY: window.scrollY,
+                scrollX: window.scrollX
             },'',url);
         }
         document.title = await result.title ?? "";
 
         this.mainContent.id = result.main_id ?? "main";
         this.mainContent.innerHTML = result.body;
+
         document.dispatchEvent(new CustomEvent("navigationEvent"));
 
         mobile_nav.close();
@@ -209,7 +220,12 @@ class Router {
     }
 
     getUrlData(url) {
-        const parsed = new URL(url);
+        let parsed;
+        try {
+            parsed = new URL(url);
+        } catch (e) {
+            parsed = new URL(`${location.origin.toString()}${url}`)
+        }
         let isLocal = true;
         if(parsed.host !== location.host) isLocal = false;
 
