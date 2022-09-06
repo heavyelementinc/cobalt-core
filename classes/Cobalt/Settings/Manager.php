@@ -4,16 +4,11 @@ namespace Cobalt\Settings;
 
 use Exception;
 
-class Manager extends \Cobalt\Singleton {
+class Manager {
     
     function __construct($values) {
-        parent::__construct($this, true);
         if(gettype($values) !== "array") throw new Exception("Values are not an array");
         $this->__values = $values;
-    }
-
-    public function singletonName(): string {
-        return "settingsManager";
     }
 
     private $__values = [];
@@ -24,5 +19,9 @@ class Manager extends \Cobalt\Singleton {
         $instantiable = "\\Cobalt\\Settings\\Definitions\\$name";
 
         return new $instantiable($this->__values[$name], $this->__values);
+    }
+
+    function __set($name, $value) {
+        
     }
 }

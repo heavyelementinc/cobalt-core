@@ -1,5 +1,14 @@
 <flex-row>
     <flex-cell>
-        <a href='{{editor_route}}'>{{!post.title}}</a>
+        <a href='{{editor_route}}'>{{!post.title.md}}</a>
+    </flex-cell>
+    <flex-cell>
+        {{post.author.display}}
+    </flex-cell>
+    <flex-cell>
+        {{post.published.display}}
+    </flex-cell>
+    <flex-cell>
+        {{post.publicationDate.display}}
     </flex-cell>
 </flex-row>

@@ -13,6 +13,10 @@ class EventManager extends \Drivers\Database {
         return app("CobaltEvents_database_collection");
     }
 
+    public function get_schema_name($doc = []) {
+        return "\CobaltEvents\EventSchema";
+    }
+
     public function getEventListing() {
         $result = $this->find(
             [],
@@ -24,7 +28,7 @@ class EventManager extends \Drivers\Database {
     public function getCurrent() {
         $pq = $this->public_query();
         $result = $this->find(
-            // $pq,
+            $pq,
             [],
             ['sort' => $this->sort]
         );
@@ -35,11 +39,15 @@ class EventManager extends \Drivers\Database {
         return $this->findOne(['_id' => $this->__id($id)]);
     }
 
+    public function deleteEvent($id) {
+        return $this->deleteOne(['_id' => $this->__id($id)])->getDeletedCount();
+    }
+
     private function public_query() {
         return [
-            // 'published' => true,
-            'start_time' => ['$gte' => $this->__date()],
-            'end_time' => ['$lte' => $this->__date()]
+            'published' => true,
+            'start_time' => ['$lte' => $this->__date()],
+            'end_time' => ['$gte' => $this->__date()]
             // '$or' => [
             //     ['end_time' => null],
             // ]

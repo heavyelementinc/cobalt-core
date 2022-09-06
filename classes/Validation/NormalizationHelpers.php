@@ -2,6 +2,10 @@
 
 namespace Validation;
 
+use Auth\UserCRUD;
+use DOMDocument;
+use Exception;
+use Parsedown;
 use Validation\Exceptions\ValidationIssue;
 use Validation\Exceptions\ValidationFailed;
 
@@ -169,7 +173,23 @@ abstract class NormalizationHelpers {
         return $date->timestamp;
     }
 
-    final protected function get_date($value, $format = "Y-m-d") {
+    final protected function get_date($value, $format = "input") {
+        if(!$value) return "";
+        $shorthands = [
+            'input' => "Y-m-d",
+            'default' => 'm/d/Y',
+            "verbose" => "l, F jS Y g:i A",
+            "long" => "l, F jS Y",
+            "12-hour" => "g:i a",
+            "24-hour" => "H:i",
+            "seconds" => "g:i:s A"
+        ];
+        if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
+        if($value instanceof \MongoDB\BSON\UTCDateTime) {
+            $dateTime = $value->toDateTime();
+            $value = $dateTime->format("U");
+            return date($format, $value);
+        }
         return date($format, $value / 1000);
     }
 
@@ -345,5 +365,53 @@ abstract class NormalizationHelpers {
         unset($valid["0"]);
         $valid["0"] = "it/its";
         return $valid;
+    }
+
+    function valid_users($groupOrPermission = null, $type = null, $storage = null, $valueCallback = null) {
+        // if(!$groupOrPermission) $groupOrPermission = 'all';
+        if(!$type) $type = "all";
+        if(!$storage) $storage = "_id";
+        $value = function ($doc) {
+            $name = "$doc->fname $doc->lname";
+            if($name = " ") $name = $doc->uname;
+            return $name;
+        };
+        
+        if(is_callable($valueCallback)) $value = $valueCallback;
+        $options = [
+            'permission' => [
+                'method' => 'getUsersByPermission',
+                'query' => [$groupOrPermission]
+            ],
+            'group'      => [
+                'method' => 'getUsersByGroup',
+                'query' => [$groupOrPermission]
+            ],
+            'all'        => [
+                'method' => 'find',
+                'query' => []
+            ],
+        ];
+        if(!key_exists($type, $options)) throw new Exception("$type is an invalid way to look up users");
+
+        $crud = new UserCRUD();
+        
+        $valid = [];
+        foreach($crud->{$options[$type]['method']}(...$options[$type]['query']) as $doc) {
+            $valid[(string)$doc->_id] = $value($doc);
+        }
+
+        return $valid;
+    }
+
+    function markdown_word_limit(string $markdown, int $word_limit = 350): string {
+        $mutant = $markdown;
+
+        if(str_word_count($mutant, 0) > $word_limit) {
+            $words = str_word_count($mutant, 2);
+            $pos   = array_keys($words);
+            $mutant = substr($mutant, 0, $pos[$word_limit]);
+        }
+        return trim($mutant);
     }
 }

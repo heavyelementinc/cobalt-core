@@ -43,7 +43,7 @@
   transform: translateX(100%);
 }
 
-form-request > .form-request--working-spinner {
+:is(form-request) > .form-request--working-spinner {
   position: absolute;
   height: 100%;
   width: 100%;
@@ -60,7 +60,19 @@ form-request > .form-request--working-spinner {
   opacity: 0;
 }
 
-form-request > .form-request--working-spinner.form-request--displayed {
+:is(form-request) > .form-request--working-spinner.form-request--displayed {
   opacity: 1;
   pointer-events: all;
+}
+
+form-request fieldset label > :is(input, select, textarea, input-*) {
+  display:block;
+}
+
+form-request label:has(input-switch) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  gap: 1ch;
 }

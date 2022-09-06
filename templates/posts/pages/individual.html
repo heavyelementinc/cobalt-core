@@ -1,0 +1,15 @@
+{{!unpublished}}
+<article class="cobalt-post cobalt-post--blurb">
+    <div class="cobalt-post--splash" {{!post.default_image.display}}></div>
+    <div class="cobalt-post--header">
+        <h1 class="cobalt-post--title">{{!post.title.md}}</h1>
+        <ul>
+            <li><strong>{{!post.author.display}}</strong></li>
+            <li>{{!post.publicationDate.display}}</li>
+            <li>{{!edit}}</li>
+        </ul>
+    </div>
+    <content>
+        {{!post.body.md}}
+    </content>
+</article>

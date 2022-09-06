@@ -7,7 +7,8 @@ class CoreAdmin {
         add_vars([
             'title' => "Admin Panel",
             'user_accounts' => (new \Auth\UserCRUD())->count([]),
-            'plugin_count' => count($GLOBALS['ACTIVE_PLUGINS'])
+            'plugin_count' => count($GLOBALS['ACTIVE_PLUGINS']),
+            'cron_job' => (new \Cron\Run())->renderTaskStats(),
         ]);
         set_template("/authentication/admin-dashboard/index.html");
     }

@@ -135,7 +135,7 @@ class FormRequest {
     }
 
     errorHandler(error, result = null, post = null) {
-        if (post.result.code === 422) this.handleFieldIssues(post.result);
+        if (post && post.result.code === 422) this.handleFieldIssues(post.result);
         // let field = this.errorField;
         // if (!field) field = this.form.querySelector(".error")
         // if (field) field.innerText = error.result.error
@@ -162,9 +162,26 @@ class FormRequest {
             if (i in this.el_list) {
                 this.el_list[i].value = data[i];
             } else if (i[0] === "#" || i[0] === "." || i[0] === "[" && i[i.length - 1] === "]") { // Check if we want to query for an element in the form
-                var elements = this.form.querySelectorAll(i);
+                let elements = document.querySelectorAll(i);
+                if(!elements) return console.warn("Query yielded no results.");
+
                 for (let l of elements) {
-                    l.outerHTML = data[i]; // Replace element
+                    switch(l.tagName) {
+                        case "IMG":
+                            l.src = data[i];
+                            break;
+                        case l.className.includes("update-bg"):
+                        case l.className.includes("bg-splash"):
+                        case l.hasAttribute("bg-splash"):
+                            l.style.backgroundImage = data[i];
+                            break;
+                        case "value" in l:
+                            l.value = data[i];
+                            break;
+                        default:
+                            l.outerHTML = data[i]; // Replace element
+                            break;
+                    }
                 }
             }
         }

@@ -1,6 +1,8 @@
 <?php
 
+use CobaltEvents\EventManager;
 use CobaltEvents\EventSchema;
+use Exceptions\HTTP\NotFound;
 
 class EventsController {
     function __construct() {
@@ -24,15 +26,16 @@ class EventsController {
                 'display' => fn ($doc) => "<a href='edit/$doc->_id'>$doc->name</a>"
             ],
             'type' => [
-                'header' => 'Type'
+                'header' => 'Type',
+                'display' => fn ($doc) => $doc->{"type.display"}
             ],
             'start_time' => [
                 'header' => 'Starts',
-                'display' => fn ($doc) => "<date-span format='long' value='" . $doc->{'start_time.raw'} . "'></date-span>"
+                'display' => fn ($doc) => $doc->{"start_time.display"}
             ],
             'end_time' => [
                 'header' => 'Ends',
-                'display' => fn ($doc) => "<date-span format='long' value='" . $doc->{"end_time.raw"} . "'></date-span>"
+                'display' => fn ($doc) => $doc->{"end_time.display"}
             ]
         ];
         $result = [];
@@ -83,6 +86,14 @@ class EventsController {
         );
         // if($result->getModifiedCount() !== 1 && $result->getUpsertedCount() !== 1)
         if (!$ident) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
-        return array_merge($valid, ['_id' => $id]);
+        return $this->events->findOneAsSchema(['_id' => $id]);
+    }
+
+    function delete_event($id) {
+        $event = $this->events->getEventById($id);
+        if(!$event) throw new NotFound("That event does not exist");
+        if(!confirm("Are you sure you want to delete this event?",[])) return;
+        header("X-Redirect: /admin/cobalt-events/");
+        return $this->events->deleteEvent($id);
     }
 }

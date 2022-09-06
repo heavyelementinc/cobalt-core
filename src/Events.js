@@ -186,7 +186,12 @@ class CobaltEvent_default {
             cta.classList.add("cobalt-events--cta-button");
             cta.href = this.data.call_to_action_href;
             cta.innerText = this.data.call_to_action_prompt;
-            cta.addEventListener("click", e => this.closeItem(), { once: true });
+            cta.addEventListener("click", e => {
+                e.preventDefault();
+                window.router.location = cta.href;
+                this.closeItem();
+                
+            }, { once: true });
             cta.style.backgroundColor = this.data.btnColor;
             this.element.appendChild(cta);
             cta.style.color = colorMathBlackOrWhite(getComputedStyle(cta)['background-color']);

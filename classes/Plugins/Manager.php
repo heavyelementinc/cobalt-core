@@ -162,6 +162,7 @@ class Manager {
     }
 
     private function write_directory($data) {
+        if(!file_exists($this->plugin_directory)) touch($this->plugin_directory);
         if (!file_put_contents($this->plugin_directory, json_encode($data)))
             throw new \Exception("Cannot write plugin directory");
     }

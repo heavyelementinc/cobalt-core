@@ -19,7 +19,7 @@ items.
 */
 
 flex-table{
-    display: flex;
+    display: table;
     width: 100%;
     background: var(--project-color-table-bg-odd);
     flex-wrap: wrap;
@@ -64,6 +64,11 @@ flex-table{
             padding: .3rem;
             width: 80px;
         }
+
+        .hydrated flex-cell, .hydrated flex-header, .hydrated flex-sticky {
+            flex-grow: unset;
+            width: calc(var(--col-width) + 2em);
+        }
         
         [scroll-x] flex-cell, [scroll-x] flex-header, [scroll-x] flex-sticky{
             display: table-cell;
@@ -74,8 +79,11 @@ flex-table{
             font-weight: bold;
             text-align: center;
             justify-content: center;
-            align-items:center;
+            align-items:
+            center;
             border-bottom: var(--project-color-table-border);
+            position: sticky;
+            background: inherit;
         }
 
         flex-header [flex-table-current]:after{
@@ -102,6 +110,7 @@ flex-table{
         
         flex-header:only-of-type, flex-sticky:only-of-type{
             border: none;
+            left: 0;
         }
     
         flex-header:only-of-type:only-child,flex-sticky:only-of-type:only-child{

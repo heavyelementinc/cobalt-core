@@ -1,5 +1,7 @@
 <?php
 
+use Cobalt\Requests\Remote\Twitter;
+use Cobalt\Requests\Remote\YouTube;
 use Exceptions\HTTP\BadRequest;
 use Render\Render;
 use MikeAlmond\Color;
@@ -306,5 +308,96 @@ class Debug extends \Controllers\Pages {
 
     function drag_drop() {
         set_template("debug/sortable.html");
+    }
+
+    function twitter() {
+        
+        add_vars([
+            'title' => 'Twitter',
+            'user_result' => json_encode((new Twitter())->getSingleUserPublicDataById('2789614097'),JSON_PRETTY_PRINT),
+            'tweet_result' => json_encode((new Twitter())->getTweetPublicData(['1546477868506652673']),JSON_PRETTY_PRINT),
+            // 'api_result' => json_encode((new Twitter())->getManyUserDataByUsername(['gardiner_bryant']),JSON_PRETTY_PRINT),
+        ]);
+        set_template('debug/api/twitter.html');
+    }
+
+    function youtube() {
+        add_vars([
+            'title' => 'YouTube',
+            'user_result'   => json_encode((new YouTube())->getChannelDataById('UCv1Kcz-CuGM6mxzL3B1_Eiw'),JSON_PRETTY_PRINT),
+            'tweet_result'  => json_encode((new YouTube())->getChannelDataById('UCf8uu3IE42b6hRUusufEH8g'),JSON_PRETTY_PRINT), //   UCnuvP0behGQMR5Wd3l80IWg
+            // 'tweet_result'  => json_encode((new YouTube())->getTweetPublicData(['1546477868506652673']),JSON_PRETTY_PRINT),
+            // 'api_result' => json_encode((new YouTube())->getManyUserDataByUsername(['gardiner_bryant']),JSON_PRETTY_PRINT),
+        ]);
+        set_template('debug/api/twitter.html');
+    }
+
+
+    function assoc_test(){
+        $array = [
+            "alpha",
+            "beta",
+            "zeta",
+            "delta",
+            "alpha",
+            "beta",
+            "zeta",
+            "delta"
+        ];
+        
+        $assoc = [
+            "alpha" => "alpha",
+            "beta"  => "beta",
+            "zeta"  => "zeta",
+            "delta" => "delta",
+            "gamma" => "alpha",
+            "omicron"  => "beta",
+            "upsilon"  => "zeta",
+            "omega" => "delta"
+        ];
+
+        $mixed = [
+            "alpha" => "alpha",
+            "beta"  => "beta",
+            "zeta"  => "zeta",
+            "delta" => "delta",
+            "0" => "alpha",
+            "1"  => "beta",
+            "2"  => "zeta",
+            3 => "delta"
+        ];
+
+        $nonSequential = [
+            1 => "alpha",
+            2  => "beta",
+            3  => "zeta",
+            5 => "delta",
+            8 => "alpha",
+            9  => "beta",
+            10  => "zeta",
+            12 => "delta"
+        ];
+        
+        echo "Array <code>(should be false)</code>";
+        var_dump(is_associative_array($array));
+        
+        echo "Associative <code>(should be true)</code>";
+        var_dump(is_associative_array($assoc));
+        
+        echo "Mixed <code>(should be true)</code>";
+        var_dump(is_associative_array($mixed));
+        
+        echo "Non-sequential <code>(should be false)</code>";
+        var_dump(is_associative_array($nonSequential));
+        exit;
+    }
+
+
+
+
+    function phpinfo() {
+        if(!is_root()) die("You don't have permisison.");
+        phpinfo();
+        exit;
     }
 }

@@ -31,7 +31,10 @@ if (app('Auth_logins_enabled')) {
 }
 
 if (app("CobaltEvents_enabled")) {
-    Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", ['permission' => "CobaltEvents_crud_events"]);
+    Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
+        'handler' => 'core/events.js',
+        'permission' => "CobaltEvents_crud_events"
+    ]);
     Route::get("/cobalt-events/?...?", "EventsController@list_events", [
         'permission' => "CobaltEvents_crud_events",
         'anchor' => [
@@ -52,4 +55,28 @@ if (app('Plugin_enable_plugin_support')) {
     ]);
 
     Route::get("/plugins/{name}", "CoreAdmin@plugin_individual_manager", ['permission' => 'Plugins_allow_management']);
+}
+
+// if (has_permission("API_manage_keys")) {
+Route::get("/api/", "APIManagement@index",[
+    'permission' => 'API_manage_keys',
+    'anchor' => [
+        'name' => "API Keys",
+    ],
+    'navigation' => ['admin_panel']
+]);
+
+Route::get('/api/{name}', "APIManagement@key",[
+    'permission' => 'API_manage_keys',
+]);
+// }
+
+if(__APP_SETTINGS__['Posts']['default_enabled']) {
+    Route::get("/posts/", "Posts@admin_index",[
+        'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
+        'navigation' => ['admin_panel'],
+    ]);
+    Route::get("/posts/{id}?", "Posts@edit",[
+        'handler' => "core/posts.js",
+    ]);
 }
