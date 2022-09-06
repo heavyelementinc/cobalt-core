@@ -127,13 +127,24 @@ customElements.define("input-switch", InputSwitch);
 class RadioGroup extends HTMLElement {
     constructor() {
         super();
-        this.selected = this.getAttribute("selected");
+        this.selected = this.getAttribute("selected") ?? this.getAttribute("value") ?? this.getAttribute("checked");
         this.default = this.getAttribute("default");
 
         let first = this.querySelector("[input='radio']");
         if (first) this.name = first.getAttribute("name");
         if (this.selected) this.updateSelected(this.selected);
         else if (this.default) this.updateSelected(this.default);
+    }
+
+    get value() {
+        const node = this.querySelector("[type='radio']:checked");
+        return node.value;
+    }
+
+    set value(val) {
+        const node = this.querySelector(`[type='radio'][value='${val}']`);
+        if(!node) throw new Error("No button with specified value");
+        node.checked = true;
     }
 
     updateSelected(selected) {
@@ -184,11 +195,12 @@ class DisplayDate extends HTMLElement {
         super();
         this.formatKeywords = {
             default: "m/d/Y",
-            long: "l, F jS Y g:i A",
-            verbose: "l, F jS Y",
+            verbose: "l, F jS Y g:i A",
+            long: "l, F jS Y",
             "12-hour": "g:i a",
             "24-hour": "H:i",
             "seconds": "g:i:s A"
+
         };
     }
 
@@ -208,7 +220,9 @@ class DisplayDate extends HTMLElement {
 
 
     execute() {
-        if (this.relative === "true") return this.startRelativeTime();
+        if (this.relative === "true" || this.getAttribute("format") === "relative") {
+            return this.startRelativeTime();
+        }
         let date = new DateConverter(this.date, this.format);
         this.innerText = date.format();
     }
@@ -225,7 +239,7 @@ class DisplayDate extends HTMLElement {
             return;
         }
         this.innerText = result.result;
-        let date = new DateConverter(this.date, this.longFormat);
+        let date = new DateConverter(this.date, this.formatKeywords.verbose);
         this.setAttribute("title", date.format());
 
         // if (!["second", "moment"].includes(result.unit)) return;
@@ -643,8 +657,10 @@ class FlexTable extends HTMLElement {
         let max = 0;
         let same = 0;
         let columns = this.querySelectorAll("flex-row");
+        this.maxWidths = [];
 
         for (const i of columns) {
+            this.getCellWidths(i);
             if (i.childElementCount > max) max = i.childElementCount;
             if (i.childElement === max) {
                 same += 1;
@@ -653,6 +669,50 @@ class FlexTable extends HTMLElement {
         }
 
         this.style.setProperty("--column-count", max);
+        console.log(this.maxWidths);
+
+        for (const row of columns) {
+            this.cellCallback(row,
+                (cell, index, skip) => {
+                    cell.style.setProperty("--col-width", `${this.maxWidths[index]}px`);
+                }
+            )
+        }
+        this.classList.add("hydrated");
+    }
+    
+    getCellWidths(row) {
+        return this.cellCallback(row,
+            (cell, index, skip) => {
+                if(!this.maxWidths[index]) this.maxWidths[index] = 0;
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                const style = getComputedStyle(cell);
+                const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+                context.font = font;
+                const {
+                    width
+                } = context.measureText(cell.innerText);
+                console.log(width > this.maxWidths[index])
+                if(width > this.maxWidths[index]) this.maxWidths[index] = Math.ceil(width);
+            }
+        )
+    }
+
+    cellCallback(row, callback = (cell) => {}) {
+        let index = 0, skip = 0;
+        for(const cell of row.children) {
+            if(skip > 0) {
+                skip -= 1;
+                index += 1;
+                continue;
+            }
+            callback(cell, index, skip);
+            index += 1;
+            if(cell.getAttribute("span")) {
+                skip = parseInt(cell.getAttribute("span"));
+            }
+        }
     }
 
     // static get observedAttributes() {

@@ -120,6 +120,26 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Drag &amp; Drop Test"]
     ]);
+    Route::get("/debug/twitter", "Debug@twitter", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Twitter"]
+    ]);
+    Route::get("/debug/youtube", "Debug@youtube", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "YouTube"]
+    ]);
+
+    Route::get("/debug/assoc", "Debug@assoc_test");
+
+    if(is_root()) {
+        Route::get("/debug/php", "Debug@phpinfo");
+    }
+}
+
+if(__APP_SETTINGS__['Posts']['default_enabled']) {
+    Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@index", __APP_SETTINGS__['Posts']['public_index_options']);
+    Route::get(__APP_SETTINGS__['Posts']['public_post'],  "Posts@post",  __APP_SETTINGS__['Posts']['public_post_options']);
+    Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
 }
 
 /** If authentications are enabled, these routes should be added to the table */

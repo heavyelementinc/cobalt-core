@@ -43,7 +43,7 @@ input-wrapper, input, textarea {
     background: var(--project-color-input-invalid-bg);
   }
 
-  pre.form-request--field-issue-message{
+  validation-issue.form-request--field-issue-message{
     background: var(--project-color-input-invalid-border);
     color: var(--project-color-input-invalid-label-text);
     font-size: .9rem;

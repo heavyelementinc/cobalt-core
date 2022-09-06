@@ -11,6 +11,7 @@ use MongoDB\BSON\ObjectId;
 trait ClientFSManager {
     protected $fs = null;
     protected $format_table = null;
+    protected $filename_insert_prefix = "";
     
     // function __construct() {
     //     $this->initFS();
@@ -189,8 +190,10 @@ trait ClientFSManager {
 
     private function clientUploadImagesAndThumbnails($key,$thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null) {
         $ids = [];
+        $assoc = is_associative_array($files);
         if(!$files) $files = $_FILES;
         foreach($files[$key]['tmp_name'] as $index => $file) {
+            
             array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data));
         }
         return $ids;
@@ -201,7 +204,7 @@ trait ClientFSManager {
      * 
      * @todo add more display modes
      * @param string $href the href to access the files
-     * @param string $mode ['list'] returns an unorganized list
+     * @param string $mode ['list'|'gallery']
      * @param array $query 
      * @param array $parent 
      * @param array $child 

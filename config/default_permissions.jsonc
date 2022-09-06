@@ -14,6 +14,20 @@
         "default": false,
         "ring": 1
     },
+    "Posts_manage_posts": {
+        "group": "Posts",
+        "label": "Allows the user to manage posts (but not publish them).",
+        "dangerous": false,
+        "default": false,
+        "ring": 3
+    },
+    "Posts_publish_posts": {
+        "group": "Posts",
+        "label": "Allows the user to publish posts (but not edit them).",
+        "dangerous": true,
+        "default": false,
+        "ring": 3
+    },
     "Auth_allow_creating_users": {
         "group": "Users",
         "label": "Able to create new user accounts.",
@@ -55,18 +69,11 @@
         "default": false,
         "ring": 1
     },
-    "Blog_manage_posts": {
-        "group": "Blog",
-        "label": "Allows the user to manage blog posts (but not publish them).",
-        "dangerous": false,
-        "default": false,
-        "ring": 3
-    },
-    "Blog_publish_posts": {
-        "group": "Blog",
-        "label": "Allows the user to publish posts (but not edit them).",
+    "API_manage_keys": {
+        "group": "API",
+        "label": "Allow the user to manage API keys",
         "dangerous": true,
         "default": false,
-        "ring": 3
+        "ring": 1
     }
 }

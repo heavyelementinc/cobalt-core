@@ -77,7 +77,7 @@ class InputClass_default {
     }
 
     async create_error(before) {
-        let el = document.createElement("pre");
+        let el = document.createElement("validation-issue");
         const spawnIndex = spawn_priority(before);
         if (spawnIndex) el.style.zIndex = spawnIndex + 1;
         el.addEventListener('click', () => {
@@ -322,6 +322,10 @@ class InputClass_tag_select extends InputClass_default {
 
 }
 
+class InputClass_radiogroup extends InputClass_default {
+
+}
+
 var classMap = {
     default: InputClass_default,
     check: InputClass_checkbox,
@@ -332,5 +336,6 @@ var classMap = {
     number: InputClass_number,
     array: InputClass_array,
     objectArray: InputClass_object_array,
-    tagSelect: InputClass_tag_select
+    tagSelect: InputClass_tag_select,
+    radioGroup: InputClass_radiogroup,
 }

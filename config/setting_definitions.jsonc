@@ -81,6 +81,7 @@
                 "exception_mode": "web",
                 "permission": "Admin_panel_access",
                 "session_refresh": true,
+                "api_access": true,
                 "vars": {
                     "html_class": "admin-panel"
                 }
@@ -88,32 +89,41 @@
             "init": {
                 "processor": "Handlers\\WebHandler",
                 "session_refresh": false,
+                "api_access": false,
                 "prefix": null
             },
             "shared": {
                 "processor": "Handlers\\SharedHandler",
                 "session_refresh": false,
+                "api_access": false,
                 "prefix": "/core-content/"
             },
             "apiv1": {
                 "processor": "Handlers\\ApiHandler",
                 "session_refresh": false,
+                "api_access": false,
                 "prefix": "/api/v1/"
             },
             "webhookv1": {
                 "processor": "Handlers\\ApiHandler",
                 "session_refresh": false,
+                "api_access": false,
                 "prefix": "/webhook/v1/"
             },
             "streams": {
                 "processor": "Handlers\\ApiHandler",
                 "session_refresh": false,
+                "api_access": false,
                 "prefix": "/streams/"
             },
             "web": {
                 "processor": "Handlers\\WebHandler",
                 "session_refresh": true,
-                "prefix": "/"
+                "api_access": true,
+                "prefix": "/",
+                "vars": {
+                    "html_class": "cobalt-app"
+                }
             }
         },
         "$prepend": true
@@ -123,7 +133,13 @@
         "default": false
     },
     /* I don't think this does anything yet -GM */
-    "route_cache_enabled": {
+    "route_cache_disabled": {
+        "default": false
+    },
+    "cached_content_disabled": {
+        "default": false
+    },
+    "settings_cache_disabled": {
         "default": false
     },
     /* Enabled the core-content/ route */
@@ -268,7 +284,10 @@
             "StatusMessage.js",
             "Events.js",
             "PaginatedContainer.js",
-            "AudioPlayer.js"
+            "AudioPlayer.js",
+            "protected/Posts.js",
+            "protected/UserPanel.js",
+            "protected/UserManager.js"
         ],
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
@@ -293,6 +312,7 @@
             "status-message.css",
             "login-form.css",
             "form-request.css",
+            "posts.css",
             "flex-table.css",
             "cobalt-events.css",
             "modal.css",
@@ -359,7 +379,7 @@
         "default": true
     },
     "SPA": {
-        "default": false,
+        "default": true,
         "$public": true
     },
     "Web_normally_open_pages": {
@@ -533,5 +553,21 @@
     },
     "UGC_directory": {
         "default": "/ugc"
+    },
+    "Posts": {
+        "default": {
+            "default_enabled": false,
+            "collection_name": "CobaltPosts",
+            "default_name": "Posts",
+            "public_index": "/posts",
+            "public_index_options": {
+                "anchor": {"name": "Posts"},
+                "navigation": ["main_navigation"]
+            },
+            "public_post": "/posts/{id}",
+            "public_post_options": {}
+
+        },
+        "$merge": true
     }
 }

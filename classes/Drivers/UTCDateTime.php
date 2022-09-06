@@ -13,7 +13,7 @@
 
 namespace Drivers;
 
-use Drivers\Exceptions\DateFailed;
+use Validation\Exceptions\ValidationIssue;
 
 class UTCDateTime {
 
@@ -40,13 +40,13 @@ class UTCDateTime {
                 if ($date instanceof UTCDateTime) return $this->timestamp;
                 break;
         }
-        throw new DateFailed("Invalid date parameter");
+        throw new ValidationIssue("Invalid date parameter");
     }
 
 
     final private function date_string_parse($date) {
         $timestamp = strtotime($date);
         if ($timestamp) return $timestamp * 1000;
-        throw new DateFailed("Invalid date parameter");
+        throw new ValidationIssue("Invalid date parameter");
     }
 }

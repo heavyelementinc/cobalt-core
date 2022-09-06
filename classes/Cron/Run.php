@@ -2,6 +2,9 @@
 
 namespace Cron;
 
+use DateTime;
+use MongoDB\BSON\UTCDateTime;
+
 class Run extends \Drivers\Database {
     protected $app_tasks = __APP_ROOT__ . "/private/config/cron/tasks.json";
     private $task_types = ['DefaultType'];
@@ -17,13 +20,51 @@ class Run extends \Drivers\Database {
         parent::__construct();
     }
 
+    
     function exec() {
+        $controller = $this->taskTrackerQuery();
+        $this->updateOne($controller,
+        [
+            '$set' => [
+                'status' => 'initialized',
+                'tasks_queued' => 0,
+                'tasks_finished' => 0,
+                'started' => new UTCDateTime(),
+                'finished' => null,
+            ],
+        ],['upsert' => true]);
         $tasks = $this->get_tasks();
+        $this->updateOne($controller,
+        [
+            '$set' =>
+            [
+                'status' => 'started',
+                'tasks_queued' => count($tasks),
+            ]
+        ]);
         if (function_exists("say")) say("$this->due_task_count of $this->total_task_count tasks will be executed.");
         if (!$tasks) return say("No tasks need to be executed", "w");
         foreach ($tasks as $task) {
             $this->task($task);
+            $this->updateOne($controller,
+            [
+                '$set' => [
+                    'task_completed' => $task['name'] ?? "No Name"
+                ],
+                '$inc' => [
+                    'tasks_finished' => 1
+                ]
+            ]);
         }
+        
+        $this->updateOne($controller,
+        [
+            '$set' => [
+                'status' => 'finished',
+                'finished' => new UTCDateTime()
+            ]
+        ]);
+
         $this->log_handler();
     }
 
@@ -99,9 +140,62 @@ class Run extends \Drivers\Database {
         ];
     }
 
+
+    public function getTaskStats() {
+        $result = $this->findOne($this->taskTrackerQuery());
+        if($result === null) $result = [
+            'status' => 'Never Run',
+            'tasks_queued' => 0,
+            'tasks_finished' => 0,
+            'started' => null,
+            'finished' => null,
+            'task_completed' => null, 
+            'task_finished' => null,
+        ];
+
+        return $result;
+    }
+
+    public function renderTaskStats($style = "widget") {
+        $status = $this->getTaskStats();
+        $warning = "";
+        if($status['status'] !== 'finished' && $status['status'] !== "Never Run") {
+            $warning = "<li>The last cron job exited prematurely!</li>";
+            $status['status'] = "<span style='color:red'>$status[status]</span>";
+        }
+        if($status['status'] == "Never Run") {
+            $warning .= "<li>Cron tasks have never been run!</li>";
+            $status['status'] = "<span style='color:red'>$status[status]</span>";
+        }
+        if($status['started']) {
+            $now = (float)(new DateTime())->format('U.u');
+            $then = (float)$status['started']->toDateTime()->format('U.u');
+            $five_minutes = 15 * 60 * 1000;
+            if($now - $then >= $five_minutes) {
+                $warning .= "<li>The last cron task was executed a long time ago. <help-span value='Cron tasks should execute every five minutes.'></help-span></li>";
+            }
+            $finished = date('r',$then);
+        }
+        if(!$finished) $finished = "never";
+
+        return with("/admin/cron/$style.html",[
+            'warning' => $warning,
+            'status' => $status,
+            'finished' => $finished,
+        ]);
+    }
+
     private function most_recent_query($task) {
         return [['name' => $task['name']], ['sort' => ['last_run' => -1], 'limit' => 1]];
     }
+
+    function taskTrackerQuery() {
+        return ['cronController' => true];
+    }
+
+
+
+
 
     private function log_handler() {
         if (function_exists("say")) say(json_encode($this->log, JSON_PRETTY_PRINT));

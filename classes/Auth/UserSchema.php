@@ -140,7 +140,7 @@ class UserSchema extends \Validation\Normalize {
 
     function set_verified($value) {
         /**  */
-        if (!is_bool($value)) throw new ValidationIssue("Validated must be a boolean value.");
+        if (!is_bool($value)) throw new ValidationIssue("Verified field must be a boolean value.");
         return $value;
     }
 

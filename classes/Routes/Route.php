@@ -63,6 +63,7 @@ class Route {
 
         // Convert the path to a regex
         $regex = Route::convert_path_to_regex_pattern($path);
+
         // If the client handler is set, we should get that handler
         $handler_data = null;
         if (!key_exists('handler', $additional)) $additional['handler'] = null;
@@ -77,6 +78,11 @@ class Route {
             $file = str_replace([__APP_ROOT__, __ENV_ROOT__], ["__APP_ROOT__", "__ENV_ROOT__"], $file);
         }
 
+        $path_prefix = app('context_prefixes')[$router_table_address]['prefix'];
+
+        $real_path = substr($path_prefix,0,-1) . $path;
+        $real_regex = Route::convert_path_to_regex_pattern($real_path);
+
         if (isset($additional['anchor']) && !isset($additional['anchor']['href'])) {
             if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
             $additional['anchor']['href'] = $path;
@@ -89,7 +95,7 @@ class Route {
         ];
 
         /** Store our route data in the full route table. */
-        $GLOBALS[$router_table_address][$type][$regex] = [
+        $GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex] = [
             // Original pathname
             'original_path' => $path,
 
@@ -121,7 +127,9 @@ class Route {
             // API authentication stuff
             'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
             // Cache Control stuff is only honored by API page requests
-            'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control)
+            'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control),
+            'real_path' => $real_path,
+            'real_regex' => $real_regex,
         ];
     }
 

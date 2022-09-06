@@ -1,0 +1,21 @@
+<div class="admin-dashboard--widget admin-dashboard--widget-expanded-content" id="cronjob">
+    <h2>Cron Tasks</h2>
+    <div style="font-size: 1.5rem;">
+        <div>Status: {{!status.status}}</div>
+        <div>Queue: {{status.tasks_finished}}/{{status.tasks_queued}}</div>
+        <div style="font-size: 1rem">Last executed: {{finished}}</div>
+    </div>
+    <ul class="crontab-warning">{{!warning}}</ul>
+</div>
+<style>
+    #cronjob ul:empty{
+        display:none;
+    }
+    #cronjob ul{
+        list-style: none;
+        background: var(--project-color-problem);
+        color: white;
+        padding: 10px;
+        margin: 0;
+    }
+</style>

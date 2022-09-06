@@ -21,12 +21,18 @@
 
 namespace Routes;
 
+use Exception;
+use Exceptions\HTTP\NotFound;
+
 class Router {
 
     public $current_route = null;
     private $route_cache_name = "config/routes.json";
     public $router_table_list = [];
+    public $route_context = "web";
     public $registered_plugin_controllers = [];
+    private $router_table_initialized = false;
+    private $router_table_loaded = false;
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -36,46 +42,92 @@ class Router {
     }
 
     function init_route_table() {
-        /** Export our route table to the global space, we use this to specify where
-         * we should look for our routes.
-         */
-        $GLOBALS['ROUTE_TABLE_ADDRESS'] = $this->route_context . "_routes";
-        if (!isset($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']])) $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']] = [];
-        $this->router_table_list = [
-            __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
-        ];
+        if($this->router_table_initialized) return;
+        $contexts = app('context_prefixes');
+        //  = array_fill_keys(array_keys($contexts), []);
 
-        foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
-            $result = $plugin->register_routes($this->route_context);
-            if ($result) array_push($this->router_table_list, $result);
-            $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
+        foreach($contexts as $context => $data) {
+            $GLOBALS['ROUTE_TABLE'][$context] = [
+                'get'    => [],
+                'post'   => [],
+                'put'    => [],
+                'delete' => [],
+            ];
+
+            // Make a list of all the routes we need to load
+            $this->router_table_list[$context] = [
+                __ENV_ROOT__ . "/routes/$context.php",
+                __APP_ROOT__ . "/private/routes/$context.php",
+            ];
+            
+            foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
+                $result = $plugin->register_routes($context);
+                if ($result) array_push($this->router_table_list[$context], $result);
+                $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
+            }
         }
 
-        array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
+        $this->router_table_initialized = true;
+        // array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
+
     }
+
+    // function init_route_table() {
+    //     /** Export our route table to the global space, we use this to specify where
+    //      * we should look for our routes.
+    //      */
+    //     $GLOBALS['ROUTE_TABLE_ADDRESS'] = $this->route_context . "_routes";
+    //     if (!isset($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']])) $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']] = [];
+    //     $this->router_table_list = [
+    //         __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
+    //     ];
+
+    //     foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
+    //         $result = $plugin->register_routes($this->route_context);
+    //         if ($result) array_push($this->router_table_list, $result);
+    //         $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
+    //     }
+
+    //     array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
+    // }
 
     function get_routes() {
-        /** Check if we're supposed to cache our routes
-         *  @todo Complete the table_from_cache functionality */
-        if (app('route_cache_enabled') && $this->table_from_cache()) {
+        if($this->router_table_loaded) {
+            $this->routes = $GLOBALS['ROUTE_TABLE'];
             return;
         }
-
-        try {
-            /** Get a list of route tables that exist */
-            $route_tables = files_exist($this->router_table_list);
-        } catch (\Exception $e) {
-            /** If there are no routes available, die with a nice message */
-            die("Could not load route for context $GLOBALS[route_context]");
+        foreach($this->router_table_list as $context => $value) {
+            foreach($value as $table){
+                $GLOBALS['ROUTE_TABLE_ADDRESS'] = $context;
+                if(file_exists($table)) require_once $table;
+            }
         }
-
-        /** Execute each router table we found */
-        foreach ($route_tables as $table) {
-            require_once $table;
-        }
-
-        $this->routes = $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']];
+        $this->routes = $GLOBALS['ROUTE_TABLE'];
+        $this->router_table_loaded = true;
     }
+
+    // function get_routes() {
+    //     /** Check if we're supposed to cache our routes
+    //      *  @todo Complete the table_from_cache functionality */
+    //     if (app('route_cache_enabled') && $this->table_from_cache()) {
+    //         return;
+    //     }
+
+    //     try {
+    //         /** Get a list of route tables that exist */
+    //         $route_tables = files_exist($this->router_table_list);
+    //     } catch (\Exception $e) {
+    //         /** If there are no routes available, die with a nice message */
+    //         die("Could not load route for context $GLOBALS[route_context]");
+    //     }
+
+    //     /** Execute each router table we found */
+    //     foreach ($route_tables as $table) {
+    //         require_once $table;
+    //     }
+
+    //     $this->routes = $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']];
+    // }
 
     /** @todo complete this */
     function table_from_cache() {
@@ -84,25 +136,27 @@ class Router {
     }
 
 
-    function discover_route($route = null, $query = null) {
-        if ($route === null) $route = $_SERVER['REQUEST_URI'];
-        if ($query === null) $query = $_SERVER['QUERY_STRING'];
+    function discover_route($route = null, $query = null, $method = null, $context = null) {
+        if ($route   === null) $route   = $_SERVER['REQUEST_URI'];
+        if ($query   === null) $query   = $_SERVER['QUERY_STRING'];
+        if ($method  === null) $method  = $this->method;
+        if ($context === null) $context = $this->route_context;
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
          */
         $this->uri = urldecode(str_replace(["?" . $query], "", $route));
-        if ($this->route_context !== "web") {
-            $this->context_prefix = app("context_prefixes")[$this->route_context]['prefix'];
+        if ($context !== "web") {
+            $this->context_prefix = app("context_prefixes")[$context]['prefix'];
             $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);
         }
 
         // $route = null;
         /** Search through our current routes and look for a match */
-        foreach ($this->routes[$this->method] as $preg_pattern => $directives) {
+        foreach ($this->routes[$context][$method] as $preg_pattern => $directives) {
             $match = [];
             /** Regular Expression against our uri, store any matches in $match */
             if (preg_match($preg_pattern, $this->uri, $match) === 1) {
-                if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern);
+                if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern, $context);
 
                 $this->current_route = $preg_pattern;
                 if ($route[strlen($route) - 1] === "/") {
@@ -115,14 +169,15 @@ class Router {
         if ($this->current_route === null) throw new \Exceptions\HTTP\NotFound("No route discovered.");
     }
 
-    function set_uri_vars($directives, $match, $route) {
+    function set_uri_vars($directives, $match, $route, $context) {
+        if($context === null) $context = $this->route_context;
         array_shift($match);
         $_GET['uri'] = \array_fill_keys($directives['uri_var_names'], $match);
         foreach ($directives['uri_var_names'] as $i => $name) {
             if (key_exists($name, $_GET)) $name = "uri_$name";
             if (key_exists($i, $match)) $_GET['uri'][$name] = $match[$i];
         }
-        $this->routes[$this->method][$route]['matches'] = $match;
+        $this->routes[$context][$this->method][$route]['matches'] = $match;
         // array_shift($match);
         // if($match === null) $match = [];
         // /** Store the $match with the route data */
@@ -130,9 +185,15 @@ class Router {
         // $this->current_route = $route;
     }
 
-    function execute_route() {
+    function execute_route($route = null, $method = null, $context = null) {
+        // Allow executing arbitrary routes
+        if($route   === null) $route   = $this->current_route;
+        if($method  === null) $method  = $this->method;
+        if($context === null) $context = $this->route_context;
+
         /** Store our route data for easy access */
-        $exe = $this->routes[$this->method][$this->current_route];
+        $exe = $this->routes[$context][$method][$route];
+        if(!$exe) throw new NotFound("Route controller not found");
         if (isset($exe['permission'])) {
             $permission = true;
             try {
@@ -200,19 +261,40 @@ class Router {
         $prefix = "";
         if ($GLOBALS['route_context']) $prefix = "^" . app("context_prefixes")[$GLOBALS['route_context']]['prefix'];
         $prefix = substr($prefix, 0, -1);
-        foreach ($this->routes as $method => $routes) {
-            foreach ($routes as $path => $route) {
-                $handler = $route['handler'];
-                if ($handler === null) continue;
-                $files = \files_exist([
-                    __APP_ROOT__ . "/private/controllers/client/$handler",
-                    __ENV_ROOT__ . "/controllers/client/$handler",
-                ]);
-                if ($prefix !== "" && $path[0] = "^") $path = substr($path, 2);
-                if ($path[strlen($path) - 1] === "%") $path = substr($path, 0, -1);
-                array_push($table, "\n'$prefix$path': " . file_get_contents($files[0]));
+        foreach($this->routes as $context => $methods) {
+            foreach ($methods as $method => $routes) {
+                foreach ($routes as $path => $route) {
+                    $handler = $route['handler'];
+                    $hasHandler = false;
+                    if($handler) $hasHandler = true;
+                    if($hasHandler === false) {
+                        $handlerByControllerName = "$route[controller].js";
+                        $handler = $handlerByControllerName;
+                        $hasHandler = true;
+                    }
+                    if($hasHandler === false) continue;
+
+                    $files = \files_exist([
+                        __APP_ROOT__ . "/private/controllers/client/$handler",
+                        __ENV_ROOT__ . "/controllers/client/$handler",
+                    ], false);
+                    if(empty($files)){
+                        if(isset($route['handler'])) throw new Exception("The router table specfied a client controller but the file was not found");
+                        else continue;
+                    }
+                    $real_regex = $route['real_regex'];
+                    // if ($prefix !== "" && $path[0] == "^") $real_regex = substr($real_regex, 2);
+                    $index1 = 0;
+                    $index2 = 0;
+                    if ($real_regex[0] === "%") $index1 = 1;
+                    if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
+                    $real_regex = substr($real_regex, $index1, $index2);
+                    array_push($table, "\n'$real_regex': " . file_get_contents($files[0]));
+                }
             }
         }
         return "\nconst router_table = {\n" . implode(",\n", array_unique($table)) . "\n}\n";
     }
+
+    // public function get_route_path_by_controller_name($name,$controller,)
 }

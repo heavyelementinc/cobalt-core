@@ -15,6 +15,7 @@
 use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
+use Exceptions\HTTP\NotFound;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -107,6 +108,7 @@ function get_all_where_available($paths, $merged = true) {
     $available = [];
     foreach ($paths as $key => $path) {
         if (file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path), true);
+        if($available[$key] === null) unset($available[$key]);
     }
     if ($merged) return array_merge(...$available);
     return $available;
@@ -290,15 +292,6 @@ function set_template($path) {
  * @return void
  */
 function add_vars($vars) {
-    $exportable = [];
-
-    foreach(array_merge($vars) as $var => $val) {
-        if($var[0] . $var[1] !== "__") continue;
-        $exportable += correct_exported_values($vars, $var, $val);
-    }
-
-    export_vars($exportable);
-
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
         return;
@@ -635,6 +628,42 @@ function associative_to_path(array $arr) {
 }
 
 /**
+ * Will determine if an array has string keys
+ * @param mixed $array 
+ * @return bool 
+ */
+function is_associative_array(mixed $array) {
+    if (array() === $array) return false;
+    return array_keys($array) !== range(0, count($array) - 1);
+}
+
+/**
+ * A shorthand way of rendering a template and getting the results. This is
+ * included so you can include a template inside another template. This has the
+ * potential to cause some recursive crap... so use caution!
+ *
+ * @param  string $template The name of the template
+ * @param  mixed  $vars     Variables to include
+ * @return string Processed template
+ * @deprecated Use view() instead
+ */
+function with(string $template, $vars = []) {
+    return view($template, $vars);
+}
+
+/** An error-tolerant template inclusion routine. Wraps the `with` function in a
+ * try/catch block
+ * 
+ * @param string  $template The name of the template
+ * @param mixed   $vars     Variables to include
+ * @return string The processed template OR an empty string on error
+ * @deprecated use maybe_view()
+ */
+function maybe_with($template, $vars = []) {
+    return maybe_view($template, $vars);
+}
+
+/**
  * A shorthand way of rendering a template and getting the results. This is
  * included so you can include a template inside another template. This has the
  * potential to cause some recursive crap... so use caution!
@@ -643,7 +672,7 @@ function associative_to_path(array $arr) {
  * @param  mixed  $vars     Variables to include
  * @return string Processed template
  */
-function with(string $template, $vars = []) {
+function view(string $template, array $vars = []):string {
     $render = new \Render\Render();
     if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
     $render->set_vars($vars);
@@ -658,15 +687,17 @@ function with(string $template, $vars = []) {
  * @param mixed   $vars     Variables to include
  * @return string The processed template OR an empty string on error
  */
-function maybe_with($template, $vars = []) {
+function maybe_view(string $template, array $vars = []):string {
     if (!$template) return "";
     if (!is_string($template)) return "";
     try {
-        return with($template, $vars);
+        return view($template, $vars);
     } catch (Exception $e) {
         return "";
     }
 }
+
+
 
 function conditional_addition(string $template, bool $is_shown, $vars = []) {
     if (!$is_shown) return "";
@@ -712,19 +743,19 @@ function is_child_dir($base_dir, $path) {
  * 
  * @return string 
  */
-function get_path_from_route(string $class, string $method, array $args = [], string $routeMethod = "get", $context = null) {
+function get_path_from_route(string $class, string $method, array $args = [], string $routeMethod = "get", string $context = null) {
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
     $router = $GLOBALS['router'];
-    if($context !== $router->route_context) {
-        if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
-        if($context !== $router->route_context) throw new Error("Could not establish proper context");
-    }
-    $routes = $router->routes[$routeMethod];
+    // if($context !== $router->route_context) {
+    //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
+    //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
+    // }
+    $routes = $router->routes[$context][$routeMethod];
     $route = null;
     foreach($routes as $r => $data) {
         if($data['controller'] !== $controllerAlias) continue;
-        $rt = $data['original_path'];
+        $rt = $data['real_path'];
         $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
         
         $replacement = [];
@@ -736,9 +767,34 @@ function get_path_from_route(string $class, string $method, array $args = [], st
             $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
         }
 
-        return preg_replace("/\/{2,}/","/",$router->context_prefix . $mutant);
+        return preg_replace("/\/{2,}/","/", $mutant);
     }
     return $route;
+}
+
+function route(string $directiveName, array $args = [], array $context = []):string {
+    $routeMethod = $context['method'] ?? "get";
+    $ctx = $context['context'] ?? "web";
+    $split = explode("@", $directiveName);
+    
+    $route = get_path_from_route($split[0], $split[1], $args, $routeMethod, $ctx);
+    if(!$route) throw new Exception("Could not find route based on directive name.");
+    return $route;
+}
+
+function validate_route($directiveName, $context) {
+    $routeMethod = $context['method'] ?? "get";
+    $ctx = $context['context'] ?? "web";
+    
+    $router = $GLOBALS['router'];
+    $routes = $router->routes[$ctx][$routeMethod];
+
+    foreach($routes as $r => $data) {
+        if($data['controller'] !== $directiveName) continue;
+        return true;
+    }
+
+    return false;
 }
 
 /** Create a directory listing from existing web GET routes
@@ -755,31 +811,38 @@ function get_route_group($directory_group, $misc = []) {
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
     $current_route = $GLOBALS['router']->current_route;
 
-
-    foreach ($GLOBALS['router']->routes['get'] as $r => $route) {
-        $groups = $route['navigation'] ?? false;
-        if (!$groups) continue;
-        // If we get here, we know we [probably] have an array
-
-        // Now we check if the directory group is in $groups or the key exists
-        // If both are FALSE, then we skip list assembly.
-        if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
-        if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
-        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
-        if ($r === $current_route) $info['attributes'] = 'class="current--route"';
-        $ul .= build_directory_item($info, $misc['with_icon'], $misc['prefix']);
-
+    foreach($GLOBALS['router']->routes as $context => $methods) {
+        foreach($methods as $method => $routes) {
+            foreach ($routes as $r => $route) {
+                $groups = $route['navigation'] ?? false;
+                if (!$groups) continue;
+                // If we get here, we know we [probably] have an array
+        
+                // Now we check if the directory group is in $groups or the key exists
+                // If both are FALSE, then we skip list assembly.
+                if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
+                if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
+                $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+                if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
+                if ($r === $current_route) $info['attributes'] = 'class="current--route"';
+                $ul .= build_directory_item($info, $misc['with_icon'], $context);
+        
+            }
+        }
     }
 
     return $ul . "</ul>";
 }
 
-function build_directory_item($item, $icon = false, $prefix = "") {
+function build_directory_item($item, $icon = false, $context = "") {
+    $prefix = "";
     if ($icon) $icon = "<ion-icon name='$item[icon]'></ion-icon>";
     else $icon = "";
     $attributes = $item["attributes"] ?? '';
-    if (!empty($prefix) && $prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
+    if ($context !== "web") {
+        $prefix = app('context_prefixes')[$context]['prefix'];
+        if($prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
+    }
     $submenu = "";
     if (isset($item['submenu_group'])) $submenu = get_route_group($item['submenu_group'], ['classes' => 'directory--submenu', 'icon' => $icon, 'prefix' => $prefix]);
     if(strpos($submenu,'current--route')) {
@@ -1033,4 +1096,34 @@ function sanitize_path_name($path) {
 
 function relative_time($date, $now = null) {
     if (!$now) $now = time();
+}
+
+function pretty_rounding($number):string{
+    if($number === 0) return "zero";
+    $map = [
+        [
+            'factor' => 1000,
+            'precision' => 1,
+            'suffix' => 'k'
+        ], [
+            'factor' => 1000000,
+            'precision' => 1,
+            'suffix' => 'm'
+        ], [
+            'factor' => 1000000000,
+            'precision' => 1,
+            'suffix' => 'b',
+        ], [
+            'factor' => 1000000000000,
+            'precision' => 1,
+            'suffix' => 't',
+        ]
+    ];
+
+    foreach($map as $data) {
+        if($number < $data['factor']) continue;
+        $result = round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP) . $data['suffix'];
+    }
+
+    return $result;
 }

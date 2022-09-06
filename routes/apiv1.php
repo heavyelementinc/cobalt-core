@@ -74,3 +74,15 @@ if (app('debug')) {
 
 }
 
+if(__APP_SETTINGS__['Posts']['default_enabled']) {
+    Route::put(   "/posts/{id}/update", "Posts@update");
+    Route::delete("/posts/{id}/delete", "Posts@deletePost");
+    Route::post(  "/posts/{id}/upload", "Posts@upload");
+    Route::delete("/posts/attachment/{id}", "Posts@delete");
+    Route::put(   "/posts/attachment/{id}/default", "Posts@defaultImage");
+    Route::put(   "/posts/attachment/{id}/sort", "Posts@updateSortOrder");
+}
+
+
+Route::put("/api/key/{service}", "APIManagement@update", ['permission' => 'API_manage_keys']);
+Route::post("/api/key/{service}", "APIManagement@parse", ['permission' => 'API_manage_keys']);

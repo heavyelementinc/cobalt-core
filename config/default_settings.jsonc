@@ -267,6 +267,11 @@
         "$merge": true, // Prepend user packages (is that what we want to do?),
         "$method": "set_packages"
     },
+    "admin_packages": {
+        "default": [
+
+        ]
+    },
     /* A list of CSS files to be concatenated, minified, and sent to the client
     with every page.
     
@@ -338,7 +343,7 @@
         "default": ""
     },
     "Plugin_enable_plugin_support": {
-        "default": true
+        "default": false
     },
     "Plugin_enabled_plugins": {
         "default": []

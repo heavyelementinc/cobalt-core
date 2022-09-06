@@ -13,6 +13,7 @@ class ApiFetch {
         this.cache = cache;
         this.credentials = credentials;
         this.headers = headers;
+        this.result = null;
     }
 
     async send(data = "") {
@@ -30,13 +31,14 @@ class ApiFetch {
             if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
             let result = null;
             result = await fetch(this.uri, send);
-    
+            this.result = await result.json();
+
             if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
             if (result.ok === false) {
-                reject(result);
-                await this.handleErrors(result);
+                reject(this.result);
+                await this.handleErrors(result,this.result);
             }
-            else this.result = await result.json();
+            // this.result = result;
     
             if("headers" in result) {
                 this.headers['X-Next-Request'] = result.headers.get("X-Next-Request") ?? null;
@@ -53,9 +55,10 @@ class ApiFetch {
         return await this.send("", "GET", {});
     }
 
-    async handleErrors(result) {
-        const json = await result.json();
-        this.result = json;
+    async handleErrors(result, json) {
+        // const json = await result.json();
+        // this.result = json;
+        
         switch (result.status) {
             case 300:
                 let confirm = new FetchConfirm(json, this);

@@ -146,7 +146,7 @@ class SettingsManager {
      * @return object
      */
     function __construct($cache = true) {
-        $this->enable_settings_from_cache = $cache;
+        $this->enable_settings_from_cache = app('settings_cache_disabled') || $cache;
         $this->settings = new \SettingsManager\Settings();
 
         // Check if the core settings file exists

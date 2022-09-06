@@ -418,6 +418,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             if (is_callable($valid)) $valid = $valid($val, $field);
             if (key_exists($val, $valid)) return $valid[$val];
         }
+        if($val instanceof \MongoDB\BSON\UTCDateTime) return $this->get_date($val, 'verbose');
         return $val;
     }
 

@@ -6,13 +6,16 @@ use Validation\Exceptions\ValidationIssue;
 
 class EventSchema extends \Validation\Normalize {
 
-    protected $allowed_event_types = ['modal' => "Modal pop-up", 'banner' => "Banner"];
+    protected $allowed_event_types = [
+        'banner' => "Banner",
+        'modal' => "Modal pop-up",
+    ];
     protected $allowed_session_policies = [
-        'nag' => 'On every page (not recommended)',
+        '24_hours'     => 'After 24+ hours',
         'with_session' => 'After closing tab (session)',
-        '24_hours' => 'After 24+ hours',
-        'half_date' => 'Event end - closed time / 2',
-        'never' => 'Never show event again'
+        'half_date'    => 'Half time between close and event end',
+        'nag'          => 'On every page (not recommended)',
+        'never'        => 'Never show event again'
     ];
 
 
@@ -108,7 +111,7 @@ class EventSchema extends \Validation\Normalize {
                 'set' => 'boolean_helper'
             ],
             'start_date' => [
-                'get' => fn ($val) => $this->get_date('start_time'),
+                'get' => fn () => $this->get_date($this->__dataset['start_time'],'input'),
                 'set' => false,
             ],
             'start_time' => [
@@ -116,7 +119,7 @@ class EventSchema extends \Validation\Normalize {
                 'set' => fn ($val) => $this->set_time($val, 'start')
             ],
             'end_date' => [
-                'get' => fn () => $this->get_date('end_time'),
+                'get' => fn () => $this->get_date($this->__dataset['end_time'],'input'),
                 'set' => false
             ],
             'end_time' => [
@@ -150,10 +153,10 @@ class EventSchema extends \Validation\Normalize {
         ];
     }
 
-    function get_date($val) {
-        if (!$this->__dataset[$val]) return "";
-        return mongo_date($this->__dataset[$val]);
-    }
+    // function get_date($val) {
+    //     if (!$this->__dataset[$val]) return "";
+    //     return mongo_date($this->__dataset[$val]);
+    // }
 
     function set_time($val, $type) {
         $this->date_sanity_check($val, 'start_date', 'start_time', 'end_time', 'end_date');
