@@ -18,7 +18,7 @@ class Router {
 
         this.navigationStarted = false;
 
-        this.linkSelector = "a:not([is])";
+        this.linkSelector = `a[href^='/']:not([is]),a[href^='${location.origin.toString()}']:not([is])`;
         this.formSelector = "form.cobalt-query-controls";
         this.mainContent = document.querySelector("main");
 
@@ -106,6 +106,8 @@ class Router {
     initialize_SPA_navigation(allLinks = null) {
         // Don't do anything if we're not in SPA mode.
         if(!this.isSPA) return;
+        const load = document.createElement("loading-bar");
+        // document.body.prepend(load);
         
         if(allLinks === null) allLinks = this.first_run;
 
@@ -120,7 +122,8 @@ class Router {
             },'',url);
             links = document.querySelectorAll(this.linkSelector);
             window.addEventListener("hashchange",(event) => {
-                console.info("Hashchange triggered", event);
+                // console.info("Hashchange triggered", event);
+                event.preventDefault();
             });
             window.addEventListener("popstate",(event) => {
                 console.info("Popstate firing");
@@ -159,6 +162,8 @@ class Router {
                 return false;
             });
         }
+
+        // document.body.removeChild(load);
     }
 
     handleClick(element, event){

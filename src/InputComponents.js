@@ -654,31 +654,78 @@ customElements.define("copy-span", CopySpan);
 
 class FlexTable extends HTMLElement {
     connectedCallback() {
-        let max = 0;
-        let same = 0;
-        let columns = this.querySelectorAll("flex-row");
-        this.maxWidths = [];
+        // Get our computed width
+        this.computedWidth = parseInt(getComputedStyle(this).width.replace("px",""));
 
+        // Query for our columns
+        let columns = this.querySelectorAll("flex-row");
+
+        // The max count of columns
+        let max = 0;
+        // How many iterations we've gone without updating the column count
+        let same = 0;
+
+        let index = -1;
+
+        // First thing we need to do is find out how many columns are in this table
         for (const i of columns) {
-            this.getCellWidths(i);
+            index += 1;
+            // Check if there is another row with more columns
             if (i.childElementCount > max) max = i.childElementCount;
+
+            // If we've gone through iterations or more and they've all been the
+            // same then we abort the loop
             if (i.childElement === max) {
                 same += 1;
                 if (same >= 3) break;
             }
         }
 
+        // Set the max column count
         this.style.setProperty("--column-count", max);
+
+        // An array of each column's max widths
+        this.maxWidths = [];
+        // Next, we need to establish the values of the elements
+        for (const i of columns) {
+            // Get the cell width of the current row
+            this.getCellWidths(i);
+        }
+
+        // Get the min and max values so we can normalize our data
+        this.minColumnWidth = Math.min(...this.maxWidths);
+        this.clampLimitParentWidth = this.computedWidth / max;
+
+        // Loop through the max widths and clamp them
+        this.maxWidths.forEach((e, i) => {
+            this.maxWidths[i] = this.clamp(e,this.minColumnWidth, this.clampLimitParentWidth);
+        });
+
+        this.maxColumnWidth = Math.max(...this.maxWidths);
+
         console.log(this.maxWidths);
 
+        
         for (const row of columns) {
-            this.cellCallback(row,
-                (cell, index, skip) => {
-                    cell.style.setProperty("--col-width", `${this.maxWidths[index]}px`);
-                }
-            )
+            this.cellCallback(row, (cell, index, skip) => {
+                cell.style.setProperty("--flex-column-grow", `${this.normalizeWidths(this.maxWidths[index], this.minColumnWidth, this.maxColumnWidth)}`)
+                cell.style.setProperty("--col-width",`${this.maxWidths[index]}px`);
+                // this.calculatePercentage(this.maxWidths[index],)
+                // cell.style.setProperty("--col-width", `%`);
+                // `${this.maxWidths[index]}px`);
+            });
         }
+        
+        // this.style.setProperty("--max-column-width", `px`);
         this.classList.add("hydrated");
+    }
+   
+    normalizeWidths(val, min, max) {
+        return Math.abs((val - min) / (max - min));
+    }
+
+    clamp(val, min, max) {
+        return Math.min(Math.max(val, min), max);
     }
     
     getCellWidths(row) {
@@ -713,6 +760,10 @@ class FlexTable extends HTMLElement {
                 skip = parseInt(cell.getAttribute("span"));
             }
         }
+    }
+
+    calculatePercentage(rowSize, total) {
+        return (100 * rowSize) / total;
     }
 
     // static get observedAttributes() {

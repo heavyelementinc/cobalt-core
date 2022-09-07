@@ -23,7 +23,7 @@
     controls() {
         return `
             <div class="hbox">
-                <button name="playpause"><ion-icon name="play"></ion-icon><ion-icon name="pause" style="display:none"></ion-icon></button>
+                <button name="playpause"></ion-icon></button>
                 <div class="waveform">
                 <svg class="svg-waveform" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <rect class="playback" width="0%" height="100%"></rect>
@@ -51,16 +51,19 @@
             this.current.textContent = this.calculateTime(this.audio.currentTime);
         })
         this.audio.addEventListener("play", () => {
-            this.button.querySelector("[name='play']").style.display = "none";
-            this.button.querySelector("[name='pause']").style.display = "block";
+            this.classList.add("playing");
+            // this.button.querySelector("[name='play']").style.display = "none";
+            // this.button.querySelector("[name='pause']").style.display = "block";
             this.style.transition = "width 1s";
         });
         this.audio.addEventListener("pause", () => {
-            this.button.querySelector("[name='play']").style.display = "block";
-            this.button.querySelector("[name='pause']").style.display = "none";
+            this.classList.remove("playing");
+            // this.button.querySelector("[name='play']").style.display = "block";
+            // this.button.querySelector("[name='pause']").style.display = "none";
             this.style.transition = "";
         });
         this.audio.addEventListener("ended",() =>{
+            this.classList.remove("playing");
             this.style.transition = "";
         })
 
@@ -77,7 +80,6 @@
             }
         });
 
-        console.log(this.audio, this.button, this.progress);
     }
 
     async getWaveform(){

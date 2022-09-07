@@ -1,6 +1,7 @@
 :is(article.cobalt-post) {
     max-width:100%;
     padding: 0;
+    margin: 0 0 2rem;
 }
 
 :is(.cobalt-post--splash) {
@@ -66,6 +67,14 @@ article.cobalt-post :is(.cobalt-post--header, content) {
     display:block;
     width:100%;
     height:auto;
+}
+
+:is(article.cobalt-post + article.cobalt-post) {
+
+}
+:is(.button.cobalt-post--continue-reading) {
+    padding: 0.6em 1em;
+    margin: 0 auto 1em;
 }
 
 @media only screen and (max-width: 35em) {

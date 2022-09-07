@@ -66,8 +66,14 @@ flex-table{
         }
 
         .hydrated flex-cell, .hydrated flex-header, .hydrated flex-sticky {
-            flex-grow: unset;
-            width: calc(var(--col-width) + 2em);
+            flex-grow: var(--flex-column-grow);
+            width: var(--col-width);
+        }
+
+        .hydrated flex-cell:not([col-span]),
+        .hydrated flex-header:not([col-span]),
+        .hydrated flex-sticky:not([col-span]) {
+            max-width: var(--max-column-width);
         }
         
         [scroll-x] flex-cell, [scroll-x] flex-header, [scroll-x] flex-sticky{
@@ -163,4 +169,10 @@ table{
 
 tr:nth-of-type(even) {
     background: var(--project-color-table-bg-even);
+}
+
+flex-table async-button {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }

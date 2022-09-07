@@ -15,8 +15,18 @@ audio-player {
         background: var(--project-color-button-init);
         color: var(--project-color-button-text);
         width: 50px;
-        font-size: 3em;
+        font-size: 3rem;
         cursor: pointer;
+        padding: 0 2rem;
+        text-align: center;
+    }
+
+    audio-player button[name="playpause"]:before {
+        content: "\25B6"; /* Play character */
+    }
+
+    audio-player.playing button[name="playpause"]:before {
+        content: "\23F8"; /* Pause character */
     }
 
 
@@ -50,6 +60,10 @@ audio-player {
     audio-player .audio-player--underhang > div {
         display: flex;
         align-items: center;
+    }
+
+    audio-player .waveform {
+        width:100%;
     }
 
 

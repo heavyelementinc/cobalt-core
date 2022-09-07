@@ -1,5 +1,5 @@
 <article class="cobalt-post cobalt-post--blurb">
-    <div class="cobalt-post--splash" {{!post.default_image.display}}></div>
+    <a href='{{href}}' class="cobalt-post--splash" {{!post.default_image.display}}></a>
     <div class="cobalt-post--header">
         <h1 class="cobalt-post--title"><a href='{{href}}'>{{!post.title.md}}</a></h1>
         <ul>
@@ -10,5 +10,5 @@
     <content>
         {{!post.excerpt.md}}
     </content>
-    <a href="{{href}}">Read More</a>
+    <div class="hbox"><a href="{{href}}" class="button cobalt-post--continue-reading">Read More</a></div>
 </article>

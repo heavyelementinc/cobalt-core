@@ -10,7 +10,7 @@
  *  - once    [true|false] will disable the button once completed
  *  - value   [string] the value to be submitted as a post request
  */
-class AsyncButton extends HTMLButtonElement {
+class AsyncButton extends HTMLElement {
     constructor() {
         super();
         this.request = null;
@@ -23,7 +23,9 @@ class AsyncButton extends HTMLButtonElement {
     connectedCallback() {
         this.innerHTML = this.spinner() + this.innerHTML;
         this.spinner = this.querySelector("svg");
-        this.addEventListener("click", (e) => this.send());
+        this.addEventListener("click", (e) => 
+            this.send()
+        );
     }
 
     static get observedAttributes() {
@@ -157,4 +159,4 @@ class AsyncButton extends HTMLButtonElement {
     }
 }
 
-customElements.define("async-button", AsyncButton, { extends: 'button' });
+customElements.define("async-button", AsyncButton);// { extends: 'button' });
