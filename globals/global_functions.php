@@ -93,8 +93,8 @@ function has_permission($perm_name, $group = null, $user = null, $throw_no_sessi
 function is_root() {
     $session = session();
     if(!$session) return false;
-    if(!key_exists('groups',$session)) return false;
-    return in_array('root',$session['groups']->getArrayCopy());
+    if(!key_exists('groups',(array)$session)) return false;
+    return in_array('root',(array)$session['groups']->getArrayCopy());
 }
 
 /** This function will return a merged array of decoded JSON files that are 
@@ -144,9 +144,15 @@ function files_exist($arr, $error_on_empty = true) {
  * @return string|false false if no file found, path name as string otherwise
  */
 function find_one_file(array $arr_of_paths, $filename) {
+    $deprecated_path = __APP_ROOT__ . "/private";
     foreach ($arr_of_paths as $path) {
         $file = "$path/$filename";
-        if (file_exists($file)) return $file;
+        if (file_exists($file)) {
+            if(substr($deprecated_path,0,strlen($deprecated_path)) === $deprecated_path) {
+                trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
+            }
+            return $file;
+        }
     }
     return false;
 }
@@ -163,6 +169,7 @@ function template_exists($template) {
 }
 
 $GLOBALS['CLASSES_DIR'] = [
+    __APP_ROOT__ . "/classes",
     __APP_ROOT__ . "/private/classes/",
     __ENV_ROOT__ . "/classes/"
 ];
@@ -440,26 +447,6 @@ function from_markdown(string $string, bool $untrusted = true) {
     $md = new Parsedown();
     $md->setSafeMode($untrusted);
     return $md->text($string);
-}
-
-
-/**
- * db_cursor
- * The
- * 
- * @param string $collection - The name of the collection
- * @param string $database - (Optional) The name of the database
- * @return object
- */
-function db_cursor($collection, $database = null) {
-    if (!$database) $database = app('database');
-    try {
-        $client = new MongoDB\Client(app('server_address'));
-    } catch (Exception $e) {
-        die("Cannot connect to database");
-    }
-    $database = $client->{$database};
-    return $database->{$collection};
 }
 
 /**

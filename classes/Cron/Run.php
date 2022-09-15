@@ -105,9 +105,9 @@ class Run extends \Drivers\Database {
         }
         $this->total_task_count = count($builtins);
 
-        if ($type === 'all') {
-            return $builtins;
-        }
+        // if ($type === 'all') {
+        //     return $builtins;
+        // }
         $due = [];
         // Filter out any task which we don't want to run.
         foreach ($builtins as $task) {
@@ -178,7 +178,7 @@ class Run extends \Drivers\Database {
         }
         if(!$finished) $finished = "never";
 
-        return with("/admin/cron/$style.html",[
+        return view("/admin/cron/$style.html",[
             'warning' => $warning,
             'status' => $status,
             'finished' => $finished,

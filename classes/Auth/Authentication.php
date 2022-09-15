@@ -21,7 +21,7 @@ class Authentication {
             return $this;
         }
 
-        $GLOBALS['session'] = (array)$this->user;
+        $GLOBALS['session'] = new UserSchema($this->user);
         $GLOBALS['session']['session_data'] = (array)$this->session;
     }
 

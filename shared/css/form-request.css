@@ -11,6 +11,12 @@
   width:100%;
   transition: transform .5s, opacity .5s;
 }
+
+:is(form-request) > fieldset {
+  border: var(--project-color-table-border);
+  background: white;
+}
+
 /* 
 :is(form-request,login-form-request) > section.form-request--actual{
   position: relative;

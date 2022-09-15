@@ -25,7 +25,7 @@ session_start();
 if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
 
 /* Cobalt Version Number */
-define("__COBALT_VERSION", "0.2");
+define("__COBALT_VERSION", "1.0");
 
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
@@ -48,6 +48,8 @@ if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
 // Define a few values that we will use to handle writing output during an exception
 $allowed_to_exit_on_exception = true;
 $write_to_buffer_handled = false;
+
+require_once __DIR__ . "/globals/bootstrap.php";
 
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_exceptions.php";

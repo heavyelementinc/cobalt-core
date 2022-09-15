@@ -256,6 +256,9 @@
         "default": "url(/core-content/img/default_poster_image.jpg)",
         "$style": true
     },
+    "common-pagackages": {
+        "default": []
+    },
     /* A list of JS files to be concatenated, minified, and sent to the client
     with every page */
     "packages": {
@@ -285,6 +288,7 @@
             "Events.js",
             "PaginatedContainer.js",
             "AudioPlayer.js",
+            "CobaltParallax.js",
             "protected/Posts.js",
             "protected/UserPanel.js",
             "protected/UserManager.js"
@@ -299,18 +303,23 @@
     files for use there. */
     "css_packages": {
         "default": [
+            "header.css",
+            "main.css"
+        ],
+        "$merge": true // User's packages should come second.
+    },
+    "common-css-packages": {
+        "default": [
             "components/autocomplete.css",
             "components/tag-select.css",
             "components/fold-out.css",
             "normalize.css",
-            "header.css",
             "slideshow.css",
             "inputs.css",
             "loading-spinner.css",
             "buttons.css",
             "action-menu.css",
             "status-message.css",
-            "login-form.css",
             "form-request.css",
             "posts.css",
             "flex-table.css",
@@ -321,12 +330,14 @@
             "webcomponents.css",
             "audio-player.css",
             "paginated-container.css",
-            "main.css"
-        ],
-        "$merge": true // User's packages should come second.
+            "parallax.css"
+        ]
     },
-    "admin_css_packages": {
-        "default": []
+    "admin-css-packages": {
+        "default": [
+            "protected/admin.css",
+            "login-form.css"
+        ]
     },
     "default-color-scheme": {
         "default": "light"
@@ -569,5 +580,16 @@
 
         },
         "$merge": true
+    },
+    "Posts_enable_parallax": {
+        "default": true
+    },
+    "enable_default_parallax": {
+        "default": true,
+        "$public": true
+    },
+    "Parallax_enable_debug": {
+        "default": false,
+        "$public": true
     }
 }

@@ -341,7 +341,7 @@ class WebHandler implements RequestHandler {
         $link_tags = "";
         $compiled = "";
         $debug = app("debug");
-        foreach (app('css_packages') as $package) {
+        foreach (array_merge(app('common-css-packages'), app('css_packages')) as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",

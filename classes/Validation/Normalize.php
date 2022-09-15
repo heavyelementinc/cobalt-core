@@ -451,7 +451,6 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 $type = gettype($val);
         }
 
-
         $options = "";
         foreach ($valid as $k => $v) {
             $value = $v;
@@ -471,6 +470,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 case "object":
                     if ($val instanceof \MongoDB\Model\BSONArray) {
                         $selected = (in_array($k, $val->getArrayCopy())) ? "selected='selected'" : "";
+                    } elseif($val instanceof \MongoDB\BSON\ObjectId && (string)$val === $k) {
+                        $selected = "selected='selected'";
                     }
                     break;
                 case "array":

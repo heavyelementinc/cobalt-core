@@ -787,6 +787,8 @@ customElements.define("flex-table", FlexTable);
 class ProgressBar extends HTMLElement {
     constructor() {
         super();
+        this.maxValue = this.getAttribute("max") || 100;
+        this.progressValue = 0;
         this.messageContainer = document.createElement("div");
         this.messageContainer.innerHTML = "&nbsp;";
     }
@@ -805,8 +807,24 @@ class ProgressBar extends HTMLElement {
     set percent(value) {
         this.setAttribute("percent", value);
     }
+
     set complete(value) {
         this.setAttribute("complete", value);
+    }
+
+    set max(value) {
+        this.maxValue = value;
+        this.setAttribute("max", value);
+    }
+
+    set progress(value) {
+        this.progressValue += value;
+        this.percent = Math.round((this.progressValue / this.maxValue) * 100);
+    }
+
+    set regress(value) {
+        this.progressValue -= value;
+        this.percent = Math.round((this.progressValue / this.maxValue) * 100);
     }
 
     set message(value) {
@@ -814,7 +832,7 @@ class ProgressBar extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['percent'];
+        return ['percent','max'];
     }
 
     show() {
@@ -834,6 +852,10 @@ class ProgressBar extends HTMLElement {
 
     change_handler_percent(newValue, oldValue) {
         this.bar.style.width = `${newValue}%`;
+    }
+
+    change_handler_max(newValue, oldValue) {
+        this.maxValue = newValue;
     }
 
     change_handler_complete(newValue, oldValue) {

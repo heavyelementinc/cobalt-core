@@ -33,9 +33,18 @@ class UserSchema extends \Validation\Normalize {
         }
         if ($additional) $integrate = $additional->__get_additional_schema();
         return array_merge([
-            'fname' => [],
+            'fname' => [
+                'display' => fn () => $this->name
+            ],
             'lname' => [],
             'uname' => [],
+            'name'  => [
+                'get' => function () {
+                    if($this->fname && $this->lname) return "<span title='Username: $this->uname'>$this->fname " . $this->lname[0] . ".</span>";
+                    return $this->uname;
+                },
+                'set' => null
+            ],
             'pword' => [],
             'email' => [],
             'flags.verified' => [

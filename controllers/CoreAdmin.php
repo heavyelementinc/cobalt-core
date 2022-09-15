@@ -99,4 +99,27 @@ class CoreAdmin {
         ]);
         set_template("plugins/individual.html");
     }
+
+    function settings_index() {
+        add_vars([
+            'title' => "Settings Panel",
+            'settings_panel' => get_route_group("settings_panel",['with_icon' => true])
+        ]);
+
+        set_template("/admin/settings.html");
+    }
+
+    function cron_panel() {
+        $cron = new \Cron\Run();
+
+        $tasks = "";
+        foreach($cron->get_tasks('all') as $task){
+            $tasks .= (new \Cron\Task($task, new DateTime()))->getView($cron->task_stats($task->name));
+        }
+        add_vars([
+            // 'widgets ' => $widgets,
+            'tasks' => $tasks
+        ]);
+        set_template("/admin/cron/cron-task-index.html");
+    }
 }

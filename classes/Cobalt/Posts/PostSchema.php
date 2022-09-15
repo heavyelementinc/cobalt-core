@@ -59,7 +59,7 @@ class PostSchema extends \Validation\Normalize {
                 },
                 'display' => function ($val) {
                     if(!$val) return "";
-                    return "style=\"background-image:url(".$this->default_image."); background-position: ".$this->{'alignment.position'}."\" bg-splash";
+                    return "style=\"background-image:url(".$this->default_image."); background-position: ".$this->{'alignment.position'}."\" bg-splash" . ((__APP_SETTINGS__['Posts_enable_parallax']) ? ' parallax-mode="background"' : '');
                 }
             ],
             'alignment.position' => [

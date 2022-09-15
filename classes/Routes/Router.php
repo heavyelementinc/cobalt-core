@@ -57,7 +57,8 @@ class Router {
             // Make a list of all the routes we need to load
             $this->router_table_list[$context] = [
                 __ENV_ROOT__ . "/routes/$context.php",
-                __APP_ROOT__ . "/private/routes/$context.php",
+                __APP_ROOT__ . "/routes/$context.php",
+                // __APP_ROOT__ . "/private/routes/$context.php",
             ];
             
             foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
@@ -220,6 +221,7 @@ class Router {
         $controller_method = $explode[1];
 
         $controller_search = [
+            __APP_ROOT__ . "/controllers",
             __APP_ROOT__ . "/private/controllers",
             ...array_values($this->registered_plugin_controllers),
             __ENV_ROOT__ . "/controllers"
@@ -275,6 +277,7 @@ class Router {
                     if($hasHandler === false) continue;
 
                     $files = \files_exist([
+                        __APP_ROOT__ . "/controllers/client/$handler",
                         __APP_ROOT__ . "/private/controllers/client/$handler",
                         __ENV_ROOT__ . "/controllers/client/$handler",
                     ], false);

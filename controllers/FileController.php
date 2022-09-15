@@ -1,6 +1,9 @@
 <?php
-class FileController extends \Controllers\FileController {
 
+use Controllers\ClientFSManager;
+
+class FileController extends \Controllers\FileController {
+    use ClientFSManager;
     function __construct() {
         if (!app("enable_core_content")) throw new Exceptions\HTTP\NotFound("Shared files are not enabled.");
         $cacheControl = 'Cache-Control: private, ';

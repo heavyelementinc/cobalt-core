@@ -11,6 +11,8 @@ Route::get("/", "Pages@index", [
     'navigation' => ['main_navigation']
 ]);
 
+Route::get("/res/fs/...","FileController@download");
+
 /** Debug routes are for testing purposes and should not be enabled in production */
 if (app("enable_debug_routes")) {
     Route::get("/debug", "Debug@debug_directory");

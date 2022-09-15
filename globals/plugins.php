@@ -14,6 +14,7 @@ try {
     $GLOBALS['ACTIVE_PLUGINS'] = $plugin_manager->instantiate_active_plugins();
 
     $TEMPLATE_PATHS = [
+        __APP_ROOT__ . "/templates/",
         __APP_ROOT__ . "/private/templates/",
     ];
 
