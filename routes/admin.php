@@ -10,6 +10,15 @@ Route::get("/?", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
+Route::get("/settings/application/","CoreAdmin@app_settings",[
+    'name' => "App Settings",
+    'anchor' => [
+        'name' => 'App Settings',
+        'icon' => "settings-outline"
+    ],
+    'navigation' => ['admin_basic_panel']
+]);
+
 if (app('Auth_logins_enabled')) {
     /** User management interface */
     Route::get("/create-user", "CoreAdmin@create_user", [

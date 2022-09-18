@@ -688,7 +688,7 @@ function maybe_view(string $template, array $vars = []):string {
 
 function conditional_addition(string $template, bool $is_shown, $vars = []) {
     if (!$is_shown) return "";
-    return with($template, $vars);
+    return view($template, $vars);
 }
 
 function with_each(string $template, $docs, $var_name = 'doc') {

@@ -86,6 +86,17 @@
                     "html_class": "admin-panel"
                 }
             },
+            "debug": {
+                "processor": "Handlers\\WebHandler",
+                "prefix": "/debug/",
+                "exception_mode": "web",
+                "permission": "Debug_access",
+                "session_refresh": true,
+                "api_access": true,
+                "vars": {
+                    "html_class": "debug-panel"
+                }
+            },
             "init": {
                 "processor": "Handlers\\WebHandler",
                 "session_refresh": false,
@@ -288,7 +299,7 @@
             "Events.js",
             "PaginatedContainer.js",
             "AudioPlayer.js",
-            "CobaltParallax.js",
+            "CobaltScrollManager.js",
             "protected/Posts.js",
             "protected/UserPanel.js",
             "protected/UserManager.js"

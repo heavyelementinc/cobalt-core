@@ -58,7 +58,7 @@ class CoreAdmin {
 
         try {
             $auth = new \Auth\AdditionalUserFields();
-            $additional = maybe_with($auth->__get_additional_user_tab());
+            $additional = maybe_view($auth->__get_additional_user_tab());
         } catch (\Exception $e) {
             $additional = "";
         }
@@ -103,10 +103,16 @@ class CoreAdmin {
     function settings_index() {
         add_vars([
             'title' => "Settings Panel",
-            'settings_panel' => get_route_group("settings_panel",['with_icon' => true])
+            'basic_settings' => get_route_group('admin_basic_panel', ['with_icon' => true]),
+            'settings_panel' => get_route_group("settings_panel",['with_icon' => true]),
+            'advanced_panel' => get_route_group("access_panel",['with_icon' => true]),
         ]);
 
-        set_template("/admin/settings.html");
+        set_template("/admin/settings/control-panel.html");
+    }
+
+    function app_settings() {
+        set_template("/admin/settings/basic-settings.html");
     }
 
     function cron_panel() {

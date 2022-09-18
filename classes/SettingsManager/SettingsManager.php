@@ -116,6 +116,8 @@ class SettingsManager {
 
     /** Possible files containing app settings */
     private $app_paths_settings = [
+        __APP_ROOT__ . "/config/settings.json",  // App's settings
+        __APP_ROOT__ . "/config/settings.jsonc",  // App's settings
         __APP_ROOT__ . "/private/config/settings.json",  // App's settings
         __APP_ROOT__ . "/private/config/settings.jsonc",  // App's settings
         __APP_ROOT__ . "/ignored/config/settings.json", // .gitignored file can override APP settings

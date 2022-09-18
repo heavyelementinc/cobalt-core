@@ -1,0 +1,38 @@
+<fieldset>
+    <legend>Application Settings</legend>
+    {{!basic_settings}}
+</fieldset>
+<fieldset>
+    <legend>Basic Settings</legend>
+    {{!settings_panel}}
+</fieldset>
+<style>
+    .directory--icon-group {
+        display: flex;
+        list-style: none;
+        gap: 1em;
+    }
+
+    .directory--icon-group a {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: black;
+        font-weight: normal;
+        text-decoration: none;
+        height: 5.5rem;
+        width: 5.5rem;
+        padding: 1em;
+        border-radius: .5rem;
+        background-color:white;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .directory--icon-group ion-icon {
+        font-size: 5rem;
+    }
+</style>
