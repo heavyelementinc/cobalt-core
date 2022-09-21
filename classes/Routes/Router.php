@@ -23,6 +23,7 @@ namespace Routes;
 
 use Exception;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\NotImplemented;
 
 class Router {
 
@@ -194,7 +195,7 @@ class Router {
 
         /** Store our route data for easy access */
         $exe = $this->routes[$context][$method][$route];
-        if(!$exe) throw new NotFound("Route controller not found");
+        if(!$exe) throw new NotImplemented("Route controller not implemented");
         if (isset($exe['permission'])) {
             $permission = true;
             try {

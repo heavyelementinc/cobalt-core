@@ -1,47 +1,45 @@
 <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
-    <h2><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></h2>
-    <div id="tab-list--parent">
-        <ul class="tab-list--tab-row">
-            <li><button for="basics" class="tab-list--active">Basics</button></li>
-            <li><button for="permissions">Permissions</button></li>
+    <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
+
+    <tab-nav id="tab-list--parent">
+        <nav>
+            <a href="#basics" class="tab-nav--current-content">Basic Info</a>
+            <a href="#permissions">Permissions</a>
+            <a href="#statistics">Stats</a>
             {{!additional_button}}
-            <li><button for="statistics">Stats</button></li>
-            <li><button for="manage">Manage</button></li>
-        </ul>
-        <section id="basics" class="drawer-list--item drawer-list--active">
+            <a href="#manage">Manage</a>
+        </nav>
+        <section id="basics" class="">
+            <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{user_account._id}}/update"
+                autosave="autosave">
+                <fieldset>
+                    <legend>Basic Info</legend>
+                    <label>Name</label>
+                    <input name="fname" value="{{user_account.fname}}" placeholder="First name" for="#fname"> <input
+                        name="lname" value="{{user_account.lname}}" placeholder="Last name" for="#lname">
+                
+                    <label>Username</label>
+                    <input name="uname" value="{{user_account.uname}}" for="#uname">
+                
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{user_account.email}}">
+                </fieldset>
+            </form-request>
+    
             <div>
-                <h2>Basic Info</h2>
-                <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{user_account._id}}/update"
-                    autosave="autosave">
+                <form-request id="profile-picture" method='POST' action="/api/v1/user/{{user_account._id}}/picture">
                     <fieldset>
-                        <label>Name</label>
-                        <input name="fname" value="{{user_account.fname}}" placeholder="First name" for="#fname"> <input
-                            name="lname" value="{{user_account.lname}}" placeholder="Last name" for="#lname">
-                    </fieldset>
-                    <fieldset>
-                        <label>Username</label>
-                        <input name="uname" value="{{user_account.uname}}" for="#uname">
-                    </fieldset>
-                    <fieldset>
-                        <label>Email</label>
-                        <input type="email" name="email" value="{{user_account.email}}">
+                        <legend>Profile Picture</legend>
+                        <input type="file" name="profilepic">
+                        <button type="submit">Upload</button>
                     </fieldset>
                 </form-request>
-            </div>
-            <div>
-                <h2>Change Password</h2>
                 <form-request id="password-reset" method="PUT" action="/api/v1/user/{{user_account._id}}/password">
                     <fieldset>
+                        <legend>Change Password</legend>
                         <input type="password" name="pword" placeholder="Password" required="required">
+                        <input type='submit' value="Save">
                     </fieldset>
-                    <input type='submit' value="Change Password">
-                </form-request>
-            </div>
-            <div>
-                <h2>Account Flags</h2>
-                <form-request id="account-flags" method="PUT" action="/api/v1/user/{{user_account._id}}/update"
-                    autosave="autosave">
-                    {{!account_flags}}
                 </form-request>
             </div>
         </section>
@@ -49,14 +47,13 @@
             <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{user_account._id}}/permissions"
                 autosave="autosave">
                 <div style="flex-grow:1">
-                    <h1>Permissions</h1>
                     {{!permission_table.permissions}}
                 </div>
                 <div style="min-width:35%; padding: 0 0 1rem 1rem;">
-                    <h1>Group Membership<help-span
+                    <h2>Group Membership<help-span
                             value="Group membership grants the user *all* permissions for that group. However, any permissions the user has been granted/denied will be preserved.">
                         </help-span>
-                    </h1>
+                    </h2>
                     {{!permission_table.groups}}
                 </div>
             </form-request>
@@ -71,8 +68,15 @@
             <form-request id="delete-user" method="DELETE" action="/api/v1/user/{{user_account._id}}/delete">
                 <button type="submit">Delete</button>
             </form-request>
+            <form-request id="account-flags" method="PUT" action="/api/v1/user/{{user_account._id}}/update"
+                    autosave="autosave">
+                    <fieldset>
+                        <legend>Account Flags</legend>
+                        {{!account_flags}}
+                    </fieldset>
+                </form-request>
         </section>
-    </div>
+    </tab-nav>
 
     <style>
         #basics.drawer-list--active {

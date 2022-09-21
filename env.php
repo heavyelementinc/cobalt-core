@@ -54,6 +54,7 @@ require_once __DIR__ . "/globals/bootstrap.php";
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
+require_once __DIR__ . "/globals/global_csrf.php";
 
 $app_env = __APP_ROOT__ . "/app_env.php";
 if(file_exists($app_env)) require_once $app_env;

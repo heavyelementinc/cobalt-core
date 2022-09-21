@@ -6,7 +6,7 @@ use DateTime;
 use MongoDB\BSON\UTCDateTime;
 
 class Run extends \Drivers\Database {
-    protected $app_tasks = __APP_ROOT__ . "/private/config/cron/tasks.json";
+    protected $app_tasks = __APP_ROOT__ . "/config/cron/tasks.json";
     private $task_types = ['DefaultType'];
     private $task_cache = [];
     private $log = [];

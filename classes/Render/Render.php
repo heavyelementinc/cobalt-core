@@ -313,13 +313,26 @@ class Render {
     function replace_functs($subject, $functions) {
         $mutant = $subject;
         foreach ($functions[1] as $i => $funct) {
-            if (!is_callable($funct)) $this->debug_template($funct[0][$i], "$funct is not callable");
-            $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
+            if (!is_callable($funct)) $this->debug_template($funct, "@$funct() is not callable");
+            try{
+                $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Exception $e) {
+                $this->debug_template($functions[2][$i], "@$funct() was supplied malformed parameters");
+            }
             $mutant_vars = $this->functs_get_vars($args);
-            // We want to include the current context's variables when @with is called
+            
+            // We want to include the current context's variables when @view is called
             // from inside a template, so we add a special case. Fun.
-            if (in_array($funct, ['maybe_with', 'with']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
-            $result = $funct(...$mutant_vars);
+            if (in_array($funct, ['maybe_with', 'with', 'view', 'maybe_view']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
+            try{
+                $result = $funct(...$mutant_vars);
+            } catch (\Exception $e) {
+                $this->debug_template($funct, $e->getMessage());
+            } catch (\Error $e) {
+                $this->debug_template($funct, $e->getMessage());
+            }
+            // If we run the 'set' callable, then we want to update our current vars with 
+            // the values set just set.
             if($funct === "set") $this->vars = array_merge($this->vars,$GLOBALS['WEB_PROCESSOR_VARS']);
             $mutant = \str_replace($functions[0][$i], $result, $mutant);
         }
@@ -335,10 +348,65 @@ class Render {
         return $mutant;
     }
 
-    function debug_template($funct) {
+    function debug_template($funct, $message) {
         $strpos = \strpos($this->body, $funct);
-        $message = "";
-        throw new \Exception($message . "; at position " . $strpos);
+        $template = $this->template_cache[$this->name];
+        $substr = substr($template, 0, $strpos);
+        $explosion = explode("\n",$substr);
+        $lineNum = count($explosion);
+        $linePos = strlen($explosion[$lineNum - 1]);
+        // $substr = substr();
+        // $message = "";
+        if(app("debug")) $this->render_template_error($funct, $message, $lineNum, $linePos);
+        $errorMessage = "$message in \"$this->name\" on line $lineNum, column $linePos";
+        try{
+            throw new \Exception($errorMessage);
+        } catch (\Exception $e){}
+        die("A template error occurred. Please contact your IT team.");
+    }
+
+    function render_template_error($funct, $message, $lineNum, $strpos) {
+        header("HTTP/1.1 500 Internal Server Error");
+        $template = $this->template_cache[$this->name];
+        $safe = htmlspecialchars($template);
+        $safe = str_replace($funct,"<code>$funct</code>",$safe);
+        echo "<h1>Cobalt Template Debugger</h1>";
+        echo "<code>".$message . " in \"$this->name\" on line $lineNum, column " . $strpos."</code>";
+        echo "<pre>";
+        foreach(explode("\n",$safe) as $number => $line) {
+            echo "<span>" . $line . "</span>\n";
+        }
+        echo "</pre>";
+        echo "<style>
+        h1 {
+            display:pre;
+            font-family: monospace;
+        }
+        pre{
+            background:#212124;
+            color:white;
+            white-space:pre-wrap
+            counter-reset: line;
+        }
+        pre span {
+            counter-increment: line;
+            display: pre;
+            color: inherit;
+            white-space: pre-wrap;
+        }
+        pre span:before{
+            content: counter(line);
+            display: inline-block;
+            border-right: 1px solid #ddd;
+            width: 3ch;
+            text-align:right;
+            padding: 0 .5em;
+        }
+        pre code{
+            color:red;
+            font-weight:bold;
+        }</style>";
+        die();
     }
 
     function strposall($needle, $haystack, $up_to) {

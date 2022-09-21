@@ -95,8 +95,8 @@ class Manager {
         </form-request></flex-cell>";
             $content .= "<flex-cell style='flex-grow:$name_column_size'><a href='$url" . "$plugin[plugin]'>$plugin[name]</a></flex-cell>";
             $content .= "<flex-cell>$plugin[description]</flex-cell>";
-            $content .= "<flex-cell style='flex-grow:$number_column_size'>" . count($plugin['settings']) . "</flex-cell>";
-            $content .= "<flex-cell style='flex-grow:$number_column_size'>" . count($plugin['permissions']) . "</flex-cell>";
+            $content .= "<flex-cell style='flex-grow:$number_column_size'>" . count($plugin['settings'] ?? []) . "</flex-cell>";
+            $content .= "<flex-cell style='flex-grow:$number_column_size'>" . count($plugin['permissions'] ?? []) . "</flex-cell>";
             $content .= "</flex-row>";
         }
         $content .= "</flex-table>";
