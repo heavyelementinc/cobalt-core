@@ -118,7 +118,7 @@ class Router {
             let url = location.toString();
             history.replaceState({
                 title: document.title,
-                url: url
+                url: url,
             },'',url);
             links = document.querySelectorAll(this.linkSelector);
             window.addEventListener("hashchange",(event) => {

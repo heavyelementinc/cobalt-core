@@ -1,15 +1,15 @@
-:is(fold-out){
+:where(fold-out){
     display: block;
     transition: height .8s;
     height: var(--height);
     overflow: hidden;
 }
 
-:is(fold-out.fold-out--closed ){
+:where(fold-out.fold-out--closed ){
     height: var(--closed-height);
 }
 
-:is(fold-out > h1:first-of-type ){
+:where(fold-out > h1:first-of-type ){
     display: flex;
     background: var(--project-color-table-bg-even);
     border: var(--project-color-table-border);
@@ -19,11 +19,11 @@
     padding: .2em .4em;
 }
 
-:is(fold-out > h1:first-of-type:hover ){
+:where(fold-out > h1:first-of-type:hover ){
     background-color: var(--project-color-table-bg-odd);
 }
 
-:is(fieldset fold-out h1:first-of-type) {
+:where(fieldset fold-out h1:first-of-type) {
     font-weight: normal;
     font-size: 16px;
     font-family: var(--project-body-family);
@@ -31,17 +31,17 @@
 }
 
 
-:is(fold-out > h1 i:before ){
+:where(fold-out > h1 i:before ){
     content: '\25B2';
     font-size: .8em;
     color: rgba(0,0,0,.6)
 }
 
-:is(fold-out > h1 i ){
+:where(fold-out > h1 i ){
     transition: transform .8s;
     line-height: 28px;
 }
 
-:is(fold-out.fold-out--closed > h1 i ){
+:where(fold-out.fold-out--closed > h1 i ){
     transform: rotate(180deg);
 }

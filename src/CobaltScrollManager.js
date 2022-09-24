@@ -164,9 +164,11 @@ class CobaltScrollManager {
         //     image.src = src;
         // });
 
-        element.style.backgroundRepeat = "no-repeat";
-        element.style.backgroundAttachment = "fixed";
-        element.style.backgroundSize = "cover";
+        element.classList.add("cobalt-parallax--bg-parallax");
+
+        // element.style.backgroundRepeat = "no-repeat";
+        // element.style.backgroundAttachment = "fixed";
+        // element.style.backgroundSize = "cover";
 
         const position = element.getAttribute("parallax-start-position") ?? "top";
         element.style.backgroundPosition = `center ${position}`;
@@ -174,11 +176,11 @@ class CobaltScrollManager {
     }
 
     parallaxBackground(element, data) {
-        // We take the viewport's height relative to to the element's top
-        const relativeViewportHeight = element.getBoundingClientRect().top;
-        let x = relativeViewportHeight / (data.speed ?? this.modifier);
+        let x = element.getBoundingClientRect().top / (element.getAttribute("parallax-speed") ?? this.modifier);
         let y = Math.round(x * 100) / 100;
-        element.style.backgroundPosition = 'center ' + (y + data.offset) + 'px';
+        // console.log({x,y,data});
+        (data.offset ?? 0)
+        element.style.backgroundPosition = `center ${y}px`;
     }
 
     parallaxPositionInit(element, data) {

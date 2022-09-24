@@ -79,6 +79,7 @@
                 "processor": "Handlers\\AdminHandler",
                 "prefix": "/admin/",
                 "exception_mode": "web",
+                "mode": "text/html",
                 "permission": "Admin_panel_access",
                 "session_refresh": true,
                 "api_access": true,
@@ -90,6 +91,7 @@
                 "processor": "Handlers\\WebHandler",
                 "prefix": "/debug/",
                 "exception_mode": "web",
+                "mode": "text/html",
                 "permission": "Debug_access",
                 "session_refresh": true,
                 "api_access": true,
@@ -99,36 +101,43 @@
             },
             "init": {
                 "processor": "Handlers\\WebHandler",
+                "mode": "application/json",
                 "session_refresh": false,
                 "api_access": false,
                 "prefix": null
             },
             "shared": {
                 "processor": "Handlers\\SharedHandler",
+                "mode": "application/json",
                 "session_refresh": false,
                 "api_access": false,
                 "prefix": "/core-content/"
             },
             "apiv1": {
                 "processor": "Handlers\\ApiHandler",
+                "mode": "application/json",
                 "session_refresh": false,
                 "api_access": false,
                 "prefix": "/api/v1/"
             },
             "webhookv1": {
                 "processor": "Handlers\\ApiHandler",
+                "mode": "application/json",
                 "session_refresh": false,
                 "api_access": false,
                 "prefix": "/webhook/v1/"
             },
             "streams": {
                 "processor": "Handlers\\ApiHandler",
+                "mode": "application/json",
                 "session_refresh": false,
                 "api_access": false,
                 "prefix": "/streams/"
             },
             "web": {
                 "processor": "Handlers\\WebHandler",
+                "exception_mode": "web",
+                "mode": "text/html",
                 "session_refresh": true,
                 "api_access": true,
                 "prefix": "/",
@@ -326,6 +335,7 @@
             "components/tag-select.css",
             "components/fold-out.css",
             "components/tab-nav.css",
+            "components/cobalt-carousel.css",
             "normalize.css",
             "slideshow.css",
             "inputs.css",

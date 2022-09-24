@@ -95,7 +95,7 @@ try {
     $context_processor->_stage_execute($router_result);
     $context_processor->_stage_bootstrap['_stage_execute'] = true;
 
-    $context_result = $context_processor->_stage_output();
+    $context_result = $context_processor->_stage_output($router_result);
     $context_processor->_stage_bootstrap['_stage_output'] = true;
     ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
@@ -114,4 +114,6 @@ if($context_result !== null) {
     echo $context_result;
     ob_flush();
     exit;
+} else {
+    die("No content in buffer");
 }

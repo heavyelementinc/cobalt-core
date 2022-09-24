@@ -284,7 +284,12 @@ function add_template($path) {
  * @return void
  */
 function set_template($path) {
-    $GLOBALS['web_processor_template'] = $path;
+    $templates = files_exist([
+        __APP_ROOT__ . "/templates/$path",
+        __ENV_ROOT__ . "/templates/$path",
+    ]);
+    $GLOBALS['WEB_PROCESSOR_TEMPLATE'] = $path;
+    return $templates[0];
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.

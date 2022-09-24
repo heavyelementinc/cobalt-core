@@ -22,6 +22,7 @@
 namespace Routes;
 
 use Exception;
+use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\NotImplemented;
 
@@ -168,7 +169,7 @@ class Router {
             }
         }
 
-        if ($this->current_route === null) throw new \Exceptions\HTTP\NotFound("No route discovered.");
+        if ($this->current_route === null) throw new NotFound("No route discovered.");
     }
 
     function set_uri_vars($directives, $match, $route, $context) {
@@ -195,7 +196,7 @@ class Router {
 
         /** Store our route data for easy access */
         $exe = $this->routes[$context][$method][$route];
-        if(!$exe) throw new NotImplemented("Route controller not implemented");
+        if(!$exe) throw new MethodNotAllowed("Route controller not implemented");
         if (isset($exe['permission'])) {
             $permission = true;
             try {
@@ -233,6 +234,8 @@ class Router {
             // controllers to override the core's controllers.
             $controller_file = find_one_file($controller_search, "$controller_name.php");
         } catch (\Exception $e) {
+            // throw new NotImplemented("Controller $controller_name not found.");
+            // header("HTTP/")
             die("Controller $controller_name not found.");
         }
 
@@ -242,7 +245,7 @@ class Router {
 
         // Instantiate our controller and then execute it
         $ctrl = new $controller_name();
-        if (!method_exists($ctrl, $controller_method)) throw new \Exceptions\HTTP\NotFound("Specified method was not found.");
+        if (!method_exists($ctrl, $controller_method)) throw new \Exceptions\HTTP\MethodNotAllowed("Specified method was not found.");
         $test = new \ReflectionMethod($controller_name, $controller_method);
         /** We check to make sure that we're not going to have callable exception 
          * where we aren't supplying the correct number of arguments to a callable. 
@@ -254,8 +257,10 @@ class Router {
          */
         if ($test->getNumberOfRequiredParameters() > count($exe['matches'])) throw new \Exceptions\HTTP\BadRequest("Method supplied too few arguments.");
         if (gettype($exe['matches']) !== "array") $exe['matches'] = [$exe['matches']];
+        
         /** Execute our method */
         return $ctrl->{$controller_method}(...$exe['matches']);
+        
     }
 
     /** @todo Fix terrible nested loops/logic */

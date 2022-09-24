@@ -31,6 +31,7 @@ class FileController extends \Controllers\FileController {
         // header('Pragma: public');
         $this->get_etag($file);
         readfile($file);
+        exit;
     }
 
     function javascript($match) {
@@ -50,6 +51,7 @@ class FileController extends \Controllers\FileController {
         header("Content-Type: application/javascript;charset=UTF-8");
         $this->get_etag($file);
         readfile($file);
+        exit;
     }
 
     function css($match) {
@@ -65,6 +67,7 @@ class FileController extends \Controllers\FileController {
         header("Content-Type: text/css;charset=UTF-8");
         $this->get_etag($file);
         readfile($file);
+        exit;
     }
 
 
@@ -96,6 +99,7 @@ class FileController extends \Controllers\FileController {
         header('Content-Length: ' . filesize($file));
         $this->get_etag($file);
         readfile($file);
+        exit;
     }
 
     function manifest() {
@@ -103,6 +107,7 @@ class FileController extends \Controllers\FileController {
         header('Content-Type: text/json');
         header('Content-Length: ' . strlen($content) * 8);
         echo $content;
+        exit;
     }
 
     function get_etag($path) {
@@ -113,5 +118,6 @@ class FileController extends \Controllers\FileController {
         $header .= app('version') . "\"";
         header($header);
         header('Content-Length: ' . $filesize);
+        // exit;
     }
 }

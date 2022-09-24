@@ -19,6 +19,11 @@
   position: absolute;
 }
 
+.cobalt-parallax--bg-parallax {
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
 
 :is(html.js [lazy-reveal]){
   opacity: 0;

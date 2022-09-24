@@ -368,8 +368,8 @@ class Render {
     function render_template_error($funct, $message, $lineNum, $strpos) {
         header("HTTP/1.1 500 Internal Server Error");
         $template = $this->template_cache[$this->name];
-        $safe = htmlspecialchars($template);
-        $safe = str_replace($funct,"<code>$funct</code>",$safe);
+        $safe = highlight_file($template);
+        $safe = str_replace($funct,"<code class='error'>$funct</code>",$safe);
         echo "<h1>Cobalt Template Debugger</h1>";
         echo "<code>".$message . " in \"$this->name\" on line $lineNum, column " . $strpos."</code>";
         echo "<pre>";
@@ -402,7 +402,7 @@ class Render {
             text-align:right;
             padding: 0 .5em;
         }
-        pre code{
+        pre code.error{
             color:red;
             font-weight:bold;
         }</style>";

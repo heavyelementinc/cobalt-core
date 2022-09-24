@@ -85,11 +85,11 @@ class WebHandler implements RequestHandler {
     }
 
     public function _stage_execute($router_result = "") {
-        if (!isset($GLOBALS['web_processor_template'])) throw new NotFound("No template specified by controller");
-        if (!\template_exists($GLOBALS['web_processor_template'])) throw new NotFound("That template doesn't exist!");
+        if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
+        if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
     }
 
-    public function _stage_output() {
+    public function _stage_output($context_result) {
         if ($this->context_mode === "web" || $this->context_mode === "admin") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
@@ -102,7 +102,7 @@ class WebHandler implements RequestHandler {
 
     public function _public_exception_handler($e) {
         // Prevent trying to load a template that might not exist already.
-        unset($GLOBALS['web_processor_template']);
+        unset($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
 
         // Get the message string and data
         $message = $e->getMessage();
@@ -142,7 +142,7 @@ class WebHandler implements RequestHandler {
 
         // Add the error template as the main content
         $this->main_content_from_template($template);
-        return $this->_stage_output();
+        return $this->_stage_output("");
     }
 
     /** END INTERFACE REQUIREMENTS */
@@ -444,7 +444,7 @@ class WebHandler implements RequestHandler {
     }
 
     function process() {
-        if (isset($GLOBALS['web_processor_template'])) $this->main_content_from_template($GLOBALS['web_processor_template']);
+        if (isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) $this->main_content_from_template($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
         if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
         if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
         $this->renderer->set_body($this->template_body);
