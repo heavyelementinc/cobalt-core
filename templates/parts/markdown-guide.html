@@ -1,0 +1,46 @@
+<fold-out title="Markdown Guide">
+    <div>
+        <flex-table>
+            <flex-row>
+                <flex-cell>
+                    <code>**Bold**</code>
+                </flex-cell>
+                <flex-cell>@from_markdown("**Bold**");</flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell><code>*Italic*</code></flex-cell>
+                <flex-cell>@from_markdown("*Italic*");</flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell><code>[http://google.com](Hyperlink)</code></flex-cell>
+                <flex-cell><a href="http://google.com">Hyperlink</a></flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell><code>![/core-content/img/default_poster_image.jpg](Image alt text)</code></flex-cell>
+                <flex-cell><img height="50" src="/core-content/img/default_poster_image.jpg" alt="Image alt text" title="Image alt text"></flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell>
+                    <pre>
+* Bullet 1
+* Bullet 2
+                    </pre>
+                </flex-cell>
+                <flex-cell>@from_markdown("* Bullet 1\n* Bullet 2");</flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell>
+                    <pre>
+1. Ordered list 1
+1. Ordered list 2
+                    </pre>
+                </flex-cell>
+                <flex-cell>@from_markdown("1. Ordered list 1\n1. Ordered list 2");</flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell><code>> Quote</code></flex-cell>
+                <flex-cell>@from_markdown("> Quote");</flex-cell>
+            </flex-row>
+        </ul>
+    </div>
+</fold-out>

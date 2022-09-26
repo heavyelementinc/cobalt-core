@@ -106,6 +106,12 @@ class PostSchema extends \Validation\Normalize {
                     return null;
                 },
                 'set' => false
+            ],
+            'prominent' => [
+                'set' => fn ($val) => $this->boolean_helper($val),
+                'display' => function ($val) {
+                    return ($val) ? " cobalt-post--prominent" : "";
+                }
             ]
         ];
     }

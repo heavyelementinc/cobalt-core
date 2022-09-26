@@ -122,7 +122,8 @@ abstract class PostController extends Controller {
 
         $posts = "";
 
-        foreach($docs as $doc) {
+        foreach($docs as $index => $doc) {
+            if($index === 0) $doc->prominent = true;
             $posts .= view($doc->getTemplate('blurb'), [
                 'post' => $doc,
                 'href' => $this->path('post',[(string)$doc['url_slug']])

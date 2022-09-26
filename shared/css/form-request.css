@@ -87,3 +87,12 @@ form-request label:has(input-switch) {
   justify-content: left;
   gap: 1ch;
 }
+
+form-request .form-request--autosave-feedback {
+  opacity: .6;
+  pointer-events: none;
+}
+
+form-request * {
+  transition: opacity .5;
+}
