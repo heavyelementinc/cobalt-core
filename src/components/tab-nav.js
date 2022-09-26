@@ -27,8 +27,11 @@
             if(!url) console.warn("URL is missing a hash location", e);
             const content = this.querySelector(url);
             if(!content) e.setAttribute("disabled","disabled");
-            e.addEventListener("click", e => {
-                e.stopPropagation();
+            e.addEventListener("click", evt => {
+                evt.preventDefault();
+                // evt.stopPropagation();
+                // history.replaceState({},'',e.href);
+                // this.hashUpdate();
             });
         })
 
