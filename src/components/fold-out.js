@@ -11,7 +11,7 @@ class FoldOut extends HTMLElement {
     }
 
     initTitleElement() {
-        this.titleElement = document.createElement("h1");
+        this.titleElement = document.createElement("label");
         this.titleElement.innerHTML = `<span>${this.title ?? "Expand"}</span><i></i>`;
         this.titleElement.tabIndex = 0;
 

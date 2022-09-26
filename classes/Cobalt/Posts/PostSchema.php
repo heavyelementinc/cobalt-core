@@ -89,7 +89,7 @@ class PostSchema extends \Validation\Normalize {
                     return $this->clientUploadImagesAndThumbnails("attachments", 200, null, ['for' => $this->_id], $mutant);
                 },
                 'display' => function ($val) {
-                    return with("/posts/parts/edit-gallery.html",['gallery' => $this->directoryListing("$this->public_link/attachment/", "gallery", ['filter' => ['for' => $this->_id]])]);
+                    return view("/posts/parts/edit-gallery.html",['gallery' => $this->directoryListing("$this->public_link/attachment/", "gallery", ['filter' => ['for' => $this->_id]])]);
                     // '
                     // <cobalt-listing id="gallery" 
                     //     custom-label-1="Make Post Default" custom-action-1="/api/v1/posts/attachment/{id}/default" custom-method-1="PUT"

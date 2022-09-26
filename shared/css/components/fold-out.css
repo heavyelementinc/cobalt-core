@@ -9,7 +9,7 @@
     height: var(--closed-height);
 }
 
-:where(fold-out > h1:first-of-type ){
+:where(fold-out > label:first-of-type ){
     display: flex;
     background: var(--project-color-table-bg-even);
     border: var(--project-color-table-border);
@@ -19,11 +19,11 @@
     padding: .2em .4em;
 }
 
-:where(fold-out > h1:first-of-type:hover ){
+:where(fold-out > label:first-of-type:hover ){
     background-color: var(--project-color-table-bg-odd);
 }
 
-:where(fieldset fold-out h1:first-of-type) {
+:where(fieldset fold-out label:first-of-type) {
     font-weight: normal;
     font-size: 16px;
     font-family: var(--project-body-family);
@@ -31,17 +31,17 @@
 }
 
 
-:where(fold-out > h1 i:before ){
+:where(fold-out > label i:before ){
     content: '\25B2';
     font-size: .8em;
     color: rgba(0,0,0,.6)
 }
 
-:where(fold-out > h1 i ){
+:where(fold-out > label i ){
     transition: transform .8s;
     line-height: 28px;
 }
 
-:where(fold-out.fold-out--closed > h1 i ){
+:where(fold-out.fold-out--closed > label i ){
     transform: rotate(180deg);
 }
