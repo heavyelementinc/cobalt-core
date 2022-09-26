@@ -28,8 +28,8 @@
             const content = this.querySelector(url);
             if(!content) e.setAttribute("disabled","disabled");
             e.addEventListener("click", evt => {
-                evt.preventDefault();
-                // evt.stopPropagation();
+                // evt.preventDefault();
+                evt.stopPropagation();
                 // history.replaceState({},'',e.href);
                 // this.hashUpdate();
             });
