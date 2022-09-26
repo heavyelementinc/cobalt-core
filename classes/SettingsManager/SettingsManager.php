@@ -110,6 +110,7 @@ class SettingsManager {
     private $enable_settings_from_cache = true;
     /** The path to the default setting definitions file. */
     private $path_to_settings_definitions_file = __ENV_ROOT__ . "/config/setting_definitions.jsonc";
+    private $path_to_flags_file = __ENV_ROOT__ . "/config/flags.jsonc";
 
     /** The parsed default settings */
     private $setting_definitions = [];
@@ -155,11 +156,14 @@ class SettingsManager {
         if (!file_exists($this->path_to_settings_definitions_file)) throw new SettingsManagerException("No core settings file found");
 
         // Import our settings definitions
-        $json = file_get_contents($this->path_to_settings_definitions_file);
-
+        $settings = file_get_contents($this->path_to_settings_definitions_file);
+        $flags = file_get_contents($this->path_to_flags_file);
         try {
             // Try to decode our settings definitions.
-            $this->setting_definitions = jsonc_decode($json, true, 512, JSON_THROW_ON_ERROR);
+            $this->setting_definitions = array_merge(
+                jsonc_decode($flags, true, 512, JSON_THROW_ON_ERROR),
+                jsonc_decode($settings, true, 512, JSON_THROW_ON_ERROR)
+            );
 
             $plugin_settings = [];
             foreach ($GLOBALS['ACTIVE_PLUGINS'] as $plugin) {

@@ -367,13 +367,13 @@ abstract class NormalizationHelpers {
         return $valid;
     }
 
-    function valid_users($groupOrPermission = null, $type = null, $storage = null, $valueCallback = null) {
+    function valid_users_by_permission($groupOrPermission = null, $type = null, $storage = null, $valueCallback = null) {
         // if(!$groupOrPermission) $groupOrPermission = 'all';
         if(!$type) $type = "all";
         if(!$storage) $storage = "_id";
         $value = function ($doc) {
             $name = "$doc->fname $doc->lname";
-            if($name = " ") $name = $doc->uname;
+            if($name === " ") $name = $doc->uname;
             return $name;
         };
         
@@ -399,6 +399,17 @@ abstract class NormalizationHelpers {
         $valid = [];
         foreach($crud->{$options[$type]['method']}(...$options[$type]['query']) as $doc) {
             $valid[(string)$doc->_id] = $value($doc);
+        }
+
+        return $valid;
+    }
+
+    function get_valid_users_from_query($query, $options) {
+        $crud = new UserCRUD();
+        $valid = [];
+
+        foreach($crud->findAllAsSchema($query, $options) as $user) {
+            $valid[$user->uname] = $user->name;
         }
 
         return $valid;

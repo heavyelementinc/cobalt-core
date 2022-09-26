@@ -75,6 +75,11 @@ form-request fieldset label > :is(input, select, textarea, input-*) {
   display:block;
 }
 
+form-request fieldset :is(input, select, textarea, input-*):not(input-switch, [type='radio'], [type='button'], [type='checkbox'], [type='file']) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 form-request label:has(input-switch) {
   display: flex;
   flex-direction: row;

@@ -497,6 +497,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     private function __proto_md($val, $field) {
+        if (!$val) $val = $this->{$field};
         if (!$val) return "";
         return from_markdown($val);
     }

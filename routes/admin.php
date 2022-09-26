@@ -10,7 +10,7 @@ Route::get("/?", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
-Route::get("/settings/application/","CoreAdmin@app_settings",[
+Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
     'name' => "App Settings",
     'anchor' => [
         'name' => 'App Settings',
@@ -34,7 +34,7 @@ if (app('Auth_logins_enabled')) {
         ],
         'navigation' => ['settings_panel']
     ]);
-    Route::get(app("Auth_user_manager_individual_page") . "/{user}", "CoreAdmin@individual_user_management_panel", [
+    Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
         'handler' => 'core/user_manager.js',
         'permission' => "Auth_allow_editing_users"
     ]);

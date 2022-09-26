@@ -77,6 +77,18 @@ article.cobalt-post :is(.cobalt-post--header, content) {
     margin: 0 auto 1em;
 }
 
+:is(.cobalt-post) a.cobalt-post--article-link {
+    color: inherit;
+}
+
+:is(.cobalt-post) .cobalt-post--title a.cobalt-post--article-link {
+    text-decoration: none;
+}
+
+:is(.cobalt-post) .cobalt-post--title a.cobalt-post--article-link:hover {
+    text-decoration: underline;
+}
+
 @media only screen and (max-width: 35em) {
     :is(article.cobalt-post .cobalt-post--header ul) {
         flex-wrap:wrap;

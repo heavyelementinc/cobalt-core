@@ -1,16 +1,27 @@
+<h1>{{title}}</h1>
 <tab-nav>
     <nav>
-        <a href="#target-1">Table 1</a>
-        <a href="#target-2">Table 2</a>
-        <a href="#target-3">Table 3</a>
+        {{!headings}}
     </nav>
-    <div id="target-1">
-        <h1>Table 1</h1>
-    </div>
-    <div id="target-2">
-        <h1>Table 2</h1>
-    </div>
-    <div id="target-3">
-        <h1>Table 3</h1>
-    </div>
+    {{!settings}}
 </tab-nav>
+<cite>Note: This page is just a placeholder for now</cite>
+
+<style>
+    .list-panel {
+        width: 100%;
+    }
+    .list-panel li {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .list-panel li label {
+        width: 100%;
+    }
+    .list-panel :where(input, input-array) {
+        flex-grow: 1;
+        margin-right: 1em;
+    }
+    
+</style>

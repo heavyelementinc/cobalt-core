@@ -22,6 +22,10 @@ class UserCRUD extends \Drivers\Database {
         return 'users';
     }
 
+    function get_schema_name($doc = []) {
+        return "UserSchema";
+    }
+
     final function getUserById($id) {
         return $this->findOne(['_id' => $this->__id($id)]);
     }

@@ -6,12 +6,14 @@ use Exception;
 use Exceptions\HTTP\RangeNotSatisfiable;
 
 class FileSystem {
-    public $db = __APP_SETTINGS__['database'];
+    // public $db = __APP_SETTINGS__['database'];
     public $bucket;
 
     function __construct($database = null) {
         if ($database !== null) $this->db = $database;
-        $this->client = new \MongoDB\Client(app('server_address'));
+        // $this->client = new \MongoDB\Client($GLOBALS['config']['server_address']);
+        $this->db = $GLOBALS['CONFIG']['database'];
+        $this->client = \db_cursor('', null, true);
         $this->database = $this->client->{$this->db};
         $this->bucket = $this->database->selectGridFSBucket();
         $this->collection = $this->database->{'fs.files'};

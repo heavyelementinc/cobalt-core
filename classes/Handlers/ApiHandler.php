@@ -50,7 +50,7 @@ class ApiHandler implements RequestHandler {
         return $this->router_result;
     }
 
-    public function _stage_output($context_output) {
+    public function _stage_output($context_output = "") {
         $return_value = [];
         /** TODO: Finish X-Update-Client-State */
         if (key_exists('X-Update-Client-State', $this->headers)) $return_value = [

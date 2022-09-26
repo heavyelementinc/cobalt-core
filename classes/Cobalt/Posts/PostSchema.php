@@ -13,12 +13,13 @@ use Validation\Exceptions\ValidationIssue;
 
 class PostSchema extends \Validation\Normalize {
     use ClientFSManager;
+    private $soft_char_cap = 200;
     public function __get_schema(): array {
         return [
             'author' => [
                 // 'get' => [],
                 'valid' => function ($val) {
-                    return $this->valid_users($GLOBALS['POST_PERMISSIONS'],'permission');
+                    return $this->valid_users_by_permission('Posts_manage_posts','permission');
                 }
             ],
             'title' => [],
@@ -39,10 +40,15 @@ class PostSchema extends \Validation\Normalize {
             ],
             'body' => [],
             'excerpt' => [
+                'get' => function ($val) {
+                    if(!$val) return $this->markdown_word_limit($this->__dataset['body'], $this->soft_char_cap);
+                    return $val;
+                },
                 'set' => function ($val) {
-                    $soft_char_cap = 200;
-                    if($val) return $val;
-                    return $this->markdown_word_limit($this->__dataset['body'], $soft_char_cap);
+                    if(!$val) return null;
+                    $truncated = $this->markdown_word_limit($this->__dataset['body'], $this->soft_char_cap);
+                    if($truncated === $val) return null;
+                    return $truncated;
                 }
                 // 'soft_char_cap' => 200
             ],

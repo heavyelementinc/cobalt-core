@@ -20,15 +20,14 @@ class CoreAdmin {
             <flex-header>Username</flex-header>
             <flex-header>Email</flex-header>
             <flex-header>Groups</flex-header>
+            <flex-header>Verified</flex-header>
         </flex-row>";
         foreach ($collection->find([]) as $user) {
-            $list .= "<flex-row><flex-cell><flex-cell>" . $this->user_link($user['_id']) . "$user[fname] $user[lname]</a></flex-cell>";
-            $list .= "<flex-cell>" . $this->user_link($user['_id']) . "@$user[uname]</a></flex-cell>";
-            $list .= "<flex-cell>$user[email]</flex-cell>";
             $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
-            $list .= "<flex-cell>" . $this->user_link($user['_id'], "#permissions") . (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>") . "</a></flex-cell>";
-            // $list .= "<flex-cell>" . json_encode($user["verified"]) . "</flex-cell>";
-            $list .= "</flex-row>";
+            $list .= view("/admin/users/user.html", [
+                'user' => new UserSchema($user),
+                'groups' => (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>"),
+            ]);
         }
         $list .= "</flex-table>";
         add_vars([
