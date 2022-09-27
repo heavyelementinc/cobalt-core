@@ -122,6 +122,7 @@ class ActionMenu {
         }
         try {
             result = await action.callback(action, event, requestData);
+            this.event.target.dispatchEvent(new CustomEvent("actionmenucomplete",{detail: {action, event, requestData, result}}));
         } catch (error) {
             console.log(error);
             console.log(requestData);

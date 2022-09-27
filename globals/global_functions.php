@@ -563,6 +563,7 @@ function associative_to_path(array $arr) {
  * @return bool 
  */
 function is_associative_array(mixed $array) {
+    if(gettype($array) !== "array") return false;
     if (array() === $array) return false;
     return array_keys($array) !== range(0, count($array) - 1);
 }
