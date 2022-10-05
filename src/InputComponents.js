@@ -50,6 +50,10 @@ class InputSwitch extends HTMLElement {
         this.checked = val;
     }
 
+    // get checked() {
+    //     return this.checkbox.checked;
+    // }
+
     /** The CONNECTED CALLBACK is the function that is executed when the element
      *  is added to the DOM.
      */
@@ -88,6 +92,7 @@ class InputSwitch extends HTMLElement {
     flipElement() {
         this.clearIntermediateState({ target: this.checkbox });
         this.checkbox.checked = !this.checkbox.checked;
+        this.checked = this.checkbox.checked;
         const change = new Event("change");
         this.checkbox.dispatchEvent(change);
         this.dispatchEvent(change);

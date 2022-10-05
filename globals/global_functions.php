@@ -295,10 +295,11 @@ function set_template($path) {
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
  * 
  * A few template vars for quick reference:
- * title      - The title of the page
- * main_id    - the main element's id
- * body_id    - the body element's id
- * body_class - the body element's class list
+ *  * title       - The title of the page
+ *  * main_id     - the main element's id
+ *  * body_id     - the body element's id
+ *  * body_class  - the body element's class list
+ *  * og_template - relative path of an open graph template
  * 
  * @param array $vars MUST BE ASSOCIATIVE ARRAY
  * @return void
@@ -643,6 +644,21 @@ function with_each(string $template, $docs, $var_name = 'doc') {
     return $rendered;
 }
 
+function credit_card_form(array|object $data = [],$shipping = false):string {
+    $currentYear = (int)date("Y");
+    $years = "";
+    for($i = 0; $i <= 10; $i++){
+        $years .= "<option>" . $currentYear + $i . "</options>";
+    }
+    $months = '<option value="01">January (01)</option><option value="02">February (02)</option><option value="03">March (03)</option><option value="04">April (04)</option><option value="05">May (05)</option><option value="06">June (06)</option><option value="07">July (07)</option><option value="08">August (08)</option><option value="09">September (09)</option><option value="10">October (10)</option><option value="11">November (11)</option><option value="12">December (12)</option>';
+    return view("/parts/credit-card.html",[
+        'cc' => $data,
+        'expiryYearOptions' => $years,
+        'months' => $months,
+        'shipping' => ($shipping) ? view('/parts/credit-card-shipping.html',['cc' => $data]) : "",
+    ]);
+}
+
 /** Compare two pathnames
  * 
  * $base_dir is used to substr $path after they have both been canonincalized.
@@ -666,7 +682,7 @@ function is_child_dir($base_dir, $path) {
 }
 
 /**
- * Limitations: this will only return 
+ * Limitations: this will only return the first route that uses the specified controller
  * @param string $class
  * @param string $method
  * @param array $args 
@@ -678,6 +694,7 @@ function get_path_from_route(string $class, string $method, array $args = [], st
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
     $router = $GLOBALS['router'];
+    if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
     // if($context !== $router->route_context) {
     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
@@ -686,23 +703,38 @@ function get_path_from_route(string $class, string $method, array $args = [], st
     $route = null;
     foreach($routes as $r => $data) {
         if($data['controller'] !== $controllerAlias) continue;
-        $rt = $data['real_path'];
-        $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
-        
-        $replacement = [];
-        preg_match_all($regex,$rt,$replacement);
-
-        $mutant = $rt;
-        // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
-        foreach($replacement[0] as $i => $replace) {
-            $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
-        }
-
-        return preg_replace("/\/{2,}/","/", $mutant);
+        $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
+        return route_replacement($data['real_path'], $args, $data);
     }
+
+    $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $route;
     return $route;
 }
 
+function route_replacement($path, $args, $data) {
+    $rt = $path;
+    $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
+    
+    $replacement = [];
+    preg_match_all($regex,$rt,$replacement);
+
+    $mutant = $rt;
+    // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
+    foreach($replacement[0] as $i => $replace) {
+        $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
+    }
+
+    return preg_replace("/\/{2,}/","/", $mutant);
+}
+
+/**
+ * This will only return the first route that uses $directiveName
+ * @param string $directiveName the "Controller@method" direvitve specified in your router table
+ * @param array $args Any arguments used here will get filled in as values for {variables} in route names from left to right
+ * @param array $context The context to search ("web", "admin", "apiv1", etc.)
+ * @return string 
+ * @throws Exception 
+ */
 function route(string $directiveName, array $args = [], array $context = []):string {
     $routeMethod = $context['method'] ?? "get";
     $ctx = $context['context'] ?? "web";

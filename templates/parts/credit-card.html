@@ -1,0 +1,50 @@
+<credit-card>
+    <fieldset id="cobalt-credit-card--card-details">
+        <legend>Card Details</legend>
+        <div class="hbox">
+            <label>Cardholder Name</label>
+            <div class="hbox">
+                <input name="firstName" value="{{cc.firstName}}" placeholder="First Name">
+                <input name="lastName" value="{{cc.lastName}}" placeholder="Last Name">
+            </div>
+        </div>
+        <input name="company" value="{{cc.company}}" placeholder="Company">
+        <input name="email" value="{{cc.email}}" placeholder="Email Address">
+        <div class="hbox">
+            <label>Card Number</label>
+            <input name="number" placeholder="XXXX-XXXX-XXXX-XXXX">
+            <input name="cvv" placeholder="395">
+        </div>
+        <!-- <select name="type" value="{{cc.type}}">
+            <option
+        </select> -->
+        <div class="hbox">
+            <label>Expiration Date</label>
+            <select name="expiryMonth">{{!months}}</select>
+            <select name="expiryYear">{{!expiryYearOptions}}</select>
+        </div>
+        <!-- <div class="hbox">
+            <select name="startMonth" value="{{cc.startMonth}}">{{!months}}</select>
+            <select name="startYear" value="{{cc.startYear}}">{{!expiryYearOptions}}</select>
+        </div> -->
+        <!-- <input name="issueNumber" value="{{cc.issueNumber}}"> -->
+    </fieldset>
+    <fieldset id="cobalt-credit-card--billing-address">
+        <legend>Billing</legend>
+        <label>Address</label>
+        <input name="billingAddress1" value="{{cc.billingAddress1}}" placeholder="Address 1">
+        <input name="billingAddress2" value="{{cc.billingAddress2}}" placeholder="Address 2">
+        <div class="hbox">
+            <label>City</label>
+            <input name="billingCity" value="{{cc.billingCity}}" placeholder="Town">
+            <input name="billingPostcode" value="{{cc.billingPostcode}}" placeholder="Zip">
+        </div>
+        <div>
+            <label></label>
+            <input name="billingState" value="{{cc.billingState}}" placeholder="State">
+            <input name="billingCountry" value="{{cc.billingCountry}}" placeholder="Country">
+        </div>
+        <input type="tel" name="billingPhone" value="{{cc.billingPhone}}" placeholder="Phone Number">
+        {{!shipping}}
+    </fieldset>
+</credit-card>

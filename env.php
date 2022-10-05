@@ -22,7 +22,7 @@ session_start();
 
 // Let's make sure we're running a suppoted version of PHP (since we use 
 // the not-insane array syntax and the spread "..." syntax)
-if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
+if (!version_compare(PHP_VERSION, "8.1", ">=")) die("You must be running PHP version 8.1.0 or greater");
 
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "1.0");
@@ -50,7 +50,7 @@ $allowed_to_exit_on_exception = true;
 $write_to_buffer_handled = false;
 
 require_once __DIR__ . "/globals/bootstrap.php";
-
+require_once __DIR__ . "/globals/global_declarations.php";
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";

@@ -120,10 +120,15 @@ abstract class PostController extends Controller {
         $query = $this->getParams($this->postMan, ['published' => true]);
         $docs = $this->postMan->findAllAsSchema(...$query);
 
+        $og_image = "";
+        $og_title = __APP_SETTINGS__ . "";
+        $og_body = __APP_SETTINGS__['app_name'] . " news and updates feature the kinds of";
+
         $posts = "";
 
         foreach($docs as $index => $doc) {
             if($index === 0) $doc->prominent = true;
+            if(isset($_SESSION['Posts_display_type'])) $doc->prominent = $_SESSION['Posts_display_type'];
             $posts .= view($doc->getTemplate('blurb'), [
                 'post' => $doc,
                 'href' => $this->path('post',[(string)$doc['url_slug']])
@@ -197,5 +202,25 @@ abstract class PostController extends Controller {
             throw new UnknownError("Could not find '$methodName' route");
         }
         return $path;
+    }
+
+    private function getDisplaySession() {
+        $validTypes = [
+            'wide'   => true,
+            'mixed'  => null,
+            'narrow' => false,
+        ];
+        
+        if(!key_exists($_GET['display'],$validTypes)) {
+            unset($_SESSION['Posts_display_type']);
+            exit;
+        }
+        $value = $validTypes[$_GET['display']];
+
+        if($value === null) {
+            unset($_SESSION['Posts_display_type']);
+            return;
+        }
+        $_SESSION['Posts_display_type'] = $value;
     }
 }

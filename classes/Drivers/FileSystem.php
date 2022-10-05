@@ -28,7 +28,7 @@ class FileSystem {
      * @param array $options 
      * @return never Creating a download for the client will exit this application!
      */
-    final public function download(string $filename, $options = ['revision' => 0]) {
+    final public function download(string $filename, $options = ['revision' => 0]): never {
         ob_clean();
         $stream = $this->getStream($filename, $options);
         $metadata = $this->bucket->getFileDocumentForStream($stream);

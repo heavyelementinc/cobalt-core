@@ -110,7 +110,7 @@ class Router {
         // document.body.prepend(load);
         
         if(allLinks === null) allLinks = this.first_run;
-
+        if(!this.first_run) window.scrollTo(0,0);
         // Select the appropriate anchor tags
         let links;
         let forms;

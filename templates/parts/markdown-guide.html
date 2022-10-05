@@ -12,6 +12,20 @@
                 <flex-cell>@from_markdown("*Italic*");</flex-cell>
             </flex-row>
             <flex-row>
+                <flex-cell><code>`Inline code`</code></flex-cell>
+                <flex-cell>@from_markdown("`Inline code`");</flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-cell><pre>```
+    Preformatted
+    Text
+                ```</pre></flex-cell>
+                <flex-cell>
+                    <pre>   Preformatted
+    Text</pre>
+                </flex-cell>
+            </flex-row>
+            <flex-row>
                 <flex-cell><code>[http://google.com](Hyperlink)</code></flex-cell>
                 <flex-cell><a href="http://google.com">Hyperlink</a></flex-cell>
             </flex-row>

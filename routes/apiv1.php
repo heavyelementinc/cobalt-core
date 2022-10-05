@@ -86,6 +86,10 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     Route::put(   "/posts/attachment/{id}/sort", "Posts@updateSortOrder");
 }
 
+// if(__APP_SETTINGS__['PaymentGateways_enabled']) {
+    Route::put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data");
+// }
+
 
 Route::put("/api/key/{service}", "APIManagement@update", ['permission' => 'API_manage_keys']);
 Route::post("/api/key/{service}", "APIManagement@parse", ['permission' => 'API_manage_keys']);

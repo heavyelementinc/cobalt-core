@@ -1,3 +1,8 @@
+/**
+ * # FoldOut
+ * @element <fold-out>
+ * @attribute title [null]|String - Used to determine the name of the fold-out element.
+ */
 class FoldOut extends HTMLElement {
 
     connectedCallback() {

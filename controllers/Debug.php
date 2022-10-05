@@ -400,4 +400,13 @@ class Debug extends \Controllers\Pages {
         phpinfo();
         exit;
     }
+
+    function credit_card() {
+        add_vars([
+            'title' => "Credit Card Test",
+            'main' => credit_card_form(),
+            'shipping' => credit_card_form([], true)
+        ]);
+        set_template("/debug/credit-card.html");
+    }
 }

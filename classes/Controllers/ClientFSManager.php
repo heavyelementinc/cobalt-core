@@ -306,6 +306,16 @@ trait ClientFSManager {
                 'tag_end' => "",
                 'anchor' => fn () => ""
             ],
+            'carousel' => [
+                'container' => 'cobalt-carousel',
+                'class' => 'cobalt--fs-directory-listing cfs-carousel',
+                'tag_start' => function ($value, $href, $lazy = true) {
+                    $lazy = ($lazy) ? " loading='lazy'" : "";
+                    return "img src='$href".($value->thumbnail ?? $value->filename)."' draggable='false' onclick='lightbox(this)' full-resolution='$href"."$value->filename'$lazy";
+                },
+                'tag_end' => "",
+                'anchor' => fn () => ""
+            ]
         ];
     }
 

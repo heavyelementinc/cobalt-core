@@ -1,24 +1,132 @@
-:where(cobalt-carousel) {
+cobalt-carousel {
+    visibility: hidden;
     display: flex;
-    overflow-x: scroll;
-    height: 25em;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    /* position: relative; */
+}
+
+cobalt-carousel.locked button{
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+cobalt-carousel {
+    visibility: initial;
+}
+
+cobalt-carousel .cobalt-carousel--scroll-container {
+    display: flex;
+    white-space: nowrap;
+    overflow: hidden;
+    /* height: 25em; */
     width: 100%;
-    
+    user-select: none;
+    scroll-behavior:  smooth;
+    /* scroll-snap-type: x proximity;
+    scroll-snap-align: center; */
+    mask-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 12%, rgba(255,255,255,1) 88%, rgba(255,255,255,0) 100%);
+    -webkit-mask-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 12%, rgba(255,255,255,1) 88%, rgba(255,255,255,0) 100%);
+    isolation: isolate;
+    padding: 5% 0;
+    align-items: center;
 }
 
-:where(cobalt-carousel > a) {
-    height: 100%;
-    min-width: 33%;
-    width: 33%;
+cobalt-carousel .cobalt-carousel--scroll-container > * {
+    scroll-snap-align: start;
+    width: 50%;
+    margin: 0 .2em;
+    transition: opacity .3s, filter .3s, scale .4s;
+    transition-delay: .2s;
+    opacity: .4;
+    filter: grayscale(1);
+    z-index: 1;
+    position: relative;
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
-:where(cobalt-carousel img) {
-    height: 100%;
-    min-width: 33%;
-    width: 33%;
-    object-fit: cover;
+cobalt-carousel .cobalt-carousel--scroll-container :is(img, picture, video) {
+    height: var(--height);
 }
 
-:where(cobalt-carousel > a img) {
+cobalt-carousel[fit] .cobalt-carousel--scroll-container :is(img, picture, video) {
+    object-fit: var(--fit);
+}
+
+cobalt-carousel .cobalt-carousel--scroll-container > .cobalt-carousel--current-scroll-target,
+cobalt-carousel .cobalt-carousel--scroll-container > :hover {
+    opacity: 1;
+    filter: none;
+}
+
+cobalt-carousel .cobalt-carousel--scroll-container > .cobalt-carousel--current-scroll-target {
+    scale: 1.1;
+    z-index: 10;
+}
+
+cobalt-carousel.cobalt-carousel--draggable .cobalt-carousel--scroll-container {
+    cursor: grab;
+}
+
+cobalt-carousel.cobalt-carousel--draggable .cobalt-carousel--scroll-container.drag-container {
+    cursor: grab;
+}
+
+:where(cobalt-carousel .cobalt-carousel--scroll-container > a:has(img)) {
+    display: inline-block;
+    width: 50%;
+}
+
+:where(cobalt-carousel .cobalt-carousel--scroll-container img) {
+    width: 50%;
+    object-fit: contain;
+}
+
+:where(cobalt-carousel .cobalt-carousel--scroll-container > a img) {
     width: 100%;
+}
+
+cobalt-carousel.cobalt-carousel--draggable .cobalt-carousel--scroll-container > [draggable="false"][onclick^="lightbox"] {
+    cursor: grab;
+    user-select: none;
+}
+
+cobalt-carousel.cobalt-carousel--draggable .cobalt-carousel--scroll-container.grabbing {
+    cursor: grabbing;
+}
+
+cobalt-carousel .cobalt-carousel--scroll-container.grabbing [onclick] {
+    pointer-events: none;
+}
+
+cobalt-carousel button {
+    font-family: 'Courier New', Courier, monospace;
+    display: grid;
+    place-content: center;
+    border: 1px solid inherit;
+    background-color: rgba(255,255,255,.3);
+    transition: background-color .2s, opacity .2s, border .2s, color .2s;
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+    /* position: absolute;
+    top: calc(50% - 25px);
+    translate: -50%; */
+    color: var(--project-color-inactive);
+}
+
+cobalt-carousel button:hover {
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+}
+
+cobalt-carousel button:before {
+    content: "<";
+}
+
+cobalt-carousel button.cobalt-carousel--next:before{
+    content: ">";
 }

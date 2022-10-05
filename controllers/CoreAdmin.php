@@ -1,6 +1,10 @@
 <?php
 
 use \Auth\UserSchema;
+use MongoDB\BSON\ObjectId;
+use Cobalt\Payments\PaymentGateway;
+use Cobalt\Payments\PaymentGatewaySchema;
+
 
 class CoreAdmin {
     function index() {
@@ -126,5 +130,24 @@ class CoreAdmin {
             'tasks' => $tasks
         ]);
         set_template("/admin/cron/cron-task-index.html");
+    }
+
+
+    function payment_gateways() {
+        $gateMan = new PaymentGateway();
+        
+        $stripe = $gateMan->get_gateway_data('stripe');
+        if(!$stripe) $stripe = new PaymentGatewaySchema(['_id' => new ObjectId()]);
+
+        $paypal = $gateMan->get_gateway_data('paypal');
+        if(!$paypal) $paypal = new PaymentGatewaySchema(['_id' => new ObjectId()]);
+
+        add_vars([
+            'title' => "Payment Gateways",
+            'stripe' => $stripe,
+            'paypal' => $paypal,
+        ]);
+
+        set_template("/admin/settings/payment-gateways.html");
     }
 }

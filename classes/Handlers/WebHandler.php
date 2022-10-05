@@ -63,7 +63,8 @@ class WebHandler implements RequestHandler {
         /** If we're in a web context, load the HTML body. This is so that we can
          * request just the main-content of a page via API later.
          */
-        if ($GLOBALS['route_context'] === "web" || $GLOBALS['route_context'] === "admin") {
+        $this->encoding_mode = __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['mode'];
+        if ($this->encoding_mode === "text/html") {
             $this->context_mode = $GLOBALS['route_context'];
             $this->template_body = $this->load_template("parts/body.html"); // Load the main HTML template
         } else {
@@ -90,7 +91,7 @@ class WebHandler implements RequestHandler {
     }
 
     public function _stage_output($context_result) {
-        if ($this->context_mode === "web" || $this->context_mode === "admin") {
+        if ($this->encoding_mode === "text/html") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
             if (!$this->results_sent_to_client) return $this->process();
@@ -431,11 +432,13 @@ class WebHandler implements RequestHandler {
     }
 
     function add_vars($vars) {
+        $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
+
         $exportable = [];
 
         foreach(array_merge($vars) as $var => $val) {
-            if($var[0] . $var[1] !== "__") continue;
-            $exportable += correct_exported_values($vars, $var, $val);
+            if(in_array($var, $always_export_these_keys)) $exportable += correct_exported_values($vars, $var, $val);
+            if($var[0] . $var[1] == "__") $exportable += correct_exported_values($vars, $var, $val);
         }
     
         export_vars($exportable);

@@ -30,7 +30,7 @@ if (app('Auth_logins_enabled')) {
         'handler' => "core/user_panel.js",
         'anchor' => [
             'name' => 'Users',
-            'icon' => "people"
+            'icon' => "people-outline"
         ],
         'navigation' => ['settings_panel']
     ]);
@@ -60,7 +60,7 @@ if (app('Plugin_enable_plugin_support')) {
         'permission' => 'Plugins_allow_management',
         'anchor' => [
             'name' => "Plugins",
-            'icon' => 'extension-puzzle'
+            'icon' => 'extension-puzzle-outline'
         ],
         'navigation' => ['settings_panel']
     ]);
@@ -73,7 +73,7 @@ Route::get("/settings/api-keys", "APIManagement@index",[
     'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "API Keys",
-        'icon' => 'key'
+        'icon' => 'key-outline'
     ],
     'navigation' => ['settings_panel']
 ]);
@@ -99,7 +99,16 @@ Route::get("/settings/cron", "CoreAdmin@cron_panel",[
     // 'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "Scheduled Jobs",
-        'icon' => 'time'
+        'icon' => 'time-outline'
     ],
     'navigation' => ['settings_panel']
+]);
+
+Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
+    // 'permission' => 'API_manage_keys',
+    'anchor' => [
+        'name' => "Payments",
+        'icon' => 'card-outline'
+    ],
+    'navigation' => ['admin_basic_panel']
 ]);

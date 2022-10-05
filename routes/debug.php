@@ -2,7 +2,7 @@
 use Routes\Route;
 
 /** Debug routes are for testing purposes and should not be enabled in production */
-// if (app("enable_debug_routes")) {
+if (app("enable_debug_routes")) {
     Route::get("/", "Debug@debug_directory");
     Route::get("/renderer", "Debug@debug_renderer", [
         'navigation' => ['debug'],
@@ -119,9 +119,14 @@ use Routes\Route;
         'anchor' => ['name' => "YouTube"]
     ]);
 
+    Route::get("/credit-card-test", "Debug@credit_card", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Credit Card Test"]
+    ]);
+
     Route::get("/assoc", "Debug@assoc_test");
 
     if(is_root()) {
         Route::get("/php", "Debug@phpinfo");
     }
-// }
+}
