@@ -2,6 +2,9 @@
 
 namespace Routes;
 
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
+
 class Route {
 
     public static $preg_quote = "[^/?]+";
@@ -24,19 +27,19 @@ class Route {
      * @param string $controller A controller/method pair in the "Controller@method" format
      * @param array $additional An array of optional metadata ['handler','anchor','lists',]
      */
-    static function get(String $path, $controller, array $additional = []) {
+    static function get(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
         Route::add_route($path, $controller, $additional, 'get');
     }
 
-    static function post(String $path, $controller, array $additional = []) {
+    static function post(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
         Route::add_route($path, $controller, $additional, 'post');
     }
 
-    static function put(String $path, $controller, array $additional = []) {
+    static function put(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
         Route::add_route($path, $controller, $additional, 'put');
     }
 
-    static function delete(String $path, $controller, array $additional = []) {
+    static function delete(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
         Route::add_route($path, $controller, $additional, 'delete');
     }
 
@@ -47,7 +50,11 @@ class Route {
      * we'd like to add a ROUTE TABLE CACHE to speed things up a bit and here seems
      * like the best place to find and store the variable names.
      */
-    static function add_route(String $path, $controller, array $additional = [], $type = "get") {
+    static function add_route(String $path, $controller, array|BSONArray|BSONDocument $additional = [], $type = "get") {
+        if($additional instanceof BSONArray || $additional instanceof BSONDocument) {
+            $additional = $additional->getArrayCopy();
+        }
+
         /** Okay, let's first suss out our variable names */
         $var_names = [];
         $search = "%\{(" . self::$preg_quote . ")\}%";

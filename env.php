@@ -1,4 +1,5 @@
 <?php
+$GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
 session_start();
 
 /**
@@ -77,18 +78,6 @@ if (file_exists($app_env)) require_once $app_env;
 
 /** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
 $GLOBALS['time_to_update'] = false;
-// $update_list = [
-//     __APP_ROOT__ . "/private/config/settings.json",
-//     __APP_ROOT__ . "/private/config/settings.jsonc",
-//     __ENV_ROOT__ . "/config/settings.json",
-// ];
-
-// foreach($update_list as $file) {
-//     if(file_exists($file) && filemtime($file)) {
-//         $GLOBALS['time_to_update'] = true;
-//         break;
-//     }
-// }
 
 try {
     // Load our ACTIVE plugins.
@@ -97,12 +86,13 @@ try {
     die($e->getMessage());
 }
 
-// Instantiate our settings (`true` for loading settings from cache)
 try {
-    $application = new SettingsManager(true);
+    $application = new \Cobalt\Settings\Settings(true);
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
+    die($e->getMessage());
+} catch (Error $e) {
     die($e->getMessage());
 }
 
@@ -116,4 +106,3 @@ if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on
 
 /** If we're NOT in a CLI environment, we should import the context processor */
 if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";
-

@@ -1,0 +1,67 @@
+<div id="container">
+    <div id="list">{{!buttons}}</div>
+    <div id="inspector">{{!pages}}</div>
+</div>
+<style>
+    #container {
+        display:flex;
+        max-height: 80vh;
+        max-width: 100%;
+        background: white;
+    }
+    #list {
+        overflow-x: scroll;
+        padding: 1em;
+    }
+    #list a {
+        display: flex;
+    }
+    #list a span {
+        margin-left: auto;
+    }
+    #list li {
+        display: block;
+    }
+    #inspector {
+        overflow-x: scroll;
+        padding: 1em;
+    }
+
+    #inspector > div {
+        display: none;
+    }
+    #inspector > div:target {
+        display: block;
+    }
+    .list-panel label {
+        min-width: 13ch;
+    }
+    .list-panel code {
+        white-space: pre;
+    }
+    pre {
+        color: white;
+        background: black;
+        counter-reset: line;
+
+    }
+    pre span:before {
+        width: 4ch;
+        text-align: right;
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        border-right: 1px solid #ddd;
+        padding: 0 .5em;
+        margin-right: .5em;
+        color: #888
+    }
+</style>
+<script>
+    const buttons = document.querySelectorAll("#list a");
+    buttons.forEach(e => {
+        e.addEventListener("click", evt => {
+            window.scrollTo(0,0);
+        })
+    });
+</script>

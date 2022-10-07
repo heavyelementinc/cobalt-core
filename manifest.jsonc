@@ -1,0 +1,81 @@
+{
+    "js": {
+        "common": [
+            "global_functions.js",
+            "sortable.js",
+            "components/autocomplete-interface.js",
+            "components/input-array.js",
+            "components/autocomplete.js",
+            "components/cobalt-carousel.js",
+            "components/tag-select.js",
+            "components/fs-listing.js",
+            "components/fold-out.js",
+            "components/tab-nav.js",
+            "components/credit-card.js",
+            "DateConverter.js",
+            "Modal.js",
+            "TabbedUI.js",
+            "Slideshow.js",
+            "Slideshow2.js",
+            "InputClasses.js",
+            "FormRequest.js",
+            "components/FormRequestSimplified.js",
+            "ApiFetch.js",
+            "InputComponents.js",
+            "AsyncButton.js",
+            "UserMenu.js",
+            "ActionMenu.js",
+            "StatusMessage.js",
+            "Events.js",
+            "PaginatedContainer.js",
+            "AudioPlayer.js",
+            "CobaltScrollManager.js"
+        ],
+        "public": [
+
+        ],
+        "private": [
+            "protected/Posts.js",
+            "protected/UserPanel.js",
+            "protected/UserManager.js"
+        ]
+    },
+    "css": {
+        "common": [
+            "components/autocomplete.css",
+            "components/tag-select.css",
+            "components/fold-out.css",
+            "components/tab-nav.css",
+            "components/cobalt-carousel.css",
+            "normalize.css",
+            "slideshow.css",
+            "inputs.css",
+            "loading-spinner.css",
+            "buttons.css",
+            "action-menu.css",
+            "status-message.css",
+            "form-request.css",
+            "posts.css",
+            "flex-table.css",
+            "cobalt-events.css",
+            "modal.css",
+            "tabs-drawer.css",
+            "calendar.css",
+            "webcomponents.css",
+            "audio-player.css",
+            "paginated-container.css",
+            "parallax.css"
+        ],
+        "public": [
+            "header.css",
+            "main.css"
+        ],
+        "private": [
+            "protected/admin.css",
+            "login-form.css"
+        ],
+        "public-vars": {
+            
+        }
+    }
+}

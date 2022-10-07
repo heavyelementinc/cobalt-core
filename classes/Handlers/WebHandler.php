@@ -60,6 +60,10 @@ class WebHandler implements RequestHandler {
     private $context_mode = null;
 
     function __construct() {
+        $this->web_manifest = get_all_where_available([
+            __ENV_ROOT__ . "/manifest.json",
+            __APP_ROOT__ . "/manifest.json"
+        ]);
         /** If we're in a web context, load the HTML body. This is so that we can
          * request just the main-content of a page via API later.
          */
@@ -181,9 +185,10 @@ class WebHandler implements RequestHandler {
         return $template;
     }
 
+    // TODO: Remove root style bullshit
     function app_settings() {
-        $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['app']->public_settings) . "</script>";
-        $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
+        $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
+        $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['ROOT_STYLE'] . "}</style>";
         return $settings;
     }
 

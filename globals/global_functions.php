@@ -16,6 +16,7 @@ use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use MongoDB\Model\BSONArray;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -104,11 +105,17 @@ function is_root() {
  * If $merged is false, the decoded files will be returned as separate elements 
  * of the array.
  */
-function get_all_where_available($paths, $merged = true) {
+function get_all_where_available($paths, $merged = true, $throwOnFail = false) {
     $available = [];
     foreach ($paths as $key => $path) {
-        if (file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path), true);
-        if($available[$key] === null) unset($available[$key]);
+        $options = 0;
+        if($throwOnFail) $options = JSON_ERROR_SYNTAX;
+        try {
+            if (file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path), true, 512 ,$options);
+        } catch (Exception $e) {
+            throw new Exception("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""], $path) . '`');
+        }
+        if($available[$key] === null || $available[$key] === []) unset($available[$key]);
     }
     if ($merged) return array_merge(...$available);
     return $available;
@@ -1063,6 +1070,7 @@ function relative_time($date, $now = null) {
 
 function pretty_rounding($number):string{
     if($number === 0) return "zero";
+    
     $map = [
         [
             'factor' => 1000,
@@ -1082,6 +1090,8 @@ function pretty_rounding($number):string{
             'suffix' => 't',
         ]
     ];
+    
+    if($number < $map[0]['factor']) return $number;
 
     foreach($map as $data) {
         if($number < $data['factor']) continue;
@@ -1089,4 +1099,15 @@ function pretty_rounding($number):string{
     }
 
     return $result;
+}
+
+function benchmark_start($name) {
+    if(!__APP_SETTINGS__['debug']) return;
+    $GLOBALS['BENCHMARK_RESULTS'][$name] = ['start' => microtime(true) * 1000];
+}
+
+function benchmark_end($name) {
+    if(!__APP_SETTINGS__['debug']) return;
+    $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] = microtime(true) * 1000;
+    $GLOBALS['BENCHMARK_RESULTS'][$name]['delta'] = $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] - $GLOBALS['BENCHMARK_RESULTS'][$name]['start'];
 }

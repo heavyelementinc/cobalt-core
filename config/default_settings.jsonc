@@ -22,34 +22,389 @@
     /* Provide a doman name that we expect to be listening for. This will later 
     be used to add CORS headers. */
     "domain_name": {
-        "default": ""
+        "default": "",
+        "meta": {
+            "group": "Basic",
+            "name": "Domain Name",
+            "type": "input"
+        }
     },
     /* The full name of the application. */
     "app_name": {
         "default": "Cobalt Engine",
-        "$public": true
+        "directives": {
+            "public": true
+        },
+        "meta": {
+            "group": "Basic",
+            "name": "Application Name",
+            "type": "input"
+        }
     },
     /* A shortened name for the application. */
     "app_short_name": {
         "default": "",
-        "$alt": "app_name",
-        "$public": true
+        "directives": {
+            "alias": "app_name",
+            "public": true
+        },
+        "meta": {
+            "group": "Basic",
+            "name": "Short Name",
+            "type": "input"
+        }
     },
     /* A bespoke name to be listed in the copyright notice */
     "app_copyright_name": {
         "default": "",
-        "$alt": "app_short_name"
+        "meta": {
+            "group": "Basic",
+            "name": "Copyright Name",
+            "type": "input"
+        },
+        "directives": {
+            "alias": "app_short_name"
+        }
     },
     /* The name of the designer as well as their website and title text */
     "designer": {
         "default": {
             "prefix": "Designed by",
-            "name": "Heavy Element, Inc.",
-            "href": "https://heavyelement.io/",
-            "title": "Maine's Premier New Media Production Studio"
+            "name":   "Heavy Element, Inc.",
+            "href":   "https://heavyelement.io/",
+            "title":  "Maine's Premier New Media Production Studio"
+        },
+        "meta": {
+            "group": "Basic",
+            "name": "Designer Credit",
+            "type": "input-object"
         }
     },
-    /* If true, the settings will be cached after being processed and the cache 
+    /* Debug routes include things like the WebComponent input tests */
+    "enable_debug_routes": {
+        "default": false,
+        "meta": {
+            "group": "Cache &amp; Debug",
+            "name": "Enable debug routes",
+            "type": "input-switch",
+            "debug": true
+        }
+    },
+    /* I don't think this does anything yet -GM */
+    "route_cache_disabled": {
+        "default": false,
+        "meta": {
+            "group": "Cache &amp; Debug",
+            "name": "Route Cache Disabled",
+            "type": "input-switch",
+            "debug": true
+        }
+    },
+    "cached_content_disabled": {
+        "default": false,
+        "meta": {
+            "group": "Cache &amp; Debug",
+            "name": "Cached Content Disabled",
+            "type": "input-switch",
+            "debug": true
+        }
+    },
+    "settings_cache_disabled": {
+        "default": false,
+        "meta": {
+            "group": "Cache &amp; Debug",
+            "name": "Settings Cahce Disabled",
+            "type": "input-switch",
+            "debug": true
+        }
+    },
+    /* Enabled the core-content/ route */
+    "enable_core_content": {
+        "default": true,
+        "meta": {
+            "group": "Cache &amp; Debug",
+            "name": "Core Content Disabled",
+            "type": "input-switch",
+            "debug": true
+        }
+    },
+
+    /* Fonts to be used. This can be referenced by the rendering engine for 
+    email templates and more. */
+    "fonts": {
+        "default": [],
+        "directives": {
+            "merge":  {
+                "head": {
+                    "family": "'Assistant', sans-serif",
+                    "import": "Assistant:500,800"
+                },
+                "body": {
+                    "family": "'Open Sans', sans-serif",
+                    "import": "Open+Sans:400,400i,800,800i"
+                }
+            },
+            "style": true
+        },
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Default Fonts",
+            "type": "input-object"
+        }
+    },
+    "css-vars": {
+        "default": [],
+        "directives": {
+            "merge": {
+                "modal-z-index": 2000,
+                "body-background": "#efefef",
+                "box-shadow": "0 4px 10px rgba(0, 0, 0, .2)",
+                "color-header-branding": "#004BA8",
+                "color-user-panel-button": "#342A21",
+                "color-admin-panel-background": "var(--project-color-header-branding)",
+                "color-admin-panel-font": "white",
+                "color-acknowledge": "#598B2C",
+                "color-active": "#598B2C",
+                "color-inactive": "#B1C1C0",
+                "color-input-border-nofocus": "#b1c3c3",
+                "color-input-border-focus": "#000",
+                "color-input-background": "#fff",
+                "color-input-text-color": "#000",
+                "color-input-background-focus": "#FFF",
+                "color-input-invalid-border": "#BB4430",
+                "color-input-invalid-bg": "#F7E2DE",
+                "color-input-invalid-label-text": "#FFF",
+                "color-input-disabled": "#F4F6F6",
+                "color-disabled": "rgba(0,0,0,.2)",
+                "color-table-border": "1px solid var(--project-color-input-border-nofocus)",
+                "color-table-bg-odd": "var(--project-color-input-background)",
+                "color-table-bg-even": "var(--project-color-input-disabled)",
+                "color-problem": "#FE5F55",
+                "color-button-init": "#004BA8",
+                "color-button-hover": "#9DD1F1",
+                "color-button-text": "#FFF",
+                "color-button-hover-text": "#000",
+                "color-button-pressed": "#00377A",
+                "calendar-borders": "1px solid var(--project-color-button-init)",
+                "calendar-cell-bg": "#FFF",
+                "calendar-cell-other-bg": "#EFEFEF",
+                "calendar-cell-txt": "#000",
+                "calendar-header-color": "var(--project-color-button-init)",
+                "calendar-header-text": "var(--project-color-button-text)",
+                "action-menu-background": "var(--project-color-input-disabled)",
+                "action-menu-border": "var(--project-color-table-border)",
+                "action-menu-hover": "var(--project-color-inactive)",
+            
+                "events-banner-background": "#efefef",
+                "events-banner-text": "#000000",
+                "events-button-color": "var(--project-color-button-init)",
+                "events-button-color-hover": "var(--project-color-button-hover)",
+                "events-button-text": "var(--project-color-button-text)",
+                "events-button-text-hover": "var(--project-color-button-hover-text)"
+            },
+            "style": true
+        }
+    },
+    
+    /* The image displayed when loading a page. */
+    "login-hero-sidebar": {
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Sidebar Image",
+            "type": "input"
+        },
+        "directives": {
+            "style": true
+        },
+        "default": "url('/core-content/img/default_poster_image.jpg')"
+    },
+
+    "API_CORS_allowed_origins": {
+        "default": [],
+        "meta": {
+            "group": "API",
+            "name": "Allowed Origins",
+            "type": "input-array"
+        },
+        "directives": {
+            "push": [
+                "domain_name"
+            ]
+        }
+    },
+    "API_CORS_enable_other_origins": {
+        "default": true,
+        "meta": {
+            "group": "API",
+            "name": "Enable Other Origins",
+            "type": "input-switch"
+        }
+    },
+    "API_contact_form_enabled": {
+        "default": false,
+        "meta": {
+            "group": "API",
+            "name": "Enable Contact Form",
+            "type": "input-switch"
+        }
+    },
+    "API_contact_form_recipient": {
+        "default": "",
+        "meta": {
+            "group": "API",
+            "name": "Contact Form Recipient",
+            "type": "input"
+        }
+    },
+    "CobaltEvents_enabled": {
+        "default": true,
+        "directives": {
+            "public": true
+        },
+        "meta": {
+            "group": "Banners &amp; Pop-ups",
+            "name": "Enable Banners &amp; Pop-ups",
+            "type": "input-switch"
+        }
+    },
+    "CobaltEvents_database_collection": {
+        // "meta": {
+        //     "group": "Banners &amp; Pop-ups",
+        //     "name": "Database Collection",
+        //     "type": "input"
+        // },
+        "default": "CobaltEvents"
+    },
+    /* The id attribute of the body tag when errors happen in a web context. */
+    "HTTP_error_body_id": {
+        "default": "cobalt_http_error"
+    },
+    /** Mail **/
+    "Mail_smtp_host": {
+        "default": "",
+        "directives":{
+            "env": "MAIL_SMTP_HOST"
+        },
+        "meta": {
+            "group": "Mail",
+            "name": "SMTP Host",
+            "type": "input"
+        }
+    },
+    "Mail_smtp_auth": {
+        "default": true,
+        "directives": {"env": "MAIL_AUTH"},
+        "meta": {
+            "group": "Mail",
+            "name": "SMTP Auth Enabled",
+            "type": "input-switch"
+        }
+    },
+    "Mail_SMTP_options": {
+        "default": {}
+    },
+    "Mail_username": {
+        "default": "",
+        "directives": {
+            "env": "MAIL_USERNAME"
+        },
+        "meta": {
+            "group": "Mail",
+            "name": "Username",
+            "type": "input"
+        }
+    },
+    "Mail_from_address": {
+        "default": "",
+        "directives":{"alias": "Mail_username"},
+        "meta": {
+            "group": "Mail",
+            "name": "From Address",
+            "type": "input"
+        }
+    },
+    "Mail_from_name": {
+        "default": "",
+        "directives":{"alias": "app_short_name"},
+        "meta": {
+            "group": "Mail",
+            "name": "From Name",
+            "type": "input"
+        }
+    },
+    "Mail_reply_to_address": {
+        "default": "",
+        "directives":{"alias": "Mail_from_address"},
+        "meta": {
+            "group": "Mail",
+            "name": "Reply To",
+            "type": "input"
+        }
+    },
+    "Mail_reply_to_name": {
+        "default": "",
+        "directives":{"alias": "app_short_name"},
+        "meta": {
+            "group": "Mail",
+            "name": "Reply To Name",
+            "type": "input"
+        }
+    },
+    "Mail_password": {
+        "default": "",
+        "directives": {"env": "MAIL_PASSWORD"},
+        "meta": {
+            "group": "Mail",
+            "name": "Mail Password",
+            "type": "input"
+        }
+    },
+    "Mail_port": {
+        "default": 587,
+        "directives":{"env": "MAIL_PORT"},
+        "meta": {
+            "group": "Mail",
+            "name": "SMTP Port",
+            "type": "input"
+        }
+    },
+    "Cookie_consent_prompt": {
+        "default": false,
+        "meta": {
+            "group": "Banners &amp; Pop-ups",
+            "name": "Cookie Consent Prompt",
+            "type": "input-switch"
+        }
+    },
+
+    "Posts_enable_parallax": {
+        "default": true,
+        "meta": {
+            "group": "Parallax",
+            "name": "Enable Parallax for Blog Post Headline Images",
+            "type": "input-switch"
+        }
+    },
+    "enable_default_parallax": {
+        "default": true,
+        "directives":{"public": true},
+        "meta": {
+            "group": "Parallax",
+            "name": "Enable Parallax",
+            "type": "input-switch"
+        }
+    },
+    "Parallax_enable_debug": {
+        
+        "default": false,
+        "directives":{"public": true},
+        "meta": {
+            "group": "Parallax",
+            "name": "Enable Parallax Debug",
+            "type": "input-switch"
+        }
+    },
+       /* If true, the settings will be cached after being processed and the cache 
     will only be updated if any of the settings files are modified. */
     "cache_settings": {
         "default": true
@@ -59,265 +414,99 @@
     "version": {
         "default": "0.0"
     },
-    /* 
-    If debugging is TRUE, then a bunch of things happen. 
-        - core/apiv1.php will add a HelloWorld route
-        - HTTPExceptions used to display an B64 value of the exception message
-    If debugging is FALSE, then:
-        - The WebHandler will cache a concat of all JS files in `packages`
-        - The WebHandler will cache a concat of all CSS files in `css-packages`
-    */
-    "debug": {
-        "default": true
-    },
     /* API Routes consist of prefixes for URI path names. These prefixes are 
     used to load the appropriate routing table and tell the engine which 
     processor to use to handle the request. */
     "context_prefixes": {
-        "default": {
-            "admin": {
-                "processor": "Handlers\\AdminHandler",
-                "prefix": "/admin/",
-                "exception_mode": "web",
-                "permission": "Admin_panel_access",
-                "session_refresh": true,
-                "vars": {
-                    "html_class": "admin-panel"
+        "default": {},
+        "directives":{
+            "prepend": {
+                "admin": {
+                    "processor": "Handlers\\AdminHandler",
+                    "prefix": "/admin/",
+                    "exception_mode": "web",
+                    "mode": "text/html",
+                    "permission": "Admin_panel_access",
+                    "session_refresh": true,
+                    "api_access": true,
+                    "vars": {
+                        "html_class": "admin-panel"
+                    }
+                },
+                "debug": {
+                    "processor": "Handlers\\WebHandler",
+                    "prefix": "/debug/",
+                    "exception_mode": "web",
+                    "mode": "text/html",
+                    "permission": "Debug_access",
+                    "session_refresh": true,
+                    "api_access": true,
+                    "vars": {
+                        "html_class": "debug-panel"
+                    }
+                },
+                "init": {
+                    "processor": "Handlers\\WebHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": null
+                },
+                "shared": {
+                    "processor": "Handlers\\SharedHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/core-content/"
+                },
+                "apiv1": {
+                    "processor": "Handlers\\ApiHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/api/v1/"
+                },
+                "webhookv1": {
+                    "processor": "Handlers\\ApiHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/webhook/v1/"
+                },
+                "streams": {
+                    "processor": "Handlers\\ApiHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/streams/"
+                },
+                "web": {
+                    "processor": "Handlers\\WebHandler",
+                    "exception_mode": "web",
+                    "mode": "text/html",
+                    "session_refresh": true,
+                    "api_access": true,
+                    "prefix": "/",
+                    "vars": {
+                        "html_class": "cobalt-app"
+                    }
                 }
-            },
-            "init": {
-                "processor": "Handlers\\WebHandler",
-                "session_refresh": false,
-                "prefix": null
-            },
-            "shared": {
-                "processor": "Handlers\\SharedHandler",
-                "session_refresh": false,
-                "prefix": "/core-content/"
-            },
-            "apiv1": {
-                "processor": "Handlers\\ApiHandler",
-                "session_refresh": false,
-                "prefix": "/api/v1/"
-            },
-            "webhookv1": {
-                "processor": "Handlers\\ApiHandler",
-                "session_refresh": false,
-                "prefix": "/webhook/v1/"
-            },
-            "streams": {
-                "processor": "Handlers\\ApiHandler",
-                "session_refresh": false,
-                "prefix": "/streams/"
-            },
-            "web": {
-                "processor": "Handlers\\WebHandler",
-                "session_refresh": true,
-                "prefix": "/"
             }
-        },
-        "$prepend": true
-    },
-    /* Debug routes include things like the WebComponent input tests */
-    "enable_debug_routes": {
-        "default": false
-    },
-    /* I don't think this does anything yet -GM */
-    "route_cache_enabled": {
-        "default": false
-    },
-    /* Enabled the core-content/ route */
-    "enable_core_content": {
-        "default": true
-    },
-    /* The name of our Mongo database */
-    "database": {
-        "default": ""
-    },
-    /* Our database user */
-    "db_usr": {
-        "default": ""
-    },
-    /* Our db user's password */
-    "db_pwd": {
-        "default": ""
-    },
-    /* Our default address. */
-    "db_addr": {
-        "default": "localhost:27017"
-    },
-    /* Our databse authentication string, if default is non-false */
-    "database_authentication": {
-        "default": false,
-        "$combine": [
-            "db_usr",
-            ":",
-            "db_pwd",
-            "@"
-        ]
-    },
-    /* Our total server address. */
-    "server_address": {
-        "default": "",
-        "$combine": [
-            "mongodb://",
-            "database_authentication",
-            "db_addr"
-        ],
-        "$env": "COBALT_MONGODB"
-    },
-    /* Fonts to be used. This can be referenced by the rendering engine for 
-    email templates and more. */
-    "fonts": {
-        "default": {
-            "head": {
-                "family": "'Assistant', sans-serif",
-                "import": "Assistant:500,800"
-            },
-            "body": {
-                "family": "'Open Sans', sans-serif",
-                "import": "Open+Sans:400,400i,800,800i"
-            }
-        },
-        "$merge": true,
-        "$style": true
-    },
-    /* Basic CSS variables we want included in our body. Can also be used for 
-    email templates and more. */
-    "css-vars": {
-        "default": {
-            "modal-z-index": 2000,
-            "body-background": "#efefef",
-            "box-shadow": "0 4px 10px rgba(0, 0, 0, .2)",
-            "color-header-branding": "#004BA8",
-            "color-user-panel-button": "#342A21",
-            "color-admin-panel-background": "var(--project-color-header-branding)",
-            "color-admin-panel-font": "white",
-            "color-acknowledge": "#598B2C",
-            "color-active": "#598B2C",
-            "color-inactive": "#B1C1C0",
-            "color-input-border-nofocus": "#b1c3c3",
-            "color-input-border-focus": "#000",
-            "color-input-background": "#fff",
-            "color-input-text-color": "#000",
-            "color-input-background-focus": "#FFF",
-            "color-input-invalid-border": "#BB4430",
-            "color-input-invalid-bg": "#F7E2DE",
-            "color-input-invalid-label-text": "#FFF",
-            "color-input-disabled": "#F4F6F6",
-            "color-disabled": "rgba(0,0,0,.2)",
-            "color-table-border": "1px solid var(--project-color-input-border-nofocus)",
-            "color-table-bg-odd": "var(--project-color-input-background)",
-            "color-table-bg-even": "var(--project-color-input-disabled)",
-            "color-problem": "#FE5F55",
-            "color-button-init": "#004BA8",
-            "color-button-hover": "#9DD1F1",
-            "color-button-text": "#FFF",
-            "color-button-hover-text": "#000",
-            "color-button-pressed": "#00377A",
-            "calendar-borders": "1px solid var(--project-color-button-init)",
-            "calendar-cell-bg": "#FFF",
-            "calendar-cell-other-bg": "#EFEFEF",
-            "calendar-cell-txt": "#000",
-            "calendar-header-color": "var(--project-color-button-init)",
-            "calendar-header-text": "var(--project-color-button-text)",
-            "action-menu-background": "var(--project-color-input-disabled)",
-            "action-menu-border": "var(--project-color-table-border)",
-            "action-menu-hover": "var(--project-color-inactive)",
-            /** Events banner colors should be the full sextet */
-            "events-banner-background": "#efefef",
-            "events-banner-text": "#000000",
-            "events-button-color": "var(--project-color-button-init)",
-            "events-button-color-hover": "var(--project-color-button-hover)",
-            "events-button-text": "var(--project-color-button-text)",
-            "events-button-text-hover": "var(--project-color-button-hover-text)"
-        },
-        "$merge": true,
-        "$style": true
-    },
-    /* The image displayed when loading a page. */
-    "login-hero-sidebar": {
-        "default": "url(/core-content/img/default_poster_image.jpg)",
-        "$style": true
-    },
-    /* A list of JS files to be concatenated, minified, and sent to the client
-    with every page */
-    "packages": {
-        "default": [
-            "global_functions.js",
-            "components/autocomplete.js",
-            "components/tag-select.js",
-            "DateConverter.js",
-            "Modal.js",
-            "TabbedUI.js",
-            "Slideshow.js",
-            "Slideshow2.js",
-            "InputClasses.js",
-            "FormRequest.js",
-            "ApiFetch.js",
-            "InputComponents.js",
-            "AsyncButton.js",
-            "UserMenu.js",
-            "ActionMenu.js",
-            "StatusMessage.js",
-            "Events.js",
-            "PaginatedContainer.js",
-            "AudioPlayer.js"
-        ],
-        "$merge": true, // Prepend user packages (is that what we want to do?),
-        "$method": "set_packages"
-    },
-    "admin_packages": {
-        "default": [
-
-        ]
-    },
-    /* A list of CSS files to be concatenated, minified, and sent to the client
-    with every page.
-    
-    If "debug" is `true`, this list will be used to create <link> tags to the 
-    files for use there. */
-    "css_packages": {
-        "default": [
-            "components/autocomplete.css",
-            "components/tag-select.css",
-            "normalize.css",
-            "header.css",
-            "slideshow.css",
-            "inputs.css",
-            "loading-spinner.css",
-            "buttons.css",
-            "action-menu.css",
-            "status-message.css",
-            "login-form.css",
-            "form-request.css",
-            "flex-table.css",
-            "cobalt-events.css",
-            "modal.css",
-            "tabs-drawer.css",
-            "calendar.css",
-            "webcomponents.css",
-            "audio-player.css",
-            "paginated-container.css",
-            "main.css"
-        ],
-        "$merge": true // User's packages should come second.
-    },
-    "admin_css_packages": {
-        "default": []
+        }
     },
     "default-color-scheme": {
         "default": "light"
     },
     "opengraph": {
-        "default": {
-            "type": "website",
-            "image": "/core-content/img/branding/cobalt-logo.svg",
-            "image_X": 500,
-            "image_Y": 500,
-            "description": "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io"
-        },
-        "$merge": true
+        "directives": {
+            "merge": {
+                "type": "website",
+                "image": "/core-content/img/branding/cobalt-logo.svg",
+                "image_X": 500,
+                "image_Y": 500,
+                "description": "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io"
+            }
+        }
     },
     "pwa": {
         "default": {
@@ -330,11 +519,15 @@
     },
     "session_secure_status": {
         "default": true,
-        "$env": "SESSION_SECURE"
+        "directives": {
+            "env": "SESSION_SECURE"
+        }
     },
     "loading_spinner": {
         "default": "dashes",
-        "$public": true
+        "directives": {
+            "public": true
+        }
     },
     /* The CSRF seed is a secret string that is prepended to the client's 
     session cookie to form a unique "password". This password is then encrypted
@@ -343,7 +536,7 @@
         "default": ""
     },
     "Plugin_enable_plugin_support": {
-        "default": false
+        "default": true
     },
     "Plugin_enabled_plugins": {
         "default": []
@@ -355,6 +548,12 @@
     default value supplied for its router table entry */
     "Router_csrf_required_default": {
         "default": true
+    },
+    "SPA": {
+        "default": true,
+        "directives": {
+            "public": true
+        }
     },
     "Web_normally_open_pages": {
         "default": true
@@ -382,8 +581,10 @@
     },
     "Admin_panel_access": {
         "default": true,
-        "$required": {
-            "Auth_user_accounts_enabled": true
+        "directives": {   
+            "required": {
+                "Auth_user_accounts_enabled": {"is": true}
+            }
         }
     },
     "Auth_min_password_length": {
@@ -391,8 +592,10 @@
     },
     "Auth_logins_enabled": {
         "default": true,
-        "$required": {
-            "Auth_user_accounts_enabled": true
+        "directives": {   
+            "required": {
+                "Auth_user_accounts_enabled": true
+            }
         }
     },
     "Auth_enable_insecure_logins": {
@@ -400,35 +603,40 @@
     },
     "Auth_session_panel_enabled": {
         "default": true,
-        "$required": {
-            "Auth_user_accounts_enabled": true
+        "directives": {   
+            "required": {
+                "Auth_user_accounts_enabled": true
+            }
         }
     },
     "Auth_user_menu_enabled": {
         "default": true,
-        "$required": {
-            "Auth_user_accounts_enabled": true
+        "directives": {   
+            "required": {
+                "Auth_user_accounts_enabled": true
+            }
         }
     },
     "Auth_account_creation_enabled": {
         "default": false,
-        "$required": {
-            "Auth_user_accounts_enabled": true
+        "directives": {   
+            "required": {
+                "Auth_user_accounts_enabled": true
+            }
         }
     },
     "Auth_login_page": {
         "default": "/login",
-        "$required": {
-            "Auth_user_accounts_enabled": true,
-            "on_fail_value": ""
-        },
-        "$public": true
+        "directives": {   
+            "required": {
+                "Auth_user_accounts_enabled": true,
+                "on_fail_value": ""
+            },
+            "public": true
+        }
     },
     "Auth_onboading_url": {
         "default": "/onboarding"
-    },
-    "Auth_user_manager_individual_page": {
-        "default": "/manage/user"
     },
     "Auth_enable_root_group": {
         /* THIS IS DANGEROUS. ENABLING MEMBERSHIP IN THE ROOT GROUP WILL BYPASS 
@@ -438,89 +646,24 @@
     "Auth_session_days_until_expiration": {
         "default": 90
     },
-    "API_CORS_allowed_origins": {
-        "default": [],
-        "$push": [
-            "domain_name"
-        ]
-    },
-    "API_CORS_enable_other_origins": {
-        "default": true
-    },
-    "API_contact_form_enabled": {
-        "default": false
-    },
-    "API_contact_form_recipient": {
-        "default": ""
-    },
-    "CobaltEvents_enabled": {
-        "default": true,
-        "$public": true
-    },
-    "CobaltEvents_database_collection": {
-        "default": "CobaltEvents"
-    },
-    /* The id attribute of the body tag when errors happen in a web context. */
-    "HTTP_error_body_id": {
-        "default": "cobalt_http_error"
-    },
-    /** Mail **/
-    "Mail_smtp_host": {
-        "default": "",
-        "$env": "MAIL_SMTP_HOST"
-    },
-    "Mail_smtp_auth": {
-        "default": true,
-        "$env": "MAIL_AUTH"
-    },
-    "Mail_SMTP_options": {
-        "default": {}
-    },
-    "Mail_username": {
-        "default": "",
-        "$env": "MAIL_USERNAME"
-    },
-    "Mail_from_address": {
-        "default": "",
-        "$alt": "Mail_username"
-    },
-    "Mail_from_name": {
-        "default": "",
-        "$alt": "app_short_name"
-    },
-    "Mail_reply_to_address": {
-        "default": "",
-        "$alt": "Mail_from_address"
-    },
-    "Mail_reply_to_name": {
-        "default": "",
-        "$alt": "app_short_name"
-    },
-    "Mail_password": {
-        "default": "",
-        "$env": "MAIL_PASSWORD"
-    },
-    "Mail_port": {
-        "default": 587,
-        "$env": "MAIL_PORT"
-    },
     "Renderer_parse_for_multiline_functions": {
         // When true, the trailing semicolon is REQUIRED.
         "default": false
     },
     "Mobile_nav_menu_closes_on_anchor_link_click": {
         "default": true,
-        "$public": true
-    },
-    "Cookie_consent_prompt": {
-        "default": false
+        "directives": {   
+            "public": true
+        }
     },
     "UGC_enable_user_generated_content": {
         "default": false
     },
     "UGC_retrieval_endpoint": {
         "default": "/ugc",
-        "$public": true
+        "directives": {   
+            "public": true
+        }
     },
     "UCG_database_collection": {
         "default": "ugc"
@@ -528,7 +671,37 @@
     "UGC_directory": {
         "default": "/ugc"
     },
-    "ENV_allow_user_error_reporting": {
-        "default": false
+    "Posts": {
+        "directives": {   
+            "merge": {
+                "default_enabled": false,
+                "collection_name": "CobaltPosts",
+                "default_name": "Posts",
+                "public_index": "/posts",
+                "public_index_options": {
+                    "anchor": {"name": "Posts"},
+                    "navigation": ["main_navigation"]
+                },
+                "public_post": "/posts/{id}",
+                "public_post_options": {}
+            }
+        }
+    },
+    /* 
+    If debugging is TRUE, then a bunch of things happen. 
+        - core/apiv1.php will add a HelloWorld route
+        - HTTPExceptions used to display an B64 value of the exception message
+    If debugging is FALSE, then:
+        - The WebHandler will cache a concat of all JS files in `packages`
+        - The WebHandler will cache a concat of all CSS files in `css-packages`
+    */
+    "debug": {
+        "default": true,
+        "definition": "Debug",
+        "meta": {
+            "group": "Cache &amp; Debug",
+            "name": "Debug status",
+            "type": "input-switch"
+        }
     }
 }
