@@ -58,7 +58,7 @@ class CobaltSetting {
         if(!$value) return $value;
         if($this->user_modified_settings[$data]) return $this->user_modified_settings[$data];
         if($this->allSettings[$data]) return $this->allSettings[$data];
-        throw new \Exception("Setting $this->name depends on $data but it's not yet defined");
+        throw new AliasMissingDependency("Setting $this->name depends on $data but it's not yet defined");
     }
 
     function directive_prepend(array|null $value, array $data) {
