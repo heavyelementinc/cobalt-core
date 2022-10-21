@@ -29,6 +29,16 @@
         },
         "default": ""
     },
+    /* A bespoke name to be listed in the copyright notice */
+    "app_copyright_name": {
+        "manage": {
+            "group": "Basic",
+            "name": "Copyright Name",
+            "type": "input"
+        },
+        "default": "",
+        "$alt": "app_short_name"
+    },
     /* The full name of the application. */
     "app_name": {
         "manage": {
@@ -49,16 +59,6 @@
         "default": "",
         "$alt": "app_name",
         "$public": true
-    },
-    /* A bespoke name to be listed in the copyright notice */
-    "app_copyright_name": {
-        "manage": {
-            "group": "Basic",
-            "name": "Copyright Name",
-            "type": "input"
-        },
-        "default": "",
-        "$alt": "app_short_name"
     },
     /* The name of the designer as well as their website and title text */
     "designer": {
