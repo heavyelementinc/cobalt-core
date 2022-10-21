@@ -24,6 +24,59 @@ class Debug extends \Controllers\Pages {
         set_template("debug/renderer.html");
     }
 
+    function settings() {
+        $GLOBALS['app']->getSettingDefinitions();
+        
+        $settings = $GLOBALS['app']->__settings;
+        $stored = $GLOBALS['app']->fetchModifiedSettings();
+        $definitions = $GLOBALS['app']->definitions;
+
+        $buttons = "";
+        $pages = "";
+        $directive_abbr = [
+            'alias' => 'A',
+            'env' => 'E',
+            'prepend' => 'P',
+            'merge' => "m",
+            'mergeAll' => "M",
+            'push' => 'p',
+            'style' => 'S'
+        ];
+
+        foreach($definitions as $setting => $data) {
+            $cached_value = $settings[$setting];
+            $directives = "";
+            foreach($definitions[$setting]['directives'] ?? [] as $dir => $d) {
+                if(key_exists($dir, $directive_abbr)) $directives .= $directive_abbr[$dir] . ",";
+            }
+            $directives = substr($directives,0,-1);
+            $buttons .= "<a href='#$setting'>$setting<span class='directives'>$directives</span></a>";
+            $filename = str_replace([__ENV_ROOT__, __APP_ROOT__],['__ENV__', '__APP__'],$data['defined']);
+            $shorthand = $data['shorthand'];
+            unset($definitions[$setting]['defined']);
+            unset($definitions[$setting]['shorthand']);
+            $pages .= view('/debug/settings/inspector.html',
+                [
+                    'name' => $setting,
+                    'cached_value' => json_encode($cached_value, JSON_PRETTY_PRINT),
+                    'stored' => json_encode($stored[$setting] ?? "",JSON_PRETTY_PRINT),
+                    'default' => json_encode($GLOBALS['app']->default_values[$setting] ?? $data['default'] ?? $data['meta']['merge'] ?? $data['meta']['mergeAll'],JSON_PRETTY_PRINT),
+                    'definition' => "<span>".substr(implode("</span>\n<span>",explode("\n",json_encode($definitions[$setting],JSON_PRETTY_PRINT))),0) . "</span>",
+                    'defined_in' => $filename,
+                    'shorthand' => json_encode($shorthand),
+                ]
+            );
+        }
+
+        add_vars([
+            'title' => 'Settings Inspector',
+            'buttons' => $buttons,
+            'pages' => $pages,
+        ]);
+        
+        set_template("/debug/settings/container.html");
+    }
+
     function debug_router() {
         // $routes = json_encode($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']],JSON_PRETTY_PRINT);
 
@@ -399,5 +452,47 @@ class Debug extends \Controllers\Pages {
         if(!is_root()) die("You don't have permisison.");
         phpinfo();
         exit;
+    }
+
+    function credit_card() {
+        add_vars([
+            'title' => "Credit Card Test",
+            'main' => credit_card_form(),
+            'shipping' => credit_card_form([], true)
+        ]);
+        set_template("/debug/credit-card.html");
+    }
+
+    function doc_test() {
+        $prepStart = microtime(true) * 1000;
+        $million = [];
+        for($i = 0; $i <= 1000000; $i++){
+            array_push($million, random_string(10));
+        }
+        $prepEnd = microtime(true) * 1000;
+        // $doc = $GLOBALS['application']->allSettings;
+        
+        $timeAStart = microtime(true) * 1000;
+        doc_to_array($million);
+        $timeAEnd = microtime(true) * 1000;
+
+        function mongo_doc_to_array($doc) {
+            return json_decode(json_encode($doc),true);
+        }
+
+        $timeBStart = microtime(true) * 1000;
+        mongo_doc_to_array($million);
+        $timeBEnd = microtime(true) * 1000;
+
+        $deltaPrep = $prepEnd - $prepStart;
+        $deltaA = $timeAEnd - $timeAStart;
+        $deltaB = $timeBEnd - $timeBStart;
+
+        add_vars([
+            'title' => "Doc Test",
+            'main' => "<pre>Prep took $deltaPrep ms\ndoc_to_array took $deltaA ms\nmongo_doc_to_array took $deltaB ms</pre>"
+        ]);
+
+        return set_template("/parts/main.html");
     }
 }

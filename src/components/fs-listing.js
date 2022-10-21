@@ -96,7 +96,7 @@ class CobaltListing extends HTMLElement {
                         method: element.method ?? "PUT",
                         action: this.actionUrl(element.action, el.dataset.id)
                     },
-                    callback: () => {
+                    callback: (action, event, requestData) => {
                         return true;
                     }
                 });

@@ -11,7 +11,7 @@
  * @license cobalt-core/license
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
-
+benchmark_start("router_setup");
 ob_start();
 
 /** We need to determine which routing tables we need to load 
@@ -64,6 +64,7 @@ try {
         require_once __ENV_ROOT__ . "/globals/init.php";
     }
 
+
     // The router takes care of much of the rest of this process.
     $router = new Routes\Router($route_context);
 
@@ -84,18 +85,23 @@ try {
     /** @global array $current_route_meta contains the discovered route's metadata */
     $current_route_meta = $router->discover_route();
 
+    benchmark_end("router_setup");
+    benchmark_start("context_setup");
     $context_processor->_stage_route_discovered(...$current_route_meta);
     $context_processor->_stage_bootstrap['_stage_route_discovered'] = true;
-
+    
     // Assign some stuff to be done globally in your app.
     $global_route = __APP_ROOT__ . "/private/global_route.php";
     if (file_exists($global_route)) require_once $global_route;
+    
+    benchmark_end("context_setup");
+    benchmark_start("controller_execution");
 
     $router_result = $router->execute_route();
     $context_processor->_stage_execute($router_result);
     $context_processor->_stage_bootstrap['_stage_execute'] = true;
 
-    $context_result = $context_processor->_stage_output();
+    $context_result = $context_processor->_stage_output($router_result);
     $context_processor->_stage_bootstrap['_stage_output'] = true;
     ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
@@ -109,9 +115,21 @@ try {
     $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
 }
 
+benchmark_end("controller_execution");
+
 // Let's finally output the result:
 if($context_result !== null) {
     echo $context_result;
+    $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['end'] = microtime(true) * 1000;
+    $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['delta'] = $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['end'] - $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['start'];
+
+    $global_benchmarks = "";
+    if(app('debug') && isset($context_processor->encoding_mode) && $context_processor->encoding_mode === "text/html") {
+        $global_benchmarks = view("/debug/benchmarks.html",['results' => str_replace("\"","\\\"",json_encode($GLOBALS['BENCHMARK_RESULTS']))]);
+        echo $global_benchmarks;
+    }
     ob_flush();
     exit;
+} else {
+    die("No content in buffer");
 }

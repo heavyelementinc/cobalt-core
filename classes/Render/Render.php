@@ -78,7 +78,7 @@ use Exceptions\HTTP\NotFound;
 class Render {
     public $body = "";
     public $vars = [];
-    const VAR_STRING = "([!@#$]?[\w.\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    const VAR_STRING = "([!@#$]*[\w.\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
     public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
     public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
@@ -144,21 +144,28 @@ class Render {
      * @return void
      */
     function from_template(string $template_path) {
-        if (!\property_exists($this, "template_cache")) $this->template_cache = [];
+        // Create our template cache if it doesn't exist
+        // if (!\property_exists($GLOBALS, "template_cache")) $GLOBALS['TEMPLATE_CACHE'] = [];
+        
+        // Check if we need to replace our template path with he appropriate CORE or APP path
         if ($template_path[0] === "_") {
             $template_path = str_replace(
                 ["__CORE__", "__APP__"],
                 [__ENV_ROOT__ . "/templates/", __APP_ROOT__ . "/private/templates/"],
                 $template_path
             );
+            // If the file doesn't exist, let's throw an error
             if (!file_exists($template_path)) throw new \Exceptions\HTTP\NotFound("That template was not found");
-            $this->template_cache[$template_path] = file_get_contents($template_path);
-        } else if (!key_exists($template_path, $this->template_cache)) {
+            // Let's load our template and save it to the temporary cache
+            $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($template_path);
+        } else if (!key_exists($template_path, $GLOBALS['TEMPLATE_CACHE'])) { // We do not have the file saved to the template cache
+            // Load our template from the specified paths
             $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
             if($contenders === false) throw new NotFound("The template ($template_path) was not found ");
-            $this->template_cache[$template_path] = file_get_contents($contenders);
+            // Load the template
+            $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($contenders);
         }
-        $this->set_body($this->template_cache[$template_path], $template_path);
+        $this->set_body($GLOBALS['TEMPLATE_CACHE'][$template_path], $template_path);
     }
 
     /** Set the body html template. $body is the template we'll be parsing for 
@@ -240,7 +247,10 @@ class Render {
                     break;
                 case "$":
                     $name = substr($name, 1);
-                    // $is_pretty_print = JSON_PRETTY_PRINT;
+                    if($name[0] === "!") {
+                        $is_pretty_print = JSON_PRETTY_PRINT;
+                        $name = substr($name, 1);
+                    }
                     $is_inline_json = true;
                     $options = ENT_NOQUOTES;
                     $process_vars = false;
@@ -313,13 +323,26 @@ class Render {
     function replace_functs($subject, $functions) {
         $mutant = $subject;
         foreach ($functions[1] as $i => $funct) {
-            if (!is_callable($funct)) $this->debug_template($funct[0][$i], "$funct is not callable");
-            $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
+            if (!is_callable($funct)) $this->debug_template($funct, $functions[2][$i], $functions[0][$i], "@$funct() is not callable", $i, $subject);
+            try{
+                $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Exception $e) {
+                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], "@$funct() was supplied malformed parameters", $i, $subject);
+            }
             $mutant_vars = $this->functs_get_vars($args);
-            // We want to include the current context's variables when @with is called
+            
+            // We want to include the current context's variables when @view is called
             // from inside a template, so we add a special case. Fun.
-            if (in_array($funct, ['maybe_with', 'with']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
-            $result = $funct(...$mutant_vars);
+            if (in_array($funct, ['maybe_with', 'with', 'view', 'maybe_view']) && !isset($mutant_vars[1])) $mutant_vars[1] = $this->vars;
+            try{
+                $result = $funct(...$mutant_vars);
+            } catch (\Exception $e) {
+                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], $e->getMessage(), $i, $subject);
+            } catch (\Error $e) {
+                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], $e->getMessage(), $i, $subject);
+            }
+            // If we run the 'set' callable, then we want to update our current vars with 
+            // the values set just set.
             if($funct === "set") $this->vars = array_merge($this->vars,$GLOBALS['WEB_PROCESSOR_VARS']);
             $mutant = \str_replace($functions[0][$i], $result, $mutant);
         }
@@ -335,10 +358,68 @@ class Render {
         return $mutant;
     }
 
-    function debug_template($funct) {
-        $strpos = \strpos($this->body, $funct);
-        $message = "";
-        throw new \Exception($message . "; at position " . $strpos);
+    function debug_template($funct, $args, $errorToHighlight, $message, $index, $body) {
+        // $strpos = \strpos($GLOBALS['TEMPLATE_CACHE'][$this->name], $funct);
+        // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
+        $errorToHighlight = preg_quote($errorToHighlight);
+        $strpos = \strpos($body, $errorToHighlight);
+        $template = $body;
+        $substr = substr($template, 0, $strpos);
+        $explosion = explode("\n",$substr);
+        $lineNum = count($explosion);
+        $linePos = strlen($explosion[$lineNum - 1]);
+        // $substr = substr();
+        // $message = "";
+        if(app("debug")) $this->render_template_error($errorToHighlight, $message, $lineNum, $linePos, $template);
+        $errorMessage = "$message in \"$this->name\" on line $lineNum, column $linePos";
+        try{
+            throw new \Exception($errorMessage);
+        } catch (\Exception $e){}
+        die("A template error occurred. Please contact your IT team.");
+    }
+
+    function render_template_error($funct, $message, $lineNum, $strpos, $template) {
+        header("HTTP/1.1 500 Internal Server Error");
+        // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
+        $safe = htmlspecialchars($template);
+        $safe = str_replace($funct,"<code class='error'>$funct</code>",$safe);
+        echo "<h1>Cobalt Template Debugger</h1>";
+        echo "<code>".$message . " in \"$this->name\" on line $lineNum, column " . $strpos."</code>";
+        echo "<pre>";
+        foreach(explode("\n",$safe) as $number => $line) {
+            echo "<span>" . $line . "</span>\n";
+        }
+        echo "</pre>";
+        echo "<style>
+        h1 {
+            display:pre;
+            font-family: monospace;
+        }
+        pre{
+            background:#212124;
+            color:white;
+            white-space:pre-wrap
+            counter-reset: line;
+        }
+        pre span {
+            counter-increment: line;
+            display: pre;
+            color: inherit;
+            white-space: pre-wrap;
+        }
+        pre span:before{
+            content: counter(line);
+            display: inline-block;
+            border-right: 1px solid #ddd;
+            width: 3ch;
+            text-align:right;
+            padding: 0 .5em;
+        }
+        pre code.error{
+            color:red;
+            font-weight:bold;
+        }</style>";
+        die();
     }
 
     function strposall($needle, $haystack, $up_to) {

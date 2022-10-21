@@ -22,4 +22,8 @@ class Task {
     public function log_message() {
         return "No message.";
     }
+
+    public function getView($data) {
+        return view('/admin/cron/view.html',['t' => $this, 'd' => $data]);
+    }
 }

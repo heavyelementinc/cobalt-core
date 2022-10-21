@@ -1,5 +1,14 @@
-/** AutoComplete - The Cobalt Engine Autocomplete webcomponent
+/** # AutoComplete
+ * @description The Cobalt Engine Autocomplete webcomponent
+ * @element <input-autocomplete>
+ * @todo Make this element extend the new AutocompleteInterface
  * 
+ * @attribute allow-custom []
+ * @attribute placeholder
+ * @attribute readonly
+ * @attribute url
+ * @attribute min 
+ * @attribute clear-button
  * 
  */
 

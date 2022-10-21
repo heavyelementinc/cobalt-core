@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Payments\PaymentGateway;
 use \Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use \Exceptions\HTTP\ServiceUnavailable;
@@ -163,5 +164,24 @@ class CoreApi extends \Controllers\Pages {
         if (!is_bool($_POST['enabled'])) throw new BadRequest("State must be boolean");
         $GLOBALS['plugin_manager']->change_plugin_state($name, $_POST['enabled']);
         return $_POST;
+    }
+
+    function update_gateway_data($id){
+        $gateMan = new PaymentGateway();
+        $schema = $gateMan->get_schema_name();
+        
+        $schema = new $schema;
+        $mutant = $schema->validate($_POST);
+
+        $result = $gateMan->updateOne(
+            ['_id' => $gateMan->__id($id)],
+            ['$set' => $mutant],
+            ['upsert' => true]
+        );
+        
+        return [
+            'secret' => '',
+            'token' => ''
+        ];
     }
 }

@@ -9,7 +9,7 @@ use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 
 trait ClientFSManager {
-    protected $fs = null;
+    public $fs = null;
     protected $format_table = null;
     protected $filename_insert_prefix = "";
     
@@ -27,6 +27,8 @@ trait ClientFSManager {
         $_id = new \MongoDB\BSON\ObjectId($id);
         return $this->fs->findOne(['_id' => $_id]);
     }
+
+    // function getFileMetadataByName()
 
     public function download($filename) {
         $this->initFS();
@@ -103,7 +105,7 @@ trait ClientFSManager {
      * @param int $index The index of $_FILES to use
      * @return array 
      */
-    private function clientUploadFile($key, $index = null, $arbitrary_data = null, $files = null):array {
+    public function clientUploadFile($key, $index = null, $arbitrary_data = null, $files = null, $meta = false):array {
         $this->initFS();
         if(!$files) $files = $_FILES;
         if(empty($files)) throw new BadRequest("No files were uploaded");
@@ -121,18 +123,32 @@ trait ClientFSManager {
             'tmp_name' => $file['tmp_name'][$index],
         ];
 
-        $thumb_id = $this->fs->upload($file_array,$index,$arbitrary_data);
 
-        return ['id' => $thumb_id, 'filename' => $file_array['name']];
+        $metadata = getimagesize($file_array['tmp_name']);
+        if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($file_array['tmp_name'])];
+        $meta = [
+            'width' => $metadata[0],
+            'height' => $metadata[1],
+            'mimetype' => $metadata['mimetype'],
+        ];
+
+        $arbitrary_data = array_merge($arbitrary_data, ['meta' => $meta]);
+
+        $thumb_id = $this->fs->upload($file_array,$index,$arbitrary_data);
+        $returnable = ['id' => $thumb_id, 'filename' => $file_array['name']];
+        if($meta) {
+            $returnable['meta'] = $arbitrary_data['meta'];
+        }
+        return $returnable;
     }
 
-    private function clientUploadFiles($key, $arbitrary_data = null, $files = null) {
+    public function clientUploadFiles($key, $arbitrary_data = null, $files = null, $meta = false) {
         if(!$files) $files = $_FILES;
         if(empty($files)) throw new BadRequest("No files were uploaded");
         if(empty($files[$key])) throw new BadRequest("No files were uploaded");
         $ids = [];
         foreach($files[$key]['tmp_name'] as $i => $file) {
-            $ids = array_merge($ids,$this->clientUploadFile($key,$i,$arbitrary_data));
+            $ids = array_merge($ids,$this->clientUploadFile($key, $i, $arbitrary_data, $files, $meta));
         }
         return $ids;
     }
@@ -150,7 +166,7 @@ trait ClientFSManager {
      * @throws BadRequest 
      * @throws Exception 
      */
-    private function clientUploadImageThumbnail($key, $index, $thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null) {
+    public function clientUploadImageThumbnail($key, $index, $thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null, $meta = false) {
         if($files === null) $files = $_FILES;
         $tmp_name = "/tmp/" . random_string(16);
         $path           = pathinfo($files[$key]['name'][$index],PATHINFO_DIRNAME);
@@ -176,7 +192,7 @@ trait ClientFSManager {
             ]
         ];
 
-        $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true],$toInsert);
+        $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true], $toInsert, $meta);
         $thumb_id = $thumb['_id'];
 
         $arbitrary_data = array_merge($arbitrary_data, [
@@ -184,17 +200,25 @@ trait ClientFSManager {
             'thumbnail' => $toInsert[$key]['name'][1]]
         );
 
-        return $this->clientUploadFile($key,0,$arbitrary_data,$toInsert);
+        $returnable = $this->clientUploadFile($key, 0, $arbitrary_data, $toInsert, $meta);
+        if($meta) {
+            $returnable = [
+                'media' => $returnable,
+                'thumb' => $thumb
+            ];
+        }
+
+        return $returnable;
 
     }
 
-    private function clientUploadImagesAndThumbnails($key,$thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null) {
+    public function clientUploadImagesAndThumbnails($key,$thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null, $meta = false) {
         $ids = [];
         $assoc = is_associative_array($files);
         if(!$files) $files = $_FILES;
         foreach($files[$key]['tmp_name'] as $index => $file) {
             
-            array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data));
+            array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data, $files, $meta));
         }
         return $ids;
     }
@@ -211,6 +235,7 @@ trait ClientFSManager {
      * @return string 
      */
     final public function directoryListing(string $href = "", string $mode = "list", array $query = ['filter' => [], 'options' => []], array $options = []){
+        if($href === "") $href = "/res/fs/";
         $options = array_merge([
             'parent' => [],
             'child' => [],
@@ -281,6 +306,16 @@ trait ClientFSManager {
                 'tag_end' => "",
                 'anchor' => fn () => ""
             ],
+            'carousel' => [
+                'container' => 'cobalt-carousel',
+                'class' => 'cobalt--fs-directory-listing cfs-carousel',
+                'tag_start' => function ($value, $href, $lazy = true) {
+                    $lazy = ($lazy) ? " loading='lazy'" : "";
+                    return "img src='$href".($value->thumbnail ?? $value->filename)."' draggable='false' onclick='lightbox(this)' full-resolution='$href"."$value->filename'$lazy";
+                },
+                'tag_end' => "",
+                'anchor' => fn () => ""
+            ]
         ];
     }
 

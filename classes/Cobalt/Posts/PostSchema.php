@@ -13,12 +13,13 @@ use Validation\Exceptions\ValidationIssue;
 
 class PostSchema extends \Validation\Normalize {
     use ClientFSManager;
+    private $soft_char_cap = 200;
     public function __get_schema(): array {
         return [
             'author' => [
                 // 'get' => [],
                 'valid' => function ($val) {
-                    return $this->valid_users($GLOBALS['POST_PERMISSIONS'],'permission');
+                    return $this->valid_users_by_permission('Posts_manage_posts','permission');
                 }
             ],
             'title' => [],
@@ -39,10 +40,15 @@ class PostSchema extends \Validation\Normalize {
             ],
             'body' => [],
             'excerpt' => [
+                'get' => function ($val) {
+                    if(!$val) return $this->markdown_word_limit($this->__dataset['body'], $this->soft_char_cap);
+                    return $val;
+                },
                 'set' => function ($val) {
-                    $soft_char_cap = 200;
-                    if($val) return $val;
-                    return $this->markdown_word_limit($this->__dataset['body'], $soft_char_cap);
+                    if(!$val) return null;
+                    $truncated = $this->markdown_word_limit($this->__dataset['body'], $this->soft_char_cap);
+                    if($truncated === $val) return null;
+                    return $truncated;
                 }
                 // 'soft_char_cap' => 200
             ],
@@ -58,8 +64,9 @@ class PostSchema extends \Validation\Normalize {
                     return "$this->public_link/attachment/$results->filename";
                 },
                 'display' => function ($val) {
+                    $val = $this->default_image;
                     if(!$val) return "";
-                    return "style=\"background-image:url(".$this->default_image."); background-position: ".$this->{'alignment.position'}."\" bg-splash";
+                    return "style=\"background-image:url('".$val."'); background-position: ".$this->{'alignment.position'}."\" bg-splash";
                 }
             ],
             'alignment.position' => [
@@ -83,7 +90,7 @@ class PostSchema extends \Validation\Normalize {
                     return $this->clientUploadImagesAndThumbnails("attachments", 200, null, ['for' => $this->_id], $mutant);
                 },
                 'display' => function ($val) {
-                    return with("/posts/parts/edit-gallery.html",['gallery' => $this->directoryListing("$this->public_link/attachment/", "gallery", ['filter' => ['for' => $this->_id]])]);
+                    return view("/posts/parts/edit-gallery.html",['gallery' => $this->directoryListing("$this->public_link/attachment/", "gallery", ['filter' => ['for' => $this->_id]])]);
                     // '
                     // <cobalt-listing id="gallery" 
                     //     custom-label-1="Make Post Default" custom-action-1="/api/v1/posts/attachment/{id}/default" custom-method-1="PUT"
@@ -99,6 +106,12 @@ class PostSchema extends \Validation\Normalize {
                     return null;
                 },
                 'set' => false
+            ],
+            'prominent' => [
+                'set' => fn ($val) => $this->boolean_helper($val),
+                'display' => function ($val) {
+                    return ($val) ? " cobalt-post--prominent" : "";
+                }
             ]
         ];
     }

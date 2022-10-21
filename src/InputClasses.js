@@ -126,6 +126,8 @@ class InputClass_default {
         this.error.parentNode.removeChild(this.error);
         this.error = false;
     }
+
+    
 }
 
 class InputClass_date extends InputClass_default {

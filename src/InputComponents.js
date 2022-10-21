@@ -50,6 +50,10 @@ class InputSwitch extends HTMLElement {
         this.checked = val;
     }
 
+    // get checked() {
+    //     return this.checkbox.checked;
+    // }
+
     /** The CONNECTED CALLBACK is the function that is executed when the element
      *  is added to the DOM.
      */
@@ -88,6 +92,7 @@ class InputSwitch extends HTMLElement {
     flipElement() {
         this.clearIntermediateState({ target: this.checkbox });
         this.checkbox.checked = !this.checkbox.checked;
+        this.checked = this.checkbox.checked;
         const change = new Event("change");
         this.checkbox.dispatchEvent(change);
         this.dispatchEvent(change);
@@ -171,7 +176,9 @@ class LoadingSpinner extends HTMLElement {
     }
 
     dashes() {
-        return `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="calc(2em * 4)" height="calc(2em * 4)" viewBox="0 0 100 100" version="1.1" id="svg1091"><circle class="spinner-dashes" style="fill:none;stroke:${getComputedStyle(this).color};stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1" id="path1964" cx="50" cy="50" r="43.098995" /></svg>`
+        const height = this.getAttribute("height") ?? "calc(2em * 4)",
+        width = this.getAttribute("width") ?? "calc(2em * 4)"
+        return `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 100 100" version="1.1" id="svg1091"><circle class="spinner-dashes" style="fill:none;stroke:${getComputedStyle(this).color};stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1" id="path1964" cx="50" cy="50" r="43.098995" /></svg>`
     }
 
     he() {
@@ -654,31 +661,78 @@ customElements.define("copy-span", CopySpan);
 
 class FlexTable extends HTMLElement {
     connectedCallback() {
-        let max = 0;
-        let same = 0;
-        let columns = this.querySelectorAll("flex-row");
-        this.maxWidths = [];
+        // Get our computed width
+        this.computedWidth = parseInt(getComputedStyle(this).width.replace("px",""));
 
+        // Query for our columns
+        let columns = this.querySelectorAll("flex-row");
+
+        // The max count of columns
+        let max = 0;
+        // How many iterations we've gone without updating the column count
+        let same = 0;
+
+        let index = -1;
+
+        // First thing we need to do is find out how many columns are in this table
         for (const i of columns) {
-            this.getCellWidths(i);
+            index += 1;
+            // Check if there is another row with more columns
             if (i.childElementCount > max) max = i.childElementCount;
+
+            // If we've gone through iterations or more and they've all been the
+            // same then we abort the loop
             if (i.childElement === max) {
                 same += 1;
                 if (same >= 3) break;
             }
         }
 
+        // Set the max column count
         this.style.setProperty("--column-count", max);
+
+        // An array of each column's max widths
+        this.maxWidths = [];
+        // Next, we need to establish the values of the elements
+        for (const i of columns) {
+            // Get the cell width of the current row
+            this.getCellWidths(i);
+        }
+
+        // Get the min and max values so we can normalize our data
+        this.minColumnWidth = Math.min(...this.maxWidths);
+        this.clampLimitParentWidth = this.computedWidth / max;
+
+        // Loop through the max widths and clamp them
+        this.maxWidths.forEach((e, i) => {
+            this.maxWidths[i] = this.clamp(e,this.minColumnWidth, this.clampLimitParentWidth);
+        });
+
+        this.maxColumnWidth = Math.max(...this.maxWidths);
+
         console.log(this.maxWidths);
 
+        
         for (const row of columns) {
-            this.cellCallback(row,
-                (cell, index, skip) => {
-                    cell.style.setProperty("--col-width", `${this.maxWidths[index]}px`);
-                }
-            )
+            this.cellCallback(row, (cell, index, skip) => {
+                cell.style.setProperty("--flex-column-grow", `${this.normalizeWidths(this.maxWidths[index], this.minColumnWidth, this.maxColumnWidth)}`)
+                cell.style.setProperty("--col-width",`${this.maxWidths[index]}px`);
+                // this.calculatePercentage(this.maxWidths[index],)
+                // cell.style.setProperty("--col-width", `%`);
+                // `${this.maxWidths[index]}px`);
+            });
         }
+        
+        // this.style.setProperty("--max-column-width", `px`);
         this.classList.add("hydrated");
+    }
+   
+    normalizeWidths(val, min, max) {
+        return Math.abs((val - min) / (max - min));
+    }
+
+    clamp(val, min, max) {
+        return Math.min(Math.max(val, min), max);
     }
     
     getCellWidths(row) {
@@ -715,6 +769,10 @@ class FlexTable extends HTMLElement {
         }
     }
 
+    calculatePercentage(rowSize, total) {
+        return (100 * rowSize) / total;
+    }
+
     // static get observedAttributes() {
     //     return ['columns'];
     // }
@@ -736,6 +794,8 @@ customElements.define("flex-table", FlexTable);
 class ProgressBar extends HTMLElement {
     constructor() {
         super();
+        this.maxValue = this.getAttribute("max") || 100;
+        this.progressValue = 0;
         this.messageContainer = document.createElement("div");
         this.messageContainer.innerHTML = "&nbsp;";
     }
@@ -754,8 +814,24 @@ class ProgressBar extends HTMLElement {
     set percent(value) {
         this.setAttribute("percent", value);
     }
+
     set complete(value) {
         this.setAttribute("complete", value);
+    }
+
+    set max(value) {
+        this.maxValue = value;
+        this.setAttribute("max", value);
+    }
+
+    set progress(value) {
+        this.progressValue += value;
+        this.percent = Math.round((this.progressValue / this.maxValue) * 100);
+    }
+
+    set regress(value) {
+        this.progressValue -= value;
+        this.percent = Math.round((this.progressValue / this.maxValue) * 100);
     }
 
     set message(value) {
@@ -763,7 +839,7 @@ class ProgressBar extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['percent'];
+        return ['percent','max'];
     }
 
     show() {
@@ -783,6 +859,10 @@ class ProgressBar extends HTMLElement {
 
     change_handler_percent(newValue, oldValue) {
         this.bar.style.width = `${newValue}%`;
+    }
+
+    change_handler_max(newValue, oldValue) {
+        this.maxValue = newValue;
     }
 
     change_handler_complete(newValue, oldValue) {

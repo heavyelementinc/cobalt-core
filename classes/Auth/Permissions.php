@@ -11,10 +11,13 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Unauthorized;
 
 class Permissions extends Database {
+    /** @todo Remove /private directory */
     private $permission_files = [
         __ENV_ROOT__ . "/config/default_permissions.jsonc",
-        __APP_ROOT__ . "/private/config/app_permissions.jsonc",
-        __APP_ROOT__ . "/private/config/app_permissions.json",
+        __APP_ROOT__ . "/config/permissions.jsonc",
+        __APP_ROOT__ . "/config/permissions.json",
+        __APP_ROOT__ . "/private/config/permissions.jsonc",
+        __APP_ROOT__ . "/private/config/permissions.json",
     ];
     public $valid = [];
     public $groups = [];
@@ -79,14 +82,14 @@ class Permissions extends Database {
             if (in_array($group, (array)$user->groups)) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
-                $table[$group] = "<h2>$group</h2>\n<ul class='list-panel'>";
+                $table[$group] = "<fieldset><legacy>$group</legacy>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
             /** Concat our current permission into the group */
             $table[$group] .= "<li><input-switch type='checkbox' checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
-        return ['permissions' => implode("</ul>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$root_group $groups</ul>"];
+        return ['permissions' => implode("</ul></fieldset>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$root_group $groups</ul>"];
     }
 
     function validate($id, $request) {

@@ -52,12 +52,13 @@ interface RequestHandler {
     /**
      * Called at the end of the context.php
      * 
-     * This method outputs the final results of the request to the client.
+     * Prepare the context_output for output to client
      * 
      * @param $router_result - the return value of the route controller
+     * @deprecated - use _stage_execute instead
      * @return void - this method should write to the output
      */
-    public function _stage_output();
+    public function _stage_output($context_result);
 
     /**
      * Called when an Exception\HTTP\* error is thrown.

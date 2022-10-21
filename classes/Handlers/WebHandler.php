@@ -60,10 +60,15 @@ class WebHandler implements RequestHandler {
     private $context_mode = null;
 
     function __construct() {
+        $this->web_manifest = get_all_where_available([
+            __ENV_ROOT__ . "/manifest.json",
+            __APP_ROOT__ . "/manifest.json"
+        ]);
         /** If we're in a web context, load the HTML body. This is so that we can
          * request just the main-content of a page via API later.
          */
-        if ($GLOBALS['route_context'] === "web" || $GLOBALS['route_context'] === "admin") {
+        $this->encoding_mode = __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['mode'];
+        if ($this->encoding_mode === "text/html") {
             $this->context_mode = $GLOBALS['route_context'];
             $this->template_body = $this->load_template("parts/body.html"); // Load the main HTML template
         } else {
@@ -85,12 +90,12 @@ class WebHandler implements RequestHandler {
     }
 
     public function _stage_execute($router_result = "") {
-        if (!isset($GLOBALS['web_processor_template'])) throw new NotFound("No template specified by controller");
-        if (!\template_exists($GLOBALS['web_processor_template'])) throw new NotFound("That template doesn't exist!");
+        if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
+        if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
     }
 
-    public function _stage_output() {
-        if ($this->context_mode === "web" || $this->context_mode === "admin") {
+    public function _stage_output($context_result) {
+        if ($this->encoding_mode === "text/html") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
             if (!$this->results_sent_to_client) return $this->process();
@@ -102,7 +107,7 @@ class WebHandler implements RequestHandler {
 
     public function _public_exception_handler($e) {
         // Prevent trying to load a template that might not exist already.
-        unset($GLOBALS['web_processor_template']);
+        unset($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
 
         // Get the message string and data
         $message = $e->getMessage();
@@ -142,7 +147,7 @@ class WebHandler implements RequestHandler {
 
         // Add the error template as the main content
         $this->main_content_from_template($template);
-        return $this->_stage_output();
+        return $this->_stage_output("");
     }
 
     /** END INTERFACE REQUIREMENTS */
@@ -180,9 +185,10 @@ class WebHandler implements RequestHandler {
         return $template;
     }
 
+    // TODO: Remove root style bullshit
     function app_settings() {
-        $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['app']->public_settings) . "</script>";
-        $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['app']->root_style_definition . "}</style>";
+        $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
+        $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['ROOT_STYLE'] . "}</style>";
         return $settings;
     }
 
@@ -341,7 +347,7 @@ class WebHandler implements RequestHandler {
         $link_tags = "";
         $compiled = "";
         $debug = app("debug");
-        foreach (app('css_packages') as $package) {
+        foreach (array_merge(app('common-css-packages'), app('css_packages')) as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
@@ -431,11 +437,13 @@ class WebHandler implements RequestHandler {
     }
 
     function add_vars($vars) {
+        $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
+
         $exportable = [];
 
         foreach(array_merge($vars) as $var => $val) {
-            if($var[0] . $var[1] !== "__") continue;
-            $exportable += correct_exported_values($vars, $var, $val);
+            if(in_array($var, $always_export_these_keys)) $exportable += correct_exported_values($vars, $var, $val);
+            if($var[0] . $var[1] == "__") $exportable += correct_exported_values($vars, $var, $val);
         }
     
         export_vars($exportable);
@@ -444,7 +452,7 @@ class WebHandler implements RequestHandler {
     }
 
     function process() {
-        if (isset($GLOBALS['web_processor_template'])) $this->main_content_from_template($GLOBALS['web_processor_template']);
+        if (isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) $this->main_content_from_template($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
         if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
         if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
         $this->renderer->set_body($this->template_body);

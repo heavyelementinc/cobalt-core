@@ -116,10 +116,52 @@ class FormRequest {
     }
 
     /** Autosave handler */
-    autosave_handler(element, event) {
-        let data = this.build_query([element]);;
+    async autosave_handler(element, event) {
+        const el = element.element;
+        el.classList.add("form-request--autosave-feedback");
+        
+        const autosave_spinner = this.autosave_feedback(el);
+
+        const time = Date.now();
+        
+        let data = this.build_query([element]);
         if (this.form.getAttribute("autosave") == "form") data = this.build_query();
-        this.send(data);
+        try {
+            await this.send(data);
+        } catch (error) {
+            return this.autosave_reenable_field(el, autosave_spinner);
+        }
+
+        if(Date.now() - time > 1000) {
+            this.autosave_reenable_field(el, autosave_spinner);
+        } else {
+            setTimeout(() => {
+                this.autosave_reenable_field(el, autosave_spinner);
+            }, 500);
+        }
+        
+    }
+
+    autosave_reenable_field(el, spinner) {
+        el.classList.remove("form-request--autosave-feedback");
+        spinner.parentNode.removeChild(spinner);
+    }
+
+    autosave_feedback(el) {
+        const offset = get_offset(el);
+        const working = document.createElement("loading-spinner");
+        working.style.position = "absolute";
+        working.style.justifyContent = "unset";
+        working.style.alignItems = "unset";
+        
+        const width = Math.min(offset.h - 4, 30);
+        working.style.top = `${offset.y + 2}px`;
+        working.style.left = `${offset.right - 2 - width}px`;
+        working.setAttribute("height", `${width}px`);
+        working.setAttribute("width",  `${width}px`);
+
+        document.body.appendChild(working);
+        return working;
     }
 
     /** Build the list of items */

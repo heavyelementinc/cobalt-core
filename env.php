@@ -1,4 +1,5 @@
 <?php
+$GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
 session_start();
 
 /**
@@ -22,10 +23,10 @@ session_start();
 
 // Let's make sure we're running a suppoted version of PHP (since we use 
 // the not-insane array syntax and the spread "..." syntax)
-if (!version_compare(PHP_VERSION, "7.4", ">=")) die("You must be running PHP version 7.4 or greater");
+if (!version_compare(PHP_VERSION, "8.1", ">=")) die("You must be running PHP version 8.1.0 or greater");
 
 /* Cobalt Version Number */
-define("__COBALT_VERSION", "0.2");
+define("__COBALT_VERSION", "1.0");
 
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
@@ -49,9 +50,12 @@ if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
 $allowed_to_exit_on_exception = true;
 $write_to_buffer_handled = false;
 
+require_once __DIR__ . "/globals/bootstrap.php";
+require_once __DIR__ . "/globals/global_declarations.php";
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
+require_once __DIR__ . "/globals/global_csrf.php";
 
 $app_env = __APP_ROOT__ . "/app_env.php";
 if(file_exists($app_env)) require_once $app_env;
@@ -74,18 +78,6 @@ if (file_exists($app_env)) require_once $app_env;
 
 /** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
 $GLOBALS['time_to_update'] = false;
-// $update_list = [
-//     __APP_ROOT__ . "/private/config/settings.json",
-//     __APP_ROOT__ . "/private/config/settings.jsonc",
-//     __ENV_ROOT__ . "/config/settings.json",
-// ];
-
-// foreach($update_list as $file) {
-//     if(file_exists($file) && filemtime($file)) {
-//         $GLOBALS['time_to_update'] = true;
-//         break;
-//     }
-// }
 
 try {
     // Load our ACTIVE plugins.
@@ -94,12 +86,13 @@ try {
     die($e->getMessage());
 }
 
-// Instantiate our settings (`true` for loading settings from cache)
 try {
-    $application = new SettingsManager(true);
+    $application = new \Cobalt\Settings\Settings(true);
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
+    die($e->getMessage());
+} catch (Error $e) {
     die($e->getMessage());
 }
 
@@ -113,4 +106,3 @@ if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on
 
 /** If we're NOT in a CLI environment, we should import the context processor */
 if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";
-

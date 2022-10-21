@@ -273,19 +273,36 @@ function float_pad(number, pad = 2, padWith = 0) {
 }
 
 
-/** @param str string */
+/**
+ * # string_to_bool
+ * @description Converts a string like "true" or "false" to a boolean `true` or `false`
+ * @param str the string to be evaluated
+ * @param altName [true] if set to `true`, the value of str will be added to the list of truthy values to follow the standard HTML `attribute="attribute"` paradigm.
+ * If altName is a string, it will be added to the list.
+ * All comparisons are lower case.
+ * */
 function string_to_bool(str, altName = true) {
     if (str === null) return null;
     let truthy = ['on', 'true', 'y', 'yes', 'checked', 'selected'];
     if(altName === true) truthy.push(str.toLowerCase);
     else if(typeof altName === "string") truthy.push(altName.toLowerCase());
     else if(Array.isArray(altName)) truthy = [...truthy, ...altName.forEach(value => value.toLowerCase())];
-    return (truthy.includes(str.toLowerCase())) ? true : false;
+    return truthy.includes(str.toLowerCase())
 }
 
-function compare_arrays(arr1, arr2) {
+/**
+ * # compare_arrays
+ * @description Seeing as array comparisons are really wonky in JavaScript, compare_arrays looks to resolve this issue.
+ * @param arr1 
+ * @param arr2 
+ * @param sort 
+ * @returns bool
+ */
+function compare_arrays(arr1, arr2, sort = false) {
+    if(sort)
     return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
+
 
 function plurality(number, returnValue = "s") {
     if (number == 1) return "";

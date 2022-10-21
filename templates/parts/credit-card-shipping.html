@@ -1,0 +1,21 @@
+<label for="cobalt-credit-card--enable-shipping-address">
+    <input-switch id="cobalt-credit-card--enable-shipping-address" checked="false" tiny></input-switch>
+    Different shipping address
+</label>
+</fieldset>
+<fieldset id="cobalt-credit-card--shipping-address">
+    <legend>Shipping</legend>
+    <label>Address</label>
+    <input class="shipping-toggle--target" name="shippingAddress1" value="{{cc.shippingAddress1}}" placeholder="Address 1" disabled="disabled">
+    <input class="shipping-toggle--target" name="shippingAddress2" value="{{cc.shippingAddress2}}" placeholder="Address 2" disabled="disabled">
+    <div class="hbox">
+        <label>City</label>
+        <input class="shipping-toggle--target" name="shippingCity" value="{{cc.shippingCity}}" placeholder="Town" disabled="disabled">
+        <input class="shipping-toggle--target" name="shippingPostcode" value="{{cc.shippingPostcode}}" placeholder="Zip" disabled="disabled">
+    </div>
+    <div>
+        <label></label>
+        <input class="shipping-toggle--target" name="shippingState" value="{{cc.shippingState}}" placeholder="State" disabled="disabled">
+        <input class="shipping-toggle--target" name="shippingCountry" value="{{cc.shippingCountry}}" placeholder="Country" disabled="disabled">
+    </div>
+    <input class="shipping-toggle--target" type="tel" name="shippingPhone" value="{{cc.shippingPhone}}" placeholder="Phone Number" disabled="disabled">

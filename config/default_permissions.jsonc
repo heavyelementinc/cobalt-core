@@ -14,6 +14,13 @@
         "default": false,
         "ring": 1
     },
+    "Debug_access": {
+        "group": "Admin",
+        "label": "Access to debug tools for web developers.<help-span value='Most people do NOT need this.'></help-span>",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
     "Posts_manage_posts": {
         "group": "Posts",
         "label": "Allows the user to manage posts (but not publish them).",

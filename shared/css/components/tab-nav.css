@@ -1,0 +1,54 @@
+tab-nav {
+    display:flex;
+    flex-direction: column;
+    width: 100%;
+    border: var(--project-color-table-border);
+    background: var(--project-color-table-bg-odd);
+}
+
+tab-nav nav {
+    display:flex;
+    justify-content: center;
+    gap: .5em;
+    background: var(--project-color-table-bg-even);
+    border-bottom: var(--project-color-table-border);
+}
+
+tab-nav nav a {
+    display:block;
+    color: black;
+    text-decoration: none;
+    font-weight: normal;
+    padding: .5rem 1rem;
+    background: var(--project-color-table-bg-odd);
+    border-left: var(--project-color-table-border);
+    border-right: var(--project-color-table-border);
+    box-sizing: border-box;
+}
+
+tab-nav a[disabled="disabled"] {
+    background: inherit;
+    color: var(--project-color-input-border-nofocus);
+    font-style:italic;
+    pointer-events: none;
+}
+
+tab-nav nav a.tab-nav--current-tab {
+    color: inherit;
+    /* border-bottom: 1px solid; */
+    box-shadow: 0 2px 0 var(--project-color-table-bg-odd), 0 -2px;
+    text-decoration: none;
+    font-style: normal;
+}
+
+tab-nav > *:not(nav) {
+    display: none;
+    /* visibility: none; */
+    padding: .5rem .5rem .6rem;
+}
+
+tab-nav:not(.tab-nav--hydrated) > :target,
+tab-nav .tab-nav--current-content {
+    display: flex;
+    visibility: visible;
+}

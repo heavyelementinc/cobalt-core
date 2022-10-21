@@ -20,7 +20,7 @@ use Drivers\UTCDateTime;
 use Validation\Exceptions\ValidationFailed;
 
 abstract class Database {
-    public $db = __APP_SETTINGS__['database'];
+    public $db = null;
     public $collection;
     public string $__schema;
 
@@ -44,6 +44,7 @@ abstract class Database {
     }
 
     function __construct($database = null, $collection = null) {
+        $this->db = $GLOBALS['CONFIG']['database'];
         if ($database !== null) $this->db = $database;
         if ($collection !== null) $this->collectionSpecifiedAtConstruction = $collection;
         $this->collection = db_cursor($collection ?? $this->get_collection_name(), $this->db);

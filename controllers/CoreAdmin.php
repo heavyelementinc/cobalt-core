@@ -1,6 +1,10 @@
 <?php
 
 use \Auth\UserSchema;
+use MongoDB\BSON\ObjectId;
+use Cobalt\Payments\PaymentGateway;
+use Cobalt\Payments\PaymentGatewaySchema;
+
 
 class CoreAdmin {
     function index() {
@@ -20,15 +24,14 @@ class CoreAdmin {
             <flex-header>Username</flex-header>
             <flex-header>Email</flex-header>
             <flex-header>Groups</flex-header>
+            <flex-header>Verified</flex-header>
         </flex-row>";
         foreach ($collection->find([]) as $user) {
-            $list .= "<flex-row><flex-cell><flex-cell>" . $this->user_link($user['_id']) . "$user[fname] $user[lname]</a></flex-cell>";
-            $list .= "<flex-cell>" . $this->user_link($user['_id']) . "@$user[uname]</a></flex-cell>";
-            $list .= "<flex-cell>$user[email]</flex-cell>";
             $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
-            $list .= "<flex-cell>" . $this->user_link($user['_id'], "#permissions") . (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>") . "</a></flex-cell>";
-            // $list .= "<flex-cell>" . json_encode($user["verified"]) . "</flex-cell>";
-            $list .= "</flex-row>";
+            $list .= view("/admin/users/user.html", [
+                'user' => new UserSchema($user),
+                'groups' => (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>"),
+            ]);
         }
         $list .= "</flex-table>";
         add_vars([
@@ -58,7 +61,7 @@ class CoreAdmin {
 
         try {
             $auth = new \Auth\AdditionalUserFields();
-            $additional = maybe_with($auth->__get_additional_user_tab());
+            $additional = maybe_view($auth->__get_additional_user_tab());
         } catch (\Exception $e) {
             $additional = "";
         }
@@ -98,5 +101,53 @@ class CoreAdmin {
             'plugin' => $plugin
         ]);
         set_template("plugins/individual.html");
+    }
+
+    function settings_index() {
+        add_vars([
+            'title' => "Settings Panel",
+            'basic_settings' => get_route_group('admin_basic_panel', ['with_icon' => true]),
+            'settings_panel' => get_route_group("settings_panel",['with_icon' => true]),
+            'advanced_panel' => get_route_group("access_panel",['with_icon' => true]),
+        ]);
+
+        set_template("/admin/settings/control-panel.html");
+    }
+
+    function app_settings() {
+        set_template("/admin/settings/basic-settings.html");
+    }
+
+    function cron_panel() {
+        $cron = new \Cron\Run();
+
+        $tasks = "";
+        foreach($cron->get_tasks('all') as $task){
+            $tasks .= (new \Cron\Task($task, new DateTime()))->getView($cron->task_stats($task->name));
+        }
+        add_vars([
+            // 'widgets ' => $widgets,
+            'tasks' => $tasks
+        ]);
+        set_template("/admin/cron/cron-task-index.html");
+    }
+
+
+    function payment_gateways() {
+        $gateMan = new PaymentGateway();
+        
+        $stripe = $gateMan->get_gateway_data('stripe');
+        if(!$stripe) $stripe = new PaymentGatewaySchema(['_id' => new ObjectId()]);
+
+        $paypal = $gateMan->get_gateway_data('paypal');
+        if(!$paypal) $paypal = new PaymentGatewaySchema(['_id' => new ObjectId()]);
+
+        add_vars([
+            'title' => "Payment Gateways",
+            'stripe' => $stripe,
+            'paypal' => $paypal,
+        ]);
+
+        set_template("/admin/settings/payment-gateways.html");
     }
 }

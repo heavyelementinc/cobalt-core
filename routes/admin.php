@@ -10,6 +10,15 @@ Route::get("/?", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
+Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
+    'name' => "App Settings",
+    'anchor' => [
+        'name' => 'App Settings',
+        'icon' => "settings-outline"
+    ],
+    'navigation' => ['admin_basic_panel']
+]);
+
 if (app('Auth_logins_enabled')) {
     /** User management interface */
     Route::get("/create-user", "CoreAdmin@create_user", [
@@ -20,11 +29,12 @@ if (app('Auth_logins_enabled')) {
         'name' => "Users",
         'handler' => "core/user_panel.js",
         'anchor' => [
-            'name' => 'Users'
+            'name' => 'Users',
+            'icon' => "people-outline"
         ],
-        'navigation' => ['admin_panel']
+        'navigation' => ['settings_panel']
     ]);
-    Route::get(app("Auth_user_manager_individual_page") . "/{user}", "CoreAdmin@individual_user_management_panel", [
+    Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
         'handler' => 'core/user_manager.js',
         'permission' => "Auth_allow_editing_users"
     ]);
@@ -50,23 +60,25 @@ if (app('Plugin_enable_plugin_support')) {
         'permission' => 'Plugins_allow_management',
         'anchor' => [
             'name' => "Plugins",
+            'icon' => 'extension-puzzle-outline'
         ],
-        'navigation' => ['admin_panel']
+        'navigation' => ['settings_panel']
     ]);
 
     Route::get("/plugins/{name}", "CoreAdmin@plugin_individual_manager", ['permission' => 'Plugins_allow_management']);
 }
 
 // if (has_permission("API_manage_keys")) {
-Route::get("/api/", "APIManagement@index",[
+Route::get("/settings/api-keys", "APIManagement@index",[
     'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "API Keys",
+        'icon' => 'key-outline'
     ],
-    'navigation' => ['admin_panel']
+    'navigation' => ['settings_panel']
 ]);
 
-Route::get('/api/{name}', "APIManagement@key",[
+Route::get('/settings/api-keys/{name}', "APIManagement@key",[
     'permission' => 'API_manage_keys',
 ]);
 // }
@@ -80,3 +92,23 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
         'handler' => "core/posts.js",
     ]);
 }
+
+Route::get("/settings/", "CoreAdmin@settings_index");
+
+Route::get("/settings/cron", "CoreAdmin@cron_panel",[
+    // 'permission' => 'API_manage_keys',
+    'anchor' => [
+        'name' => "Scheduled Jobs",
+        'icon' => 'time-outline'
+    ],
+    'navigation' => ['settings_panel']
+]);
+
+Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
+    // 'permission' => 'API_manage_keys',
+    'anchor' => [
+        'name' => "Payments",
+        'icon' => 'card-outline'
+    ],
+    'navigation' => ['admin_basic_panel']
+]);

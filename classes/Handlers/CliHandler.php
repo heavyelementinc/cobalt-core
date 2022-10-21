@@ -29,7 +29,7 @@ class CliHandler implements RequestHandler {
         
     }
 
-    public function _stage_output() {
+    public function _stage_output($context_output) {
         
     }
 

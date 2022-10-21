@@ -54,8 +54,8 @@ class ActionMenu {
     }
 
     async draw() {
-        this.menu = document.createElement("action-menu")
-        let header = document.createElement("header")
+        this.menu = document.createElement("action-menu");
+        let header = document.createElement("header");
         header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
         this.menu.appendChild(header);
 
@@ -122,6 +122,7 @@ class ActionMenu {
         }
         try {
             result = await action.callback(action, event, requestData);
+            this.event.target.dispatchEvent(new CustomEvent("actionmenucomplete",{detail: {action, event, requestData, result}}));
         } catch (error) {
             console.log(error);
             console.log(requestData);

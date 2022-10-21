@@ -11,6 +11,12 @@
   width:100%;
   transition: transform .5s, opacity .5s;
 }
+
+:is(form-request) > fieldset {
+  border: var(--project-color-table-border);
+  background: white;
+}
+
 /* 
 :is(form-request,login-form-request) > section.form-request--actual{
   position: relative;
@@ -39,6 +45,21 @@
   opacity: 0;
 }
 
+#login-form-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  justify-content: center;
+  align-items: center;
+}
+
+#login-form-container fieldset input{
+  display: block;
+}
+#login-form-container fieldset button{
+  width:100%;
+}
+
 .current-to-previous{
   transform: translateX(100%);
 }
@@ -65,8 +86,24 @@
   pointer-events: all;
 }
 
+form-request fieldset {
+  gap: 1fr;
+}
+
 form-request fieldset label > :is(input, select, textarea, input-*) {
   display:block;
+}
+
+form-request fieldset :is(input, select, textarea, input-*):not(input-switch, [type='radio'], [type='button'], [type='checkbox'], [type='file']) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+fieldset .hbox {
+  flex-wrap: wrap;
+}
+fieldset .hbox label {
+  width:100%;
 }
 
 form-request label:has(input-switch) {
@@ -75,4 +112,13 @@ form-request label:has(input-switch) {
   align-items: center;
   justify-content: left;
   gap: 1ch;
+}
+
+form-request .form-request--autosave-feedback {
+  opacity: .6;
+  pointer-events: none;
+}
+
+form-request * {
+  transition: opacity .5;
 }

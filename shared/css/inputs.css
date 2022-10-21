@@ -198,6 +198,15 @@ input-array {
     max-width: 100%;
   }
 
+  :is(input-array:disabled,input-array[disabled]) :is(.autocomplete--search-container, input-array-tag) {
+    background-color: var(--project-color-input-disabled);
+    pointer-events: none;
+  }
+
+  :is(input-array:disabled, input-array[disabled]) :is(input-array-tag input[type="button"]) {
+    display: none;
+  }
+
   input-array fieldset:empty{
     text-align: center;
   }
@@ -213,6 +222,7 @@ input-array {
     border: none;
     border-radius: unset;
     font-size: .9rem;
+    background-color: inherit;
     margin:0;
   }
 

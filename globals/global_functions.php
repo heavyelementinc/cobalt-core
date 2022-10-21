@@ -16,6 +16,7 @@ use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use MongoDB\Model\BSONArray;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -93,8 +94,8 @@ function has_permission($perm_name, $group = null, $user = null, $throw_no_sessi
 function is_root() {
     $session = session();
     if(!$session) return false;
-    if(!key_exists('groups',$session)) return false;
-    return in_array('root',$session['groups']->getArrayCopy());
+    if(!key_exists('groups',(array)$session)) return false;
+    return in_array('root',(array)$session['groups']->getArrayCopy());
 }
 
 /** This function will return a merged array of decoded JSON files that are 
@@ -104,11 +105,17 @@ function is_root() {
  * If $merged is false, the decoded files will be returned as separate elements 
  * of the array.
  */
-function get_all_where_available($paths, $merged = true) {
+function get_all_where_available($paths, $merged = true, $throwOnFail = false) {
     $available = [];
     foreach ($paths as $key => $path) {
-        if (file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path), true);
-        if($available[$key] === null) unset($available[$key]);
+        $options = 0;
+        if($throwOnFail) $options = JSON_ERROR_SYNTAX;
+        try {
+            if (file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path), true, 512 ,$options);
+        } catch (Exception $e) {
+            throw new Exception("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""], $path) . '`');
+        }
+        if($available[$key] === null || $available[$key] === []) unset($available[$key]);
     }
     if ($merged) return array_merge(...$available);
     return $available;
@@ -144,9 +151,15 @@ function files_exist($arr, $error_on_empty = true) {
  * @return string|false false if no file found, path name as string otherwise
  */
 function find_one_file(array $arr_of_paths, $filename) {
+    $deprecated_path = __APP_ROOT__ . "/private";
     foreach ($arr_of_paths as $path) {
         $file = "$path/$filename";
-        if (file_exists($file)) return $file;
+        if (file_exists($file)) {
+            if(substr($deprecated_path,0,strlen($deprecated_path)) === $deprecated_path) {
+                trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
+            }
+            return $file;
+        }
     }
     return false;
 }
@@ -163,6 +176,7 @@ function template_exists($template) {
 }
 
 $GLOBALS['CLASSES_DIR'] = [
+    __APP_ROOT__ . "/classes",
     __APP_ROOT__ . "/private/classes/",
     __ENV_ROOT__ . "/classes/"
 ];
@@ -277,16 +291,22 @@ function add_template($path) {
  * @return void
  */
 function set_template($path) {
-    $GLOBALS['web_processor_template'] = $path;
+    $templates = files_exist([
+        __APP_ROOT__ . "/templates/$path",
+        __ENV_ROOT__ . "/templates/$path",
+    ]);
+    $GLOBALS['WEB_PROCESSOR_TEMPLATE'] = $path;
+    return $templates[0];
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
  * 
  * A few template vars for quick reference:
- * title      - The title of the page
- * main_id    - the main element's id
- * body_id    - the body element's id
- * body_class - the body element's class list
+ *  * title       - The title of the page
+ *  * main_id     - the main element's id
+ *  * body_id     - the body element's id
+ *  * body_class  - the body element's class list
+ *  * og_template - relative path of an open graph template
  * 
  * @param array $vars MUST BE ASSOCIATIVE ARRAY
  * @return void
@@ -442,26 +462,6 @@ function from_markdown(string $string, bool $untrusted = true) {
     return $md->text($string);
 }
 
-
-/**
- * db_cursor
- * The
- * 
- * @param string $collection - The name of the collection
- * @param string $database - (Optional) The name of the database
- * @return object
- */
-function db_cursor($collection, $database = null) {
-    if (!$database) $database = app('database');
-    try {
-        $client = new MongoDB\Client(app('server_address'));
-    } catch (Exception $e) {
-        die("Cannot connect to database");
-    }
-    $database = $client->{$database};
-    return $database->{$collection};
-}
-
 /**
  * random_string
  *
@@ -478,68 +478,6 @@ function random_string($length, $fromChars = null) {
         $random .= $validChars[rand($min, $max)];
     }
     return $random;
-}
-
-/** ==============================================
- *  Cross-Site Request Forgery Mitigation Routines
- *  ============================================== 
- */
-
-/** 
- * Returns a CSRF Token (basically, an encrypted password) that's been 
- * truncated 
- * @return string Encrypted CSRF Token
- * */
-function get_csrf_token() {
-    return str_replace('$2y$10$', "", password_hash(csrf_session_token(), PASSWORD_BCRYPT));
-}
-
-/** 
- * Validate our supplied CSRF token 
- * @throws Exception if no cookie is specified
- * @param string $token A CSRF token generated by get_csrf_token()
- */
-function validate_csrf_token($token) {
-    /** We get our raw CSRF token */
-    $raw_text_seed = csrf_session_token();
-    if ($raw_text_seed === "") throw new Exception("No cookie specified");
-    /** We set our token string back to a token */
-    $password_string = '$2y$10$' . $token;
-    /** Verify our password */
-    return password_verify($raw_text_seed, $password_string);
-}
-
-/** Returns a raw CSRF token (unencrypted)
- * @return string Unencrypted CSRF token
- */
-function csrf_session_token() {
-    if (key_exists('csrf_old_token', $_COOKIE)) return app('csrf_seed') . $_COOKIE['csrf_old_token'];
-    // Add "was updated" check
-    if (!isset($_COOKIE[app('session_cookie_name')])) return app('csrf_seed');
-    return app('csrf_seed') . $_COOKIE[app('session_cookie_name')];
-}
-
-/** Handle token expiration. This function should return the same value until a
- * set time has passed.
- */
-function csrf_token_date() {
-    /** TODO: TOKEN EXPIRATION */
-    return (string)round(time(), -5);
-}
-
-/** Add a CSRF Token element to any template with @csrf_token(); 
- * @return string  HTML hidden input named csrf_token with its value set to 
- *                 the result of get_csrf_token()
- */
-function csrf_token() {
-    return "<input type='hidden' name='csrf_token' value='" . get_csrf_token() . "'>";
-}
-
-/** Add a CSRF token as an attribute to any template with @csrf_attribute(); 
- * @return string - Token Attribute
- */
-function csrf_attribute() {
-    return "token=\"" . get_csrf_token() . "\"";
 }
 
 /** Load a file containing JSON and parse it 
@@ -633,6 +571,7 @@ function associative_to_path(array $arr) {
  * @return bool 
  */
 function is_associative_array(mixed $array) {
+    if(gettype($array) !== "array") return false;
     if (array() === $array) return false;
     return array_keys($array) !== range(0, count($array) - 1);
 }
@@ -701,7 +640,7 @@ function maybe_view(string $template, array $vars = []):string {
 
 function conditional_addition(string $template, bool $is_shown, $vars = []) {
     if (!$is_shown) return "";
-    return with($template, $vars);
+    return view($template, $vars);
 }
 
 function with_each(string $template, $docs, $var_name = 'doc') {
@@ -710,6 +649,21 @@ function with_each(string $template, $docs, $var_name = 'doc') {
         $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
     }
     return $rendered;
+}
+
+function credit_card_form(array|object $data = [],$shipping = false):string {
+    $currentYear = (int)date("Y");
+    $years = "";
+    for($i = 0; $i <= 10; $i++){
+        $years .= "<option>" . $currentYear + $i . "</options>";
+    }
+    $months = '<option value="01">January (01)</option><option value="02">February (02)</option><option value="03">March (03)</option><option value="04">April (04)</option><option value="05">May (05)</option><option value="06">June (06)</option><option value="07">July (07)</option><option value="08">August (08)</option><option value="09">September (09)</option><option value="10">October (10)</option><option value="11">November (11)</option><option value="12">December (12)</option>';
+    return view("/parts/credit-card.html",[
+        'cc' => $data,
+        'expiryYearOptions' => $years,
+        'months' => $months,
+        'shipping' => ($shipping) ? view('/parts/credit-card-shipping.html',['cc' => $data]) : "",
+    ]);
 }
 
 /** Compare two pathnames
@@ -735,7 +689,7 @@ function is_child_dir($base_dir, $path) {
 }
 
 /**
- * Limitations: this will only return 
+ * Limitations: this will only return the first route that uses the specified controller
  * @param string $class
  * @param string $method
  * @param array $args 
@@ -747,6 +701,7 @@ function get_path_from_route(string $class, string $method, array $args = [], st
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
     $router = $GLOBALS['router'];
+    if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
     // if($context !== $router->route_context) {
     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
@@ -755,23 +710,38 @@ function get_path_from_route(string $class, string $method, array $args = [], st
     $route = null;
     foreach($routes as $r => $data) {
         if($data['controller'] !== $controllerAlias) continue;
-        $rt = $data['real_path'];
-        $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
-        
-        $replacement = [];
-        preg_match_all($regex,$rt,$replacement);
-
-        $mutant = $rt;
-        // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
-        foreach($replacement[0] as $i => $replace) {
-            $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
-        }
-
-        return preg_replace("/\/{2,}/","/", $mutant);
+        $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
+        return route_replacement($data['real_path'], $args, $data);
     }
+
+    $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $route;
     return $route;
 }
 
+function route_replacement($path, $args, $data) {
+    $rt = $path;
+    $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
+    
+    $replacement = [];
+    preg_match_all($regex,$rt,$replacement);
+
+    $mutant = $rt;
+    // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
+    foreach($replacement[0] as $i => $replace) {
+        $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
+    }
+
+    return preg_replace("/\/{2,}/","/", $mutant);
+}
+
+/**
+ * This will only return the first route that uses $directiveName
+ * @param string $directiveName the "Controller@method" direvitve specified in your router table
+ * @param array $args Any arguments used here will get filled in as values for {variables} in route names from left to right
+ * @param array $context The context to search ("web", "admin", "apiv1", etc.)
+ * @return string 
+ * @throws Exception 
+ */
 function route(string $directiveName, array $args = [], array $context = []):string {
     $routeMethod = $context['method'] ?? "get";
     $ctx = $context['context'] ?? "web";
@@ -1100,6 +1070,7 @@ function relative_time($date, $now = null) {
 
 function pretty_rounding($number):string{
     if($number === 0) return "zero";
+    
     $map = [
         [
             'factor' => 1000,
@@ -1119,6 +1090,8 @@ function pretty_rounding($number):string{
             'suffix' => 't',
         ]
     ];
+    
+    if($number < $map[0]['factor']) return $number;
 
     foreach($map as $data) {
         if($number < $data['factor']) continue;
@@ -1126,4 +1099,15 @@ function pretty_rounding($number):string{
     }
 
     return $result;
+}
+
+function benchmark_start($name) {
+    if(!__APP_SETTINGS__['debug']) return;
+    $GLOBALS['BENCHMARK_RESULTS'][$name] = ['start' => microtime(true) * 1000];
+}
+
+function benchmark_end($name) {
+    if(!__APP_SETTINGS__['debug']) return;
+    $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] = microtime(true) * 1000;
+    $GLOBALS['BENCHMARK_RESULTS'][$name]['delta'] = $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] - $GLOBALS['BENCHMARK_RESULTS'][$name]['start'];
 }

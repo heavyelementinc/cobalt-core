@@ -1,0 +1,10 @@
+<flex-row>
+    <flex-cell>{{t.task.name}}</flex-cell>
+    <flex-cell>{{data.lastRan.display}}</flex-cell>
+    <flex-cell>{{data.lastResult}}</flex-cell>
+    <flex-cell>
+        <form-request method="PUT" action="/api/v1/cron/enable-task/{{t.task.name}}">
+            <input-switch name="enabled" checked="{{t.task.enabled}}" {{t.task.mutable}}></input-switch>
+        </form-request>
+    </flex-cell>
+</flex-row>

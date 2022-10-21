@@ -1,14 +1,13 @@
-<article class="cobalt-post cobalt-post--blurb">
+<a href='{{href}}' class="cobalt-post cobalt-post--blurb{{post.prominent.display}}">
     <div class="cobalt-post--splash" {{!post.default_image.display}}></div>
     <div class="cobalt-post--header">
-        <h1 class="cobalt-post--title"><a href='{{href}}'>{{!post.title.md}}</a></h1>
+        <h1 class="cobalt-post--title">{{!post.title.md}}</h1>
         <ul>
-            <li>{{!post.author.display}}</li>
+            <li><strong>{{!post.author.display}}</strong></li>
             <li>{{!post.publicationDate.display}}</li>
         </ul>
     </div>
     <content>
         {{!post.excerpt.md}}
     </content>
-    <a href="{{href}}">Read More</a>
-</article>
+</a>

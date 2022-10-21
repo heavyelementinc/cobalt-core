@@ -72,7 +72,8 @@ abstract class PostController extends Controller {
             'href' => $this->path('post',[]),
             'update_action' => $this->path('update',[$id],'put',   'apiv1'),
             'upload_action' => $this->path('upload',[$id],'post',  'apiv1'),
-            'delete_action' => $this->path('delete',[$id],'delete','apiv1')
+            'delete_action' => $this->path('delete',[$id],'delete','apiv1'),
+            'pretty' => "<fold-out title=\"Raw Database Entry\"><pre>".json_encode($post, JSON_PRETTY_PRINT)."</pre></fold-out>",
         ]);
 
         set_template($post->getTemplate("edit"));
@@ -119,9 +120,15 @@ abstract class PostController extends Controller {
         $query = $this->getParams($this->postMan, ['published' => true]);
         $docs = $this->postMan->findAllAsSchema(...$query);
 
+        $og_image = "";
+        $og_title = __APP_SETTINGS__ . "";
+        $og_body = __APP_SETTINGS__['app_name'] . " news and updates feature the kinds of";
+
         $posts = "";
 
-        foreach($docs as $doc) {
+        foreach($docs as $index => $doc) {
+            if($index === 0) $doc->prominent = true;
+            if(isset($_SESSION['Posts_display_type'])) $doc->prominent = $_SESSION['Posts_display_type'];
             $posts .= view($doc->getTemplate('blurb'), [
                 'post' => $doc,
                 'href' => $this->path('post',[(string)$doc['url_slug']])
@@ -141,21 +148,31 @@ abstract class PostController extends Controller {
     public function post($slug) {
         if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
         $query = ['url_slug' => $slug, 'published' => true];
-        if(has_permission($this->permission)) unset($query['published']);
+        
+        // Determine if the user is allowed to access unpublished posts
+        $is_permitted = false;
+        if(session() && has_permission($this->permission)) {
+            // If they are, we unset the 'published' query
+            unset($query['published']);
+            $is_permitted = true; // Let's also store that the user is permitted to access unpublished posts
+        }
 
+        // Query for our post and throw a not found error if we don't find anything
         $post = $this->postMan->findOneAsSchema($query);
-
         if(!$post) throw new PostNotFound("That post doesn't exist");
 
+        // Let's allow an authorized user to have access an edit link
         $edit = "";
-        if(has_permission($this->permission)) {
+        if($is_permitted) {
             $route = $this->path('edit',[$post->_id],'get','admin');
             $edit = "<a href='$route' is>Edit this post</a>";
         }
 
+        // If the post isn't published, we want to provide a warning about it.
         $unpublished = "";
         if(!$post['published']) $unpublished = "<div class='cobalt-post--unpublished-preview'>This post is unpublished. $edit when you're ready.</div>";
 
+        // Compile it all together
         add_vars([
             'title' => htmlspecialchars($post->title),
             'unpublished' => $unpublished,
@@ -185,5 +202,25 @@ abstract class PostController extends Controller {
             throw new UnknownError("Could not find '$methodName' route");
         }
         return $path;
+    }
+
+    private function getDisplaySession() {
+        $validTypes = [
+            'wide'   => true,
+            'mixed'  => null,
+            'narrow' => false,
+        ];
+        
+        if(!key_exists($_GET['display'],$validTypes)) {
+            unset($_SESSION['Posts_display_type']);
+            exit;
+        }
+        $value = $validTypes[$_GET['display']];
+
+        if($value === null) {
+            unset($_SESSION['Posts_display_type']);
+            return;
+        }
+        $_SESSION['Posts_display_type'] = $value;
     }
 }
