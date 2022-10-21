@@ -28,6 +28,7 @@
 namespace Cobalt\Settings;
 
 use Exception;
+use Cobalt\Settings\Exceptions\AliasMissingDependency;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 

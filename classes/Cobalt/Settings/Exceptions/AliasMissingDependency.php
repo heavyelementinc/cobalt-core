@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Settings;
+namespace Cobalt\Settings\Exceptions;
 
 use Exception;
 
