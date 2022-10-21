@@ -23,6 +23,14 @@ if (app('Auth_logins_enabled')) {
     Route::put("/user/{id}/password",   "UserAccounts@update_basics",   ['permission' => 'Auth_allow_editing_users']);
     Route::put("/user/password",        "UserAccounts@change_my_password", ['permission' => 'self']);
     Route::delete("/user/{id}/delete",   "UserAccounts@delete_user",   ['permission' => 'Auth_allow_deleting_users']);
+
+    Route::put("/settings/update/", "CoreSettingsPanel@update", [
+        'permission' => 'Auth_modify_cobalt_settings'
+    ]);
+
+    Route::put("/settings/default/{name}", "CoreSettingsPanel@reset_to_default", [
+        'permission' => 'Auth_modify_cobalt_settings'
+    ]);
 }
 
 if (app('Web_main_content_via_api')) {

@@ -47,7 +47,13 @@ cobalt-carousel .cobalt-carousel--scroll-container > * {
     flex-grow: 0;
 }
 
+cobalt-carousel[sizing="crop"] .cobalt-carousel--scroll-container > * {
+    /* width: auto; */
+    object-fit: cover;
+}
+
 cobalt-carousel .cobalt-carousel--scroll-container :is(img, picture, video) {
+    height: min(var(--height) 80vh);
     height: var(--height);
 }
 

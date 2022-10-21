@@ -10,7 +10,7 @@ class APIManagement {
         $apis = $this->load_files();
         $index = "";
         foreach($apis as $name => $values) {
-            $index .= "<a href='/admin/api/$name' class='pretty-link'>$values[icon]<span>$values[name]</span></a>";
+            $index .= "<a href='$name' class='pretty-link'>$values[icon]<span>$values[name]</span></a>";
         }
         
         add_vars([

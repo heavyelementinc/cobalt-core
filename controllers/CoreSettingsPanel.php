@@ -1,32 +1,48 @@
 <?php
 
 use Controllers\Controller;
+use Exceptions\HTTP\BadRequest;
+use MongoDB\BSON\ObjectId;
 
 class CoreSettingsPanel extends Controller {
     private $requiresRoot = ['Cache &amp; Debug'];
     
     function settings_index() {
-        $this->settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"));
+        // $this->settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"));
+        $GLOBALS['app']->bootstrap();
+        $this->settings = $GLOBALS['app']->instances;
+        
 
         $setting_groups = [];
         $setting_tables = [];
 
         foreach($this->settings as $index => $setting) {
-            if(!isset($setting->manage)) continue;
-            if(in_array($setting->manage->group, $this->requiresRoot) && !is_root()) continue;
-            $url = $this->url_name($setting->manage->group);
-            if(!key_exists($setting->manage->group,$setting_groups)) $setting_groups[$setting->manage->group] = "<a href='#$url'>".$setting->manage->group."</a>";
+            if(!isset($setting->meta)) continue;
+            if(in_array($setting->meta['group'], $this->requiresRoot) && !is_root()) continue;
+            if($setting->meta['group'] === "") $setting->meta['group'] = "Troublesome";
+            $url = $this->url_name($setting->meta['group']);
+            if(!key_exists($setting->meta['group'],$setting_groups)) $setting_groups[$setting->meta['group']] = "<a href='#$url'>".$setting->meta['group']."</a>";
 
-            if(!key_exists($setting->manage->group,$setting_tables)) $setting_tables[$setting->manage->group] = "<div id='$url'><ul class='list-panel'>";
+            if(!key_exists($setting->meta['group'],$setting_tables)) $setting_tables[$setting->meta['group']] = "<form-request method='PUT' action='/api/v1/settings/update/' autosave='autosave' id='$url'><ul class='list-panel'>";
 
-            $setting_tables[$setting->manage->group] .= $this->get_setting_table_entry($setting, $index, $url);
+            // if(isset($setting->value)) {
+                // `view` overrides `type`
+                if (isset($setting->meta['view'])) {
+                    $setting_tables[$setting->meta['group']] .= $this->get_input_from_view($setting, $index);
+                } else if(isset($setting->meta['type'])) {
+                    $setting_tables[$setting->meta['group']] .= $this->get_setting_table_entry($setting, $index, $url);
+                }
+            // }
             
         }
 
+        unset($setting_groups['']);
+        unset($setting_tables['']);
+
         add_vars([
-            'title' => 'Miscellaneous Settings',
+            'title' => 'Settings',
             'headings' => implode(           "", $setting_groups),
-            'settings' => implode("</ul></div>", $setting_tables) . "</ul></div>"
+            'settings' => implode("</ul></form-request>", $setting_tables) . "</ul></form-request>"
         ]);
 
         return set_template("/admin/settings/basic-settings.html");
@@ -40,55 +56,63 @@ class CoreSettingsPanel extends Controller {
     }
 
     private function get_setting_table_entry($setting, $index, $url) {
-        switch($setting->manage->type) {
+        $template = false;
+        $type = "input";
+        $options = "";
+        switch($setting->meta['type']) {
             case "input":
-                return $this->get_input($setting, $index, $url);
-            break;
+                $template = "/admin/settings/inputs/input.html";
+                $type = "text";
+                break;
+            case "number": 
+                $template = "/admin/settings/inputs/input.html";
+                $type = "number";
+                break;
+            case "password":
+                $template = "/admin/settings/inputs/password.html";
+                break;
             case "input-switch":
-                return $this->get_checkbox($setting, $index, $url);
+                $template = "/admin/settings/inputs/bool.html";
                 break;
             case "input-array":
-                return $this->get_array($setting, $index, $url);
+                $template = "/admin/settings/inputs/array.html";
+                $options = "";
+                foreach(__APP_SETTINGS__[$index] as $option) {
+                    $options.= "<option value='$option' selected='selected'>$option</option>";
+                }
                 break;
-            // case "input-object":
-                // return $this->get_object($setting, $index, $url);
         }
+        if($template) return view($template,[
+            'name' => $setting->meta['name'],
+            'setting' => $index,
+            'value' => __APP_SETTINGS__[$index],
+            'default' => $setting->defaultValue,
+            'type' => $type,
+            'disabled' => '',
+            'options' => $options,
+        ]);
         return "<li>Can't render \"$index\"</li>";
     }
 
-    private function get_input($setting, $index, $url) {
-        if(gettype($setting->default) === "bool") return $this->get_checkbox($setting, $index, $url);
-        return "
-        <li>
-            <label>".$setting->manage->name."</label>
-            <input type='input' name='$index' value='".__APP_SETTINGS__[$index]."' disabled='disabled'>
-            <button onclick='reset_to_default(".json_encode($setting->default).")' disabled='disabled'>Default</button>
-        </li>
-        ";
+    private function get_input_from_view($setting, $name) {
+        $template = $setting->meta['view'];
+        return view($template, [
+            'setting' => $setting,
+            'name' => $name,
+            'value' => $setting->get_value()
+        ]);
     }
 
-    private function get_checkbox($setting, $index, $url) {
-        return "
-        <li>
-            <label>".$setting->manage->name."</label>
-            <input-switch name='$index' checked='".json_encode(__APP_SETTINGS__[$index])."' disabled='disabled'></input-switch>
-            <button onclick='reset_to_default(".json_encode($setting->default).")' disabled='disabled'>Default</button>
-        </li>";
+    // TODO: allow dot-notated settings to be modified
+    public function update() {
+        $name  = array_keys($_POST)[0];
+        $value = $_POST[$name];
+        return $GLOBALS['app']->update_setting($name, $value);
     }
 
-    private function get_array($settings, $index, $url) {
-        $options = "";
-        foreach(__APP_SETTINGS__[$index] as $option) {
-            $options.= "<option value='$option' selected='selected'>$option</option>";
-        }
-        return "
-        <li>
-            <label>".$settings->manage->name."</label>
-            <input-array name='$index' disabled='disabled'>$options</input-array>
-            <button onclick='reset_to_default(".json_encode($settings->default).")' disabled='disabled'>Default</button>
-        </li>
-        ";
-    }
+    public function reset_to_default($name) {
+        return $GLOBALS['app']->reset_to_default($name);
+    }    
 
     // private function get_object($settings, $index, $url) {
     //     $object = "";
@@ -97,11 +121,11 @@ class CoreSettingsPanel extends Controller {
     //     }
     //     return "
     //     <li>
-    //         <label>".$settings->manage->name."</label>
+    //         <label>".$settings->meta['name']."</label>
     //         <input-object-array name='$index' value='".json_encode(__APP_SETTINGS__[$index])."'>
     //             <template></template>
     //         </input-object-array>
-    //         <button onclick='reset_to_default(".json_encode($settings->default).")' disabled='disabled'>Reset</button>
+    //         <button onclick='reset_to_default(".json_encode($settings->defaultValue).")' disabled='disabled'>Reset</button>
     //     </li>
     //     ";
     // }

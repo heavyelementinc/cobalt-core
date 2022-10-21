@@ -31,17 +31,18 @@ class CobaltScrollManager {
         this.parallaxElements = []; // The elements to be updated
         this.modifier = modifier;
 
-        this.debug = app("Parallax_enable_debug");
+        this.debug = app("Parallax_enable_debug") ?? false;
 
         document.addEventListener("navigationEvent", this.selectElements.bind(this));
         document.addEventListener("scrollManagerUpdate", this.selectElements.bind(this));
 
-        window.addEventListener("resize", () => {
-            // console.log("resize");
+        if(app("enable_default_parallax")) window.addEventListener("resize", () => {
             this.selectElements();
         });
 
         this.initDebug();
+
+        if(app("enable_default_parallax")) this.selectElements();
     }
 
     async selectElements() {

@@ -796,16 +796,18 @@ class ProgressBar extends HTMLElement {
         super();
         this.maxValue = this.getAttribute("max") || 100;
         this.progressValue = 0;
-        this.messageContainer = document.createElement("div");
-        this.messageContainer.innerHTML = "&nbsp;";
     }
 
     connectedCallback() {
+        if(this.getAttribute("no-message") === null) {
+            this.messageContainer = document.createElement("div");
+            this.messageContainer.innerHTML = "&nbsp;";
+        }
         this.bar = document.createElement("div");
         this.bar.classList.add("progress-bar--indicator");
         this.appendChild(this.bar);
         this.dimensions = get_offset(this);
-        this.parentNode.insertBefore(this.messageContainer, this.nextSibling);
+        if(this.messageContainer) this.parentNode.insertBefore(this.messageContainer, this.nextSibling);
     }
 
     /**

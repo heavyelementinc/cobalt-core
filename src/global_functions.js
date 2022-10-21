@@ -299,7 +299,9 @@ function string_to_bool(str, altName = true) {
  * @returns bool
  */
 function compare_arrays(arr1, arr2, sort = false) {
-    if(sort)
+    // if(sort) {
+        
+    // }
     return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
 

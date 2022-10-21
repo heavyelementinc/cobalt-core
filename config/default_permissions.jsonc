@@ -14,6 +14,13 @@
         "default": false,
         "ring": 1
     },
+    "Auth_modify_cobalt_settings": {
+        "group": "Admin",
+        "label": "Modify Cobalt settings.<help-span value='Access to the Cobalt Settings panel, able to modify them.'></help-span>",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
     "Debug_access": {
         "group": "Admin",
         "label": "Access to debug tools for web developers.<help-span value='Most people do NOT need this.'></help-span>",

@@ -178,7 +178,7 @@ class SettingsManager {
         // Check if we need to import our settings from the cache
         $this->got_from_cache = $this->from_cache();
         if ($this->enable_settings_from_cache && $this->got_from_cache) { // Settings ARE available from the cache
-            $GLOBALS['time_to_update'] = false;
+            $GLOBALS['TIME_TO_UPDATE'] = false;
             // Load the cached settings file
             $settings = $this->cache_resource->get("json");
 
@@ -194,7 +194,7 @@ class SettingsManager {
             return $this;
         }
 
-        $GLOBALS['time_to_update'] = true;
+        $GLOBALS['TIME_TO_UPDATE'] = true;
         // Load all the settings files
         $this->load_settings();
         // Process the settings

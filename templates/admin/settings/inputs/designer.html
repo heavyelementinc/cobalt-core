@@ -1,0 +1,27 @@
+<li>
+    <fieldset>
+        <legend>Designer Credit</legend>
+        <div class="hbox">
+            <label>
+                Credit Type
+            </label>
+            <input name="designer.prefix" value="{{value.prefix}}" placeholder="Credit Type">
+            <async-button method="PUT" action="/api/v1/settings/default/designer.prefix"></async-button>
+        </div>
+        <div class="hbox">
+            <label>
+                Designer Name
+            </label>
+            <input name="designer.name" value="{{value.name}}" placeholder="Designer Name">
+            <async-button method="PUT" action="/api/v1/settings/default/designer.name"></async-button>
+        </div>
+        <label>
+            Designer Website
+        </label>
+        <input name="designer.href" value="{{value.href}}" placeholder="Designer Website">
+        <label>
+            Link Title
+        </label>
+        <input name="designer.title" value="{{value.title}}" placeholder="Link Title">
+    </fieldset>
+</li>

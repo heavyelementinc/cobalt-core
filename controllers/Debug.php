@@ -30,6 +30,14 @@ class Debug extends \Controllers\Pages {
         $settings = $GLOBALS['app']->__settings;
         $stored = $GLOBALS['app']->fetchModifiedSettings();
         $definitions = $GLOBALS['app']->definitions;
+        // $definitions['js-web'] = [];
+        // $definitions['js-admin'] = [];
+        // $definitions['css-web'] = [];
+        // $definitions['css-admin'] = [];
+        // $definitions['vars-web'] = [];
+        // $definitions['vars-admin'] = [];
+        // $definitions['root-style'] = [];
+        $order = array_unique(array_merge(array_keys($definitions), array_keys((array)$settings)));
 
         $buttons = "";
         $pages = "";
@@ -43,15 +51,18 @@ class Debug extends \Controllers\Pages {
             'style' => 'S'
         ];
 
-        foreach($definitions as $setting => $data) {
+        foreach($order as $setting) {
+            $data = $definitions[$setting] ?? [];
             $cached_value = $settings[$setting];
             $directives = "";
             foreach($definitions[$setting]['directives'] ?? [] as $dir => $d) {
                 if(key_exists($dir, $directive_abbr)) $directives .= $directive_abbr[$dir] . ",";
             }
             $directives = substr($directives,0,-1);
-            $buttons .= "<a href='#$setting'>$setting<span class='directives'>$directives</span></a>";
             $filename = str_replace([__ENV_ROOT__, __APP_ROOT__],['__ENV__', '__APP__'],$data['defined']);
+            $source = "<span class='source env'>ENV</span>";
+            if(strpos($filename, "__APP__") === 0) $source = "<span class='source app'>APP</span>";
+            $buttons .= "<a href='#$setting'>$source<span class='fake-link'>$setting</span><span class='directives'>$directives</span></a>";
             $shorthand = $data['shorthand'];
             unset($definitions[$setting]['defined']);
             unset($definitions[$setting]['shorthand']);

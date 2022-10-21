@@ -16,6 +16,9 @@ class Router {
         this.route_args = null;
         /** @property Object - the route directives to be used */
 
+        /** @method or @null  */
+        this.navigationEventReject = null;
+
         this.navigationStarted = false;
 
         this.linkSelector = `a[href^='/']:not([is]),a[href^='${location.origin.toString()}']:not([is])`;
@@ -29,7 +32,13 @@ class Router {
             this.find_current_navlist_item();
         });
 
-        this.initialize_SPA_navigation(true);
+        if(this.isSPA) {
+            this.SPA_indicator = document.createElement("progress-bar");
+            this.SPA_indicator.setAttribute("no-message", "true");
+            this.SPA_indicator.classList.add("spa-loading-indicator");
+            document.body.prepend(this.SPA_indicator);
+            this.initialize_SPA_navigation(true);
+        }
 
         document.dispatchEvent(new CustomEvent("navigationEvent"));
     }
@@ -106,8 +115,7 @@ class Router {
     initialize_SPA_navigation(allLinks = null) {
         // Don't do anything if we're not in SPA mode.
         if(!this.isSPA) return;
-        const load = document.createElement("loading-bar");
-        // document.body.prepend(load);
+        
         
         if(allLinks === null) allLinks = this.first_run;
         if(!this.first_run) window.scrollTo(0,0);
@@ -175,6 +183,9 @@ class Router {
     }
 
     async handle_SPA_navigation(url, event = {}) {
+        this.abortSPANavigation();
+        this.SPA_indicator.classList.add("navigation-start");
+        
         // Parse the URL
         const urlData = this.getUrlData(url);
         if(!urlData.isLocal) window.location = url;
@@ -184,11 +195,20 @@ class Router {
 
         let result;
         try{
-            result = await pageLoad.get();
+            result = await new Promise(async (resolve, reject) => {
+                this.navigationEventReject = reject;
+                const result = await pageLoad.get()
+                this.navigationEventReject = null;
+                resolve(result);
+                this.navigationEnd();
+            })
         } catch (error) {
+            this.navigationEnd();
+            if(error = "Navigation aborted") return console.log(error);
             console.warn("There was an error");
         }
         
+        window.messageHandler.closeAll();
 
         if(this.route_directives && "exit_callback" in this.route_directives) {
             console.info("Firing exit callback");
@@ -217,11 +237,21 @@ class Router {
         this.mainContent.id = result.main_id ?? "main";
         this.mainContent.innerHTML = result.body;
 
+        this.navigationEnd();
         document.dispatchEvent(new CustomEvent("navigationEvent"));
 
         mobile_nav.close();
 
         this.initialize_SPA_navigation(false);
+    }
+
+    navigationEnd() {
+        this.SPA_indicator.classList.remove("navigation-start");
+    }
+
+    async abortSPANavigation() {
+        if(this.navigationEventReject === null) return;
+        this.navigationEventReject("Navigation aborted");
     }
 
     getUrlData(url) {

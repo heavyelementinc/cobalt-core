@@ -26,7 +26,7 @@ session_start();
 if (!version_compare(PHP_VERSION, "8.1", ">=")) die("You must be running PHP version 8.1.0 or greater");
 
 /* Cobalt Version Number */
-define("__COBALT_VERSION", "1.0");
+define("__COBALT_VERSION", "2.0");
 
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
@@ -72,13 +72,6 @@ $app_env = __APP_ROOT__ . "/private/app_env.php";
 if (file_exists($app_env)) require_once $app_env;
 
 
-/** We will now instantiate our database connection */
-// require_once __ENV_ROOT__ . "/globals/settings.php";
-
-
-/** @global TIME_TO_UPDATE determines if we need to rebuild our cached assets */
-$GLOBALS['time_to_update'] = false;
-
 try {
     // Load our ACTIVE plugins.
     require_once __ENV_ROOT__ . "/globals/plugins.php";
@@ -87,7 +80,7 @@ try {
 }
 
 try {
-    $application = new \Cobalt\Settings\Settings(true);
+    $application = new \Cobalt\Settings\Settings();
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {

@@ -16,7 +16,8 @@ Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
         'name' => 'App Settings',
         'icon' => "settings-outline"
     ],
-    'navigation' => ['admin_basic_panel']
+    'navigation' => ['admin_basic_panel'],
+    'permission' => "Auth_modify_cobalt_settings"
 ]);
 
 if (app('Auth_logins_enabled')) {
@@ -69,7 +70,7 @@ if (app('Plugin_enable_plugin_support')) {
 }
 
 // if (has_permission("API_manage_keys")) {
-Route::get("/settings/api-keys", "APIManagement@index",[
+Route::get("/settings/api-keys/", "APIManagement@index",[
     'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "API Keys",

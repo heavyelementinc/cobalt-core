@@ -125,7 +125,8 @@ if($context_result !== null) {
 
     $global_benchmarks = "";
     if(app('debug') && isset($context_processor->encoding_mode) && $context_processor->encoding_mode === "text/html") {
-        $global_benchmarks = view("/debug/benchmarks.html",['results' => str_replace("\"","\\\"",json_encode($GLOBALS['BENCHMARK_RESULTS']))]);
+        if($GLOBALS['TIME_TO_UPDATE']) $global_benchmarks .= "<script>console.warn('Cobalt Engine Bootstrap Completed')</script>";
+        $global_benchmarks .= view("/debug/benchmarks.html",['results' => str_replace("\"","\\\"",json_encode($GLOBALS['BENCHMARK_RESULTS']))]);
         echo $global_benchmarks;
     }
     ob_flush();

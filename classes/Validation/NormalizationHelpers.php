@@ -415,7 +415,7 @@ abstract class NormalizationHelpers {
         return $valid;
     }
 
-    function markdown_word_limit(string $markdown, int $word_limit = 350): string {
+    function markdown_word_limit(string|null $markdown, int $word_limit = 350): string {
         $mutant = $markdown;
 
         if(str_word_count($mutant, 0) > $word_limit) {

@@ -1,29 +1,28 @@
+<h1>{{title}}</h1>
 
 <form-request method="PUT" action="/api/v1/api/key/{{id}}">
     <fieldset>
-        <label>Key</label>
+        <legend>Key Data</legend>
+        <label>Key <help-span value=""></help-span></label>
         <input type="string" name="key" value="{{token.key}}">
-    </fieldset>
-    <fieldset>
+    
         <label>Secret</label>
         <input type="password" name="secret" value="{{token.secret}}">
-    </fieldset>
-    <fieldset>
+    
         <label>Token</label>
         <input type="password" name="token" value="{{token.token}}">
     </fieldset>
     <fieldset>
+        <legend>Metadata</legend>
         <label>Type</label>
         <input-autocomplete value="{{token.type}}" name="type">
             <option value="Authorization">Authorization</option>
             <option value="Parameter">Parameter</option>
         </input-autocomplete>
-    </fieldset>
-    <fieldset>
+    
         <label>Prefix: {{token.prefix}}</label>
         <input type="string" name="prefix" value="{{token.prefix}}">
-    </fieldset>
-    <fieldset>
+    
         <label>Expiration</label>
         <input type="date" name="expiration" value="{{token.expiration}}">
     </fieldset>
