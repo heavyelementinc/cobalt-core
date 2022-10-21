@@ -11,19 +11,22 @@ class CobaltSetting {
     protected $value = null;
     protected $settings = null;
     
-    function __construct($name, $definition, &$user_modified_settings, &$settings) {
+    function __construct($name, $definition, &$user_modified_settings, &$settings, $reference, &$toCache) {
         $this->name = $name;
         $this->defaultValue = $definition['default'];
         $this->directives   = $definition['directives'];
-        $this->meta         = $definition['meta'];
+        $this->meta         = $definition['meta'] ?? null;
         $this->validate     = $definition['validate'];
         $this->user_modified_settings = $user_modified_settings;
         $this->allSettings  = $settings;
+
+        $this->reference = $reference;
+        $this->toCache = $toCache;
     }
 
     function get_value() {
         $value = $this->defaultValue;
-        if(isset($this->user_modified_settings[$this->name])) $value = $this->user_modified_settings[$this->name];
+        if(isset($this->user_modified_settings[$this->name])) return $this->user_modified_settings[$this->name];
         $mutant = $value;
         foreach($this->directives as $directive => $data) {
             if(!method_exists($this, "directive_$directive")) continue;
@@ -82,14 +85,16 @@ class CobaltSetting {
     }
 
     function directive_style($value, $data) {
+        if(!isset($this->toCache['root-style'])) $this->toCache['root-style'] = "";
         if ($this->name === "fonts") {
             foreach ($value as $type => $v) {
-                $GLOBALS['ROOT_STYLE'] .= "--project-$type-family: $v[family];\n";
+                if(!isset($this->toCache['vars-web'])) $this->toCache['vars-web'] = [];
+                $this->toCache['vars-web']["$type-family"] = $v['family'];
             }
         }
         if($this->name === "css-vars") {
             foreach ($value as $type => $v) {
-                $GLOBALS['ROOT_STYLE'] .= "--project-$type: $v;\n";
+                $this->toCache['root-style'] .= "--project-$type: $v;\n";
             }
         }
         return $value;

@@ -27,6 +27,12 @@
             "group": "Basic",
             "name": "Domain Name",
             "type": "input"
+        },
+        "validate": {
+            "confirm": "If you change this value, you may lose access to this page and will need to manually change the value to regain access.",
+            "filter": {
+                "FILTER_VALIDATE_URL": []
+            }
         }
     },
     /* The full name of the application. */
@@ -63,21 +69,7 @@
             "type": "input"
         },
         "directives": {
-            "alias": "app_short_name"
-        }
-    },
-    /* The name of the designer as well as their website and title text */
-    "designer": {
-        "default": {
-            "prefix": "Designed by",
-            "name":   "Heavy Element, Inc.",
-            "href":   "https://heavyelement.io/",
-            "title":  "Maine's Premier New Media Production Studio"
-        },
-        "meta": {
-            "group": "Basic",
-            "name": "Designer Credit",
-            "type": "input-object"
+            "alias": "app_name"
         }
     },
     /* Debug routes include things like the WebComponent input tests */
@@ -88,6 +80,9 @@
             "name": "Enable debug routes",
             "type": "input-switch",
             "debug": true
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     /* I don't think this does anything yet -GM */
@@ -98,6 +93,9 @@
             "name": "Route Cache Disabled",
             "type": "input-switch",
             "debug": true
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     "cached_content_disabled": {
@@ -107,6 +105,9 @@
             "name": "Cached Content Disabled",
             "type": "input-switch",
             "debug": true
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     "settings_cache_disabled": {
@@ -116,6 +117,9 @@
             "name": "Settings Cahce Disabled",
             "type": "input-switch",
             "debug": true
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     /* Enabled the core-content/ route */
@@ -126,6 +130,9 @@
             "name": "Core Content Disabled",
             "type": "input-switch",
             "debug": true
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
 
@@ -133,6 +140,7 @@
     email templates and more. */
     "fonts": {
         "default": [],
+        // "definiiton": "Fonts",
         "directives": {
             "merge":  {
                 "head": {
@@ -145,64 +153,35 @@
                 }
             },
             "style": true
-        },
-        "meta": {
-            "group": "Look &amp; Feel",
-            "name": "Default Fonts",
-            "type": "input-object"
         }
+        // "meta": {
+        //     "group": "Look &amp; Feel",
+        //     "name": "Default Fonts",
+        //     "view": "/admin/settings/inputs/fonts.html"
+        // }
     },
     "css-vars": {
         "default": [],
         "directives": {
             "merge": {
-                "modal-z-index": 2000,
-                "body-background": "#efefef",
-                "box-shadow": "0 4px 10px rgba(0, 0, 0, .2)",
-                "color-header-branding": "#004BA8",
-                "color-user-panel-button": "#342A21",
-                "color-admin-panel-background": "var(--project-color-header-branding)",
-                "color-admin-panel-font": "white",
-                "color-acknowledge": "#598B2C",
-                "color-active": "#598B2C",
-                "color-inactive": "#B1C1C0",
-                "color-input-border-nofocus": "#b1c3c3",
-                "color-input-border-focus": "#000",
-                "color-input-background": "#fff",
-                "color-input-text-color": "#000",
-                "color-input-background-focus": "#FFF",
-                "color-input-invalid-border": "#BB4430",
-                "color-input-invalid-bg": "#F7E2DE",
-                "color-input-invalid-label-text": "#FFF",
-                "color-input-disabled": "#F4F6F6",
-                "color-disabled": "rgba(0,0,0,.2)",
-                "color-table-border": "1px solid var(--project-color-input-border-nofocus)",
-                "color-table-bg-odd": "var(--project-color-input-background)",
-                "color-table-bg-even": "var(--project-color-input-disabled)",
-                "color-problem": "#FE5F55",
-                "color-button-init": "#004BA8",
-                "color-button-hover": "#9DD1F1",
-                "color-button-text": "#FFF",
-                "color-button-hover-text": "#000",
-                "color-button-pressed": "#00377A",
-                "calendar-borders": "1px solid var(--project-color-button-init)",
-                "calendar-cell-bg": "#FFF",
-                "calendar-cell-other-bg": "#EFEFEF",
-                "calendar-cell-txt": "#000",
-                "calendar-header-color": "var(--project-color-button-init)",
-                "calendar-header-text": "var(--project-color-button-text)",
-                "action-menu-background": "var(--project-color-input-disabled)",
-                "action-menu-border": "var(--project-color-table-border)",
-                "action-menu-hover": "var(--project-color-inactive)",
-            
-                "events-banner-background": "#efefef",
-                "events-banner-text": "#000000",
-                "events-button-color": "var(--project-color-button-init)",
-                "events-button-color-hover": "var(--project-color-button-hover)",
-                "events-button-text": "var(--project-color-button-text)",
-                "events-button-text-hover": "var(--project-color-button-hover-text)"
+                
             },
             "style": true
+        }
+    },
+
+    /* The name of the designer as well as their website and title text */
+    "designer": {
+        "default": {
+            "prefix": "Designed by",
+            "name":   "Heavy Element, Inc.",
+            "href":   "https://heavyelement.io/",
+            "title":  "Maine's Premier New Media Production Studio"
+        },
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Designer Credit",
+            "view": "/admin/settings/inputs/designer.html"
         }
     },
     
@@ -221,41 +200,23 @@
 
     "API_CORS_allowed_origins": {
         "default": [],
-        "meta": {
-            "group": "API",
-            "name": "Allowed Origins",
-            "type": "input-array"
-        },
+        // "meta": {
+        //     "group": "API",
+        //     "name": "Allowed Origins",
+        //     "type": "input-array"
+        // },
         "directives": {
             "push": [
                 "domain_name"
             ]
         }
     },
+    // This was once allowed to be modified by the user in the Settings panel
+    // but people could toggle it and then not be able to change it.
     "API_CORS_enable_other_origins": {
-        "default": true,
-        "meta": {
-            "group": "API",
-            "name": "Enable Other Origins",
-            "type": "input-switch"
-        }
+        "default": true
     },
-    "API_contact_form_enabled": {
-        "default": false,
-        "meta": {
-            "group": "API",
-            "name": "Enable Contact Form",
-            "type": "input-switch"
-        }
-    },
-    "API_contact_form_recipient": {
-        "default": "",
-        "meta": {
-            "group": "API",
-            "name": "Contact Form Recipient",
-            "type": "input"
-        }
-    },
+
     "CobaltEvents_enabled": {
         "default": true,
         "directives": {
@@ -263,8 +224,11 @@
         },
         "meta": {
             "group": "Banners &amp; Pop-ups",
-            "name": "Enable Banners &amp; Pop-ups",
+            "name": "Enable Event Banners <help-span value='Enables the Event Manager and allows you to schedule private & public pop-ups and banners.'></help-span>",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     "CobaltEvents_database_collection": {
@@ -280,6 +244,52 @@
         "default": "cobalt_http_error"
     },
     /** Mail **/
+
+    "API_contact_form_enabled": {
+        "default": false,
+        "meta": {
+            "group": "Mail",
+            "name": "Enable Contact Form",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "API_contact_form_recipient": {
+        "default": "",
+        "meta": {
+            "group": "Mail",
+            "name": "Contact Form Recipient",
+            "type": "input"
+        }
+    },
+
+    "Mail_username": {
+        "default": "",
+        "directives": {
+            "env": "MAIL_USERNAME"
+        },
+        "meta": {
+            "group": "Mail",
+            "name": "SMTP Username",
+            "type": "input"
+        }
+    },
+
+    "Mail_password": {
+        "default": "",
+        "directives": {"env": "MAIL_PASSWORD"},
+        "meta": {
+            "group": "Mail",
+            "name": "SMTP Password",
+            "type": "input"
+        },
+        "validate": {
+            "confirm": "Are you sure you want to update this password? Doing so will overwrite your current password!"
+        }
+    },
+
     "Mail_smtp_host": {
         "default": "",
         "directives":{
@@ -291,6 +301,20 @@
             "type": "input"
         }
     },
+
+    "Mail_port": {
+        "default": 587,
+        "directives":{"env": "MAIL_PORT"},
+        "meta": {
+            "group": "Mail",
+            "name": "SMTP Port",
+            "type": "number"
+        },
+        "validate": {
+            "type": "int"
+        }
+    },
+    
     "Mail_smtp_auth": {
         "default": true,
         "directives": {"env": "MAIL_AUTH"},
@@ -298,22 +322,40 @@
             "group": "Mail",
             "name": "SMTP Auth Enabled",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
-    "Mail_SMTP_options": {
-        "default": {}
-    },
-    "Mail_username": {
+
+    "Mail_reply_to_address": {
         "default": "",
-        "directives": {
-            "env": "MAIL_USERNAME"
-        },
+        "directives":{"alias": "Mail_from_address"},
         "meta": {
             "group": "Mail",
-            "name": "Username",
+            "name": "Reply To",
+            "type": "input"
+        },
+        "validate": {
+            "filter": {
+                "FILTER_VALIDATE_EMAIL": {}
+            }
+        }
+    },
+    "Mail_reply_to_name": {
+        "default": "",
+        "directives":{"alias": "app_short_name"},
+        "meta": {
+            "group": "Mail",
+            "name": "Reply To Name",
             "type": "input"
         }
     },
+    
+    "Mail_SMTP_options": {
+        "default": {}
+    },
+    
     "Mail_from_address": {
         "default": "",
         "directives":{"alias": "Mail_username"},
@@ -332,76 +374,63 @@
             "type": "input"
         }
     },
-    "Mail_reply_to_address": {
-        "default": "",
-        "directives":{"alias": "Mail_from_address"},
-        "meta": {
-            "group": "Mail",
-            "name": "Reply To",
-            "type": "input"
-        }
-    },
-    "Mail_reply_to_name": {
-        "default": "",
-        "directives":{"alias": "app_short_name"},
-        "meta": {
-            "group": "Mail",
-            "name": "Reply To Name",
-            "type": "input"
-        }
-    },
-    "Mail_password": {
-        "default": "",
-        "directives": {"env": "MAIL_PASSWORD"},
-        "meta": {
-            "group": "Mail",
-            "name": "Mail Password",
-            "type": "input"
-        }
-    },
-    "Mail_port": {
-        "default": 587,
-        "directives":{"env": "MAIL_PORT"},
-        "meta": {
-            "group": "Mail",
-            "name": "SMTP Port",
-            "type": "input"
-        }
-    },
+    
+    
+
+
+
     "Cookie_consent_prompt": {
         "default": false,
         "meta": {
             "group": "Banners &amp; Pop-ups",
             "name": "Cookie Consent Prompt",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
 
     "Posts_enable_parallax": {
-        "default": true,
+        "default": false,
+        "directives":{
+            "public": true
+        },
         "meta": {
             "group": "Parallax",
             "name": "Enable Parallax for Blog Post Headline Images",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     "enable_default_parallax": {
         "default": true,
-        "directives":{"public": true},
+        "directives":{
+            "public": true
+        },
         "meta": {
             "group": "Parallax",
-            "name": "Enable Parallax",
+            "name": "Enable Parallax <help-span value='Allows you to specify [parallax-mode=\"\"] attributes on elements in your pages.'></help-span>",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
     "Parallax_enable_debug": {
-        
         "default": false,
-        "directives":{"public": true},
+        "directives":{
+            "public": true
+        },
         "meta": {
             "group": "Parallax",
-            "name": "Enable Parallax Debug",
+            "name": "Enable Parallax Debug <help-span value='Allows the scroll manager to display debug output to help troubleshoot parallax issues.'></help-span>",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     },
        /* If true, the settings will be cached after being processed and the cache 
@@ -438,7 +467,7 @@
                     "prefix": "/debug/",
                     "exception_mode": "web",
                     "mode": "text/html",
-                    "permission": "Debug_access",
+                    // "permission": "Debug_access",
                     "session_refresh": true,
                     "api_access": true,
                     "vars": {
@@ -594,7 +623,7 @@
         "default": true,
         "directives": {   
             "required": {
-                "Auth_user_accounts_enabled": true
+                "Auth_user_accounts_enabled": {"is": true}
             }
         }
     },
@@ -605,7 +634,7 @@
         "default": true,
         "directives": {   
             "required": {
-                "Auth_user_accounts_enabled": true
+                "Auth_user_accounts_enabled": {"is": true}
             }
         }
     },
@@ -613,7 +642,7 @@
         "default": true,
         "directives": {   
             "required": {
-                "Auth_user_accounts_enabled": true
+                "Auth_user_accounts_enabled": {"is": true}
             }
         }
     },
@@ -621,7 +650,7 @@
         "default": false,
         "directives": {   
             "required": {
-                "Auth_user_accounts_enabled": true
+                "Auth_user_accounts_enabled": {"is": true}
             }
         }
     },
@@ -629,7 +658,7 @@
         "default": "/login",
         "directives": {   
             "required": {
-                "Auth_user_accounts_enabled": true,
+                "Auth_user_accounts_enabled": {"is": true},
                 "on_fail_value": ""
             },
             "public": true
@@ -685,6 +714,10 @@
                 "public_post": "/posts/{id}",
                 "public_post_options": {}
             }
+        },
+        "meta": {
+            "group": "Features",
+            "view": "/admin/settings/inputs/posts.html"
         }
     },
     /* 
@@ -702,6 +735,9 @@
             "group": "Cache &amp; Debug",
             "name": "Debug status",
             "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
         }
     }
 }

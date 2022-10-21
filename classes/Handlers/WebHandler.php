@@ -28,6 +28,7 @@ use \Exceptions\HTTP\NotFound;
 class WebHandler implements RequestHandler {
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
+    var $meta_selector = "web";
 
     /** The `body.html` is scanned for these specific tags and then the 
      * corresponding methods are called and their results are stored with the 
@@ -185,10 +186,19 @@ class WebHandler implements RequestHandler {
         return $template;
     }
 
-    // TODO: Remove root style bullshit
+
     function app_settings() {
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
-        $settings .= "<style id=\"style-main\">:root{" . $GLOBALS['ROOT_STYLE'] . "}</style>";
+
+        $vars = "";
+        foreach(__APP_SETTINGS__["vars-" . $this->meta_selector] as $var => $value) {
+            $vars .= "--project-$var: $value;\n";
+        }
+        foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
+            $vars .= "--project-$name-family: $family[family];\n";
+        }
+        
+        $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;
     }
 
@@ -277,14 +287,14 @@ class WebHandler implements RequestHandler {
         $cache = new CacheManager($cache_name);
         $script_content = "";
         // if($cache->outdated(__APP_ROOT__ . "/cache/config/settings.000.json",5)) {
-        if (app('cached_content_disabled') || $GLOBALS['time_to_update']) {
+        if (app('cached_content_disabled') || $GLOBALS['TIME_TO_UPDATE']) {
             $script_content = $this->{$callable}($cache_name);
             $cache->set($script_content, false);
         } else {
             try {
                 $script_content = $cache->get();
             } catch (\Exception $e) {
-                $GLOBALS['time_to_update'] = true;
+                $GLOBALS['TIME_TO_UPDATE'] = true;
                 $script_content = $this->cache_handler($cache_name, $callable);
             }
         }
@@ -297,7 +307,7 @@ class WebHandler implements RequestHandler {
         $table_name = str_replace(".js", ".$this->context_mode.js", $this->route_table_cache);
         $cache = new CacheManager($table_name);
         $table_content = "";
-        if (app('route_cache_disabled') === false || $GLOBALS['time_to_update'] || !$cache->cache_exists()) {
+        if (app('route_cache_disabled') === false || $GLOBALS['TIME_TO_UPDATE'] || !$cache->cache_exists()) {
             $table_content = $GLOBALS['router']->get_js_route_table();
             $cache->set($table_content, false);
         } else $table_content = $cache->get();
@@ -305,11 +315,14 @@ class WebHandler implements RequestHandler {
         return "<script>$table_content</script>";
     }
 
+
     function generate_script_content($script_name) {
         $script_tags = "";
         $compiled = "";
         $debug = app("debug");
-        foreach (app('packages') as $package) {
+
+        // Load packages from manifest
+        foreach (app("js-$this->meta_selector") as $package) {
             if ($debug) {
                 $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
             } else {
@@ -321,6 +334,7 @@ class WebHandler implements RequestHandler {
             }
         }
 
+        // Load JS packages from plugins.
         foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
             if (!file_exists($private)) continue;
             if ($debug) {
@@ -343,19 +357,58 @@ class WebHandler implements RequestHandler {
         return $script_tags;
     }
 
+    // function generate_script_content($script_name) {
+    //     $script_tags = "";
+    //     $compiled = "";
+    //     $debug = app("debug");
+    //     foreach (app('packages') as $package) {
+    //         if ($debug) {
+    //             $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
+    //         } else {
+    //             $files = files_exist([
+    //                 __APP_ROOT__ . "/src/$package",
+    //                 __ENV_ROOT__ . "/src/$package"
+    //             ]);
+    //             $compiled .= "\n\n" . file_get_contents($files[0]);
+    //         }
+    //     }
+
+    //     foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
+    //         if (!file_exists($private)) continue;
+    //         if ($debug) {
+    //             $script_tags .= "<script src='$public?{{app.version}}'></script>";
+    //         } else {
+    //             $compiled .= "\n\n" . file_get_contents($private);
+    //         }
+    //     }
+
+    //     if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
+
+    //     if ($compiled !== "") {
+    //         $minifier = new \MatthiasMullie\Minify\JS();
+    //         $minifier->add($compiled);
+    //         $compiled = $minifier->minify();
+
+    //         $cache = new CacheManager("js-precomp/package.js");
+    //         $cache->set($compiled, false);
+    //     }
+    //     return $script_tags;
+    // }
+
     function generate_style_meta() {
         $link_tags = "";
         $compiled = "";
         $debug = app("debug");
-        foreach (array_merge(app('common-css-packages'), app('css_packages')) as $package) {
+        foreach (app("css-$this->meta_selector") as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
-            ]);
+            ], false);
             if ($debug === true) {
                 $path = "/res/css/";
                 if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
+                else if(empty($files)) throw new NotFound("That file does not exist");
                 $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
             } else {
                 $compiled .= "\n\n" . file_get_contents($files[0]);

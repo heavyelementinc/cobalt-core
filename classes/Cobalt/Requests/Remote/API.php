@@ -146,7 +146,7 @@ abstract class API extends \Drivers\Database implements APICall {
         return $namespace . $exploded[count($exploded) - 1];
     }
 
-    final private function fetch(string $url, string $method) {
+    final private function fetch(string $url, string $method, mixed $body) {
         $this->authorizationToken();
 
         $data = [

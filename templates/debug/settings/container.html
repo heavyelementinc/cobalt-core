@@ -15,9 +15,23 @@
     }
     #list a {
         display: flex;
+        text-decoration: none;
+        color:blue;
     }
-    #list a span {
+    #list a:nth-of-type(odd) {
+        background-color: var(--project-calendar-cell-other-bg)
+    }
+    #list a span.directives {
         margin-left: auto;
+    }
+    #list .source {
+        background-color:black;
+        color: white;
+        font-size: .7rem;
+        padding: .15rem;
+        margin: .1rem;
+        display:inline-grid;
+        place-items: center;
     }
     #list li {
         display: block;

@@ -491,7 +491,7 @@ function get_json($file_name, $array = true) {
         else return false;
     }
     $json = file_get_contents($file_name);
-    return json_decode($json, $array);
+    return jsonc_decode($json, $array);
 }
 
 /** Parse JSONC (commented JSON)
@@ -567,6 +567,7 @@ function associative_to_path(array $arr) {
 
 /**
  * Will determine if an array has string keys
+ * Will provide a false positive if indexes are non-linear
  * @param mixed $array 
  * @return bool 
  */

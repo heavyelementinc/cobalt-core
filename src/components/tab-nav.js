@@ -24,12 +24,16 @@
         
         this.nav.querySelectorAll("a").forEach(e => {
             const url = new URL(e.href).hash;
-            if(!url) console.warn("URL is missing a hash location", e);
+            if(!url) {
+                console.warn("URL is missing a hash location", e);
+                e.setAttribute("disabled","disabled");
+                return;
+            }
             const content = this.querySelector(url);
             if(!content) e.setAttribute("disabled","disabled");
             e.addEventListener("click", evt => {
                 // evt.preventDefault();
-                evt.stopPropagation();
+                // evt.stopPropagation();
                 // history.replaceState({},'',e.href);
                 // this.hashUpdate();
             });
@@ -45,7 +49,6 @@
         newHash = newHash;
 
         const anchors = this.nav.querySelectorAll("a");
-
         anchors.forEach(e => {
             e.classList.remove(this.currentNavClass);
         });
@@ -64,3 +67,9 @@
 }
 
 customElements.define("tab-nav", TabNav);
+
+class ChipNav extends TabNav {
+
+}
+
+customElements.define("chip-nav", ChipNav);

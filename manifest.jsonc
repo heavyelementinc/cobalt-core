@@ -31,13 +31,18 @@
             "AudioPlayer.js",
             "CobaltScrollManager.js"
         ],
-        "public": [
+        "web": [
 
         ],
-        "private": [
+        "admin": [
             "protected/Posts.js",
             "protected/UserPanel.js",
             "protected/UserManager.js"
+        ],
+        "append": [
+            "main.js",
+            "app.js",
+            "Router.js"
         ]
     },
     "css": {
@@ -55,6 +60,7 @@
             "action-menu.css",
             "status-message.css",
             "form-request.css",
+            "login-form.css",
             "posts.css",
             "flex-table.css",
             "cobalt-events.css",
@@ -64,18 +70,71 @@
             "webcomponents.css",
             "audio-player.css",
             "paginated-container.css",
-            "parallax.css"
+            "parallax.css",
+            "header.css"
         ],
-        "public": [
-            "header.css",
+        "web": [
             "main.css"
         ],
-        "private": [
-            "protected/admin.css",
-            "login-form.css"
+        "admin": [
+            "protected/admin.css"
         ],
-        "public-vars": {
+        "append": [
             
-        }
+        ]
+    },
+    "vars": {
+        "common": {
+            "modal-z-index": 2000,
+            "body-background": "#efefef",
+            "box-shadow": "0 4px 10px rgba(0, 0, 0, .2)",
+            "color-header-branding": "#004BA8",
+            "color-user-panel-button": "#342A21",
+            "color-acknowledge": "#598B2C",
+            "color-active": "#598B2C",
+            "color-inactive": "#B1C1C0",
+            "color-input-border-nofocus": "#b1c3c3",
+            "color-input-border-focus": "#000",
+            "color-input-background": "#fff",
+            "color-input-text-color": "#000",
+            "color-input-background-focus": "#FFF",
+            "color-input-invalid-border": "#BB4430",
+            "color-input-invalid-bg": "#F7E2DE",
+            "color-input-invalid-label-text": "#FFF",
+            "color-input-disabled": "#F4F6F6",
+            "color-disabled": "rgba(0,0,0,.2)",
+            "color-table-border": "1px solid var(--project-color-input-border-nofocus)",
+            "color-table-bg-odd": "var(--project-color-input-background)",
+            "color-table-bg-even": "var(--project-color-input-disabled)",
+            "color-problem": "#FE5F55",
+            "color-button-init": "#004BA8",
+            "color-button-hover": "#9DD1F1",
+            "color-button-text": "#FFF",
+            "color-button-hover-text": "#000",
+            "color-button-pressed": "#00377A",
+            "calendar-borders": "1px solid var(--project-color-button-init)",
+            "calendar-cell-bg": "#FFF",
+            "calendar-cell-other-bg": "#EFEFEF",
+            "calendar-cell-txt": "#000",
+            "calendar-header-color": "var(--project-color-button-init)",
+            "calendar-header-text": "var(--project-color-button-text)",
+            "action-menu-background": "var(--project-color-input-disabled)",
+            "action-menu-border": "var(--project-color-table-border)",
+            "action-menu-hover": "var(--project-color-inactive)",
+            "events-banner-background": "#efefef",
+            "events-banner-text": "#000000",
+            "events-button-color": "var(--project-color-button-init)",
+            "events-button-color-hover": "var(--project-color-button-hover)",
+            "events-button-text": "var(--project-color-button-text)",
+            "events-button-text-hover": "var(--project-color-button-hover-text)"
+        },
+        "web": {
+            
+        },
+        "admin": {
+            "color-admin-panel-background": "#004BA8",
+            "color-admin-panel-font": "white"
+        },
+        "append": {}
     }
 }

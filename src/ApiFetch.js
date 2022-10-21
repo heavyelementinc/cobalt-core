@@ -14,10 +14,15 @@ class ApiFetch {
         this.credentials = credentials;
         this.headers = headers;
         this.result = null;
+        this.abortController = null;
+        this.reject = null;
     }
 
+    // fetch requests are now abortable!
     async send(data = "") {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve, reject) => {
+            this.reject = reject;
+            this.abortController = new AbortController();
             let send = {
                 method: this.method,
                 credentials: 'include',
@@ -27,6 +32,7 @@ class ApiFetch {
                     // "X-Mitigation": document.querySelector("meta[name='token']").getAttribute("content"),
                     ...this.headers
                 },
+                signal: this.abortController.signal
             }
             if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
             let result = null;
@@ -47,8 +53,13 @@ class ApiFetch {
             
             this.execPlugins("after", this.result, result);
             resolve(this.result);
+            this.reject = null;
             return this.result;
         })
+    }
+
+    async abort() {
+        this.abortController.abort();
     }
 
     async get() {
