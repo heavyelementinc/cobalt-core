@@ -1,6 +1,7 @@
 <?php
 
 namespace Cobalt\Settings;
+use Cobalt\Settings\Exceptions\AliasMissingDependency;
 
 class CobaltSetting {
 
