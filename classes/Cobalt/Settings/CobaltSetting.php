@@ -27,14 +27,17 @@ class CobaltSetting {
 
     function get_value() {
         $value = $this->defaultValue;
-        if(isset($this->user_modified_settings[$this->name])) return $this->user_modified_settings[$this->name];
+        if(isset($this->user_modified_settings[$this->name])) {
+            if(key_exists("public", $this->directives)) $this->directive_public($this->user_modified_settings[$this->name]);
+            return $this->user_modified_settings[$this->name];
+        }
+
         $mutant = $value;
         foreach($this->directives as $directive => $data) {
             if(!method_exists($this, "directive_$directive")) continue;
 
             $mutant = $this->{"directive_$directive"}($mutant, $data);
         }
-
         return $mutant;
     }
 
@@ -59,7 +62,8 @@ class CobaltSetting {
         if(!$value) return $value;
         if($this->user_modified_settings[$data]) return $this->user_modified_settings[$data];
         if($this->allSettings[$data]) return $this->allSettings[$data];
-        throw new AliasMissingDependency("Setting $this->name depends on $data but it's not yet defined");
+        return $value;
+        // throw new AliasMissingDependency("Setting $this->name depends on $data but it's not yet defined");
     }
 
     function directive_prepend(array|null $value, array $data) {
