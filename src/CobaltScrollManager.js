@@ -260,3 +260,4 @@ class CobaltScrollManager {
 }
 
 if(app("enable_default_parallax")) window.parallax = new CobaltScrollManager();
+else document.body.classList.add("parallax-disabled");
