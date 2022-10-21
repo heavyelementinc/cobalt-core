@@ -23,7 +23,7 @@ session_start();
 
 // Let's make sure we're running a suppoted version of PHP (since we use 
 // the not-insane array syntax and the spread "..." syntax)
-if (!version_compare(PHP_VERSION, "8.1", ">=")) die("You must be running PHP version 8.1.0 or greater");
+if (!version_compare(PHP_VERSION, "8.1", ">=")) die("You must be running PHP version 8.1.0 or greater (".PHP_VERSION.")");
 
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "2.0");

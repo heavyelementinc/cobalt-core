@@ -99,6 +99,7 @@ class Settings extends \Drivers\Database {
         $this->__user_modified_settings = $this->fetchModifiedSettings();
 
         $this->instances = [];
+        $this->waitingForDependencies = [];
 
         // Process each setting and get the value
         $toCache = [];
@@ -116,7 +117,19 @@ class Settings extends \Drivers\Database {
             if(!$setting) $setting = new CobaltSetting($name, $this->normalizeSetting($name, $definition), $this->__user_modified_settings, $this->__settings, $this, $toCache);
 
             $this->instances[$name] = $setting;
-            $toCache[$name] = $setting->get_value();
+            try{
+                $toCache[$name] = $setting->get_value();
+            } catch (AliasMissingDependency $e) {
+                $this->waitingForDependencies[$name] = $setting;
+            }
+        }
+
+        foreach($this->waitingForDependencies as $name => $setting) {
+            try{
+                $toCache[$name] = $setting->get_value();
+            } catch (AliasMissingDependency $e) {
+                die($e);
+            }
         }
 
         $toCache = array_merge($toCache, $this->bootstrapManifestData());
