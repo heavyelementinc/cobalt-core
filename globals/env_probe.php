@@ -11,9 +11,37 @@ define("__COBALT_VERSION", "2.0");
 
 // The following are PHP dependencies
 $dependencies = [
-    "gd",          "curl",       "dom",      "json",     "mongodb",
-    "mbstring",    "bcmath",     "libxml",   "mcrypt",
-    "openssl",     "protobuf",   "yaml",
+    "dom",
+    "mongodb",
+    "libxml",
+    "mcrypt",
+    "protobuf",
+    "yaml",
+    "standard",
+    "date",
+    "pcre",
+    "json",
+    "exif",
+    "gd",
+    "fileinfo",
+    "filter",
+    "SPL",
+    "ctype",
+    "readline",
+    "apcu",
+    "mbstring",
+    "session",
+    "hash",
+    "imap",
+    "intl",
+    "openssl",
+    "tokenizer",
+    "zlib",
+    "gmp",
+    "bcmath",
+    "igbinary",
+    "curl",
+
     // "ERROR FOR TESTING PURPOSES"
 ];
 
@@ -25,3 +53,27 @@ foreach($dependencies as $dependency) {
 }
 
 if($missing !== "") die("Your environment is misconfigured! Please install the following required packages.<br>$missing");
+
+$required_functions = [
+    'imagecreatefromjpeg',
+    'imagejpeg',
+    'imagecreatefrompng',
+    'imagepng',
+    'imagecreatefromgif',
+    'imagegif',
+    'imagecreatefromwebp',
+    'imagewebp',
+    'imagecreatefromavif',
+    'imageavif',
+    'apache_request_headers',
+    // 'ERROR FOR TESTING PURPOSES'
+];
+
+$missing = "";
+
+foreach($required_functions as $funct) {
+    if(!is_callable($funct)) $missing .= " $funct";
+}
+
+if($missing !== "") die("Your runtime is missing the following required functions!<br>$missing");
+
