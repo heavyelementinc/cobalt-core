@@ -17,11 +17,11 @@ It was created by [Heavy Element, Inc](https://heavyelement.io).
 # Getting Started
 
 ## Preparation
-To get started with Cobalt, you'll need at least PHP version 7.4 and MongoDB on your host system. 
+To get started with Cobalt, you'll need at least PHP version 8.1 and MongoDB on your host system. 
 
 ### On Ubuntu
 ```shell
-  sudo apt install apache2 php7.4 php-mongodb
+  sudo apt install apache2 php8.1 php-mongodb
   # Depending on your setup, you might also want MongoDB set up on your system
   sudo a2enmod rewrite
 ```
@@ -60,12 +60,4 @@ Your new project will be created based on the answers to the CLI's questions. Fo
    * **NOTE:** if you do not specify one or more of the above items, you will be prompted for them
 
 ## MongoDB
-If you have enabled MongoDB authentication you'll want to provide your username and password in `app_directory/ignored/settings.json`. You *can* add these to your `app_directory/private/config/settings.json` but this is **not** recommended.
-
-If you're running Cobalt in a Docker container, you can specify your MongoDB connection information as an environment variable.
-
-```shell
-COBALT_MONGODB=mongodb:\\localhost:27017
-# OR
-COBALT_MONGODB=mongodb:\\username:password@localhost:27017
-```
+If you have enabled MongoDB authentication you'll want to provide your username, password, and other details in `__APP_ROOT__/config/config.php`.
