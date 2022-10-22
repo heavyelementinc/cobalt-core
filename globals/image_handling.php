@@ -27,10 +27,10 @@ const IMAGE_HANDLERS = [
         'load' => 'imagecreatefromwebp',
         'save' => 'imagewebp',
     ],
-    // IMAGETYPE_AVIF => [
-    //     'load' => 'imagecreatefromavif',
-    //     'save' => 'imageavif'
-    // ],
+    IMAGETYPE_AVIF => [
+        'load' => 'imagecreatefromavif',
+        'save' => 'imageavif'
+    ],
 ];
 
 /**
