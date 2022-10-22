@@ -41,7 +41,6 @@ $dependencies = [
     "bcmath",
     "igbinary",
     "curl",
-
     // "ERROR FOR TESTING PURPOSES"
 ];
 
@@ -65,6 +64,20 @@ $required_functions = [
     'imagewebp',
     'imagecreatefromavif',
     'imageavif',
+
+    "exif_imagetype",
+    "exif_read_data",
+    "imageflip",
+    "imagerotate",
+    "imagesx",
+    "imagesy",
+    "imagecreatetruecolor",
+    "imagecolortransparent",
+    "imagecolorallocate",
+    "imagealphablending",
+    "imagesavealpha",
+    "imagecopyresampled",
+    
     'apache_request_headers',
     // 'ERROR FOR TESTING PURPOSES'
 ];
