@@ -1,4 +1,7 @@
 <?php
+
+use Exceptions\ImageThumbnailException;
+
 /**
  * @author https://gist.github.com/pqina/
  * https://gist.github.com/pqina/7a42bf0833d988dd81d3c9438009da21
@@ -52,6 +55,7 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
 
     // if no valid type or no handler found -> exit
     if (!$type || !IMAGE_HANDLERS[$type]) {
+        throw new ImageThumbnailException("Invalid image type: '$type'");
         return null;
     }
 
@@ -60,6 +64,7 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
 
     // no image found at supplied location -> exit
     if (!$image) {
+        throw new ImageThumbnailException("Invalid image supplied for thumbnailing");
         return null;
     }
 
@@ -127,6 +132,8 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
 
     // create duplicate image based on calculated target size
     $thumbnail = imagecreatetruecolor($targetWidth, $targetHeight);
+    
+    if($thumbnail === false) throw new ImageThumbnailException("There was an error creating a true color thumbnail");
 
     // set transparency options for GIFs and PNGs
     if ($type == IMAGETYPE_GIF || $type == IMAGETYPE_PNG) {
@@ -145,13 +152,14 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
     }
 
     // copy entire source image to duplicate image and resize
-    imagecopyresampled(
+    $resampled = imagecopyresampled(
         $thumbnail,
         $image,
         0, 0, 0, 0,
         $targetWidth, $targetHeight,
         $width, $height
     );
+    if(!$resampled) throw new ImageThumbnailException("Failed to copy resampled image.");
 
 
     // 3. Save the $thumbnail to disk
@@ -161,16 +169,21 @@ function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
     
     // Workaround for the odd imagegif function only accepting two parameters and no more.
     if(IMAGE_HANDLERS[$type]['save'] === "imagegif") {
-        return call_user_func(
+        $result = call_user_func(
             IMAGE_HANDLERS[$type]['save'],
             $thumbnail,
             $dest);
+    } else { 
+        // save the duplicate version of the image to disk
+        $result = call_user_func(
+            IMAGE_HANDLERS[$type]['save'],
+            $thumbnail,
+            $dest,
+            IMAGE_HANDLERS[$type]['quality']
+        );
     }
-    // save the duplicate version of the image to disk
-    return call_user_func(
-        IMAGE_HANDLERS[$type]['save'],
-        $thumbnail,
-        $dest,
-        IMAGE_HANDLERS[$type]['quality']
-    );
+
+    if(!$result) throw new ImageThumbnailException("Failed to write thumbnail!");
+
+    return $result;
 }
