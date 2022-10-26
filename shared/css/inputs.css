@@ -16,7 +16,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input, textarea {
+input-wrapper, input, textarea, input-password {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -25,19 +25,20 @@ input-wrapper, input, textarea {
   color: var(--project-color-input-text-color);
 }
 
-  input-wrapper input {
+  :is(input-wrapper, input-password) input {
     border: unset;
     background: unset;
     padding: 0;
     border-radius: unset;
   }
 
-  input-wrapper input:focus {
+  :is(input-wrapper, input-password) input:focus {
     border: unset;
   }
 
   input[invalid],
   textarea[invalid],
+  :is(input-wrapper, input-password) input[invalid],
   input-array[invalid] {
     border: 1px solid var(--project-color-input-invalid-border);
     background: var(--project-color-input-invalid-bg);
@@ -72,7 +73,7 @@ input-wrapper, input, textarea {
     }
   }
 
-  input-wrapper:focus-within,input:focus{
+  :is(input-wrapper, input-password):focus-within,input:focus{
     border: 1px solid var(--project-color-input-border-focus);
   }
 
@@ -596,3 +597,39 @@ form.cobalt-query-controls button {
 form.cobalt-query-controls button:disabled {
   opacity: .2;
 }
+
+input-password {
+  display: flex;
+  padding: unset;
+  flex-grow: 1;
+}
+
+input-password > input {
+  padding: .2rem;
+  margin: 0;
+  width:100%;
+}
+
+input-password > button {
+  background: transparent;
+  border: unset;
+  padding: 0 .4rem;
+}
+
+input-password > button:hover {
+  background: transparent;
+}
+
+input-password > input + button:before {
+  content: "-";
+  color: var(--project-color-input-border-nofocus);
+}
+
+input-password > button:hover:before{
+  color: black;
+}
+
+input-password > input[type='password'] + button:before {
+  content: "o";
+}
+

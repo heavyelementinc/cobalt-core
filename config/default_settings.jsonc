@@ -283,7 +283,7 @@
         "meta": {
             "group": "Mail",
             "name": "SMTP Password",
-            "type": "input"
+            "type": "password"
         },
         "validate": {
             "confirm": "Are you sure you want to update this password? Doing so will overwrite your current password!"
