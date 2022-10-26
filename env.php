@@ -64,10 +64,6 @@ require_once $composer;
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload", true);
 
-$app_env = __APP_ROOT__ . "/private/app_env.php";
-if (file_exists($app_env)) require_once $app_env;
-
-
 try {
     // Load our ACTIVE plugins.
     require_once __ENV_ROOT__ . "/globals/plugins.php";

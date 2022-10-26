@@ -330,6 +330,7 @@ class InputClass_radiogroup extends InputClass_default {
 
 var classMap = {
     default: InputClass_default,
+    password: InputClass_default,
     check: InputClass_checkbox,
     checkbox: InputClass_checkbox,
     switch: InputClass_switch,

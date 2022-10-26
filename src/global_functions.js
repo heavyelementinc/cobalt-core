@@ -1,5 +1,5 @@
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-tag-select[name], radio-group";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);

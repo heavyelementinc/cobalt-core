@@ -6,6 +6,7 @@
             "components/autocomplete-interface.js",
             "components/input-array.js",
             "components/autocomplete.js",
+            "components/input-password.js",
             "components/cobalt-carousel.js",
             "components/tag-select.js",
             "components/fs-listing.js",
