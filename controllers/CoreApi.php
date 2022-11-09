@@ -1,6 +1,8 @@
 <?php
 
+use Cobalt\Notifications\Notification1_0Schema;
 use Cobalt\Payments\PaymentGateway;
+use Contact\ContactManager;
 use \Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use \Exceptions\HTTP\ServiceUnavailable;
@@ -126,40 +128,7 @@ class CoreApi extends \Controllers\Pages {
     //     ]);
     // }
 
-    function contact() {
-
-        $validator = new \Contact\ContactFormValidator();
-
-        $mutant = $validator->validate($_POST);
-        // if (empty($_POST['phone']) && empty($_POST['email'])) {
-        //     $error = "";
-        //     if (key_exists('phone', $_POST)) $error .= " or phone number (or both)";
-        //     throw new BadRequest("You must specify an email$error");
-        // }
-
-        // if (empty($_POST['name']))
-        //     throw new BadRequest("You need to provide your name");
-
-        $email = new SendMail();
-        $email->set_vars(array_merge(
-            $mutant,
-            ['POST' => $_POST],
-            [
-                "ip" => $_SERVER['REMOTE_ADDR'],
-                "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"]
-            ]
-        ));
-        $email->set_body_template("/emails/contact-form.html");
-        try {
-            $subject = "New contact form submission";
-            if (key_exists("subject", $_POST)) $subject = "Webform: \"" . strip_tags($_POST['subject'] . "\"");
-            $email->send(app("API_contact_form_recipient"), $subject);
-        } catch (Exception $e) {
-            throw new ServiceUnavailable("There was an error on our end.");
-        }
-        return $mutant;
-    }
-
+    
     function modify_plugin_state($name) {
         if (!is_bool($_POST['enabled'])) throw new BadRequest("State must be boolean");
         $GLOBALS['plugin_manager']->change_plugin_state($name, $_POST['enabled']);

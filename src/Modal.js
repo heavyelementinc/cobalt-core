@@ -40,6 +40,7 @@ class Modal {
         parentClass = "", // The container's HTML classes
         body = "", // The body content of the modal window
         url = "", // A URL to use to download the modal content of a page
+        type = "",
         chrome = {}, // A list of buttons and callbacks we want to include or a non-true value for no buttons
         close_btn = true, // Include a close '✖️' button in the top right corner of the screen
         dismiss_on_router_event = true, // ADD THIS FUNCTIONALITY
@@ -67,22 +68,10 @@ class Modal {
         this.lockedViewportClass = "scroll-locked";
         this.zIndex = zIndex;
         this.event = event;
+        this.type = type;
 
-        // Our default button configuration will be merged with whatever the
-        // user provided
-        this.defaults = {
-            cancel: {
-                label: "Cancel",
-                dangerous: false,
-                callback: async (event) => true, // If true, close the modal
-            },
-            okay: {
-                label: "Okay",
-                dangerous: false,
-                callback: async (event) => true, // If true, close the modal,
-                // color: "var(--project-progress)"
-            },
-        }
+
+        this.chooseButtonsAndLayout()
 
         this.pageTitle = document.title;
         this.modalTitle = pageTitle;
@@ -381,5 +370,38 @@ class Modal {
         this.container.append(next);
     }
 
+    chooseButtonsAndLayout() {
+        // Our default button configuration will be merged with whatever the
+        // user provided
+        const buttons = {
+            default: {
+                cancel: {
+                    label: "Cancel",
+                    dangerous: false,
+                    callback: async (event) => true, // If true, close the modal
+                },
+                okay: {
+                    label: "Okay",
+                    dangerous: false,
+                    callback: async (event) => true, // If true, close the modal,
+                    // color: "var(--project-progress)"
+                },
+            }
+        }
+
+        // const body = {
+        //     default: 
+        // }
+
+        let buttonSelector = "default";
+
+        switch(this.type) {
+            default:
+                buttonSelector = "default";
+                break;
+        }
+
+        this.defaults = buttons[buttonSelector];
+    }
 
 }

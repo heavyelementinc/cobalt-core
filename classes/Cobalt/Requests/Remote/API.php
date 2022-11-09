@@ -20,6 +20,7 @@ abstract class API extends \Drivers\Database implements APICall {
 
     function __construct() {
         parent::__construct();
+        $this->token = $this->authorizationToken();
     }
 
     abstract function getIfaceName():string;
@@ -27,6 +28,8 @@ abstract class API extends \Drivers\Database implements APICall {
     abstract function getPaginationToken():array;
 
     abstract function refreshTokenCallback($result):string;
+
+    abstract function testAPI():bool;
 
     /**
      * Must return an 'icon' and a 'name' value
@@ -82,14 +85,17 @@ abstract class API extends \Drivers\Database implements APICall {
      * @return object 
      * @throws Exception 
      */
-    public function authorizationToken($query = null) {
+    public function authorizationToken($query = null, $document = false) {
         if(!$query) $query = $this->getDefaultTokenQuery();
 
         $this->doc = $this->findOne($query);
 
+        if($document === true) return $this->doc;
+
         $iface = $this->getInterface();
         if(is_iterable($this->doc)) $this->doc = iterator_to_array($this->doc);
         $tk = new $iface($this->doc,$this->mode);
+
         
         /** Now we figure out what to do with this stuff */
         switch(strtolower($tk->type)) {
@@ -146,22 +152,51 @@ abstract class API extends \Drivers\Database implements APICall {
         return $namespace . $exploded[count($exploded) - 1];
     }
 
-    final private function fetch(string $url, string $method, mixed $body) {
+    final private function fetch(string $url, string $method, mixed $body = null) {
         $this->authorizationToken();
-
+        $this->addRequestHeaders([
+            "Content-Type" => $this->token->encoding
+        ]);
         $data = [
             'headers' => $this->request_headers
         ];
 
         $mutant_url = $url;
+        // Add request parameters:
         if(!empty($this->request_params)) $mutant_url = "$mutant_url?".http_build_query($this->request_params);
-        if($method !== "get") $data['body'] = $this->request_body;
-        $client   = new Guzzle();
+        
+        // Import our request body
+        if($body || !empty($this->request_body)) {
+            $data['body'] = $body ?? $this->request_body;
+            if(gettype($data['body']) !== "string") {
+                switch($this->token->encoding) {
+                    case "form-data":
+                    case "multipart/form-data":
+                    case "application/x-www-form-urlencoded":
+                    case "text/plain":
+                        $data['body'] = http_build_query($data['body']);
+                        break;
+                    case "application/json":
+                    case "application/x-javascript":
+                    case "text/javascript":
+                    case "text/x-javascript":
+                    case "text/x-json":
+                    default:
+                        $data['body'] = json_encode($data['body']);
+                        break;
+                }
+            }
+        }
+        
+        if($this->sanityCheck($url, $method, $body));
+
+        $client = new Guzzle();
         try{
             $response = $client->request($method, $mutant_url, $data);
         } catch (GuzzleException $e) {
             $error_message = $e->getResponse()->getBody()->getContents();
-            if(is_root()) $e = $error_message;
+            // if(is_root()) 
+            throw new HTTPException($error_message);
             throw new HTTPException($e);
         }
         $this->parseHeaders($response->getHeaders());
@@ -206,11 +241,16 @@ abstract class API extends \Drivers\Database implements APICall {
 
         if(preg_match("/json/",$contentType[0])) {
             return json_decode((string)$body);
-        } else if($contentType[0] === "application/x-www-form-urlencoded"){
+        } else { //} if($contentType[0] === "application/x-www-form-urlencoded"){
             $result = [];
             parse_str((string)$body,$result);
             return $result;
         }
         return (string)$body;
+    }
+
+    function sanityCheck($url, $method, $body = null) {
+        // if($this->)
+        return true;
     }
 }

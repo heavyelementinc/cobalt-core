@@ -12,6 +12,10 @@ class YouTube extends API {
         return [];
     }
 
+    public function testAPI(): bool {
+        return true;
+    }
+
     function getIfaceName():string {
         return "\\Cobalt\\Requests\\Tokens\\YouTube";
     }
@@ -40,8 +44,9 @@ class YouTube extends API {
 
     static function getMetadata(): array {
         return [
-            'icon' => "<ion-icon name='logo-youtube'></ion-icon>",
-            'name' => "YouTube"
+            'icon' => "<i name='youtube'></i>",
+            'name' => "YouTube",
+            'view' => '/admin/api/youtube.html'
         ];
     }
 }

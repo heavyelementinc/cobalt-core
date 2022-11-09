@@ -28,6 +28,7 @@ message-item{
     border-radius: 4px;
     box-shadow: 5px 0px 20px rgba(0,0,0,.3);
     --height: 100px;
+    --min-height: 100px;
     height: var(--height);
     --margins: 15px;
     margin: var(--margins);
@@ -36,9 +37,11 @@ message-item{
 
     message-item ion-icon{
         height: var(--height);
+        min-height: var(--min-height);
         font-size: 3rem;
         white-space: nowrap;
-        width: 15%;
+        min-width: 17%;
+        flex-grow: .17;
         box-sizing: border-box;
         padding: 0 calc(var(--margins) / 2);
         display: flex;
@@ -50,14 +53,24 @@ message-item{
     message-item section{
         padding: calc(var(--margins) / 2) 0;
         height: var(--height);
-        flex-grow: 1;
+        min-height: var(--min-height);
+        max-width: calc(100 - 27%);
+        flex-grow: calc(1 - .27);
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
     }
 
     message-item button{
         height: 100%;
-        width: 15%;
-        background: transparent;
+        min-height: var(--min-height);
+        min-width: 10%;
+        background-color: var(--project-color-table-border);
+        color: var(--project-color-input-border-nofocus);
         border: none;
+        border-left: 1px solid var(--project-color-input-border-nofocus);
+        padding: 0;
+        flex-grow: .1;
     }
 
     .status-message--opening {
@@ -135,3 +148,45 @@ message-item{
     }
     
 }
+
+message-item[name="success"] ion-icon {
+    color: var(--project-color-active);
+}
+
+:is(message-item[name="error"],message-item.status-message--error) {
+    background-color: var(--project-color-input-invalid-border);
+    color: white;
+}
+
+:is(message-item[name="error"],message-item.status-message--error) button {
+    border-left: rgba(255,255,255,.8);
+    color: white;
+}
+
+:is(message-item[name="error"],message-item.status-message--error) button:hover {
+    background: white;
+    color:var(--project-color-input-invalid-border);
+}
+
+:is(message-item[name="error"],message-item.status-message--error) ion-icon {
+    color: white;
+}
+
+message-item[name="pizza"] {
+    background-color: #facd8e;
+    color: black;
+    border: 3px solid #f8efd9;
+}
+
+    message-item[name="pizza"] ion-icon {
+        color: #b52a04;
+    }
+
+    message-item[name="pizza"] button {
+        border-left: inherit;
+        color: #f8efd9;
+    }
+
+    message-item[name="pizza"] button:hover {
+        background: #fb8b23;
+    }

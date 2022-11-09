@@ -18,8 +18,12 @@ class Stripe extends API {
 
     public static function getMetadata(): array {
         return [
-            'icon' => "<ion-icon name='logo-stripe'></ion-icon>",
+            'icon' => "<i name='credit-card-settings-outline'></i>",
             'name' => "Stripe"
         ];
+    }
+
+    public function testAPI(): bool {
+        return true;
     }
 }

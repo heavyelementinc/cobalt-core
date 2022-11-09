@@ -89,5 +89,12 @@
         "dangerous": true,
         "default": false,
         "ring": 1
+    },
+    "CRUDControllerPermission": {
+        "group": "Users",
+        "label": "Allow the user to access default CRUD endpoints",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
     }
 }

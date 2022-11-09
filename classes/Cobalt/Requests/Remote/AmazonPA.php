@@ -12,6 +12,10 @@ class AmazonPA extends API {
         return [];
     }
 
+    public function testAPI(): bool {
+        return true;
+    }
+
     function getIfaceName():string {
         return "\\Cobalt\\Requests\\Tokens\\AmazonPA";
     }

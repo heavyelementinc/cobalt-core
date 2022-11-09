@@ -3,6 +3,7 @@
 namespace Validation;
 
 use Auth\UserCRUD;
+use Auth\UserSchema;
 use DOMDocument;
 use Exception;
 use Parsedown;
@@ -424,5 +425,32 @@ abstract class NormalizationHelpers {
             $mutant = substr($mutant, 0, $pos[$word_limit]);
         }
         return trim($mutant);
+    }
+
+    /** Will return a valid User ID for an existing user or false
+     * @param mixed $id the ID to be validated
+     * @return false on failure or an ObjectId
+    */
+    function user_id(mixed $id):false|\MongoDB\BSON\ObjectId {
+        try {
+            $crud = new UserCRUD();
+            $_id = $crud->__id($id);
+        } catch (\Exception $e) {
+            return false;
+        }
+        $result = $crud->findOne(['_id' => $_id]);
+        if($result) return $_id;
+        return false;
+    }
+
+    /**
+     * 
+     */
+    function user($id):?UserSchema {
+        $crud = new UserCRUD();
+        $_id = $crud->__id($id);
+        $user = $crud->findOne(['_id' => $_id]);
+        if($user) return new UserSchema($user);
+        return null;
     }
 }

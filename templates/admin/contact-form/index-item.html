@@ -1,0 +1,14 @@
+<flex-row class="read-status--{{doc.read_status.display}}">
+    <flex-cell>
+        <a href='/admin/contact-form/{{doc._id}}'>{{doc.name}}</a>
+    </flex-cell>
+    <flex-cell>
+        <a href='/admin/contact-form/{{doc._id}}'>{{doc.date.display}}</a>
+    </flex-cell>
+    <flex-cell>
+        <code>{{doc.email}}</code>
+    </flex-cell>
+    <flex-cell>
+        <async-button class="toggle-read-status" method="PUT" action="/api/v1/contact/read-status/{{doc._id}}" value="{{doc.read_status_inverted}}">{{doc.read_status_inverted.display}}</async-button>
+    </flex-cell>
+</flex-row>

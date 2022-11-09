@@ -406,9 +406,11 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
  * }
  */
 function get_offset(element) {
-    let parent = element.offsetParent,
+    let parent = element,
         offsetParentX = 0,
         offsetParentY = 0,
+        scrollX = element.scrollLeft,
+        scrollY = element.scrollTop,
         zIndex = 0;
 
     // Just use a while loop.
@@ -419,9 +421,20 @@ function get_offset(element) {
         parent = parent.offsetParent;
     }
 
+    parent = element;
+
+    while (parent) {
+        if(parent === document.body.parentNode) break;
+        scrollX += parent.scrollLeft || 0; 
+        scrollY += parent.scrollTop || 0;
+        parent = parent.parentNode;
+    }
+
     // Get the values for the actual element
-    let x = element.offsetLeft + offsetParentX,
-        y = element.offsetTop + offsetParentY,
+    let xNoScroll = offsetParentX,
+        yNoScroll = offsetParentY,   
+        x = xNoScroll - scrollX,
+        y = yNoScroll - scrollY,
         w = element.offsetWidth,
         h = element.offsetHeight,
         xPrime = element.offsetLeft,
@@ -429,7 +442,7 @@ function get_offset(element) {
         right = x + w,
         bottom = y + h;
 
-    return { x, y, w, h, right, bottom, xPrime, yPrime, zIndex }
+    return { x, y, w, h, right, bottom, xPrime, yPrime, zIndex, xNoScroll, yNoScroll };
 }
 
 /** Binary Contrast */
@@ -573,4 +586,59 @@ function reflow() {
     return new Promise((resolve) => {
         return resolve(window.scrollX);
     });
+}
+
+/**
+ * Will convert units to pixels or return the same string
+ */
+ function cssToPixel( cssValue, target = null, error = true ) {
+
+    target = target || document.body;
+
+    const supportedUnits = {
+
+        // Absolute sizes
+        'px': value => value,
+        'cm': value => value * 38,
+        'mm': value => value * 3.8,
+        'q': value => value * 0.95,
+        'in': value => value * 96,
+        'pc': value => value * 16,
+        'pt': value => value * 1.333333,
+
+        // Relative sizes
+        'rem': value => value * parseFloat( getComputedStyle( document.documentElement ).fontSize ),
+        'em': value => value * parseFloat( getComputedStyle( target ).fontSize ),
+        'vw': value => value / 100 * window.innerWidth,
+        'vh': value => value / 100 * window.innerHeight,
+
+        // Times
+        'ms': value => value,
+        's': value => value * 1000,
+
+        // Angles
+        'deg': value => value,
+        'rad': value => value * ( 180 / Math.PI ),
+        'grad': value => value * ( 180 / 200 ),
+        'turn': value => value * 360
+
+    };
+
+    // Match positive and negative numbers including decimals with following unit
+    const pattern = new RegExp( `^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${ Object.keys( supportedUnits ).join( '|' ) })$`, 'i' );
+
+    // If is a match, return example: [ "-2.75rem", "-2.75", "rem" ]
+    const matches = String.prototype.toString.apply( cssValue ).trim().match( pattern );
+
+    if ( matches ) {
+        const value = Number( matches[ 1 ] );
+        const unit = matches[ 2 ].toLocaleLowerCase();
+        
+        // Sanity check, make sure unit conversion function exists
+        if ( unit in supportedUnits ) {
+            return Math.round(supportedUnits[unit]( value ) * 10) / 10;
+        } else if (error) throw Error("The value supplied cannot be converted");
+    }
+
+    return cssValue;
 }

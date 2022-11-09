@@ -1,20 +1,30 @@
 class StatusMessage {
-    constructor({ message, id = null, icon = "", duration = 2000, action = e => true, close = true, type = "status" }) {
+    constructor({ message, id = null, icon = "", duration = 0, action = e => true, close = true, type = "status" }) {
         this.message = message;
-        this.icon = icon || "information-circle-outline";
+        this.icon = this.decideIcon(icon, type);
+        this.type = type;
         this.id = id || random_string();
         this.action = action;
         this.closeable = close;
-        this.type = type;
+        this.duration = duration;
+        this.classes = {
+            StatusMessage: "status-message--status",
+            StatusError: "status-message--error",
+        };
 
         // Let's now set this message up to be added to the MessageHandler class
         this.element = window.messageHandler.message(this);
+
+        this.updateClasses();
     }
 
     /** @todo add action event updating */
-    async update(message, icon = this.icon, action = this.action) {
+    async update(message, icon = this.icon, action = this.action, type = this.type) {
         const section = this.element.querySelector("section");
         const ionIcon = this.element.querySelector("ion-icon");
+        this.element.setAttribute("name", type);
+
+        this.updateClasses();
         const animClass = "status-message--update";
         section.innerHTML = message;
         ionIcon.name = icon;
@@ -25,11 +35,70 @@ class StatusMessage {
     async close() {
         window.messageHandler.dismiss({ id: this.id }, {}, false);
     }
+
+    decideIcon(icon, type) {
+        if(icon) return icon;
+        switch(type) {
+            case "success":
+                return "checkmark-circle-outline";
+            case "heartbeat":
+                return "pulse-outline";
+            case "money":
+            case 402:
+                return "cash-outline";
+            case "bookmark":
+                return "bookmark-outline";
+            case "pizza":
+                return "pizza-outline";
+            case "teapot":
+            case 418:
+                return "cafe-outline";
+            case "fire":
+            case 451:
+                return "flame-outline";
+            case "update":
+                return "refresh-circle-outline";
+            case "email":
+                return "mail-outline";
+            case "notification":
+            case "notify":
+                return "notifications-outline";
+            case "chat":
+            case "text":
+            case "message":
+                return "chatbubbles-outline";
+            case "auth":
+            case "authentication":
+            case "user":
+            case 401:
+                return "finger-print-outline";
+            case "fail":
+            case "missing":
+            case 400:
+            case type >= 403 && type <= 499:
+                return "ban-outline";
+            case type >= 500 && type <= 599:
+            case "error":
+                return "warning-outline";
+            case "status":
+            default:
+                return "information-circle-outline";
+        }
+    }
+
+    updateClasses() {
+        let classes = "";
+
+        if(this.element.classList) {
+            this.element.classList.remove(...Object.values(this.classes));
+            this.element.classList.add(this.classes[this.constructor.name]);
+        }
+    }
 }
 
 class StatusError extends StatusMessage {
-    constructor({ message, id, icon = null, action = e => true }) {
-        super({ message, id, icon: icon || `warning-outline`, action, type: "error"});
+    constructor({ message, id, icon = null, action = e => true, type = "error" }) {
+        super({ message, id, icon, action, type});
     }
 }
 
@@ -42,7 +111,8 @@ class MessageHandler {
 
     message(details) {
         const message = document.createElement("message-item");
-        message.classList.add(`status-message--${details.type}`);
+        message.setAttribute("name",details.type);
+        message.classList.add(`status-message`);
         message.setAttribute("data-id",details.id);
         message.innerHTML = `<ion-icon name='${details.icon}'></ion-icon><section>${details.message}</section>`;
         let close_btn = document.createElement("button");
@@ -50,7 +120,7 @@ class MessageHandler {
         // close_btn.addEventListener()
         if (details.closeable) message.appendChild(close_btn);
 
-        message.addEventListener("click", event => this.dismiss(details, event, true));
+        // message.addEventListener("click", event => this.dismiss(details, event, true));
         close_btn.addEventListener("click", event => {
             event.stopPropagation();
             this.dismiss(details, event, false)
@@ -61,6 +131,7 @@ class MessageHandler {
                 details.message || this.messageQueue[details.id].message || "",
                 details.icon || this.messageQueue[details.id].icon || "",
                 details.action || this.messageQueue[details.id].action || function () {return true},
+                details.type || this.messageQueue[details.id].type || "status",
             );
         }
 
@@ -68,6 +139,8 @@ class MessageHandler {
 
         this.messageQueue[details.id] = details;
         this.container.appendChild(message);
+
+        message.style.setProperty("--height", `${get_offset(message).h || 100}px`);
 
         this.spawn(message);
 

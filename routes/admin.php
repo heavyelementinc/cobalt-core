@@ -1,5 +1,6 @@
 <?php
 
+use Contact\ContactManager;
 use Routes\Route;
 
 Route::get("/?", "CoreAdmin@index", [
@@ -10,31 +11,54 @@ Route::get("/?", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
+
+if(__APP_SETTINGS__['Posts']['default_enabled']) {
+    Route::get("/posts/", "Posts@admin_index",[
+        'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
+        'navigation' => ['admin_panel'],
+    ]);
+    Route::get("/posts/{id}?", "Posts@edit",[
+        'handler' => "core/posts.js",
+    ]);
+}
+
+
+
+
+
+/** Control Panel and Settings Editor */
+
+Route::get("/settings/", "CoreAdmin@settings_index");
+
 Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
     'name' => "App Settings",
     'anchor' => [
         'name' => 'App Settings',
-        'icon' => "settings-outline"
+        'icon' => "tune-vertical"
     ],
     'navigation' => ['admin_basic_panel'],
     'permission' => "Auth_modify_cobalt_settings"
 ]);
 
+/** CONTROL PANEL ITEMS */
+
 if (app('Auth_logins_enabled')) {
-    /** User management interface */
-    Route::get("/create-user", "CoreAdmin@create_user", [
-        'handler' => 'core/create_user.js',
-        'permission' => 'Auth_allow_creating_users'
-    ]);
+
     Route::get("/users/", "CoreAdmin@list_all_users", [
         'name' => "Users",
         'handler' => "core/user_panel.js",
         'anchor' => [
             'name' => 'Users',
-            'icon' => "people-outline"
+            'icon' => "account-multiple-plus-outline"
         ],
         'navigation' => ['settings_panel']
     ]);
+
+    Route::get("/create-user", "CoreAdmin@create_user", [
+        'handler' => 'core/create_user.js',
+        'permission' => 'Auth_allow_creating_users'
+    ]);
+
     Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
         'handler' => 'core/user_manager.js',
         'permission' => "Auth_allow_editing_users"
@@ -50,9 +74,10 @@ if (app("CobaltEvents_enabled")) {
         'permission' => "CobaltEvents_crud_events",
         'anchor' => [
             'name' => 'Event Manager',
-            'href' => '/cobalt-events/'
+            'href' => '/cobalt-events/',
+            'icon' => 'information-outline'
         ],
-        'navigation' => ['admin_panel']
+        'navigation' => ['public_settings_panel']
     ]);
 }
 
@@ -61,7 +86,7 @@ if (app('Plugin_enable_plugin_support')) {
         'permission' => 'Plugins_allow_management',
         'anchor' => [
             'name' => "Plugins",
-            'icon' => 'extension-puzzle-outline'
+            'icon' => 'puzzle'
         ],
         'navigation' => ['settings_panel']
     ]);
@@ -69,38 +94,25 @@ if (app('Plugin_enable_plugin_support')) {
     Route::get("/plugins/{name}", "CoreAdmin@plugin_individual_manager", ['permission' => 'Plugins_allow_management']);
 }
 
-// if (has_permission("API_manage_keys")) {
 Route::get("/settings/api-keys/", "APIManagement@index",[
     'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "API Keys",
-        'icon' => 'key-outline'
+        'icon' => 'api'
     ],
-    'navigation' => ['settings_panel']
+    'navigation' => ['admin_basic_panel']
 ]);
 
 Route::get('/settings/api-keys/{name}', "APIManagement@key",[
     'permission' => 'API_manage_keys',
 ]);
-// }
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
-    Route::get("/posts/", "Posts@admin_index",[
-        'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
-        'navigation' => ['admin_panel'],
-    ]);
-    Route::get("/posts/{id}?", "Posts@edit",[
-        'handler' => "core/posts.js",
-    ]);
-}
-
-Route::get("/settings/", "CoreAdmin@settings_index");
 
 Route::get("/settings/cron", "CoreAdmin@cron_panel",[
     // 'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "Scheduled Jobs",
-        'icon' => 'time-outline'
+        'icon' => 'clock-time-eight-outline'
     ],
     'navigation' => ['settings_panel']
 ]);
@@ -109,7 +121,22 @@ Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
     // 'permission' => 'API_manage_keys',
     'anchor' => [
         'name' => "Payments",
-        'icon' => 'card-outline'
+        'icon' => 'credit-card-fast-outline'
     ],
     'navigation' => ['admin_basic_panel']
 ]);
+
+if(app("Contact_form_interface") === "panel") {
+    Route::get("/contact-form/", "ContactForm@index", [
+        'anchor' => [
+            'name' => "Contact Form",
+            'icon' => 'chat-alert-outline',
+        ],
+        'navigation' => ['public_settings_panel'],
+        'unread' => function () {
+            return (new ContactManager())->get_unread_count_for_user(session());
+        },
+        'handler' => '/core/contact-form.js'
+    ]);
+    Route::get("/contact-form/{id}", "ContactForm@read");
+}

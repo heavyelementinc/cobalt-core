@@ -137,7 +137,12 @@ class Route {
             'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control),
             'real_path' => $real_path,
             'real_regex' => $real_regex,
+            'unread' => $additional['unread'],
         ];
+        
+        if(!key_exists($controller, $GLOBALS['ROUTE_LOOKUP_CACHE'])) {
+            $GLOBALS['ROUTE_LOOKUP_CACHE'][$controller] = $real_path;
+        }
     }
 
     /** Expressions allowed in a route path:

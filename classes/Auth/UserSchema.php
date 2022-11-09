@@ -26,11 +26,8 @@ class UserSchema extends \Validation\Normalize {
 
     function __get_schema(): array {
         $integrate = [];
-        try {
-            $additional = new AdditionalUserFields();
-        } catch (\Exception $e) {
-            $additional = null;
-        }
+        $additional = null;
+        if(file_exists(__APP_ROOT__ . "/classes/Auth/AdditionalUserFields")) $additional = new AdditionalUserFields();
         if ($additional) $integrate = $additional->__get_additional_schema();
         return array_merge([
             'fname' => [

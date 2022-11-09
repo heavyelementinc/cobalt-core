@@ -4,7 +4,12 @@ cobalt-carousel {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    container: cobalt-carousel size;
     /* position: relative; */
+}
+
+cobalt-carousel.locked .cobalt-carousel--scroll-container {
+    overflow-x: hidden;
 }
 
 cobalt-carousel.locked button{
@@ -17,7 +22,7 @@ cobalt-carousel {
 }
 
 cobalt-carousel .cobalt-carousel--scroll-container {
-    display: flex;
+    /* display: flex; */
     white-space: nowrap;
     overflow: hidden;
     /* height: 25em; */
@@ -31,9 +36,24 @@ cobalt-carousel .cobalt-carousel--scroll-container {
     isolation: isolate;
     padding: 5% 0;
     align-items: center;
+    font-size: 0px;
 }
 
-cobalt-carousel .cobalt-carousel--scroll-container > * {
+cobalt-carousel[scroll] .cobalt-carousel--scroll-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--scroll-padding);
+    text-space-collapse: discard;
+}
+
+cobalt-carousel[scroll] .cobalt-carousel--scroll-container::-webkit-scrollbar { 
+    /* display: none;  */
+}
+
+cobalt-carousel .cobalt-carousel--carousel-item {
+    display: inline-block;
     scroll-snap-align: start;
     width: 50%;
     margin: 0 .2em;
@@ -45,20 +65,26 @@ cobalt-carousel .cobalt-carousel--scroll-container > * {
     position: relative;
     flex-shrink: 0;
     flex-grow: 0;
+    scroll-snap-align: center;
+    vertical-align: middle;
 }
 
-cobalt-carousel[sizing="crop"] .cobalt-carousel--scroll-container > * {
+cobalt-carousel[sizing] .cobalt-carousel--carousel-item {
     /* width: auto; */
     object-fit: cover;
 }
 
+cobalt-carousel[aspect-ratio] .cobalt-carousel--carousel-item{
+    width: var(--ratio-width);
+}
+
 cobalt-carousel .cobalt-carousel--scroll-container :is(img, picture, video) {
-    height: min(var(--height) 80vh);
-    height: var(--height);
+    height: min(var(--height), 50vh);
 }
 
 cobalt-carousel[fit] .cobalt-carousel--scroll-container :is(img, picture, video) {
     object-fit: var(--fit);
+    object-position: var(--position);
 }
 
 cobalt-carousel .cobalt-carousel--scroll-container > .cobalt-carousel--current-scroll-target,
@@ -135,4 +161,43 @@ cobalt-carousel button:before {
 
 cobalt-carousel button.cobalt-carousel--next:before{
     content: ">";
+}
+
+@media only screen and (max-width:35em) {
+    cobalt-carousel {
+        position: relative;
+    }
+    cobalt-carousel .cobalt-carousel--scroll-container {
+        mask-image: linear-gradient(
+            90deg,
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,1) 6%,
+            rgba(255,255,255,1) 94%,
+            rgba(255,255,255,0) 100%);
+        -webkit-mask-image: linear-gradient(90deg,
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,1) 6%,
+            rgba(255,255,255,1) 94%,
+            rgba(255,255,255,0) 100%);
+    }
+
+    cobalt-carousel .cobalt-carousel--scroll-container > * {
+        width: 80%;
+    }
+    cobalt-carousel button {
+        position: absolute;
+        z-index: 20;
+    }
+
+    cobalt-carousel button.cobalt-carousel--prev {
+        left: 0;
+    }
+
+    cobalt-carousel button.cobalt-carousel--next {
+        right: 0;
+    }
+}
+
+@container cobalt-carousel (min-width: 35em) {
+
 }

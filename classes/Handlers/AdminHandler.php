@@ -29,7 +29,7 @@ class AdminHandler extends WebHandler {
         $panel .= get_route_group("admin_panel", ['prefix' => app("context_prefixes")['admin']['prefix']]);
         $session = session();
         
-        $panel .= "<div id='user-panel-header'>".$session->{'name'}."<a href='/admin/settings/'><ion-icon name='settings'></ion-icon></a></div>";
+        $panel .= "<div id='user-panel-header'>".$session->{'name'}."<a href='/admin/settings/'><i name='cog'></i></a></div>";
         $panel .= "</nav>";
         return $panel;
     }

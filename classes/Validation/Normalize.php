@@ -141,6 +141,26 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     abstract function __get_schema(): array;
 
+    function __edit() {
+        if(!$this->edit_view) return "Cannot display this document. Please set an edit view using \$this-&gt;edit_view in " .  $this->__CLASS__ . " or override the __edit method.";
+        return view($this->edit_view, ['doc' => $this]);
+    }
+
+    function __index() {
+        if(!$this->index_view) $this->index_view = "/CRUD/admin/default-list-item.html";
+        return view($this->index_view, ['doc' => $this]);
+    }
+
+    function __public() {
+        if(!$this->public_view) return "Cannot display this document. Please set an edit view using \$this-&gt;edit_view in " .  $this->__CLASS__ . " or override the __edit method.";
+        return view($this->public_view, ['doc' => $this]);
+    }
+
+    function __list() {
+        if(!$this->list_view) $this->list_view = "/CRUD/web/default-list-item.html";
+        return view($this->list_view, ['doc' => $this]);
+    }
+
     /**
      * Validation routine.
      * 
@@ -218,6 +238,13 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
         // Step one: get the value from the __dataset so we can operate on it
 
+        $getOperator = false;
+        $pos = strpos($name,"?");
+        if($pos !== false) {
+            $getOperator = substr($name, $pos + 1);
+            $name = substr($name, 0, $pos);
+        }
+
         // Check if $name is in the dataset
         if (isset($this->__dataset[$name])) $value = $this->__dataset[$name]; // Get the value from the dataset
         else {
@@ -229,9 +256,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 return;
             }
         }
-
-
-
+        if($pos !== false) $value = lookup_js_notation($getOperator, $this->__callable($value, $name));
         if ($n !== $name && $proto !== false) return $this->__execute_prototype($value, $name, $proto[1]);
 
         // If we don't want normalizing, just return the value we already have
@@ -242,6 +267,12 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             $subdoc = new Subdocument($value, $this->__schema[$name]['each'], $this);
             return iterator_to_array($subdoc);
         }
+
+        if($pos) return $value;
+        return $this->__callable($value, $name); // Return the value
+    }
+
+    private function __callable($value, $name) {
         $method_name = $this->__schema[$name]['get'] ?? "get_" . str_replace(".", "__", $name);
 
         if (is_callable($method_name)) {
@@ -250,8 +281,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         } else if (method_exists($this, $method_name)) {
             $value = $this->{$method_name}($value, $name);
         }
-
-        return $value; // Return the value
+        return $value;
     }
 
     /**

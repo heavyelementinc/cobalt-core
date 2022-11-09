@@ -11,7 +11,6 @@ class CoreSettingsPanel extends Controller {
         // $this->settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"));
         $GLOBALS['app']->bootstrap();
         $this->settings = $GLOBALS['app']->instances;
-        
 
         $setting_groups = [];
         $setting_tables = [];
@@ -81,6 +80,14 @@ class CoreSettingsPanel extends Controller {
                     $options.= "<option value='$option' selected='selected'>$option</option>";
                 }
                 break;
+            case "select":
+                $template = "/admin/settings/inputs/select.html";
+                $options = "";
+                foreach($setting->validate['options'] as $valid => $label) {
+                    $checked = "";
+                    if($valid === __APP_SETTINGS__[$index]) $checked = " selected='selected'";
+                    $options .= "<option value='$valid'$checked>$label</option>\n";
+                }
         }
         if($template) return view($template,[
             'name' => $setting->meta['name'],

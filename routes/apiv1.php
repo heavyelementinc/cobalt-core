@@ -38,7 +38,9 @@ if (app('Web_main_content_via_api')) {
 }
 
 if (app('API_contact_form_enabled')) {
-    Route::post("/contact", "CoreApi@contact");
+    Route::post("/contact", "ContactForm@contact_submit");
+    Route::put("/contact/read-status/{id}", "ContactForm@read_status");
+    Route::delete("/contact/delete/{id}", "ContactForm@delete");
 }
 
 if (app("CobaltEvents_enabled")) {
@@ -80,7 +82,7 @@ if (app('debug')) {
     Route::post("/debug/file-upload/arbitrary-data","DebugFiles@extra_metadata");
     Route::delete("/debug/file-upload/{id}","DebugFiles@delete");
 
-
+    Route::put("/debug/control-headers/...", "Debug@control_headers");
     // Route::fs("/debug/file-upload/);
 
 }

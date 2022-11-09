@@ -12,6 +12,17 @@ if (app("enable_debug_routes")) {
         'navigation' => ['debug'],
         'anchor' => ['name' => "Renderer"]
     ]);
+
+    Route::get("/notification", "Notifications@debug", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Notification"]
+    ]);
+
+    Route::get("/server-control", "Debug@status_modal", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "Server Control Headers"]
+    ]);
+
     Route::get("/router", "Debug@debug_router", [
         'navigation' => ['debug'],
         'anchor' => ['name' => "Router"]

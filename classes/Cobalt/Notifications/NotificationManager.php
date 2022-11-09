@@ -14,7 +14,7 @@ class NotificationManager extends \Drivers\Database {
     }
 
     public function renderNotification($notificationData) {
-        return with($notificationData->getTemplate(),['ntfy' => $notificationData]);
+        return view($notificationData->getTemplate(),['ntfy' => $notificationData]);
     }
 
     public function updateRecipientMeta($notificationId, $user = null, $meta) {

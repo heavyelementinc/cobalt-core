@@ -78,7 +78,7 @@ use Exceptions\HTTP\NotFound;
 class Render {
     public $body = "";
     public $vars = [];
-    const VAR_STRING = "([!@#$]*[\w.\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
     public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
     public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
