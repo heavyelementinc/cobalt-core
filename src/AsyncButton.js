@@ -21,8 +21,8 @@ class AsyncButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = this.spinner() + this.innerHTML;
-        this.spinner = this.querySelector("svg");
+        // this.innerHTML = this.spinner() + this.innerHTML;
+        // this.spinner = this.querySelector("svg");
         this.addEventListener("click", (e) => 
             this.send()
         );
@@ -77,6 +77,7 @@ class AsyncButton extends HTMLElement {
         }
         this.classList.add("working");
         this.classList.remove("error");
+        this.dispatchEvent(new CustomEvent("start", {detail: this.getAttribute("action")}));
     }
 
     requestSuccess(result) {
@@ -99,6 +100,7 @@ class AsyncButton extends HTMLElement {
         if("X-Location" in headers) window.location = headers['X-Location'];
         if("X-Next-Request" in headers) this.handleNextRequest(headers['X-Next-Request']);
         this.handleUpdatingContent(result);
+        this.dispatchEvent(new CustomEvent("success", {detail: result}));
     }
 
     handleNextRequest(headers) {
@@ -144,6 +146,7 @@ class AsyncButton extends HTMLElement {
         this.classList.remove("working");
         this.classList.add("error");
         this.statusMessage = new StatusError({ message: e.result.error, id: action });
+        this.dispatchEvent(new CustomEvent("error", {detail: e}));
     }
 
     spinner() {

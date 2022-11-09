@@ -46,4 +46,9 @@ class HTTPException extends \Exception {
         ];
         if ($this->exit) exit;
     }
+
+    public function dismissError() {
+        $this->status_code = 200;
+        header("HTTP/1.0 $this->status_code", true);
+    }
 }

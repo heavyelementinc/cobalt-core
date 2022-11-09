@@ -248,7 +248,7 @@
     "API_contact_form_enabled": {
         "default": false,
         "meta": {
-            "group": "Mail",
+            "group": "Contact Form",
             "name": "Enable Contact Form",
             "type": "input-switch"
         },
@@ -256,10 +256,65 @@
             "type": "boolean"
         }
     },
+
+    
+    "Contact_form_interface": {
+        "default": "panel",
+        "meta": {
+            "group": "Contact Form",
+            "name": "Contact Form Backend",
+            "type": "select"
+        },
+        "validate": {
+            "type": "string",
+            "options": {
+                "panel": "Admin Panel",
+                "SMTP": "Email"
+            }
+        }
+    },
+
+    "Contact_form_submission_throttle": {
+        "default": 500,
+        "meta": {
+            "group": "Contact Form",
+            "name": "Minumum number of seconds between contact form submissions (based on IP address)",
+            "type": "input"
+        },
+        "validate": {
+            "type": "int"
+        }
+    },
+
+    "Contact_form_success_message": {
+        "default": "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
+        "meta": {
+            "group": "Contact Form",
+            "name": "Contact Form Success Message",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
+    
+    "Contact_form_notify_on_new_submission": {
+        "default": false,
+        "meta": {
+            "group": "Contact Form",
+            "name": "Send admins a notification when new notifications are received",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    
+
     "API_contact_form_recipient": {
         "default": "",
         "meta": {
-            "group": "Mail",
+            "group": "Contact Form",
             "name": "Contact Form Recipient",
             "type": "input"
         }
@@ -397,7 +452,7 @@
             "public": true
         },
         "meta": {
-            "group": "Parallax",
+            "group": "Look &amp; Feel",
             "name": "Enable Parallax for Blog Post Headline Images",
             "type": "input-switch"
         },
@@ -411,7 +466,7 @@
             "public": true
         },
         "meta": {
-            "group": "Parallax",
+            "group": "Look &amp; Feel",
             "name": "Enable Parallax <help-span value='Allows you to specify [parallax-mode=\"\"] attributes on elements in your pages.'></help-span>",
             "type": "input-switch"
         },
@@ -425,7 +480,7 @@
             "public": true
         },
         "meta": {
-            "group": "Parallax",
+            "group": "Look &amp; Feel",
             "name": "Enable Parallax Debug <help-span value='Allows the scroll manager to display debug output to help troubleshoot parallax issues.'></help-span>",
             "type": "input-switch"
         },
@@ -580,6 +635,12 @@
     },
     "SPA": {
         "default": true,
+        "directives": {
+            "public": true
+        }
+    },
+    "SPA_smooth_scroll_on_nav": {
+        "default": false,
         "directives": {
             "public": true
         }

@@ -6,22 +6,29 @@ use Controllers\Controller;
 class Notifications extends Controller {
     function debug() {
         $notification = new \Cobalt\Notifications\Notification1_0Schema([
+            'version' => '1.0',
             'subject' => 'Hello, World',
             'body'    => "Here's some **markdown** to use for a test",
+            'sent'    => strtotime("-1 day") * 1000,
+            'from'    => session()["_id"],
             'for'     => [
                 [
-                    'user' => new \MongoDB\BSON\ObjectId("62c86a1de50fc66d640f09b2"),
+                    'user' => "8888888888888888",
+                    'read' => false,
+                    'recieved' => new \MongoDB\BSON\UTCDateTime(1661612937423)
+                ],
+                [
+                    'user' => session()["_id"],
                     'read' => false,
                     'recieved' => new \MongoDB\BSON\UTCDateTime(1661612937423)
                 ]
             ],
             'action' => [
+                'path'    => "/",
+                'route'   => 'CoreAdmin@individual_user_management_panel',
                 'params'  => [
                     '62c86a1de50fc66d640f09b2'
                 ],
-                'route'   => 'CoreAdmin@individual_user_management_panel',
-                'path'    => null,
-                'context' => 'admin'
             ]
         ]);
 

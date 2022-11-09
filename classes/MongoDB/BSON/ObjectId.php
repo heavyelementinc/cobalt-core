@@ -1,7 +1,6 @@
 <?php
 
-// THIS IS A STUB TO PREVENT INTELLEPHENSE FROM LABELING EVERY INSTANCE OF THIS
-// CLASS AS AN ERROR.
+/** Stubs to appease the IDE gods */
 
 namespace MongoDB\BSON;
 

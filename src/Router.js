@@ -2,6 +2,10 @@ class Router {
     constructor() {
         window.router_entities = {};
         this.isSPA = app().SPA;
+        this.prefersLimitedMotion = !app("SPA_smooth_scroll_on_nav") || window.matchMedia("prefers-reduced-motion").matches || false;
+        if(this.prefersLimitedMotion) {
+            document.body.parentNode.style.scrollBehavior = "initial";
+        }
 
         /**  */
         this.navigation_items = document.querySelectorAll("header nav a, footer nav a");
@@ -16,7 +20,7 @@ class Router {
         this.route_args = null;
         /** @property Object - the route directives to be used */
 
-        /** @method or @null  */
+        /** @method or @null */
         this.navigationEventReject = null;
 
         this.navigationStarted = false;
@@ -118,7 +122,7 @@ class Router {
         
         
         if(allLinks === null) allLinks = this.first_run;
-        if(!this.first_run) window.scrollTo(0,0);
+        if(!this.first_run) this.scrollToTop();
         // Select the appropriate anchor tags
         let links;
         let forms;
@@ -193,11 +197,17 @@ class Router {
         // Set up to execute our fetch request from the API.
         const pageLoad = new ApiFetch(`/api/v1/page/?route=${urlData.pathname}${urlData.apiSearchParams}`,"GET", {});
 
+
         let result;
         try{
             result = await new Promise(async (resolve, reject) => {
                 this.navigationEventReject = reject;
-                const result = await pageLoad.get()
+                let result;
+                try{
+                    result = await pageLoad.get()
+                } catch(error) {
+                    reject(error);
+                }
                 this.navigationEventReject = null;
                 resolve(result);
                 this.navigationEnd();
@@ -277,6 +287,12 @@ class Router {
             parsed,
             isLocal,
         }
+    }
+
+    scrollToTop() {
+        // Implement screen scrolling and setting
+        
+        window.scrollTo(0,0);
     }
 
 }

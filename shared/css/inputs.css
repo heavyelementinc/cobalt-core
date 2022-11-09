@@ -118,7 +118,7 @@ input:disabled, textarea:disabled {
   --btn-normal: var(--project-color-button-init);
   --btn-text: var(--project-color-button-text);
   --btn-hover: var(--project-color-button-hover);
-  --btn-hover-text: var(--project-color-button-text-hover);
+  --btn-hover-text: var(--project-color-button-hover-text);
   background-color: var(--btn-normal);
   color: var(--btn-text);
   padding: .7rem 1.4rem;
@@ -621,8 +621,9 @@ input-password > button:hover {
 }
 
 input-password > input + button:before {
-  content: "-";
+  content: "\F06D1";
   color: var(--project-color-input-border-nofocus);
+  font-family: "Material Design Icons";
 }
 
 input-password > button:hover:before{
@@ -630,6 +631,6 @@ input-password > button:hover:before{
 }
 
 input-password > input[type='password'] + button:before {
-  content: "o";
+  content: "\F0208";
 }
 

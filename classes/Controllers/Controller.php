@@ -1,9 +1,11 @@
 <?php
 namespace Controllers;
 
+use Clue\StreamFilter\CallbackFilter;
 use Drivers\Database;
 use Exception;
 use Exceptions\HTTP\BadRequest;
+use Iterator;
 
 class Controller{
 
@@ -45,8 +47,8 @@ class Controller{
      * @throws BadRequest 
      * @throws Exception 
      */
-    public function getParams(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = []): array {
-        return $this->parseFilterAndOptions($manager, $filterOverride, $allowedFilters, $allowedOptions);
+    public function getParams(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = [], $defaultOptions = null): array {
+        return $this->parseFilterAndOptions($manager, $filterOverride, $allowedFilters, $allowedOptions, $defaultOptions);
     }
 
     /**
@@ -70,10 +72,10 @@ class Controller{
      * @throws BadRequest 
      * @throws Exception 
      */
-    final public function parseFilterAndOptions(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = []): array {
+    final public function parseFilterAndOptions(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = [], $defaultOptions = null): array {
         $this->manager = $manager;
         $this->filter = $this->getFilters($allowedFilters);
-        $this->options = $this->getOptions($allowedOptions);
+        $this->options = $this->getOptions($allowedOptions, $defaultOptions);
         $this->filterOverride = $filterOverride;
         return [array_merge($this->filter, $filterOverride), $this->options];
     }
@@ -195,5 +197,21 @@ class Controller{
             }
         }
         return $mutant;
+    }
+
+    /**
+     * Apply a view to documents
+     * 
+     * @param array|Iterator $docs - An array or MongoDB Cursor
+     * @param string|Closure $view - The path to a view or a function which MUST return a path to a view
+     * @param string $root - The name of the variable for referencing in the view template
+     * @return string - A string which has concatinated the results of all views
+     */
+    function docsToViews(array|Iterator $docs, string|\Closure $view, string $root = "doc"): string {
+        $views = "";
+        foreach($docs as $doc) {
+            $views .= view(($view instanceof \Closure) ? $view($doc) : $view, [$root => $doc]);
+        }
+        return $views;
     }
 }

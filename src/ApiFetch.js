@@ -40,6 +40,8 @@ class ApiFetch {
             this.result = await result.json();
 
             if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
+            if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
+            if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
             if (result.ok === false) {
                 reject(this.result);
                 await this.handleErrors(result,this.result);
@@ -56,6 +58,41 @@ class ApiFetch {
             this.reject = null;
             return this.result;
         })
+    }
+
+    statusMessage(status){
+        let parsed = this.parseShorthandCommand(status);
+
+        parsed.id = this.uri;
+        new StatusMessage({...parsed});
+    }
+
+    modal(modal) {
+        let parsed = this.parseShorthandCommand(modal);
+        parsed.id = this.uri;
+
+        const modalContainer = new Modal({...parsed});
+        modalContainer.draw();
+    }
+
+    parseShorthandCommand(command) {
+        let parsed = command;
+        try{
+            parsed = JSON.parse(command);
+        } catch (error) {
+
+        }
+
+        if(typeof parsed === "string") parsed = {message: parsed}
+
+        // Handle shorthand type selection
+        if(parsed.message[0] === "@") {
+            let shorthand = parsed.message.substring(1, parsed.message.indexOf(" "));
+            parsed.type = parsed.type || shorthand;
+            parsed.message = parsed.message.substring(`${shorthand} `.length);
+        }
+
+        return parsed;
     }
 
     async abort() {
@@ -182,7 +219,7 @@ class FetchError extends Error {
     }
 
     statusMessage() {
-        if("error" in this.result && this.result.error) new StatusError({message: this.result.error, id: this.url});
+        if("error" in this.result && this.result.error) new StatusError({message: this.result.error, id: this.url, type: this.result.code});
         else new StatusError({message:"An unknown error occurred", id: this.url});
     }
 }

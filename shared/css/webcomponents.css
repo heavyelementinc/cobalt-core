@@ -158,8 +158,8 @@ help-span{
   text-align: center;
   height: 1em;
   width:  1em;
-  color:white;
-  background:var(--project-color-input-border-nofocus);
+  /* color:white; */
+  color:var(--project-color-input-border-nofocus);
   border-radius: 50%;
   margin:0 .5ch;
   font-family: sans-serif;
@@ -168,19 +168,20 @@ help-span{
 }
 
 help-span[warning]{
-  background-color: var(--project-color-problem);
+  color: var(--project-color-problem);
 }
   help-span[warning]:before{
-    content: "!";
+    content: "\F0028";
     justify-self: center;
     align-self:center;
   }
 
   help-span:before{
-    content: "?";
-    font-weight: bold;
-    font-size: .8em;
-    margin-top: .05em;
+    content: "\F02D7";
+    font-family: "Material Design Icons";
+    /* font-weight: bold; */
+    font-size: 1em;
+    /* margin-top: .05em; */
     align-self: flex-start;
   }
 

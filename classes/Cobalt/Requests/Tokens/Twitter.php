@@ -29,7 +29,7 @@ class Twitter extends TokenInterface {
     function getTokenExpiration():\DateTime|null{
         return null;
     }
-    
+
     /** Prepare for storage */
     function setKey():string {
         return "";
@@ -48,5 +48,13 @@ class Twitter extends TokenInterface {
     }
     function setTokenExpiration():\DateTime|null {
         return null;
+    }
+
+    function getEndpoint():string {
+        return "";
+    }
+
+    function setEndpoint():string {
+        return "";
     }
 }

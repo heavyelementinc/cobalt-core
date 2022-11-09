@@ -4,12 +4,13 @@ use \Auth\UserSchema;
 use MongoDB\BSON\ObjectId;
 use Cobalt\Payments\PaymentGateway;
 use Cobalt\Payments\PaymentGatewaySchema;
-
+use Contact\ContactManager;
 
 class CoreAdmin {
     function index() {
         add_vars([
             'title' => "Admin Panel",
+            'contact_manager' => (new ContactManager())->get_unread_count_for_user(session()),
             'user_accounts' => (new \Auth\UserCRUD())->count([]),
             'plugin_count' => count($GLOBALS['ACTIVE_PLUGINS']),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
@@ -109,6 +110,7 @@ class CoreAdmin {
             'basic_settings' => get_route_group('admin_basic_panel', ['with_icon' => true]),
             'settings_panel' => get_route_group("settings_panel",['with_icon' => true]),
             'advanced_panel' => get_route_group("access_panel",['with_icon' => true]),
+            'public_settings_panel' => get_route_group("public_settings_panel",['with_icon' => true]),
         ]);
 
         set_template("/admin/settings/control-panel.html");

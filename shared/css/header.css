@@ -28,6 +28,31 @@ header nav ul li {
     z-index: calc(var(--project-modal-z-index) - 1);
 }
 
+.directory--group .unread {
+    background: var(--project-color-problem);
+    color: white;
+    font-weight: bold;
+    height: 1.1em;
+    width: 1.1em;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: var(--project-body-family);
+}
+
+.directory--group.directory--icon-group li {
+    position: relative;
+}
+
+.directory--group.directory--icon-group .unread {
+    top: -.5em;
+    right: -.5em;
+    padding: .3em;
+    font-size: 1.1em;
+    position: absolute;
+}
+
 header .directory--group li:hover .directory--submenu {
     display: block;
     position: absolute;
@@ -161,6 +186,8 @@ header nav a.navigation--current {
         transition: transform .6s;
         flex-direction: column;
         position: fixed;
+        isolation: isolate;
+        overflow: hidden;
     }
     #nav-menu-spawn-nojs:checked+header {
         transform: translateX(0);
@@ -188,4 +215,63 @@ header nav a.navigation--current {
         display: flex;
     } */
 
+    header .mobile-navigation--initiator {
+        position: relative;
+    }
+    header .mobile-navigation--initiator:after {
+        content: "\203A";
+        font-size: 2rem;
+        margin-top: -.15rem;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        translate: .5rem -50%;
+    }
+
+    header .mobile-navigation--submenu-container {
+        height: 100%;
+        background-color: inherit;
+        width: 100%;
+        z-index: 10;
+        position: absolute;
+        transition: translate .6s;
+        translate: 200%;
+        top: 0;
+        left: 0;
+        box-shadow: 0 0 20px rgba(0,0,0,.3);
+        list-style: none;
+    }
+
+    header .mobile-navigation--submenu-container a {
+        text-decoration: none;
+    }
+
+    header .directory--submenu--active {
+        translate: 0;
+    }
+
+    header .mobile-navigation--submenu-container div.header {
+        display:flex;
+        align-items: center;
+        height: 3rem;
+        padding: 1rem;
+    }
+
+
+
+    header .mobile-navigation--submenu-container div.header button.back-button {
+        background: unset;
+        border: none;
+        font-size: 3em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 3rem;
+        width: 3rem;
+        position: relative;
+    }
+
+    header .mobile-navigation--submenu-container div.header button.back-button:before {
+        content: "\2039";
+    }
 }

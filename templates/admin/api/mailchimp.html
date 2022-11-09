@@ -1,0 +1,17 @@
+<h1>{{title}}</h1>
+
+<form-request method="PUT" action="/api/v1/api/key/{{id}}">
+    <fieldset>
+        <legend>Key Data</legend>
+        <label>DC Endpoint <help-span value=""></help-span></label>
+        <input type="text" name="endpoint" value="{{token.endpoint}}">
+    
+        <label>List ID</label>
+        <input type="text" name="key" value="{{token.key}}">
+    
+        <label>Token</label>
+        <input-password name="token" value="{{token.token}}"></input-password>
+    </fieldset>
+    <button type="submit">Submit</button>
+</form-request>
+{{token.encoding}}

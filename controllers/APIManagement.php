@@ -1,5 +1,6 @@
 <?php
 
+use Exceptions\HTTP\BadGateway;
 use Exceptions\HTTP\NotFound;
 
 class APIManagement {
@@ -28,12 +29,7 @@ class APIManagement {
         $thing = $files[$name]['namespace'] . "\\" . $name;
 
         $api = new $thing();
-        $token = iterator_to_array($api->authorizationToken());
-
-        if(!is_root()) {
-            $token['secret'] = "";
-            $token['token'] = "";
-        }
+        $token = $api->authorizationToken(null, true);
 
         add_vars([
             'title' => $thing::getMetadata()['name'],
@@ -41,7 +37,11 @@ class APIManagement {
             'token' => $token
         ]);
 
-        set_template("/admin/api/key.html");
+        $template = "/admin/api/key.html";
+        $meta = $thing::getMetadata();
+        if(isset($meta['view'])) $template = $meta['view'];
+
+        set_template($template);
     }
 
     function load_files() {
@@ -84,10 +84,19 @@ class APIManagement {
             'type'   => $_POST['authorization'],
             'prefix' => $_POST['prefix'],
             'expiration' => $_POST['expiration'],
+            'endpoint' => $_POST['endpoint'],
         ];
 
         $result = $manager->updateToken($mutant);
         
+        try {
+            $error = $manager->testAPI();
+        } catch(\Exception $e) {
+            $error = true;
+        }
+
+        if($error == false) throw new BadGateway("Your tokens were saved but something went wrong when testing your new settings against the API");
+        header('X-Status: @success Your settings were saved and testing was successful.');
         return $result;
     }
 }

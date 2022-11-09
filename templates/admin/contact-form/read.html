@@ -1,0 +1,38 @@
+<h1>Contact Form Submission</h1>
+<div class='hrow'>
+    <date>{{doc.date.display}}</date>
+    <menu>
+        <async-button method="DELETE" action="/api/v1/contact/delete/{{doc._id}}">Delete</async-button>
+    </menu>
+</div>
+<flex-table>
+    <flex-row>
+        <flex-header>Name</flex-header>
+        <flex-cell>{{doc.name}}</flex-cell>
+    </flex-row>
+    <flex-row>
+        <flex-header>Organization</flex-header>
+        <flex-cell>{{doc.organization}}</flex-cell>
+    </flex-row>
+    <flex-row>
+        <flex-header>Email</flex-header>
+        <flex-cell><a href="mailto:{{doc.email}}">{{doc.email}}</a></flex-cell>
+    </flex-row>
+    <flex-row>
+        <flex-header>Phone</flex-header>
+        <flex-cell><a href="tel:{{doc.phone}}">{{doc.phone}}</a></flex-cell>
+    </flex-row>
+    <flex-row>
+        <flex-header>Method</flex-header>
+        <flex-cell>{{doc.preferred.display}}</flex-cell>
+    </flex-row>
+    <flex-row>
+        <flex-header>Source IP</flex-header>
+        <flex-cell><code>{{doc.ip}}</code></flex-cell>
+    </flex-row>
+</flex-table>
+
+<h2>Message</h2>
+<blockquote>
+    {{doc.additional}}
+</blockquote>

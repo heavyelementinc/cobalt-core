@@ -10,6 +10,7 @@
  * @attribute height [null]|Integer - Specify an integer to apply a uniform height to all scrollable elements.
  * @attribute fit ["cover"]|"contain" - Changes how img, picture, and video tags fit their contents in available space.
  * @attribute sizing ["uniform-min"]|"uniform-max"|"natural" - Changes how img, picture, and video tags are styles versus each other
+ * @attribute scroll INCOMPLETE and DISABLED
  * 
  * @copyright 2022 Heavy Element, Inc.
  * @author Gardiner Bryant
@@ -20,79 +21,15 @@ class CobaltCarousel extends HTMLElement {
         this.visible = "auto";    // Visible
         this.container = null;    // The scrollable container that items are moved into.
         this.validTargets = null; // The child elements that are meant to be scrolled through.
+        this.sizingPromises = []; // The promises we're awaiting in updateSizing
         this.index = null;        // The index into the validTargets array that is currently visible.
         this.pagination = true;   // Controls a yet-to-be-implemented pagination routine.
         this.buttons = true;      // Controls if next/previous buttons are to be displayed.
     }
 
-    observedAttributes() {
-        return ['height', 'fit', 'sizing'];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        switch(name) {
-            case "height":
-                if(newValue && newValue.toString()[newValue.toString().length - 1] !== "x") newValue = `${newValue}px`;
-            case "fit":
-                this.updateCSSVar(name, newValue);
-                break;
-            case "sizing":
-                this.updateSizing(name, newValue);
-                break;
-        }
-    }
-
-    updateCSSVar(name, value) {
-        this.style.setProperty(`--${name}`, value);
-    }
-
-    async updateSizing(name, value) {
-        let promises = [];
-        let targets = [];
-        this.validTargets.forEach(el => {
-            let target = null;
-            if(["IMG","PICTURE","VIDEO"].includes(el.tagName)) target = el;
-            else {
-                const element = el.querySelector("img, picture, video");
-                if(element) target = element;
-            }
-            if(target) promises.push(new Promise((resolve, reject) => {
-                target.addEventListener("load", e => resolve());
-                target.addEventListener("error", e => resolve());
-                if(target.complete === true) resolve();
-            }));
-            targets.push(target);
-        });
-
-        await Promise.all(promises);
-
-        let sizes = [];
-
-        targets.forEach(el => {
-            sizes.push(el.getAttribute("height") || el.naturalHeight);
-        });
-
-        const max = Math.max(...sizes),
-        min = Math.min(...sizes);
-
-        console.log({min, max, sizes, targets});
-
-        switch(value) {
-            case "natural":
-            case "initial":
-                if(!this.getAttribute("height")) this.style.removeProperty("--fit");
-                // if(!this.getAttribute("height")) this.style.removeProperty("--height");
-            case "uniform-max":
-                if(!this.getAttribute("height")) this.attributeChangedCallback("height", null, max.toString());
-                break;
-            case "uniform-min":
-            default:
-                if(!this.getAttribute("height")) this.attributeChangedCallback("height", null, min.toString());
-                break;
-        }
-    }
-
     connectedCallback() {
+        this.previousScrollPosition = 0;
+        this.scrollDirection = 1;
         this.attributeChangedCallback("fit",null,this.getAttribute("fit"));
         this.attributeChangedCallback("height",null,this.getAttribute("height"))
         // Let's initialize our element by moving the children of the element into the container
@@ -106,14 +43,13 @@ class CobaltCarousel extends HTMLElement {
         // Now let's add a scroll event so we can fire our custom event when scrolling stops.
         this.container.addEventListener("scroll", () => {
             clearTimeout(this.scrollStopTimeout);
+            this.scrollDirection = (this.previousScrollPosition < this.container.scrollLeft) ? 1 : -1;
+            this.previousScrollPosition = this.container.scrollLeft;
             this.scrollStopTimeout = setTimeout(() => this.container.dispatchEvent(new CustomEvent("scrollend")), 150);
         });
 
-        // Let's instantiate the valid targets of this carousel
-        // We're spreading the children property so we break the pointer to the
-        // children property (this gets modified later)
-        this.validTargets = [...this.container.children];
-
+        this.initValidTargets();
+        
         this.attributeChangedCallback("sizing",null,this.getAttribute("sizing"));
         // This html attribute changes the behavior of the element.
         if(this.getAttribute('center-align') !== "false") this.initFakeElements();
@@ -136,7 +72,93 @@ class CobaltCarousel extends HTMLElement {
         if(this.autoScroll) this.invokeAutoScroll();
 
         this.updateScroll();
-        
+
+        this.observeIntersection();
+    }
+
+    get observedAttributes() {
+        return ['height', 'fit', 'sizing', 'aspect-ratio'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        switch(name) {
+            case "aspect-ratio":
+                this.updateAspectRatio(newValue);
+                break;
+            case "height":
+                this.handleHeightChange(newValue);
+            case "fit":
+                this.updateCSSVar(name, newValue);
+                break;
+            case "sizing":
+                this.updateSizing(name, newValue);
+                break;
+        }
+    }
+
+    updateCSSVar(name, value) {
+        this.style.setProperty(`--${name}`, value);
+    }
+
+    async updateSizing(name, value) {
+        if(!this.validTargets) return;
+        let targets = [];
+        if(this.sizingPromises.length === 0) {
+            this.validTargets.forEach(el => {
+                let target = null;
+                if(["IMG","PICTURE","VIDEO"].includes(el.tagName)) target = el;
+                else {
+                    const element = el.querySelector("img, picture, video");
+                    if(element) target = element;
+                }
+                if(target) this.sizingPromises.push(new Promise((resolve, reject) => {
+                    target.addEventListener("load", e => resolve());
+                    target.addEventListener("error", e => resolve());
+                    if(target.complete === true) resolve();
+                }));
+                targets.push(target);
+            });
+        }
+
+        await Promise.all(this.sizingPromises);
+
+        let max = this.getAttribute("height"), min = this.getAttribute("height");
+        if(!max) {
+            let sizes = [];
+    
+            targets.forEach(el => {
+                sizes.push(el.getAttribute("height") || el.naturalHeight || 100);
+            });
+    
+            max = Math.max(...sizes),
+            min = Math.min(...sizes);
+        }
+        if(Math.abs(max) === Infinity || Math.abs(min) === Infinity) {
+            max = 100;
+            min = 100;
+        }
+
+        if(typeof value === "number") value = this.getAttribute("sizing");
+
+        // This is the sizing attribute
+        switch(value) {
+            case "natural":
+                this.style.removeProperty("--fit");
+                this.handleHeightChange(max.toString());
+                break;
+            case "uniform-max":
+                this.setAttribute("fit", this.getAttribute("fit") || "cover");
+                this.updateCSSVar("fit", this.getAttribute("fit"));
+                this.handleHeightChange(max.toString());
+                break;
+            case "uniform-min":
+            case "initial":
+            default:
+                this.setAttribute("fit", this.getAttribute("fit") || "cover");
+                this.updateCSSVar("fit", this.getAttribute("fit"));
+                this.handleHeightChange(min.toString());
+                break;
+        }
     }
 
     initNextPrevButtons() {
@@ -159,72 +181,110 @@ class CobaltCarousel extends HTMLElement {
         this.append(next);
     }
 
-    scrollButton(direction = 1) {
-        this.index += direction;
-        // Prevent overflow
+    async scrollButton(direction = 1, index = false) {
+        if(this.resolveScrollComplete) this.resolveScrollComplete();
+        // Add our direction to the index.
+        if(index === false) this.index += direction;
+        // OR set the index's value to an arbitrary number
+        else this.index = index;
+        // Now let's check for overflow and handle it
         if(this.index >= this.validTargets.length && direction >= 1) {
+            // If we've overflowed, set the index to zero
             this.index = 0;
-            this.jumpScroll = this.firstClone;
+            // And set the jump scroll pointer to first clone... why?!?
+            this.jumpScrollClonePointer = this.firstClone;
         }
         if(this.index < 0 && direction <= -1) {
             this.index = this.validTargets.length - 1;
-            this.jumpScroll = this.lastClone;
+            this.jumpScrollClonePointer = this.lastClone;
         }
     }
 
-    async updateScroll(fakeElement = null) {
-        this.classList.add("locked");
-        clearTimeout(this.timeout);
+    fallback() {
+        this.classList.remove("locked");
+        this.container.style.overflowX = "scroll";
+    }
 
+    async updateScroll(fakeElement = null) {
+        if(this.jumpScrollClonePointer) this.classList.add("locked");
+        clearTimeout(this.timeout);
+        
+        // Select the current element
+        let element = this.setCurrentTarget(this.validTargets[this.index]);
+
+        let elementCenter = this.containerOffset(this.jumpScrollClonePointer || element);
+
+        try{
+            this._observationTargetIgnoreScroll = true;
+            await this.waitForScrollComplete(elementCenter);
+        } catch (error) {
+            console.warn(error);
+            this.fallback();
+            return;
+        }
+
+        this.invokeAutoScroll();
+
+        this.performJumpScroll();
+        this.classList.remove("locked");
+        this._observationTargetIgnoreScroll = false;
+    }
+
+    setCurrentTarget(element) {
         // Clean up the current target
         const currentTargetClass = "cobalt-carousel--current-scroll-target";
         const currentTargetElements = this.container.querySelectorAll(`.${currentTargetClass}`);
 
         currentTargetElements.forEach(e => e.classList.remove(currentTargetClass));
-
-        // Select the current element
-        let element = this.validTargets[this.index];
+        
         element.classList.add(currentTargetClass); // Add the current target class
-        if(this.jumpScroll) element = this.jumpScroll; // Let's get ready for a jump scroll
-        element.classList.add(currentTargetClass); 
+        if(this.jumpScrollClonePointer) element = this.jumpScrollClonePointer; // Let's get ready for a jump scroll
+        element.classList.add(currentTargetClass);
+        return element;
+    }
 
-        let elementCenter = this.containerOffset(element);
-
-        await this.waitForScrollComplete(elementCenter);
-
-        this.invokeAutoScroll();
-
-        if(this.jumpScroll) {
+    performJumpScroll() {
+        if(this.jumpScrollClonePointer) {
             this.container.style.scrollBehavior = "auto";
+            this.container.style.overflow = "hidden";
             let offset = this.containerOffset(this.validTargets[this.index]);
             this.container.scrollLeft = offset;
             this.container.style.removeProperty("scroll-behavior");
-            this.jumpScroll = false;
+            this.container.style.removeProperty("overflow");
+            this.jumpScrollClonePointer = false;
         }
-        this.classList.remove("locked");
     }
 
     waitForScrollComplete(offset) {
         return new Promise((resolve, reject) => {
+            this.resolveScrollComplete = resolve;
             this.container.addEventListener("scrollend",() => {
                 resolve();
-                
+                this.resolveScrollComplete = null;
             }, {once: true});
+            // if(offset > this.container.scrollHeight) reject("Scroll height is greater than the current scroll height");
             this.container.scrollLeft = offset;
-            // setTimeout(() => resolve(),400);
+            setTimeout(() => reject("It's been 1500 ms and we haven't received a scrollend signal, aborting."),1500);
         });
     }
 
     containerOffset(element) {
+        const isMobile = window.matchMedia("(max-width: 35em)").matches;
+        let offset = .5;
+        
         const elementOffset = get_offset(element);
-        const elementOffsetFromX = elementOffset.x;
-        const elementCenter = elementOffset.w * .5;
+        const elementOffsetFromX = element.offsetLeft;
+        const elementCenter = elementOffset.w * offset;
 
         const containerOffset = get_offset(this.container);
-        const containerOffsetFromX = containerOffset.x;
-        const containerCenter = containerOffset.w * .5;
+        const containerOffsetFromX = this.container.offsetLeft;
+        const containerCenter = containerOffset.w * offset;
         const finalScrollPosition = elementOffsetFromX - containerOffsetFromX;
 
+        const middleOffset = containerCenter - elementCenter;
+        return finalScrollPosition - middleOffset;
+        // console.log({isMobile, offset, elementOffsetFromX, elementCenter,finalScrollPosition, final: finalScrollPosition - elementCenter});
+        if(isMobile) return finalScrollPosition - (containerOffset.w * .05);
         return finalScrollPosition - elementCenter;
     }
 
@@ -279,10 +339,20 @@ class CobaltCarousel extends HTMLElement {
         secondClone = this.validTargets[1].cloneNode(true),
         penultimateClone = this.validTargets[this.validTargets.length - 2].cloneNode(true),
         lastClone = this.validTargets[this.validTargets.length - 1].cloneNode(true);
+
+        this.validTargets[0].clone = firstClone;
+        this.validTargets[1].clone = secondClone;
+        this.validTargets[this.validTargets.length - 2].clone = penultimateClone;
+        this.validTargets[this.validTargets.length - 1].clone = lastClone;
+
         firstClone.classList.add(fakeClass);
+        firstClone.reference = this.validTargets[0];
         secondClone.classList.add(fakeClass);
+        secondClone.reference = this.validTargets[1];
         penultimateClone.classList.add(fakeClass);
+        penultimateClone.reference = this.validTargets[this.validTargets.length - 2];
         lastClone.classList.add(fakeClass);
+        lastClone.reference = this.validTargets[this.validTargets.length - 1];
 
         this.firstClone = firstClone;
         this.lastClone = lastClone;
@@ -292,6 +362,93 @@ class CobaltCarousel extends HTMLElement {
         this.container.prepend(lastClone);
         this.container.prepend(penultimateClone);
     }
+
+    handleHeightChange(height) {
+        if(height === null) return this.style.setProperty("--height", "200px");
+        if(height < 50) height = 100;
+        const clamp = cssToPixel("60vh"); // (window.matchMedia("(max-width: 35em)").matches) ? cssToPixel("80vh")
+
+        const lastChar = height.toString()[height.toString().length - 1];
+        const parsed = cssToPixel(height);
+
+        const min = Math.min(clamp, parsed);
+        if(min !== parsed) height = clamp;
+        // Check if the last character is a string
+        // !is not a number === true
+        if(!isNaN(lastChar)) {
+            this.style.setProperty("--height",`${height}px`);
+            this.updateAspectRatio(this.getAttribute("aspect-ratio"));
+            return;
+        }
+        this.style.setProperty("--height", height);
+        this.updateAspectRatio(this.getAttribute("aspect-ratio"));
+    }
+
+    observeIntersection() {
+        let options = {
+            root: this.container,
+            rootMargin: '0px',
+            threshold: 1.0
+        }
+
+        this.observe = new IntersectionObserver((element) => {
+            if(!this.hasAttribute("scroll")) return;
+            this.observationTarget(element[0].target);
+        }, options);
+        
+        for(const el of this.container.children) {
+            this.observe.observe(el);
+        }
+    }
+
+    observationTarget(target) {
+        if(this._observationTargetIgnoreScroll) return;
+        this.validTargets.forEach((e, i) => {
+            if(e === target) this.scrollButton(this.scrollDirection, i);
+        });
+        
+        this.setCurrentTarget(target);
+
+        if("reference" in target) {
+            this.jumpScrollClonePointer = target.reference;
+            this.performJumpScroll();
+        }
+    }
+
+    initValidTargets() {
+        // Let's instantiate the valid targets of this carousel
+        // We're spreading the children property so we break the pointer to the
+        // children property (this gets modified later)
+        this.validTargets = [...this.container.children];
+
+        if(!this.elementObserver) this.elementObserver = new MutationObserver(e => {
+            console.log(e);
+            e[0].target.style.setProperty("--position". e[0].target.getAttribute("position"));
+        });
+        const options = {
+            attributes: true,
+            attributeFilter: ["position"]
+        }
+        
+        this.validTargets.forEach(el => {
+            el.classList.add("cobalt-carousel--carousel-item");
+            el.style.setProperty("--position",el.getAttribute("position") || "");
+            this.elementObserver.observe(el, options);
+        });
+    }
+
+    updateAspectRatio(value) {
+        console.log(value);
+        if(!value) return;
+        const split = value.split(":");
+        const hR = split[0], wR = split[1];
+        const factor = hR / wR; // For 16:9, should be 1.77
+        const pixelHeight = cssToPixel(this.style.getPropertyValue("--height"), this); // Reduced to 720 pixels
+        const pixelWidth = pixelHeight * factor; // About 1280 pixels
+        this.style.setProperty("--ratio-width", `${pixelWidth}px`);
+        console.log(pixelWidth)
+    }
+
 }
 
 customElements.define("cobalt-carousel", CobaltCarousel);

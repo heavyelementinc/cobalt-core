@@ -53,7 +53,7 @@ function app($setting = null) {
 function session($info = null) {
     if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
-    if (key_exists($info, $GLOBALS['session'])) return $GLOBALS['session'][$info];
+    if (property_exists($GLOBALS['session'],$info)) return $GLOBALS['session'][$info];
     return lookup_js_notation($info, $GLOBALS['session'], true);
     throw new Exception("Field $info does not exist");
 }
@@ -219,10 +219,19 @@ function cobalt_autoload($class) {
         }
         $controllers_special_case = '/Controllers/';
         if (preg_match($controllers_special_case, $class)) {
-            $file = find_one_file([__APP_ROOT__ . "/private", __ENV_ROOT__], $class);
+            $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class);
             if ($file !== false) {
                 require_once $file;
 
+                return;
+            }
+        }
+
+        $has_namespace = strpos("\\", $class);
+        if($has_namespace === false) {
+            $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class . ".php");
+            if ($file !== false) {
+                require_once $file;
                 return;
             }
         }
@@ -291,10 +300,14 @@ function add_template($path) {
  * @return void
  */
 function set_template($path) {
-    $templates = files_exist([
-        __APP_ROOT__ . "/templates/$path",
-        __ENV_ROOT__ . "/templates/$path",
-    ]);
+    try {
+        $templates = files_exist([
+            __APP_ROOT__ . "/templates/$path",
+            __ENV_ROOT__ . "/templates/$path",
+        ]);
+    } catch (\Exception $e) {
+        throw new NotFound("Template not found");
+    }
     $GLOBALS['WEB_PROCESSOR_TEMPLATE'] = $path;
     return $templates[0];
 }
@@ -698,7 +711,7 @@ function is_child_dir($base_dir, $path) {
  * 
  * @return string 
  */
-function get_path_from_route(string $class, string $method, array $args = [], string $routeMethod = "get", string $context = null) {
+function get_path_from_route(string $class, string $method, array $args = [], ?string $routeMethod = "get", string $context = null) {
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
     $router = $GLOBALS['router'];
@@ -707,19 +720,21 @@ function get_path_from_route(string $class, string $method, array $args = [], st
     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
     // }
-    $routes = $router->routes[$context][$routeMethod];
+    // $routes = $router->routes[$context][$routeMethod];
     $route = null;
-    foreach($routes as $r => $data) {
-        if($data['controller'] !== $controllerAlias) continue;
-        $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
-        return route_replacement($data['real_path'], $args, $data);
+    foreach($router->routes as $routes) {
+        foreach($routes[$routeMethod] as $r => $data) {
+            if($data['controller'] !== $controllerAlias) continue;
+            $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
+            return route_replacement($data['real_path'], $args, $data);
+        }
     }
 
     $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $route;
     return $route;
 }
 
-function route_replacement($path, $args, $data) {
+function route_replacement($path, $args, $data = []) {
     $rt = $path;
     $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
     
@@ -794,6 +809,7 @@ function get_route_group($directory_group, $misc = []) {
                 if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
                 if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
                 $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+                if(key_exists('unread',$route)) $info['unread'] = $route['unread'];
                 if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
                 if ($r === $current_route) $info['attributes'] = 'class="current--route"';
                 $ul .= build_directory_item($info, $misc['with_icon'], $context);
@@ -807,7 +823,7 @@ function get_route_group($directory_group, $misc = []) {
 
 function build_directory_item($item, $icon = false, $context = "") {
     $prefix = "";
-    if ($icon) $icon = "<ion-icon name='$item[icon]'></ion-icon>";
+    if ($icon) $icon = "<i name='$item[icon]'></i>";
     else $icon = "";
     $attributes = $item["attributes"] ?? '';
     if ($context !== "web") {
@@ -822,7 +838,11 @@ function build_directory_item($item, $icon = false, $context = "") {
             $items['attributes'] = substr($item['attributes'],-1) . "$current_route_classes\"";
         }
     }
-    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]</a>$submenu</li>";
+    $unread = "";
+    if (isset($item['unread']) && $item['unread'] instanceof \Closure) $unread_count = $item['unread']($item);
+    if($unread_count) $unread = "<span class='unread'>$unread_count</span>";
+
+    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]$unread</a>$submenu</li>";
 }
 
 function get_schema_group_names(string $group_name, array $schema) {

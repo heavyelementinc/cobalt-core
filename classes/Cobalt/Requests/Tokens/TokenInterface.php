@@ -13,22 +13,55 @@ abstract class TokenInterface implements Iterator {
     }
 
     /** Prepare for usage */
-    abstract function getKey():string;
-    abstract function getSecret():string;
     abstract function getToken():string;
-    abstract function getRefresh():string;
-    abstract function getTokenType():string;
-    abstract function getTokenPrefix():string;
-    abstract function getTokenExpiration():\DateTime|null;
+    abstract function getSecret():string;
+    function getKey():string {
+        return "";
+    }
+    function getRefresh():string {
+        return "";
+    }
+    function getTokenType():string {
+        return "";
+    }
+    function getTokenPrefix():string {
+        return "";
+    }
+    function getTokenExpiration():\DateTime|null {
+        return null;
+    }
+    function getEndpoint():string {
+        return "";
+    }
+
+    function getEncoding():string {
+        return "application/json";
+    }
     
     /** Prepare for storage */
-    abstract function setKey():?string;
     abstract function setSecret():?string;
     abstract function setToken():string;
-    abstract function setRefresh():string;
-    abstract function setTokenType():?string;
-    abstract function setTokenPrefix():?string;
-    abstract function setTokenExpiration():\DateTime|null;
+    function setKey():?string {
+        return "";
+    }
+    function setRefresh():string {
+        return "";
+    }
+    function setTokenType():?string {
+        return "";
+    }
+    function setTokenPrefix():?string {
+        return "";
+    }
+    function setTokenExpiration():\DateTime|null {
+        return null;
+    }
+    function setEndpoint():string {
+        return "";
+    }
+    function setEncoding():string {
+        return "";
+    }
 
     private $index = 0;
     private $map = [
@@ -43,6 +76,10 @@ abstract class TokenInterface implements Iterator {
         'token'      => [
             'get'=>'getToken',
             'set'=>'setToken',
+        ],
+        'endpoint'   => [
+            'get'=>'getEndpoint',
+            'set'=>'setEndpoint',
         ],
         'refresh'      => [
             'get'=>'getRefresh',
@@ -60,10 +97,19 @@ abstract class TokenInterface implements Iterator {
             'get'=>'getTokenExpiration',
             'set'=>'setTokenExpiration',
         ],
+        'encoding'   => [
+            'get'=>'getEncoding',
+            'set'=>'setEncoding',
+        ],
     ];
 
     public function __get($name) {
-        if(!key_exists($name, $this->map)) return null;
+        $allowMisc = false;
+        if(method_exists($this, 'setMisc')) $allowMisc = true;
+        if(!key_exists($name, $this->map)) {
+            if(!$allowMisc) return null;
+            if(key_exists($name, $this->__token)) return $this->__token[$name];
+        }
         return $this->{$this->map[$name]['get']}();
     }
 

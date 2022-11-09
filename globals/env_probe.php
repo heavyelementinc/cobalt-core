@@ -1,12 +1,15 @@
 <?php
-// Let's make sure we're running a suppoted version of PHP (since we use 
-// the not-insane array syntax and the spread "..." syntax)
+// Let's make sure we're running a suppoted version of PHP (since we use the 
+// not-insane [] array syntax, the spread "..." syntax, and match expressions)
 
 if (!version_compare(PHP_VERSION, "8.1", ">=")) die("You must be running PHP version 8.1.0 or greater (".PHP_VERSION.")");
 
 /* Cobalt Version Number */
 define("__COBALT_VERSION", "2.0");
 
+/* A list of modules we don't allow along with anonymous funcitons which may
+   configure it to work correctly.
+*/
 $module_blacklist = [
     'uopz' => function () {
         if(function_exists("uopz_allow_exit")) {
@@ -93,8 +96,9 @@ $required_functions = [
     "imagealphablending",
     "imagesavealpha",
     "imagecopyresampled",
-
-    'apache_request_headers',
+    
+    "get_current_user",
+    // 'apache_request_headers',
     // 'ERROR FOR TESTING PURPOSES'
 ];
 
@@ -106,3 +110,4 @@ foreach($required_functions as $funct) {
 
 if($missing !== "") die("Your runtime is missing the following required functions!<br>$missing");
 
+// if(!in_array(get_current_user(), ["www-data", "apache"])) die ("You must be running Cobalt as the web server user.");

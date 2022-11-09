@@ -105,7 +105,7 @@
 
 .paginated-button--next {
     background: var(--project-color-button-init);
-    color: var(--project-button-text);
+    color: var(--project-color-button-text);
 }
 .paginated-button--next:hover {
     background: var(--project-color-button-init);

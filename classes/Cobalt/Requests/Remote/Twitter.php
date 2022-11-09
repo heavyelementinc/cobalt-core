@@ -14,6 +14,10 @@ class Twitter extends API {
         return $this->post("https://api.twitter.com/2/oauth2/token",[],[]);
     }
 
+    public function testAPI(): bool {
+        return true;
+    }
+
     public function getPaginationToken(): array {
         return [];
     }
@@ -124,7 +128,7 @@ class Twitter extends API {
 
     static function getMetadata(): array {
         return [
-            'icon' => "<ion-icon name='logo-twitter'></ion-icon>",
+            'icon' => "<i name='twitter'></i>",
             'name' => "Twitter"
         ];
     }

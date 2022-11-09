@@ -58,6 +58,7 @@
             "inputs.css",
             "loading-spinner.css",
             "buttons.css",
+            "notification.css",
             "action-menu.css",
             "status-message.css",
             "form-request.css",

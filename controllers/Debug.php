@@ -506,4 +506,50 @@ class Debug extends \Controllers\Pages {
 
         return set_template("/parts/main.html");
     }
+
+    function status_modal() {
+        add_vars(['title' => "Server Control Headers"]);
+
+        return set_template("/debug/server-control-headers.html");
+    }
+
+    function control_headers() {
+        switch($_POST['method']) {
+            case "modal":
+                $method = "X-Modal:";
+                break;
+            case "status":
+            default:
+                $method = "X-Status:";
+                break;
+        }
+
+        switch($_POST['class']) {
+            case "warning":
+                header("HTTP/1.0 400 Bad Request");
+                break;
+            case "error":
+                // header("HTTP/1.0 500 Error");
+                break;
+            case "message":
+            default:
+                header("HTTP/1.0 200 OK");
+                break;
+        }
+
+        $messages = [
+            "Parlay.",
+            "You need to find yourself a girl, mate.",
+            "I'm dishonest, and a dishonest man you can always trust to be dishonest.",
+            "If you were waiting for the opportune moment, that was it.",
+            "I'm disinclined to acquiesce to your request.",
+            "Savvy?"
+        ];
+
+        $message = $messages[rand(0, count($messages) - 1)];
+
+        header("$method @$_POST[type] $message");
+
+        return ['message' => $message];
+    }
 }

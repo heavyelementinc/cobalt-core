@@ -49,5 +49,11 @@ class Stripe extends TokenInterface {
     function setTokenExpiration():\DateTime|null {
         return null;
     }
+    function getEndpoint():string {
+        return "";
+    }
 
+    function setEndpoint():string {
+        return "";
+    }
 }
