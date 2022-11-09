@@ -331,7 +331,16 @@ class Settings extends \Drivers\Database {
 
     public function array_handler($method, $name, $value) {
         $value = $this->validate($name, $value);
-        if(gettype($this->__settings[$name]) !== "array") throw new \Exception("$name must be an array");
+        // if(gettype($this->__settings[$name]) !== "array") throw new \Exception("$name must be an array");
+        
+        // Get the existing setting from modified settings
+        $id = $this->__user_modified_settings['_id'];
+        
+        // If the setting doesn't exist, set up to push/pull the value
+        if(!isset($this->__user_modified_settings->$name)) {
+            $this->updateOne(['_id' => $id], ['$set' => [$name => $this->__settings[$name]]]);
+        }
+
         $m_time = time();
         $method = match($method) {
             'pull' => '$pull',
@@ -339,9 +348,8 @@ class Settings extends \Drivers\Database {
         };
         $query = [
             $method => [$name => $value],
-            'Meta.max_m_time' => $m_time,
+            '$set' => ['Meta.max_m_time' => $m_time],
         ];
-        $id = $this->__user_modified_settings['_id'];
         $result = $this->updateOne(['_id' => $id], $query);
         return [$name => $this->findOne(['_id' => $id])->{$name}];
     }
