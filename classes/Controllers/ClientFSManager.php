@@ -175,6 +175,8 @@ trait ClientFSManager {
         $extension      = pathinfo($files[$key]['name'][$index],PATHINFO_EXTENSION);
         $thumbnail_name = "$name.$this->thumbnail_suffix.$extension";
         
+        if(!$files[$key]['tmp_name'][$index]) throw new BadRequest("Invalid indicies");
+
         $generationResult = createThumbnail($files[$key]['tmp_name'][$index],$tmp_name,$thumbnail_x, $thumbnail_y);
         if(!$generationResult) throw new BadRequest("Cannot generate a thumbnail for this file type.");
 
@@ -192,6 +194,7 @@ trait ClientFSManager {
             ]
         ];
 
+        // First, let's insert our thumbnail
         $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true], $toInsert, $meta);
         $thumb_id = $thumb['_id'];
 
@@ -200,6 +203,7 @@ trait ClientFSManager {
             'thumbnail' => $toInsert[$key]['name'][1]]
         );
 
+        // Now let's insert our actual image
         $returnable = $this->clientUploadFile($key, 0, $arbitrary_data, $toInsert, $meta);
         if($meta) {
             $returnable = [

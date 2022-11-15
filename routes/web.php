@@ -36,3 +36,7 @@ if (app("Auth_logins_enabled")) {
 if (app("Auth_account_creation_enabled")) {
     Route::get(app("Auth_onboading_url"), "UserAccounts@onboarding");
 }
+
+if (app("Database_fs_enabled")) {
+    Route::get(trim_trailing_slash(app("Database_fs_public_endpoint")) . "/...", "FileController@download");
+}

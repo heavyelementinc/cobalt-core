@@ -18,12 +18,9 @@
     connectedCallback() {
         this.getRequest();
         if (this.request.autosave === false) {
-            // let searchForButtons = this;
+
             let queries = "button[type='submit'],input[type='submit']";
-            // if (this.getAttribute("submit")) {
-            //     searchForButtons = this.closest("modal-container");
-            //     queries = "button.modal-button-okay";
-            // }
+
             let elements = this.querySelector(queries);
             if (elements) {
                 elements.addEventListener('click', (e) => {
@@ -35,12 +32,13 @@
         if (!error) {
             error = document.createElement("div");
             error.classList.add("error");
-            // let button = this.stages[0].querySelector("button[type='submit']");
-            // this.stages[0].appendChild(error);
         }
         this.error = error;
         this.request.errorField = error;
         this.additionalContent = null;
+
+        if(this.getAttribute("success-message")) this.successMessage();
+        if(this.getAttribute("success-route")) this.successAction();
     }
 
     disconnectedCallback() {
@@ -70,10 +68,11 @@
             try {
                 result = await this.send_and_subscribe();
                 resolve(result);
+                this.dispatchEvent(new CustomEvent("formRequestSuccess", {detail: result}));
             } catch (error) {
                 this.working_spinner_off();
                 reject(result);
-                // throw new Error("Bad news!");
+                this.dispatchEvent(new CustomEvent("formRequestFail", {detail: result}));
             }
             this.working_spinner_off();
         });
@@ -159,6 +158,37 @@
             },{once: true})
             this.additionalContent.classList.remove("form-request--displayed");
         })
+    }
+
+    successMessage() {
+        this.addEventListener("formRequestSuccess", (e) => {
+            let message = this.getAttribute("success-message");
+            let matches = message.match(new RegExp(/\$(\w+)/g));
+            matches.forEach((n) => {
+                const varName = n.substring(1);
+                if (typeof e.detail === "object") {
+                    if(varName in e.detail) message.replace(n, e.detail[varName]);
+                } else {
+                    let form = this.querySelector(`[name='${varName}']`);
+                    if(form.value) message = message.replace(n, escapeHtml(form.value));
+                }
+            });
+            this.displayItem(`<div>${message}</div>`).classList.add("success");
+        });
+    }
+
+    successAction() {
+        return null;
+    }
+
+    displayItem(messageContent) {
+        const child = document.createElement("form-next-item");
+        child.innerHTML = messageContent;
+        this.appendChild(child);
+        setTimeout(() => {
+            child.classList.add("displayed");
+        }, 100);
+        return child;
     }
 
     // async confirm_stage() {

@@ -470,9 +470,22 @@ function get_temp_path($path, $key) {
  * @return string - HTML-formatted string
  */
 function from_markdown(string $string, bool $untrusted = true) {
-    $md = new Parsedown();
+    $md = new ParsedownExtra();
     $md->setSafeMode($untrusted);
-    return $md->text($string);
+    // Implmentented reddit's ^ for superscript. Only works one word at a time.
+    return preg_replace(
+        [
+            "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
+            "/\^(\w)/",
+            // "/&lt;a(\s*[='\(\)]*.*)&gt;(.*)&lt;\/a&gt;/",
+        ],
+        [
+            "<sup>$1</sup>",
+            "<sup>$1</sup>",
+            // "<a$1>$2</a>",
+        ],
+        $md->text($string)
+    );
 }
 
 /**

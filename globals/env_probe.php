@@ -111,3 +111,10 @@ foreach($required_functions as $funct) {
 if($missing !== "") die("Your runtime is missing the following required functions!<br>$missing");
 
 // if(!in_array(get_current_user(), ["www-data", "apache"])) die ("You must be running Cobalt as the web server user.");
+
+// if(app("always_add_missing_trailing_slash")) {
+//     $path_info = pathinfo($_SERVER['REQUEST_URI']);
+//     if($path_info['filename']) {
+//         exit;
+//     }
+// }

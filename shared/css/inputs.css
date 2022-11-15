@@ -79,6 +79,9 @@ input-wrapper, input, textarea, input-password {
 
   input::placeholder, textarea::placeholder, input + .placeholder {
     color: var(--project-color-input-border-nofocus);
+  }
+
+  input + .placeholder {
     background: transparent;
     position: absolute;
     transition: top 300ms, left 300ms, color 300ms, font-size 300ms;

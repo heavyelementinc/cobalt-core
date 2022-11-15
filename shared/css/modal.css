@@ -12,6 +12,8 @@ modal-container {
   align-items: center;
   height: 100%;
   width: 100%;
+  max-height: 100vh;
+  max-width: 100vw;
   position: fixed;
   top: 0;
   left: 0;
@@ -60,11 +62,19 @@ modal-box {
     position: relative;
     min-height: 20%;
     min-width: 20%;
+    max-width:  calc(100vw - 2em);
+    max-height: calc(100vh - 2em);
     opacity: 0;
     transition: transform .5s, opacity .5s;
-    overflow:hidden;
+    overflow-x: scroll;
     border-radius: 4px;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;
 }
+
+    modal-box::-webkit-scrollbar {
+        display: none;
+    }
 
   modal-box.modal-window--input input {
       width: 100%;
