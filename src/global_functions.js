@@ -238,6 +238,26 @@ async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_c
     });
 }
 
+function modalView(url, close = "Close") {
+    return new Promise((resolve, reject) => {
+        const modal = new Modal({
+            url: url,
+            event: event,
+            chrome: {
+                cancel: {
+                    label: close,
+                    callback: async () => {
+                        resolve("");
+                        return true;
+                    }
+                },
+                okay: null
+            }
+        })
+        modal.draw();
+    });
+}
+
 async function quickRequest(url, { data = {}, method = "POST", }) {
     return await new Promise((resolve, reject) => {
         const api = new ApiFetch(url, method, {});
@@ -641,4 +661,15 @@ function reflow() {
     }
 
     return cssValue;
+}
+
+function iOS() {
+    return [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }

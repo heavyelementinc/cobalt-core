@@ -23,6 +23,9 @@
 
 class CobaltScrollManager {
     constructor(querySelector = null, modifier = 2) {
+        // Let's not do any parallax on iOS.
+        if(iOS()) return this;
+
         this.allowUpdate = false; // The bool that controls the animation loop
         this.simultaneousDelayValue = 50;
         this.querySelector = querySelector ?? "[parallax-mode],[parallax-speed]";
@@ -58,11 +61,13 @@ class CobaltScrollManager {
         let nodes = document.querySelectorAll(this.querySelector);
 
         for(const e of nodes) {
+            // Let's store our elements in the parallaxElements property
             const mode = this.getMode(e.getAttribute("parallax-mode"));
             this.parallaxElements.push({
                 mode,
                 speed: Math.abs(e.getAttribute("parallax-speed") ?? this.modifier),
                 offset: e.getAttribute("parallax-offset") ?? (this.getPageOffset(e)) * -1,
+                dimensions: get_offset(e),
                 element: e
             });
             this[mode + "Init"](e, this.parallaxElements[this.parallaxElements.length - 1]);
@@ -145,31 +150,32 @@ class CobaltScrollManager {
 
 
     async parallaxBackgroundInit(element, data) {
-        // await new Promise((resolve, reject) => {
-        //     const src = element.style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
-        //     let height = element.getAttribute("parallax-height");
-
-        //     if(height) {
-        //         data.height = height;
-        //         resolve();
-        //     }
-
-        //     const image = new Image();
-        //     image.onload = () => {
-        //         data.height = image.height;
-        //         data.width = image.width;
-                
-        //         resolve();
-        //     }
+        if(this.allowNativeCover === false) {
+            console.warn("Parallax Background Init");
+            // Height and width of image
+            const {height, width} = await this.loadImage(element, data); // height: 2788, width: 4190
+            
+            // const containerHeight = element.offsetHeight, // 977
+            // containerWidth = element.offsetWidth; // 1258
     
-        //     image.src = src;
-        // });
+            const containerHeight = window.innerHeight, // 977
+            containerWidth = window.innerWidth; // 1258
+    
+            // Determine the smallest and largest dimensions
+            const smallestImageDimension = Math.min(height, width);
+    
+            // Determine which height is smaller so we can constrain our image dimensions        
+            let divisor = containerHeight;
+            if (containerHeight > containerWidth) divisor = containerWidth;
+            
+            let scaleFactor;
+            if(divisor > smallestImageDimension) scaleFactor = divisor / smallestImageDimension;
+            else divisor = smallestImageDimension / divisor;
+    
+            element.style.backgroundSize = `${width * scaleFactor}px ${height * scaleFactor}px`;
+        }
 
         element.classList.add("cobalt-parallax--bg-parallax");
-
-        // element.style.backgroundRepeat = "no-repeat";
-        // element.style.backgroundAttachment = "fixed";
-        // element.style.backgroundSize = "cover";
 
         const position = element.getAttribute("parallax-start-position") ?? "top";
         element.style.backgroundPosition = `center ${position}`;
@@ -256,6 +262,32 @@ class CobaltScrollManager {
         for(const i of debugs) {
             i.parentNode.removeChild(i);
         }
+    }
+
+    loadImage(element, data) {
+        return new Promise((resolve, reject) => {
+            const src = element.style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
+            // let height = element.getAttribute("parallax-height");
+
+            // if(height) {
+            //     data.height = height;
+            //     resolve(image);
+            // }
+
+            const image = new Image();
+            image.onload = () => {
+                // data.height = image.height;
+                // data.width = image.width;
+                
+                resolve({height: image.naturalHeight, width: image.naturalWidth});
+            }
+            image.onerror = () => {
+                reject({height: 0, width: 0});
+            }
+            image.src = src;
+            if(image.error) reject({height: 0, width: 0});
+            if(image.complete) resolve({height: image.naturalHeight, width: image.naturalWidth});
+        });
     }
 }
 

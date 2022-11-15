@@ -122,3 +122,37 @@ form-request .form-request--autosave-feedback {
 form-request * {
   transition: opacity .5;
 }
+
+form-next-item {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  translate: 100%;
+  background-color: var(--project-body-background);
+  opacity: 0;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  transition: translate .5s, opacity .5s;
+  border: var(--project-color-table-border);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+form-next-item:before {
+  font-family: "Material Design Icons";
+  font-size: 4em;
+}
+
+form-next-item.success:before {
+  content: "\F05E1";
+  color: var(--project-color-acknowledge);
+}
+
+form-next-item.displayed {
+  translate: 0%;
+  opacity: 1;
+}

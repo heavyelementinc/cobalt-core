@@ -9,6 +9,7 @@
         "czproject/git-php": "^4.0",
         "league/omnipay": "^3",
         "omnipay/paypal": "^3.0",
-        "omnipay/stripe": "^3.2"
+        "omnipay/stripe": "^3.2",
+        "erusev/parsedown-extra": "^0.8.1"
     }
 }

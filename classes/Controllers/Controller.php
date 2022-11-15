@@ -46,9 +46,18 @@ class Controller{
      * @return array 
      * @throws BadRequest 
      * @throws Exception 
+     * @deprecated use ->params instead
      */
     public function getParams(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = [], $defaultOptions = null): array {
         return $this->parseFilterAndOptions($manager, $filterOverride, $allowedFilters, $allowedOptions, $defaultOptions);
+    }
+
+    public function params(\Drivers\Database &$manager, array $defaultFilters = [], $misc = [
+        'defaultOptions' => null,
+        'allowedFilters' => [],
+        'allowedOptions' => [],
+    ]) {
+        return $this->parseFilterAndOptions($manager, $defaultFilters, $misc['allowedFilters'] ?? [], $misc['allowedOptions'] ?? [], $misc['defaultOptions']);
     }
 
     /**

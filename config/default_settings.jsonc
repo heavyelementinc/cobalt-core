@@ -800,5 +800,12 @@
         "validate": {
             "type": "boolean"
         }
+    },
+
+    "Database_fs_enabled": {
+        "default": true
+    },
+    "Database_fs_public_endpoint": {
+        "default": "/dbfs/"
     }
 }
