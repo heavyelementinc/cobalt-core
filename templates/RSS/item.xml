@@ -1,0 +1,8 @@
+        <item>
+            <title>{{doc.title}}</title>
+            <link>https://{{app.domain_name}}{{doc.public_link}}</link>
+            <guid>https://{{app.domain_name}}{{doc.public_link}}</guid>
+            <description>{{!doc.body.md}}</description>
+            <author>{{doc.author.display}}</author>
+            <pubDate>{{doc.publicationDate.gmt}}</pubDate>
+        </item>

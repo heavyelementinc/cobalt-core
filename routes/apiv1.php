@@ -9,8 +9,8 @@ if(app("UGC_enable_user_generated_content")) {
 /** API routes for authorization */
 if (app('Auth_logins_enabled')) {
     /** Login and logout routes */
-    Route::post("/login", "CoreApi@login");
-    Route::get("/logout", "CoreApi@logout");
+    Route::post("/login", "Login@handle_login");
+    Route::get("/logout", "Login@handle_logout");
     /** User update routes */
     Route::put("/create-user", "UserAccounts@create_user", ['permission' => 'Auth_allow_creating_users']);
     

@@ -175,12 +175,6 @@ function template_exists($template) {
     return false;
 }
 
-$GLOBALS['CLASSES_DIR'] = [
-    __APP_ROOT__ . "/classes",
-    __APP_ROOT__ . "/private/classes/",
-    __ENV_ROOT__ . "/classes/"
-];
-
 /**
  * Uses the controller's `title` to generate an ID. This is automatically applied
  * to a page if no `main_id` is specified.
@@ -1090,6 +1084,28 @@ function doc_to_array($it): array {
     return $result;
 }
 
+function merge() {
+    $arguments = func_get_args();
+    try {
+        return array_merge(...$arguments);
+    } catch (TypeError $e) {
+
+    }
+    $list = [];
+    foreach($arguments as $i => $arg) {
+        if($arg instanceof \MongoDB\Model\BSONDocument) {
+            $list[$i] = doc_to_array($arg);
+            continue;
+        }
+        if($arg instanceof Iterator) {
+            $list[$i] = iterator_to_array($arg);
+            continue;
+        }
+        $list[$i] = $arg;
+    }
+    return array_merge(...$list);
+}
+
 function cookie_consent_check() {
     return isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === "all";
 }
@@ -1144,4 +1160,51 @@ function benchmark_end($name) {
     if(!__APP_SETTINGS__['debug']) return;
     $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] = microtime(true) * 1000;
     $GLOBALS['BENCHMARK_RESULTS'][$name]['delta'] = $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] - $GLOBALS['BENCHMARK_RESULTS'][$name]['start'];
+}
+
+function obscure_email(string $email, int $threshold = 3, string $character = "•"): string {
+    $obscured = "";
+    $temp_thresh = $threshold;
+    $domain = false;
+    for($i = 0; $i <= strlen($email) - 1; $i++) {
+        if($email[$i] === "@") {
+            $temp_thresh = $threshold;
+            $domain = true;
+        }
+        if($email[$i] === "." && $domain) $temp_thresh = 2;
+
+        if($temp_thresh <= 0) {
+            $obscured .= $character;
+            continue;
+        }
+
+        $obscured .= $email[$i];
+        $temp_thresh -= 1;
+    }
+    return $obscured;
+}
+
+
+function set_up_db_config_file(string $database, string $user, string $password, string $addr = "localhost", string $port = "27017", string $ssl = "false", string $sslFile = "", string $invalidCerts = "false", ?string $path = null) {
+    $path = $path ?? $GLOBALS['db_config'];
+    file_put_contents($path,"
+<?php
+/**
+ * This is the bootstrap config file. We use this to
+ * Set up our database access. This file is read every
+ * time the app is instantiated.
+ */
+
+\$GLOBALS['CONFIG'] = [
+    'db_driver'      => 'MongoDB', // The Cobalt Engine database driver to use to access the database (MongoDB is the only supported driver)
+    'db_addr'        => '$addr', // The database's address
+    'db_port'        => '$port', // The database port number
+    'database'       => '$database', // The name of your app's database
+    'db_usr'         => '$user', // The username for your database
+    'db_pwd'         => '$password', // The password for your database
+    'db_ssl'         => $ssl, // Enable SSL communication between the app and database
+    'db_sslFile'     => '$sslFile', // The SSL cert file for communicating with the database
+    'db_invalidCerts'=> $invalidCerts, // Allow self-signed certificates
+];"
+);
 }

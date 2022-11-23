@@ -83,10 +83,11 @@ class Controller{
      */
     final public function parseFilterAndOptions(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = [], $defaultOptions = null): array {
         $this->manager = $manager;
-        $this->filter = $this->getFilters($allowedFilters);
-        $this->options = $this->getOptions($allowedOptions, $defaultOptions);
         $this->filterOverride = $filterOverride;
-        return [array_merge($this->filter, $filterOverride), $this->options];
+        $this->defaultOptions = $defaultOptions;
+        $this->filter = $this->getFilters($allowedFilters);
+        $this->options = $this->getOptions($allowedOptions, $this->defaultOptions);
+        return [array_merge($this->filter, $this->filterOverride), $this->options];
     }
 
     final public function getFilters(array $allowedFilters): array {
@@ -194,9 +195,10 @@ class Controller{
 
             if(key_exists('callback',$values) && is_callable($values['callback'])) {
                 // Here's where we run the callback
-                $m = $values['callback']($mutant[$k]);
+                $m = $values['callback']($mutant[$k],$this);
                 switch(gettype($m)) {
                     case "array":
+                        unset($mutant[$k]);
                         $mutant = array_merge($mutant, $m);
                         break;
                     default:
@@ -206,6 +208,14 @@ class Controller{
             }
         }
         return $mutant;
+    }
+
+    public function clear_filter($name) {
+        unset($this->filterOverride[$name]);
+    }
+
+    public function clear_option($name) {
+        unset($this->defaultOptions[$name]);
     }
 
     /**

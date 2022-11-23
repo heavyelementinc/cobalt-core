@@ -70,6 +70,7 @@ namespace Validation;
 use ArrayAccess;
 use Iterator;
 use JsonSerializable;
+use MongoDB\BSON\UTCDateTime;
 use \Validation\Exceptions\NoValue;
 use \Validation\Exceptions\ValidationIssue;
 use \Validation\Exceptions\ValidationFailed;
@@ -93,6 +94,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'capitalize', // Capitalizes the first letter of a string
         'uppercase',  // Upper cases the entire string
         'lowercase',  // Lower cases the entire string
+        'gmt',
     ];
 
     // We set up our schema and store it
@@ -203,7 +205,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
         if (count($this->issues) !== 0) throw new ValidationFailed("Validation failed.", $this->issues);
 
-        return array_merge($this->__dataset, $this->__merge_private_fields($this->__dataset));
+        return merge($this->__dataset, $this->__merge_private_fields($this->__dataset));
     }
 
     public function __normalize($value) {
@@ -432,6 +434,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             return $this->__dataset[$field];
         }
         return '';
+    }
+
+    private function __proto_gmt($val, $field) {
+        if($val instanceof UTCDateTime) $val = $val->toDateTime()->getTimestamp();
+        return date('r', $val);
     }
 
     /** Allows us to specify in the schema an alternate display method

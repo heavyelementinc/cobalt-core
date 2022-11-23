@@ -8,25 +8,43 @@ class NewProject{
             'confirm' => 'Directory     ',
             'validate' => '__np_validate_directory',
             'value' => null,
+            'key' => 'settings.json',
         ],
         'domain_name' => [
             'prompt' => "Domain name:",
             'confirm' => 'Domain name   ',
             'validate' => '__np_validate_cannot_be_blank',
-            'value' => null
+            'value' => null,
+            'key' => 'settings.json',
         ],
         'app_name' => [
             'prompt' => "What's your app's name?",
             'confirm' => 'App name      ',
             'validate' => '__np_validate_cannot_be_blank',
             'value' => null,
+            'key' => 'settings.json',
         ],
         'database' => [
             'prompt' => "Provide a unique name for your database:",
             'confirm' => 'Database name ',
             'validate' => "__np_validate_cannot_be_blank",
             'value' => null,
+            'key' => 'config.php',
         ],
+        'username' => [
+            'prompt' => "Database username (leave blank if none)",
+            'confirm' => 'DB Username   ',
+            'validate' => "__np_validate_may_be_blank",
+            'value' => null,
+            'key' => 'config.php',
+        ],
+        'password' => [
+            'prompt' => "Database password (leave blank if none)",
+            'confirm' => 'DB Password   ',
+            'validate' => "__np_validate_may_be_blank",
+            'value' => null,
+            'key' => 'config.php',
+        ]
         // 'Auth_enable_logins' => [
         //     'prompt' => "Enable user accounts? (Y/n)",
         //     'validate' => '__np_validate_enable_logins'
@@ -43,6 +61,9 @@ class NewProject{
         ],
         "ignored" => [
             'execute' => '__np_create_ignored',
+        ],
+        "config" => [
+            'execute' => '__np_db_config_file',
         ],
         "settings" => [
             'execute' => '__np_write_app_settings',
@@ -63,7 +84,8 @@ class NewProject{
         $this->app_root = __CLI_ROOT__ . "/../../";
     }
 
-    function __collect_new_project_settings(){
+    function __collect_new_project_settings($arguments = []){
+
         say("Let's set up your new Cobalt App!","b");
         say("Type `!quit` at any point to abort without making any changes.","i");
         
@@ -71,15 +93,16 @@ class NewProject{
          * there was an error by decrementing $i;
          */
         for($i = 0; $i <= count($this->app) - 1; $i++){
+
             $key = array_keys($this->app)[$i];
-            $val = trim(readline($this->app[$key]['prompt'] . " "));
+            $val = (isset($arguments[$i])) ? trim($arguments[$i]) : trim(readline($this->app[$key]['prompt'] . " "));
             if($val === "!quit") return; // Quit this process without making changes
             try{
                 // Check if we're supposed to validate, then validate
                 if(key_exists('validate',$this->app[$key]) && method_exists($this,$this->app[$key]['validate'])) $val = $this->{$this->app[$key]['validate']}($val,$key);
                 else if (key_exists('validate',$this->app[$key]) && is_callable($this->app[$key]['validate'])) $val = $this->app[$key]['validate']($val,$key);
                 // Set the value in the new_app array
-                $this->new_app[$key] = $val;
+                $this->new_app[$this->app[$key]['key']][$key] = $val;
             } catch(Exception $e){
                 // Catch Exceptions
                 say($e->getMessage()."\n","e");
@@ -127,7 +150,12 @@ class NewProject{
         $this->new_project_dir = $dir_name;
         return $dir_name;
     }
-    var $apache_config_file = "private/config/apache/cobalt.conf";
+    
+    function __np_validate_may_be_blank($validate) {
+        return $validate;
+    }
+
+    var $apache_config_file = "config/apache/cobalt.conf";
     function __np_apache_config(){
         print(" -> Generating Apache VirtualHost configuration... ");
         $file = $this->new_project_dir . "/$this->apache_config_file";
@@ -148,7 +176,7 @@ class NewProject{
     function __np_confirm_creation(){
         say("\nNew app summary:","b");
         foreach($this->app as $name => $values){
-            print("  - $values[confirm] " . $this->new_app[$name] . "\n");
+            print("  - $values[confirm] " . $this->new_app[$values['key']][$name] . "\n");
         }
         print("\n\n");
         $correct = confirm_message("Does this look correct?","Y");
@@ -172,9 +200,9 @@ class NewProject{
 
     function __np_write_app_settings(){
         print(" -> Writing settings file... ");
-        $settings = $this->new_app;
+        $settings = $this->new_app['settings.json'];
         unset($settings['root']);
-        $conf = $this->new_project_dir . "/private/config/settings.json";
+        $conf = $this->new_project_dir . "/config/settings.json";
         if(file_put_contents($conf,json_encode($settings))) return true;
         else return false;
     }
@@ -182,6 +210,13 @@ class NewProject{
     function __np_database_do_nothing(){
         print(" -> We're not doing anything with the database yet... ");
         return true;
+    }
+
+    function __np_db_config_file(){
+        print(" -> Writing config.php... ");
+        $conf = $this->new_app['config.php'];
+        require_once __CLI_ROOT__ . "/../globals/global_functions.php";
+        set_up_db_config_file($conf['database'],$conf['username'],$conf['password'], "localhost", "27017", "false", "", "false", $this->new_project_dir . "/config/config.php");
     }
 }
 

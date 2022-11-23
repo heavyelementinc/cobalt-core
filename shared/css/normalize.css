@@ -175,6 +175,7 @@ progress {
 
 textarea {
     overflow: auto;
+    resize: vertical;
 }
 
 [type="checkbox"], [type="radio"] {
@@ -415,6 +416,9 @@ ul.list-panel {
 }
 
 @media only screen and (max-width: 900px) {
+    html, body {
+        font-size: 3.5vw;
+    }
     #cookie-consent {
         max-width: 100vw;
         max-height: 100vh;
