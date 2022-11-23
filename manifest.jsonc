@@ -13,6 +13,7 @@
             "components/fold-out.js",
             "components/tab-nav.js",
             "components/credit-card.js",
+            "components/flex-table.js",
             "DateConverter.js",
             "Modal.js",
             "TabbedUI.js",

@@ -16,6 +16,9 @@ Route::get("/res/fs/...","FileController@download");
 
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
+    if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
+        Route::get(__APP_SETTINGS__['Posts_rss_feed_path'], "Posts@RSS_feed");
+    }
     Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@index", __APP_SETTINGS__['Posts']['public_index_options']);
     Route::get(__APP_SETTINGS__['Posts']['public_post'],  "Posts@post",  __APP_SETTINGS__['Posts']['public_post_options']);
     Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
@@ -24,13 +27,14 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
 /** If authentications are enabled, these routes should be added to the table */
 if (app("Auth_logins_enabled")) {
     /** Basic login page */
-    Route::get(app("Auth_login_page"), "Login@login");
+    Route::get(app("Auth_login_page"), "Login@login_form");
     // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
 
     Route::get("/user/menu", "UserAccounts@get_user_menu");
     Route::get("/admin", "CoreController@admin_redirect");
+    Route::get("/password-reset", "Login@password_reset_initial_form");
 }
 
 if (app("Auth_account_creation_enabled")) {

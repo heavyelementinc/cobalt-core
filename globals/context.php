@@ -56,11 +56,11 @@ try {
     // Check if we need to initialize Cobalt and start initialization if needed.
     // When we init, we change the route_context to "init" so as to ignore all
     // other web routes.
-    $init_file = __APP_ROOT__ . "/ignored/init.json";
+    $init_file = __APP_ROOT__ . "/ignored/init";
 
     // Check the settings to see if user accounts are enabled, and then check if we
     // have set the current file.
-    if ($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists("$init_file.set")) {
+    if ($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists($init_file)) {
         require_once __ENV_ROOT__ . "/globals/init.php";
     }
 

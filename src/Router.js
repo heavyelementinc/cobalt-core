@@ -26,7 +26,7 @@ class Router {
         this.navigationStarted = false;
 
         this.linkSelector = `a[href^='/']:not([is]),a[href^='${location.origin.toString()}']:not([is])`;
-        this.formSelector = "form.cobalt-query-controls";
+        this.formSelector = "form";
         this.mainContent = document.querySelector("main");
 
         document.addEventListener("navigationEvent", (e) => {
@@ -48,11 +48,11 @@ class Router {
     }
 
     get route() {
-        return this.current_route;
+        return this.location;
     }
 
     get location() {
-        return this.current_route;
+        return this.current_route || `${location.pathname}${(location.search) ? `?${location.search}` : ""}`;
     }
 
     /** @todo Make the router handle smooth transitioning and change this! */

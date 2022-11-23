@@ -195,7 +195,7 @@
         "directives": {
             "style": true
         },
-        "default": "url('/core-content/img/default_poster_image.jpg')"
+        "default": "/core-content/img/default_poster_image.jpg"
     },
 
     "API_CORS_allowed_origins": {
@@ -666,6 +666,9 @@
     "Auth_require_verified_status": {
         "default": true
     },
+    "Auth_allow_password_reset": {
+        "default": true
+    },
     "Admin_panel_prefix": {
         "default": "/admin"
     },
@@ -779,6 +782,56 @@
         "meta": {
             "group": "Features",
             "view": "/admin/settings/inputs/posts.html"
+        }
+    },
+    "Posts_enable_rss_feed": {
+        "default": true,
+        "meta": {
+            "group": "Features",
+            "name": "Enable Post RSS Feed",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Posts_rss_feed_name": {
+        "default": "RSS Feed",
+        "directives": {
+            "alias": "app_name"
+        },
+        "meta": {
+            "group": "Features",
+            "name": "Post RSS Name",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
+    "Posts_rss_feed_description": {
+        "default": "A Cobalt Engine RSS Feed",
+        "directives": {
+            "alias": "app_name"
+        },
+        "meta": {
+            "group": "Features",
+            "name": "Post RSS Feed Description",
+            "type": "textarea"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
+    "Posts_rss_feed_path": {
+        "default": "/posts/feed/",
+        "meta": {
+            "group": "Features",
+            "name": "Post RSS Feed Path",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
         }
     },
     /* 

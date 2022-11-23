@@ -1,6 +1,5 @@
 <?php
 $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
-session_start();
 
 /**
  * env.php - The Cobalt Environment Bootstrapper
@@ -46,8 +45,8 @@ if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
 $allowed_to_exit_on_exception = true;
 $write_to_buffer_handled = false;
 
-require_once __DIR__ . "/globals/bootstrap.php";
 require_once __DIR__ . "/globals/global_declarations.php";
+require_once __DIR__ . "/globals/bootstrap.php";
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
@@ -85,6 +84,10 @@ try {
  *                           settings 
  * */
 define("__APP_SETTINGS__", $application->get_settings());
+
+session_start([
+    
+]);
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
 if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");

@@ -1,7 +1,22 @@
 /** LOGIN FORM **/
 
+main:has(#login-form-container) {
+  display:flex;
+  width: 100vw;
+  height: 80vh;
+  justify-content: center;
+  align-items: center;
+}
+
 #login-form-container {
   display: flex;
+  flex-direction: column;
+  width: 30vw;
+  height: auto;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: var(--project-color-input-background);
+  justify-content: space-between;
+  overflow: hidden;
 }
 
 .login-hero-sidebar {
@@ -12,8 +27,13 @@
   background-image: var(--project-login-hero-sidebar);
   background-color: gray;
   background-size: cover;
-  height: 30vh;
-  width: 50%;
+  height: 200px;
+  width: 100%;
+}
+
+#login-form-container :is(input, button) {
+  width:100%;
+  box-sizing: border-box;
 }
 
 modal-box#login-modal {
@@ -30,10 +50,17 @@ modal-box#login-modal>section {
   text-align: center;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #login-form fieldset {
   padding: 0;
+}
+
+#login-form h1 {
+  font-size: 1.45em;
+  margin-bottom: 0.5em;
 }
 
 #login-form input[type="username"], #login-form input[type="password"] {
@@ -66,4 +93,21 @@ modal-box#login-modal>section {
   padding: .35rem;
   font-size: 1.15rem;
   font-family: var(--project-head-family);
+  margin-top: 1em;
+}
+
+#login-form label:has(input-switch) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#login-form input-switch {
+  margin-right: 1ch;
+}
+
+@media only screen and (max-width: 35em) {
+  #login-form-container {
+    width: 100vw;
+  }
 }

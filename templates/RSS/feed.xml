@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <title>{{app.Posts_rss_feed_name}}</title>
+        <link>https://{{app.domain_name}}</link>
+        <description>{{app.Posts_rss_feed_description}}</description>
+        <image>
+            <url>https://{{app.domain_name}}</url>
+            <title>{{app.Posts_rss_feed_name}}</title>
+            <link>https://{{app.domain_name}}</link>
+        </image>
+        <language>en-us</language>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <copyright>©@date("Y"); {{app.name}}. All rights reserved.</copyright>
+{{!posts}}
+    </channel>
+</rss>

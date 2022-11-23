@@ -20,7 +20,7 @@ class Project {
 
     function init() {
         $this->np = new NewProject();
-        $this->np->__collect_new_project_settings();
+        $this->np->__collect_new_project_settings(func_get_args());
     }
 
     function rebuild() {

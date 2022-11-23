@@ -16,6 +16,9 @@ namespace Auth;
 
 use \Validation\Exceptions\ValidationIssue;
 use \Auth\AdditionalUserFields;
+use DateTime;
+use MongoDB\BSON\UTCDateTime;
+use PhpToken;
 
 class UserSchema extends \Validation\Normalize {
 
@@ -59,12 +62,52 @@ class UserSchema extends \Validation\Normalize {
                 'attributes' => [],
                 'label' => 'Require password reset on next login'
             ],
+            'token' => [
+                'set' => null
+            ]
             // "prefs" => [],
             // "since" => [],
             // "verified" => [],
             // "groups" => [],
             // "permissions" => [],
         ], $integrate);
+    }
+
+    /**
+     * This will generate a token (and will override a token of the same name) and
+     * store the token in the user's database entry.
+     * 
+     * @param $name - The name of the token to be generated
+     * @param $expires - If INT, it's treated as seconds to wait before expiration. If DateTime, it's the expiration DateTime
+     * @return $token
+     */
+    public function generate_token($name, int|DateTime $expires) {
+        if(!$this->_id) throw new \Exception("Tokens may only be generated for populated schemas.");
+        $token = new \Cobalt\Token();
+        $crud = new UserCRUD();
+        $crud->updateOne(
+            [
+                '_id' => $this->_id
+            ],[
+                '$set' => [
+                    "token" => [
+                        'name' => $name,
+                        'value' => $token,
+                        'expires' => new UTCDateTime((gettype($expires) === "int") ? $expires * 1000 : $expires)
+                    ]
+                ]
+            ]
+        );
+        return $token;
+    }
+
+    public function validate_token($name, $value) {
+        if(!$this->_id) throw new \Exception("Tokens may only be validated for populated schemas.");
+        return (string)$this->{"token"} === (string)$value;
+    }
+
+    public function expire_token($name, $value) {
+        
     }
 
     /** Functions are called via the \Auth\CRUDUser class with the following arguments: [$value, $field, $submitted_user_info] */
@@ -84,8 +127,9 @@ class UserSchema extends \Validation\Normalize {
         $this->required_field($value);
         $v = trim($value);
         if ($v !== $value) throw new ValidationIssue("Your username cannot begin or end with spaces.");
+        $crud = new UserCRUD();
         /** Count the number of users with the supplied username */
-        $uname_uniqueness = $this->collection->count(['uname' => $v]);
+        $uname_uniqueness = $crud->count(['uname' => $v]);
         /** If the username is not zero (meaning it's in use), throw an error */
         if ($uname_uniqueness !== 0) throw new ValidationIssue("That username is already in use.");
         return $v;

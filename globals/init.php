@@ -26,14 +26,13 @@
  * @return bool
  */
 function __cobalt_initialize($values) {
-    // We don't want to be passed anything but an array, so let's force an array.
-    if (!is_array($values)) $values = [];
+    if(gettype($values) !== "array") $values = [$values];
 
     // Check to see if we have at least one user account, if so, return.
     $collection = db_cursor('users');
     $result = $collection->count([]);
     if ($result !== 0) {
-        __cobalt_initialize_set_init_file_complete();
+        __cobalt_initialize_set_init_complete();
         return;
     }
 
@@ -58,12 +57,12 @@ function __cobalt_initialize($values) {
 
     // Loop through our required fields and generate inputs for those fields.
     foreach ($required_fields as $key => $field) {
-        $input = "<fieldset><label>$field[label]</label><input type=\"$field[type]\" name=\"$key\" ";
+        $input = "<label>$field[label]</label><input type=\"$field[type]\" name=\"$key\" ";
         if (key_exists($key, $values)) {
             $input .= "value=\"$values[$key]\"";
             array_push($included, $key);
         }
-        $input .= "></fieldset>";
+        $input .= ">";
 
         // Store the inputs we generated in an array
         array_push($ask_for, $input);
@@ -102,7 +101,11 @@ function __cobalt_initialize_create_user($root_user) {
     $crud = new \Auth\UserCRUD();
 
     $result = $crud->createUser($root_user);
-    $crud->updateOne(['_id' => $result['_id']], ['$set' => ['groups' => ['root']]]);
+    try {
+        $crud->updateOne(['_id' => $result['_id']], ['$set' => ['groups' => ['root']]]);
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
 
     // Redact the password field
     $root_user['pword'] = "###############";
@@ -115,20 +118,20 @@ function __cobalt_initialize_create_user($root_user) {
         die($err);
     }
 
-    __cobalt_initialize_set_init_file_complete();
+    __cobalt_initialize_set_init_complete();
 
     // Force a settings update on next load.
-    touch(__APP_ROOT__ . "/private/config/settings.json");
+    touch(__APP_ROOT__ . "/config/settings.json");
 
     return true;
 }
 
 /**
- * __cobalt_initialize_set_init_file_complete
+ * __cobalt_initialize_set_init_complete
  *
  * @return void
  */
-function __cobalt_initialize_set_init_file_complete() {
+function __cobalt_initialize_set_init_complete() {
     $file = $GLOBALS['init_file'];
     // If the file doesn't exist, create it
     if (!file_exists($file)) touch($file);

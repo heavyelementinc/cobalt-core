@@ -40,6 +40,7 @@ class ApiFetch {
             this.result = await result.json();
 
             if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
+            if (result.headers.get("X-Refresh")) this.pageRefresh(result.headers.get("X-Refresh"));
             if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
             if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
             if (result.ok === false) {
@@ -60,6 +61,13 @@ class ApiFetch {
         })
     }
 
+    pageRefresh(value) {
+        if(value === "now") router.location = router.location;
+        this.statusMessage(`@refresh Refreshing page in ${value} seconds`);
+        setTimeout(() => {
+            router.location = router.location
+        },value * 1000);
+    }
     statusMessage(status){
         let parsed = this.parseShorthandCommand(status);
 
