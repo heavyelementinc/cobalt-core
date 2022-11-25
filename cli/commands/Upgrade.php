@@ -68,8 +68,8 @@ class Upgrade{
         $result = $repo->addAllChanges();
         $commit_message = readline("Message >");
         if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting");
-        $repo->commit($commit_message);
-        return $this->push($branch,[]);
+        $result = $repo->commit($commit_message);
+        return $repo->push($branch,[]);
     }
 
     function all($force = false) {
