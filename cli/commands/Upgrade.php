@@ -71,7 +71,7 @@ class Upgrade{
         // adds all changes in repository
         $repo->addAllChanges();
         $commit_message = readline("Message > ");
-        if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting");
+        if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting", 'e');
         $repo->commit($commit_message);
         $repo->push('origin',[]);
         return say("Pushed changes to '$app' repo's origin: $branch",'i');
