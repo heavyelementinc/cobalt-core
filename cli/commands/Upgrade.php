@@ -69,11 +69,11 @@ class Upgrade{
         say("Pushing '$app' changes to remote: $branch.", 'i');
 
         // adds all changes in repository
-        $result = $repo->addAllChanges();
-        $commit_message = readline("Message >");
+        $repo->addAllChanges();
+        $commit_message = readline("Message > ");
         if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting");
-        $result = $repo->commit($commit_message);
-        $result = $repo->push('origin',[]);
+        $repo->commit($commit_message);
+        $repo->push('origin',[]);
         return say("Pushed changes to '$app' repo's origin: $branch",'i');
     }
 
