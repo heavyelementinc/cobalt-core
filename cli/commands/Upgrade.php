@@ -75,7 +75,8 @@ class Upgrade{
         $repo->commit($commit_message);
         say("Pushing changes... this may take some time...");
         $repo->push('origin',[]);
-        return fmt("Pushed changes to '$app' repo's origin: $branch",'i');
+        say("Pushed changes to '$app' repo's origin: $branch",'i');
+        return "Success";
     }
 
     function all($force = false) {
