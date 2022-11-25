@@ -37,8 +37,8 @@ class Upgrade{
 
         // Get branch name
         $branch = $repo->getCurrentBranchName();
-        $app = "app";
-        if(__ENV_ROOT__ === $repo_path) $app = "core";
+        $app = (__ENV_ROOT__ === $repo_path) ? "core" : "app";
+
         say("Upgrading $app from remote: $branch", 'i');
         // Check for updates. Tell user no changes are available.
         if($repo->hasChanges()) {
@@ -60,11 +60,9 @@ class Upgrade{
 
         // Get branch name
         $branch = $repo->getCurrentBranchName();
-        $app = "app";
-        if(__ENV_ROOT__ === $repo_path) {
-            $app = "core";
-        }
-        say("Pushing $app changes to remote: $branch.", 'i');
+        $app = (__ENV_ROOT__ === $repo_path) ? "core" : "app";
+        
+        say("Pushing '$app' changes to remote: $branch.", 'i');
 
         // adds all changes in repository
         $result = $repo->addAllChanges();
