@@ -18,6 +18,10 @@ class Upgrade{
             'description' => "['push' | 'force'] Upgrades only your application",
             'context_required' => true,
         ],
+        'branch' => [
+            'description' => "['core' | 'app', branch_name] Switch to a new branch. If no branch specified, a branch listing occurs.",
+            'context_required' => true,
+        ]
     ];
     
     function core($force = false) {
@@ -48,8 +52,8 @@ class Upgrade{
         }
         
         // Pull changes from repo
-        $result = $repo->pull($branch,[]);
-        return say("Upgraded '$app' from remote: $branch",'i');
+        $result = $repo->pull('origin',[]);
+        return fmt("Upgraded '$app' from remote: $branch",'i');
     }
 
     private function push($repo_path) {
@@ -61,22 +65,35 @@ class Upgrade{
         // Get branch name
         $branch = $repo->getCurrentBranchName();
         $app = (__ENV_ROOT__ === $repo_path) ? "core" : "app";
-        
+        if($repo->hasChanges() === false) return say("No changes to $app: $branch.");
         say("Pushing '$app' changes to remote: $branch.", 'i');
 
         // adds all changes in repository
-        $result = $repo->addAllChanges();
-        $commit_message = readline("Message >");
-        if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting");
-        $result = $repo->commit($commit_message);
-        $result = $repo->push('origin',[]);
-        return say("Pushed changes to '$app' repo's origin: $branch",'i');
+        $repo->addAllChanges();
+        $commit_message = readline("Message > ");
+        if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting", 'e');
+        $repo->commit($commit_message);
+        say("Pushing changes... this may take some time...");
+        $repo->push('origin',[]);
+        say("Pushed changes to '$app' repo's origin: $branch",'i');
+        return "Success";
     }
 
     function all($force = false) {
-        $result = $this->core($force) . "/n";
+        $result = $this->core($force);
         $result .= $this->app($force);
-        return $result;
+        return "Completed process.";
+    }
+
+    function branch($app, $switch = false) {
+        $repo_path = ($app === "core") ? __ENV_ROOT__ : __APP_ROOT__;
+        $app = (__ENV_ROOT__ === $repo_path) ? "core" : "app";
+
+        $git = new CzProject\GitPhp\Git;
+        $repo = $git->open($repo_path);
+
+        if($switch === false) return json_encode($repo->getBranches(), JSON_PRETTY_PRINT);
+        
     }
 
 }
