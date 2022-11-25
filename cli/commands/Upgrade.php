@@ -53,7 +53,7 @@ class Upgrade{
         
         // Pull changes from repo
         $result = $repo->pull('origin',[]);
-        return say("Upgraded '$app' from remote: $branch",'i');
+        return fmt("Upgraded '$app' from remote: $branch",'i');
     }
 
     private function push($repo_path) {
@@ -73,8 +73,9 @@ class Upgrade{
         $commit_message = readline("Message > ");
         if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting", 'e');
         $repo->commit($commit_message);
+        say("Pushing changes... this may take some time...");
         $repo->push('origin',[]);
-        return say("Pushed changes to '$app' repo's origin: $branch",'i');
+        return fmt("Pushed changes to '$app' repo's origin: $branch",'i');
     }
 
     function all($force = false) {
