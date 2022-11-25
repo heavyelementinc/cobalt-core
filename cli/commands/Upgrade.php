@@ -52,7 +52,7 @@ class Upgrade{
         }
         
         // Pull changes from repo
-        $result = $repo->pull('origin',[]);
+        $result = $repo->pull();
         return fmt("Upgraded '$app' from remote: $branch",'i');
     }
 
