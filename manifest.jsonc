@@ -135,6 +135,7 @@
             
         },
         "admin": {
+            "head-family": "Arial, sans-serif",
             "color-admin-panel-background": "#004BA8",
             "color-admin-panel-font": "white"
         },

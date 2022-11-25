@@ -19,3 +19,6 @@ $GLOBALS['CLASSES_DIR'] = [
     __APP_ROOT__ . "/private/classes/",
     __ENV_ROOT__ . "/classes/"
 ];
+
+/** @global ?UserSchema */
+$GLOBALS['session'] = null;

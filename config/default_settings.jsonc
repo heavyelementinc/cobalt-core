@@ -696,7 +696,7 @@
     },
     "Auth_session_panel_enabled": {
         "default": true,
-        "directives": {   
+        "directives": {
             "required": {
                 "Auth_user_accounts_enabled": {"is": true}
             }
