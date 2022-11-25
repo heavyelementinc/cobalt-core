@@ -52,7 +52,7 @@ class Upgrade{
         }
         
         // Pull changes from repo
-        $result = $repo->pull($branch,[]);
+        $result = $repo->pull('origin',[]);
         return say("Upgraded '$app' from remote: $branch",'i');
     }
 
