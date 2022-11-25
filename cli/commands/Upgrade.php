@@ -65,7 +65,7 @@ class Upgrade{
         // Get branch name
         $branch = $repo->getCurrentBranchName();
         $app = (__ENV_ROOT__ === $repo_path) ? "core" : "app";
-        
+        if($repo->hasChanges() === false) return say("No changes to $app: $branch.");
         say("Pushing '$app' changes to remote: $branch.", 'i');
 
         // adds all changes in repository
