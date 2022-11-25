@@ -7,38 +7,39 @@ class Upgrade{
 
     public $help_documentation = [
         'all' => [
-            'description' => "Upgrades both Cobalt Engine and your application.",
+            'description' => "['push' | 'force'] Upgrades both Cobalt Engine and your application.",
             'context_required' => true,
         ],
         'core' => [
-            'description' => "Upgrades only Cobalt Engine",
+            'description' => "['push' | 'force'] Upgrades only Cobalt Engine",
             'context_required' => false
         ],
         'app' => [
-            'description' => "Upgrades only your application",
+            'description' => "['push' | 'force'] Upgrades only your application",
             'context_required' => true,
         ],
     ];
     
     function core($force = false) {
         if($force === "push") return $this->push(__ENV_ROOT__);
-        return $this->upgrade(__ENV_ROOT__, $force);
+        return $this->upgrade(__ENV_ROOT__, $force === "force");
     }
 
     function app($force = false) {
         if($force === "push") return $this->push(__APP_ROOT__);
-        return $this->upgrade(__APP_ROOT__, $force);
+        return $this->upgrade(__APP_ROOT__, $force === "force");
     }
 
     private function upgrade($repo_path, $force = false) {
-        $force = cli_to_bool($force);
         // Init our project
         $git = new CzProject\GitPhp\Git;
         $repo = $git->open($repo_path);
 
         // Get branch name
         $branch = $repo->getCurrentBranchName();
-
+        $app = "app";
+        if(__ENV_ROOT__ === $repo_path) $app = "core";
+        say("Upgrading $app from remote: $branch", 'i');
         // Check for updates. Tell user no changes are available.
         if($repo->hasChanges()) {
             if(!$force) return say("Your local repo has changes. You must specify 'true' as the first and only argument to overwrite these changes.");
@@ -59,11 +60,17 @@ class Upgrade{
 
         // Get branch name
         $branch = $repo->getCurrentBranchName();
+        $app = "app";
+        if(__ENV_ROOT__ === $repo_path) {
+            $app = "core";
+        }
+        say("Pushing $app changes to remote: $branch.", 'i');
 
         // adds all changes in repository
-        $repo->addAllChanges();
-
-        $repo->commit(readline("Commit >"));
+        $result = $repo->addAllChanges();
+        $commit_message = readline("Message >");
+        if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting");
+        $repo->commit($commit_message);
         return $this->push($branch,[]);
     }
 
