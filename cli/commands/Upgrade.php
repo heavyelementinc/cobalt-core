@@ -46,7 +46,7 @@ class Upgrade{
         say("Upgrading $app from remote: $branch", 'i');
         // Check for updates. Tell user no changes are available.
         if($repo->hasChanges()) {
-            if(!$force) return say("Your local repo has changes. You must specify 'true' as the first and only argument to overwrite these changes.");
+            if(!$force) return say("Your local $app has changes. You must specify 'force' as the first and only argument to overwrite these changes.");
             say("Local changes are being obliterated!", "i");
             return $repo->execute('reset', '--hard', $branch);
         }
