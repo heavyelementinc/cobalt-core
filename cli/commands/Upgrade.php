@@ -10,16 +10,27 @@ class Upgrade{
             'description' => "Upgrades both Cobalt Engine and your application.",
             'context_required' => true,
         ],
+        'core' => [
+            'description' => "Upgrades only Cobalt Engine",
+            'context_required' => false
+        ],
         'app' => [
             'description' => "Upgrades only your application",
             'context_required' => true,
         ],
-        'core' => [
-            'description' => "Upgrades only Cobalt Engine",
-            'context_required' => false
-        ]
     ];
     
-    
+    function core() {
+        
+    }
+
+    function app() {
+
+    }
+
+    function all() {
+        $this->core();
+        $this->app();
+    }
 
 }

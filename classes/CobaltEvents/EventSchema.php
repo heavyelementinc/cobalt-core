@@ -78,23 +78,23 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             "bgColor" => [
-                'get' => fn ($val) => ($val) ? $val : "",
+                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-background"),
                 'set' => 'hex_color',
-                'display' => fn ($val) => $this->hex_color($val, ""),
+                'display' => fn ($val) => $this->hex_color($val, app("vars-web.events-banner-background")),
             ],
             "txtColor" =>  [
-                'get' => fn ($val) => ($val) ? $val : "",
+                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-text"),
                 'set' => function ($val) {
                     return $this->contrast_color($val, $this->__dataset['bgColor']);
                 },
-                'display' => fn ($val) => $this->hex_color($val ?? "", ""),
+                'display' => fn ($val) => $this->hex_color($val ?? app("vars-web.events-banner-text"), app("vars-web.events-banner-text")),
             ],
             'btnColor' =>  [
-                'get' => fn ($val) => ($val) ? $val : "",
+                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-text"),
                 'set' => function ($val) {
                     return $this->contrast_color($val, $this->__dataset['bgColor'], 1.2);
                 },
-                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? "", "") : "",
+                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? app("vars-web.color-button-init"), app("vars-web.color-button-init")) : "",
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],
@@ -199,16 +199,3 @@ class EventSchema extends \Validation\Normalize {
         return $options;
     }
 }
-
-
-/*
-app("css-vars.events-banner-background")
-app("css-vars.events-banner-background")
-app("css-vars.events-banner-text")
-app("css-vars.events-banner-text")
-app("css-vars.events-banner-text")
-app("css-vars.events-banner-text")
-app("css-vars.color-button-init")
-app("css-vars.color-button-init")
-app("domain_name"), "", $m);
- */

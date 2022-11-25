@@ -305,13 +305,15 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             throw new ValidationIssue("Maximum character length exceeded.");
         }
 
+        $set = $this->__schema[$name]['set'];
+
         // Ensure we want to save our $value to the dataset (in other words, if
         // set === false, ignore this field)
-        if (isset($this->__schema[$name]['set']) && $this->__schema[$name]['set'] === false) return;
+        if (isset($set) && in_array($set, [null, false])) return;
 
         // Check if a method named set_$name exists and execute it
         $method_name = "set_" . str_replace(".", "__", $name);
-        if (isset($this->__schema[$name]['set'])) $method_name = $this->__schema[$name]['set'];
+        if (isset($set)) $method_name = $set;
 
         // Check if $method_name is either the name of a funciton or a function
         if (is_callable($method_name)) {
