@@ -18,6 +18,10 @@ class Upgrade{
             'description' => "['push' | 'force'] Upgrades only your application",
             'context_required' => true,
         ],
+        'branch' => [
+            'description' => "['core' | 'app', branch_name] Switch to a new branch. If no branch specified, a branch listing occurs.",
+            'context_required' => true,
+        ]
     ];
     
     function core($force = false) {
@@ -74,9 +78,20 @@ class Upgrade{
     }
 
     function all($force = false) {
-        $result = $this->core($force) . "/n";
+        $result = $this->core($force);
         $result .= $this->app($force);
-        return $result;
+        return "Completed process.";
+    }
+
+    function branch($app, $switch = false) {
+        $repo_path = ($app === "core") ? __ENV_ROOT__ : __APP_ROOT__;
+        $app = (__ENV_ROOT__ === $repo_path) ? "core" : "app";
+
+        $git = new CzProject\GitPhp\Git;
+        $repo = $git->open($repo_path);
+
+        if($switch === false) return json_encode($repo->getBranches(), JSON_PRETTY_PRINT);
+        
     }
 
 }
