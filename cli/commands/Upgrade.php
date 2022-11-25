@@ -70,7 +70,7 @@ class Upgrade{
         if(isset($commit_message[0]) && $commit_message[0] === "!") return say("Aborting");
         $result = $repo->commit($commit_message);
         $result = $repo->push('origin',[]);
-        return say("Pushed changes to '$app' repo's origin $branch",'i');
+        return say("Pushed changes to '$app' repo's origin: $branch",'i');
     }
 
     function all($force = false) {
