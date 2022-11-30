@@ -77,9 +77,19 @@ class ApiFetch {
 
     modal(modal) {
         let parsed = this.parseShorthandCommand(modal);
-        parsed.id = this.uri;
-
-        const modalContainer = new Modal({...parsed});
+        let modalContainer;
+        try{
+            parsed = JSON.parse(parsed.message.trim());
+            if("id" in parsed === false) parsed.id = this.uri;
+            modalContainer = new Modal({...parsed});
+        } catch(Error) {
+            if("id" in parsed === false) parsed.id = this.uri;
+            modalContainer = new Modal({
+                body: parsed.message,
+                chrome: {cancel: null}
+            });
+        }
+        
         modalContainer.draw();
     }
 

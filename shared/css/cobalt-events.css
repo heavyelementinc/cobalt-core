@@ -38,12 +38,13 @@ a.cobalt-events--cta-button:hover {
 }
 
 
-.cobalt-events--banner-close {
+button.cobalt-events--banner-close {
     border: none;
     background:transparent;
     position: absolute;
     color: var(--project-events-banner-text);
     right: 1em;
+    padding: 0;
 }
 
 

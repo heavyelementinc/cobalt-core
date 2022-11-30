@@ -110,8 +110,14 @@ class Modal {
         this.close_button(); // Add our close button
 
         // Set a window 
+        window.router.modalState();
         history.pushState({ page: 1 }, this.modalTitle || document.title, "");
-        window.addEventListener("popstate", e => { if (this.container.parentNode !== null) this.close(e) }, { once: true })
+        window.addEventListener("popstate", e => {
+            if (this.container.parentNode !== null) this.close(e)
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }, { once: true })
 
 
         // Handle animation stuff
@@ -214,6 +220,7 @@ class Modal {
         // Loop through our buttons
         for (const i in this.chrome) {
             const c = this.chrome[i]; // Our current button
+            if (!c) continue;
             if ("display" in c && c.display === false) continue; // The display property set to false will ignore that button
             // UNIMPLEMENTED What color should the button be?
             let color = c.color | "var(--project-gray)";

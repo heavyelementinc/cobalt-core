@@ -4,6 +4,7 @@ namespace Validation;
 
 use Auth\UserCRUD;
 use Auth\UserSchema;
+use Cobalt\Style\Color;
 use DOMDocument;
 use Exception;
 use Parsedown;
@@ -54,13 +55,33 @@ abstract class NormalizationHelpers {
      * @param null|string $val The default hex value to use
      * @return string Uppercased 6 digit hex color starting with #
      */
-    final protected function hex_color($val, $default = null) {
+    final protected function hex_color($val, $default = null, $normalize = true) {
+        if(!$val) $val = "#000000";
+        $matches = [];
+        $result = preg_match("/^var\((.*)\)$/", $val, $matches);
+        if($result) {
+            $name = str_replace("--project-","",$matches[1]);
+            $val = app("vars-web.$name");
+        }
+
         if (!$val && $default !== null) return $default;
         if (strlen($val) > 8) throw new ValidationIssue("Not a hex color.");
-        $pattern = "/^#[0-9A-Fa-f]{3,6}$/";
+        $pattern = "/^#?[0-9A-Fa-f]{3,6}$/";
         if (!preg_match($pattern, $val)) throw new ValidationIssue("Not a hex color.");
-        if (strlen($val) === 4) $val = "#$val[1]$val[1]$val[2]$val[2]$val[3]$val[3]";
-        return strtoupper($val);
+        if($val[0] !== "#" && $normalize) $val = "#$val";
+        $length = strlen($val);
+        if ($length <= 4) {
+            $one = 1;
+            $two = 2;
+            $three = 3;
+            if($val[0] !== "#") {
+                $one = 0;
+                $two = 1;
+                $three = 2;
+            }
+            $val = "#$val[$one]$val[$one]$val[$two]$val[$two]$val[$three]$val[$three]";
+        }
+        return preg_replace("/#{2,}/","#",strtoupper($val));
     }
 
     /**
@@ -112,6 +133,10 @@ abstract class NormalizationHelpers {
             hexdec($val[2] . $val[3]),
             hexdec($val[4] . $val[5]),
         ];
+    }
+
+    final protected function get_best_contrast($val, $black = "000000", $white = "FFFFFF"):string {
+        return (new Color($val))->get_best_contrast($this->hex_color($black), $this->hex_color($white));
     }
 
     /**

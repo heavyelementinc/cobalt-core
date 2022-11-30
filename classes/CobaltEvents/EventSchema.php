@@ -43,9 +43,6 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             'body' => [ // The body content of the user's input
-                'get' => function ($val) {
-                    return from_markdown($val);
-                },
             ],
             'type' => [ // The type of modal
                 'valid' => fn () => $this->allowed_event_types,
@@ -90,11 +87,22 @@ class EventSchema extends \Validation\Normalize {
                 'display' => fn ($val) => $this->hex_color($val ?? app("vars-web.events-banner-text"), app("vars-web.events-banner-text")),
             ],
             'btnColor' =>  [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-text"),
+                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-button-color"),
                 'set' => function ($val) {
-                    return $this->contrast_color($val, $this->__dataset['bgColor'], 1.2);
+                    return $val;
                 },
-                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? app("vars-web.color-button-init"), app("vars-web.color-button-init")) : "",
+                'display' => function ($val) {
+                    return $this->hex_color($val ?? app("vars-web.events-button-color"),app("vars-web.events-button-color"));
+                    // ($val) ? $this->hex_color($val ?? app("vars-web.events-button-color"), app("vars-web.events-button-color")) : ""
+                },
+            ],
+            'btnTextColor' => [
+                'get' => fn ($val) => $val,
+                'set' => function ($val) {
+                    $color = $this->get_best_contrast($this->btnColor);
+                    return $color;
+                },
+                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? app("vars-web.events-button-text"), app("vars-web.events-button-text")) : "",
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],

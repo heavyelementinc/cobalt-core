@@ -22,17 +22,22 @@ class CobaltEvents {
         this.currentEvents = await this.api.get();
     }
 
-    async initializeEvent(evt) {
+    async initializeEvent(evt, preview = false) {
         let type = "default";
         if (evt.type in this.eventTypes) type = evt.type;
-        const event = new this.eventTypes[type](evt);
-        if (!event.isElligibleForDisplay()) return false;
-        if (this.hasAnotherEventBeenShown) return false;
-        this.hasAnotherEventBeenShown = true;
-        await this.timeout(localStorage.getItem("eventDelay") || evt.advanced.delay);
+        const event = new this.eventTypes[type](evt, preview);
+        if(preview === false) {
+            if (!event.isElligibleForDisplay()) return false;
+            if (this.hasAnotherEventBeenShown) return false;
+            this.hasAnotherEventBeenShown = true;
+            await this.timeout(localStorage.getItem("eventDelay") || evt.advanced.delay);
+        } else {
+            if(this.eventQueue.preview) this.eventQueue.preview.dismiss();
+        }
         event.draw();
         event.element.addEventListener("cobaltEventsClosed", e => this.eventClosure(e));
-        this.eventQueue[evt._id.$oid] = event;
+        if(!preview) this.eventQueue[evt._id.$oid] = event;
+        else this.eventQueue.preview = event;
         return true;
     }
 
@@ -50,8 +55,13 @@ class CobaltEvents {
 }
 
 class CobaltEvent_default {
-    constructor(data) {
+    constructor(data, preview = false) {
         this.data = data;
+        this.preview = preview;
+    }
+
+    destructor() {
+        this.element.parentNode.removeChild(this.element);
     }
 
     isElligibleForDisplay() {
@@ -106,6 +116,7 @@ class CobaltEvent_default {
     }
 
     closeItem() {
+        if(this.preview) return this.dismiss();
         this[this.storageMedium](this.data._id.$oid, { closed: true, date: this.sessionPolicyDate });
         this.element.dispatchEvent(new CustomEvent("cobaltEventsClosed", {
             detail: this.data._id.$oid || this.data._id
@@ -193,6 +204,7 @@ class CobaltEvent_default {
                 
             }, { once: true });
             cta.style.backgroundColor = this.data.btnColor;
+            cta.style.color = this.data.btnTextColor;
             this.element.appendChild(cta);
             cta.style.color = colorMathBlackOrWhite(getComputedStyle(cta)['background-color']);
         }

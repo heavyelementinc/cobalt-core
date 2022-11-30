@@ -47,10 +47,26 @@ class EventManager extends \Drivers\Database {
         return [
             'published' => true,
             'start_time' => ['$lte' => $this->__date()],
-            'end_time' => ['$gte' => $this->__date()]
+            'end_time' => ['$gte' => $this->__date()],
             // '$or' => [
             //     ['end_time' => null],
             // ]
         ];
+    }
+
+    public function getAdminWidget() {
+        $count = [
+            'current' => $this->count($this->public_query()),
+            'upcoming' => $this->count([
+                'published' => true,
+                'start_time' => ['$gte' => $this->__date()],
+                'end_time' => ['$gte' => $this->__date()]
+            ]),
+            'draft' => $this->count([
+                'published' => false,
+                'end_time' => ['$gte' => $this->__date()]
+            ]),
+        ];
+        return $count;
     }
 }

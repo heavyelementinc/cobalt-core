@@ -73,6 +73,51 @@ function session_exists() {
     return false;
 }
 
+
+/**
+ * @param MongoDB\BSON\Document|mixed $it The Mongo document to be converted
+ * @return array returns an array representation of the document
+ */
+function doc_to_array($it): array {
+    if (is_array($it)) return $it;
+    $result = [];
+    foreach ($it as $key => $value) {
+        if ($value instanceof \Traversable) {
+            $result[$key] = doc_to_array($value);
+        } else {
+            $result[$key] = $value;
+        }
+    }
+    return $result;
+}
+
+/**
+ * Merges the elements of one or more arguments
+ * @param array|Iterator $args,... Arguments
+ * @return mixed 
+ */
+function merge() {
+    $arguments = func_get_args();
+    try {
+        return array_merge(...$arguments);
+    } catch (TypeError $e) {
+
+    }
+    $list = [];
+    foreach($arguments as $i => $arg) {
+        if($arg instanceof \MongoDB\Model\BSONDocument) {
+            $list[$i] = doc_to_array($arg);
+            continue;
+        }
+        if($arg instanceof Iterator) {
+            $list[$i] = iterator_to_array($arg);
+            continue;
+        }
+        $list[$i] = $arg;
+    }
+    return array_merge(...$list);
+}
+
 /**
  * Check if the current user has permission.
  *
@@ -1067,44 +1112,6 @@ function plural($number, string $suffix = "s") {
     return $suffix;
 }
 
-/**
- * @param MongoDB\BSON\Document|mixed $it The Mongo document to be converted
- * @return array returns an array representation of the document
- */
-function doc_to_array($it): array {
-    if (is_array($it)) return $it;
-    $result = [];
-    foreach ($it as $key => $value) {
-        if ($value instanceof \Traversable) {
-            $result[$key] = doc_to_array($value);
-        } else {
-            $result[$key] = $value;
-        }
-    }
-    return $result;
-}
-
-function merge() {
-    $arguments = func_get_args();
-    try {
-        return array_merge(...$arguments);
-    } catch (TypeError $e) {
-
-    }
-    $list = [];
-    foreach($arguments as $i => $arg) {
-        if($arg instanceof \MongoDB\Model\BSONDocument) {
-            $list[$i] = doc_to_array($arg);
-            continue;
-        }
-        if($arg instanceof Iterator) {
-            $list[$i] = iterator_to_array($arg);
-            continue;
-        }
-        $list[$i] = $arg;
-    }
-    return array_merge(...$list);
-}
 
 function cookie_consent_check() {
     return isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === "all";

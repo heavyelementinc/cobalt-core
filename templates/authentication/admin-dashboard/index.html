@@ -6,6 +6,24 @@
         <a href="contact-form/">Read Submissions</a>
     </div>
     <div class='admin-dashboard--widget'>
+        <h2>Events</h2>
+        <div class="hbox" style="padding: 0 .5rem; box-sizing:border-box;justify-content:center">
+            <div class="vbox" style="margin: 0 1rem">
+                <span>{{events.current}}</span>
+                <label>Current</label>
+            </div>
+            <div class="vbox" style="margin: 0 1rem">
+                <span>{{events.upcoming}}</span>
+                <label>Upcoming</label>
+            </div>
+            <div class="vbox" style="margin: 0 1rem">
+                <span>{{events.draft}}</span>
+                <label>Draft@plural("$events.draft");</label>
+            </div>
+        </div>
+        <a href="/admin/cobalt-events/">See all events</a>
+    </div>
+    <div class='admin-dashboard--widget'>
         <h2>Registered Users</h2>
         <div>{{user_accounts}}</div>
         <a href="users/">Manage users</a>
@@ -48,5 +66,8 @@
 
     .admin-dashboard--widget>a {
         text-align: right;
+    }
+    .admin-dashboard--widget label {
+        font-size: 1rem;
     }
 </style>

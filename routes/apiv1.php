@@ -13,6 +13,11 @@ if (app('Auth_logins_enabled')) {
     Route::get("/logout", "Login@handle_logout");
     /** User update routes */
     Route::put("/create-user", "UserAccounts@create_user", ['permission' => 'Auth_allow_creating_users']);
+
+    if(app("Auth_allow_password_reset")) {
+        Route::put("/password-reset/request", "Login@api_password_reset_username_endpoint");
+        Route::put("/password-reset/{token}", "Login@api_password_reset_username_endpoint");
+    }
     
     if(app("Auth_account_creation_enabled")){
         Route::put("/account-creation", "UserAccounts@account_creation");
