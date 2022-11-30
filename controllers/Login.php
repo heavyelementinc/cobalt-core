@@ -66,36 +66,48 @@ class Login {
         // Accept the username
         $query = [
             '$or' => [
-                'username' => $_POST['username'],
-                'email' => $_POST['username']
+                ['uname' => $_POST['username'],],
+                ['email' => $_POST['username'],]
             ]
         ];
         
         // Check that the username exists
         $crud = new \Auth\UserCRUD();
         $user = $crud->findOneAsSchema($query);
-        
+        $message = "X-Modal: @success We will send you an email if your information is in our database.";
         // If it doesn't, send a failure status
-        if(!$user) throw new BadRequest("Resource does not exist.");
+        if(!$user) {
+            header($message);
+            return 1;
+        }
         
         // Check that sending mail is supported
         
         // Generate a token
-        $token = $user->generate_token('password-reset', );
+        $token = $user->generate_token('password-reset');
 
         // Fire off an email with a password reset token
         $mail = new SendMail();
         $mail->set_vars(['token' => $token]);
         $mail->set_body_template("/authentication/password-reset/reset-email.html");
+        $mail->send($user->email, "Password Reset");
 
         // Send a successful message
+        header($message);
+        return 1;
     }
 
 
     function password_reset_token_form($token) {
+        $crud = new \Auth\UserCRUD();
         // Check that the token is valid
-            // Otherwise, throw a 404
+        $check = $crud->findUserByToken('password-reset', $token);
+        // Otherwise, throw a 404
+        if(!$check) throw new NotFound("That token either does not exist or has expired.");
         // Present the user with a form to create a new password
+        add_vars(['title' => 'Password Reset', 'token' => $check->token]);
+
+        return set_template("/authentication/password-reset/new-password-form.html");
     }
 
     function api_password_reset_password_validation($token) {

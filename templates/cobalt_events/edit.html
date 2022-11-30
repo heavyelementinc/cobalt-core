@@ -1,5 +1,5 @@
 <h1 id="internal_name">{{title}}</h1>
-<form-request method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
+<form-request id="event-editor" method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
     <div id="event-edit">
         <fieldset class="admin-panel--container">
             <legend>Basic Info</legend>
@@ -24,7 +24,7 @@
             <input type="date" name="end_date" value="{{event.end_date}}">
             <input type="time" name="end_time" value="{{event.end_time}}">
             <label class="hbox" style="justify-content:left;gap:1ch;">
-                <input-switch name="published" checked="{{event.published}}"></input-switch> Published
+                <input-switch name="published" checked="{{event.published}}" tiny></input-switch> Published
                 <help-span value="In order for an event to be displayed, this switch must be 'on'."></help-span>
             </label>
             <async-button method="DELETE" action="/api/v1/cobalt-events/{{event._id}}">Delete</async-button>
@@ -54,30 +54,30 @@
             <div class="hbox">
                 <input type="color" name="bgColor" value="{{event.bgColor.display}}"
                     default="{{css_vars.events-banner-background}}">
-                <button onclick="resetToDefault('bgColor')" style="margin-left:10px;">
+                <!-- <button onclick="resetToDefault('bgColor')" style="margin-left:10px;">
                     <ion-icon name='refresh'></ion-icon>
-                </button>
+                </button> -->
             </div>
             <label>Text Color <help-span value="Choose the text color for your event.">
                 </help-span></label>
             <div class="hbox">
                 <input type="color" name="txtColor" value="{{event.txtColor.display}}"
                     default="{{css_vars.events-banner-text}}">
-                <button onclick="resetToDefault('txtColor')" style="margin-left:10px;">
+                <!-- <button onclick="resetToDefault('txtColor')" style="margin-left:10px;">
                     <ion-icon name='refresh'></ion-icon>
-                </button>
+                </button> -->
             </div>
             <label>CTA Button Color <help-span
-                    value="Choose the background color of the 'Call To Action' button. A contrasting color will be automatically assigned.">
+                    value="Choose the background color of the 'Call To Action' button. A contrasting text color will be automatically assigned (either black or white).">
                 </help-span></label>
             <div class="hbox">
                 <input type="color" name="btnColor" value="{{event.btnColor.display}}"
-                    default="{{css_vars.color-button-init}}">
-                <button onclick="resetToDefault('btnColor')" style="margin-left:10px;">
+                    default="{{css_vars.events-button-color}}">
+                <input type="hidden" name="btnTextColor" value="{{event.btnTextColor}}">
+                <!-- <button onclick="resetToDefault('btnColor')" style="margin-left:10px;">
                     <ion-icon name='refresh'></ion-icon>
-                </button>
+                </button> -->
             </div>
-
         </fieldset>
         <fieldset id="fieldset" class="admin-panel--container">
             <legend>Advanced</legend>
@@ -96,13 +96,13 @@
                 {{!event.advanced.excluded_paths.options}}
             </input-array>
             <label>
-                <input-switch name="advanced.exclusive" checked="{{event.advanced.exclusive}}"></input-switch> Exclusive
-                <help-span value="An exclusive event will prevent other events from displaying."></help-span>
+                <input-switch name="advanced.exclusive" checked="{{event.advanced.exclusive}}" tiny></input-switch> Exclusive
+                <help-span value="An exclusive event will prevent other events from displaying. Turning this off will allow other events to display at the same time as this one. Be careful!"></help-span>
             </label>
             <label>
                 <label>Delay time <help-span value="Number of seconds to wait until this event gets showed. Max is 90">
                     </help-span></label>
-                <input type="number" name="advanced.delay" value="{{event.advanced.delay}}">
+                <input type="number" name="advanced.delay" value="{{event.advanced.delay}}" min="0" max="90">
             </label>
             <label>Container ID <help-span
                     value="The container of this event will be given this ID. (Useful if you want to bind CSS to this event)">
@@ -111,7 +111,10 @@
             </label>
         </fieldset>
     </div>
-    <input type="submit" value="Save">
+    <div class="hbox" style="justify-content:flex-end">
+        <label><input-switch id="preview-after-save" checked="true" tiny></input-switch> Preview on save</label>
+        <button type="submit">Save</button>
+    </div>
 </form-request>
 
 <style>

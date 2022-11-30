@@ -1,0 +1,23 @@
+{
+    "js": {
+        "common": [],
+        "web": [],
+        "admin": [],
+        "append": []
+    },
+    "css": {
+        "common": [],
+        "web": [],
+        "admin": [],
+        "append": []
+    },
+    "vars": {
+        "common": {},
+        "web": {
+            "body-background": "#efefef",
+            "color-header-branding": "var(--project-body-background)"
+        },
+        "admin": {},
+        "append": {}
+    }
+}

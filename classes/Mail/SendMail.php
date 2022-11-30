@@ -33,7 +33,7 @@ class SendMail{
     $this->mail->Password   = $this->password;                  // SMTP password
     $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;   // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
     $this->mail->Port       = $this->port;                      // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
-    $this->mail->setFrom($this->from_address, $this->from_address_name);
+    $this->mail->setFrom($this->from_address, $this->from_address_name ?? app('name'));
     $this->mail->addReplyTo($this->reply_to_address, $this->reply_to_name);
   }
 

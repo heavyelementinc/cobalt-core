@@ -35,6 +35,7 @@ if (app("Auth_logins_enabled")) {
     Route::get("/user/menu", "UserAccounts@get_user_menu");
     Route::get("/admin", "CoreController@admin_redirect");
     Route::get("/password-reset", "Login@password_reset_initial_form");
+    Route::get("/password-reset/{token}", "Login@password_reset_token_form");
 }
 
 if (app("Auth_account_creation_enabled")) {

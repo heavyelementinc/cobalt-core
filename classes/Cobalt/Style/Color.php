@@ -19,6 +19,11 @@
  */
 namespace Cobalt\Style;
 
+
+/**
+ * Functions should only ever RETURN a value and NEVER mutate the root $hex color
+ * @package Cobalt\Style
+ */
 class Color {
     use ColorTraits, HSV;
     private $hex = "";
@@ -41,10 +46,10 @@ class Color {
         return $this->hex;
     }
     
-    public function get_best_contrast($black = "000", $white = "FFF") {
+    public function get_best_contrast($black = "000000", $white = "FFFFFF") {
         $black_contrast = $this->luminance_difference($this->hex,$black);
         $white_contrast = $this->luminance_difference($this->hex,$white);
-        return ($black_contrast > $white_contrast) ? $black : $white;
+        return ($black_contrast > $white_contrast) ? "$black" : "$white";
     }
 
     public function adjust(float $hue, float $sat, float $lum) {

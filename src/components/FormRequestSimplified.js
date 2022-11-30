@@ -191,6 +191,10 @@
         return child;
     }
 
+    get value() {
+        return this.request.build_query();
+    }
+
     // async confirm_stage() {
     //     let confirm = this.getAttribute("success-route");
     //     let page = this.getAttribute("success-message") || "<p>Your form was submitted successfully.</p>";

@@ -63,7 +63,9 @@ class UserSchema extends \Validation\Normalize {
                 'label' => 'Require password reset on next login'
             ],
             'token' => [
-                'set' => null
+                'get' => fn($val) => $val,
+                'set' => null,
+                // 'each' => '\\Cobalt\\Token'
             ]
             // "prefs" => [],
             // "since" => [],
@@ -81,7 +83,7 @@ class UserSchema extends \Validation\Normalize {
      * @param $expires - If INT, it's treated as seconds to wait before expiration. If DateTime, it's the expiration DateTime
      * @return $token
      */
-    public function generate_token($name, int|DateTime $expires) {
+    public function generate_token($name, null|int|DateTime $expires = null) {
         if(!$this->_id) throw new \Exception("Tokens may only be generated for populated schemas.");
         $token = new \Cobalt\Token();
         $crud = new UserCRUD();
@@ -89,10 +91,10 @@ class UserSchema extends \Validation\Normalize {
             [
                 '_id' => $this->_id
             ],[
-                '$set' => [
+                '$addToSet' => [
                     "token" => [
                         'name' => $name,
-                        'value' => $token,
+                        'value' => (string)$token,
                         'expires' => new UTCDateTime((gettype($expires) === "int") ? $expires * 1000 : $expires)
                     ]
                 ]
@@ -101,13 +103,41 @@ class UserSchema extends \Validation\Normalize {
         return $token;
     }
 
-    public function validate_token($name, $value) {
+    public function get_token($name):?\Cobalt\Token {
         if(!$this->_id) throw new \Exception("Tokens may only be validated for populated schemas.");
-        return (string)$this->{"token"} === (string)$value;
+        $match = null;
+        foreach($this->token as $data) {
+            if($name !== $data->name) continue;
+            $match = $data;
+            break;
+        }
+        
+        if(!$match) return null;
+        return new \Cobalt\Token($match->value, $match->expires);
     }
 
-    public function expire_token($name, $value) {
-        
+    public function expire_token($token_object) {
+        if(!$this->_id) throw new \Exception("Tokens may only be expired for populated schemas.");
+        $crud = new UserCRUD();
+        $query = $token_object;
+        $result = $crud->updateOne(['_id' => $this->_id], [
+            '$pull' => [
+                'token' => $query,
+            ]
+        ]);
+        return $result->getModifiedCount();
+    }
+
+    public function expire_token_type($name) {
+        if(!$this->_id) throw new \Exception("Tokens may only be expired for populated schemas.");
+        $crud = new UserCRUD();
+        $query = [
+            '$elemMatch' => ['name' => $name]
+        ];
+        $result = $crud->updateOne(['_id' => $this->_id],[
+            '$pull' => ['token' => $query]
+        ]);
+        return $result->getModifiedCount();
     }
 
     /** Functions are called via the \Auth\CRUDUser class with the following arguments: [$value, $field, $submitted_user_info] */

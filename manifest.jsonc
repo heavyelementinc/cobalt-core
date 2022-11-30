@@ -39,7 +39,8 @@
         "admin": [
             "protected/Posts.js",
             "protected/UserPanel.js",
-            "protected/UserManager.js"
+            "protected/UserManager.js",
+            "protected/EventManager.js"
         ],
         "append": [
             "main.js",

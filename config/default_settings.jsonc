@@ -668,6 +668,7 @@
     },
     "Auth_allow_password_reset": {
         "default": true
+        // Allows public password resets
     },
     "Admin_panel_prefix": {
         "default": "/admin"

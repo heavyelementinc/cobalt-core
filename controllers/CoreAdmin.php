@@ -4,6 +4,7 @@ use \Auth\UserSchema;
 use MongoDB\BSON\ObjectId;
 use Cobalt\Payments\PaymentGateway;
 use Cobalt\Payments\PaymentGatewaySchema;
+use CobaltEvents\EventManager;
 use Contact\ContactManager;
 
 class CoreAdmin {
@@ -12,6 +13,7 @@ class CoreAdmin {
             'title' => "Admin Panel",
             'contact_manager' => (new ContactManager())->get_unread_count_for_user(session()),
             'user_accounts' => (new \Auth\UserCRUD())->count([]),
+            'events' => (new EventManager())->getAdminWidget(),
             'plugin_count' => count($GLOBALS['ACTIVE_PLUGINS']),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
         ]);

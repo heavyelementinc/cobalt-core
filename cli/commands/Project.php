@@ -12,10 +12,6 @@ class Project {
             'description' => "Schedule a rebuild of cached settings on next request.",
             'context_required' => true
         ],
-        // 'upgrade' => [
-        //     'description' => '["all"*|"app"|"env"] - Pull from [specified] Git remotes.',
-        //     'context_required' => true
-        // ]
     ];
 
     function init() {

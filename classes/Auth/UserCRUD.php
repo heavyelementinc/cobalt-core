@@ -14,7 +14,7 @@ namespace Auth;
 
 use Auth\UserValidate;
 use Auth\UserSchema;
-
+use DateTime;
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {
@@ -23,7 +23,7 @@ class UserCRUD extends \Drivers\Database {
     }
 
     function get_schema_name($doc = []) {
-        return "UserSchema";
+        return "\\Auth\\UserSchema";
     }
 
     final function getUserById($id) {
@@ -66,6 +66,22 @@ class UserCRUD extends \Drivers\Database {
         return $this->find([
             'group' => $groups
         ], $options);
+    }
+
+    final function findUserByToken(string $name, string $token):?UserSchema {
+        $result = $this->findOneAsSchema([
+            'token.name' => $name,
+            'token.value' => $token,
+        ]);
+        if(!$result) return null;
+        $tkn = $result->get_token($name);
+        $expires = $tkn->getExpires();
+        // Expire token if its invalid
+        if($expires && $expires > new DateTime()) {
+            $modified = $result->expire_token($tkn);
+            return null;
+        }
+        return $result;
     }
 
     final function updateUser($id, $request) {

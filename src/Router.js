@@ -138,8 +138,10 @@ class Router {
                 event.preventDefault();
             });
             window.addEventListener("popstate",(event) => {
-                console.info("Popstate firing");
-                if(event.state && "url" in event.state) this.handle_SPA_navigation(event.state.url, event);
+                if(event.state) {
+                    if("modalState" in event.state) return;
+                    if("url" in event.state) this.handle_SPA_navigation(event.state.url, event)
+                } 
                 else console.log(event);
             });
             forms = document.querySelectorAll(this.formSelector);
@@ -293,6 +295,15 @@ class Router {
         // Implement screen scrolling and setting
         
         window.scrollTo(0,0);
+    }
+
+    updateState(data = {}) {
+        const state = history.state;
+        history.replaceState({...state, ...data}, '');
+    }
+
+    modalState() {
+        this.updateState({modalState: true});
     }
 
 }
