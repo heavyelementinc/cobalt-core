@@ -1,14 +1,14 @@
 
 .close-glyph {
   color: inherit;
-  font-family: 'Futura', 'Arial', sans-serif;
+  font-family: 'Material Design Icons', sans-serif;
   font-weight: 900;
   font-size: 18pt;
   cursor: pointer;
 }
 
 .close-glyph:before {
-  content:"x";
+  content:"\F05AD";
 }
 
 /** Inputs */
@@ -16,7 +16,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input, textarea, input-password {
+input-wrapper, input, textarea, input-password, button[native] {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -25,7 +25,7 @@ input-wrapper, input, textarea, input-password {
   color: var(--project-color-input-text-color);
 }
 
-  :is(input-wrapper, input-password) input {
+  :is(input-wrapper, input-password) :is(input, button) {
     border: unset;
     background: unset;
     padding: 0;
@@ -189,11 +189,12 @@ input-array {
     width: 100%;
   }
 
-  input-array fieldset{
+  :is(form-request) input-array fieldset, input-array fieldset{
     display: flex;
     flex-wrap: wrap;
     flex-grow:1;
     min-height: 2rem;
+    border: 0;
     border-bottom: 1px solid var(--project-color-input-border-nofocus);
     background: var(--project-color-input-disabled);
     margin: 0;

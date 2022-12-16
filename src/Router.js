@@ -2,7 +2,7 @@ class Router {
     constructor() {
         window.router_entities = {};
         this.isSPA = app().SPA;
-        this.prefersLimitedMotion = !app("SPA_smooth_scroll_on_nav") || window.matchMedia("prefers-reduced-motion").matches || false;
+        this.prefersLimitedMotion = window.matchMedia("prefers-reduced-motion").matches || false;
         if(this.prefersLimitedMotion) {
             document.body.parentNode.style.scrollBehavior = "initial";
         }
@@ -19,6 +19,8 @@ class Router {
         /** @property Array - the results of the regex match */
         this.route_args = null;
         /** @property Object - the route directives to be used */
+
+        this.skipToContent = document.querySelector("#sr-skip-to-content");
 
         /** @method or @null */
         this.navigationEventReject = null;
@@ -116,13 +118,13 @@ class Router {
         }
     }
 
-    initialize_SPA_navigation(allLinks = null) {
+    async initialize_SPA_navigation(allLinks = null) {
         // Don't do anything if we're not in SPA mode.
         if(!this.isSPA) return;
         
         
         if(allLinks === null) allLinks = this.first_run;
-        if(!this.first_run) this.scrollToTop();
+        if(!this.first_run) await this.scrollToTop();
         // Select the appropriate anchor tags
         let links;
         let forms;
@@ -140,7 +142,7 @@ class Router {
             window.addEventListener("popstate",(event) => {
                 if(event.state) {
                     if("modalState" in event.state) return;
-                    if("url" in event.state) this.handle_SPA_navigation(event.state.url, event)
+                    if("url" in event.state || "alwaysReloadOnForward" in event.state) this.handle_SPA_navigation(event.state.url, event)
                 } 
                 else console.log(event);
             });
@@ -247,6 +249,7 @@ class Router {
         document.title = await result.title ?? "";
 
         this.mainContent.id = result.main_id ?? "main";
+        this.skipToContent.href = result.main_id ?? "main";
         this.mainContent.innerHTML = result.body;
 
         this.navigationEnd();
@@ -291,10 +294,15 @@ class Router {
         }
     }
 
-    scrollToTop() {
+    async scrollToTop() {
         // Implement screen scrolling and setting
+        const scrollBehaviorStore = document.body.parentNode.style.scrollBehavior;
         
+        document.body.parentNode.style.scrollBehavior = (app("SPA_smooth_scroll_on_nav")) ? "smooth" : "initial";
+        await reflow();
         window.scrollTo(0,0);
+        document.body.parentNode.style.scrollBehavior = scrollBehaviorStore;
+        return;
     }
 
     updateState(data = {}) {
@@ -304,6 +312,25 @@ class Router {
 
     modalState() {
         this.updateState({modalState: true});
+    }
+
+    replaceLocation(url, title = document.title, data = {}, triggerEvent = true) {
+        history.replaceState({url: url, ...data}, document.title, url);
+        let check;
+        try {
+            check = new URL(url);
+        } catch (Error) {
+            try {
+                check = new URL(`${origin}${url}`);
+            } catch (Error) {
+                console.warn("Cannot create a URL");
+            }
+        }
+        if(check.hash && triggerEvent) {
+            window.dispatchEvent(new Event("hashchange"));
+        } else if (triggerEvent) {
+            this.location = check;
+        }
     }
 
 }

@@ -23,7 +23,7 @@ class EventsController {
         $table = [
             'name' => [
                 'header' => 'Event Name (Internal)',
-                'display' => fn ($doc) => "<a href='edit/$doc->_id'>$doc->name</a>"
+                'display' => fn ($doc) => "<a href='/admin/cobalt-events/edit/$doc->_id'>$doc->name</a>"
             ],
             'type' => [
                 'header' => 'Type',

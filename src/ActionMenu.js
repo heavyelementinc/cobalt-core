@@ -59,7 +59,7 @@ class ActionMenu {
         header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
         this.menu.appendChild(header);
 
-        header.querySelector("button").addEventListener("click", (e) => this.closeMenu())
+        header.querySelector("button").addEventListener("click", this.closeMenu.bind(this))
         // await wait_for_animation("action-menu--deploy");
         // const api = new ApiFetch("", "GET");
         // const options = await api.send("");
@@ -112,7 +112,8 @@ class ActionMenu {
         const api = new ApiFetch(action.request.action, action.request.method,{});
         if("method" in action.request && "action" in action.request) {
             try {
-                requestData = await api.send();
+                const toSubmit = this.toSubmit(action, event);
+                requestData = await api.send(toSubmit);
             } catch (error) {
                 console.log(api);
                 action.loading.error(error);
@@ -132,6 +133,12 @@ class ActionMenu {
         }
         action.loading.end();
         if (result === true) this.closeMenu();
+    }
+
+    toSubmit(action, event) {
+        let data = event.target.getAttribute("value") || event.target.closest("button").getAttribute("value");
+        if(data) data = JSON.parse(data);
+        return action.value || data || {};
     }
 
     /** Close this menu */
@@ -164,7 +171,7 @@ class ActionMenu {
 
     positionMenu() {
         if (this.mode === "modal") {
-            document.body.classList.add("scroll-locked")
+            document.body.classList.add("scroll-locked");
             return;
         }
 
@@ -175,8 +182,14 @@ class ActionMenu {
         let viewportHeight = window.innerHeight;
         let originX = this.getAbsolutePosition("left");
         let originY = this.getAbsolutePosition("top");
-        if ((originX + menuWidth + 5) >= viewportWidth) originX -= menuWidth;
-        if (((originY + menuHeight + 5)) >= (viewportHeight + scrollTop)) originY -= menuHeight;
+        if ((originX + menuWidth + 5) >= viewportWidth) {
+            originX -= Math.abs((originX + menuWidth + 5) - viewportWidth);
+
+        }
+        if (((originY + menuHeight + 5)) >= (viewportHeight + scrollTop)) {
+            originY -= Math.abs((originY + menuHeight + 5)) - (viewportHeight + scrollTop);
+
+        }
         this.wrapper.style.left = `${originX}px`;
         this.wrapper.style.top = `${originY}px`;
     }
@@ -186,11 +199,9 @@ class ActionMenu {
             left: 'X',
             top: 'Y'
         }
-        if (this.mode === "spawn" 
-            || this.attachTo) return this.getAbsolutePositionElement(type);
+        return this.getAbsolutePositionElement(type);
 
-
-        return this.event['page' + translation[type]];
+        // return this.event['page' + translation[type]];
     }
 
     getAbsolutePositionElement(type) {
@@ -198,12 +209,19 @@ class ActionMenu {
 
         if(target.parentNode.tagName === "BUTTON") target = target.parentNode
         if(this.attachTo) target = this.attachTo;
+        else {
+            target = this.event.target.closest("button, input[type='button'], input[type='submit'], async-button, split-button");
+        }
 
         switch(type) {
+            case "right":
+                return get_offset(target).right;
             case "left":
                 return get_offset(target).x
             case "top":
-                return get_offset(target).bottom
+                return get_offset(target).bottom;
+            case "bottom":
+                return get_offset(target).y;
         }
 
         let translation = {

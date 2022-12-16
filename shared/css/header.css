@@ -189,7 +189,7 @@ header nav a.navigation--current {
         isolation: isolate;
         overflow: hidden;
     }
-    #nav-menu-spawn-nojs:checked+header {
+    .js-nav-spawned #app-header {
         transform: translateX(0);
     }
     .cobalt-events--default.cobalt-events--banner{

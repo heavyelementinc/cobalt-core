@@ -12,9 +12,13 @@
   transition: transform .5s, opacity .5s;
 }
 
-:is(form-request) > fieldset {
+:is(form-request) fieldset {
   border: var(--project-color-table-border);
   background: white;
+}
+
+:is(form-request) fieldset > label {
+  margin-top: .5rem;
 }
 
 /* 
@@ -155,4 +159,8 @@ form-next-item.success:before {
 form-next-item.displayed {
   translate: 0%;
   opacity: 1;
+}
+
+.form-request--excluded-element {
+  display: none;
 }

@@ -7,15 +7,41 @@ use Validation\Exceptions\ValidationIssue;
 class EventSchema extends \Validation\Normalize {
 
     protected $allowed_event_types = [
-        'banner' => "Banner",
-        'modal' => "Modal pop-up",
+        'banner' => [
+            'value' => "Banner",
+            'exclude' => "[name='body']",
+        ],
+        'modal'  => [
+            'value' => "Modal pop-up",
+            'exclude' => "",
+        ],
     ];
     protected $allowed_session_policies = [
-        '24_hours'     => 'After 24+ hours',
-        'with_session' => 'After closing tab (session)',
-        'half_date'    => 'Half time between close and event end',
-        'nag'          => 'On every page (not recommended)',
-        'never'        => 'Never show event again'
+        '24_hours'     => [
+            'value' => 'After 24+ hours',
+            'exclude' => "[name='session_policy_hours']",
+        ],
+        '12_hours'     => [
+            'value' => 'After 12+ hours',
+            'exclude' => "[name='session_policy_hours']",
+        ],
+        'hours' => 'After [n]+ hours',
+        'with_session' => [
+            'value' => 'After closing tab (session)',
+            'exclude' => "[name='session_policy_hours']",
+        ],
+        'half_date'    => [
+            'value' => 'Half time between close and event end',
+            'exclude' => "[name='session_policy_hours']",
+        ],
+        'nag'          => [
+            'value' => 'On every page (not recommended)',
+            'exclude' => "[name='session_policy_hours']",
+        ],
+        'never'        => [
+            'value' => 'Never show event again',
+            'exclude' => "[name='session_policy_hours']",
+        ],
     ];
 
 
@@ -61,6 +87,12 @@ class EventSchema extends \Validation\Normalize {
                     return $val;
                 },
                 'valid' => fn () => $this->allowed_session_policies
+            ],
+            'session_policy_hours' => [
+                'get' => fn ($val) => $val ?? 12,
+                'set' => function ($val) {
+                    return clamp(filter_var($val, FILTER_VALIDATE_INT), 1, 1000);
+                }
             ],
             'call_to_action_prompt' => [
                 'set' => 'sanitize'
@@ -144,12 +176,16 @@ class EventSchema extends \Validation\Normalize {
                 'valid' => fn ($val) => $this->filled($val)
             ],
             'advanced.exclusive' => [
-                'get' => fn ($val) => $val ?? true,
+                'get' => fn ($val) => $val ?? false,
                 'set' => 'boolean_helper'
             ],
             "advanced.delay" => [
                 'get' => fn ($val) => $val ?? 10,
                 'set' => fn ($val) => $this->min_max($val, 0, 90)
+            ],
+            "changes_override" => [
+                'get' => fn ($val) => $val,
+                'set' => fn ($val) => $this->boolean_helper($val)
             ]
         ];
     }

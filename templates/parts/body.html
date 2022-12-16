@@ -33,15 +33,19 @@
 </head>
 
 <body id="{{body_id}}" class="{{body_class}}">
+    <a id="sr-skip-to-content" href="{{main_id}}" class="sr-only">Skip to content</a>
     <noscript>
         {{app.name}} <strong>REQUIRES</strong> JavaScript. Basic functionality <strong>will not work</strong>
         without JavaScript enabled. Please enable JavaScript or upgrade your
-        browser.{{!noscript_binding_after}}</noscript>
-    <label id="nav-menu-spawn" for="nav-menu-spawn-nojs" tabindex="0">
-        <ion-icon name="menu"></ion-icon>
-    </label>
-    <input type="checkbox" id="nav-menu-spawn-nojs">
-    <header>
+        browser.{{!noscript_binding_after}}
+    </noscript>
+    <button id="nav-menu-spawn" aria-pressed="false"
+        aria-controls="app-header" aria-expanded="false" 
+    >
+        <span class="visually-hidden">Menu</span>
+        <i name="menu"></i>
+    </button>
+    <header id="app-header">
         {{!header_binding_before}}
         @header_content@
         {{!header_binding_middle}}

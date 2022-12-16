@@ -2,6 +2,18 @@
          INPUT SWITCH
    ========================= */
 
+switch-container {
+  padding: .4rem;
+  margin-top: .5rem;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+
 input-switch {
   display: inline-block;
   width: 64px;

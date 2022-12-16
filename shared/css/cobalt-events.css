@@ -7,6 +7,7 @@
     top:0;
     background: var(--project-events-banner-background);
     z-index: calc(var(--project-modal-z-index) - 1);
+    align-items: center;
 }
 
 .cobalt-events--banner :is(h1, h1:first-of-type){
@@ -29,7 +30,7 @@ a.cobalt-events--cta-button {
     font-weight: bold;
     border-radius: 3px;
     font-size: 1.1em;
-    font-family: var(--project-body-family);
+    font-family: var(--project-events-font-family);
 }
 
 

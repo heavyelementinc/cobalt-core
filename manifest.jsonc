@@ -1,9 +1,13 @@
 {
     "js": {
         "common": [
+            "Preferences.js",
             "global_functions.js",
             "sortable.js",
+            "components/custom-button.js",
             "components/autocomplete-interface.js",
+            "components/radio-buttons.js",
+            "components/split-button.js",
             "components/input-array.js",
             "components/autocomplete.js",
             "components/input-password.js",
@@ -45,6 +49,7 @@
         "append": [
             "main.js",
             "app.js",
+            "Cobalt/MobileNavMenu.js",
             "Router.js"
         ]
     },
@@ -53,6 +58,7 @@
             "components/autocomplete.css",
             "components/tag-select.css",
             "components/fold-out.css",
+            "components/split-button.css",
             "components/tab-nav.css",
             "components/cobalt-carousel.css",
             "normalize.css",
@@ -130,7 +136,8 @@
             "events-button-color": "var(--project-color-button-init)",
             "events-button-color-hover": "var(--project-color-button-hover)",
             "events-button-text": "var(--project-color-button-text)",
-            "events-button-text-hover": "var(--project-color-button-hover-text)"
+            "events-button-text-hover": "var(--project-color-button-hover-text)",
+            "events-font-family": "var(--project-body-family)"
         },
         "web": {
             

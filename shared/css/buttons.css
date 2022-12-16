@@ -90,3 +90,53 @@ async-button.final{
     pointer-events: none;
     opacity: .8;
 }
+
+split-button {
+    display: flex;
+    border: 1px solid currentColor;
+    background: var(--project-color-button-init);
+    border-radius: 4px;
+    font-size: 1.1rem;
+    color: var(--project-color-button-text);
+    overflow: hidden;
+    grid-template-rows: auto;
+    grid-template-columns: auto 3rem;
+}
+
+split-button option {
+    display: none;
+}
+
+split-button :is(button, async-button:not(.link, [link]), async-button.link, async-button[link]),
+split-button :is(button, async-button:not(.link, [link]), async-button.link, async-button[link]):hover {
+    border: none;
+    color: inherit;
+    background: none;
+    margin: 0;
+    padding: .4rem .6rem;
+    text-align: center;
+    border-radius: 0;
+    transition: none;
+    height: 100%;
+    flex-grow: 1;
+    align-items:center;
+    height: 3rem;
+    box-sizing: border-box;
+}
+
+split-button :is(button, async-button:not(.link, [link]), async-button.link, async-button[link]):hover {
+    background: var(--project-color-button-hover);
+    color: var(--project-color-button-hover-text);
+}
+
+split-button button.split-button--additional-options,
+split-button button.split-button--additional-options:hover {
+    border-left: .5px solid currentColor;
+    max-width: 3rem;
+    width: 3rem;
+}
+
+:is(button, async-button, input[type="button"])[aria-pressed='true'] {
+    background: var(--project-color-button-text);
+    color: var(--project-color-button-init);
+}

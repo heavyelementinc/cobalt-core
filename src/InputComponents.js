@@ -124,6 +124,21 @@ class InputSwitch extends HTMLElement {
 
 customElements.define("input-switch", InputSwitch);
 
+class SwitchContainer extends HTMLElement {
+    connectedCallback() {
+        this.switch = this.querySelector("input-switch");
+
+        this.addEventListener("click", (e) => {
+            for(const i of e.path) {
+                if(i.tagName === "INPUT-SWITCH") return;
+            }
+            this.switch.value = !this.switch.value;
+        });
+    }
+}
+
+customElements.define("switch-container", SwitchContainer);
+
 /**
  * radio-groups support the following attributes:
  *

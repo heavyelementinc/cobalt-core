@@ -3,6 +3,7 @@ class EventManager {
         this.id = id;
         this.form = document.querySelector("#event-editor");
         this.previewSwitch = document.querySelector("#preview-after-save");
+        this.initPreviewSwitch();
         this.menuActions = [
             (menu) => {
                 menu.registerAction({
@@ -24,11 +25,11 @@ class EventManager {
             this.previewEvent(e.detail);
         })
 
-        const button = document.createElement("button"),
-        headline = document.querySelector("#internal_name");
+        const button = document.querySelector("#more-menu"),
+        headline = document.querySelector("#options");
         headline.appendChild(button);
         button.addEventListener("click", e => {
-            const menu = new ActionMenu({event: e, title: "Manage", mode: "modal"});
+            const menu = new ActionMenu({event: e, title: "Manage"});
             this.menuActions.forEach((e) => {
                 e(menu);
             })
@@ -57,5 +58,20 @@ class EventManager {
 
     getPreviewFromForm() {
         this.previewEvent(this.form.value);
+    }
+
+    resetToDefault(target) {
+        target = document.querySelector(`[name='${target}']`)
+        const reset = target.getAttribute("default");
+        target.value = reset;
+    }
+
+    initPreviewSwitch() {
+        const prefName = "Events-preview-on-save";
+        const value = pref(prefName) || true
+        this.previewSwitch.value = JSON.parse(value);
+        this.previewSwitch.addEventListener("change", () => {
+            window.Preferences.set("cobalt-events--preview-on-save", this.previewSwitch.value);
+        });
     }
 }

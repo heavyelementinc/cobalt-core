@@ -13,6 +13,7 @@
  class FormRequestElement extends HTMLElement {
     constructor() {
         super();
+        this.excludedClass = "form-request--excluded-element";
     }
 
     connectedCallback() {
@@ -36,9 +37,14 @@
         this.error = error;
         this.request.errorField = error;
         this.additionalContent = null;
+        
 
         if(this.getAttribute("success-message")) this.successMessage();
         if(this.getAttribute("success-route")) this.successAction();
+
+        this.initExcludeFields();
+
+        // this.fieldExclusion();
     }
 
     disconnectedCallback() {
@@ -193,6 +199,89 @@
 
     get value() {
         return this.request.build_query();
+    }
+
+    // fieldExclusion() {
+    //     const exclude = this.querySelectorAll('[data-exclude]');
+    //     exclude.forEach(e => {
+    //         const origin = e;
+    //         switch(e.tagName) {
+    //             case "OPTION":
+    //             case "OPTGROUP":
+    //                 e = e.closest("select, input-array, tag-select");
+    //                 break;
+    //         }
+    //         e.addEventListener('change', event => {
+    //             const currentlyExcluded = this.querySelectorAll(this.excludedClass);
+    //             for(const ex of currentlyExcluded) {
+    //                 ex.classList.remove(this.excludedClass);
+    //             }
+    //             const query = origin.dataset.exclude;
+    //             this.querySelector(query).forEach(this.excludeElement.bind(this))
+    //         });
+    //     })
+    // }
+
+
+    initExcludeFields() {
+        // const exclude = this.querySelectorAll("[data-exclude]");
+        // if(!exclude) return;
+        // for(let el of exclude) {
+        //     const query = el.getAttribute("data-exclude");
+        //     if(!query) continue;
+        //     this.handleFieldExclusions(el, query);
+        // }
+    }
+
+    handleFieldExclusions(element, query){
+        let listenerElement = element;
+        let value = listenerElement.value
+        if(element.tagName === "OPTION") {
+            listenerElement = element.closest("select, input-autocomplete, input-array, input-multiselect");
+        }
+        const namedExclusion = `${this.excludedClass}--${listenerElement.getAttribute("name")}`;
+        
+        const eventHandler = event => {
+            if(listenerElement !== element) {
+                if(listenerElement.value !== value) return;
+            }
+            // Reset all fields that have been excluded because of this field
+            const previouslyHidden = this.querySelectorAll(namedExclusion);
+            for(const excluded of previouslyHidden) {
+                this.includeElement(excluded, namedExclusion);
+            }
+
+            const toHide = this.querySelectorAll(query);
+            // Exclude the fields for this element
+            for(const excluded of toHide) {
+                this.excludeElement(excluded, namedExclusion);
+            }
+        }
+
+        listenerElement.addEventListener("change", eventHandler);
+        eventHandler();
+    }
+
+    excludeElement(element, namedExclusion) {
+        element.classList.add(this.excludedClass, namedExclusion);
+        const label = this.getElementLabelsAndContainers(element);
+        if(label) label.add(this.excludedClass, namedExclusion);
+    }
+    
+    includeElement(element, namedExclusion) {
+        element.classList.remove(this.excludedClass, namedExclusion);
+        const label = this.getElementLabelsAndContainers(element);
+        if(label) label.remove(this.excludedClass, namedExclusion);
+    }
+
+    getElementLabelsAndContainers(excludedElement) {
+        let elligibleParent = excludedElement.closest("label, switch-container");
+        if(elligibleParent) return elligibleParent.classList.add(this.excludedClass);
+
+        let elligibleLabel = excludedElement.previousElementSibling;
+        if(!elligibleLabel) elligibleLabel = this.querySelector(`[for='${excludedElement.name}],[for='#${excludedElement.id || excludedElement.name}]`);
+        
+        if(elligibleLabel) return elligibleLabel;
     }
 
     // async confirm_stage() {

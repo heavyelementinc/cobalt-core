@@ -1,5 +1,5 @@
 {
     navigation_callback: (id = null) => {
-        const eventEditor = new EventManager(id);
+        window.router_entities.eventEditor = new EventManager(id);
     }
 }
