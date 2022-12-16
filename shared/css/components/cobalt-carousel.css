@@ -24,7 +24,8 @@ cobalt-carousel {
 cobalt-carousel .cobalt-carousel--scroll-container {
     /* display: flex; */
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: none;
+    overflow-y: none;
     /* height: 25em; */
     width: 100%;
     user-select: none;
@@ -39,7 +40,7 @@ cobalt-carousel .cobalt-carousel--scroll-container {
     font-size: 0px;
 }
 
-cobalt-carousel[scroll] .cobalt-carousel--scroll-container {
+cobalt-carousel .cobalt-carousel--scroll-container {
     -ms-overflow-style: none;
     scrollbar-width: none;
     overflow-x: scroll;
@@ -48,8 +49,8 @@ cobalt-carousel[scroll] .cobalt-carousel--scroll-container {
     text-space-collapse: discard;
 }
 
-cobalt-carousel[scroll] .cobalt-carousel--scroll-container::-webkit-scrollbar { 
-    /* display: none;  */
+cobalt-carousel .cobalt-carousel--scroll-container::-webkit-scrollbar { 
+    display: none; 
 }
 
 cobalt-carousel .cobalt-carousel--carousel-item {

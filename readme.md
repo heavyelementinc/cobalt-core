@@ -1,14 +1,15 @@
 # Cobalt Engine
 
 <img align="right" src="shared/img/branding/cobalt-logo.svg" alt="Heavy Element" height="200" width="auto">
-Cobalt Engine is meant to provide developers with a simple and intuitive router-based web development frontend. It's compatible with Docker and easily deployed.
+Cobalt Engine is meant to provide developers with a simple and powerful router-based web development frontend. It's compatible with Docker and easily deployed.
 
 Cobalt aims to provide an all-in-one framework which includes
  * An expressive HTML template engine
- * A hybrid backend/frontend routing system
- * Route contexts for HTML content, RESTful APIs, webhooks, and more
+ * Robust user account management and permission system
+ * A unified routing system for both the backend and frontend
  * Frontend WebComponents for easily interacting with the API
- * User account management and extendable permission system
+ * A CLI for managing settings, user accounts, CRON tasks, and more
+ * Route contexts for HTML content, RESTful APIs, webhooks, and more
 
 It was created by [Heavy Element, Inc](https://heavyelement.io).
 

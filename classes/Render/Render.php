@@ -99,6 +99,7 @@ class Render {
             'app'  => __APP_SETTINGS__,
             'get'  => $_GET,
             'post' => $_POST,
+            // '$main_id' => 'main-content',
             'session' => session(),
             'request' => [
                 'url' => "$http://$_SERVER[SERVER_NAME]" . "$_SERVER[REQUEST_URI]$query_string",

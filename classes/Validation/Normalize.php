@@ -495,10 +495,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             $value = $v;
             $data = "";
             if (gettype($v) === "array") {
-                $value = $v['value'];
-                unset($v['value']);
-                foreach ($v as $attr => $value) {
-                    $data .= " data-$attr=\"$value\"";
+                $v = $v['value'];
+                unset($value['value']);
+                foreach ($value as $attr => $val) {
+                    $data .= " data-$attr=\"$val\"";
                 }
             }
             $selected = "";

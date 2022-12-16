@@ -10,7 +10,7 @@
  *  - once    [true|false] will disable the button once completed
  *  - value   [string] the value to be submitted as a post request
  */
-class AsyncButton extends HTMLElement {
+class AsyncButton extends CustomButton {
     constructor() {
         super();
         this.request = null;

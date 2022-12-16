@@ -1,10 +1,22 @@
-<h1 id="internal_name">{{title}}</h1>
+<div class="hbox">
+    <h1 id="internal_name">{{title}}</h1>
+    <div id="options">
+        <button id="more-menu"><i name="menu"></i></button>
+    </div>
+</div>
 <form-request id="event-editor" method="PUT" action="/api/v1/cobalt-events/update/{{event._id}}">
     <div id="event-edit">
         <fieldset class="admin-panel--container">
             <legend>Basic Info</legend>
 
-            <label>Internal Name
+            <switch-container>
+                <label class="hbox" style="justify-content:left;gap:1ch;">
+                        Published <help-span value="In order for an event to be displayed, this switch must be 'on'."></help-span>
+                </label>
+                <input-switch name="published" checked="{{event.published}}" tiny></input-switch>
+            </switch-container>
+
+            <label>Internal Name <help-span value="This is for internal reference only and is not displayed publicly. HOWEVER, this field is not entirely hidden from the public. Do not put sensitive info in this field."></help-span>
                 <input name="name" value="{{event.name}}" for="#internal_name">
             </label>
             <label>Event Type
@@ -13,21 +25,25 @@
                 </select>
             </label>
             <label>"Display Again" Policy <help-span value="When to display the event again after closure."></help-span>
-                <select name="session_policy" value="{{event.session_policy}}">
-                    {{!event.session_policy.options}}
-                </select>
+                <div class="hbox">
+                    <select name="session_policy" value="{{event.session_policy}}">
+                        {{!event.session_policy.options}}
+                    </select>
+                    <input type="number" name="session_policy_hours" value="{{event.session_policy_hours}}" style="max-width: 5ch;">
+                </div>
             </label>
-            <label>Event Starts</label>
+            
+            <div class="hbox" style="margin:20px 0 10px">
+                <legend>Start/End&nbsp;Times</legend>
+                <hr>
+            </div>
+            <label>Event Starts <help-span value="Start times are when the event starts displaying on the website."></help-span></label>
             <input type="date" name="start_date" value="{{event.start_date}}">
             <input type="time" name="start_time" value="{{event.start_time}}">
-            <label>Event Ends</label>
+            <label>Event Ends <help-span value="End times are when the event ceases to be displayed on the website."></help-span></label>
             <input type="date" name="end_date" value="{{event.end_date}}">
             <input type="time" name="end_time" value="{{event.end_time}}">
-            <label class="hbox" style="justify-content:left;gap:1ch;">
-                <input-switch name="published" checked="{{event.published}}" tiny></input-switch> Published
-                <help-span value="In order for an event to be displayed, this switch must be 'on'."></help-span>
-            </label>
-            <async-button method="DELETE" action="/api/v1/cobalt-events/{{event._id}}">Delete</async-button>
+            
         </fieldset>
         
         <fieldset class="admin-panel--container">
@@ -39,6 +55,31 @@
             <label>Body
                 <textarea name="body">{{event.body.raw}}</textarea>
             </label>
+            
+            <label>Background Color <help-span value="Choose the background color of your event."></help-span>
+            </label>
+            <div class="hbox">
+                <input type="color" name="bgColor" value="{{event.bgColor.display}}"
+                    default='@normalize_color("$app.vars-web.events-banner-background")'>
+                <button class="reset" title="Reset to default color" onclick="window.router_entities.eventEditor.resetToDefault('bgColor')" native>
+                    <i name='refresh'></i>
+                </button>
+            </div>
+            <label>Text Color <help-span value="Choose the text color for your event.">
+                </help-span></label>
+            <div class="hbox">
+                <input type="color" name="txtColor" value="{{event.txtColor.display}}"
+                    default='@normalize_color("$app.vars-web.events-banner-text")'>
+                <button class="reset" title="Reset to default color" onclick="window.router_entities.eventEditor.resetToDefault('txtColor')" native>
+                    <i name='refresh'></i>
+                </button>
+            </div>
+
+            <div class="hbox" style="margin:20px 0 10px">
+                <legend>Call&nbsp;to&nbsp;Action</legend>
+                <hr>
+            </div>
+            
             <label>Call to Action Text <help-span
                     value="The user will be presented with a button. This is the text of that button."></help-span>
                     <input name="call_to_action_prompt" value="{{event.call_to_action_prompt}}">
@@ -48,35 +89,17 @@
                 </help-span>
                 <input name="call_to_action_href" value="{{event.call_to_action_href}}" pattern="[^\s]">
             </label>
-            <label>Background Color <help-span value="Choose the background color of your event.">
-                </help-span>
-            </label>
-            <div class="hbox">
-                <input type="color" name="bgColor" value="{{event.bgColor.display}}"
-                    default="{{css_vars.events-banner-background}}">
-                <!-- <button onclick="resetToDefault('bgColor')" style="margin-left:10px;">
-                    <ion-icon name='refresh'></ion-icon>
-                </button> -->
-            </div>
-            <label>Text Color <help-span value="Choose the text color for your event.">
-                </help-span></label>
-            <div class="hbox">
-                <input type="color" name="txtColor" value="{{event.txtColor.display}}"
-                    default="{{css_vars.events-banner-text}}">
-                <!-- <button onclick="resetToDefault('txtColor')" style="margin-left:10px;">
-                    <ion-icon name='refresh'></ion-icon>
-                </button> -->
-            </div>
+            
             <label>CTA Button Color <help-span
                     value="Choose the background color of the 'Call To Action' button. A contrasting text color will be automatically assigned (either black or white).">
                 </help-span></label>
             <div class="hbox">
                 <input type="color" name="btnColor" value="{{event.btnColor.display}}"
-                    default="{{css_vars.events-button-color}}">
-                <input type="hidden" name="btnTextColor" value="{{event.btnTextColor}}">
-                <!-- <button onclick="resetToDefault('btnColor')" style="margin-left:10px;">
-                    <ion-icon name='refresh'></ion-icon>
-                </button> -->
+                    default='@normalize_color("$app.vars-web.events-button-color");'>
+                <button class="reset" title="Reset to default color" onclick="window.router_entities.eventEditor.resetToDefault('btnColor')" native>
+                    <i name='refresh'></i>
+                </button>
+                <input type="hidden" name="btnTextColor" value="{{event.btnTextColor}}" native>
             </div>
         </fieldset>
         <fieldset id="fieldset" class="admin-panel--container">
@@ -95,12 +118,15 @@
             <input-array name="advanced.excluded_paths" value="{{@event.advanced.excluded_paths}}" allow-custom="true">
                 {{!event.advanced.excluded_paths.options}}
             </input-array>
+            <switch-container>
+                <label>
+                    Exclusive <help-span value="An exclusive event will prevent other events from displaying. Turning this off will allow other events to display at the same time as this one. Be careful!"></help-span>
+                </label>
+                <input-switch name="advanced.exclusive" checked="{{event.advanced.exclusive}}" tiny></input-switch>
+            </switch-container>
+
             <label>
-                <input-switch name="advanced.exclusive" checked="{{event.advanced.exclusive}}" tiny></input-switch> Exclusive
-                <help-span value="An exclusive event will prevent other events from displaying. Turning this off will allow other events to display at the same time as this one. Be careful!"></help-span>
-            </label>
-            <label>
-                <label>Delay time <help-span value="Number of seconds to wait until this event gets showed. Max is 90">
+                <label>Delay time <help-span value="Number of seconds to wait until this event gets showed. Max is 90.">
                     </help-span></label>
                 <input type="number" name="advanced.delay" value="{{event.advanced.delay}}" min="0" max="90">
             </label>
@@ -109,17 +135,92 @@
                 </help-span>
                 <input name="container_id" value="{{event.container_id}}">
             </label>
+            <switch-container>
+                <label>Changes override "display again" policy <help-span value="When this box is checked, any changes you make here will trigger this event to be shown again to the end user, even if the 'Display Again' timout hasn't expired for end users who have 'seen' this event."></help-span></label>
+                <input-switch name="changes_override" checked="true" tiny></input-switch>
+            </switch-container>
         </fieldset>
+        
     </div>
     <div class="hbox" style="justify-content:flex-end">
-        <label><input-switch id="preview-after-save" checked="true" tiny></input-switch> Preview on save</label>
+        <label>
+            <input-switch id="preview-after-save" checked="pref('Events-preview-on-save') || true)" tiny></input-switch>
+            Preview on save
+        </label>
         <button type="submit">Save</button>
     </div>
+
 </form-request>
+
+<fold-out title="Learn More About Cobalt Events">
+    <p>Cobalt Events are messages that will be showed to visitors of your site.
+        This can take the form of banners which stick to the top of the screen
+        or modal boxes which pop up over the content in the page.
+    </p>
+    <h3>Banner vs. Pop up</h3>
+    <p>Generally speaking, banners are less intrusive to the end users experience
+        on your site while modals will guarantee that the user sees the event.
+    </p>
+    <p>Too many pop-ups will cause the end user to become annoyed and leave,
+        especially if they happen frequently. So, please, only use them for
+        important info everyone visiting your site needs to see.
+    </p>
+    <h3>Tracking "seen" status</h3>
+    <p>When an event is displayed to the user the user may click the <em>Call to Action</em> button
+        or the close (<i name="close"></i>) button.
+    </p>
+    <p>Either action will <strong>dismiss</strong> the event dialog and the event
+        will be considered "seen." This "seen" status is stored on the user's
+        device upon interacting with the event.
+    </p>
+    <p>The exact time and date of their closing the event dialog is stored along
+        with this status. Finally, the event's "last_updated_on" value is also
+        stored with this data.
+    </p>
+    <p>The seen status is stored individually for each event. So if you have two
+        (or more) events running at the same time, the user will see the one
+        ending most recently unless they've already "seen" it.
+    </p>
+    <p>Multiple events can be displayed at the same time by unchecking the
+        Advanced<i name="arrow-right"></i>Exclusive box. However, this is
+        <strong>strongly</strong> discouraged. Especially multiple events of the
+        same type (two banners, two pop-ups, etc).
+    </p>
+    <h3>Will people who have "seen" an Event see it again?</h3>
+    <p>Depending on the "Display Again" Policy, the seen status for the device will
+        eventually expire. Most of these are self-explanatory. However, one of them
+        is not. <em>Half time between close and event end</em> has proved to be unintuitive
+        to understand.</p>
+    <cite>In this instance, "closing the event" and "marking an event as seen" are used
+        interchangably.
+    </cite>
+        
+    <p>Essentially, the user will see the event again once they reach the middle
+        point between the time they closed the event and the scheduled time the
+        Event Ends.
+    </p>
+    <blockquote>
+        <p>For example:</p>
+        <p>If I close an event that is scheduled to end ten days from now, I will
+            see it again in five days.</p>
+        <p>If I close an event ending in four days, I'd see it again in two days.</p>
+        <p>If I close an event at 8 AM that ends at 12PM, I'll see it again at about 10 AM.</p>
+    </blockquote>
+
+    <p>The event will <strong>not</strong> be shown to them again until their "seen" status expires
+        for this specific event <strong>or</strong> you update the event with the
+        Advanced<i name="arrow-right"></i><em>Changes override "display again" policy</em> setting.
+    </p>
+    <p></p>
+</fold-out>
 
 <style>
     fieldset :is(h1, h2, h3) {
         margin-top: 0;
+    }
+
+    fieldset .hbox {
+        flex-wrap: nowrap;
     }
 
     #event-edit {
@@ -137,12 +238,6 @@
         width: 100%;
         height: 36px;
     }
+    
 </style>
 
-<script>
-    function resetToDefault(target) {
-        target = document.querySelector(`[name='${target}']`)
-        const reset = target.getAttribute("default");
-        target.value = reset;
-    }
-</script>

@@ -1215,3 +1215,44 @@ function set_up_db_config_file(string $database, string $user, string $password,
 ];"
 );
 }
+
+function normalize_color($val, $default = null, $normalize = null) {
+    if(!$val) $val = "#000000";
+    $matches = [];
+    $result = preg_match("/^var\((.*)\)$/", $val, $matches);
+    if($result) {
+        $name = str_replace("--project-","",$matches[1]);
+        $val = app("vars-web.$name");
+    }
+
+    if (!$val && $default !== null) return $default;
+    if (strlen($val) > 8) throw new ValidationIssue("Not a hex color.");
+    $pattern = "/^#?[0-9A-Fa-f]{3,6}$/";
+    if (!preg_match($pattern, $val)) throw new ValidationIssue("Not a hex color.");
+    if($val[0] !== "#" && $normalize) $val = "#$val";
+    $length = strlen($val);
+    if ($length <= 4) {
+        $one = 1;
+        $two = 2;
+        $three = 3;
+        if($val[0] !== "#") {
+            $one = 0;
+            $two = 1;
+            $three = 2;
+        }
+        $val = "#$val[$one]$val[$one]$val[$two]$val[$two]$val[$three]$val[$three]";
+    }
+    return preg_replace("/#{2,}/","#",strtoupper($val));
+}
+
+
+/**
+ * Clamps a value between the $min and $max value;
+ * @param int|float $int 
+ * @param int|float $min 
+ * @param int|float $max 
+ * @return int|float 
+ */
+function clamp(int|float $current, int|float $min, int|float $max):int|float {
+    return max($min, min($max, $current));
+}

@@ -228,6 +228,17 @@ table, tr, td {
     display: none !important;
 }
 
+.visually-hidden:not(:focus):not(:active),
+.sr-only:not(:focus):not(:active) {
+    clip: rect(0 0 0 0); 
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap; 
+    width: 1px;
+}
+
 /* ==================
      STYLE DEFAULTS
    ================== */

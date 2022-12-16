@@ -6,7 +6,12 @@ class CobaltEvents {
             default: CobaltEvent_default,
             modal: CobaltEvent_modal
         }
+        this.typesOnDisplay = {
+            default: false,
+            modal: false,
+        }
         this.hasAnotherEventBeenShown = false;
+        this.hasAnExclusiveEventBeenShown = false;
         this.api = new ApiFetch('/api/v1/cobalt-events/current/', 'GET', {});
         this.init();
     }
@@ -14,7 +19,7 @@ class CobaltEvents {
     async init() {
         await this.getCurrentEvents();
         for (const evt of this.currentEvents) {
-            if (this.initializeEvent(evt)) continue;
+            if (await this.initializeEvent(evt)) continue;
         }
     }
 
@@ -28,17 +33,31 @@ class CobaltEvents {
         const event = new this.eventTypes[type](evt, preview);
         if(preview === false) {
             if (!event.isElligibleForDisplay()) return false;
-            if (this.hasAnotherEventBeenShown) return false;
+            if (!this.isExclusiveAllowed()) return false;
             this.hasAnotherEventBeenShown = true;
+            this.typesOnDisplay[event.type] = true;
             await this.timeout(localStorage.getItem("eventDelay") || evt.advanced.delay);
         } else {
             if(this.eventQueue.preview) this.eventQueue.preview.dismiss();
         }
         event.draw();
         event.element.addEventListener("cobaltEventsClosed", e => this.eventClosure(e));
+        
+        // Store this event in the displayed event queue.
         if(!preview) this.eventQueue[evt._id.$oid] = event;
         else this.eventQueue.preview = event;
         return true;
+    }
+
+    isExclusiveAllowed(event) {
+        if(!event || this.typesOnDisplay[event.type]) return false;
+
+        // If the event is not exclusive
+        // if(this.advanced.exclusive === false) return true;
+
+        // Check if another event has been shown
+        if (this.hasAnotherEventBeenShown) return false;
+        return true
     }
 
     eventClosure(e) {
@@ -65,7 +84,8 @@ class CobaltEvent_default {
     }
 
     isElligibleForDisplay() {
-        const hasBeenClosed = this[this.storageMedium](this.data._id.$oid)?.closed ?? null;
+        const stored = this[this.storageMedium](this.data._id.$oid);
+        const hasBeenClosed = stored?.closed ?? null;
         const includePathnameMatch = this.pathname(this.data.advanced.included_paths);
 
         // Let's get a malliable version of our pathnames
@@ -75,13 +95,22 @@ class CobaltEvent_default {
         const excludePathnameMatch = this.pathname(excludedPathnames);
 
         if (hasBeenClosed === true) {
-            return false
+            if(!this.hasBeenChanged(stored)) return false;
         };
         if (includePathnameMatch) return true;
         if (excludePathnameMatch) {
             return false;
         }
         return true;
+    }
+
+    hasBeenChanged(stored) {
+        if(!this.data.changes_override) return false;
+        if(!stored.lastUpdated) return true;
+        if(!this.data.last_updated_on) return false;
+        // If the dates don't match, then something has changed. Therefore, we
+        // want to return the inverse bool of the comparison.
+        return !(stored.lastUpdated.$date.$numberLong === this.data.last_updated_on.$date.$numberLong);
     }
 
     pathname(paths, empty = false) {
@@ -115,9 +144,9 @@ class CobaltEvent_default {
         return `cobalt-events--${this.data.type}`;
     }
 
-    closeItem() {
+    closeItem(status = "closed") {
         if(this.preview) return this.dismiss();
-        this[this.storageMedium](this.data._id.$oid, { closed: true, date: this.sessionPolicyDate });
+        this[this.storageMedium](this.data._id.$oid, { closed: true, status, date: this.sessionPolicyDate, lastUpdated: this.data.last_updated_on });
         this.element.dispatchEvent(new CustomEvent("cobaltEventsClosed", {
             detail: this.data._id.$oid || this.data._id
         }));
@@ -146,6 +175,12 @@ class CobaltEvent_default {
             case "with_session":
             case "24_hours":
                 date = now + (1000 * 60 * 60 * 24);
+                break;
+            case "12_hours":
+                date = now + (1000 * 60 * 60 * 12);
+                break;
+            case "hours":
+                date = now + (1000 * 60 * 60 * this.data.session_policy_hours);
                 break;
             case "half_date":
                 date = now + (end - now / 2);
@@ -200,7 +235,7 @@ class CobaltEvent_default {
             cta.addEventListener("click", e => {
                 e.preventDefault();
                 window.router.location = cta.href;
-                this.closeItem();
+                this.closeItem("cta");
                 
             }, { once: true });
             cta.style.backgroundColor = this.data.btnColor;
@@ -234,7 +269,7 @@ class CobaltEvent_default {
         close.innerHTML = window.closeGlyph;
         close.style.color = colorMathBlackOrWhite(this.data.bgColor ?? "#FFFFFF");
 
-        close.addEventListener("click", e => this.closeItem(), { once: true })
+        close.addEventListener("click", e => this.closeItem("close-button"), { once: true })
         this.element.appendChild(close);
     }
 }

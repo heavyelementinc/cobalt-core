@@ -12,3 +12,12 @@
     <async-button method="PUT" action="/api/v1/debug/control-headers/" value='{"method":"modal","class":"message","type":"pizza"}'>Pizza Message</async-button>
     <async-button method="PUT" action="/api/v1/debug/control-headers/" value='{"method":"modal","class":"error","type":"pizza"}'>Pizza Error</async-button>
 </fieldset>
+<fieldset>
+    <legend>Split button test</legend>
+    <split-button>
+        <async-button method="PUT" action="/api/v1/debug/control-headers/" value='{"method":"modal","class":"message","type":"auth"}'>Auth Message</async-button>
+        <option method="PUT" action="/api/v1/debug/control-headers/">Auth Error</option>
+        <option method="PUT" action="/api/v1/debug/control-headers/">Pizza Message</option>
+        <option method="PUT" action="/api/v1/debug/control-headers/">Pizza Error</option>
+    </split-button>
+</fieldset>
