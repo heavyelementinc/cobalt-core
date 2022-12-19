@@ -123,6 +123,8 @@ trait ClientFSManager {
             'tmp_name' => $file['tmp_name'][$index],
         ];
 
+        if($this->fs_filename_path) $file_array['name'] = trim_trailing_slash($this->fs_filename_path)."/$file_array[name]";
+
 
         $metadata = getimagesize($file_array['tmp_name']);
         if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($file_array['tmp_name'])];
