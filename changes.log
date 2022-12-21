@@ -1,0 +1,4 @@
+# Changes in Cobalt 1.0
+- Session cookies have been renamed to "COBALTID". This will LOG OUT everyone.
+- Sessions are now stored in the browser for 90 days be default, may be adjusted in settings file "Auth_session_days_until_expiration"
+- Sessions 

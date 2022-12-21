@@ -581,11 +581,15 @@ progress-bar .progress-bar--indicator{
   }
 }
 
-form.cobalt-query-controls {
+.cobalt-query-controls {
   text-align: center;
 }
 
-form.cobalt-query-controls button {
+.cobalt-query-controls .page-controls {
+  font-size: 1.3em;
+}
+
+.cobalt-query-controls button {
   border: none;
   background-color: var(--project-calendar-cell-txt);
   border-radius: 50%;
@@ -598,8 +602,9 @@ form.cobalt-query-controls button {
   justify-content: center;
 }
 
-form.cobalt-query-controls button:disabled {
+.cobalt-query-controls :is(:disabled, [disabled="disabled"], [disabled]) {
   opacity: .2;
+  pointer-events: none;
 }
 
 input-password {

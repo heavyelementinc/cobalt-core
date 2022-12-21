@@ -293,7 +293,7 @@ class Settings extends \Drivers\Database {
             $array_type = is_associative_array($manifest['common'] ?? $result[$index]);
             
             if($array_type) $result[$index] = array_merge($result[$index], $val ?? []);
-            else array_push($result[$index], ...$val);
+            else array_push($result[$index], ...array_values($val));
 
             if(isset($manifest['append'])) {
                 if(!isset($this->appendable[$index])) $this->appendable[$index] = [];

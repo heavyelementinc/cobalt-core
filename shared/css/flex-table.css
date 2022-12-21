@@ -107,6 +107,10 @@ flex-table{
             margin: 0 4px;
             transform: rotate(-135deg);
         }
+
+        flex-header i.sort-icon {
+            font-size: 1.3em;
+        }
     
         /** flex-sticky items should only be the left-most column OR the first row*/
         flex-sticky{
