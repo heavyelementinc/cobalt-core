@@ -508,7 +508,8 @@ function get_temp_path($path, $key) {
  * @param  bool $untrusted - Whether the markdown is user input
  * @return string - HTML-formatted string
  */
-function from_markdown(string $string, bool $untrusted = true) {
+function from_markdown(?string $string, bool $untrusted = true) {
+    if(!$string) return "";
     $md = new ParsedownExtra();
     $md->setSafeMode($untrusted);
     // Implmentented reddit's ^ for superscript. Only works one word at a time.

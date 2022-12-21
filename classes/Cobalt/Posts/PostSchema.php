@@ -35,8 +35,12 @@ class PostSchema extends \Validation\Normalize {
             ],
             'publicationDate' => [
                 'get' => fn ($val) => $this->get_date($val),
-                'set' => fn ($val) => $this->make_date($val),
+                'set' => fn ($val) => $this->make_date($val . " " . $this->__to_validate['publicationTime']),
                 'display' => fn ($val) => $this->get_date($val, 'verbose'),
+            ],
+            'publicationTime' => [
+                'get' => fn () => $this->get_date($this->__dataset->publicationDate, "24-hour"),
+                'set' => false,
             ],
             'body' => [],
             'excerpt' => [
@@ -45,12 +49,14 @@ class PostSchema extends \Validation\Normalize {
                     return $val;
                 },
                 'set' => function ($val) {
-                    if(!$val) return null;
+                    if($val) return $this->markdown_word_limit($val, $this->soft_char_cap);
                     $truncated = $this->markdown_word_limit($this->__dataset['body'], $this->soft_char_cap);
-                    if($truncated === $val) return null;
                     return $truncated;
-                }
-                // 'soft_char_cap' => 200
+                },
+                // 'soft_char_cap' => 200,
+                'display' => function ($val) {
+                    return str_replace(['<a',"</a"], ['<strong','</strong'], from_markdown($this->{"excerpt"}));
+                },
             ],
             'postType' => [
                 'get' => fn ($val) => $val ?? "Posts",

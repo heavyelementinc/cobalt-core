@@ -47,7 +47,7 @@ abstract class PostController extends Controller {
         add_vars([
             'title' => ($this->customTitle) ? $this->customTitle . " Admin Panel" : 'Posts Admin Panel',
             'posts' => $posts,
-            'controls' => $this->getPaginationControls(),
+            'controls' => $this->getPaginationLinks(),
             'new_post_link' => $this->path('edit',[(string)$this->postMan->__id()],"get","admin")
         ]);
 
@@ -139,7 +139,7 @@ abstract class PostController extends Controller {
         add_vars([
             'title' => $this->postMan->get_public_name(),
             'posts' => $posts,
-            'controls' => $this->getPaginationControls(true),
+            'controls' => $this->getPaginationLinks(true),
         ]);
 
         set_template((new PostManager())->getTemplate('public'));

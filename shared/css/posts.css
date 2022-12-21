@@ -2,6 +2,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1em;
+    width: 80vw;
+    margin: 0 auto;
 }
 
     .cobalt-posts--public-index a.cobalt-post--blurb {

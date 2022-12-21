@@ -645,6 +645,22 @@
             "public": true
         }
     },
+    "Web_privacy_policy": {
+        "default": "",
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Path to Privacy Policy",
+            "type": "input"
+        }
+    },
+    "Web_terms_of_service": {
+        "default": "",
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Path to Terms of Service",
+            "type": "input"
+        }
+    },
     "Web_normally_open_pages": {
         "default": true
     },

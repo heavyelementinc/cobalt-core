@@ -68,9 +68,11 @@
 namespace Validation;
 
 use ArrayAccess;
+use Exception;
 use Iterator;
 use JsonSerializable;
 use MongoDB\BSON\UTCDateTime;
+use TypeError;
 use \Validation\Exceptions\NoValue;
 use \Validation\Exceptions\ValidationIssue;
 use \Validation\Exceptions\ValidationFailed;
@@ -219,6 +221,73 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     public function __get_raw() {
         return $this->__dataset;
+    }
+
+    /**
+     * Map external data to a schema. This is useful if you have API data and want
+     * to normalize it into database entries.
+     * 
+     * In your schema, specify a "map" key for each of the items you wish to have
+     * data mapped to. For example:
+     * 
+     * "note" => [
+     *     "map" => "some.external.note"
+     * ],
+     * "email" => [
+     *     "map" => function ($data, $toDataset, $key, $schemaData) {
+     *          return $data->user->auth->email;
+     *     }
+     * ]
+     * 
+     * Map may be either a string or a function. Anything else will throw a
+     * TypeError.
+     * 
+     * Any callable will be passed the parameters of the __map() invocation as 
+     * well as the key and data of the schema entry in that order.
+     * 
+     * Provide the data you want to map as the first argument, 
+     * 
+     * @param mixed $data 
+     * @param bool $toDataset 
+     * @return array 
+     * @throws Exception 
+     * @throws TypeError 
+     */
+    public function __map(mixed $data, bool $toDataset = false) {
+        $processed = [];
+        // Loop through the schema
+        foreach($this->__schema as $key => $schemaData) {
+            // Look for any schema items that have a "map" key
+            if(!in_array("map", $schemaData)) continue;
+            switch(gettype($schemaData['map'])) {
+                case "callable":
+                    // Carry out the mapping process for callable items
+                    $processed[$key] = $this->set_map($key, $schemaData['map']($data, $toDataset, $key, $schemaData));
+                    break;
+                case "string":
+                    // Look up the value if provided a string (will throw an exception upon failure)
+                    try {
+                        $processed[$key] = $this->set_map($key, lookup_js_notation($schemaData['map'], $data, true));
+                    } catch(Exception $e) {
+                        $processed[$key] = null;
+                    }
+                    break;
+                default:
+                    // Throw a TypeError if $d['map'] is not a string or callable
+                    throw new TypeError("An unexpected map value was set for `$key` in " . $this::class);
+            }
+        }
+        // If $toDataset is true, overwrite the values we just updated
+        if($toDataset) $this->__dataset = array_merge($this->__dataset, $processed);
+        // Return the items we just updated
+        return $processed;
+    }
+
+    private function set_map($key, $value) {
+        if(key_exists('set', $this->__schama) && is_callable($this->__schema['set'])) {
+            return $this->__schema['set']($value);
+        }
+        return $value;
     }
 
     /**

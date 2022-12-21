@@ -27,7 +27,7 @@ class Router {
 
         this.navigationStarted = false;
 
-        this.linkSelector = `a[href^='/']:not([is]),a[href^='${location.origin.toString()}']:not([is])`;
+        this.linkSelector = `a[href^='/']:not([is]),a[href^='?']:not([is]),a[href^='${location.origin.toString()}']:not([is])`;
         this.formSelector = "form";
         this.mainContent = document.querySelector("main");
 

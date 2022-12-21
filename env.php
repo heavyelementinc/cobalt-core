@@ -85,9 +85,13 @@ try {
  * */
 define("__APP_SETTINGS__", $application->get_settings());
 
-session_start([
-    
+session_name("COBALTID");
+$cobalt_session_started = session_start([
+    'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60
 ]);
+
+if($cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
+
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
 if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");
