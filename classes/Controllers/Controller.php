@@ -103,7 +103,8 @@ class Controller {
         return $this->parseData($allowedFilters,$_GET);
     }
 
-    final public function getOptions($allowedOptions, array $data = []):array {
+    final public function getOptions($allowedOptions, $data = []):array {
+        if($data === null) $data = [];
         $data = array_merge($data, $_GET);
         // Special case for the 'limit' guy.
         if(key_exists("limit",$data)) $this->limit = (int)$data['limit'];
@@ -200,7 +201,7 @@ class Controller {
         $nextLink .= " class='page-controls'><i name='chevron-right'></i></a>";
 
         $pageNumber = "";
-        if($withPageNumber) $pageNumber = "$currentPage / $pageCount";
+        if($withPageNumber) $pageNumber = "<span>$currentPage / $pageCount</span>";
 
         return "<div class='cobalt-query-controls'>$previousLink $pageNumber $nextLink</div>";
 

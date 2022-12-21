@@ -582,7 +582,10 @@ progress-bar .progress-bar--indicator{
 }
 
 .cobalt-query-controls {
+  display: flex;
   text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .cobalt-query-controls .page-controls {
