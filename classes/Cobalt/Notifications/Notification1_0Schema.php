@@ -20,7 +20,9 @@ class Notification1_0Schema extends \Validation\Normalize {
             'subject' => [
                 'max_char_length' => 80
             ],
-            'body' => [],
+            'body' => [
+                'display' => fn ($val) => from_markdown($val),
+            ],
             'sent' => [
                 'get' => fn ($val) => $this->get_date($val, 'relative'),
                 'set' => fn ($val) => $this->make_date($val),
@@ -29,24 +31,18 @@ class Notification1_0Schema extends \Validation\Normalize {
                 'get' => fn ($val) => $this->user($val),
                 'set' => fn ($val) => $this->user_id($val),
                 'display' => function ($val) {
+                    $data = $this->from;
 
+                    return $data->fname;
                 }
+            ],
+            'class' => [
+                // The schema's class name.
+                'set' => fn ($val) => $this::class
             ],
             'type' => [],
             'for' => [
-                "each" => [
-                    'user' => [
-                        'get' => fn ($val) => $this->user($val),
-                        'set' => fn ($val) => $this->user_id($val),
-                    ],
-                    'read' => [
-                        'set' => fn ($val) => $this->boolean_helper($val)
-                    ],
-                    'recieved' => [
-                        'get' => fn ($val) => $this->get_date($val, 'relative'),
-                        'set' => fn ($val) => $this->make_date($val)
-                    ]
-                ],
+                'set' => false,
                 'display' => function ($val) {
                     $id = (string)session()['_id'];
                     $me = "";
@@ -77,7 +73,17 @@ class Notification1_0Schema extends \Validation\Normalize {
                     return $me . $and . $others;
                 }
             ],
-
+            'for.user' => [
+                'get' => fn ($val) => $this->user($val),
+                'set' => fn ($val) => $this->user_id($val),
+            ],
+            'for.read' => [
+                'set' => fn ($val) => $this->boolean_helper($val)
+            ],
+            'for.recieved' => [
+                'get' => fn ($val) => $this->get_date($val, 'relative'),
+                'set' => fn ($val) => $this->make_date($val)
+            ],
             // We need a way to make notifications actionable
             'action' => [
                 'get' => 'get_action',

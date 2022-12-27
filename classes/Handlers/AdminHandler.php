@@ -26,10 +26,12 @@ class AdminHandler extends WebHandler {
         $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";
         $panel .= "<nav id='admin-panel'>";
         
-        $panel .= get_route_group("admin_panel", ['prefix' => app("context_prefixes")['admin']['prefix']]);
+        $panel .= get_route_group("admin_panel", [
+            'prefix' => app("context_prefixes")['admin']['prefix'],
+            'ulSuffix' => "<a href='/admin/settings/'><i name='cog'></i> Settings</a>",
+        ]);
         $session = session();
-        
-        $panel .= "<div id='user-panel-header'>".$session->{'name'}."<a href='/admin/settings/'><i name='cog'></i></a></div>";
+        $panel .= "<div id='user-panel-header'>".$session->{'name'}."</div>";
         $panel .= "</nav>";
         return $panel;
     }

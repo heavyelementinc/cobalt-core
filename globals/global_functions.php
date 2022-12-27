@@ -517,6 +517,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
         [
             "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
             "/\^(\w)/",
+            // "/<img src=['\"]()['\"])/"
             // "/&lt;a(\s*[='\(\)]*.*)&gt;(.*)&lt;\/a&gt;/",
         ],
         [
@@ -836,21 +837,28 @@ function validate_route($directiveName, $context) {
     return false;
 }
 
+// TODO: Fix this
 /** Create a directory listing from existing web GET routes
  * 
- * with_icon, prefix, classes, id
+ * with_icon, prefix, classes, id, [array] ulPrefix, [array] ulSuffix
  * 
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
-    $misc = array_merge(['with_icon' => false, 'prefix' => "", 'classes' => "", 'id' => ""], $misc);
+    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'classes' => "", 'id' => ""], $misc);
     if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
+    
+    // Check if we have prefixes or suffixes specified
+    
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
     $current_route = $GLOBALS['router']->current_route;
+    $list = $GLOBALS['router']->routes;
 
-    foreach($GLOBALS['router']->routes as $context => $methods) {
+    handleAuxiliaryRoutes($list, $misc, $directory_group);
+
+    foreach($list as $context => $methods) {
         foreach($methods as $method => $routes) {
             foreach ($routes as $r => $route) {
                 $groups = $route['navigation'] ?? false;
@@ -871,7 +879,54 @@ function get_route_group($directory_group, $misc = []) {
         }
     }
 
-    return $ul . "</ul>";
+    return "$ul</ul>";
+}
+
+// TODO: Fix this
+function handleAuxiliaryRoutes(&$list, $misc, $group):void {
+    $prefix = ($misc['ulPrefix']) ? $misc['ulPrefix'] : [];
+    $suffix = ($misc['ulSuffix']) ? $misc['ulSuffix'] : [];
+    // If the prefixes or suffixes are strings, make them arrays
+    if(gettype($prefix) === "string") $prefix = [$prefix];
+    if(gettype($suffix) === "string") $suffix = [$suffix];
+    $mutantPrefix = [];
+    foreach($prefix as $pfx) {
+        $mutantPrefix += auxRouteHandler($pfx, $group);
+    }
+
+    $mutantSuffix = [];
+
+    foreach($suffix as $sfx) {
+        array_push($mutantSuffix, [$sfx => auxRouteHandler($sfx, $group)]);
+    }
+
+    foreach($list as $element) {
+        array_unshift($element['get'], ...$mutantPrefix);
+        array_push($element['get'], ...$mutantSuffix);
+    }
+}
+
+// TODO: Fix this
+function auxRouteHandler($route, $group) {
+    if(is_string($route)) {
+        if(strpos($route,"@") !== false) {
+            $rt = route($route);
+            $rt['groups'] === [$group];
+            return $rt;
+        } 
+        return [
+            "/" . preg_quote($route) . "/" => [
+                'original_path' => $route,
+                'controller' => "",
+                'anchor' => [
+                    'label' => $route,
+                    'href' => $route
+                ],
+                'groups' => [$group]
+            ]
+        ];
+    } else if (is_array($route)) return route(...array_values($route));
+    throw new Exception("Provided auxiliary is not a valid auxiliary route type");
 }
 
 function build_directory_item($item, $icon = false, $context = "") {

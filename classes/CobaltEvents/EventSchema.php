@@ -50,7 +50,7 @@ class EventSchema extends \Validation\Normalize {
             'name' =>  [ // An name for internal purposes
                 'get' => fn ($val) => $val,
                 'set' => function ($val) {
-                    $val = $this->sanitize($val);
+                    // $val = $this->sanitize($val);
                     $val = $this->required_field($val);
                     return $val;
                 }
@@ -63,7 +63,7 @@ class EventSchema extends \Validation\Normalize {
             ],
             'headline' => [ // An external name
                 'set' => function ($val) {
-                    $val = $this->sanitize($val);
+                    // $val = $this->sanitize($val);
                     $val = $this->required_field($val);
                     return $val;
                 }
@@ -231,7 +231,7 @@ class EventSchema extends \Validation\Normalize {
     private function remove_junk($v) {
         $m = preg_replace("/^(https?:\/\/)/", "", $v);
         $m = str_replace(app("domain_name"), "", $m);
-        return $this->sanitize($m);
+        return $m; // $this->sanitize($m);
     }
 
     function filled($val = null) {

@@ -309,6 +309,32 @@
             "type": "boolean"
         }
     },
+
+    "Notifications_system_enabled": {
+        "default": true,
+        "meta": {
+            "group": "Notifications",
+            "name": "Enable the notification system",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Notifications_in_session_panel": {
+        "default": true,
+        "meta": {
+            "group": "Notifications",
+            "name": "Show notifications in the user's session panel",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Notifications_collection": {
+        "default": "CobaltNotifications"
+    },
     
 
     "API_contact_form_recipient": {
@@ -542,6 +568,13 @@
                     "session_refresh": false,
                     "api_access": false,
                     "prefix": "/core-content/"
+                },
+                "apinotifications": {
+                    "processor": "Handlers\\ApiHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/api/notifications/"
                 },
                 "apiv1": {
                     "processor": "Handlers\\ApiHandler",

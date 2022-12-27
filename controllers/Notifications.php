@@ -2,10 +2,26 @@
 
 use Cobalt\Notifications\NotificationManager;
 use Controllers\Controller;
+use MongoDB\BSON\ObjectId;
 
 class Notifications extends Controller {
+    
+    function __construct() {
+        $this->ntfy = new NotificationManager();
+    }
+    
+    function getUserNotifications() {
+        return $this->ntfy->getNotificationsForUser();
+    }
+
+    function sendNotification() {
+        return $this->ntfy->sendNotification($_POST);
+    }
+
+
     function debug() {
         $notification = new \Cobalt\Notifications\Notification1_0Schema([
+            '_id' => new ObjectId(),
             'version' => '1.0',
             'subject' => 'Hello, World',
             'body'    => "Here's some **markdown** to use for a test",
@@ -24,7 +40,7 @@ class Notifications extends Controller {
                 ]
             ],
             'action' => [
-                'path'    => "/",
+                // 'path'    => "/",
                 'route'   => 'CoreAdmin@individual_user_management_panel',
                 'params'  => [
                     '62c86a1de50fc66d640f09b2'
