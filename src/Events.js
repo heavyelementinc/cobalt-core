@@ -32,8 +32,8 @@ class CobaltEvents {
         if (evt.type in this.eventTypes) type = evt.type;
         const event = new this.eventTypes[type](evt, preview);
         if(preview === false) {
-            if (!event.isElligibleForDisplay()) return false;
-            if (!this.isExclusiveAllowed()) return false;
+            if (!event.isElligibleForDisplay(event)) return false;
+            if (!this.isExclusiveAllowed(evt)) return false;
             this.hasAnotherEventBeenShown = true;
             this.typesOnDisplay[event.type] = true;
             await this.timeout(localStorage.getItem("eventDelay") || evt.advanced.delay);
