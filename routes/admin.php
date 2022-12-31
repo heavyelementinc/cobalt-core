@@ -28,7 +28,7 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
 
 /** Control Panel and Settings Editor */
 
-Route::get("/settings/", "CoreAdmin@settings_index");
+Route::get("/settings/", "CoreAdmin@settings_index", ['anchor' => ['name' => 'Cobalt Settings', 'icon' => 'gear']]);
 
 Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
     'name' => "App Settings",

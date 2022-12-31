@@ -125,6 +125,15 @@ class Controller {
                     if(gettype($val) === "array") return ['sort' => $val];
                     $direction = $_GET[$this->sortDirectionParam] ?? 1;
                     $direction = (int)$direction;
+                    if(strpos($val,",")) {
+                        $val = explode(",", $val);
+                        $sort = [];
+                        foreach($val as $v) {
+                            if(!$v) continue;
+                            array_push($sort, [$v => $direction]);
+                        }
+                        return $sort;
+                    }
                     return [
                         'sort' => [$val => $direction],
                     ];
@@ -340,7 +349,7 @@ class Controller {
 
             $new_query_string = $this->paramContinuity(['sort' => $name, $this->sortDirectionParam => $direction]);
             if($schema['no_link']) {
-                $result = "<flex-header>$schema[name]</flex-header>";
+                $result = "<$container_type>$schema[name]</$container_type>";
                 continue;
             }
             $result .= "<$container_type><a href=\"?$new_query_string\">".$schema["name"]." $icon</i></a></$container_type>";

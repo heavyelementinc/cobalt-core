@@ -756,6 +756,26 @@ function is_child_dir($base_dir, $path) {
     return ($substr === $base_dir); // return comparison operation.
 }
 
+// function get_route_data(string $class, string $method, ?string $routeMethod = "get", string $context = null) {
+//     if($context === null) $context = "web";
+//     $controllerAlias = "$class@$method";
+//     $router = $GLOBALS['router'];
+//     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
+//     // if($context !== $router->route_context) {
+//     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
+//     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
+//     // }
+//     // $routes = $router->routes[$context][$routeMethod];
+//     $route = null;
+//     foreach($router->routes as $routes) {
+//         foreach($routes[$routeMethod] as $r => $data) {
+//             if($data['controller'] !== $controllerAlias) continue;
+//             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
+//             return $data;
+//         }
+//     }
+// }
+
 /**
  * Limitations: this will only return the first route that uses the specified controller
  * @param string $class
@@ -840,12 +860,12 @@ function validate_route($directiveName, $context) {
 // TODO: Fix this
 /** Create a directory listing from existing web GET routes
  * 
- * with_icon, prefix, classes, id, [array] ulPrefix, [array] ulSuffix
+ * with_icon, prefix, classes, id, (array) ulPrefix, (array) ulSuffix, (bool) excludeWrapper
  * 
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
-    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'classes' => "", 'id' => ""], $misc);
+    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
     if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
@@ -853,10 +873,11 @@ function get_route_group($directory_group, $misc = []) {
     // Check if we have prefixes or suffixes specified
     
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
+    if($misc['excludeWrapper'] === true) $ul = "";
     $current_route = $GLOBALS['router']->current_route;
     $list = $GLOBALS['router']->routes;
 
-    handleAuxiliaryRoutes($list, $misc, $directory_group);
+    // handleAuxiliaryRoutes($list, $misc, $directory_group);
 
     foreach($list as $context => $methods) {
         foreach($methods as $method => $routes) {
@@ -878,8 +899,8 @@ function get_route_group($directory_group, $misc = []) {
             }
         }
     }
-
-    return "$ul</ul>";
+    $wrapper = ($misc['excludeWrapper']) ? "" : "</ul>";
+    return $ul . $wrapper;
 }
 
 // TODO: Fix this

@@ -24,12 +24,16 @@ class AdminHandler extends WebHandler {
     function auth_panel() {
         if (!session_exists()) return "";
         $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";
-        $panel .= "<nav id='admin-panel'>";
-        
+        $panel .= "<nav id='admin-panel'><ul class='directory--group'>";
+    
         $panel .= get_route_group("admin_panel", [
             'prefix' => app("context_prefixes")['admin']['prefix'],
-            'ulSuffix' => "<a href='/admin/settings/'><i name='cog'></i> Settings</a>",
+            'excludeWrapper' => true,
+            'ulSuffix' => ["CoreAdmin@settings_index"],
         ]);
+        $settings = route("CoreAdmin@settings_index");
+        $panel .= "<li><a href='$settings'>Settings</a></li>";
+        $panel .= "</ul>";
         $session = session();
         $panel .= "<div id='user-panel-header'>".$session->{'name'}."</div>";
         $panel .= "</nav>";

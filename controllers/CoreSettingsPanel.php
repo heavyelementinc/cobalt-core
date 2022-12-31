@@ -19,33 +19,40 @@ class CoreSettingsPanel extends Controller {
             if(!isset($setting->meta)) continue;
             if(in_array($setting->meta['group'], $this->requiresRoot) && !is_root()) continue;
             if($setting->meta['group'] === "") $setting->meta['group'] = "Troublesome";
+            if(!isset($setting->meta['subgroup']) || $setting->meta['subgroup'] === "") $setting->meta['subgroup'] = "General";
             $url = $this->url_name($setting->meta['group']);
             if(!key_exists($setting->meta['group'],$setting_groups)) $setting_groups[$setting->meta['group']] = "<a href='#$url'>".$setting->meta['group']."</a>";
 
-            if(!key_exists($setting->meta['group'],$setting_tables)) $setting_tables[$setting->meta['group']] = "<form-request method='PUT' action='/api/v1/settings/update/' autosave='autosave' id='$url'><ul class='list-panel'>";
+            if(!key_exists($setting->meta['group'],$setting_tables)) $setting_tables[$setting->meta['group']] = ["<form-request method='PUT' action='/api/v1/settings/update/' autosave='autosave' id='$url'>"];
 
-            // if(isset($setting->value)) {
-                // `view` overrides `type`
-                if (isset($setting->meta['view'])) {
-                    $setting_tables[$setting->meta['group']] .= $this->get_input_from_view($setting, $index);
-                } else if(isset($setting->meta['type'])) {
-                    $setting_tables[$setting->meta['group']] .= $this->get_setting_table_entry($setting, $index, $url);
-                }
-            // }
+            // Instance subgroups
+            if(!isset($setting_tables[$setting->meta['group']][$setting->meta['subgroup']])) $setting_tables[$setting->meta['group']][$setting->meta['subgroup']] = "<h2>" . $setting->meta['subgroup'] . "</h2><ul class='list-panel'>";
+
+            // `view` overrides `type`
+            if (isset($setting->meta['view'])) {
+                $setting_tables[$setting->meta['group']][$setting->meta['subgroup']] .= $this->get_input_from_view($setting, $index);
+            } else if(isset($setting->meta['type'])) {
+                $setting_tables[$setting->meta['group']][$setting->meta['subgroup']] .= $this->get_setting_table_entry($setting, $index, $url);
+            }
             
         }
 
         unset($setting_groups['']);
         unset($setting_tables['']);
+        
+        foreach($setting_tables as $heading => $column) {
+            $setting_tables[$heading] = implode("</ul>", $column) . "</ul>";
+        }
 
         add_vars([
             'title' => 'Settings',
-            'headings' => implode(           "", $setting_groups),
-            'settings' => implode("</ul></form-request>", $setting_tables) . "</ul></form-request>"
+            'headings' => implode("", $setting_groups),
+            'settings' => implode("</form-request>", $setting_tables) . "</form-request>"
         ]);
 
         return set_template("/admin/settings/basic-settings.html");
     }
+
 
     private function url_name($name) {
         return strtolower(str_replace(
@@ -66,6 +73,10 @@ class CoreSettingsPanel extends Controller {
             case "number": 
                 $template = "/admin/settings/inputs/input.html";
                 $type = "number";
+                break;
+            case "textarea":
+                $template = "/admin/settings/inputs/textarea.html";
+                $type = "text";
                 break;
             case "password":
                 $template = "/admin/settings/inputs/password.html";
