@@ -111,7 +111,7 @@ class Modal {
 
         // Set a window 
         window.router.modalState();
-        history.pushState({ page: 1 }, this.modalTitle || document.title, "");
+        history.pushState({ page: 1, isModalState: true }, this.modalTitle || document.title, "");
         window.addEventListener("popstate", e => {
             if (this.container.parentNode !== null) this.close(e)
             e.preventDefault();
@@ -282,9 +282,11 @@ class Modal {
     close(e = null) {
         this.unlockViewport();
 
-        // Unset popstate listener. We return if e is null because this function
-        // will be called again. Probably really hacky, but it works.
-        if (e === null) return history.back();
+        // Let's back up until we've closed all the windows
+        while(history.state.modalState === true) {
+            console.log(history.state);
+            history.back();
+        }
 
         /** Handle in case of no animations */
         if (!this.animations) this.container.parentNode.removeChild(this.container);

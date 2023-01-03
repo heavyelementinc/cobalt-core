@@ -159,27 +159,67 @@ class Router {
         }
 
         for(const i of forms) {
+            // Listen for a submit event
             i.addEventListener("submit", (event) => {
-                event.preventDefault();
+                // If the form is not a "get" method, do nothing
                 if(i.method.toLowerCase() !== "get") return;
-                console.info("Submit firing");
+                
+                // Get our form's data
                 let formData = new FormData(i);
+                // Check if we need to add our button's value to the data
                 let submitter = {};
                 if(event.submitter.name && event.submitter.value) submitter[event.submitter.name] = event.submitter.value;
-                const params = new URLSearchParams({...formData, ...submitter}).toString();
-                const search = new URL(i.action).search.toString();
-                let location = i.action;
-                if(search) location = i.action.replace(search,"");
                 
-                if(params) {
-                    // this.location = `${location}?${params}`;
-                    this.handle_SPA_navigation(`${location}?${params}`, event);
+                // Check if we need to include another form's data
+                let include = i.getAttribute("include");
+                let toInclude = {};
+                if(include) {
+                    try {
+                        include = document.querySelectorAll(include)
+                    } catch(error) {
+
+                    }
+                    if(include) {
+                        // Load the form's data
+                        include.forEach(included => {
+                            if(included.tagName !== "FORM") return;
+                            toInclude = {...toInclude, ...this.formdataToObject(new FormData(included))}
+                        })
+                    }
                 }
+                
+                // Create URL Query Parameters
+                const params = new URLSearchParams({...submitter, ...toInclude, ...this.formdataToObject(formData)}).toString();
+                const search = new URL(i.action).search.toString();
+
+                // Get the form's action
+                let location = i.action;
+                if(search) location = i.action.replace(search,""); // Replace the search params with nothing
+                
+                // Check if we have params
+                if(params) {
+                    // Prevent the default submit behavior
+                    event.preventDefault();
+                    // Handle the location traversal with an API fetch request
+                    console.info("Caught SPA form submission");
+                    this.handle_SPA_navigation(`${location}?${params}`, event);
+                    return;
+                }
+                console.warn("Aborting submit");
                 return false;
+                // return false;
             });
         }
 
         // document.body.removeChild(load);
+    }
+
+    formdataToObject(formData) {
+        let object = {};
+        for(const key of formData.keys()) {
+            object[key] = formData.get(key);
+        }
+        return object;
     }
 
     handleClick(element, event){

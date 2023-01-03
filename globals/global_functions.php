@@ -1333,3 +1333,12 @@ function normalize_color($val, $default = null, $normalize = null) {
 function clamp(int|float $current, int|float $min, int|float $max):int|float {
     return max($min, min($max, $current));
 }
+
+function country2flag(string $countryCode, ?string $countryName = null): string {
+    $unicode = (string) preg_replace_callback(
+        '/./',
+        static fn (array $letter) => mb_chr(ord($letter[0]) % 32 + 0x1F1E5),
+        $countryCode
+    );
+    return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
+}
