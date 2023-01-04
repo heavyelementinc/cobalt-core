@@ -126,13 +126,14 @@ class Controller {
                     $direction = $_GET[$this->sortDirectionParam] ?? 1;
                     $direction = (int)$direction;
                     if(strpos($val,",")) {
-                        $val = explode(",", $val);
+                        $exploded = explode(",", $val);
                         $sort = [];
-                        foreach($val as $v) {
+                        foreach($exploded as $v) {
                             if(!$v) continue;
-                            array_push($sort, [$v => $direction]);
+                            $sort += [$v => $direction];
                         }
-                        return $sort;
+                        // var_dump($sort);
+                        return ['sort' => $sort];
                     }
                     return [
                         'sort' => [$val => $direction],
