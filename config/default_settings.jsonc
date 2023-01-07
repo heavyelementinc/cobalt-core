@@ -912,6 +912,9 @@
             "type": "string"
         }
     },
+    "Posts_default_index_display": {
+        "default": "default"
+    },
     /* 
     If debugging is TRUE, then a bunch of things happen. 
         - core/apiv1.php will add a HelloWorld route

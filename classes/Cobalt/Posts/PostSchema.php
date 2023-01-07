@@ -75,6 +75,10 @@ class PostSchema extends \Validation\Normalize {
                     return "style=\"background-image:url('".$val."'); background-position: ".$this->{'alignment.position'}."\" bg-splash";
                 }
             ],
+            'no_image' => [
+                'get' => fn () => ($this->__dataset['default_image']) ? "" : "cobalt-post--no-image",
+                'set' => false,
+            ],
             'alignment.position' => [
                 'get' => fn ($val) => $val ?? "center center",
                 'set' => fn ($val) => $this->setAlignment($val),
@@ -116,6 +120,7 @@ class PostSchema extends \Validation\Normalize {
             'prominent' => [
                 'set' => fn ($val) => $this->boolean_helper($val),
                 'display' => function ($val) {
+                    if(app("Posts_default_index_display") === "prominent") return " cobalt-post--prominent";
                     return ($val) ? " cobalt-post--prominent" : "";
                 }
             ]

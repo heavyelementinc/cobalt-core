@@ -14,6 +14,7 @@
         width: 30%;
         overflow: hidden;
         transition: scale .3s;
+        text-align: left;
     }
 
         .cobalt-posts--public-index a.cobalt-post--blurb:hover {
@@ -71,17 +72,16 @@
     .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent {
         width: 100%;
         height: 30vh;
-        display:grid;
-        grid-template-columns: 40vh 1fr;
-        grid-template-rows: 25% 25% 25% 25%;
+        display:flex;
+        min-height: 295px;
+        /* grid-template-columns: 40vh 1fr;
+        grid-template-rows: 25% 25% 25% 25%; */
     }
     
         .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--splash {
-            display: block;
-            width: 40vh;
-            height: 100%;
-            grid-row: 1 / span 4;
-            grid-column: 1 / span 1;
+            width: 30vw;
+            aspect-ratio: 1 / 1;
+            display: flex;
         }
 
         .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--header {
@@ -95,8 +95,10 @@
             flex-grow: 1;
             margin-top: 0;
             flex-grow: 1;
-            grid-row: 2 / span 3;
-            grid-column: 2 / span 1;
+        }
+
+        .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--splash.cobalt-post--no-image {
+            display: none;
         }
 
 article.cobalt-post, a.cobalt-post:not(.cobalt-post--blurb) {
@@ -129,6 +131,7 @@ article.cobalt-post .cobalt-post--header, content {
 
 .cobalt-post--header .cobalt-post--title {
     font-size: 2.2em;
+    text-align: left;
 }
 
 .cobalt-post--header .cobalt-post--title p {

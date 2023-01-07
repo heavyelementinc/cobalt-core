@@ -284,7 +284,6 @@ class Modal {
 
         // Let's back up until we've closed all the windows
         while(history.state.modalState === true) {
-            console.log(history.state);
             history.back();
         }
 
