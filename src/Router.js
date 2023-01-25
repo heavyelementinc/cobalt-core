@@ -234,6 +234,14 @@ class Router {
         this.abortSPANavigation();
         this.SPA_indicator.classList.add("navigation-start");
         
+        let state = {...history.state};
+        console.log(state);
+        if(state !== null) {
+            // Before we move on to the next page, we need to save the scroll position
+            // of the page so we can restore it in the event of a popstate
+            // history.replaceState({...state, scrollPosition: window.scrollY},'',state.url);
+        }
+
         // Parse the URL
         const urlData = this.getUrlData(url);
         if(!urlData.isLocal) window.location = url;
@@ -269,21 +277,14 @@ class Router {
             this.route_directives.exit_callback(...this.route_args, result);
         }
 
-        // history.replaceState({
-        //     title: result.title ?? "",
-        //     url: url,
-        //     scrollY: window.scrollY,
-        //     scrollX: window.scrollX
-        // });
-
         window.__ = result;
 
         if("type" in event === false || "type" in event && event.type !== "popstate") {
             history.pushState({
                 title: result.title ?? "",
                 url: url,
-                scrollY: window.scrollY,
-                scrollX: window.scrollX
+                // scrollY: window.scrollY,
+                // scrollX: window.scrollX
             },'',url);
         }
         document.title = await result.title ?? "";
@@ -302,6 +303,7 @@ class Router {
 
     navigationEnd() {
         this.SPA_indicator.classList.remove("navigation-start");
+        // if("scrollPosition" in history.state) window.scrollY = history.state.scrollPosition;
     }
 
     async abortSPANavigation() {

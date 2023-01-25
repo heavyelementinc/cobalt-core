@@ -1,6 +1,8 @@
 <?php
-
 $db_config = __APP_ROOT__ . "/config/config.php";
+if(file_exists(__APP_ROOT__ . "/ignored/DEVELOPMENT") || file_exists(__APP_ROOT__ . "/ignored/DEV")) {
+    $db_config = __APP_ROOT__ . "/config/config.development.php";
+}
 
 if(file_exists($db_config)) {
     // Load the settings file

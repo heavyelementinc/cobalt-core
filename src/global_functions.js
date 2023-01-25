@@ -680,3 +680,4 @@ function iOS() {
       'iPod'
     ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }
+
