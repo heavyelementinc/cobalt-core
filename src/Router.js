@@ -283,8 +283,8 @@ class Router {
             history.pushState({
                 title: result.title ?? "",
                 url: url,
-                // scrollY: window.scrollY,
-                // scrollX: window.scrollX
+                scrollY: window.scrollY,
+                scrollX: window.scrollX
             },'',url);
         }
         document.title = await result.title ?? "";
