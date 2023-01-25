@@ -43,6 +43,7 @@ class ApiFetch {
             if (result.headers.get("X-Refresh")) this.pageRefresh(result.headers.get("X-Refresh"));
             if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
             if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
+
             if (result.ok === false) {
                 reject(this.result);
                 await this.handleErrors(result,this.result);

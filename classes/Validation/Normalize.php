@@ -441,6 +441,14 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $doc->__validate($value);
     }
 
+    protected function each($schema, $data) {
+        $processed = [];
+        foreach($data as $doc) {
+            array_push($processed, new $schema($doc));
+        }
+        return $processed;
+    }
+
     final protected function init_schema($schema = []) {
         // We write this schema to __schema
         $this->__schema = array_merge($this->__get_schema(), (array)$schema);

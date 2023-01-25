@@ -53,7 +53,7 @@ class ApiHandler implements RequestHandler {
     public function _stage_output($context_output = "") {
         $return_value = [];
         /** TODO: Finish X-Update-Client-State */
-        if (key_exists('X-Update-Client-State', $this->headers)) $return_value = [
+        if (key_exists('X-Update-Client-State', $this->headers) || key_exists('x-update-client-state', $this->headers)) $return_value = [
             'response' => $this->router_result,
             'settings' => $GLOBALS['app']->public_settings,
             // 'user' => [
@@ -106,6 +106,7 @@ class ApiHandler implements RequestHandler {
         if (empty($incoming_stream)) {
             $max_upload = getMaximumFileUploadSize();
             if ($this->headers['Content-Length'] > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
+            if ($this->headers['content-length'] > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
             if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0) {
                 $incoming_stream = $_POST['json_payload'];
                 $file_upload = true;

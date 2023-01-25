@@ -167,7 +167,10 @@
         "default": "url(/core-content/img/default_poster_image.jpg)",
         "$style": true
     },
-
+    "API_authentication_mode": {
+        "default": false, // Set to "headers" for legacy mode
+        "$public": true
+    },
     "API_CORS_allowed_origins": {
         "manage": {
             "group": "API",

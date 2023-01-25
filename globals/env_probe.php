@@ -33,8 +33,8 @@ $dependencies = [
     "dom",
     "mongodb",
     "libxml",
-    "mcrypt",
-    "protobuf",
+    // "mcrypt", // Retired mcrypt dependency
+    // "protobuf", // Retired protobuf dependency
     "yaml",
     "standard",
     "date",

@@ -23,11 +23,19 @@ class Login {
     function handle_login() {
         // Get the headers
         $headers = apache_request_headers();
+        $auth = null;
+
         // Check if the authentication values exist
-        if (!key_exists('Authentication', $headers)) throw new BadRequest("Request is missing Authentication");
+        if (app('API_authentication_mode') === "headers") {
+            if (!key_exists('Authentication', $headers)) throw new BadRequest("Request is missing Authentication");
+            $auth = $headers['Authentication'];
+        } else {
+            if (!key_exists('Authentication', $_POST)) throw new BadRequest("Request is missing Authentication");
+            $auth = $_POST['Authentication'];
+        }
 
         // Decode and split the credentials
-        $credentials = explode(":", base64_decode($headers['Authentication']));
+        $credentials = explode(":", base64_decode($auth));
 
         // Log in the user using the credentials provided. If invalid credentials
         // then login_user will throw an exception.

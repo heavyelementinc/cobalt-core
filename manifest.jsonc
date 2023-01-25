@@ -8,6 +8,7 @@
             "components/autocomplete-interface.js",
             "components/radio-buttons.js",
             "components/split-button.js",
+            "components/button-toggle.js",
             "components/input-array.js",
             "components/autocomplete.js",
             "components/input-password.js",

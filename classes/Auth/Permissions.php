@@ -16,6 +16,8 @@ class Permissions extends Database {
         __ENV_ROOT__ . "/config/default_permissions.jsonc",
         __APP_ROOT__ . "/config/permissions.jsonc",
         __APP_ROOT__ . "/config/permissions.json",
+        __APP_ROOT__ . "/config/app_permissions.jsonc",
+        __APP_ROOT__ . "/config/app_permissions.json",
         __APP_ROOT__ . "/private/config/permissions.jsonc",
         __APP_ROOT__ . "/private/config/permissions.json",
     ];

@@ -30,7 +30,9 @@ class CobaltListing extends HTMLElement {
     listItemElement(el) {
         el.addEventListener("contextmenu",event => {
             const menu = new ActionMenu({
+                title: `Edit file`,
                 event: event,
+                mode: "modal",
             });
 
             if(this.editAction) {
@@ -57,6 +59,25 @@ class CobaltListing extends HTMLElement {
                 });
             }
 
+            for(const i in this.customMenuOptions) {
+                const element = this.customMenuOptions[i];
+                const test = ('label' in element && 'action' in element);
+                if(!test) {
+                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
+                    continue;
+                }
+                menu.registerAction({
+                    label: element.label,
+                    request: {
+                        method: element.method ?? "PUT",
+                        action: this.actionUrl(element.action, el.dataset.id)
+                    },
+                    callback: (action, event, requestData) => {
+                        return true;
+                    }
+                });
+            }
+
             if(this.deleteAction) {
                 menu.registerAction({
                     label: "Delete",
@@ -80,25 +101,6 @@ class CobaltListing extends HTMLElement {
                         return true;
                     },
                     dangerous: true
-                });
-            }
-
-            for(const i in this.customMenuOptions) {
-                const element = this.customMenuOptions[i];
-                const test = ('label' in element && 'action' in element);
-                if(!test) {
-                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
-                    continue;
-                }
-                menu.registerAction({
-                    label: element.label,
-                    request: {
-                        method: element.method ?? "PUT",
-                        action: this.actionUrl(element.action, el.dataset.id)
-                    },
-                    callback: (action, event, requestData) => {
-                        return true;
-                    }
                 });
             }
 

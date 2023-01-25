@@ -17,6 +17,7 @@ use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
 use MongoDB\Model\BSONArray;
+use Validation\Exceptions\NoValue;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -595,6 +596,7 @@ function build_object_from_paths($object) {
 }
 
 function is_secure() {
+    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'])) return true;
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || $_SERVER['SERVER_PORT'] == 443;
 }
@@ -717,6 +719,18 @@ function with_each(string $template, $docs, $var_name = 'doc') {
         $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
     }
     return $rendered;
+}
+
+function view_each(string $template, Iterator|array $docs, string $var_name = 'doc', string|false $separator = "") {
+    return implode($separator, view_array($template, $docs, $var_name));
+}
+
+function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
+    $array = [];
+    foreach($docs as $index => $doc){
+        $array[$index] = view($template, [$var_name => $doc]);
+    }
+    return $array;
 }
 
 function credit_card_form(array|object $data = [],$shipping = false):string {
@@ -1082,6 +1096,7 @@ function flex_table($docs, $table, $schema) {
 function confirm($message, $data, $okay = "Continue", $dangerous = true) {
     $headers = apache_request_headers();
     if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
+    if (key_exists('x-confirm-dangerous', $headers) && $headers['x-confirm-dangerous']) return true;
     throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
 }
 
@@ -1341,4 +1356,14 @@ function country2flag(string $countryCode, ?string $countryName = null): string 
         $countryCode
     );
     return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
+}
+
+function getHeader($header) {
+    $toMatch = strtolower($header);
+    $headers = [];
+    foreach(getallheaders() as $key => $value){
+        $headers[strtolower($key)] = $value;
+    }
+    if(key_exists($toMatch, $headers)) return $header[$key];
+    throw new NoValue("The specified header was not found among the request headers");
 }

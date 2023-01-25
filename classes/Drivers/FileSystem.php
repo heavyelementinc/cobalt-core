@@ -3,11 +3,16 @@
 namespace Drivers;
 
 use Exception;
+use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\RangeNotSatisfiable;
 
 class FileSystem {
     // public $db = __APP_SETTINGS__['database'];
     public $bucket;
+    protected $db = null;
+    protected $client = null;
+    protected $database = null;
+    protected $collection = null;
 
     function __construct($database = null) {
         if ($database !== null) $this->db = $database;
@@ -30,7 +35,15 @@ class FileSystem {
      */
     final public function download(string $filename, $options = ['revision' => 0]): never {
         ob_clean();
-        $stream = $this->getStream($filename, $options);
+        try{
+            $stream = $this->getStream("/".$filename, $options);
+        } catch(Exception $e) {
+            try {
+                $stream = $this->getStream($filename, $options);
+            } catch(Exception $e) {
+                throw new NotFound("Not found");
+            }
+        }
         $metadata = $this->bucket->getFileDocumentForStream($stream);
         
         $headers = getallheaders();
@@ -46,6 +59,10 @@ class FileSystem {
         fpassthru($stream);
 
         exit;
+    }
+
+    final public function count(array $filter) {
+        return $this->collection->count($filter);
     }
 
     private function partial_content(&$stream, $metadata, $headers) {

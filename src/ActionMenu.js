@@ -117,6 +117,10 @@ class ActionMenu {
             } catch (error) {
                 console.log(api);
                 action.loading.error(error);
+                if(api.result.code === 300) {
+                    this.closeMenu();
+                    return true;
+                }
                 new StatusError({message: api.result.message, icon: "ion-warning"});
                 return;
             }
@@ -205,8 +209,8 @@ class ActionMenu {
     }
 
     getAbsolutePositionElement(type) {
-        let target = this.event.target;
-
+        let target = this.event.target ?? this.event.srcElement;
+        console.log(this.event, this.event.target, this.event.srcElement);
         if(target.parentNode.tagName === "BUTTON") target = target.parentNode
         if(this.attachTo) target = this.attachTo;
         else {

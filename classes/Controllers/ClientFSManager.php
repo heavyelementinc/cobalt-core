@@ -12,6 +12,7 @@ trait ClientFSManager {
     public $fs = null;
     protected $format_table = null;
     protected $filename_insert_prefix = "";
+    public $fs_filename_path = "";
     
     // function __construct() {
     //     $this->initFS();
@@ -69,9 +70,9 @@ trait ClientFSManager {
         return $deleted;
     }
 
-    public function updateSortOrder() {
+    public function updateSortOrder($data = null) {
         if(!$_POST) throw new BadRequest("Malformed request.");
-        $data = $_POST;
+        if(!$data) $data = $_POST;
         if(gettype($data))
         $validated_data = [];
 
@@ -101,6 +102,17 @@ trait ClientFSManager {
 
     /**
      * 
+     * @param mixed $query 
+     * @return void 
+     */
+    public function updateMetadata($query, $data) {
+        $this->initFS();
+        $result = $this->fs->updateOne($query, $data);
+        return $result;
+    }
+
+    /**
+     * 
      * @param string|int $key The key of the $_FILES field
      * @param int $index The index of $_FILES to use
      * @return array 
@@ -123,11 +135,12 @@ trait ClientFSManager {
             'tmp_name' => $file['tmp_name'][$index],
         ];
 
-        if($this->fs_filename_path) $file_array['name'] = trim_trailing_slash($this->fs_filename_path)."/$file_array[name]";
+        if($this->fs_filename_path && !isset($meta['isThumbnail'])) $file_array['name'] = trim_trailing_slash($this->fs_filename_path)."/$file_array[name]";
 
 
         $metadata = getimagesize($file_array['tmp_name']);
         if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($file_array['tmp_name'])];
+        $metadata['mimetype'] = mime_content_type($file_array['tmp_name']);
         $meta = [
             'width' => $metadata[0],
             'height' => $metadata[1],
@@ -175,6 +188,7 @@ trait ClientFSManager {
         $path = ($path) ? "$path/" : "";
         $name           = pathinfo($files[$key]['name'][$index],PATHINFO_FILENAME);
         $extension      = pathinfo($files[$key]['name'][$index],PATHINFO_EXTENSION);
+        // $thumbnail_name = trim_trailing_slash($this->fs_filename_path) . "/$name.$this->thumbnail_suffix.$extension";
         $thumbnail_name = "$name.$this->thumbnail_suffix.$extension";
         
         if(!$files[$key]['tmp_name'][$index]) throw new BadRequest("Invalid indicies");
@@ -198,21 +212,20 @@ trait ClientFSManager {
 
         // First, let's insert our thumbnail
         $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true], $toInsert, $meta);
-        $thumb_id = $thumb['_id'];
+        $thumb_id = $thumb['id'];
 
         $arbitrary_data = array_merge($arbitrary_data, [
             'thumbnail_id' => $thumb_id,
-            'thumbnail' => $toInsert[$key]['name'][1]]
+            'thumbnail' => $thumb['filename']]
         );
 
         // Now let's insert our actual image
         $returnable = $this->clientUploadFile($key, 0, $arbitrary_data, $toInsert, $meta);
-        if($meta) {
-            $returnable = [
-                'media' => $returnable,
-                'thumb' => $thumb
-            ];
-        }
+        
+        $returnable = [
+            'media' => $returnable,
+            'thumb' => $thumb
+        ];
 
         return $returnable;
 
@@ -241,7 +254,8 @@ trait ClientFSManager {
      * @return string 
      */
     final public function directoryListing(string $href = "", string $mode = "list", array $query = ['filter' => [], 'options' => []], array $options = []){
-        if($href === "") $href = "/res/fs/";
+        if($href === "") $href = "/res/fs";
+        // if($this->fs_filename_path) $href = trim_trailing_slash($href) . trim_trailing_slash($this->fs_filename_path);
         $options = array_merge([
             'parent' => [],
             'child' => [],
@@ -251,7 +265,7 @@ trait ClientFSManager {
         
         $this->initFS();
         $query['filter'] = array_merge(['isThumbnail' => ['$exists' => false]], $query['filter'] ?? []);
-        $query['options'] = array_merge(['sort' => ['order' => 1]],$query['options'] ?? []);
+        $query['options'] = array_merge(['sort' => ['order' => 1, '_id' => 1]],$query['options'] ?? []);
         
         $docs = $this->fs->find($query['filter'] ?? [],$query['options'] ?? []);
 
@@ -308,6 +322,16 @@ trait ClientFSManager {
                 'tag_start' => function ($value, $href, $lazy = true) {
                     $lazy = ($lazy) ? " loading='lazy'" : "";
                     return "img src='$href".($value->thumbnail ?? $value->filename)."' onclick='lightbox(this)' full-resolution='$href"."$value->filename'$lazy";
+                },
+                'tag_end' => "",
+                'anchor' => fn () => ""
+            ],
+            'limitedGallery' => [
+                'container' => 'div',
+                'class' => 'cobalt--fs-directory-listing cfs--picture-gallery',
+                'tag_start' => function ($value, $href, $lazy = true) {
+                    $lazy = ($lazy) ? " loading='lazy'" : "";
+                    return "img src='$href".($value->thumbnail ?? $value->filename)."' full-resolution='$href"."$value->filename'$lazy";
                 },
                 'tag_end' => "",
                 'anchor' => fn () => ""

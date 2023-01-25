@@ -282,7 +282,11 @@ class LoginFormRequest extends FormRequest {
         error_container.innerText = "";
 
         let data = this.build_query();
-        let headers = { ...this.headers, "Authentication": btoa(`${data.username}:${data.password}`) }
+        let headers = {};
+        const encoded = btoa(`${data.username}:${data.password}`);
+        headers = { ...this.headers, "Authentication": encoded }
+        data.Authentication = encoded;
+        
         delete data.username;
         delete data.password;
         const post = new ApiFetch(this.action, this.method, { headers: headers });

@@ -426,12 +426,17 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
  * }
  */
 function get_offset(element) {
+    if(element === null) throw new Error("Element must not be null!");
     let parent = element,
         offsetParentX = 0,
         offsetParentY = 0,
-        scrollX = element.scrollLeft,
-        scrollY = element.scrollTop,
+        scrollX = 0,
+        scrollY = 0,
         zIndex = 0;
+    if("scrollLeft" in element) {
+        scrollX = element.scrollLeft;
+        scrollY = element.scrollTop;
+    }
 
     // Just use a while loop.
     while (parent) {
@@ -445,8 +450,10 @@ function get_offset(element) {
 
     while (parent) {
         if(parent === document.body.parentNode) break;
-        scrollX += parent.scrollLeft || 0; 
-        scrollY += parent.scrollTop || 0;
+        if("scrollLeft" in element) {
+            scrollX += parent.scrollLeft || 0;
+            scrollY += parent.scrollTop || 0;
+        }
         parent = parent.parentNode;
     }
 
