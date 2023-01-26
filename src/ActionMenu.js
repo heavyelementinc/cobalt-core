@@ -55,7 +55,8 @@ class ActionMenu {
 
     async draw() {
         this.menu = document.createElement("action-menu");
-        let header = document.createElement("header");
+        let header = document.createElement("div");
+        header.classList.add('header')
         header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
         this.menu.appendChild(header);
 
