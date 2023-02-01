@@ -105,7 +105,7 @@ trait ClientFSManager {
      * @param mixed $query 
      * @return void 
      */
-    public function updateMetadata($query, $data) {
+    public function updateMetadata($query, $data):object {
         $this->initFS();
         $result = $this->fs->updateOne($query, $data);
         return $result;
@@ -135,7 +135,7 @@ trait ClientFSManager {
             'tmp_name' => $file['tmp_name'][$index],
         ];
 
-        if($this->fs_filename_path && !isset($meta['isThumbnail'])) $file_array['name'] = trim_trailing_slash($this->fs_filename_path)."/$file_array[name]";
+        if(!isset($meta['isThumbnail'])) $file_array['name'] = $this->prefixFilename($file_array['name']);
 
 
         $metadata = getimagesize($file_array['tmp_name']);
@@ -188,7 +188,7 @@ trait ClientFSManager {
         $path = ($path) ? "$path/" : "";
         $name           = pathinfo($files[$key]['name'][$index],PATHINFO_FILENAME);
         $extension      = pathinfo($files[$key]['name'][$index],PATHINFO_EXTENSION);
-        // $thumbnail_name = trim_trailing_slash($this->fs_filename_path) . "/$name.$this->thumbnail_suffix.$extension";
+        
         $thumbnail_name = "$name.$this->thumbnail_suffix.$extension";
         
         if(!$files[$key]['tmp_name'][$index]) throw new BadRequest("Invalid indicies");
@@ -231,6 +231,11 @@ trait ClientFSManager {
 
     }
 
+    private function prefixFilename($filename) {
+        if($this->fs_filename_path) $filename = trim_trailing_slash($this->fs_filename_path)."/$filename";
+        return $filename;
+    }
+
     public function clientUploadImagesAndThumbnails($key,$thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null, $meta = false) {
         $ids = [];
         $assoc = is_associative_array($files);
@@ -240,6 +245,49 @@ trait ClientFSManager {
             array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data, $files, $meta));
         }
         return $ids;
+    }
+
+    public function renameFile($id, $submittedName = null) {
+        $this->initFS();
+        if(is_null($submittedName)) $submittedName = $_POST['rename'];
+        $_id = new ObjectId($id);
+        $q = ['_id' => $_id];
+
+        $newName = $this->prefixFilename($submittedName);
+        $result = $this->fs->findOne($q);
+
+        $oldExtension = pathinfo($result['filename'], PATHINFO_EXTENSION);
+        $newExtension = pathinfo($newName, PATHINFO_EXTENSION);
+        if(!$newExtension) {
+            $newName .= ".$oldExtension";
+            $newExtension = $oldExtension;
+        } else if($oldExtension !== $newExtension) confirm("WARNING: You're changing the file extension for this file. It may become unreadable. Are you sure you want to continue?", $_POST);
+
+        $update = ['filename' => $newName];
+
+        $thumbnail = $this->fs->findOne(['_id' => $result->thumbnail_id]);
+        $thumbnail_filename = null;
+        if($thumbnail) {
+            $thumbnail_filename = str_replace(".$newExtension", ".$this->thumbnail_suffix.$newExtension", $newName);
+            $update['thumbnail'] = $thumbnail_filename;
+        }
+
+        $modified = $this->updateMetadata($q,[
+            '$set' => $update
+        ]);
+
+        $returnValues = [
+            'name' => "/res/fs$newName",
+        ];
+
+        if($thumbnail_filename) {
+            $modified_thumb = $this->updateMetadata(['_id' => $thumbnail->_id],[
+                '$set' => ['filename' => $thumbnail_filename]
+            ]);
+            $returnValues['thumbnail'] = "/res/fs$thumbnail_filename";
+        }
+        
+        return $returnValues;
     }
 
     /**

@@ -1,0 +1,68 @@
+/* All entries in this list are accessible in any template by referencing
+   {{custom.path.to.entry}}
+*/
+{
+    "copyright_name": {
+        "manage": {
+            "group": "Basic",
+            "name": "Copyright Name",
+            "type": "input"
+        },
+        "default": "",
+        "$alt": "app_short_name"
+    },
+    "app_short_name": {
+        "manage": {
+            "group": "Basic",
+            "name": "Short Name",
+            "type": "input"
+        },
+        "default": "",
+        "$alt": "app_name",
+        "$public": true
+    },
+    "designer": {
+        "manage": {
+            "group": "Look &amp; Feel",
+            "name": "Designer Credit",
+            "type": "input-object"
+        },
+        "default": {
+            "prefix": "Designed by",
+            "name": "Heavy Element, Inc.",
+            "href": "https://heavyelement.io/",
+            "title": "Maine's Premier New Media Production Studio"
+        }
+    },
+    /* Fonts to be used. This can be referenced by the rendering engine for 
+    email templates and more. */
+    "fonts": {
+        "manage": {
+            "group": "Look &amp; Feel",
+            "name": "Default Fonts",
+            "type": "input-object"
+        },
+        "default": {
+            "head": {
+                "family": "'Assistant', sans-serif",
+                "import": "Assistant:500,800"
+            },
+            "body": {
+                "family": "'Open Sans', sans-serif",
+                "import": "Open+Sans:400,400i,800,800i"
+            }
+        },
+        "$merge": true,
+        "$style": true
+    },
+    /* The image displayed when loading a page. */
+    "login-hero-sidebar": {
+        "manage": {
+            "group": "Look &amp; Feel",
+            "name": "Sidebar Image",
+            "type": "input"
+        },
+        "default": "url(/core-content/img/default_poster_image.jpg)",
+        "$style": true
+    },
+}

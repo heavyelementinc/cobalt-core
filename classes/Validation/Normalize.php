@@ -99,11 +99,36 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'gmt',
     ];
 
+    protected $__global_fields = [];
+
+    protected function getGlobalField($name) {
+        if(!key_exists($name, $this->__global_fields)) return null;
+        return $this->__global_fields[$name]['callback']();
+    }
+
     // We set up our schema and store it
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
         $this->__normalize($normalize_get);
 
+        $this->__global_fields = [
+            'isEmptyDoc' => [
+                'callback' => fn () => (count($this->__dataset) < 1)
+            ],
+            'newDocDisabled' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? " disabled=disabled" : "",   // Check if there are any files
+            ],
+            'newDocSubmit' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "<button type=submit>Submit</button>" : "",
+            ],
+            'newDocAutosave' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=autosave",
+            ],
+            'newDocAutosaveFieldset' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=fieldset",
+            ]
+        ];
+        
         $this->init_schema();
         // Only enable pronoun prototypes if the 'pronoun_set' key is in the schema.
         // Do we actually want this?
@@ -303,6 +328,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     public function __get($n) { // Returns normalized user input
         $name = $n;
+        $global = $this->getGlobalField($name);
+        if($global !== null) return $global;
+
         $value = null;
         $proto = $this->__get_prototype($name); // $n = "name.raw"; $proto = ['name','raw']
         if ($proto !== false) $name = $proto[0];
@@ -532,10 +560,21 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         } else if (isset($this->__schema[$field]['valid'])) {
             $valid = $this->__schema[$field]['valid'];
             if (is_callable($valid)) $valid = $valid($val, $field);
+            $type = gettype($val);
+            if ($type === "object" || $type === "array") return $this->__proto_display_array_items($val, $valid);
             if (key_exists($val, $valid)) return $valid[$val];
         }
         if($val instanceof \MongoDB\BSON\UTCDateTime) return $this->get_date($val, 'verbose');
         return $val;
+    }
+    
+    private function __proto_display_array_items($values, $valid) {
+        $labeled = [];
+        foreach($values as $val) {
+            if(key_exists($val, $valid)) array_push($labeled, $valid[$val]);
+            else array_push($labeled, $val);
+        }
+        return implode(", ", $labeled);
     }
 
     /** Executes the 'valid' method defined in the schema and returns results */
@@ -552,6 +591,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __proto_options($val, $field) {
         $valid = $this->__proto_valid($val, $field);
         $gotten_value = $this->{$field};
+        if($gotten_value instanceof \MongoDB\Model\BSONArray) $gotten_value = $gotten_value->getArrayCopy();
 
         $type = gettype($val);
 
@@ -563,7 +603,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 foreach($val as $o) {
                     $v[$o] = $o;
                 }
-                $valid = array_merge($valid ?? [], $v ?? []);
+                $valid = array_merge($v ?? [], $valid ?? []);
                 $type = gettype($val);
         }
 

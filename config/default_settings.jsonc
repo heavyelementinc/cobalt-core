@@ -941,5 +941,8 @@
     },
     "Database_fs_public_endpoint": {
         "default": "/dbfs/"
+    },
+    "API_authentication_mode": {
+        "default": "POST" // Set to "header" for legacy mode
     }
 }

@@ -1,0 +1,20 @@
+action-menu {
+    display: flex;
+    aspect-ratio: 1 / 1;
+    width: 2ch;
+    align-items: center;
+    justify-content: center;
+}
+action-menu:before {
+    content: "\F035C";
+    font-family: "Material Design Icons";
+}
+action-menu option{
+    display: none;
+}
+action-menu[aria-pressed="true"] {
+    background: var(--project-action-menu-background);
+}
+.action-menu-element-toggled .action-menu {
+    background: var(--project-color-input-background);
+}

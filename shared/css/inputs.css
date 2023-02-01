@@ -16,7 +16,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input, textarea, input-password, button[native] {
+input-wrapper, input, textarea, input-password, button[native], action-menu {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -158,7 +158,7 @@ a.button {
   border: 1px solid;
 }
 
-.button:hover,button:hover {
+.button:hover,button:hover, action-menu:hover {
   background-color: var(--btn-hover);
   color: var(--btn-hover-text);
 }

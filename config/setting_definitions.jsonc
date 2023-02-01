@@ -63,7 +63,7 @@
     /* The name of the designer as well as their website and title text */
     "designer": {
         "manage": {
-            "group": "Basic",
+            "group": "Look &amp; Feel",
             "name": "Designer Credit",
             "type": "input-object"
         },
