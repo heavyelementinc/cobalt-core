@@ -1,9 +1,10 @@
 <h1>{{title}}</h1>
-<flex-table>
-    {{!lines}}
-</flex-table>
+<flex-table>{{!lines}}</flex-table>
 <style>
     .read-status--unread {
         font-weight: bold;
+    }
+    flex-table:empty:before{
+        content: "Contact form submissions will be displayed here... when they exist."
     }
 </style>

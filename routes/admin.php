@@ -77,7 +77,7 @@ if (app("CobaltEvents_enabled")) {
             'href' => '/cobalt-events/',
             'icon' => 'information-outline'
         ],
-        'navigation' => ['public_settings_panel']
+        'navigation' => ['admin_panel']
     ]);
 }
 
@@ -132,7 +132,7 @@ if(app("Contact_form_interface") === "panel") {
             'name' => "Contact Form",
             'icon' => 'chat-alert-outline',
         ],
-        'navigation' => ['public_settings_panel'],
+        'navigation' => ['admin_panel'],
         'unread' => function () {
             return (new ContactManager())->get_unread_count_for_user(session());
         },
