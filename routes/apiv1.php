@@ -33,6 +33,10 @@ if (app('Auth_logins_enabled')) {
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 
+    Route::post("/settings/update/", "CoreSettingsPanel@updateLogo", [
+        'permission' => 'Auth_modify_cobalt_settings'
+    ]);
+
     Route::put("/settings/default/{name}", "CoreSettingsPanel@reset_to_default", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);

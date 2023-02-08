@@ -1,10 +1,12 @@
 <?php
 
+use Controllers\ClientFSManager;
 use Controllers\Controller;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
 
 class CoreSettingsPanel extends Controller {
+    use ClientFSManager;
     private $requiresRoot = ['Cache &amp; Debug'];
     
     function settings_index() {
@@ -128,9 +130,57 @@ class CoreSettingsPanel extends Controller {
         return $GLOBALS['app']->update_setting($name, $value);
     }
 
+    public function updateLogo() {
+        $name  = array_keys($_POST)[0];
+        if(empty($_FILES)) throw new BadRequest("Must specify a file");
+        
+        $name = "logo";
+        // $_FILES[$name]['name'][0] = "masthead.png";
+
+        // First, let's find the current masthead
+        $query = ['masthead' => true];
+
+        // $cleanup = __APP_SETTINGS__[$name];
+
+        // Delete the current masthead
+        // if($cleanup) $this->delete($cleanup);
+
+        // Now, let's get ready to insert our new logo
+        $this->fs_filename_path = "/settings/masthead/";
+
+        $content = mime_content_type($_FILES[$name]['tmp_name'][0]);
+
+        // Upload it to the database
+        if($content === "image/svg+xml") {
+            $upload = [
+                'media' => $this->clientUploadFile($name, 0, $query, $_FILES)
+            ];
+            $upload['thumb'] = $upload['media'];
+        } else {
+            $upload = $this->clientUploadImageThumbnail($name, 0, 300, null, $query, $_FILES);
+        }
+        
+        $upload['media']['filename'] = "/res/fs".$upload['media']['filename'];
+        $upload['thumb']['filename'] = "/res/fs".$upload['thumb']['filename'];
+
+        // Set the value 
+        $_POST[$name] = $upload;
+
+        $value = $_POST[$name];
+        return $GLOBALS['app']->update_setting($name, $value);
+    }
+
     public function reset_to_default($name) {
         return $GLOBALS['app']->reset_to_default($name);
-    }    
+    }
+
+    public function presentation() {
+        add_vars([
+            'title' => "Presentation",
+        ]);
+
+        return set_template("/admin/settings/presentation.html");
+    }
 
     // private function get_object($settings, $index, $url) {
     //     $object = "";

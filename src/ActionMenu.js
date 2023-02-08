@@ -44,6 +44,7 @@ class ActionMenu {
     renderAction(action) {
         const button = document.createElement('button');
         if (this.withIcons) button.innerHTML = action.icon;
+
         const label = document.createElement("span");
         label.innerText = action.label;
         button.appendChild(label);

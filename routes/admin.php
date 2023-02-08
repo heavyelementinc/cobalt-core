@@ -40,6 +40,17 @@ Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
     'permission' => "Auth_modify_cobalt_settings"
 ]);
 
+Route::get("/settings/presentation", "CoreSettingsPanel@presentation",[
+    'permission' => 'Auth_modify_cobalt_settings',
+    'anchor' => [
+        'name' => "Presentation",
+        'icon' => 'palette-swatch-variant'
+    ],
+    'navigation' => ['public_settings_panel'],
+    'handler' => 'admin/presentation.js'
+]);
+
+
 /** CONTROL PANEL ITEMS */
 
 if (app('Auth_logins_enabled')) {

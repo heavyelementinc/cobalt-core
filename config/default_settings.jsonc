@@ -76,6 +76,39 @@
             "alias": "app_name"
         }
     },
+    /* A bespoke name to be listed in the copyright notice */
+    "logo": {
+        "default": {
+            "media":{
+                "id": null,
+                "filename": "\/core-content\/img\/branding\/cobalt-logo.svg",
+                "meta":{
+                    "width":1500,
+                    "height":1500,
+                    "mimetype":"image\/svg+xml"
+                }
+            },
+            "thumb":{
+                "id": null,
+                "filename": "\/core-content\/img\/branding\/cobalt-logo.svg",
+                "meta":{
+                    "width":150,
+                    "height":150,
+                    "mimetype":"image\/svg+xml"
+                }
+            }
+        },
+        "meta": {
+            // "group": "Logo",
+            // "subgroup": "Details",
+            // "name": "Logo",
+            // "view": "/admin/settings/inputs/logo.html"
+        }
+    },
+    /* Decides if the logo should be shown in the default header */
+    "display_masthead": {
+        "default": true
+    },
     /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
         "default": false,

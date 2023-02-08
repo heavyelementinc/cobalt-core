@@ -23,19 +23,25 @@ class AdminHandler extends WebHandler {
     // }
     function auth_panel() {
         if (!session_exists()) return "";
+        
+        // $session = session();
+        $settings = route("CoreAdmin@settings_index");
+        $userPanel = view('/admin/users/session-panel.html', [
+            'settings' => ($settings) ? "<option icon='cog' onclick=\"router.location = '$settings'; return true;\">Settings</option>" : ""
+        ]);
+
         $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";
-        $panel .= "<nav id='admin-panel'><ul class='directory--group'>";
+
+        $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='directory--group'>";
     
         $panel .= get_route_group("admin_panel", [
             'prefix' => app("context_prefixes")['admin']['prefix'],
             'excludeWrapper' => true,
             'ulSuffix' => ["CoreAdmin@settings_index"],
         ]);
-        $settings = route("CoreAdmin@settings_index");
-        $panel .= "<li><a href='$settings'>Settings</a></li>";
+        // $settings = route("CoreAdmin@settings_index");
+        // $panel .= ;
         $panel .= "</ul>";
-        $session = session();
-        $panel .= "<div id='user-panel-header'>".$session->{'name'}."</div>";
         $panel .= "</nav>";
         return $panel;
     }

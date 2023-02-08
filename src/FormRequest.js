@@ -127,7 +127,7 @@ class FormRequest {
         let data = this.build_query([element]);
         if (this.form.getAttribute("autosave") == "form") data = this.build_query();
         try {
-            await this.send(data);
+            const result = await this.send(data);
         } catch (error) {
             return this.autosave_reenable_field(el, autosave_spinner);
         }

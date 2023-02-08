@@ -47,9 +47,10 @@ class ActionMenuElement extends HTMLElement {
     }
 
     actionFromOption(opt) {
+        const icon = opt.getAttribute("icon");
         let action = {
             label: opt.innerHTML || "Default",
-            icon: `<i name="${opt.getAttribute("icon")}"></i>`,
+            icon: (icon) ? `<i name="${icon}"></i>` : "",
             dangerous: opt.hasAttribute("dangerous"),
             disabled: opt.hasAttribute("disabled")
         }

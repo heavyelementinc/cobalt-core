@@ -206,8 +206,18 @@ class WebHandler implements RequestHandler {
 
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
+        $masthead = "";
+        
+        $logo = app("logo.thumb");
+        $meta = $logo->meta;
+        $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+        
         $header = $this->load_template($this->header_template);
-        $this->add_vars(['header_nav' => $this->header_nav()]);
+        $this->add_vars([
+            'header_nav' => $this->header_nav(),
+            'masthead' => (app("display_masthead")) ? $masthead : "",
+            'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
+        ]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
     }

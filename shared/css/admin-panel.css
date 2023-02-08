@@ -2,6 +2,12 @@
     --admin-panel-width: 200px;
 }
 
+nav#admin-panel .cobalt-masthead {
+    width: var(--admin-panel-width);
+    height: 150px;
+    object-fit: contain;
+}
+
 nav#admin-panel {
     position: fixed;
     display: flex;
@@ -15,6 +21,12 @@ nav#admin-panel {
 #admin-panel ul {
     flex-grow: 1;
     height: 100%;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+#admin-panel ul::-webkit-scrollbar {
+    display: none;
 }
 
 #admin-panel li a {
@@ -67,6 +79,9 @@ main {
     color: white;
     display: flex;
     justify-content: space-between;
+    padding: .8em;
+    align-items: center;
+    background: var(--project-color-user-panel-button);
 }
 
 #user-panel-header a {

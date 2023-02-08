@@ -1,0 +1,7 @@
+<div id='user-panel-header'>
+    <span>{{session.name}}</span>
+    <action-menu title="User">
+        <option icon="account" onclick="router.location = '/admin/users/manage/{{session._id}}'; return true">Edit Profile</option>
+        {{!settings}}
+    </action-menu>
+</div>

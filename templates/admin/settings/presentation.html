@@ -1,0 +1,58 @@
+<h1>{{title}}</h1>
+<ul class="list-panel">
+    <li>
+        <form-request action="/api/v1/settings/update/" method="PUT" autosave="autosave">
+            <label>Application name</label>
+            <input type="text" name="app_name" value="{{app.app_name}}">
+        </form-request>
+    </li>
+    <li>
+        <form-request action="/api/v1/settings/update/" method="PUT" autosave="autosave">
+            <label>Short name</label>
+            <input type="text" name="app_short_name" value="{{app.app_short_name}}">
+        </form-request>
+    </li>
+    <li>
+        <form-request action="/api/v1/settings/update/" method="PUT" autosave="autosave">
+            <switch-container>
+                <label>Display logo</label>
+                <input-switch name="display_masthead" checked="{{app.display_masthead}}"></input-switch>
+            </switch-container>
+        </form-request>
+    </li>
+    <li>
+        <form-request id="logo-updater" action="/api/v1/settings/update/" method="POST" autosave="autosave" class="hbox">
+            <img src="{{app.logo.thumb.filename}}" width="100" height="100">
+            <div style="margin-left: 1em">
+                <label style="display:block">Logo</label>
+                <div class="hbox">
+                    <input type="file" name="logo">
+                    <action-menu title="Options">
+                        <option method="PUT" action="/api/v1/settings/default/logo">Reset Logo</option>
+                    </action-menu>
+                </div>
+            </div>
+        </form-request>
+    </li>
+</ul>
+
+{{$app.logo}}
+
+
+<style>
+    form-request > img {
+        background:gray;
+        object-fit:contain;
+        max-width: 100px;
+    }
+    .list-panel li:nth-of-type(even) {
+        background: white;
+    }
+    .list-panel form-request {
+        width:100%;
+    }
+    .list-panel form-request > * {
+        width:100%;
+        box-sizing: border-box;
+    }
+</style>
