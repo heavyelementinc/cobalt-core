@@ -16,12 +16,15 @@ namespace Auth;
 
 use \Validation\Exceptions\ValidationIssue;
 use \Auth\AdditionalUserFields;
+use Controllers\ClientFSManager;
 use DateTime;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\UTCDateTime;
 use PhpToken;
 
 class UserSchema extends \Validation\Normalize {
-
+    use ClientFSManager;
     function __construct($doc = null, $normalize_get = true) {
         $this->collection = \db_cursor('users');
         parent::__construct($doc, $normalize_get);
@@ -45,15 +48,26 @@ class UserSchema extends \Validation\Normalize {
                 },
                 'set' => null
             ],
+            'nametag' => [
+                'get' => function () {
+                    return "<div class='cobalt-user--profile-display'>".$this->{"avatar.display"}." $this->name ".$this->{'flags.verified.display'}."</div>";
+                },
+                'set' => false
+            ],
             'pword' => [],
             'email' => [],
+            'avatar' => [
+                'get' => fn ($val) => $this->getAvatar($val),
+                'set' => fn ($val) => $this->setAvatar($val),
+                'display' => fn ($val) => $this->displayAvatar($val),
+            ],
             'flags.verified' => [
                 'set' => 'boolean_helper',
                 'groups' => ['flags'],
                 'tag' => 'input-switch',
                 'attributes' => [],
-                'label' => 'Is user verified'
-
+                'label' => 'Is user verified',
+                'display' => fn ($val) => ($val) ? "<i name='check-decagram' title='Verified user'></i>" : "",
             ],
             'flags.password_reset_required' => [
                 'set' => 'boolean_helper',
@@ -73,6 +87,31 @@ class UserSchema extends \Validation\Normalize {
             // "groups" => [],
             // "permissions" => [],
         ], $integrate);
+    }
+
+    function default_values(): array {
+        return [
+            'avatar' => [
+                'media' => [
+                    '_id' => null,
+                    'filename' => '/core-content/img/unknown-user.jpg',
+                    'meta' => [
+                        'height' => 1200,
+                        'width' => 1084,
+                        'mimetype' => 'image/jpeg'
+                    ]
+                ],
+                'thumb' => [
+                    '_id' => null,
+                    'filename' => '/core-content/img/unknown-user.thumb.jpg',
+                    'meta' => [
+                        'height' => 250,
+                        'width' => 226,
+                        'mimetype' => 'image/jpeg'
+                    ]
+                ]
+            ]
+        ];
     }
 
     /**
@@ -265,5 +304,43 @@ class UserSchema extends \Validation\Normalize {
         }
 
         return $mutant; // Can be empty!
+    }
+
+    function getAvatar($val) {
+        if(!$val) return "/core-content/img/unknown-user.jpg";
+        if($val['thumb']['id'] === null) return $val['thumb']['filename'];
+        $thumb = $val['thumb']['filename'];
+        return "/res/fs$thumb";
+    }
+
+    function setAvatar($val) {
+        $this->fs_filename_path = "/avatars/";
+        if(gettype($val) !== "array") $val = $_FILES;
+        // Rename the file just submitted with a (probably) unique ID
+        $val['avatar']['name'][0] = uniqid("profile.", true) .".". pathinfo($val['avatar']['name'][0],PATHINFO_EXTENSION);
+        $result = $this->clientUploadImageThumbnail('avatar', 0, 200, null, ['avatar' => true], $val);
+        return $result;
+    }
+
+    function displayAvatar($val) {
+        $link = $this->avatar;
+        $meta = $val['thumb']['meta'];
+        $img = "<img src='$link' class='cobalt-user--avatar' width='$meta[width]' height='$meta[height]'>";
+        return $img;
+    }
+
+    function deleteAvatar() {
+        if(!$this->_id) throw new BadRequest("Incomplete request.");
+        if($this->__dataset['avatar']['media']['id'] === null) throw new NotFound("The avatar to delete was not specified");
+        try {
+            $this->delete($this->__dataset['avatar']['media']['id'], true);
+        } catch(NotFound $e) { 
+            // Don't worry about not deleting the existing avatar.
+        }
+        $man = new UserCRUD();
+        $result = $man->updateOne(['_id' => $this->_id], [
+            '$unset' => ['avatar' => true]
+        ]);
+        return $result->getModifiedCount();
     }
 }

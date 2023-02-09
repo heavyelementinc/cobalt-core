@@ -400,6 +400,7 @@ ul.list-panel {
 .list-panel h2 {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .list-panel li {
@@ -420,6 +421,14 @@ ul.list-panel {
 
 .list-panel li:only-child{
     border-radius: 4px;
+}
+
+.list-panel li label {
+    width:100%;
+}
+
+.list-panel li > * {
+    box-sizing: border-box;
 }
 
 .list-panel input-switch {

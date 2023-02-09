@@ -1,11 +1,17 @@
-<h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+<div class='hbox'>
+    <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+    <action-menu title="Manage User">
+        <option method="DELETE" action="/api/v1/user/{{user_account._id}}/avatar" dangerous>Reset Avatar to Default</option>
+        <option method="DELETE" action="/api/v1/user/{{user_account._id}}/delete" dangerous>Delete {{user_account.fname}}</option>
+    </action-menu>
+</div>
     <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
 
     <tab-nav id="tab-list--parent">
         <nav>
             <a href="#basics" class="tab-nav--current-content">Basic Info</a>
             <a href="#permissions">Permissions</a>
-            <a href="#statistics">Stats</a>
+            <!-- <a href="#statistics">Stats</a> -->
             {{!additional_button}}
             <a href="#manage">Manage</a>
         </nav>
@@ -14,34 +20,37 @@
                 autosave="autosave">
                 <fieldset>
                     <legend>Basic Info</legend>
-                    <label>Name</label>
-                    <input name="fname" value="{{user_account.fname}}" placeholder="First name" for="#fname"> <input
-                        name="lname" value="{{user_account.lname}}" placeholder="Last name" for="#lname">
-                
-                    <label>Username</label>
-                    <input name="uname" value="{{user_account.uname}}" for="#uname">
-                
-                    <label>Email</label>
-                    <input type="email" name="email" value="{{user_account.email}}">
+                <ul class="list-panel">
+                    <li>
+                        <label>Name</label>
+                        <input name="fname" value="{{user_account.fname}}" placeholder="First name" for="#fname"> <input
+                            name="lname" value="{{user_account.lname}}" placeholder="Last name" for="#lname">
+                    </li>
+                    <li>
+                        <label>Username</label>
+                        <input name="uname" value="{{user_account.uname}}" for="#uname">
+                    </li>
+                    <li>
+                        <label>Email</label>
+                        <input type="email" name="email" value="{{user_account.email}}">
+                    </li>
+                </ul>
                 </fieldset>
             </form-request>
     
-            <div>
-                <form-request id="profile-picture" method='POST' action="/api/v1/user/{{user_account._id}}/picture">
+    
+                <form-request id="profile-picture" method='POST' action="/api/v1/user/{{user_account._id}}/avatar">
                     <fieldset>
                         <legend>Profile Picture</legend>
-                        <input type="file" name="profilepic">
-                        <button type="submit">Upload</button>
+                        <ul class="list-panel">
+                            <li>
+                                {{!user_account.avatar.display}}
+                                <input type="file" name="avatar">
+                                <button type="submit">Upload</button>
+                            </li>
+                        </ul>
                     </fieldset>
                 </form-request>
-                <form-request id="password-reset" method="PUT" action="/api/v1/user/{{user_account._id}}/password">
-                    <fieldset>
-                        <legend>Change Password</legend>
-                        <input type="password" name="pword" placeholder="Password" required="required">
-                        <input type='submit' value="Save">
-                    </fieldset>
-                </form-request>
-            </div>
         </section>
         <section id="permissions" class="drawer-list--item">
             <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{user_account._id}}/permissions"
@@ -50,31 +59,41 @@
                     {{!permission_table.permissions}}
                 </div>
                 <div style="min-width:35%; padding: 0 0 1rem 1rem;">
-                    <h2>Group Membership<help-span
-                            value="Group membership grants the user *all* permissions for that group. However, any permissions the user has been granted/denied will be preserved.">
-                        </help-span>
-                    </h2>
-                    {{!permission_table.groups}}
+                    <fieldset>
+                        
+                        <legend>Group Membership<help-span
+                                value="Group membership grants the user *all* permissions for that group. However, any permissions the user has been granted/denied will be preserved.">
+                            </help-span>
+                        </legend>
+                        {{!permission_table.groups}}
+                    </fieldset>
                 </div>
             </form-request>
         </section>
         {{!additional_panel}}
-        <section id="statistics" class="drawer-list--item">
+        <!-- <section id="statistics" class="drawer-list--item">
             <h2>Statistics</h2>
             <p>Placeholder section for {{user_account.uname}}'s statistics</p>
-        </section>
+        </section> -->
         <section id="manage" class="drawer-list--item">
-            <h2>Manage</h2>
-            <form-request id="delete-user" method="DELETE" action="/api/v1/user/{{user_account._id}}/delete">
-                <button type="submit">Delete</button>
-            </form-request>
             <form-request id="account-flags" method="PUT" action="/api/v1/user/{{user_account._id}}/update"
                     autosave="autosave">
-                    <fieldset>
-                        <legend>Account Flags</legend>
-                        {{!account_flags}}
-                    </fieldset>
-                </form-request>
+                <fieldset>
+                    <legend>Account Flags</legend>
+                    {{!account_flags}}
+                </fieldset>
+            </form-request>
+            <form-request id="password-reset" method="PUT" action="/api/v1/user/{{user_account._id}}/password">
+                <fieldset>
+                    <legend>Change Password</legend>
+                    <ul class='list-panel'>
+                        <li>
+                            <input type="password" name="pword" placeholder="Password" required="required">
+                            <input type='submit' value="Save">
+                        </li>
+                    </ul>
+                </fieldset>
+            </form-request>
         </section>
     </tab-nav>
 
@@ -83,7 +102,30 @@
             display: flex;
         }
 
-        #permissions-form .form-request--actual {
+        #permissions form-request {
             display: flex;
+        }
+
+        main tab-nav section form-request{
+            display: block;
+            width:100%;
+        }
+        #profile-picture li {
+            position: relative;
+        }
+
+        #avatar-button {
+            position: absolute;
+            top: .5rem;
+            right: .5rem;
+            height: 2rem;
+            width: 2rem;
+        }
+
+        ul.list-panel li {
+            flex-wrap: wrap;
+        }
+        ul.list-panel label {
+            flex-grow: 1;
         }
     </style>

@@ -84,7 +84,7 @@ class Permissions extends Database {
             if (in_array($group, (array)$user->groups)) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
-                $table[$group] = "<fieldset><legacy>$group</legacy>\n<ul class='list-panel'>";
+                $table[$group] = "<fieldset><legend>$group</legend>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
             /** Concat our current permission into the group */

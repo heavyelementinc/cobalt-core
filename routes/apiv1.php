@@ -23,9 +23,12 @@ if (app('Auth_logins_enabled')) {
         Route::put("/account-creation", "UserAccounts@account_creation");
     }
     
+    Route::post("/user/me/", "UserAccounts@update_me");
+    Route::delete("/user/{id}/avatar", "UserAccounts@delete_avatar");
     Route::put("/user/{id}/permissions", "UserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
     Route::put("/user/{id}/update",     "UserAccounts@update_basics",     ['permission' => 'Auth_allow_editing_users']);
     Route::put("/user/{id}/password",   "UserAccounts@update_basics",   ['permission' => 'Auth_allow_editing_users']);
+    Route::post("/user/{id}/avatar",   "UserAccounts@update_basics",   ['permission' => 'Auth_allow_editing_users']);
     Route::put("/user/password",        "UserAccounts@change_my_password", ['permission' => 'self']);
     Route::delete("/user/{id}/delete",   "UserAccounts@delete_user",   ['permission' => 'Auth_allow_deleting_users']);
 

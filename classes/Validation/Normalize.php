@@ -109,6 +109,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     // We set up our schema and store it
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
+        if($data) $this->__dataset = array_merge($this->default_values(), doc_to_array($this->__dataset));
+        
         $this->__normalize($normalize_get);
 
         $this->__global_fields = [
@@ -135,6 +137,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         if (key_exists('pronoun_set', $this->__schema)) {
             $this->__init_pronoun_set();
         }
+    }
+
+    function default_values():array {
+        return [];
     }
 
     /**

@@ -13,6 +13,7 @@ trait ClientFSManager {
     protected $format_table = null;
     protected $filename_insert_prefix = "";
     public $fs_filename_path = "";
+    public $last_modified_result = null;
     
     // function __construct() {
     //     $this->initFS();
@@ -37,16 +38,26 @@ trait ClientFSManager {
         $this->fs->download($filename);
     }
 
-    public function delete($id) {
+    public function find($query = [], $options = []) {
+        $this->initFS();
+        return $this->fs->find($query, $options);
+    }
+
+    public function findOne($query = [], $options = []) {
+        $this->initFS();
+        return $this->fs->findOne($query, $options);
+    }
+
+    public function delete($id, $skipConfirm = false) {
         $this->initFS();
         $_id = new \MongoDB\BSON\ObjectId($id);
         $result = $this->fs->findOne(["_id" => $_id]);
         if($result === null) throw new NotFound("That file was not found");
-        confirm("Are you sure you want to delete <strong>" . htmlspecialchars($result->filename) . "</strong>?",[]);
+        if($skipConfirm == false) confirm("Are you sure you want to delete <strong>" . htmlspecialchars($result->filename) . "</strong>?",[]);
 
         if($result->thumbnail_id) $this->fs->delete($result->thumbnail_id);
         $result = $this->fs->delete($_id);
-
+        $this->last_modified_result = $result;
         return (string)$_id;
     }
 
@@ -56,12 +67,14 @@ trait ClientFSManager {
             array_push($_ids, new \MongoDB\BSON\ObjectId($id));
         }
         $result = $this->fs->deleteMany(['_id' => ['$in' => $id]]);
+        $this->last_modified_result = $result;
         return $result->getDeletedCount();
     }
 
     public function deleteAllBelongingToId($parent_id, $key = "for") {
         $_id = new ObjectId($parent_id);
         $result = $this->findMany([$key => $_id]);
+        $this->last_modified_result = $result;
         $deleted = 0;
         foreach($result as $doc) {
             $r = $this->delete($doc['_id']);
@@ -108,6 +121,7 @@ trait ClientFSManager {
     public function updateMetadata($query, $data):object {
         $this->initFS();
         $result = $this->fs->updateOne($query, $data);
+        $this->last_modified_result = $result;
         return $result;
     }
 

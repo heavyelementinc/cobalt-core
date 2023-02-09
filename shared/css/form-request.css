@@ -33,6 +33,10 @@ form-header :is(h1, h2, h3, h4, h5) {
   margin-top: .5rem;
 }
 
+fieldset:has(legend:first-child + ul.list-panel:last-child) {
+  border: none;
+}
+
 /* 
 :is(form-request,login-form-request) > section.form-request--actual{
   position: relative;

@@ -11,7 +11,6 @@ Route::get("/?", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
-
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
     Route::get("/posts/", "Posts@admin_index",[
         'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
@@ -22,7 +21,11 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     ]);
 }
 
-
+Route::get("/me/", "UserAccounts@me",
+    [
+        
+    ]
+);
 
 
 

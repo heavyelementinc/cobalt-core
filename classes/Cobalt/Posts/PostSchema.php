@@ -4,6 +4,7 @@
  */
 namespace Cobalt\Posts;
 
+use Auth\UserCRUD;
 use Controllers\ClientFSManager;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
@@ -20,6 +21,11 @@ class PostSchema extends \Validation\Normalize {
                 // 'get' => [],
                 'valid' => function ($val) {
                     return $this->valid_users_by_permission('Posts_manage_posts','permission');
+                },
+                'display' => function ($val) {
+                    $man = new UserCRUD();
+                    $author = $man->findOneAsSchema(['_id' => new ObjectId($val)]);
+                    return $author->nametag;
                 }
             ],
             'title' => [],

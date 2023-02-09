@@ -1,7 +1,11 @@
 <?php
 
 use \Auth\UserCRUD;
+use Auth\UserSchema;
 use \Auth\UserValidate;
+use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Unauthorized;
+use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationFailed;
 
 class UserAccounts extends \Controllers\Pages {
@@ -18,6 +22,15 @@ class UserAccounts extends \Controllers\Pages {
     function update_basics($id) {
         $update = $_POST;
         $ua = new UserCRUD();
+        if(key_exists('avatar', $update)) {
+            $schema = $ua->findOneAsSchema(['_id' => new ObjectId($id)]);
+            try {
+                $schema->deleteAvatar();
+            } catch(NotFound $e) {
+                header("HTTP/1.1 200 OK");
+                // Do nothing
+            }
+        }
         $validated = $ua->updateUser($id, $update);
         return $validated;
     }
@@ -92,5 +105,61 @@ class UserAccounts extends \Controllers\Pages {
         ]);
 
         set_template("authentication/account-creation/onboarding.html");
+    }
+
+    function me() {
+        $session = session();
+        add_vars([
+            'title' => "$session->fname $session->lname",
+            'doc' => $session
+        ]);
+
+        set_template("/authentication/user-self-service-panel.html");
+    }
+
+    function update_me() {
+        $session = session();
+        if(!$session) throw new Unauthorized("You're not logged in");
+        
+        // Only allow these fields to be updated through this method
+        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar'];
+        $update = [];
+        foreach($filter as $key){
+            if(key_exists($key, $_POST)) $update[$key] = $_POST[$key];
+        }
+
+        $schema = new UserSchema();
+        $validated = $schema->validate($update);
+
+        if(key_exists('avatar', $_POST)) {
+            $avatar = $session['avatar'] ?? [];
+            try{
+                $session->deleteAvatar();
+            } catch(NotFound $e){
+                // Ignore it if we can't delete the avatar.
+                header("HTTP/1.1 200 OK");
+            }
+        }
+
+        $user = new UserCRUD();
+
+        $result = $user->updateOne(['_id' => $session['_id']],['$set' => $validated]);
+
+        return $validated;
+    }
+
+    function delete_avatar($id) {
+        if($id === "me") {
+            $user = session();
+            $message = "your";
+        } else {
+            if(!has_permission("Auth_allow_editing_users")) throw new Unauthorized("You are not authorized to modify this resource.");
+            $man = new UserCRUD();
+            $user = $man->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $message = "this user's";
+        }
+        confirm("This action will <strong>permanently delete</strong> $message avatar. Are you sure you want to continue?", $_POST);
+
+        return $user->deleteAvatar();
     }
 }
