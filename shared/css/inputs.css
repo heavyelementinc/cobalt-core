@@ -659,3 +659,7 @@ input-password > input[type='password'] + button:before {
   display: flex;
   flex-wrap: wrap;
 }
+
+.cobalt-sortable--current-drag-item {
+  opacity: .2;
+}

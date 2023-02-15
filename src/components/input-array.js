@@ -53,7 +53,7 @@ class InputArray extends AutoCompleteInterface {
         try{
             this.value = JSON.parse(newVal)
         } catch(error) {
-            console.warn("Failed to parse JSON while updating " + this.name + "'s value");
+            console.warn(`Failed to parse JSON while updating ${this.getAttribute("name")}'s value`);
         }
     }
 

@@ -212,7 +212,7 @@ class CobaltListing extends HTMLElement {
         if(this.sortAction === null) return;
         const container = this.querySelector(".cobalt--fs-directory-listing");
         console.log(container.children)
-        this.sortable = new Sortable(container.children, container.children, container);
+        this.sortable = new Sortable(container.children, container.children, container, {orientation: "ltr"});
         this.sortable.container.addEventListener("cobtaltsortcomplete",() => {
             const fetch = new ApiFetch(this.sortAction, this.getAttribute("sort-method") ?? "POST", {});
             let sortData = [];
