@@ -45,23 +45,19 @@ class Route {
     }
 
     static function s_get(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::throw_without_session("access");
-        Route::add_route($path, $controller, $additional, 'get');
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'get');
     }
 
     static function s_post(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::throw_without_session();
-        Route::add_route($path, $controller, $additional, 'post');
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'post');
     }
 
     static function s_put(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::throw_without_session();
-        Route::add_route($path, $controller, $additional, 'put');
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'put');
     }
 
     static function s_delete(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::throw_without_session();
-        Route::add_route($path, $controller, $additional, 'delete');
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'delete');
     }
 
     static function throw_without_session($access = "modify") {
@@ -163,6 +159,7 @@ class Route {
             'real_path' => $real_path,
             'real_regex' => $real_regex,
             'unread' => $additional['unread'] ?? fn () => null,
+            'require_session' => $additional['require_session'] ?? !app("Web_normally_open_pages"),
         ];
         
         if(!key_exists($controller, $GLOBALS['ROUTE_LOOKUP_CACHE'])) {

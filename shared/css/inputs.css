@@ -646,3 +646,16 @@ input-password > input[type='password'] + button:before {
   content: "\F0208";
 }
 
+
+.cobalt-sortable--drop-indicator {
+  display: inline-block;
+  width: 4px;
+  color: var(--project-color-active);
+  background-color: var(--project-color-active);
+  padding: 4px;
+}
+
+.cobalt--fs-directory-listing {
+  display: flex;
+  flex-wrap: wrap;
+}

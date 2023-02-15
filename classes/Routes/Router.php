@@ -25,6 +25,7 @@ use Exception;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\NotImplemented;
+use Exceptions\HTTP\Unauthorized;
 
 class Router {
 
@@ -205,6 +206,11 @@ class Router {
                 $permission = false;
             }
             if (!$permission) throw new \Exceptions\HTTP\Unauthorized('You do not have the required privileges.');
+        }
+        if ($exe['require_session'] === true) {
+            $errorMessage = "modify";
+            if($method === "get") $errorMessage = "access";
+            if(!session_exists()) throw new Unauthorized("You do not have permission to $errorMessage this resource");
         }
         /** Check if we're a callable or a string and execute as necessary */
         if (is_callable($exe['controller'])) throw new \Exception("Anonymous functions are no longer supported as controllers."); //return $this->controller_callable($exe);

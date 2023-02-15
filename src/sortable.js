@@ -4,6 +4,8 @@ class Sortable {
         this.dropTargets = dropTargets;
         this.sortableItems = sortableItems;
         this.container = eventContainer;
+        this.dropIndicator = document.createElement("div");
+        this.dropIndicator.classList.add("cobalt-sortable--drop-indicator");
 
         if(this.container === null) this.findContainers();
 
@@ -73,7 +75,7 @@ class Sortable {
     dragStart(element,event) {
         // this.dragStartIndex = +event.target.dataset.cobaltSortableIndex;
         this.currentDragItem = element;
-        
+        document.body.style.cursor = "grabbing";
     }
 
     dragDrop(element,event) {
@@ -81,6 +83,8 @@ class Sortable {
         const dragEndIndex = +event.target.dataset.cobaltSortableIndex;
 
         event.target.classList.remove('cobalt-sortable--valid-drop-target', this.validTargetClass);
+
+        if(this.dropIndicator.parentNode) this.dropIndicator.parentNode.removeChild(this.dropIndicator);
         
         const dropTarget = this.getBeforeAfterFromOrientation(element, event);
         console.log(dropTarget);
@@ -91,10 +95,14 @@ class Sortable {
         
         this.currentDragItem = null;
         this.triggerDropEvent();
+        document.body.style.cursor = "";
     }
 
     dragOver(element,event) {
         event.preventDefault();
+        const target = this.getBeforeAfterFromOrientation(event.target,event);
+        console.log({element, event, same: element === event.target});
+        event.target.parentNode.insertBefore(this.dropIndicator, target.nextElementSibling);
     }
 
     dragEnter(element,event) {
@@ -114,13 +122,14 @@ class Sortable {
         if(['portrait', 'ttb'].includes(this.orientation)) constraint = ["y", "h"];
         const dims = get_offset(el);
         // Divide the element's chosen dimension in half
-        const half = dims[constraint[1]] * .5;
+        const half = dims[constraint[1]] / 2;
+
         const droppedAt = dropEvent[constraint[0]];
         const dropTargetOffset = dims[constraint[0]];
         const normalizedDropPosition = dims[constraint[1]] - (droppedAt - dropTargetOffset);
         // Check if the event's constraint action is less than or greater than
         // the half threshold of the drop element
-        console.log({check: normalizedDropPosition > half, normalizedDropPosition, half, dropTargetOffset, constraint, droppedAt});
+        console.log({check: normalizedDropPosition > half, normalizedDropPosition, half, dropTargetOffset, droppedAt});
         // console.log(normalizedDropPosition > half);
         return (normalizedDropPosition > half) ? el : el.nextElementSibling;
     }
