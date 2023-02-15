@@ -52,6 +52,16 @@ class Settings extends \Drivers\Database {
         
     ];
 
+    public $waitingForDependencies;
+    public $max_m_time;
+    public $__settings;
+    public $__user_modified_settings;
+    public $definitions;
+    public $instances;
+    public $raw_decode;
+    public $default_values;
+    public $update_settings;
+
     // const __SETTINGS__ = [
     //     __ENV_ROOT__ . "/config/flags.jsonc",
     //     __APP_ROOT__ . "/ignored/config/custom_settings.json",

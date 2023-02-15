@@ -11,6 +11,16 @@ class CobaltSetting {
      */
     protected $value = null;
     protected $settings = null;
+    public $name;
+    public $defaultValue;
+    public $directives;
+    public $meta;
+    public $validate;
+    public $user_modified_settings;
+    public $allSettings;
+    public $reference;
+    public $toCache;
+    public $aliasedValue;
     
     function __construct($name, $definition, &$user_modified_settings, &$settings, $reference, &$toCache) {
         $this->name = $name;
@@ -59,9 +69,12 @@ class CobaltSetting {
     }
 
     function directive_alias($value, $data) {
-        if(!$value) return $value;
-        if($this->user_modified_settings[$data]) return $this->user_modified_settings[$data];
-        if($this->allSettings[$data]) return $this->allSettings[$data];
+        // if(!$value) return $value;
+
+        $umod_data = lookup_js_notation($data, $this->user_modified_settings);
+        if($umod_data) return $umod_data;
+        $allSettings = lookup_js_notation($data, $this->allSettings);
+        if($allSettings) return $allSettings;
         return $value;
         // throw new AliasMissingDependency("Setting $this->name depends on $data but it's not yet defined");
     }

@@ -202,7 +202,7 @@ function find_one_file(array $arr_of_paths, $filename) {
         $file = "$path/$filename";
         if (file_exists($file)) {
             if(substr($deprecated_path,0,strlen($deprecated_path)) === $deprecated_path) {
-                trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
+                // trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
             }
             return $file;
         }

@@ -3,11 +3,15 @@
 namespace Controllers;
 
 use Exception;
+use MongoDB\BSON\ObjectId;
 use Routes\Route;
 
 abstract class CRUDController extends Controller {
     
     var $initialized = false;
+
+    public ?\Drivers\Database $manager = null;
+    public ?array $controller_data = null;
 
     function __construct() {
         $manager = $this->get_manager();
@@ -19,6 +23,11 @@ abstract class CRUDController extends Controller {
 
     abstract function get_manager(): string;
 
+    /**
+     * Fields required include:
+     * 
+     * @return array 
+     */
     abstract static function get_controller_data(): array;
 
     /**
@@ -35,7 +44,7 @@ abstract class CRUDController extends Controller {
 
     public function read($id): \Validation\Normalize {
         $schemaName = $this->manager->get_schema_name($_POST ?? $_GET);
-        $result = $this->manager->findOne();
+        $result = $this->manager->findOne(['_id' => new ObjectId($id)]);
         return ($result) ? new $schemaName($result) : null;
     }
 
@@ -49,7 +58,7 @@ abstract class CRUDController extends Controller {
     }
 
     public function delete($id) {
-        confirm("Are you sure you want to delete this entry?", [], "Yes");
+        confirm("Are you sure you want to delete this entry?", $_POST, "Yes");
         $_id = $this->manager->__id($id);
         $result = $this->manager->deleteOne(['_id' => $_id]);
         return $result->getDeletedCount();

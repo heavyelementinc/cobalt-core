@@ -65,7 +65,7 @@ if (app('Auth_logins_enabled')) {
             'name' => 'Users',
             'icon' => "account-multiple-plus-outline"
         ],
-        'navigation' => ['settings_panel']
+    'navigation' => ['settings_panel']
     ]);
 
     Route::get("/create-user", "CoreAdmin@create_user", [
@@ -140,7 +140,7 @@ Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
     'navigation' => ['admin_basic_panel']
 ]);
 
-if(app("Contact_form_interface") === "panel") {
+if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
     Route::get("/contact-form/", "ContactForm@index", [
         'anchor' => [
             'name' => "Contact Form",

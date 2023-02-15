@@ -90,7 +90,7 @@ $cobalt_session_started = session_start([
     'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60
 ]);
 
-if($cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
+if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
 
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;

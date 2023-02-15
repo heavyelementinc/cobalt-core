@@ -56,7 +56,9 @@ class Login {
     }
 
     function handle_logout() {
-        return $GLOBALS['auth']->logout_user();
+        $result = $GLOBALS['auth']->logout_user();
+        header("X-Redirect: /");
+        return $result;
     }
 
     function password_reset_initial_form() {

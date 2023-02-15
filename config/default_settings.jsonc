@@ -231,9 +231,10 @@
             "type": "input"
         },
         "directives": {
-            "style": true
+            "style": true,
+            "alias": "logo.media.filename"
         },
-        "default": "/core-content/img/default_poster_image.jpg"
+        "default": ""
     },
 
     "API_CORS_allowed_origins": {

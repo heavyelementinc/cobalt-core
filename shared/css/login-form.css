@@ -26,7 +26,9 @@ main:has(#login-form-container) {
   align-items: center;
   background-image: var(--project-login-hero-sidebar);
   background-color: gray;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   height: 200px;
   width: 100%;
 }

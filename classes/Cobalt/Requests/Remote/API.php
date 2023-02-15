@@ -17,6 +17,8 @@ abstract class API extends \Drivers\Database implements APICall {
     public $request_headers = [];
     public $request_body = [];
     public $request_params = [];
+    public $token = null;
+    public $json_parse_as_array = false;
 
     function __construct() {
         parent::__construct();
@@ -99,6 +101,11 @@ abstract class API extends \Drivers\Database implements APICall {
         
         /** Now we figure out what to do with this stuff */
         switch(strtolower($tk->type)) {
+            case "header":
+            case "x-header":
+            case "custom header":
+                $this->addRequestHeaders([$tk->prefix => $tk->token]);
+                break;
             case "authorization":
                 $this->addRequestHeaders(["Authorization" => "$tk->prefix $tk->token"]);
                 break;
@@ -240,7 +247,7 @@ abstract class API extends \Drivers\Database implements APICall {
         if(!$contentType) return (string)$body;
 
         if(preg_match("/json/",$contentType[0])) {
-            return json_decode((string)$body);
+            return json_decode((string)$body,$this->json_parse_as_array);
         } else { //} if($contentType[0] === "application/x-www-form-urlencoded"){
             $result = [];
             parse_str((string)$body,$result);

@@ -38,12 +38,12 @@ trait ClientFSManager {
         $this->fs->download($filename);
     }
 
-    public function find($query = [], $options = []) {
+    public function findFiles($query = [], $options = []) {
         $this->initFS();
         return $this->fs->find($query, $options);
     }
 
-    public function findOne($query = [], $options = []) {
+    public function findFile($query = [], $options = []) {
         $this->initFS();
         return $this->fs->findOne($query, $options);
     }

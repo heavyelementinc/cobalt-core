@@ -10,6 +10,12 @@
         "league/omnipay": "^3",
         "omnipay/paypal": "^3.0",
         "omnipay/stripe": "^3.2",
-        "erusev/parsedown-extra": "^0.8.1"
+        "erusev/parsedown-extra": "^0.8.1",
+        "demyanovs/php-highlight": "^1.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }

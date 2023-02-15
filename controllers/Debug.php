@@ -55,8 +55,13 @@ class Debug extends \Controllers\Pages {
             $data = $definitions[$setting] ?? [];
             $cached_value = $settings[$setting];
             $directives = "";
+            $alias_value = "";
             foreach($definitions[$setting]['directives'] ?? [] as $dir => $d) {
+                $alias_value = "N/A";
                 if(key_exists($dir, $directive_abbr)) $directives .= $directive_abbr[$dir] . ",";
+                if($dir === "alias") {
+                    $alias_value = json_encode($settings[$setting]) . "<br><cite style='opacity:.3'>$d</cite>";
+                }
             }
             $directives = substr($directives,0,-1);
             $filename = str_replace([__ENV_ROOT__, __APP_ROOT__],['__ENV__', '__APP__'],$data['defined']);
@@ -71,6 +76,7 @@ class Debug extends \Controllers\Pages {
                     'name' => $setting,
                     'cached_value' => json_encode($cached_value, JSON_PRETTY_PRINT),
                     'stored' => json_encode($stored[$setting] ?? "",JSON_PRETTY_PRINT),
+                    'aliased' => $alias_value,
                     'default' => json_encode($GLOBALS['app']->default_values[$setting] ?? $data['default'] ?? $data['meta']['merge'] ?? $data['meta']['mergeAll'],JSON_PRETTY_PRINT),
                     'definition' => "<span>".substr(implode("</span>\n<span>",explode("\n",json_encode($definitions[$setting],JSON_PRETTY_PRINT))),0) . "</span>",
                     'defined_in' => $filename,
