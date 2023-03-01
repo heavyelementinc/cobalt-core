@@ -1095,10 +1095,12 @@ function flex_table($docs, $table, $schema) {
  * @throws Confirm if headers are not detected throw Confirm
  */
 function confirm($message, $data, $okay = "Continue", $dangerous = true) {
-    $headers = apache_request_headers();
-    if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
-    if (key_exists('x-confirm-dangerous', $headers) && $headers['x-confirm-dangerous']) return true;
-    throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
+    try {
+        $header = getHeader("X-Confirm-Dangerous");
+        if($header) return true;
+    } catch (Exception $e) {       
+        throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
+    }
 }
 
 
@@ -1365,7 +1367,7 @@ function getHeader($header) {
     foreach(getallheaders() as $key => $value){
         $headers[strtolower($key)] = $value;
     }
-    if(key_exists($toMatch, $headers)) return $header[$key];
+    if(key_exists($toMatch, $headers)) return $headers[$toMatch];
     throw new NoValue("The specified header was not found among the request headers");
 }
 

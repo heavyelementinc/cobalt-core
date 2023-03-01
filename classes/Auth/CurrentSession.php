@@ -16,6 +16,19 @@ namespace Auth;
 use Exception;
 
 class CurrentSession extends \Drivers\Database {
+
+    public $cookie_name;
+    public $token_value;
+    public $now;
+    public $day;
+    public $month;
+    public $default_cookie_expiration;
+    public $default_token_expiration;
+    public $default_token_refresh;
+    public $cookie_options;
+    public $context;
+    public $session;
+
     /* The CurrentSession class takes the current request's validation cookie and looks
       up the token in the session database. It runs checks to see if the user's token is
       still valid.

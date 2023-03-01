@@ -114,8 +114,7 @@ class ApiHandler implements RequestHandler {
          * since we can't use php://input while we're doing this. */
         if (empty($incoming_stream)) {
             $max_upload = getMaximumFileUploadSize();
-            if ($this->headers['Content-Length'] > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
-            if ($this->headers['content-length'] > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
+            if ((int)getHeader('Content-Length') > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
             if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0) {
                 $incoming_stream = $_POST['json_payload'];
                 $file_upload = true;

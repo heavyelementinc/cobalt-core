@@ -21,14 +21,15 @@ class Login {
     }
 
     function handle_login() {
-        // Get the headers
-        $headers = apache_request_headers();
         $auth = null;
 
         // Check if the authentication values exist
         if (app('API_authentication_mode') === "headers") {
-            if (!key_exists('Authentication', $headers)) throw new BadRequest("Request is missing Authentication");
-            $auth = $headers['Authentication'];
+            try{
+                $auth = getHeader("Authentication");
+            } catch (Exception $e) {
+                throw new BadRequest("Request is missing Authentication");
+            }
         } else {
             if (!key_exists('Authentication', $_POST)) throw new BadRequest("Request is missing Authentication");
             $auth = $_POST['Authentication'];
