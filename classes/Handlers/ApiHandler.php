@@ -135,9 +135,9 @@ class ApiHandler implements RequestHandler {
         /** Set our allowed origin to be our app's domain name */
         $allowed_origin = app("domain_name");
         $allowed_methods = "GET, POST, PUT, PATCH, DELETE";
-        $current_origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+        $current_origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? null;
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) $current_origin = $this->url_to_current_mode($_SERVER['HTTP_X_FORWARDED_HOST']);
-        $current_origin = preg_replace("/^http:\/\/|https:\/\//","",$current_origin);
+        $current_origin = parse_url($current_origin, PHP_URL_HOST);
 
         /** Check if our route allows us to ignore CORS */
         if (isset($GLOBALS['current_route_meta']['cors_disabled']) && $GLOBALS['current_route_meta']['cors_disabled']) {
