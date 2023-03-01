@@ -29,6 +29,12 @@ class Controller {
 
     protected $currentlyAllowedQueryParams = null;
 
+    public $manager = null;
+    public $allowedFilters = null;
+    public $allowedOptions = null;
+    public $filterOverride = null;
+    public $defaultOptions = null;
+
 
     public function setLimit(int $limit = 20) {
         $this->limit = $limit;
@@ -350,7 +356,7 @@ class Controller {
 
             $new_query_string = $this->paramContinuity(['sort' => $name, $this->sortDirectionParam => $direction]);
             if($schema['no_link']) {
-                $result = "<$container_type>$schema[name]</$container_type>";
+                $result .= "<$container_type>$schema[name]</$container_type>";
                 continue;
             }
             $result .= "<$container_type><a href=\"?$new_query_string\">".$schema["name"]." $icon</i></a></$container_type>";

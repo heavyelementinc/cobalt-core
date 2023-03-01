@@ -41,12 +41,12 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
-    final function getUsersByPermission($permissions, $value = true, $options = null) {
+    final function getUsersByPermission($permissions, $status = true, $options = null) {
         if(!$options) $options = [
             'limit' => 50
         ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        $perms = array_fill_keys($permissions, $value);
+        $perms = array_fill_keys($permissions, $status);
         return $this->find(
             [
                 '$or' => [
@@ -141,6 +141,16 @@ class UserCRUD extends \Drivers\Database {
         return $result->getDeletedCount();
     }
 
+
+    final function grant_revoke_permission($username, $permission, bool $value) {
+        $query = ['$or' => [['uname' => $username],['email' => $username]]];
+        $result = $this->updateOne($query,[
+            '$set' => [
+                "permissions.$permission" => $value
+            ]
+        ]);
+        return $this->findOneAsSchema($query)->permissions;
+    }
 
 
     /* ============================

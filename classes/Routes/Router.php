@@ -36,6 +36,11 @@ class Router {
     public $registered_plugin_controllers = [];
     private $router_table_initialized = false;
     private $router_table_loaded = false;
+    public $routes = null;
+    public $method = null;
+    public $uri = null;
+    public $context_prefix = null;
+    public $cache_resource = null;
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -205,12 +210,18 @@ class Router {
             } catch (\Exceptions\HTTP\Unauthorized $e) {
                 $permission = false;
             }
-            if (!$permission) throw new \Exceptions\HTTP\Unauthorized('You do not have the required privileges.');
+            $unauthorized = "\\Exceptions\\HTTP\\Unauthorized";
+            if (!$permission) throw new $unauthorized('You do not have the required privileges.');
         }
         if ($exe['require_session'] === true) {
             $errorMessage = "modify";
             if($method === "get") $errorMessage = "access";
-            if(!session_exists()) throw new Unauthorized("You do not have permission to $errorMessage this resource");
+            
+            $contexts = app('context_prefixes');
+
+            $unauthorized = "\\Exceptions\\HTTP\\Unauthorized";
+            if(key_exists("no_session_exception", $contexts[$this->route_context])) $unauthorized = $contexts[$this->route_context]["no_session_exception"];
+            if(!session_exists()) throw new $contexts("You do not have permission to $errorMessage this resource");
         }
         /** Check if we're a callable or a string and execute as necessary */
         if (is_callable($exe['controller'])) throw new \Exception("Anonymous functions are no longer supported as controllers."); //return $this->controller_callable($exe);

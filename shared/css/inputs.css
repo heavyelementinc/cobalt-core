@@ -16,7 +16,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input, textarea, input-password, button[native], action-menu {
+input-wrapper, input-text, input, textarea, input-password, button[native], action-menu {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -38,7 +38,7 @@ input-wrapper, input, textarea, input-password, button[native], action-menu {
 
   input[invalid],
   textarea[invalid],
-  :is(input-wrapper, input-password) input[invalid],
+  :is(input-wrapper, input-password, input-text) input[invalid],
   input-array[invalid] {
     border: 1px solid var(--project-color-input-invalid-border);
     background: var(--project-color-input-invalid-bg);

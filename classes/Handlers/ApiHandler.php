@@ -23,6 +23,15 @@ namespace Handlers;
 class ApiHandler implements RequestHandler {
     private $methods_from_stdin = ['POST', 'PUT', 'PATCH', 'DELETE'];
     private $content_type = "application/json; charset=utf-8";
+    
+    public $http_mode = null;
+    public $headers = null;
+    public $method = null;
+    public $allowed_modes = null;
+    public $allowed_origins = null;
+    public $router_result = null;
+    public $_stage_bootstrap = [];
+
     function __construct() {
         $this->http_mode = (is_secure()) ? "https" : "http";
         $this->headers = apache_request_headers();
@@ -32,7 +41,7 @@ class ApiHandler implements RequestHandler {
         /** This will make the allowed origins be http or https */
         $this->allowed_origins = [];
         foreach (app("API_CORS_allowed_origins") as $el) {
-            array_push($this->allowed_origins, $this->url_to_current_mode($el));
+            array_push($this->allowed_origins, $el);
         }
     }
 
@@ -128,6 +137,7 @@ class ApiHandler implements RequestHandler {
         $allowed_methods = "GET, POST, PUT, PATCH, DELETE";
         $current_origin = $_SERVER['HTTP_ORIGIN'] ?? null;
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) $current_origin = $this->url_to_current_mode($_SERVER['HTTP_X_FORWARDED_HOST']);
+        $current_origin = preg_replace("/^http:\/\/|https:\/\//","",$current_origin);
 
         /** Check if our route allows us to ignore CORS */
         if (isset($GLOBALS['current_route_meta']['cors_disabled']) && $GLOBALS['current_route_meta']['cors_disabled']) {

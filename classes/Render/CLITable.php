@@ -23,7 +23,7 @@ class CLITable {
     /**
      * `title`    - Header title
      * `padding`  - The padding alignment STR_PAD_RIGHT, STR_PAD_LEFT, STR_PAD_BOTH
-     * `function` - A used to process the cell's data
+     * `function` - A function used to process the cell's data
      * @param mixed $head 
      * @return void 
      */

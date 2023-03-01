@@ -125,6 +125,7 @@ class CurrentSession extends \Drivers\Database {
         // ];
         // $count = $this->count($query);
         // if ($count === 0) return true;
+        // app("require_https_login_and_cookie") &&
         if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("No token");
         try {
             $result = $this->updateOne(

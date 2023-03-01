@@ -2,10 +2,14 @@
 
 namespace Cobalt\Requests\Remote;
 
+use Cobalt\Requests\Tokens\TokenInterface;
+use DateTime;
+use Drivers\UTCDateTime;
 use Exception;
 use Exceptions\HTTP\HTTPException;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\GuzzleException;
+use MongoDB\BSON\UTCDateTime as BSONUTCDateTime;
 use Traversable;
 
 abstract class API extends \Drivers\Database implements APICall {
@@ -29,7 +33,13 @@ abstract class API extends \Drivers\Database implements APICall {
 
     abstract function getPaginationToken():array;
 
-    abstract function refreshTokenCallback($result):string;
+    function refreshTokenCallback($result):mixed {
+        $refresh = $result->getRefresh();
+        if(!$refresh) throw new Exception("No refresh token available");
+        $e = $result->getEndpoint();
+        if(!$e) throw new Exception("Invalid endpoint");
+        return post_fetch($e['endpoint'], $e['params'], $e['headers']);
+    }
 
     abstract function testAPI():bool;
 
@@ -66,19 +76,24 @@ abstract class API extends \Drivers\Database implements APICall {
         if(!$query) $query = $this->getDefaultTokenQuery();
         $iface = $this->getInterface();
         
-        $tmp = new $iface($this->findOne($query));
-        $result= $this->refreshTokenCallback($tmp);
+        $tmp = new $iface(doc_to_array($this->findOne($query)));
+        $result = $this->refreshTokenCallback($tmp);
         
-        $token = new $iface($result);
+        // $token = new $iface($result);
 
-        $this->updateOne(
+        $r = $this->updateOne(
             $query,
-            ['$set' => $token->normalize()],
+            ['$set' => array_merge(
+                // $token->normalize(),
+                $result,
+                ['__last_refreshed' => new BSONUTCDateTime()]
+            )],
             ['upsert' => true]
         );
+        
         $token = $this->findOne($query);
 
-        return iterator_to_array(new $iface($token));
+        return doc_to_array($token);
     }
 
     /**
@@ -96,8 +111,16 @@ abstract class API extends \Drivers\Database implements APICall {
 
         $iface = $this->getInterface();
         if(is_iterable($this->doc)) $this->doc = iterator_to_array($this->doc);
+        
         $tk = new $iface($this->doc,$this->mode);
 
+        // Check token expiration
+        if($tk->isTokenStale()) {
+            $result = $this->updateAuthorizationToken();
+            $this->doc = $result;
+            $tk = new $iface($this->doc, $this->mode);
+            // return $this->authorizationToken($query, false);
+        }
         
         /** Now we figure out what to do with this stuff */
         switch(strtolower($tk->type)) {
@@ -113,7 +136,8 @@ abstract class API extends \Drivers\Database implements APICall {
                 $this->addRequestParams([$tk->prefix => $tk->token]);
                 break;
         }
-        
+
+        $this->request_params = array_merge($this->request_params, $tk->getMiscParameters());
         return $tk;
     }
 
@@ -150,7 +174,7 @@ abstract class API extends \Drivers\Database implements APICall {
         return implode(",", $param);
     }
 
-    private function getInterface(){
+    public function getInterface(){
         $iface = $this->getIfaceName();
         if($iface) return $iface;
         $namespace = "\\Cobalt\Requests\\Remote\\";
@@ -159,7 +183,7 @@ abstract class API extends \Drivers\Database implements APICall {
         return $namespace . $exploded[count($exploded) - 1];
     }
 
-    final private function fetch(string $url, string $method, mixed $body = null) {
+    final public function fetch(string $url, string $method, mixed $body = null) {
         $this->authorizationToken();
         $this->addRequestHeaders([
             "Content-Type" => $this->token->encoding
@@ -169,8 +193,10 @@ abstract class API extends \Drivers\Database implements APICall {
         ];
 
         $mutant_url = $url;
+        $queryGlue = "?";
+        if(strpos($mutant_url,"?")) $queryGlue = "&";
         // Add request parameters:
-        if(!empty($this->request_params)) $mutant_url = "$mutant_url?".http_build_query($this->request_params);
+        if(!empty($this->request_params)) $mutant_url = "$mutant_url".$queryGlue.http_build_query($this->request_params);
         
         // Import our request body
         if($body || !empty($this->request_body)) {
@@ -211,7 +237,7 @@ abstract class API extends \Drivers\Database implements APICall {
         return $this->parseBody($response->getBody());
     }
 
-    private function getDefaultTokenQuery($mode = null, \MongoDB\BSON\ObjectId|null $id = null) {
+    public function getDefaultTokenQuery($mode = null, \MongoDB\BSON\ObjectId|null $id = null) {
         // return ["token_name" => $this::class];
         if($mode === null) $mode = $this->mode ?? "app";
         if($mode === "app") return ["token_name" => $this::class];

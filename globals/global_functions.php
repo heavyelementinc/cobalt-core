@@ -12,6 +12,7 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Demyanovs\PHPHighlight\Highlighter;
 use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
@@ -1366,4 +1367,13 @@ function getHeader($header) {
     }
     if(key_exists($toMatch, $headers)) return $header[$key];
     throw new NoValue("The specified header was not found among the request headers");
+}
+
+function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
+    if(gettype($code) !== "string") $code = json_encode($code, JSON_PRETTY_PRINT);
+    $mutant = "<pre data-file='$filename' data-lang='$language'>$code</pre>";
+    $highlighter = new Highlighter($mutant, 'railscasts');
+    $highlighter->setShowLineNumbers($line_numbers);
+    $highlighter->setShowActionPanel($action_panel);
+    return $highlighter->parse();
 }

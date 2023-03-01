@@ -295,7 +295,7 @@ class Settings extends \Drivers\Database {
 
     private function manifest_combine($name, $manifest, &$result) {
         foreach($manifest as $type => $val) {
-            if($type === "common") continue;
+            // if($type === "common") continue;
             if($type === "append") continue;
             $index = "$name-$type";
             if(!isset($result[$index])) $result[$index] = $manifest['common'] ?? [];

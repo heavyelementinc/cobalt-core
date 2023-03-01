@@ -87,7 +87,9 @@ define("__APP_SETTINGS__", $application->get_settings());
 
 session_name("COBALTID");
 $cobalt_session_started = session_start([
-    'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60
+    'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
+    // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
+    // 'cookie_secure' => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
 
 if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");

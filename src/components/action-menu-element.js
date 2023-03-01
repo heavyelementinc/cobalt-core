@@ -3,6 +3,7 @@ class ActionMenuElement extends HTMLElement {
         super();
         this.tabIndex = 0;
         this.options = this.querySelectorAll("option");
+        this.type = this.getAttribute("type");
         this.menuId = random_string();
         this.menu = null;
         this.setAttribute("arai-pressed", "false");

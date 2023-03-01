@@ -17,6 +17,8 @@ class HTTPException extends \Exception {
          
         */
     ];
+    public $exit = false;
+    public $name = "";
 
     function __construct($message, $data = null, $exit = true) {
         $this->mode = $GLOBALS['route_context'] ?? "cli";

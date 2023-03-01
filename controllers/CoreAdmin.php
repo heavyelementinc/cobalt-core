@@ -54,11 +54,13 @@ class CoreAdmin {
         $user = new UserSchema($ua->getUserById($id));
         if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", ['template' => 'errors/404_invalid_user.html']);
 
+        $table = $GLOBALS['auth']->permissions->get_permission_table($user);
+
         add_vars([
             'title' => "$user->fname $user->lname",
             'user_account' => $user,
             'user_id' => (string)$user->_id,
-            'permission_table' => $GLOBALS['auth']->permissions->get_permission_table($user),
+            'permission_table' => $table,
             'account_flags' => $ua->getUserFlags($user),
         ]);
 

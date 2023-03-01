@@ -200,6 +200,17 @@ class InputClass_radio extends InputClass_default {
         console.log(element);
         return element;
     }
+
+    async dismiss_error() {
+        this.element.invalid = false;
+        this.element.removeAttribute("invalid");
+        if (!this.error === false) return;
+        await wait_for_animation(this.error, "form-request--issue-fade-out");
+        if (!this.error.parentNode) return;
+
+        this.error.parentNode.removeChild(this.error);
+        this.error = false;
+    }
 }
 
 class InputClass_button extends InputClass_default {

@@ -10,6 +10,9 @@ class Shopify extends TokenInterface {
     public function setRefresh(): string {
         return "";
     }
+    public function getEditView(): string {
+        return "";
+    }
     
     function getKey():string{
         return $this->__token['key'] ?? "";
@@ -49,8 +52,8 @@ class Shopify extends TokenInterface {
     function setTokenExpiration():\DateTime|null {
         return null;
     }
-    function getEndpoint():string {
-        return "";
+    function getEndpoint():array {
+        return [];
     }
 
     function setEndpoint():string {

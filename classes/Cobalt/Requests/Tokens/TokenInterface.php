@@ -2,6 +2,7 @@
 
 namespace Cobalt\Requests\Tokens;
 
+use DateTime;
 use Iterator;
 
 abstract class TokenInterface implements Iterator {
@@ -18,7 +19,7 @@ abstract class TokenInterface implements Iterator {
     function getKey():string {
         return "";
     }
-    function getRefresh():string {
+    function getRefresh():string|null {
         return "";
     }
     function getTokenType():string {
@@ -30,12 +31,32 @@ abstract class TokenInterface implements Iterator {
     function getTokenExpiration():\DateTime|null {
         return null;
     }
-    function getEndpoint():string {
-        return "";
+
+    /**
+     * 
+     * @return array with keys 'endpoint', 'method', and 'params'
+     */
+    function getEndpoint():array {
+        return [
+            'endpoint' => "",
+            'method' => "POST",
+            'headers' => [],
+            'params' => [
+
+            ]
+        ];
     }
 
     function getEncoding():string {
         return "application/json";
+    }
+
+    function isTokenStale():bool {
+        $date = $this->getTokenExpiration();
+        if(!$date) return false;
+        $now = (new DateTime())->getTimestamp();
+        $difference = ($now >= $date->getTimestamp());
+        return $difference;
     }
     
     /** Prepare for storage */
@@ -61,6 +82,10 @@ abstract class TokenInterface implements Iterator {
     }
     function setEncoding():string {
         return "";
+    }
+
+    function getMiscParameters():array {
+        return [];
     }
 
     private $index = 0;

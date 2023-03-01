@@ -103,8 +103,8 @@ abstract class Database {
         $results = $this->find($filter, $options);
         $processed = [];
         foreach($results as $i => $result) {
-            $schema = $schema ?? $this->get_schema_name($result);
-            $processed[$i] = new $schema($result);
+            $_schema = $schema ?? $this->get_schema_name($result);
+            $processed[$i] = new $_schema($result);
         }
         return $processed;
     }

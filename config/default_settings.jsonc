@@ -250,6 +250,9 @@
             ]
         }
     },
+    "require_https_login_and_cookie": {
+        "default": false
+    },
     // This was once allowed to be modified by the user in the Settings panel
     // but people could toggle it and then not be able to change it.
     "API_CORS_enable_other_origins": {
@@ -592,10 +595,12 @@
                     "processor": "Handlers\\AdminHandler",
                     "prefix": "/admin/",
                     "exception_mode": "web",
+                    "no_session_exception": "\\Exceptions\\HTTP\\Unauthorized",
                     "mode": "text/html",
                     "permission": "Admin_panel_access",
                     "session_refresh": true,
                     "api_access": true,
+                    "router_boundry": true,
                     "vars": {
                         "html_class": "admin-panel"
                     }
@@ -608,6 +613,7 @@
                     // "permission": "Debug_access",
                     "session_refresh": true,
                     "api_access": true,
+                    "router_boundry": true,
                     "vars": {
                         "html_class": "debug-panel"
                     }
@@ -660,6 +666,7 @@
                     "mode": "text/html",
                     "session_refresh": true,
                     "api_access": true,
+                    "router_boundry": true,
                     "prefix": "/",
                     "vars": {
                         "html_class": "cobalt-app"

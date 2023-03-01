@@ -1,5 +1,7 @@
 <?php
 
+use Auth\Permissions;
+
 class User {
     public $help_documentation = [
         'create' => [
@@ -24,6 +26,14 @@ class User {
         ],
         'require_reset' => [
             'description' => "username|email true|false - require the user to reset their password on next login",
+            'context_required' => true
+        ],
+        'grant' => [
+            'description' => "username|email Permission_name - grant the user the specified permission",
+            'context_required' => true
+        ],
+        'revoke' => [
+            'description' => "username|email Permission_name - grant the user the specified permission",
             'context_required' => true
         ],
         'promote' => [
@@ -130,6 +140,28 @@ class User {
             say("$user[uname]  .... $user[email]\n", 'i');
         }
         return fmt(" There are " . $ua->count([]) . " registered user(s).");
+    }
+
+    function grant($user, $permission = null) {
+        return $this->grant_revoke($user, $permission, true);
+    }
+
+    function revoke($user, $permission = null) {
+        return $this->grant_revoke($user, $permission, false);
+    }
+
+    private function grant_revoke($u, $p, bool $v) {
+        if($p === null) {
+            $perms = new Permissions();
+            printf($perms->get_cli_permission_list());
+            $index = readline("Choose a number: ");
+            $permissions = array_keys($perms->valid);
+            $p = (key_exists($index, $permissions)) ? $permissions[$index] : null;
+            if(!$p) return fmt("Invalid selection", "e");
+        }
+        $ua = new Auth\UserCRUD();
+        $result = $ua->grant_revoke_permission($u, $p, $v);
+        return str_replace($u, fmt($u, 'w', "normal"), substr(json_encode($result),1,-1));
     }
 
     function promote($user_or_email) {

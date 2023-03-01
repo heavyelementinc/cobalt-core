@@ -41,6 +41,15 @@ class UserSchema extends \Validation\Normalize {
             ],
             'lname' => [],
             'uname' => [],
+            'display_name' => [
+                'get' => function () {
+                    $name = $this->fname;
+                    if($name) $name .= " $this->lname";
+                    if(!$name) $name = $this->uname;
+                    return $name;
+                },
+                'set' => false
+            ],
             'name'  => [
                 'get' => function () {
                     if($this->fname && $this->lname) return "<span title='Username: $this->uname'>$this->fname " . $this->lname[0] . ".</span>";

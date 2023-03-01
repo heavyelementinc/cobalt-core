@@ -10,6 +10,11 @@ class Mailchimp extends TokenInterface {
     public function setRefresh(): string {
         return "";
     }
+    
+    public function getEditView(): string {
+        return "";
+    }
+    
 
     function getKey():string{
         return $this->__token['key'] ?? "";

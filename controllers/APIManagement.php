@@ -55,7 +55,7 @@ class APIManagement {
 
     function get_supported_apis($dir, array &$array, array $exclude = []) {
         if(!is_dir($dir)) return false;
-        $exclude = [".","..", "API.php", "APICall.php", ...$exclude];
+        $exclude = [".","..", "API.php", "APICall.php", "OAuth.php", ...$exclude];
         $namespace = $this->__namespace;
         $listing = scandir($dir);
         foreach($listing as $li) {

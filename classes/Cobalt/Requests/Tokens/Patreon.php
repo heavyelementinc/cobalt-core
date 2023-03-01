@@ -3,7 +3,7 @@ namespace Cobalt\Requests\Tokens;
 
 use DateTime;
 
-class YouTube extends TokenInterface {
+class Patreon extends TokenInterface {
 
     public function getRefresh(): string { return "";}
 
@@ -14,7 +14,7 @@ class YouTube extends TokenInterface {
     }
 
     public function getKey(): string {
-        return "";
+        return $this->__token['key'] ?? "";
     }
 
     public function getSecret(): string {
@@ -25,12 +25,12 @@ class YouTube extends TokenInterface {
         return $this->__token['token'] ?? "";
     }
 
-    public function getTokenType(): string {
-        return "Parameter";
+    function getTokenType():string{
+        return "Authorization";
     }
 
-    public function getTokenPrefix(): string {
-        return "key";
+    function getTokenPrefix():string{
+        return "Bearer";
     }
 
     public function getTokenExpiration(): ?DateTime {

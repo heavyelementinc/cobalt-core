@@ -9,6 +9,7 @@ action-menu:before {
     content: "\F035C";
     font-family: "Material Design Icons";
 }
+
 action-menu option{
     display: none;
 }
@@ -17,4 +18,15 @@ action-menu[aria-pressed="true"] {
 }
 .action-menu-element-toggled .action-menu {
     background: var(--project-color-input-background);
+}
+action-menu[type="options"] {
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    justify-self: center;
+}
+
+action-menu[type="options"]:before {
+    content: "\F01D9";
 }

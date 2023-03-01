@@ -8,6 +8,10 @@
 namespace Auth;
 
 class Authentication {
+    public $permissions = null;
+    public $session;
+    public $user = null;
+
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
 
@@ -101,7 +105,7 @@ class Authentication {
 
         // If the user account stores the permission, we return that value, 
         // whatever it may be
-        if (isset($user->permissions->{$permission})) return $user->permissions->{$permission};
+        if (key_exists($permission, $user->permissions)) return $user->permissions[$permission];
 
         // If the permission's default value is true, we return true.
         if ($this->permissions->valid[$permission]['default']) return true;

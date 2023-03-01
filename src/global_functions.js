@@ -1,5 +1,5 @@
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -681,3 +681,15 @@ function iOS() {
     ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }
 
+function imagePromise(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.addEventListener("load", () => {
+            resolve(url);
+        });
+        img.addEventListener("error",() => {
+            resolve(null);
+        })
+        img.src = url;
+    })
+}

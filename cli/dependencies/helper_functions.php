@@ -87,7 +87,7 @@ function say($str, $type = "normal", $formatted = false) {
  * @param mixed $str 
  * @param string $type 
  * @param bool $formatted 
- * @return void 
+ * @return string 
  */
 function fmt($str, $type = "normal", $back = "normal") {
     $fmt = "";

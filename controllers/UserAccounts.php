@@ -14,7 +14,7 @@ class UserAccounts extends \Controllers\Pages {
     function update_permissions($id) {
         $permissions = $_POST;
         $validated = $GLOBALS['auth']->permissions->validate($id, $permissions);
-        // $GLOBALS['auth']->permissions->update($permissions);
+        // $GLOBALS['auth']->permissions->update_permissions($permissions, $id);
         return $validated;
     }
 
