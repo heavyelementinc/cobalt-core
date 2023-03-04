@@ -105,7 +105,7 @@ class Authentication {
 
         // If the user account stores the permission, we return that value, 
         // whatever it may be
-        if (key_exists($permission, $user->permissions)) return $user->permissions[$permission];
+        if (key_exists($permission, $user->permissions->getArrayCopy())) return $user->permissions[$permission];
 
         // If the permission's default value is true, we return true.
         if ($this->permissions->valid[$permission]['default']) return true;

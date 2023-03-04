@@ -160,6 +160,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      *    * $context -> the current context ($this)
      *    * $name    -> the name of the current field
      * 
+     * The serialize entry directs the iterable
+     * 
      * # Example schema entry:
      * ```php
      *   ['example_date' => [
@@ -168,7 +170,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      *       },
      *       'set' => function ($value, $context, $name) {
      *           return $context->make_date($value);
-     *       }
+     *       },
+     *       'serialize' => 'display' // string<name of prototype>|true
      *   ]];
      * ```
      * 
@@ -495,6 +498,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         foreach ($this->__schema as $fieldname => $methods) {
             $this->find_method($fieldname, "get");
             $this->find_method($fieldname, "set");
+            // if(key_exists('serialize', $methods)) {
+            //     array_push($this->__index);
+            // }
         }
     }
 
@@ -720,6 +726,17 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $mutant = [];
         foreach ($this->__dataset as $name => $value) {
             $mutant[$name] = $this->__get($name);
+        }
+        foreach($this->__schema as $name => $data) {
+            if(!key_exists('serialize', $data)) continue;
+            switch($data['serialize']) {
+                case true:
+                    $mutant[$name] = $this->__get($name);
+                    break;
+                case in_array($name, $this->__prototypes):
+                    $mutant[$name] = $this->{"$name.$data[serialize]"};
+                    break;
+            }
         }
 
         return $mutant;

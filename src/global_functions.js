@@ -682,14 +682,67 @@ function iOS() {
 }
 
 function imagePromise(url) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const img = new Image();
         img.addEventListener("load", () => {
             resolve(url);
         });
+        img.addEventListener();
         img.addEventListener("error",() => {
             resolve(null);
         })
         img.src = url;
+    })
+}
+
+/**
+ * Returns a string
+ * @param {string} url 
+ * @param {string|element} throbber 
+ * @param {string|element} progressBar 
+ * @returns string
+ */
+function getBlobWithLoadingBar(url, throbber, progressBar) {
+    return new Promise(async (resolve, reject) => {
+
+        try{
+            if(typeof throbber === "string" && throbber) throbber = document.querySelector(throbber);
+        } catch (error) {
+            throbber = null;
+        }
+        if(throbber) {
+            throbber.style.transition = "opacity .5s";
+            throbber.style.opacity = "1";
+        }
+        if(typeof progressBar === "string") progressBar = document.querySelector(progressBar);
+        
+        if(progressBar) {
+            progressBar.value = 0;
+            progressBar.max = 100;
+        }
+
+        const client = new XMLHttpRequest();
+
+        client.open("GET", url);
+        client.responseType = 'blob';
+        client.onprogress = (event) => {
+            if(!progressBar) return;
+            if(!event.lengthComputable) return;
+            progressBar.max = event.total;
+            progressBar.value = event.loaded;
+        }
+        
+        client.onload = (event) => {
+            const blobAddress = URL.createObjectURL(client.response);
+            resolve(blobAddress);
+            if(throbber) throbber.style.opacity = "0";
+        }
+
+        client.onerror = (event) => {
+            reject(event);
+            if(throbber) throbber.style.opacity = "0";
+        }
+        
+        client.send();
     })
 }
