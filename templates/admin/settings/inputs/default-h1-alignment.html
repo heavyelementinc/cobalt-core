@@ -1,0 +1,23 @@
+<li>
+    <label>Default Event Banner Text Alignment</label>
+    <radio-group name="CobaltEvents_default_h1_alignment" value="{{value}}">
+        <label>
+            <input type='radio' name='CobaltEvents_default_h1_alignment' value='flex-start' style='display:none'{{disabled}}>
+            <i name="format-align-left"></i>
+        </label>
+        <label>
+            <input type='radio' name='CobaltEvents_default_h1_alignment' value='space-around' style='display:none'{{disabled}}>
+            <i name="format-align-center"></i>
+        </label>
+        <label>
+            <input type='radio' name='CobaltEvents_default_h1_alignment' value='flex-end' style='display:none'{{disabled}}>
+            <i name="format-align-right"></i>
+        </label>
+    </radio-group>
+    @view("/admin/settings/inputs/reset.html");
+    <style>
+        input[type=radio]:checked + i {
+            border: 1px solid black;
+        }
+    </style>
+</li>

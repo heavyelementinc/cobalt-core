@@ -8,7 +8,8 @@ use MongoDB\BSON\ObjectId;
 class CoreSettingsPanel extends Controller {
     use ClientFSManager;
     private $requiresRoot = ['Cache &amp; Debug'];
-    
+    private $settings = null;
+
     function settings_index() {
         // $this->settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"));
         $GLOBALS['app']->bootstrap();
@@ -91,6 +92,16 @@ class CoreSettingsPanel extends Controller {
                 $options = "";
                 foreach(__APP_SETTINGS__[$index] as $option) {
                     $options.= "<option value='$option' selected='selected'>$option</option>";
+                }
+                break;
+            case "radio-group":
+                $template = "/admin/settings/inputs/radio-group.html";
+                $options = "";
+                foreach($setting->validate['options'] as $name => $display) {
+                    $options .= "<label>
+                        <span class='cobalt-radio-group--select-target'>$display</span>
+                        <input type='radio' name='$index' value='$name'>
+                    </label>";
                 }
                 break;
             case "select":

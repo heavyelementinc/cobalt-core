@@ -75,6 +75,22 @@
                 </button>
             </div>
 
+            <label>Text Justification <help-span value="This will have no effect if there is a Call to Action button."></help-span></label>
+            <radio-group name="txtJustification" value="{{event.txtJustification}}">
+                <label>
+                    <i name="format-align-left"></i>
+                    <input type='radio' name='txtJustification' value='space-between' {{disabled}}>
+                </label>
+                <label>
+                    <i name="format-align-center"></i>
+                    <input type='radio' name='txtJustification' value='center' {{disabled}}>
+                </label>
+                <label>
+                    <i name="format-align-right"></i>
+                    <input type='radio' name='txtJustification' value='flex-end' {{disabled}}>
+                </label>
+            </radio-group>
+
             <div class="hbox" style="margin:20px 0 10px">
                 <legend>Call&nbsp;to&nbsp;Action</legend>
                 <hr>
@@ -238,6 +254,14 @@
         width: 100%;
         height: 36px;
     }
-    
+    radio-group {
+        display: flex;
+        justify-content: space-evenly;
+    }
+    radio-group > label {
+        display: inline-flex;
+        justify-content: center;
+        flex-direction: column;
+    }
 </style>
 

@@ -133,6 +133,11 @@ class CobaltEvent_default {
         this.element.style.color = colorMathBlackOrWhite(this.data.bgColor ?? "");
         this.element.style.color = this.data.txtColor ?? "var(--project-events-banner-text)";
         this.element.style.setProperty("--project-events-banner-text", this.element.style.color);
+        
+        // Justification may only be applied if there is no CTA button
+        if(!this.hasCtaButton()) {
+            this.element.style.justifyContent = this.data.txtJustification || app("CobaltEvents_default_h1_alignment");
+        }
 
         this.innerContent();
         this.insert();
@@ -225,8 +230,13 @@ class CobaltEvent_default {
         this.ctaButton();
     }
 
+    hasCtaButton() {
+        if(this.data.call_to_action_href) return true;
+        return false;
+    }
+    
     ctaButton() {
-        if (this.data.call_to_action_href) {
+        if (this.hasCtaButton()) {
             // Call to action
             const cta = document.createElement("a");
             cta.classList.add("cobalt-events--cta-button");
