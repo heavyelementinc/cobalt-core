@@ -33,7 +33,7 @@
  - [x] Fire requestFailed CustomEvent in FormRequest.js and test
  - [x] Make form-login-request listen for the enter key being pressed.
  - [x] Make form-login-request reload the page when a login has occurred successfully
- - [x] Track down WSOD (white screen of death) <!-- This is happening because the plugins weren't loading correctly and the catch routine wasn't handling correctly. >
+ - [x] Track down WSOD (white screen of death) <!-- This is happening because the plugins weren't loading correctly and the catch routine wasn't handling correctly. -->
 
 
 # Version 0.3
@@ -44,16 +44,14 @@
  - [ ] Add password reset process
    - [ ] Add setting to enable/disable this
  - [ ] Add user preferences
- - [ ] Cron system & CLI interface
- - [ ] Add customizable user account icons
+ - [x] Cron system & CLI interface
+ - [x] Add customizable user account icons
  - [x] Add ring privilege checks--no promoting accounts to higher access levels than your own
- - [ ] Make navigation permission-sensitive
- - [ ] Fix issue where router cache gets regenerated when on admin page and returns empty web cache.
-   - [ ] Add a `cache_version.json` file which increments when a cache update needs to take place.
+ - [x] Make navigation permission-sensitive
+ - [x] Fix issue where router cache gets regenerated when on admin page and returns empty web cache.
  - [x] Add CLI command to promote user to `root` group
    - [x] Also added 'demote' command
- - [ ] Finish InputClass value reversion on error
- - [ ] Events scheduler system
+ - [x] Events scheduler system
  - [ ] Add template/renderer debugging!!!
  - [x] Make templates able to load from any directory even if its overridden by a higher context (use __PLUGIN__ -> relative to current plugin, __APP__, __ENV__ as prefixes)
  - [ ] <replicator-button> contains internal <template>
@@ -85,3 +83,8 @@
  - [ ] Make duotone icon set a plugin
  - [ ] Update the Settings Manager so it instantiates Settings class (interface of iterable)
    - [ ] Settings class contains every default value as a method
+
+# Version 0.5
+ - [ ] Remove plugin system completely because it never worked.
+ - [ ] Finalize tokening system and implement email address verification, password reset, and email login
+ - [ ] Fix the YouTube token issue

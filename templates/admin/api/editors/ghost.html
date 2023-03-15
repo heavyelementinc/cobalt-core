@@ -1,0 +1,31 @@
+<h1>{{title}}</h1>
+
+<form-request method="PUT" action="/api/v1/api/key/{{id}}">
+    <fieldset>
+        <legend>Key Data</legend>
+        
+        <label>Content API Key</label>
+        <input-password name="secret" value="{{token.secret}}"></input-password>
+        
+        <label>Admin API key</label>
+        <input-password name="token" value="{{token.token}}"></input-password>
+        
+        <label>API URL <help-span value="The value provided by your Ghost instance"></help-span></label>
+        <input type="url" name="key" value="{{token.key}}">
+    </fieldset>
+    <!-- <fieldset>
+        <legend>Metadata</legend>
+        <label>Type</label>
+        <input-autocomplete value="{{token.type}}" name="type">
+            <option value="Authorization">Authorization</option>
+            <option value="Parameter">Parameter</option>
+        </input-autocomplete>
+    
+        <label>Prefix: {{token.prefix}}</label>
+        <input type="string" name="prefix" value="{{token.prefix}}">
+    
+        <label>Expiration</label>
+        <input type="date" name="expiration" value="{{token.expiration}}">
+    </fieldset> -->
+    <button type="submit">Submit</button>
+</form-request>

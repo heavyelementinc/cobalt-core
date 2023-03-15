@@ -191,7 +191,9 @@ class AutoComplete extends HTMLElement {
             // e.stopPropagation();
             // e.preventDefault();
         });
-        this.searchField.value = this.options[this.val].search || this.val;
+        if(this.options.length) {
+            this.searchField.value = this.options[this.val].search || this.val;
+        }
         // if(this.searchResults.)
         this.appendChild(this.searchField);
     }

@@ -26,7 +26,7 @@ class Mailchimp extends API {
 
     function getAPIStatus() {
         // $this->addRequestParams();
-        $endpoint = $this->token->endpoint;
+        $endpoint = $this->token->endpoint['endpoint'];
         $result = $this->get("https://$endpoint.api.mailchimp.com/3.0/ping");
         if($result->health_status === "Everything's Chimpy!") return true;
         return false;
@@ -34,7 +34,7 @@ class Mailchimp extends API {
 
     function insertEmailToAudience($data, $status = "subscribed") {
         if(!$data['email']) throw new BadRequest("You need to fill out the email field");
-        $endpoint = $this->token->endpoint;
+        $endpoint = $this->token->endpoint['endpoint'];
         $list_id = $this->token->key;
         $result = $this->post(
             "https://$endpoint.api.mailchimp.com/3.0/lists/$list_id/members",
@@ -52,7 +52,7 @@ class Mailchimp extends API {
 
     function updateEmailInAudience($email, $status = "subscribed") {
         if(!$email) throw new BadRequest("You need to fill out the email field");
-        $endpoint = $this->token->endpoint;
+        $endpoint = $this->token->endpoint['endpoint'];
         $list_id = $this->token->key;
         $hash = md5(strtolower($email));
         $result = $this->put(
@@ -75,7 +75,7 @@ class Mailchimp extends API {
     }
 
     function subscriberDetails($email):object|false {
-        $endpoint = $this->token->endpoint;
+        $endpoint = $this->token->endpoint['endpoint'];
         $list_id = $this->token->key;
         $hash = md5(strtolower($email));
         try{

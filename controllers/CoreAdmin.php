@@ -51,7 +51,7 @@ class CoreAdmin {
 
     function individual_user_management_panel($id) {
         $ua = new \Auth\UserCRUD();
-        $user = new UserSchema($ua->getUserById($id));
+        $user = $ua->getUserById($id);
         if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", ['template' => 'errors/404_invalid_user.html']);
 
         $table = $GLOBALS['auth']->permissions->get_permission_table($user);
@@ -66,15 +66,21 @@ class CoreAdmin {
 
         try {
             $auth = new \Auth\AdditionalUserFields();
-            $additional = maybe_view($auth->__get_additional_user_tab());
+            $additional = $auth->__get_additional_user_tabs();
         } catch (\Exception $e) {
             $additional = "";
         }
 
         if ($additional) {
+            $buttons = "";
+            $panels = "";
+            foreach($additional as $id => $values) {
+                $buttons .= "<a href='#$id'>$values[name]</a>";
+                $panels .= "<section id='$id' class='drawer-list--item'>".view($values['view'],['user_account' => $user])."</section>";
+            }
             add_vars([
-                'additional_button' => "<li><button for='additional-panel'>Other</button></li>",
-                'additional_panel' => "<section id='additional-panel' class='drawer-list--item'>$additional</section>",
+                'additional_button' => $buttons,
+                'additional_panel' => $panels,
             ]);
         }
 

@@ -41,8 +41,10 @@ class Mailchimp extends TokenInterface {
         return "application/json";
     }
 
-    function getEndpoint():string {
-        return $this->__token['endpoint'];
+    function getEndpoint():array {
+        return [
+            "endpoint" => $this->__token['endpoint']
+        ];
     }
     
     function setSecret():string {

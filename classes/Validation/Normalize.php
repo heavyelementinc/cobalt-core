@@ -109,7 +109,6 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     // We set up our schema and store it
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
-        if($data) $this->__dataset = array_merge($this->default_values(), doc_to_array($this->__dataset));
         
         $this->__normalize($normalize_get);
 
@@ -132,6 +131,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         ];
         
         $this->init_schema();
+
+        $this->__dataset = array_merge($this->default_values(), doc_to_array($this->__dataset));
         // Only enable pronoun prototypes if the 'pronoun_set' key is in the schema.
         // Do we actually want this?
         if (key_exists('pronoun_set', $this->__schema)) {
@@ -140,7 +141,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     function default_values():array {
-        return [];
+        return []; //array_fill_keys(array_keys($this->__schema),null);
     }
 
     /**

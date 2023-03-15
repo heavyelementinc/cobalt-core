@@ -11,6 +11,7 @@ class APIManagement {
         $apis = $this->load_files();
         $index = "";
         foreach($apis as $name => $values) {
+            if(!in_array($name, __APP_SETTINGS__['API_remote_gateways_enabled'])) continue;
             $index .= "<a href='$name' class='pretty-link'>$values[icon]<span>$values[name]</span></a>";
         }
         
@@ -77,15 +78,20 @@ class APIManagement {
         $name = $supported_apis[$type]["namespace"] . "\\" . $type;
         $manager = new $name();
 
-        $mutant = [
-            'key'    => $_POST['key'],
-            'secret' => $_POST['secret'],
-            'token'    => $_POST['token'],
-            'type'   => $_POST['authorization'],
-            'prefix' => $_POST['prefix'],
-            'expiration' => $_POST['expiration'],
-            'endpoint' => $_POST['endpoint'],
-        ];
+        $map = $manager->getValidSubmitData();
+        $mutant = [];
+        foreach($map as $key) {
+            $mutant[$key] = $_POST[$key];
+        }
+        // $mutant = [
+        //     'key'    => $_POST['key'],
+        //     'secret' => $_POST['secret'],
+        //     'token'    => $_POST['token'],
+        //     'type'   => $_POST['authorization'],
+        //     'prefix' => $_POST['prefix'],
+        //     'expiration' => $_POST['expiration'],
+        //     'endpoint' => $_POST['endpoint'],
+        // ];
 
         $result = $manager->updateToken($mutant);
         

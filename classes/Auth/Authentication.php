@@ -7,6 +7,14 @@
 
 namespace Auth;
 
+use Cobalt\Token;
+use DateTime;
+use Exception;
+use Exceptions\HTTP\BadRequest;
+use Mail\SendMail;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
+
 class Authentication {
     public $permissions = null;
     public $session;
@@ -25,12 +33,12 @@ class Authentication {
             return $this;
         }
 
-        $GLOBALS['session'] = new UserSchema($this->user);
+        $GLOBALS['session'] = $this->user;
         $GLOBALS['session']['session_data'] = (array)$this->session;
     }
 
     /** Our user login routine. */
-    function login_user($username, $password, $stay_logged_in = false) {
+    function login_user($username, $password, $stay_logged_in = false, $skip_password_check = false) {
         $stock_message = "Invalid credentials.";
         /** Get our user by their username or email address */
         $ua = new UserCRUD();
@@ -40,8 +48,11 @@ class Authentication {
          * submitted a username/email address that hasn't been registered, yet. */
         if ($user === null) throw new \Exceptions\HTTP\Unauthorized($stock_message);
 
-        /** Check if our password verification has failed and throw an error if it did */
-        if (!\password_verify($password, $user['pword'])) throw new \Exceptions\HTTP\Unauthorized($stock_message);
+        /** Allow the user to login via token */
+        if(!$skip_password_check) {
+            /** Check if our password verification has failed and throw an error if it did */
+            if (!\password_verify($password, $user['pword'])) throw new \Exceptions\HTTP\Unauthorized($stock_message);
+        }
 
         /** Update the user's session information */
         $result = $this->session->login_session($user['_id'], $stay_logged_in);
@@ -103,9 +114,14 @@ class Authentication {
 
         // app('Auth_require_verified_status') && 
 
+        // Check if user permissions is a BSONDocument or not
+        $user_permissions = $user->permissions;
+        // If it is a BSONDocument, get an array copy
+        if($user_permissions instanceof BSONDocument) $user_permissions = $user_permissions->getArrayCopy();
+        
         // If the user account stores the permission, we return that value, 
         // whatever it may be
-        if (key_exists($permission, $user->permissions->getArrayCopy())) return $user->permissions[$permission];
+        if (key_exists($permission, $user_permissions)) return $user_permissions[$permission];
 
         // If the permission's default value is true, we return true.
         if ($this->permissions->valid[$permission]['default']) return true;
@@ -121,5 +137,91 @@ class Authentication {
 
         // If we've made it here, we *probably* don't have the permission.
         return false;
+    }
+
+    function destroy_expired_tokens() {
+        
+    }
+
+    static function handle_login() {
+        $auth = null;
+
+        // Check if the authentication values exist
+        if (app('API_authentication_mode') === "headers") {
+            try{
+                $auth = getHeader("Authentication");
+            } catch (Exception $e) {
+                throw new BadRequest("Request is missing Authentication");
+            }
+        } else {
+            if (!key_exists('Authentication', $_POST)) throw new BadRequest("Request is missing Authentication");
+            $auth = $_POST['Authentication'];
+        }
+
+        // Decode and split the credentials
+        $credentials = explode(":", base64_decode($auth));
+
+        // Log in the user using the credentials provided. If invalid credentials
+        // then login_user will throw an exception.
+        $result = $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
+        return $result;
+    }
+
+    static function handle_email_login() {
+        $uname = $_POST['username'];
+        if(!$uname) throw new BadRequest("Unspecified username");
+
+        $crud = new UserCRUD();
+        $user = $crud->getUserByUnameOrEmail($uname);
+        if(!$user) {
+            sleep(1);
+            return;
+        }
+
+        $email = new SendMail();
+
+        $tk = $crud->set_token($user['_id'], 'login');
+
+        $email->set_body_template("/emails/email-login.html");
+
+        $path = parse_url($_SERVER['HTTP_REFERER'],PHP_URL_PATH);
+
+        $email->set_vars([
+            'token' => $tk->get_token(),
+            'user' => $user,
+            'current_host' => $_SERVER['COBALT_TRUSTED_HOST'],
+            'current_domain' => $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['COBALT_TRUSTED_HOST'],
+            'query' => http_build_query([
+                'continue' => $path,
+                'stay_logged_in' => $_POST['stay_logged_in']
+            ]),
+        ]);
+        $email->send($user['email'],"Login to " . app("app_short_name"));
+    }
+
+    static function generate_login_form():array {
+        add_vars(['title' => 'Login']);
+        $login = "/authentication/login.html";
+        if (!key_exists('HTTPS', $_SERVER) && !app("Auth_enable_insecure_logins")) {
+            $login = "/authentication/no-login.html";
+        }
+
+        if(app("Auth_login_via_email_token")) {
+            if(app("Mail_username") && app("Mail_password") && app("Mail_smtp_host")) {
+                $login = "/authentication/login-email-token.html";
+            }
+        }
+
+        if (app("Auth_account_creation_enabled")) {
+            $vars = [
+                'create_account' => "<hr>\n<a href='" . app("Auth_onboading_url") . "'>Sign up</a>"
+            ];
+        }
+
+        return [$vars ?? [], $login];
+    }
+
+    static function generate_onboarding_form(): array {
+        return [];
     }
 }

@@ -54,8 +54,8 @@ class Twitter extends TokenInterface {
         return null;
     }
 
-    function getEndpoint():string {
-        return "";
+    function getEndpoint():array {
+        return [];
     }
 
     function setEndpoint():string {

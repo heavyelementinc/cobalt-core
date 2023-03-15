@@ -7,5 +7,14 @@
         "method": "destroy_expired_sessions",
         "method_args": [],
         "interval": 3600
+    },
+    {
+        "type": "DefaultType",
+        "name": "Expire User Tokens",
+        "class": "\\Auth\\UserCRUD",
+        "class_args": [],
+        "method": "destroy_expired_tokens",
+        "method_args": [],
+        "interval": 3600
     }
 ]

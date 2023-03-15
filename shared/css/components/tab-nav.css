@@ -1,5 +1,5 @@
 :is(tab-nav,chip-nav) {
-    display:flex;
+    display:flex !important;
     flex-direction: column;
     width: 100%;
     border: var(--project-color-table-border);
@@ -7,7 +7,7 @@
 }
 
 :is(tab-nav,chip-nav) nav {
-    display:flex;
+    display:flex !important;
     justify-content: center;
     gap: .5em;
     background: var(--project-color-table-bg-even);
@@ -42,14 +42,14 @@
 }
 
 :is(tab-nav,chip-nav) > *:not(nav) {
-    display: none;
+    display: none !important;
     /* visibility: none; */
     padding: .5rem .5rem .6rem;
 }
 
 :is(tab-nav,chip-nav):not(.tab-nav--hydrated) > :target,
 :is(tab-nav,chip-nav) .tab-nav--current-content {
-    display: flex;
+    display: flex !important;
     visibility: visible;
 }
 

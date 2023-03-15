@@ -37,7 +37,7 @@ if(file_exists($db_config)) {
  * @param string $database - (Optional) The name of the database
  * @return object
  */
-function db_cursor($collection, $database = null, $returnClient = false) {
+function db_cursor($collection, $database = null, $returnClient = false, $returnDatabase = false) {
     if (!$database) $database = $GLOBALS['CONFIG']['database'];
     try {
         $config = [
@@ -53,8 +53,8 @@ function db_cursor($collection, $database = null, $returnClient = false) {
         if(!$GLOBALS['CONFIG']['db_ssl']) unset($config['ssl']);
         if(!$GLOBALS['CONFIG']['db_sslFile']) unset($config['sslCAFile']);
         if(!$GLOBALS['CONFIG']['db_invalidCerts']) unset($config['sslAllowInvalidCertificates']);
-
         $client = new MongoDB\Client("mongodb://{$GLOBALS['CONFIG']['db_addr']}:{$GLOBALS['CONFIG']['db_port']}",$config);
+        if($returnDatabase) return $client->{$database};
         if($returnClient) return $client;
     } catch (Exception $e) {
         die("Cannot connect to database");

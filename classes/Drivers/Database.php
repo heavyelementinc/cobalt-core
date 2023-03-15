@@ -23,6 +23,7 @@ abstract class Database {
     public $db = null;
     public $collection;
     public string $__schema;
+    public $collectionSpecifiedAtConstruction;
 
     /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
@@ -53,6 +54,7 @@ abstract class Database {
     /* HELPERS */
     final function __id($id = null) {
         if ($id === null) return new ObjectId();
+        if($id instanceof ObjectId) return $id;
         return new ObjectId($id);
     }
 

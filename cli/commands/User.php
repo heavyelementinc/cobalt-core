@@ -1,6 +1,8 @@
 <?php
 
 use Auth\Permissions;
+use Auth\UserCRUD;
+use MongoDB\BSON\UTCDateTime;
 
 class User {
     public $help_documentation = [
@@ -42,6 +44,10 @@ class User {
         ],
         'demote' => [
             'description' => "username|email revoke the user's root privileges",
+            'context_required' => true
+        ],
+        "expire" => [
+            'description' => "expire login tokens",
             'context_required' => true
         ]
     ];
@@ -183,6 +189,11 @@ class User {
         $message = $success_message;
         if ($result->getMatchedCount() !== 1) $message = "No user account found";
         return fmt($message);
+    }
+
+    function expire() {
+        $crud = new UserCRUD();
+        return $crud->destroy_expired_tokens();
     }
 
     // function enable_accounts($bool){

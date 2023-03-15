@@ -1,0 +1,21 @@
+<div>
+    <div style="text-align:center">
+        <img src="{{current_domain}}{{app.login-hero-sidebar}}"></section>
+    </div>
+    
+    <h1 style="text-align:center">Hi {{user.display_name}}</h1>
+    <p>We received a login request for your user account ({{user.uname}}) over on
+        {{current_host}}.</p>
+    
+    <p>Please use the link below to sign in!</p>
+    
+    <div style="text-align:center">
+        <a href="{{current_domain}}/webhooks/token/{{token}}?{{query}}"
+            style="text-align:center;
+            padding: 5px;
+            background-color: black;
+            color: white;
+            "
+        >Login</a>
+    </div>
+</div>

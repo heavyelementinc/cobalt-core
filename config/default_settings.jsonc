@@ -76,6 +76,9 @@
             "alias": "app_name"
         }
     },
+    "DB_export_directory": {
+        "default": "/ignored/db_backups/"
+    },
     /* A bespoke name to be listed in the copyright notice */
     "logo": {
         "default": {
@@ -307,6 +310,7 @@
     "HTTP_error_body_id": {
         "default": "cobalt_http_error"
     },
+
     /** Mail **/
 
     "API_contact_form_enabled": {
@@ -668,12 +672,12 @@
                     "api_access": false,
                     "prefix": "/api/v1/"
                 },
-                "webhookv1": {
+                "webhooks": {
                     "processor": "Handlers\\ApiHandler",
                     "mode": "application/json",
                     "session_refresh": false,
                     "api_access": false,
-                    "prefix": "/webhook/v1/"
+                    "prefix": "/webhooks/"
                 },
                 "streams": {
                     "processor": "Handlers\\ApiHandler",
@@ -805,6 +809,9 @@
         "default": true
         // Allows public password resets
     },
+    "Auth_login_via_email_token": {
+        "default": true
+    },
     "Admin_panel_prefix": {
         "default": "/admin"
     },
@@ -831,7 +838,7 @@
         "default": true
     },
     "Auth_session_panel_enabled": {
-        "default": true,
+        "default": false,
         "directives": {
             "required": {
                 "Auth_user_accounts_enabled": {"is": true}
@@ -839,7 +846,7 @@
         }
     },
     "Auth_user_menu_enabled": {
-        "default": true,
+        "default": false,
         "directives": {   
             "required": {
                 "Auth_user_accounts_enabled": {"is": true}
@@ -1005,7 +1012,33 @@
     "Database_fs_public_endpoint": {
         "default": "/dbfs/"
     },
+    "PaymentGateways_enabled": {
+        "default": false
+    },
     "API_authentication_mode": {
         "default": "POST" // Set to "header" for legacy mode
+    },
+    "API_remote_gateways_enabled": {
+        "default": ["GoogleOAuth","Patreon","Mailchimp"],
+        "meta": {
+            "group": "Configuration",
+            "subgroup":"Advanced",
+            "name": "Enabled APIs",
+            "type": "input-array"
+            // "view": "/admin/settings/inputs/default-h1-alignment.html"
+        },
+        "validate": {
+            "type": "array",
+            "options": {
+                "AmazonPA": "Amazon Affiliate",
+                "GoogleOAuth": "Google OAuth",
+                "Mailchimp": "Mailchimp",
+                "Patreon": "Patreon",
+                "Shopify": "Shopify",
+                "Stripe": "Stripe",
+                "Twitter": "Twitter",
+                "YouTube": "YouTube"
+            }
+        }
     }
 }

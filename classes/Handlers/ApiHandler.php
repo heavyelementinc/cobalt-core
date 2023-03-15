@@ -61,6 +61,7 @@ class ApiHandler implements RequestHandler {
 
     public function _stage_output($context_output = "") {
         $return_value = [];
+        // $result = getHeader('X-Update-Client-State');
         /** TODO: Finish X-Update-Client-State */
         if (key_exists('X-Update-Client-State', $this->headers) || key_exists('x-update-client-state', $this->headers)) $return_value = [
             'response' => $this->router_result,
@@ -70,8 +71,13 @@ class ApiHandler implements RequestHandler {
             // ]
         ];
         else $return_value = $this->router_result;
+        
+        /** Prepare for API request loading progress bar */
+        $json = json_encode($return_value);
+        header("Content-Length: " . strlen($json));
+
         /** Echo the result to the output buffer */
-        return json_encode($return_value);
+        return $json;
     }
 
     public function _public_exception_handler($e) {

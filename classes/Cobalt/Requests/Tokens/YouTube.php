@@ -60,8 +60,8 @@ class YouTube extends TokenInterface {
     public function setTokenExpiration(): ?DateTime {
         return null;
     }
-    function getEndpoint():string {
-        return "";
+    function getEndpoint():array {
+        return [];
     }
 
     function setEndpoint():string {

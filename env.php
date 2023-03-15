@@ -20,6 +20,7 @@ $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+require_once __DIR__ . "/globals/logs.php";
 // Let's make sure our environment is configured properly.
 require_once __DIR__ . "/globals/env_probe.php";
 
@@ -80,10 +81,17 @@ try {
     die($e->getMessage());
 }
 
+// Let's find our trusted cobalt domain
+$_SERVER['COBALT_TRUSTED_HOST'] = null;
+if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->getArrayCopy())) {
+    $_SERVER['COBALT_TRUSTED_HOST'] = $_SERVER['HTTP_HOST'];
+    $app->__settings->trusted_host = $_SERVER['COBALT_TRUSTED_HOST'];
+}
 /** @global __APP_SETTINGS__ The __APP_SETTINGS__ constant is an array of app 
  *                           settings 
  * */
 define("__APP_SETTINGS__", $application->get_settings());
+
 
 session_name("COBALTID");
 $cobalt_session_started = session_start([

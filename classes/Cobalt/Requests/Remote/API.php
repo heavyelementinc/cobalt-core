@@ -7,6 +7,7 @@ use DateTime;
 use Drivers\UTCDateTime;
 use Exception;
 use Exceptions\HTTP\HTTPException;
+use Exceptions\HTTP\NotFound;
 use GuzzleHttp\Client as Guzzle;
 use GuzzleHttp\Exception\GuzzleException;
 use MongoDB\BSON\UTCDateTime as BSONUTCDateTime;
@@ -23,9 +24,14 @@ abstract class API extends \Drivers\Database implements APICall {
     public $request_params = [];
     public $token = null;
     public $json_parse_as_array = false;
+    public $gateway_name = null;
+    public $fetchRefreshToken = false;
 
     function __construct() {
         parent::__construct();
+        $class = $this::class;
+        $this->gateway_name = substr($class, strrpos($class, "\\") + 1);
+        if(!in_array($this->gateway_name, __APP_SETTINGS__["API_remote_gateways_enabled"])) throw new NotFound("This remote gateway is not enabled");
         $this->token = $this->authorizationToken();
     }
 
@@ -38,7 +44,9 @@ abstract class API extends \Drivers\Database implements APICall {
         if(!$refresh) throw new Exception("No refresh token available");
         $e = $result->getEndpoint();
         if(!$e) throw new Exception("Invalid endpoint");
-        return post_fetch($e['endpoint'], $e['params'], $e['headers']);
+        $url = $e['endpoint'] . "?" . http_build_query($e['params']);
+        $response = fetch($url, $e['method'], $e['headers']);
+        return $response;
     }
 
     abstract function testAPI():bool;
@@ -84,7 +92,6 @@ abstract class API extends \Drivers\Database implements APICall {
         $r = $this->updateOne(
             $query,
             ['$set' => array_merge(
-                // $token->normalize(),
                 $result,
                 ['__last_refreshed' => new BSONUTCDateTime()]
             )],
@@ -138,6 +145,7 @@ abstract class API extends \Drivers\Database implements APICall {
         }
 
         $this->request_params = array_merge($this->request_params, $tk->getMiscParameters());
+        $this->request_headers = array_merge($this->request_headers, $tk->getMiscHeaders());
         return $tk;
     }
 

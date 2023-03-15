@@ -1,0 +1,32 @@
+<section id="login-form-container" class="login-form-container">
+    <section class="login-hero-sidebar" style="background-image: url('{{app.login-hero-sidebar}}')"></section>
+    <tab-nav>
+        <nav>
+            <a href="#email">Email</a>
+            <a href="#login-form">Password</a>
+        </nav>
+        <form-request id="email" method="POST" action="/api/v1/login/email" @csrf_attribute();>
+            <fieldset>
+                <h1>Email sign in <help-span value="An email will be sent to the account on file. You must use the link in the email to confirm your login."></help-span></h1>
+                <input type="username" name="username" placeholder="Username/Email">
+                <label><input-switch name="stay_logged_in" tiny></input-switch> Stay logged in</label>
+                <span class="error"></span>
+                <button type="submit">Sign in</button>
+            </fieldset>
+        </form-request>
+        <login-form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" @csrf_attribute();>
+            <fieldset>
+                <h1>Sign in to {{app.app_short_name}}</h1>
+                <input type="username" name="username" placeholder="Username/Email">
+    
+                <input type="password" name="password" placeholder="Password">
+    
+                <input type="hidden" name="stay_logged_in" value="false">
+                <label><input-switch name="stay_logged_in" tiny></input-switch> Stay logged in</label>
+                <span class="error"></span>
+                <button type="submit">Sign In</button>
+                {{!create_account}}
+            </fieldset>
+        </login-form-request>
+    </tab-nav>
+</section>

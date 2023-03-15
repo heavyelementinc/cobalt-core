@@ -25,16 +25,20 @@ use PhpToken;
 
 class UserSchema extends \Validation\Normalize {
     use ClientFSManager;
+    public $additional = null;
     function __construct($doc = null, $normalize_get = true) {
         $this->collection = \db_cursor('users');
         parent::__construct($doc, $normalize_get);
+        $this->additional = new AdditionalUserFields();
+
     }
 
     function __get_schema(): array {
         $integrate = [];
-        $additional = null;
-        if(file_exists(__APP_ROOT__ . "/classes/Auth/AdditionalUserFields")) $additional = new AdditionalUserFields();
-        if ($additional) $integrate = $additional->__get_additional_schema();
+
+        if(!$this->additional) $this->additional = new AdditionalUserFields();
+        
+        $integrate = $this->additional->__get_additional_schema();
         return array_merge([
             'fname' => [
                 'display' => fn () => $this->name

@@ -11,7 +11,13 @@ use MongoDB\BSON\ObjectId;
 trait ClientFSManager {
     public $fs = null;
     protected $format_table = null;
-    protected $filename_insert_prefix = "";
+    
+    /**
+     * This property is used to assign a path name to the file being uploaded
+     * You should *not* include a / to start or a trailing / at the end of the
+     * pathname.
+     * @var string
+     */
     public $fs_filename_path = "";
     public $last_modified_result = null;
     

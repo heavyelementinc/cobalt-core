@@ -131,14 +131,16 @@ Route::get("/settings/cron", "CoreAdmin@cron_panel",[
     'navigation' => ['settings_panel']
 ]);
 
-Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
-    // 'permission' => 'API_manage_keys',
-    'anchor' => [
-        'name' => "Payments",
-        'icon' => 'credit-card-fast-outline'
-    ],
-    'navigation' => ['admin_basic_panel']
-]);
+if(__APP_SETTINGS__['PaymentGateways_enabled']) {
+    Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
+        // 'permission' => 'API_manage_keys',
+        'anchor' => [
+            'name' => "Payments",
+            'icon' => 'credit-card-fast-outline'
+        ],
+        'navigation' => ['admin_basic_panel']
+    ]);
+}
 
 if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
     Route::get("/contact-form/", "ContactForm@index", [

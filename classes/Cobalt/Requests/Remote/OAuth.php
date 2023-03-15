@@ -23,22 +23,24 @@ abstract class OAuth extends API {
     }
 
     public function updateAuthorizationToken(?array $query = null):array {
+        
         if(!$query) $query = $this->getDefaultTokenQuery();
         $iface = $this->getInterface();
         
         $tmp = new $iface(doc_to_array($this->findOne($query)));
-        $result= $this->refreshTokenCallback($tmp);
+        $result = $this->refreshTokenCallback($tmp);
         
         $token = new $iface($result);
+        $normalized = $token->normalize($result);
 
         $this->updateOne(
             $query,
-            ['$set' => $token->normalize()],
+            ['$set' => $normalized],
             ['upsert' => true]
         );
         $token = $this->findOne($query);
 
-        return iterator_to_array(new $iface($token));
+        return iterator_to_array($token);
     }
 
     public function getInterface(){

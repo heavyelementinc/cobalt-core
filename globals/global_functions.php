@@ -55,7 +55,7 @@ function app($setting = null) {
 function session($info = null) {
     if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
-    if (property_exists($GLOBALS['session'],$info)) return $GLOBALS['session'][$info];
+    if (key_exists($info, $GLOBALS['session']['__dataset'])) return $GLOBALS['session']['__dataset'][$info];
     return lookup_js_notation($info, $GLOBALS['session'], true);
     throw new Exception("Field $info does not exist");
 }
@@ -1378,4 +1378,32 @@ function syntax_highlighter($code, $filename = "", $language = "json", $line_num
     $highlighter->setShowLineNumbers($line_numbers);
     $highlighter->setShowActionPanel($action_panel);
     return $highlighter->parse();
+}
+
+function createJWT(array $header, array $payload, $secret) {
+    // Create token header as a JSON string
+    $header = json_encode(array_merge([
+        'typ' => 'JWT',
+        'alg' => 'HS256'
+    ],$header));
+
+    // Create token payload as a JSON string
+    $payload = json_encode($payload);
+
+    // Encode Header to Base64Url String
+    $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+
+    // Encode Payload to Base64Url String
+    $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+
+    // Create Signature Hash
+    $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
+
+    // Encode Signature to Base64Url String
+    $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+
+    // Create JWT
+    $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
+
+    return $jwt;
 }

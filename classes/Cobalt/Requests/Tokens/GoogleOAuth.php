@@ -4,7 +4,12 @@ namespace Cobalt\Requests\Tokens;
 use DateTime;
 use MongoDB\BSON\UTCDateTime;
 
-class GoogleOAuth extends TokenInterface {
+class GoogleOAuth extends OAuthInterface {
+
+    public function getExpirationDate($object = null): UTCDateTime {
+        $d = $object->expires_in ?? $this->__token['expires_in'];
+        return new UTCDateTime((time() + $d) * 1000);
+    }
 
     public function getRefresh(): string|null { return $this->__token['refresh_token'];}
 
@@ -74,12 +79,13 @@ class GoogleOAuth extends TokenInterface {
         $file = json_decode(file_get_contents(__APP_ROOT__ . "/config/oauth.keys.json"));
         return [
             'endpoint' => "https://oauth2.googleapis.com/token",
+            'method' => 'POST',
             'headers' => [
                 'Content-Type' => 'application/x-www-form-urlencoded'
             ],
             'params' => [
-                'client_id' => $file['client_id'],
-                'client_secret' => $file['client_secret'],
+                'client_id' => $file->web->client_id,
+                'client_secret' => $file->web->client_secret,
                 'refresh_token' => $this->getRefresh(),
                 'grant_type' => "refresh_token"
             ]
@@ -89,4 +95,10 @@ class GoogleOAuth extends TokenInterface {
     function setEndpoint():string {
         return "";
     }
+
+    function normalize($response): ?array {
+        return $response;
+    }
+
+    
 }

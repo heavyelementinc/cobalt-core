@@ -90,8 +90,12 @@ class CoreSettingsPanel extends Controller {
             case "input-array":
                 $template = "/admin/settings/inputs/array.html";
                 $options = "";
-                foreach(__APP_SETTINGS__[$index] as $option) {
-                    $options.= "<option value='$option' selected='selected'>$option</option>";
+                $current = array_combine(__APP_SETTINGS__[$index], __APP_SETTINGS__[$index]);
+                $opts = array_merge($current, $setting->validate['options']);
+                foreach($opts as $key => $option) {
+                    $selected = "";
+                    if(in_array($key, $current)) $selected = " selected='selected'";
+                    $options .= "<option value='$option'$selected>$option</option>";
                 }
                 break;
             case "radio-group":

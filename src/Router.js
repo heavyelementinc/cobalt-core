@@ -39,8 +39,8 @@ class Router {
         });
 
         if(this.isSPA) {
-            this.SPA_indicator = document.createElement("progress-bar");
-            this.SPA_indicator.setAttribute("no-message", "true");
+            this.SPA_indicator = document.createElement("progress");
+            // this.SPA_indicator.setAttribute("no-message", "true");
             this.SPA_indicator.classList.add("spa-loading-indicator");
             document.body.prepend(this.SPA_indicator);
             this.initialize_SPA_navigation(true);
@@ -247,28 +247,34 @@ class Router {
         if(!urlData.isLocal) window.location = url;
 
         // Set up to execute our fetch request from the API.
-        const pageLoad = new ApiFetch(`/api/v1/page/?route=${urlData.pathname}${urlData.apiSearchParams}`,"GET", {});
-
-
-        let result;
-        try{
-            result = await new Promise(async (resolve, reject) => {
-                this.navigationEventReject = reject;
-                let result;
-                try{
-                    result = await pageLoad.get()
-                } catch(error) {
-                    reject(error);
-                }
-                this.navigationEventReject = null;
-                resolve(result);
-                this.navigationEnd();
-            })
+        // const pageLoad = new ApiFetch(`/api/v1/page/?route=${urlData.pathname}${urlData.apiSearchParams}`,"GET", {});
+        let result = null;
+        try {
+            result = await this.asyncPageRequest(urlData);
         } catch (error) {
             this.navigationEnd();
-            if(error = "Navigation aborted") return console.log(error);
             console.warn("There was an error");
         }
+
+        // let result;
+        // try{
+        //     result = await new Promise(async (resolve, reject) => {
+        //         this.navigationEventReject = reject;
+        //         let result;
+        //         try{
+        //             result = await pageLoad.get()
+        //         } catch(error) {
+        //             reject(error);
+        //         }
+        //         this.navigationEventReject = null;
+        //         resolve(result);
+        //         this.navigationEnd();
+        //     })
+        // } catch (error) {
+        //     this.navigationEnd();
+        //     if(error = "Navigation aborted") return console.log(error);
+        //     console.warn("There was an error");
+        // }
         
         window.messageHandler.closeAll();
 
@@ -299,6 +305,28 @@ class Router {
         mobile_nav.close();
 
         this.initialize_SPA_navigation(false);
+    }
+
+    asyncPageRequest(data){
+        return new Promise((resolve, reject) => {
+            this.SPA_indicator.value = null;
+            this.SPA_indicator.max = null;
+            this.navigationEventReject = reject
+            const client = new XMLHttpRequest();
+            this.lastAsyncPageLoad = client;
+            client.withCredentials = true;
+            client.onload = (event) => {
+                resolve(JSON.parse(client.response));
+                this.navigationEventReject = null;
+            };
+            client.onprogress = (event) => {
+                this.SPA_indicator.value = event.loaded;
+                this.SPA_indicator.max = event.total;
+            }
+            client.onerror = (error) => reject(error);
+            client.open('GET', `/api/v1/page/?route=${data.pathname}${data.apiSearchParams}`);
+            client.send();
+        })
     }
 
     navigationEnd() {

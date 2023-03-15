@@ -10,6 +10,7 @@ if(app("UGC_enable_user_generated_content")) {
 if (app('Auth_logins_enabled')) {
     /** Login and logout routes */
     Route::post("/login", "Login@handle_login");
+    Route::post("/login/email", "Login@handle_email_login_stage_1");
     Route::get("/logout", "Login@handle_logout");
     /** User update routes */
     Route::s_put("/create-user", "UserAccounts@create_user", ['permission' => 'Auth_allow_creating_users']);
@@ -108,9 +109,9 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     Route::s_put(   "/posts/attachment/{id}/sort",    "Posts@updateSortOrder", ['permission' => 'Posts_manage_posts']);
 }
 
-// if(__APP_SETTINGS__['PaymentGateways_enabled']) {
+if(__APP_SETTINGS__['PaymentGateways_enabled']) {
     Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);
-// }
+}
 
 
 Route::s_put("/api/key/{service}",  "APIManagement@update", ['permission' => 'API_manage_keys']);
