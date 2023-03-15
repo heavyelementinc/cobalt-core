@@ -87,8 +87,11 @@
     async send_and_subscribe() {
         return new Promise(async (resolve, reject) => {
             var request = "";
+            let data = this.request.build_query();
+            this.dispatchEvent(new CustomEvent("formRequestSubmit", {detail: data}));
+
             try {
-                request = await this.request.send(this.request.build_query());
+                request = await this.request.send(data);
             } catch (e) {
                 reject(e);
             }

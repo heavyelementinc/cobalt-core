@@ -1,37 +1,24 @@
 <?php
 
+use Auth\Authentication;
+use Auth\UserCRUD;
+use Cobalt\Token;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Unauthorized;
+use Exceptions\HTTP\UnknownError;
 use Mail\SendMail;
 
 class Login {
     function login_form() {
-        add_vars(['title' => 'Login']);
-        $login = "/authentication/login.html";
-        if (!key_exists('HTTPS', $_SERVER) && !app("Auth_enable_insecure_logins")) {
-            $login = "/authentication/no-login.html";
-        }
-
-        if (app("Auth_account_creation_enabled")) {
-            add_vars(['create_account' => "<hr>\n<a href='" . app("Auth_onboading_url") . "'>Sign up</a>"]);
-        }
-
-        set_template($login);
+        $vars = Authentication::generate_login_form();
+        add_vars(['title' => "Log in", ...$vars[0]]);
+        set_template($vars[1]);
     }
 
     function handle_login() {
-        // Get the headers
-        $headers = apache_request_headers();
-        // Check if the authentication values exist
-        if (!key_exists('Authentication', $headers)) throw new BadRequest("Request is missing Authentication");
-
-        // Decode and split the credentials
-        $credentials = explode(":", base64_decode($headers['Authentication']));
-
-        // Log in the user using the credentials provided. If invalid credentials
-        // then login_user will throw an exception.
-        $result = $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
+        $result = Authentication::handle_login();
 
         // If we're here, we've been logged in successfully. Now it's time to
         // determine what we should be doing. If we're on the login page, 
@@ -47,8 +34,61 @@ class Login {
         return $result;
     }
 
+    function handle_email_login_stage_1() {
+        $email = Authentication::handle_email_login();
+        header("X-Redirect: /login/email");
+    }
+
+    function handle_token_auth($token) {
+        $crud = new UserCRUD();
+        $user = $crud->findOneAsSchema(['login_tokens.token' => $token]);
+        if(!$user) throw new BadRequest("Invalid token");
+        $value = null;
+        foreach($user->login_tokens as $obj) {
+            if($obj['token'] === $token) {
+                $value = $obj;
+                break;
+            }
+        }
+        if(!$value) throw new BadRequest("Token could not be found");
+        $token = new Token($obj['token'], $obj['expires'], $obj['type']);
+
+        // Cleanup tokens
+        $expire = $crud->expire_login_token($obj['token']);
+                
+        $keys = [
+            'login' => "handle_email_login_stage_2",
+            'reset' => "handle_password_reset_stage_2"
+        ];
+
+        if(!$token->is_expired()) throw new Unauthorized("This token has expired");
+        if(!key_exists($value['type'], $keys)) throw new UnknownError("This token specifies invalid parameters");
+
+        return $this->{$keys[$value['type']]}($token, $user, $value);
+    }
+
+    private function handle_email_login_stage_2($token, $user, $value):never {
+        $GLOBALS['auth']->login_user($user->uname, null, ((int)$_GET['stay_logged_in'] == true), true);
+        $sanitized = $_GET["continue"];
+        header("Location: $sanitized");
+        exit;
+    }
+
+    private function handle_password_reset_stage_2($token, $user, $value) {
+
+    }
+
+    function email_sent() {
+        add_vars([
+            'title' => "Email sent"
+        ]);
+        set_template("/authentication/email-sent.html");
+    }
+
     function handle_logout() {
-        return $GLOBALS['auth']->logout_user();
+        $result = $GLOBALS['auth']->logout_user();
+        header("X-Redirect: /");
+        return $result;
     }
 
     function password_reset_initial_form() {

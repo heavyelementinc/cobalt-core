@@ -12,11 +12,13 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Demyanovs\PHPHighlight\Highlighter;
 use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
 use MongoDB\Model\BSONArray;
+use Validation\Exceptions\NoValue;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -53,7 +55,7 @@ function app($setting = null) {
 function session($info = null) {
     if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
-    if (property_exists($GLOBALS['session'],$info)) return $GLOBALS['session'][$info];
+    if (key_exists($info, $GLOBALS['session']['__dataset'])) return $GLOBALS['session']['__dataset'][$info];
     return lookup_js_notation($info, $GLOBALS['session'], true);
     throw new Exception("Field $info does not exist");
 }
@@ -201,7 +203,7 @@ function find_one_file(array $arr_of_paths, $filename) {
         $file = "$path/$filename";
         if (file_exists($file)) {
             if(substr($deprecated_path,0,strlen($deprecated_path)) === $deprecated_path) {
-                trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
+                // trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
             }
             return $file;
         }
@@ -517,6 +519,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
         [
             "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
             "/\^(\w)/",
+            // "/<img src=['\"]()['\"])/"
             // "/&lt;a(\s*[='\(\)]*.*)&gt;(.*)&lt;\/a&gt;/",
         ],
         [
@@ -594,6 +597,7 @@ function build_object_from_paths($object) {
 }
 
 function is_secure() {
+    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'])) return true;
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || $_SERVER['SERVER_PORT'] == 443;
 }
@@ -718,6 +722,18 @@ function with_each(string $template, $docs, $var_name = 'doc') {
     return $rendered;
 }
 
+function view_each(string $template, Iterator|array $docs, string $var_name = 'doc', string|false $separator = "") {
+    return implode($separator, view_array($template, $docs, $var_name));
+}
+
+function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
+    $array = [];
+    foreach($docs as $index => $doc){
+        $array[$index] = view($template, [$var_name => $doc]);
+    }
+    return $array;
+}
+
 function credit_card_form(array|object $data = [],$shipping = false):string {
     $currentYear = (int)date("Y");
     $years = "";
@@ -754,6 +770,26 @@ function is_child_dir($base_dir, $path) {
     $substr = substr(realpath($path), 0, $base_len);
     return ($substr === $base_dir); // return comparison operation.
 }
+
+// function get_route_data(string $class, string $method, ?string $routeMethod = "get", string $context = null) {
+//     if($context === null) $context = "web";
+//     $controllerAlias = "$class@$method";
+//     $router = $GLOBALS['router'];
+//     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
+//     // if($context !== $router->route_context) {
+//     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
+//     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
+//     // }
+//     // $routes = $router->routes[$context][$routeMethod];
+//     $route = null;
+//     foreach($router->routes as $routes) {
+//         foreach($routes[$routeMethod] as $r => $data) {
+//             if($data['controller'] !== $controllerAlias) continue;
+//             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
+//             return $data;
+//         }
+//     }
+// }
 
 /**
  * Limitations: this will only return the first route that uses the specified controller
@@ -836,21 +872,29 @@ function validate_route($directiveName, $context) {
     return false;
 }
 
+// TODO: Fix this
 /** Create a directory listing from existing web GET routes
  * 
- * with_icon, prefix, classes, id
+ * with_icon, prefix, classes, id, (array) ulPrefix, (array) ulSuffix, (bool) excludeWrapper
  * 
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
-    $misc = array_merge(['with_icon' => false, 'prefix' => "", 'classes' => "", 'id' => ""], $misc);
+    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
     if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
     if ($misc['classes']) $misc['classes'] = " $misc[classes]";
+    
+    // Check if we have prefixes or suffixes specified
+    
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
+    if($misc['excludeWrapper'] === true) $ul = "";
     $current_route = $GLOBALS['router']->current_route;
+    $list = $GLOBALS['router']->routes;
 
-    foreach($GLOBALS['router']->routes as $context => $methods) {
+    // handleAuxiliaryRoutes($list, $misc, $directory_group);
+
+    foreach($list as $context => $methods) {
         foreach($methods as $method => $routes) {
             foreach ($routes as $r => $route) {
                 $groups = $route['navigation'] ?? false;
@@ -870,8 +914,55 @@ function get_route_group($directory_group, $misc = []) {
             }
         }
     }
+    $wrapper = ($misc['excludeWrapper']) ? "" : "</ul>";
+    return $ul . $wrapper;
+}
 
-    return $ul . "</ul>";
+// TODO: Fix this
+function handleAuxiliaryRoutes(&$list, $misc, $group):void {
+    $prefix = ($misc['ulPrefix']) ? $misc['ulPrefix'] : [];
+    $suffix = ($misc['ulSuffix']) ? $misc['ulSuffix'] : [];
+    // If the prefixes or suffixes are strings, make them arrays
+    if(gettype($prefix) === "string") $prefix = [$prefix];
+    if(gettype($suffix) === "string") $suffix = [$suffix];
+    $mutantPrefix = [];
+    foreach($prefix as $pfx) {
+        $mutantPrefix += auxRouteHandler($pfx, $group);
+    }
+
+    $mutantSuffix = [];
+
+    foreach($suffix as $sfx) {
+        array_push($mutantSuffix, [$sfx => auxRouteHandler($sfx, $group)]);
+    }
+
+    foreach($list as $element) {
+        array_unshift($element['get'], ...$mutantPrefix);
+        array_push($element['get'], ...$mutantSuffix);
+    }
+}
+
+// TODO: Fix this
+function auxRouteHandler($route, $group) {
+    if(is_string($route)) {
+        if(strpos($route,"@") !== false) {
+            $rt = route($route);
+            $rt['groups'] === [$group];
+            return $rt;
+        } 
+        return [
+            "/" . preg_quote($route) . "/" => [
+                'original_path' => $route,
+                'controller' => "",
+                'anchor' => [
+                    'label' => $route,
+                    'href' => $route
+                ],
+                'groups' => [$group]
+            ]
+        ];
+    } else if (is_array($route)) return route(...array_values($route));
+    throw new Exception("Provided auxiliary is not a valid auxiliary route type");
 }
 
 function build_directory_item($item, $icon = false, $context = "") {
@@ -1004,9 +1095,12 @@ function flex_table($docs, $table, $schema) {
  * @throws Confirm if headers are not detected throw Confirm
  */
 function confirm($message, $data, $okay = "Continue", $dangerous = true) {
-    $headers = apache_request_headers();
-    if (key_exists('X-Confirm-Dangerous', $headers) && $headers['X-Confirm-Dangerous']) return true;
-    throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
+    try {
+        $header = getHeader("X-Confirm-Dangerous");
+        if($header) return true;
+    } catch (Exception $e) {       
+        throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
+    }
 }
 
 
@@ -1256,4 +1350,60 @@ function normalize_color($val, $default = null, $normalize = null) {
  */
 function clamp(int|float $current, int|float $min, int|float $max):int|float {
     return max($min, min($max, $current));
+}
+
+function country2flag(string $countryCode, ?string $countryName = null): string {
+    $unicode = (string) preg_replace_callback(
+        '/./',
+        static fn (array $letter) => mb_chr(ord($letter[0]) % 32 + 0x1F1E5),
+        $countryCode
+    );
+    return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
+}
+
+function getHeader($header) {
+    $toMatch = strtolower($header);
+    $headers = [];
+    foreach(getallheaders() as $key => $value){
+        $headers[strtolower($key)] = $value;
+    }
+    if(key_exists($toMatch, $headers)) return $headers[$toMatch];
+    throw new NoValue("The specified header was not found among the request headers");
+}
+
+function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
+    if(gettype($code) !== "string") $code = json_encode($code, JSON_PRETTY_PRINT);
+    $mutant = "<pre data-file='$filename' data-lang='$language'>$code</pre>";
+    $highlighter = new Highlighter($mutant, 'railscasts');
+    $highlighter->setShowLineNumbers($line_numbers);
+    $highlighter->setShowActionPanel($action_panel);
+    return $highlighter->parse();
+}
+
+function createJWT(array $header, array $payload, $secret) {
+    // Create token header as a JSON string
+    $header = json_encode(array_merge([
+        'typ' => 'JWT',
+        'alg' => 'HS256'
+    ],$header));
+
+    // Create token payload as a JSON string
+    $payload = json_encode($payload);
+
+    // Encode Header to Base64Url String
+    $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+
+    // Encode Payload to Base64Url String
+    $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+
+    // Create Signature Hash
+    $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
+
+    // Encode Signature to Base64Url String
+    $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+
+    // Create JWT
+    $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
+
+    return $jwt;
 }

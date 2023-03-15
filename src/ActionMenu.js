@@ -1,5 +1,5 @@
 class ActionMenu {
-    constructor({ event, title = "", mode = null, withIcons = true, attachTo = null }) {
+    constructor({ event, title = "", mode = null, withIcons = true, attachTo = null, closeCallback = () => {}, menuClasses = [] }) {
         // Only one instance of a menu is allowed on a single page
         if (window.menu_instance) {
             window.menu_instance.closeMenu();
@@ -12,6 +12,8 @@ class ActionMenu {
         this.withIcons = withIcons;
         this.toggle = false;
         this.attachTo = attachTo;
+        this.closeCallback = closeCallback;
+        this.menuClasses = menuClasses;
         /** @property the list of actions to display in the menu */
         this.actions = [];
         /** @property the default properties of a single action */
@@ -27,6 +29,7 @@ class ActionMenu {
             callback: async (element, event, asyncRequest) => {
                 return true; // Return true to dismiss menu
             },
+            disabled: false
         }
         this.wrapper = null;
         this.menu = null;
@@ -41,11 +44,13 @@ class ActionMenu {
     renderAction(action) {
         const button = document.createElement('button');
         if (this.withIcons) button.innerHTML = action.icon;
+
         const label = document.createElement("span");
         label.innerText = action.label;
         button.appendChild(label);
 
         if (action.dangerous) button.classList.add("action-menu-item--dangerous");
+        if (action.disabled) button.disabled = action.disabled;
         button.addEventListener("click", (ev) => {
             this.handleAction(action, ev);
         });
@@ -54,8 +59,10 @@ class ActionMenu {
     }
 
     async draw() {
-        this.menu = document.createElement("action-menu");
-        let header = document.createElement("header");
+        this.menu = document.createElement("div");
+        this.menu.classList.add("action-menu");
+        let header = document.createElement("div");
+        header.classList.add('header')
         header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
         this.menu.appendChild(header);
 
@@ -71,7 +78,7 @@ class ActionMenu {
 
         this.wrapper = document.createElement('action-menu-wrapper');
         this.wrapper.appendChild(this.menu);
-        this.wrapper.classList.add(this.mode);
+        this.wrapper.classList.add(this.mode, ...this.menuClasses);
         document.querySelector('body').appendChild(this.wrapper);
 
         window.menu_instance = this;
@@ -117,6 +124,10 @@ class ActionMenu {
             } catch (error) {
                 console.log(api);
                 action.loading.error(error);
+                if(api.result.code === 300) {
+                    this.closeMenu();
+                    return true;
+                }
                 new StatusError({message: api.result.message, icon: "ion-warning"});
                 return;
             }
@@ -147,6 +158,7 @@ class ActionMenu {
         if ("parentNode" in this.wrapper && this.wrapper.parentNode)
             this.wrapper.parentNode.removeChild(this.wrapper);
         this.clearEvent();
+        this.closeCallback();
     }
 
     clearEvent() {
@@ -184,7 +196,18 @@ class ActionMenu {
         let originY = this.getAbsolutePosition("top");
         if ((originX + menuWidth + 5) >= viewportWidth) {
             originX -= Math.abs((originX + menuWidth + 5) - viewportWidth);
-
+            if(this.attachTo !== null) {
+                // Set the origin right now since we need to not be seeing the
+                // fucking scrollbar as that throws off the attachTo X location.
+                this.wrapper.style.left = `${originX}px`;
+                this.wrapper.style.top = `${originY}px`;
+                // reflow();
+                const attached = get_offset(this.attachTo);
+                originX = attached.x;
+                originX -= menuWidth;
+                originX += attached.w;
+            } else {
+            }
         }
         if (((originY + menuHeight + 5)) >= (viewportHeight + scrollTop)) {
             originY -= Math.abs((originY + menuHeight + 5)) - (viewportHeight + scrollTop);
@@ -205,8 +228,7 @@ class ActionMenu {
     }
 
     getAbsolutePositionElement(type) {
-        let target = this.event.target;
-
+        let target = this.event.target ?? this.event.srcElement;
         if(target.parentNode.tagName === "BUTTON") target = target.parentNode
         if(this.attachTo) target = this.attachTo;
         else {

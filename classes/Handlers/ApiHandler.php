@@ -23,6 +23,15 @@ namespace Handlers;
 class ApiHandler implements RequestHandler {
     private $methods_from_stdin = ['POST', 'PUT', 'PATCH', 'DELETE'];
     private $content_type = "application/json; charset=utf-8";
+    
+    public $http_mode = null;
+    public $headers = null;
+    public $method = null;
+    public $allowed_modes = null;
+    public $allowed_origins = null;
+    public $router_result = null;
+    public $_stage_bootstrap = [];
+
     function __construct() {
         $this->http_mode = (is_secure()) ? "https" : "http";
         $this->headers = apache_request_headers();
@@ -32,7 +41,7 @@ class ApiHandler implements RequestHandler {
         /** This will make the allowed origins be http or https */
         $this->allowed_origins = [];
         foreach (app("API_CORS_allowed_origins") as $el) {
-            array_push($this->allowed_origins, $this->url_to_current_mode($el));
+            array_push($this->allowed_origins, $el);
         }
     }
 
@@ -52,8 +61,9 @@ class ApiHandler implements RequestHandler {
 
     public function _stage_output($context_output = "") {
         $return_value = [];
+        // $result = getHeader('X-Update-Client-State');
         /** TODO: Finish X-Update-Client-State */
-        if (key_exists('X-Update-Client-State', $this->headers)) $return_value = [
+        if (key_exists('X-Update-Client-State', $this->headers) || key_exists('x-update-client-state', $this->headers)) $return_value = [
             'response' => $this->router_result,
             'settings' => $GLOBALS['app']->public_settings,
             // 'user' => [
@@ -61,8 +71,13 @@ class ApiHandler implements RequestHandler {
             // ]
         ];
         else $return_value = $this->router_result;
+        
+        /** Prepare for API request loading progress bar */
+        $json = json_encode($return_value);
+        header("Content-Length: " . strlen($json));
+
         /** Echo the result to the output buffer */
-        return json_encode($return_value);
+        return $json;
     }
 
     public function _public_exception_handler($e) {
@@ -105,7 +120,7 @@ class ApiHandler implements RequestHandler {
          * since we can't use php://input while we're doing this. */
         if (empty($incoming_stream)) {
             $max_upload = getMaximumFileUploadSize();
-            if ($this->headers['Content-Length'] > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
+            if ((int)getHeader('Content-Length') > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
             if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0) {
                 $incoming_stream = $_POST['json_payload'];
                 $file_upload = true;
@@ -125,8 +140,9 @@ class ApiHandler implements RequestHandler {
         /** Set our allowed origin to be our app's domain name */
         $allowed_origin = app("domain_name");
         $allowed_methods = "GET, POST, PUT, PATCH, DELETE";
-        $current_origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+        $current_origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? null;
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) $current_origin = $this->url_to_current_mode($_SERVER['HTTP_X_FORWARDED_HOST']);
+        $current_origin = parse_url($current_origin, PHP_URL_HOST);
 
         /** Check if our route allows us to ignore CORS */
         if (isset($GLOBALS['current_route_meta']['cors_disabled']) && $GLOBALS['current_route_meta']['cors_disabled']) {

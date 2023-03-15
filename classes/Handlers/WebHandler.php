@@ -62,7 +62,9 @@ class WebHandler implements RequestHandler {
 
     function __construct() {
         $this->web_manifest = get_all_where_available([
+            __ENV_ROOT__ . "/manifest.jsonc",
             __ENV_ROOT__ . "/manifest.json",
+            __APP_ROOT__ . "/manifest.jsonc",
             __APP_ROOT__ . "/manifest.json"
         ]);
         /** If we're in a web context, load the HTML body. This is so that we can
@@ -206,8 +208,18 @@ class WebHandler implements RequestHandler {
 
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
+        $masthead = "";
+        
+        $logo = app("logo.thumb");
+        $meta = $logo->meta;
+        $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+        
         $header = $this->load_template($this->header_template);
-        $this->add_vars(['header_nav' => $this->header_nav()]);
+        $this->add_vars([
+            'header_nav' => $this->header_nav(),
+            'masthead' => (app("display_masthead")) ? $masthead : "",
+            'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
+        ]);
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
         return $header;
     }
@@ -326,7 +338,7 @@ class WebHandler implements RequestHandler {
         // Load packages from manifest
         foreach (app("js-$this->meta_selector") as $package) {
             if ($debug) {
-                $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
+                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
             } else {
                 $files = files_exist([
                     __APP_ROOT__ . "/src/$package",
@@ -357,6 +369,15 @@ class WebHandler implements RequestHandler {
             $cache->set($compiled, false);
         }
         return $script_tags;
+    }
+
+    function get_script_pathname_from_manifest_entry($entry) {
+        // $basic_script = "/core-content/js/$entry";
+        $type = gettype($entry);
+        if($type === "string") return "/core-content/js/$entry";
+        if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
+        if(key_exists('url', $entry)) return $entry['url'];
+        throw new NotFound("Unable to handle resource $type");
     }
 
     // function generate_script_content($script_name) {

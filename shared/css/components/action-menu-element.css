@@ -1,0 +1,57 @@
+action-menu {
+    display: flex;
+    aspect-ratio: 1 / 1;
+    width: 2ch;
+    align-items: center;
+    justify-content: center;
+}
+action-menu:before {
+    content: "\F035C";
+    font-family: "Material Design Icons";
+}
+
+action-menu option{
+    display: none;
+}
+action-menu[aria-pressed="true"] {
+    background: var(--project-action-menu-background);
+}
+.action-menu-element-toggled .action-menu {
+    background: var(--project-color-input-background);
+}
+action-menu[type="options"] {
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    justify-self: center;
+}
+
+action-menu[type="options"]:before {
+    content: "\F01D9";
+}
+
+inline-menu, inline-menu[status="closed"] {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    background: var(--project-color-input-background);
+    border: var(--project-action-menu-border);
+    border-radius: 4px;
+    padding: 4px;
+    aspect-radio: 1 / 1;
+}
+
+inline-menu[status="open"] {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    isolation: isolate;
+    z-index: var(--project-modal-z-index);
+}
+
+inline-menu radio-group {
+    display: flex;
+    flex-direction: column;
+}
+

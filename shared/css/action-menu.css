@@ -25,19 +25,19 @@ action-menu-wrapper.modal {
     }
 }
 
-action-menu, action-menu-items {
+.action-menu, action-menu-items {
     display: flex;
     flex-direction: column;
 }
 
-action-menu {
+.action-menu {
     background: var(--project-action-menu-background);
     border: var(--project-action-menu-border);
     border-radius: 4px;
     padding: 4px;
 }
 
-    .modal action-menu{
+    .modal .action-menu{
         transform: translateY(100%);
         animation: actionMenuSlideIn .3s forwards ease;
         width:80vw;
@@ -51,21 +51,22 @@ action-menu {
         }
     }
 
-    action-menu header{
+    .action-menu div.header{
         display: none;
+        height: unset;
     }
 
-    .modal action-menu header{
+    .modal .action-menu div.header{
         display: block;
         position: relative;
     }
 
-    action-menu header h1{
+    .action-menu div.header h1{
         text-align: center;
         padding: 1rem;
     }
 
-    action-menu header button{
+    .action-menu div.header button{
         position: absolute;
         top:0;
         right:0;
@@ -88,7 +89,18 @@ action-menu {
         padding: .5rem  2.5rem .5rem .5rem;
         border-radius: .5rem;
         color: black;
-        justify-content: space-between;
+        align-items: center;
+        /* justify-content: space-between; */
+    }
+
+    action-menu-items > button:disabled {
+        opacity: .3;
+    }
+
+    action-menu-items > button > i {
+        font-size: 1.5em;
+        font-weight: normal;
+        margin-right: 1ch;
     }
 
     action-menu-items > button loading-spinner {
@@ -103,6 +115,11 @@ action-menu {
         width: 1em;
         height: 1em;
         transform: translateY(-100%);
+    }
+
+    action-menu-items > button.action-menu-item--dangerous:hover {
+        background-color: var(--project-color-problem);
+        color:white;
     }
 
     .modal action-menu-items button{
@@ -128,7 +145,7 @@ action-menu {
     }
 
 @media only screen and (max-width:900px) {
-    .modal action-menu {
+    .modal .action-menu {
         width:80vw;
         max-width:80vw;
     }

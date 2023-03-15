@@ -30,7 +30,9 @@ class CobaltListing extends HTMLElement {
     listItemElement(el) {
         el.addEventListener("contextmenu",event => {
             const menu = new ActionMenu({
+                title: `Edit file`,
                 event: event,
+                mode: "modal",
             });
 
             if(this.editAction) {
@@ -49,11 +51,74 @@ class CobaltListing extends HTMLElement {
             if(this.renameAction) {
                 menu.registerAction({
                     label: 'Rename',
+                    callback: () => {
+                        let host = `${location.protocol}//${location.host}`
+                        let filename =  event.target.getAttribute("full-resolution") || event.target.getAttribute("src") || event.target.getAttribute("href");
+                        let url = new URL(host + filename.replace(host, ""));
+                        const charlen = url.pathname.lastIndexOf("/") + 1;
+                        const modal = new Modal({
+                            body: `
+                            <form-request method="${this.getAttribute('rename-method') ?? "PUT"}" action="${this.actionUrl(this.renameAction, el.dataset.id)}">
+                                <fieldset>
+                                    <legend>Rename file <help-span value="This will rename the file and, if the file is an image with a thumbnail, the thumbnail as well."></help-span></legend>
+                                    <input name="rename" style="width: 100%; min-width: ${charlen + 10}ch; max-width: 80vw" value="${decodeURIComponent(url.pathname.substring(charlen))}">
+                                    <ul>
+                                        <li>Replace spaces with hyphens (-) where possible.</li>
+                                        <li>The current file extension will be appended to any name lacking an extension.</li>
+                                    </ul>
+                                </fieldset>
+                            </form-request>
+                            `,
+                            chrome: {
+                                cancel: {
+                                    label: "Cancel",
+                                    dangerous: false,
+                                    callback: async () => true
+                                },
+                                okay: {
+                                    label: "Rename",
+                                    dangerous: false,
+                                    callback: async (event) => {
+                                        return new Promise((resolve, reject) => {
+                                            const form = modal.dialog.querySelector("form-request");
+                                            form.addEventListener("formRequestSuccess", (event) => {
+                                                if("code" in event.detail && event.detail.code === 300) resolve(true);
+                                                this.updateFilename(el, event.detail, event);
+                                                resolve(event.detail);
+                                            })
+                                            form.addEventListener("formRequestFail", (event) => {
+                                                console.log(event);
+                                                if(event.detail.code === 300) resolve(true);
+                                                resolve(false);
+                                            });
+                                            form.send();
+                                        })
+                                    }
+                                }
+                            }
+                        });
+                        modal.draw();
+                        return true;
+                    }
+                });
+            }
+
+            for(const i in this.customMenuOptions) {
+                const element = this.customMenuOptions[i];
+                const test = ('label' in element && 'action' in element);
+                if(!test) {
+                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
+                    continue;
+                }
+                menu.registerAction({
+                    label: element.label,
                     request: {
-                        method: this.getAttribute('rename-method') ?? "PUT",
-                        action: this.renameAction
+                        method: element.method ?? "PUT",
+                        action: this.actionUrl(element.action, el.dataset.id)
                     },
-                    
+                    callback: (action, event, requestData) => {
+                        return true;
+                    }
                 });
             }
 
@@ -80,25 +145,6 @@ class CobaltListing extends HTMLElement {
                         return true;
                     },
                     dangerous: true
-                });
-            }
-
-            for(const i in this.customMenuOptions) {
-                const element = this.customMenuOptions[i];
-                const test = ('label' in element && 'action' in element);
-                if(!test) {
-                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
-                    continue;
-                }
-                menu.registerAction({
-                    label: element.label,
-                    request: {
-                        method: element.method ?? "PUT",
-                        action: this.actionUrl(element.action, el.dataset.id)
-                    },
-                    callback: (action, event, requestData) => {
-                        return true;
-                    }
                 });
             }
 
@@ -166,7 +212,7 @@ class CobaltListing extends HTMLElement {
         if(this.sortAction === null) return;
         const container = this.querySelector(".cobalt--fs-directory-listing");
         console.log(container.children)
-        this.sortable = new Sortable(container.children, container.children, container);
+        this.sortable = new Sortable(container.children, container.children, container, {orientation: "ltr"});
         this.sortable.container.addEventListener("cobtaltsortcomplete",() => {
             const fetch = new ApiFetch(this.sortAction, this.getAttribute("sort-method") ?? "POST", {});
             let sortData = [];
@@ -176,6 +222,16 @@ class CobaltListing extends HTMLElement {
             fetch.send(sortData);
         });
         this.sortable.initialize();
+    }
+
+    updateFilename(el, names) {
+        if(el.getAttribute('src') == el.getAttribute('full-resolution')) {
+            el.setAttribute('src', names.name)
+            el.setAttribute('full-resolution', names.name);
+        } else {
+            el.setAttribute('src', names.thumbnail || names.name);
+            el.setAttribute('full-resolution', names.name);
+        }
     }
 }
 

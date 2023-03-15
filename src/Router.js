@@ -27,7 +27,7 @@ class Router {
 
         this.navigationStarted = false;
 
-        this.linkSelector = `a[href^='/']:not([is]),a[href^='?']:not([is]),a[href^='${location.origin.toString()}']:not([is])`;
+        this.linkSelector = `a[href^='/']:not([is],[real]),a[href^='?']:not([is],[real]),a[href^='${location.origin.toString()}']:not([is],[real])`;
         this.formSelector = "form";
         this.mainContent = document.querySelector("main");
 
@@ -39,8 +39,8 @@ class Router {
         });
 
         if(this.isSPA) {
-            this.SPA_indicator = document.createElement("progress-bar");
-            this.SPA_indicator.setAttribute("no-message", "true");
+            this.SPA_indicator = document.createElement("progress");
+            // this.SPA_indicator.setAttribute("no-message", "true");
             this.SPA_indicator.classList.add("spa-loading-indicator");
             document.body.prepend(this.SPA_indicator);
             this.initialize_SPA_navigation(true);
@@ -159,27 +159,67 @@ class Router {
         }
 
         for(const i of forms) {
+            // Listen for a submit event
             i.addEventListener("submit", (event) => {
-                event.preventDefault();
+                // If the form is not a "get" method, do nothing
                 if(i.method.toLowerCase() !== "get") return;
-                console.info("Submit firing");
+                
+                // Get our form's data
                 let formData = new FormData(i);
+                // Check if we need to add our button's value to the data
                 let submitter = {};
                 if(event.submitter.name && event.submitter.value) submitter[event.submitter.name] = event.submitter.value;
-                const params = new URLSearchParams({...formData, ...submitter}).toString();
-                const search = new URL(i.action).search.toString();
-                let location = i.action;
-                if(search) location = i.action.replace(search,"");
                 
-                if(params) {
-                    // this.location = `${location}?${params}`;
-                    this.handle_SPA_navigation(`${location}?${params}`, event);
+                // Check if we need to include another form's data
+                let include = i.getAttribute("include");
+                let toInclude = {};
+                if(include) {
+                    try {
+                        include = document.querySelectorAll(include)
+                    } catch(error) {
+
+                    }
+                    if(include) {
+                        // Load the form's data
+                        include.forEach(included => {
+                            if(included.tagName !== "FORM") return;
+                            toInclude = {...toInclude, ...this.formdataToObject(new FormData(included))}
+                        })
+                    }
                 }
+                
+                // Create URL Query Parameters
+                const params = new URLSearchParams({...submitter, ...toInclude, ...this.formdataToObject(formData)}).toString();
+                const search = new URL(i.action).search.toString();
+
+                // Get the form's action
+                let location = i.action;
+                if(search) location = i.action.replace(search,""); // Replace the search params with nothing
+                
+                // Check if we have params
+                if(params) {
+                    // Prevent the default submit behavior
+                    event.preventDefault();
+                    // Handle the location traversal with an API fetch request
+                    console.info("Caught SPA form submission");
+                    this.handle_SPA_navigation(`${location}?${params}`, event);
+                    return;
+                }
+                console.warn("Aborting submit");
                 return false;
+                // return false;
             });
         }
 
         // document.body.removeChild(load);
+    }
+
+    formdataToObject(formData) {
+        let object = {};
+        for(const key of formData.keys()) {
+            object[key] = formData.get(key);
+        }
+        return object;
     }
 
     handleClick(element, event){
@@ -194,33 +234,47 @@ class Router {
         this.abortSPANavigation();
         this.SPA_indicator.classList.add("navigation-start");
         
+        let state = {...history.state};
+        console.log(state);
+        if(state !== null) {
+            // Before we move on to the next page, we need to save the scroll position
+            // of the page so we can restore it in the event of a popstate
+            // history.replaceState({...state, scrollPosition: window.scrollY},'',state.url);
+        }
+
         // Parse the URL
         const urlData = this.getUrlData(url);
         if(!urlData.isLocal) window.location = url;
 
         // Set up to execute our fetch request from the API.
-        const pageLoad = new ApiFetch(`/api/v1/page/?route=${urlData.pathname}${urlData.apiSearchParams}`,"GET", {});
-
-
-        let result;
-        try{
-            result = await new Promise(async (resolve, reject) => {
-                this.navigationEventReject = reject;
-                let result;
-                try{
-                    result = await pageLoad.get()
-                } catch(error) {
-                    reject(error);
-                }
-                this.navigationEventReject = null;
-                resolve(result);
-                this.navigationEnd();
-            })
+        // const pageLoad = new ApiFetch(`/api/v1/page/?route=${urlData.pathname}${urlData.apiSearchParams}`,"GET", {});
+        let result = null;
+        try {
+            result = await this.asyncPageRequest(urlData);
         } catch (error) {
             this.navigationEnd();
-            if(error = "Navigation aborted") return console.log(error);
             console.warn("There was an error");
         }
+
+        // let result;
+        // try{
+        //     result = await new Promise(async (resolve, reject) => {
+        //         this.navigationEventReject = reject;
+        //         let result;
+        //         try{
+        //             result = await pageLoad.get()
+        //         } catch(error) {
+        //             reject(error);
+        //         }
+        //         this.navigationEventReject = null;
+        //         resolve(result);
+        //         this.navigationEnd();
+        //     })
+        // } catch (error) {
+        //     this.navigationEnd();
+        //     if(error = "Navigation aborted") return console.log(error);
+        //     console.warn("There was an error");
+        // }
         
         window.messageHandler.closeAll();
 
@@ -228,13 +282,6 @@ class Router {
             console.info("Firing exit callback");
             this.route_directives.exit_callback(...this.route_args, result);
         }
-
-        // history.replaceState({
-        //     title: result.title ?? "",
-        //     url: url,
-        //     scrollY: window.scrollY,
-        //     scrollX: window.scrollX
-        // });
 
         window.__ = result;
 
@@ -260,8 +307,31 @@ class Router {
         this.initialize_SPA_navigation(false);
     }
 
+    asyncPageRequest(data){
+        return new Promise((resolve, reject) => {
+            this.SPA_indicator.value = null;
+            this.SPA_indicator.max = null;
+            this.navigationEventReject = reject
+            const client = new XMLHttpRequest();
+            this.lastAsyncPageLoad = client;
+            client.withCredentials = true;
+            client.onload = (event) => {
+                resolve(JSON.parse(client.response));
+                this.navigationEventReject = null;
+            };
+            client.onprogress = (event) => {
+                this.SPA_indicator.value = event.loaded;
+                this.SPA_indicator.max = event.total;
+            }
+            client.onerror = (error) => reject(error);
+            client.open('GET', `/api/v1/page/?route=${data.pathname}${data.apiSearchParams}`);
+            client.send();
+        })
+    }
+
     navigationEnd() {
         this.SPA_indicator.classList.remove("navigation-start");
+        // if("scrollPosition" in history.state) window.scrollY = history.state.scrollPosition;
     }
 
     async abortSPANavigation() {

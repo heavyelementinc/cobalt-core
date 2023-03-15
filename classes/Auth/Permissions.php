@@ -9,6 +9,7 @@ namespace Auth;
 use Drivers\Database;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Unauthorized;
+use Render\CLITable;
 
 class Permissions extends Database {
     /** @todo Remove /private directory */
@@ -16,6 +17,8 @@ class Permissions extends Database {
         __ENV_ROOT__ . "/config/default_permissions.jsonc",
         __APP_ROOT__ . "/config/permissions.jsonc",
         __APP_ROOT__ . "/config/permissions.json",
+        __APP_ROOT__ . "/config/app_permissions.jsonc",
+        __APP_ROOT__ . "/config/app_permissions.json",
         __APP_ROOT__ . "/private/config/permissions.jsonc",
         __APP_ROOT__ . "/private/config/permissions.json",
     ];
@@ -47,7 +50,7 @@ class Permissions extends Database {
         }
         /** Make the groups list unique */
         $this->groups = array_unique($this->groups);
-        $this->valid = array_merge($this->valid, $GLOBALS['PERMISSIONS']);
+        $this->valid = array_merge($this->valid ?? [], $GLOBALS['PERMISSIONS'] ?? []);
     }
 
     /** Render out a list of permissions for the specified user. This is how we handle
@@ -82,11 +85,11 @@ class Permissions extends Database {
             if (in_array($group, (array)$user->groups)) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
-                $table[$group] = "<fieldset><legacy>$group</legacy>\n<ul class='list-panel'>";
+                $table[$group] = "<fieldset><legend>$group</legend>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
             /** Concat our current permission into the group */
-            $table[$group] .= "<li><input-switch type='checkbox' checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
+            $table[$group] .= "<li><input-switch checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
         return ['permissions' => implode("</ul></fieldset>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$root_group $groups</ul>"];
@@ -135,6 +138,7 @@ class Permissions extends Database {
         $valid = [];
 
         foreach ($permissions as $name => $permission) {
+            if (preg_match("/^permissions\./",$name)) $name = preg_replace("/^permissions\./","",$name);
             if (!key_exists($name, $this->valid)) throw new BadRequest("Your request contained unexpected data.");
             if (!is_bool($permission[1])) throw new BadRequest("Your request contained unexpected data.");
 
@@ -219,5 +223,20 @@ class Permissions extends Database {
 
         if ($result->getModifiedCount() !== 1) throw new BadRequest("Matched " . $result->getMatchedCount() . " and failed to update.");
         return $return;
+    }
+
+    function get_cli_permission_list() {
+        // $rows = [
+        //     'label' => [
+        //         'callback' => fn ($val) => fmt($val, 'normal', 'normal')
+        //     ]
+        // ];
+        $index = 0;
+        $table = "";
+        foreach($this->valid as $permission => $data) {
+            $table .= "$index - $permission\n";
+            $index += 1;
+        }
+        return $table;
     }
 }

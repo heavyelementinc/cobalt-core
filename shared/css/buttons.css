@@ -140,3 +140,14 @@ split-button button.split-button--additional-options:hover {
     background: var(--project-color-button-text);
     color: var(--project-color-button-init);
 }
+
+button-toggle {
+}
+
+button-toggle[aria-pressed="true"] {
+
+}
+
+button-toggle[aria-pressed="false"] {
+
+}

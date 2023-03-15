@@ -1,3 +1,10 @@
+form-header {
+  display:flex;
+  justify-content: space-between;
+}
+form-header :is(h1, h2, h3, h4, h5) {
+  display: block;
+}
 
 :is(form-request,login-form-request) {
   display:block;
@@ -12,6 +19,11 @@
   transition: transform .5s, opacity .5s;
 }
 
+:is(form-request[disabled]) {
+  opacity: .4;
+  pointer-events: disabled;
+}
+
 :is(form-request) fieldset {
   border: var(--project-color-table-border);
   background: white;
@@ -19,6 +31,10 @@
 
 :is(form-request) fieldset > label {
   margin-top: .5rem;
+}
+
+fieldset:has(legend:first-child + ul.list-panel:last-child) {
+  border: none;
 }
 
 /* 

@@ -11,7 +11,6 @@ Route::get("/?", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
-
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
     Route::get("/posts/", "Posts@admin_index",[
         'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
@@ -22,13 +21,17 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     ]);
 }
 
-
+Route::get("/me/", "UserAccounts@me",
+    [
+        
+    ]
+);
 
 
 
 /** Control Panel and Settings Editor */
 
-Route::get("/settings/", "CoreAdmin@settings_index");
+Route::get("/settings/", "CoreAdmin@settings_index", ['anchor' => ['name' => 'Cobalt Settings', 'icon' => 'gear']]);
 
 Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
     'name' => "App Settings",
@@ -39,6 +42,17 @@ Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
     'navigation' => ['admin_basic_panel'],
     'permission' => "Auth_modify_cobalt_settings"
 ]);
+
+Route::get("/settings/presentation", "CoreSettingsPanel@presentation",[
+    'permission' => 'Auth_modify_cobalt_settings',
+    'anchor' => [
+        'name' => "Presentation",
+        'icon' => 'palette-swatch-variant'
+    ],
+    'navigation' => ['public_settings_panel'],
+    'handler' => 'admin/presentation.js'
+]);
+
 
 /** CONTROL PANEL ITEMS */
 
@@ -51,7 +65,7 @@ if (app('Auth_logins_enabled')) {
             'name' => 'Users',
             'icon' => "account-multiple-plus-outline"
         ],
-        'navigation' => ['settings_panel']
+    'navigation' => ['settings_panel']
     ]);
 
     Route::get("/create-user", "CoreAdmin@create_user", [
@@ -77,7 +91,7 @@ if (app("CobaltEvents_enabled")) {
             'href' => '/cobalt-events/',
             'icon' => 'information-outline'
         ],
-        'navigation' => ['public_settings_panel']
+        'navigation' => ['admin_panel']
     ]);
 }
 
@@ -117,22 +131,24 @@ Route::get("/settings/cron", "CoreAdmin@cron_panel",[
     'navigation' => ['settings_panel']
 ]);
 
-Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
-    // 'permission' => 'API_manage_keys',
-    'anchor' => [
-        'name' => "Payments",
-        'icon' => 'credit-card-fast-outline'
-    ],
-    'navigation' => ['admin_basic_panel']
-]);
+if(__APP_SETTINGS__['PaymentGateways_enabled']) {
+    Route::get("/settings/payments", "CoreAdmin@payment_gateways",[
+        // 'permission' => 'API_manage_keys',
+        'anchor' => [
+            'name' => "Payments",
+            'icon' => 'credit-card-fast-outline'
+        ],
+        'navigation' => ['admin_basic_panel']
+    ]);
+}
 
-if(app("Contact_form_interface") === "panel") {
+if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
     Route::get("/contact-form/", "ContactForm@index", [
         'anchor' => [
             'name' => "Contact Form",
             'icon' => 'chat-alert-outline',
         ],
-        'navigation' => ['public_settings_panel'],
+        'navigation' => ['admin_panel'],
         'unread' => function () {
             return (new ContactManager())->get_unread_count_for_user(session());
         },

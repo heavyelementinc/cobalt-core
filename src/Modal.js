@@ -105,13 +105,13 @@ class Modal {
         document.querySelector("body").appendChild(this.container);
         if (!this.zIndex && event) {
             const spawnIndex = spawn_priority(event);
-            if (spawnIndex) this.container.style.zIndex = spawnIndex + 1;
+            if (spawnIndex) this.container.style.zIndex = spawnIndex + document.querySelectorAll("modal-container").length;
         }
         this.close_button(); // Add our close button
 
         // Set a window 
         window.router.modalState();
-        history.pushState({ page: 1 }, this.modalTitle || document.title, "");
+        history.pushState({ page: 1, isModalState: true }, this.modalTitle || document.title, "");
         window.addEventListener("popstate", e => {
             if (this.container.parentNode !== null) this.close(e)
             e.preventDefault();
@@ -282,9 +282,10 @@ class Modal {
     close(e = null) {
         this.unlockViewport();
 
-        // Unset popstate listener. We return if e is null because this function
-        // will be called again. Probably really hacky, but it works.
-        if (e === null) return history.back();
+        // Let's back up until we've closed all the windows
+        while(history.state.modalState === true) {
+            history.back();
+        }
 
         /** Handle in case of no animations */
         if (!this.animations) this.container.parentNode.removeChild(this.container);

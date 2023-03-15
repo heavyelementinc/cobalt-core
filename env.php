@@ -20,6 +20,7 @@ $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+require_once __DIR__ . "/globals/logs.php";
 // Let's make sure our environment is configured properly.
 require_once __DIR__ . "/globals/env_probe.php";
 
@@ -80,17 +81,26 @@ try {
     die($e->getMessage());
 }
 
+// Let's find our trusted cobalt domain
+$_SERVER['COBALT_TRUSTED_HOST'] = null;
+if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->getArrayCopy())) {
+    $_SERVER['COBALT_TRUSTED_HOST'] = $_SERVER['HTTP_HOST'];
+    $app->__settings->trusted_host = $_SERVER['COBALT_TRUSTED_HOST'];
+}
 /** @global __APP_SETTINGS__ The __APP_SETTINGS__ constant is an array of app 
  *                           settings 
  * */
 define("__APP_SETTINGS__", $application->get_settings());
 
+
 session_name("COBALTID");
 $cobalt_session_started = session_start([
-    'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60
+    'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
+    // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
+    // 'cookie_secure' => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
 
-if($cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
+if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
 
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;

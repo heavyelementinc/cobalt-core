@@ -52,6 +52,16 @@ class Settings extends \Drivers\Database {
         
     ];
 
+    public $waitingForDependencies;
+    public $max_m_time;
+    public $__settings;
+    public $__user_modified_settings;
+    public $definitions;
+    public $instances;
+    public $raw_decode;
+    public $default_values;
+    public $update_settings;
+
     // const __SETTINGS__ = [
     //     __ENV_ROOT__ . "/config/flags.jsonc",
     //     __APP_ROOT__ . "/ignored/config/custom_settings.json",
@@ -285,7 +295,7 @@ class Settings extends \Drivers\Database {
 
     private function manifest_combine($name, $manifest, &$result) {
         foreach($manifest as $type => $val) {
-            if($type === "common") continue;
+            // if($type === "common") continue;
             if($type === "append") continue;
             $index = "$name-$type";
             if(!isset($result[$index])) $result[$index] = $manifest['common'] ?? [];

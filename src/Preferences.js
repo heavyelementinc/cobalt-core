@@ -37,6 +37,6 @@ class Preferences {
 window.Preferences = new Preferences();
 
 function pref(name, value = null, isNull = false) {
-    if(value !== null || isNull === true) return windows.Preferences.set(name, value);
+    if(value !== null || isNull === true) return window.Preferences.set(name, value);
     return window.Preferences.get(name);
 }

@@ -1,3 +1,7 @@
+h1:has(action-menu) {
+  display:flex;
+  justify-content: space-between;
+}
 
 .close-glyph {
   color: inherit;
@@ -16,7 +20,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input, textarea, input-password, button[native] {
+input-wrapper, input-text, input, textarea, input-password, button[native], action-menu {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -38,7 +42,7 @@ input-wrapper, input, textarea, input-password, button[native] {
 
   input[invalid],
   textarea[invalid],
-  :is(input-wrapper, input-password) input[invalid],
+  :is(input-wrapper, input-password, input-text) input[invalid],
   input-array[invalid] {
     border: 1px solid var(--project-color-input-invalid-border);
     background: var(--project-color-input-invalid-bg);
@@ -158,7 +162,7 @@ a.button {
   border: 1px solid;
 }
 
-.button:hover,button:hover {
+.button:hover,button:hover, action-menu:hover {
   background-color: var(--btn-hover);
   color: var(--btn-hover-text);
 }
@@ -551,11 +555,6 @@ progress-bar.spa-loading-indicator {
   pointer-events: none;
 }
 
-progress-bar.spa-loading-indicator.navigation-start {
-  top: 0;
-  opacity: 1;
-}
-
 .form-request--processing progress-bar{
   max-width: 50%;
   margin: 10px auto;
@@ -646,3 +645,44 @@ input-password > input[type='password'] + button:before {
   content: "\F0208";
 }
 
+
+.cobalt-sortable--drop-indicator {
+  display: inline-block;
+  width: 4px;
+  color: var(--project-color-active);
+  background-color: var(--project-color-active);
+  padding: 4px;
+}
+
+.cobalt--fs-directory-listing {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cobalt-sortable--current-drag-item {
+  opacity: .2;
+}
+
+
+progress.spa-loading-indicator {
+  width: 100%;
+  height: 15px;
+  box-sizing: border-box;
+  position: fixed;
+  left: 0;
+  top: -25px;
+  z-index: var(--project-modal-z-index);
+  margin: unset;
+  opacity: 0;
+  pointer-events: none;
+  /* -webkit-appearance: none; */
+  accent-color: var(--project-color-input-border-nofocus);
+  /* background-color: var(--project-color-input-disabled); */
+}
+
+progress.spa-loading-indicator.navigation-start {
+  transition: top .5s, opacity .5s;
+  z-index: calc(var(--project-modal-z-index) * 100);
+  top: -4px;
+  opacity: 1;
+}

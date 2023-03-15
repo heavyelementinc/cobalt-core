@@ -1,0 +1,25 @@
+input-text {
+    display: flex;
+    align-items: center;
+}
+
+input-text > span{
+    font-size: .9em;
+    color: gray;
+    user-select: none;
+}
+
+input-text > input {
+    border: 1px solid transparent;
+    padding: none;
+    background: transparent;
+    width: 100%;
+}
+
+input-text[aria-invalid="true"] > span {
+    color: var(--project-color-problem);
+}
+
+ul.list-panel input-text {
+    width: 100%;
+}

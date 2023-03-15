@@ -1,11 +1,30 @@
 <div id="{{name}}">
     <h2>{{name}}</h2>
     <ul class="list-panel">
-        <li><label>Cached value <help-span value="The value cached in the database after a bootstrap"></help-span></label><code>{{cached_value}}</code></li>
-        <li><label>Stored value <help-span value="The value changed by the user and stored in the database, this overrides the default value"></help-span></label><code>{{stored}}</code></li>
-        <li><label>Default value <help-span value="The value stored in a setting definition file"></help-span></label><code>{{default}}</code></li>
-        <li><label>Defined in <help-span value="The file that defined this setting"></help-span></label><code>{{defined_in}}</code></li>
-        <li><label>Shorthand def. <help-span value="Was the value defined with a definition or was it provided as a single value"></help-span></label><code>{{shorthand}}</code></li>
+        <li>
+            <label>Cached value <help-span value="The value cached in the database after a bootstrap"></help-span></label>
+            <code>{{cached_value}}</code>
+        </li>
+        <li>
+            <label>Stored value <help-span value="The value changed by the user and stored in the database, this overrides the default value"></help-span></label>
+            <code>{{stored}}</code>
+        </li>
+        <li>
+            <label>Aliased value <help-span value="The value inherited from the alias path"></help-span></label>
+            <code>{{!aliased}}</code>
+        </li>
+        <li>
+            <label>Default value <help-span value="The value stored in a setting definition file"></help-span></label>
+            <code>{{default}}</code>
+        </li>
+        <li>
+            <label>Defined in <help-span value="The file that defined this setting"></help-span></label>
+            <code>{{defined_in}}</code>
+        </li>
+        <li>
+            <label>Shorthand def. <help-span value="Was the value defined with a definition or was it provided as a single value"></help-span></label>
+            <code>{{shorthand}}</code>
+        </li>
     </ul>
     <cite>The higher up on this list, the higher the priority.</cite>
     <pre>{{!definition}}</pre>

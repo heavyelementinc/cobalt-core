@@ -10,6 +10,10 @@ class Twitter extends TokenInterface {
     public function setRefresh(): string {
         return "";
     }
+
+    public function getEditView(): string {
+        return "";
+    }
     
     function getKey():string{
         return $this->__token['key'] ?? "";
@@ -50,8 +54,8 @@ class Twitter extends TokenInterface {
         return null;
     }
 
-    function getEndpoint():string {
-        return "";
+    function getEndpoint():array {
+        return [];
     }
 
     function setEndpoint():string {

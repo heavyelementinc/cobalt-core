@@ -1,0 +1,42 @@
+<header-group>
+    <h1><span id="fname">{{doc.fname}}</span> <span id="lname">{{doc.lname}}</span></h1>
+    <action-menu title="Edit User">
+        <option method="DELETE" action="/api/v1/user/me/avatar">Reset Avatar to Default</option>
+    </action-menu>
+</header-group>
+<form-request method="POST" action="/api/v1/user/me/" autosave="autosave">
+
+    <fieldset>
+        <legend>Your Profile</legend>
+        <ul class="list-panel">
+            <li>
+                <label>Avatar</label>
+                {{!doc.avatar.display}}
+                <input type="file" accept="image/svg+xml,image/*" name="avatar">
+            </li>
+            <li>
+                <label>Name</label>
+                <input type="text" name="fname" for="#fname" value="{{doc.fname}}" placeholder="First Name">
+                <input type="text" name="lname" for="#lname" value="{{doc.lname}}" placeholder="Last Name">
+            </li>
+            <li>
+                <label>Username</label>
+                <input type="text" name="uname" value="{{doc.uname}}" placeholder="Username">
+            </li>
+            <li>
+                <label>Email Address</label>
+                <input type="email" name="email" value="{{doc.email}}" placeholder="Email address">
+            </li>
+        </ul>
+    </fieldset>
+
+</form-request>
+
+<style>
+    form-request img.cobalt-user--avatar {
+        border-radius: none;
+        height: 100px;
+        width: 100px;
+        object-fit: contain;
+    }
+</style>

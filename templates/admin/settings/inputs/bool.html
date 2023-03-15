@@ -1,5 +1,7 @@
 <li>
-    <label>{{!name}}</label>
-    <input-switch name='{{setting}}' checked='{{value}}' {{disabled}}></input-switch>
+    <switch-container>
+        <input-switch name='{{setting}}' checked='{{value}}' {{disabled}}></input-switch>
+        <label>{{!name}}</label>
+    </switch-container>
     @view("/admin/settings/inputs/reset.html");
 </li>

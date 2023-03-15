@@ -25,6 +25,7 @@
         "default": "",
         "meta": {
             "group": "Basic",
+            "subgroup": "General",
             "name": "Domain Name",
             "type": "input"
         },
@@ -43,6 +44,7 @@
         },
         "meta": {
             "group": "Basic",
+            "subgroup": "General",
             "name": "Application Name",
             "type": "input"
         }
@@ -52,6 +54,7 @@
         "default": "",
         "directives": {
             "alias": "app_name",
+            "subgroup": "Details",
             "public": true
         },
         "meta": {
@@ -65,12 +68,49 @@
         "default": "",
         "meta": {
             "group": "Basic",
+            "subgroup": "Details",
             "name": "Copyright Name",
             "type": "input"
         },
         "directives": {
             "alias": "app_name"
         }
+    },
+    "DB_export_directory": {
+        "default": "/ignored/db_backups/"
+    },
+    /* A bespoke name to be listed in the copyright notice */
+    "logo": {
+        "default": {
+            "media":{
+                "id": null,
+                "filename": "\/core-content\/img\/branding\/cobalt-logo.svg",
+                "meta":{
+                    "width":1500,
+                    "height":1500,
+                    "mimetype":"image\/svg+xml"
+                }
+            },
+            "thumb":{
+                "id": null,
+                "filename": "\/core-content\/img\/branding\/cobalt-logo.svg",
+                "meta":{
+                    "width":150,
+                    "height":150,
+                    "mimetype":"image\/svg+xml"
+                }
+            }
+        },
+        "meta": {
+            // "group": "Logo",
+            // "subgroup": "Details",
+            // "name": "Logo",
+            // "view": "/admin/settings/inputs/logo.html"
+        }
+    },
+    /* Decides if the logo should be shown in the default header */
+    "display_masthead": {
+        "default": true
     },
     /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
@@ -179,7 +219,8 @@
             "title":  "Maine's Premier New Media Production Studio"
         },
         "meta": {
-            "group": "Look &amp; Feel",
+            "group": "Basic",
+            "subgroup": "Details",
             "name": "Designer Credit",
             "view": "/admin/settings/inputs/designer.html"
         }
@@ -193,9 +234,10 @@
             "type": "input"
         },
         "directives": {
-            "style": true
+            "style": true,
+            "alias": "logo.media.filename"
         },
-        "default": "/core-content/img/default_poster_image.jpg"
+        "default": ""
     },
 
     "API_CORS_allowed_origins": {
@@ -211,6 +253,9 @@
             ]
         }
     },
+    "require_https_login_and_cookie": {
+        "default": false
+    },
     // This was once allowed to be modified by the user in the Settings panel
     // but people could toggle it and then not be able to change it.
     "API_CORS_enable_other_origins": {
@@ -223,7 +268,8 @@
             "public": true
         },
         "meta": {
-            "group": "Banners &amp; Pop-ups",
+            "group": "Look &amp; Feel",
+            "subgroup":"Events",
             "name": "Enable Event Banners <help-span value='Enables the Event Manager and allows you to schedule private & public pop-ups and banners.'></help-span>",
             "type": "input-switch"
         },
@@ -233,22 +279,45 @@
     },
     "CobaltEvents_database_collection": {
         // "meta": {
-        //     "group": "Banners &amp; Pop-ups",
+        //     "group": "Look &amp; Feel",
         //     "name": "Database Collection",
         //     "type": "input"
         // },
         "default": "CobaltEvents"
     },
+    "CobaltEvents_default_h1_alignment": {
+        "default": "space-between",
+        "directives": {
+            "public": true
+        },
+        "meta": {
+            "group": "Look &amp; Feel",
+            "subgroup":"Events",
+            "name": "Select default text alignment",
+            "type": "radio-group"
+            // "view": "/admin/settings/inputs/default-h1-alignment.html"
+        },
+        "validate": {
+            "type": "string",
+            "options": {
+                "space-between": "<i name='format-align-left'></i>",
+                "center": "<i name='format-align-center'></i>",
+                "flex-end": "<i name='format-align-right'></i>"
+            }
+        }
+    },
     /* The id attribute of the body tag when errors happen in a web context. */
     "HTTP_error_body_id": {
         "default": "cobalt_http_error"
     },
+
     /** Mail **/
 
     "API_contact_form_enabled": {
         "default": false,
         "meta": {
-            "group": "Contact Form",
+            "group": "Features",
+            "subgroup":"Contact Form",
             "name": "Enable Contact Form",
             "type": "input-switch"
         },
@@ -261,7 +330,8 @@
     "Contact_form_interface": {
         "default": "panel",
         "meta": {
-            "group": "Contact Form",
+            "group": "Features",
+            "subgroup":"Contact Form",
             "name": "Contact Form Backend",
             "type": "select"
         },
@@ -277,7 +347,8 @@
     "Contact_form_submission_throttle": {
         "default": 500,
         "meta": {
-            "group": "Contact Form",
+            "group": "Features",
+            "subgroup":"Contact Form",
             "name": "Minumum number of seconds between contact form submissions (based on IP address)",
             "type": "input"
         },
@@ -289,7 +360,8 @@
     "Contact_form_success_message": {
         "default": "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
         "meta": {
-            "group": "Contact Form",
+            "group": "Features",
+            "subgroup":"Contact Form",
             "name": "Contact Form Success Message",
             "type": "input"
         },
@@ -301,7 +373,8 @@
     "Contact_form_notify_on_new_submission": {
         "default": false,
         "meta": {
-            "group": "Contact Form",
+            "group": "Features",
+            "subgroup":"Contact Form",
             "name": "Send admins a notification when new notifications are received",
             "type": "input-switch"
         },
@@ -309,12 +382,41 @@
             "type": "boolean"
         }
     },
+
+    "Notifications_system_enabled": {
+        "default": true,
+        "meta": {
+            "group": "Features",
+            "subgroup": "Notifications",
+            "name": "Enable the notification system",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Notifications_in_session_panel": {
+        "default": true,
+        "meta": {
+            "group": "Features",
+            "subgroup": "Notifications",
+            "name": "Show notifications in the user's session panel",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Notifications_collection": {
+        "default": "CobaltNotifications"
+    },
     
 
     "API_contact_form_recipient": {
         "default": "",
         "meta": {
-            "group": "Contact Form",
+            "group": "Configuration",
+            "subgroup": "Contact Form",
             "name": "Contact Form Recipient",
             "type": "input"
         }
@@ -326,7 +428,8 @@
             "env": "MAIL_USERNAME"
         },
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup": "Mail",
             "name": "SMTP Username",
             "type": "input"
         }
@@ -336,7 +439,8 @@
         "default": "",
         "directives": {"env": "MAIL_PASSWORD"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup": "Mail",
             "name": "SMTP Password",
             "type": "password"
         },
@@ -351,7 +455,8 @@
             "env": "MAIL_SMTP_HOST"
         },
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "SMTP Host",
             "type": "input"
         }
@@ -361,7 +466,8 @@
         "default": 587,
         "directives":{"env": "MAIL_PORT"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "SMTP Port",
             "type": "number"
         },
@@ -374,7 +480,8 @@
         "default": true,
         "directives": {"env": "MAIL_AUTH"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "SMTP Auth Enabled",
             "type": "input-switch"
         },
@@ -387,7 +494,8 @@
         "default": "",
         "directives":{"alias": "Mail_from_address"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "Reply To",
             "type": "input"
         },
@@ -401,7 +509,8 @@
         "default": "",
         "directives":{"alias": "app_short_name"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "Reply To Name",
             "type": "input"
         }
@@ -415,7 +524,8 @@
         "default": "",
         "directives":{"alias": "Mail_username"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "From Address",
             "type": "input"
         }
@@ -424,7 +534,8 @@
         "default": "",
         "directives":{"alias": "app_short_name"},
         "meta": {
-            "group": "Mail",
+            "group": "Configuration",
+            "subgroup":"Mail",
             "name": "From Name",
             "type": "input"
         }
@@ -437,7 +548,7 @@
     "Cookie_consent_prompt": {
         "default": false,
         "meta": {
-            "group": "Banners &amp; Pop-ups",
+            "group": "Look &amp; Feel",
             "name": "Cookie Consent Prompt",
             "type": "input-switch"
         },
@@ -452,7 +563,8 @@
             "public": true
         },
         "meta": {
-            "group": "Look &amp; Feel",
+            "group": "Features",
+            "subgroup": "Blog Posts",
             "name": "Enable Parallax for Blog Post Headline Images",
             "type": "input-switch"
         },
@@ -509,10 +621,12 @@
                     "processor": "Handlers\\AdminHandler",
                     "prefix": "/admin/",
                     "exception_mode": "web",
+                    "no_session_exception": "\\Exceptions\\HTTP\\Unauthorized",
                     "mode": "text/html",
                     "permission": "Admin_panel_access",
                     "session_refresh": true,
                     "api_access": true,
+                    "router_boundry": true,
                     "vars": {
                         "html_class": "admin-panel"
                     }
@@ -525,6 +639,7 @@
                     // "permission": "Debug_access",
                     "session_refresh": true,
                     "api_access": true,
+                    "router_boundry": true,
                     "vars": {
                         "html_class": "debug-panel"
                     }
@@ -543,6 +658,13 @@
                     "api_access": false,
                     "prefix": "/core-content/"
                 },
+                "apinotifications": {
+                    "processor": "Handlers\\ApiHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/api/notifications/"
+                },
                 "apiv1": {
                     "processor": "Handlers\\ApiHandler",
                     "mode": "application/json",
@@ -550,12 +672,12 @@
                     "api_access": false,
                     "prefix": "/api/v1/"
                 },
-                "webhookv1": {
+                "webhooks": {
                     "processor": "Handlers\\ApiHandler",
                     "mode": "application/json",
                     "session_refresh": false,
                     "api_access": false,
-                    "prefix": "/webhook/v1/"
+                    "prefix": "/webhooks/"
                 },
                 "streams": {
                     "processor": "Handlers\\ApiHandler",
@@ -570,6 +692,7 @@
                     "mode": "text/html",
                     "session_refresh": true,
                     "api_access": true,
+                    "router_boundry": true,
                     "prefix": "/",
                     "vars": {
                         "html_class": "cobalt-app"
@@ -686,6 +809,9 @@
         "default": true
         // Allows public password resets
     },
+    "Auth_login_via_email_token": {
+        "default": true
+    },
     "Admin_panel_prefix": {
         "default": "/admin"
     },
@@ -712,7 +838,7 @@
         "default": true
     },
     "Auth_session_panel_enabled": {
-        "default": true,
+        "default": false,
         "directives": {
             "required": {
                 "Auth_user_accounts_enabled": {"is": true}
@@ -720,7 +846,7 @@
         }
     },
     "Auth_user_menu_enabled": {
-        "default": true,
+        "default": false,
         "directives": {   
             "required": {
                 "Auth_user_accounts_enabled": {"is": true}
@@ -798,6 +924,7 @@
         },
         "meta": {
             "group": "Features",
+            "subgroup": "Blog Posts",
             "view": "/admin/settings/inputs/posts.html"
         }
     },
@@ -805,6 +932,7 @@
         "default": true,
         "meta": {
             "group": "Features",
+            "subgroup": "Blog Posts",
             "name": "Enable Post RSS Feed",
             "type": "input-switch"
         },
@@ -819,6 +947,7 @@
         },
         "meta": {
             "group": "Features",
+            "subgroup": "Blog Posts",
             "name": "Post RSS Name",
             "type": "input"
         },
@@ -833,6 +962,7 @@
         },
         "meta": {
             "group": "Features",
+            "subgroup": "Blog Posts",
             "name": "Post RSS Feed Description",
             "type": "textarea"
         },
@@ -844,12 +974,16 @@
         "default": "/posts/feed/",
         "meta": {
             "group": "Features",
+            "subgroup": "Blog Posts",
             "name": "Post RSS Feed Path",
             "type": "input"
         },
         "validate": {
             "type": "string"
         }
+    },
+    "Posts_default_index_display": {
+        "default": "default"
     },
     /* 
     If debugging is TRUE, then a bunch of things happen. 
@@ -877,5 +1011,34 @@
     },
     "Database_fs_public_endpoint": {
         "default": "/dbfs/"
+    },
+    "PaymentGateways_enabled": {
+        "default": false
+    },
+    "API_authentication_mode": {
+        "default": "POST" // Set to "header" for legacy mode
+    },
+    "API_remote_gateways_enabled": {
+        "default": ["GoogleOAuth","Patreon","Mailchimp"],
+        "meta": {
+            "group": "Configuration",
+            "subgroup":"Advanced",
+            "name": "Enabled APIs",
+            "type": "input-array"
+            // "view": "/admin/settings/inputs/default-h1-alignment.html"
+        },
+        "validate": {
+            "type": "array",
+            "options": {
+                "AmazonPA": "Amazon Affiliate",
+                "GoogleOAuth": "Google OAuth",
+                "Mailchimp": "Mailchimp",
+                "Patreon": "Patreon",
+                "Shopify": "Shopify",
+                "Stripe": "Stripe",
+                "Twitter": "Twitter",
+                "YouTube": "YouTube"
+            }
+        }
     }
 }

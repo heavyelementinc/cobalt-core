@@ -2,6 +2,7 @@
 
 namespace Routes;
 
+use Exceptions\HTTP\Unauthorized;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 
@@ -41,6 +42,26 @@ class Route {
 
     static function delete(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
         Route::add_route($path, $controller, $additional, 'delete');
+    }
+
+    static function s_get(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'get');
+    }
+
+    static function s_post(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'post');
+    }
+
+    static function s_put(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'put');
+    }
+
+    static function s_delete(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
+        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'delete');
+    }
+
+    static function throw_without_session($access = "modify") {
+        if(session_exists() === false) throw new Unauthorized("You're not authorized to $access this resource.");
     }
 
     /** Adding a route is simple. We need to parse the path and convert it to
@@ -137,7 +158,8 @@ class Route {
             'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control),
             'real_path' => $real_path,
             'real_regex' => $real_regex,
-            'unread' => $additional['unread'],
+            'unread' => $additional['unread'] ?? fn () => null,
+            'require_session' => $additional['require_session'] ?? !app("Web_normally_open_pages"),
         ];
         
         if(!key_exists($controller, $GLOBALS['ROUTE_LOOKUP_CACHE'])) {

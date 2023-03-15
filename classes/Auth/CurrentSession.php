@@ -16,6 +16,19 @@ namespace Auth;
 use Exception;
 
 class CurrentSession extends \Drivers\Database {
+
+    public $cookie_name;
+    public $token_value;
+    public $now;
+    public $day;
+    public $month;
+    public $default_cookie_expiration;
+    public $default_token_expiration;
+    public $default_token_refresh;
+    public $cookie_options;
+    public $context;
+    public $session;
+
     /* The CurrentSession class takes the current request's validation cookie and looks
       up the token in the session database. It runs checks to see if the user's token is
       still valid.
@@ -125,6 +138,7 @@ class CurrentSession extends \Drivers\Database {
         // ];
         // $count = $this->count($query);
         // if ($count === 0) return true;
+        // app("require_https_login_and_cookie") &&
         if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("No token");
         try {
             $result = $this->updateOne(

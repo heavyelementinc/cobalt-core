@@ -11,7 +11,7 @@ main:has(#login-form-container) {
 #login-form-container {
   display: flex;
   flex-direction: column;
-  width: 30vw;
+  width: 100%;
   height: auto;
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
@@ -26,7 +26,9 @@ main:has(#login-form-container) {
   align-items: center;
   background-image: var(--project-login-hero-sidebar);
   background-color: gray;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   height: 200px;
   width: 100%;
 }
@@ -45,7 +47,7 @@ modal-box#login-modal>section {
   margin: 0
 }
 
-#login-form {
+.login-form-container :is(form-request, login-form-request) {
   padding: 1rem;
   text-align: center;
   display: flex;
@@ -54,16 +56,22 @@ modal-box#login-modal>section {
   box-sizing: border-box;
 }
 
-#login-form fieldset {
-  padding: 0;
+.login-form-container :is(h1, p) {
+  text-align: center;
+  padding: 0 1rem;
 }
 
-#login-form h1 {
+#login-form-container fieldset {
+  padding: 0;
+  border: none;
+}
+
+#login-form-container h1 {
   font-size: 1.45em;
   margin-bottom: 0.5em;
 }
 
-#login-form input[type="username"], #login-form input[type="password"] {
+#login-form-container input[type="username"], #login-form-container input[type="password"] {
   width: 100%;
   box-sizing: border-box;
   font-family: var(--project-head-family);
@@ -72,11 +80,11 @@ modal-box#login-modal>section {
   font-size: 1.15rem;
 }
 
-#login-form input {
+#login-form-container input {
   margin-bottom: 1rem;
 }
 
-#login-form .error{
+#login-form-container .error{
   flex-grow: 1;
   flex-grow: 1;
   display: flex;
@@ -84,11 +92,11 @@ modal-box#login-modal>section {
   align-items: center;
 }
 
-#login-form hr{
+#login-form-container hr{
   width:100%;
 }
 
-#login-form button {
+#login-form-container button {
   width: 100%;
   padding: .35rem;
   font-size: 1.15rem;
@@ -96,13 +104,13 @@ modal-box#login-modal>section {
   margin-top: 1em;
 }
 
-#login-form label:has(input-switch) {
+#login-form-container label:has(input-switch) {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-#login-form input-switch {
+#login-form-container input-switch {
   margin-right: 1ch;
 }
 

@@ -4,9 +4,12 @@ class Sortable {
         this.dropTargets = dropTargets;
         this.sortableItems = sortableItems;
         this.container = eventContainer;
+        this.dropIndicator = document.createElement("div");
+        this.dropIndicator.classList.add("cobalt-sortable--drop-indicator");
 
         if(this.container === null) this.findContainers();
 
+        this.container.addEventListener("drop", e => this.dragDrop());
         this.dragStartIndex;
         this.options(options);
     }
@@ -53,6 +56,7 @@ class Sortable {
         for(const el of this.dropTargets) {
             this.initDropTarget(el);
         }
+        this.initDropTarget(this.dropIndicator);
         for(const el of this.sortableItems) {
             this.initSortableItem(el);
         }
@@ -73,28 +77,27 @@ class Sortable {
     dragStart(element,event) {
         // this.dragStartIndex = +event.target.dataset.cobaltSortableIndex;
         this.currentDragItem = element;
-        
+        this.currentDragItem.classList.add("cobalt-sortable--current-drag-item");
     }
 
-    dragDrop(element,event) {
+    dragDrop() {
         if(!this.currentDragItem) return;
-        const dragEndIndex = +event.target.dataset.cobaltSortableIndex;
+        // const dragEndIndex = +event.target.dataset.cobaltSortableIndex;
 
-        event.target.classList.remove('cobalt-sortable--valid-drop-target', this.validTargetClass);
-        
-        const dropTarget = this.getBeforeAfterFromOrientation(element, event);
-        console.log(dropTarget);
-        
-        // if(this.currentDragItem.parentNode) this.currentDragItem.parentNode.removeChild(this.currentDragItem);
-
-        element.parentNode.insertBefore(this.currentDragItem,dropTarget);
-        
-        this.currentDragItem = null;
-        this.triggerDropEvent();
+        // event.target.classList.remove('cobalt-sortable--valid-drop-target', this.validTargetClass);
+        // Let's get the parent node of the drop indicator
+        const p = this.dropIndicator.parentNode;
+        if(p) {
+            // Insert the current drag item before the dropIndicator element
+            p.insertBefore(this.currentDragItem, this.dropIndicator);
+        }
+        this.cleanupAfterDrop();
     }
 
     dragOver(element,event) {
         event.preventDefault();
+        const target = this.getBeforeAfterFromOrientation(event.target,event);
+        event.target.parentNode.insertBefore(this.dropIndicator, target);
     }
 
     dragEnter(element,event) {
@@ -105,24 +108,26 @@ class Sortable {
         event.target.classList.remove('cobalt-sortable--valid-drop-target',this.validTargetClass);
     }
 
-    getBeforeAfterFromOrientation(el, dropEvent) {
+    getBeforeAfterFromOrientation(el, event) {
         // return el.nextSibling;
         // Define constraints. If we're in `ltr` or `landscape` mode then we
         // should get the Y coordinates and the height value
         let constraint = ["x","w"];
-        // Otherwise we should get the `x` coordinates and the width value
+        // Otherwise we should get the `y` coordinates and the width value
         if(['portrait', 'ttb'].includes(this.orientation)) constraint = ["y", "h"];
         const dims = get_offset(el);
+        const x = constraint[0];
+        const w = constraint[1];
+
         // Divide the element's chosen dimension in half
-        const half = dims[constraint[1]] * .5;
-        const droppedAt = dropEvent[constraint[0]];
-        const dropTargetOffset = dims[constraint[0]];
-        const normalizedDropPosition = dims[constraint[1]] - (droppedAt - dropTargetOffset);
-        // Check if the event's constraint action is less than or greater than
-        // the half threshold of the drop element
-        console.log({check: normalizedDropPosition > half, normalizedDropPosition, half, dropTargetOffset, constraint, droppedAt});
-        // console.log(normalizedDropPosition > half);
-        return (normalizedDropPosition > half) ? el : el.nextElementSibling;
+        const half = dims[w] / 2;
+
+        const eventPosition = event[x]; // The event's position
+        const dropTargetOffset = dims[x];
+        const normalizedDropPosition = (eventPosition - dropTargetOffset);
+        
+        let target = (normalizedDropPosition < half) ? el : el.nextElementSibling
+        return target;
     }
 
     triggerDropEvent() {
@@ -140,4 +145,16 @@ class Sortable {
             el.dispatchEvent(new CustomEvent("cobtaltsortcomplete"));
         }
     }
+
+    cleanupAfterDrop() {
+        if(!this.currentDragItem) return;
+        this.currentDragItem.classList.remove("cobalt-sortable--current-drag-item");
+        this.currentDragItem = null;
+        this.triggerDropEvent();
+
+        const p = this.dropIndicator.parentNode;
+        if(p) p.removeChild(this.dropIndicator);
+    }
+
+    
 }

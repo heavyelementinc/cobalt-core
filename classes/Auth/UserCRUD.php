@@ -14,7 +14,10 @@ namespace Auth;
 
 use Auth\UserValidate;
 use Auth\UserSchema;
+use Cobalt\Token;
 use DateTime;
+use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {
@@ -27,11 +30,11 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function getUserById($id) {
-        return $this->findOne(['_id' => $this->__id($id)]);
+        return $this->findOneAsSchema(['_id' => $this->__id($id)]);
     }
 
     final function getUserByUnameOrEmail($uname_or_email) {
-        return $this->findOne(
+        return $this->findOneAsSchema(
             [
                 '$or' => [
                     ['uname' => $uname_or_email],
@@ -41,13 +44,13 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
-    final function getUsersByPermission($permissions, $value = true, $options = null) {
+    final function getUsersByPermission($permissions, $status = true, $options = null) {
         if(!$options) $options = [
             'limit' => 50
         ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        $perms = array_fill_keys($permissions, $value);
-        return $this->find(
+        $perms = array_fill_keys($permissions, $status);
+        return $this->findAllAsSchema(
             [
                 '$or' => [
                     ['permissions' => $perms],
@@ -63,7 +66,7 @@ class UserCRUD extends \Drivers\Database {
             'limit' => 50
         ];
         if (gettype($groups) === "string") $groups = [$groups];
-        return $this->find([
+        return $this->findAllAsSchema([
             'group' => $groups
         ], $options);
     }
@@ -142,6 +145,62 @@ class UserCRUD extends \Drivers\Database {
     }
 
 
+    final function grant_revoke_permission($username, $permission, bool $value) {
+        $query = ['$or' => [['uname' => $username],['email' => $username]]];
+        $result = $this->updateOne($query,[
+            '$set' => [
+                "permissions.$permission" => $value
+            ]
+        ]);
+        return $this->findOneAsSchema($query)->permissions;
+    }
+
+    final function set_token($id, $type, $expires_in = "+15 minutes"): Token {
+        // Create our expiration time
+        $date = new DateTime();
+        $date->modify($expires_in);
+
+        $count = null;
+        while(true) {
+            // Generate the token
+            $token = new Token(null, $date, 'login');
+            $tk = $token->generate_token();
+    
+            // Ensure that this token is unique in the database
+            $count = $this->count(['login_tokens.token' => $tk]);
+            if($count !== 0) continue;
+            break;
+        }
+
+        // Update the user to include
+        $result = $this->updateOne(
+            ['_id' => new ObjectId($id)],
+            [
+                '$push' => [
+                    'login_tokens' => [
+                        'token' => $token->get_token(),
+                        'expires' => new UTCDateTime($token->get_expires()),
+                        'type' => $token->get_type()
+                    ]
+                ]
+            ]
+        );
+        return $token;
+    }
+
+    final function expire_login_token($token) {
+        $result = $this->updateOne(
+            [
+                'login_tokens.token' => $token
+            ],
+            [
+                '$pull' => ['login_tokens' => ['token' => $token]]
+            ]
+        );
+
+        return $result;
+    }
+
 
     /* ============================
             HELPER FUNCTIONS
@@ -187,5 +246,37 @@ class UserCRUD extends \Drivers\Database {
             $el .= "<li><input-switch name='$name'$checked></input-switch><label>$elements[label]</label></li>";
         }
         return "<ul class='list-panel'>$el</ul>";
+    }
+
+    final function destroy_expired_tokens() {
+        $crud = $this;
+        $date = new UTCDateTime();
+        $query = [
+            'login_tokens.expires' => ['$lt' => $date]
+        ];
+        
+        $count = $crud->count($query);
+        printf("Found ". fmt($count,'i') . " expired token" . plural($count)."\n");
+        journal("This number is often larger than the document modified count", CL_NOTICE);
+        
+        // $result = $crud->find($query, ['$pull' => $query], ['limit' => $count]);
+        $result = $crud->updateMany($query, [
+            '$pull' => [
+                'login_tokens' => ['expires' => ['$lt' => $date]],
+                // 'login_tokens' => ['expires' => ['$exists' => false]],
+            ]
+        ]);
+        $modified = $result->getModifiedCount();
+
+        // $modified = 0;
+        // foreach($result as $user) {
+        //     $crud->updateOne(
+        //         ['_id' => $user],
+        //         ['$pull' => $query]
+        //     );
+        // }
+        $result = $modified . " document".plural($modified)." modified";
+        journal($result, CL_NOTICE);
+        return $result;
     }
 }

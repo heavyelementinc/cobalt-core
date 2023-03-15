@@ -99,17 +99,49 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'gmt',
     ];
 
+    protected $__global_fields = [];
+
+    protected function getGlobalField($name) {
+        if(!key_exists($name, $this->__global_fields)) return null;
+        return $this->__global_fields[$name]['callback']();
+    }
+
     // We set up our schema and store it
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
+        
         $this->__normalize($normalize_get);
 
+        $this->__global_fields = [
+            'isEmptyDoc' => [
+                'callback' => fn () => (count($this->__dataset) < 1)
+            ],
+            'newDocDisabled' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? " disabled=disabled" : "",   // Check if there are any files
+            ],
+            'newDocSubmit' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "<button type=submit>Submit</button>" : "",
+            ],
+            'newDocAutosave' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=autosave",
+            ],
+            'newDocAutosaveFieldset' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=fieldset",
+            ]
+        ];
+        
         $this->init_schema();
+
+        $this->__dataset = array_merge($this->default_values(), doc_to_array($this->__dataset));
         // Only enable pronoun prototypes if the 'pronoun_set' key is in the schema.
         // Do we actually want this?
         if (key_exists('pronoun_set', $this->__schema)) {
             $this->__init_pronoun_set();
         }
+    }
+
+    function default_values():array {
+        return []; //array_fill_keys(array_keys($this->__schema),null);
     }
 
     /**
@@ -129,6 +161,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      *    * $context -> the current context ($this)
      *    * $name    -> the name of the current field
      * 
+     * The serialize entry directs the iterable
+     * 
      * # Example schema entry:
      * ```php
      *   ['example_date' => [
@@ -137,7 +171,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      *       },
      *       'set' => function ($value, $context, $name) {
      *           return $context->make_date($value);
-     *       }
+     *       },
+     *       'serialize' => 'display' // string<name of prototype>|true
      *   ]];
      * ```
      * 
@@ -303,6 +338,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     public function __get($n) { // Returns normalized user input
         $name = $n;
+        $global = $this->getGlobalField($name);
+        if($global !== null) return $global;
+
         $value = null;
         $proto = $this->__get_prototype($name); // $n = "name.raw"; $proto = ['name','raw']
         if ($proto !== false) $name = $proto[0];
@@ -441,6 +479,14 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $doc->__validate($value);
     }
 
+    protected function each($schema, $data) {
+        $processed = [];
+        foreach($data as $doc) {
+            array_push($processed, new $schema($doc));
+        }
+        return $processed;
+    }
+
     final protected function init_schema($schema = []) {
         // We write this schema to __schema
         $this->__schema = array_merge($this->__get_schema(), (array)$schema);
@@ -453,6 +499,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         foreach ($this->__schema as $fieldname => $methods) {
             $this->find_method($fieldname, "get");
             $this->find_method($fieldname, "set");
+            // if(key_exists('serialize', $methods)) {
+            //     array_push($this->__index);
+            // }
         }
     }
 
@@ -524,10 +573,21 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         } else if (isset($this->__schema[$field]['valid'])) {
             $valid = $this->__schema[$field]['valid'];
             if (is_callable($valid)) $valid = $valid($val, $field);
+            $type = gettype($val);
+            if ($type === "object" || $type === "array") return $this->__proto_display_array_items($val, $valid);
             if (key_exists($val, $valid)) return $valid[$val];
         }
         if($val instanceof \MongoDB\BSON\UTCDateTime) return $this->get_date($val, 'verbose');
         return $val;
+    }
+    
+    private function __proto_display_array_items($values, $valid) {
+        $labeled = [];
+        foreach($values as $val) {
+            if(key_exists($val, $valid)) array_push($labeled, $valid[$val]);
+            else array_push($labeled, $val);
+        }
+        return implode(", ", $labeled);
     }
 
     /** Executes the 'valid' method defined in the schema and returns results */
@@ -544,6 +604,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __proto_options($val, $field) {
         $valid = $this->__proto_valid($val, $field);
         $gotten_value = $this->{$field};
+        if($gotten_value instanceof \MongoDB\Model\BSONArray) $gotten_value = $gotten_value->getArrayCopy();
 
         $type = gettype($val);
 
@@ -555,7 +616,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 foreach($val as $o) {
                     $v[$o] = $o;
                 }
-                $valid = array_merge($valid ?? [], $v ?? []);
+                $valid = array_merge($v ?? [], $valid ?? []);
                 $type = gettype($val);
         }
 
@@ -666,6 +727,17 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $mutant = [];
         foreach ($this->__dataset as $name => $value) {
             $mutant[$name] = $this->__get($name);
+        }
+        foreach($this->__schema as $name => $data) {
+            if(!key_exists('serialize', $data)) continue;
+            switch($data['serialize']) {
+                case true:
+                    $mutant[$name] = $this->__get($name);
+                    break;
+                case in_array($name, $this->__prototypes):
+                    $mutant[$name] = $this->{"$name.$data[serialize]"};
+                    break;
+            }
         }
 
         return $mutant;

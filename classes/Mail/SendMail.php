@@ -17,7 +17,8 @@ class SendMail{
   var $reply_to_address   =  __APP_SETTINGS__["Mail_reply_to_address"];
   var $reply_to_name      =  __APP_SETTINGS__["Mail_reply_to_name"];
   var $is_HTML            =  true;
-
+  var $renderer = null;
+  var $mail = null;
 
 
   function __construct(){

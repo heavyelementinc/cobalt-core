@@ -29,6 +29,12 @@ class Controller {
 
     protected $currentlyAllowedQueryParams = null;
 
+    public $manager = null;
+    public $allowedFilters = null;
+    public $allowedOptions = null;
+    public $filterOverride = null;
+    public $defaultOptions = null;
+
 
     public function setLimit(int $limit = 20) {
         $this->limit = $limit;
@@ -125,6 +131,16 @@ class Controller {
                     if(gettype($val) === "array") return ['sort' => $val];
                     $direction = $_GET[$this->sortDirectionParam] ?? 1;
                     $direction = (int)$direction;
+                    if(strpos($val,",")) {
+                        $exploded = explode(",", $val);
+                        $sort = [];
+                        foreach($exploded as $v) {
+                            if(!$v) continue;
+                            $sort += [$v => $direction];
+                        }
+                        // var_dump($sort);
+                        return ['sort' => $sort];
+                    }
                     return [
                         'sort' => [$val => $direction],
                     ];
@@ -340,7 +356,7 @@ class Controller {
 
             $new_query_string = $this->paramContinuity(['sort' => $name, $this->sortDirectionParam => $direction]);
             if($schema['no_link']) {
-                $result = "<flex-header>$schema[name]</flex-header>";
+                $result .= "<$container_type>$schema[name]</$container_type>";
                 continue;
             }
             $result .= "<$container_type><a href=\"?$new_query_string\">".$schema["name"]." $icon</i></a></$container_type>";

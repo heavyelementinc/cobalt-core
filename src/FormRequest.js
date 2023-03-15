@@ -127,7 +127,7 @@ class FormRequest {
         let data = this.build_query([element]);
         if (this.form.getAttribute("autosave") == "form") data = this.build_query();
         try {
-            await this.send(data);
+            const result = await this.send(data);
         } catch (error) {
             return this.autosave_reenable_field(el, autosave_spinner);
         }
@@ -282,7 +282,11 @@ class LoginFormRequest extends FormRequest {
         error_container.innerText = "";
 
         let data = this.build_query();
-        let headers = { ...this.headers, "Authentication": btoa(`${data.username}:${data.password}`) }
+        let headers = {};
+        const encoded = btoa(`${data.username}:${data.password}`);
+        headers = { ...this.headers, "Authentication": encoded }
+        data.Authentication = encoded;
+        
         delete data.username;
         delete data.password;
         const post = new ApiFetch(this.action, this.method, { headers: headers });

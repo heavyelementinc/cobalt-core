@@ -1,5 +1,5 @@
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -426,12 +426,17 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
  * }
  */
 function get_offset(element) {
+    if(element === null) throw new Error("Element must not be null!");
     let parent = element,
         offsetParentX = 0,
         offsetParentY = 0,
-        scrollX = element.scrollLeft,
-        scrollY = element.scrollTop,
+        scrollX = 0,
+        scrollY = 0,
         zIndex = 0;
+    if("scrollLeft" in element) {
+        scrollX = element.scrollLeft;
+        scrollY = element.scrollTop;
+    }
 
     // Just use a while loop.
     while (parent) {
@@ -445,8 +450,10 @@ function get_offset(element) {
 
     while (parent) {
         if(parent === document.body.parentNode) break;
-        scrollX += parent.scrollLeft || 0; 
-        scrollY += parent.scrollTop || 0;
+        if("scrollLeft" in element) {
+            scrollX += parent.scrollLeft || 0;
+            scrollY += parent.scrollTop || 0;
+        }
         parent = parent.parentNode;
     }
 
@@ -672,4 +679,70 @@ function iOS() {
       'iPhone',
       'iPod'
     ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+}
+
+function imagePromise(url) {
+    return new Promise(async (resolve, reject) => {
+        const img = new Image();
+        img.addEventListener("load", () => {
+            resolve(url);
+        });
+        img.addEventListener();
+        img.addEventListener("error",() => {
+            resolve(null);
+        })
+        img.src = url;
+    })
+}
+
+/**
+ * Returns a string
+ * @param {string} url 
+ * @param {string|element} throbber 
+ * @param {string|element} progressBar 
+ * @returns string
+ */
+function getBlobWithLoadingBar(url, throbber, progressBar) {
+    return new Promise(async (resolve, reject) => {
+
+        try{
+            if(typeof throbber === "string" && throbber) throbber = document.querySelector(throbber);
+        } catch (error) {
+            throbber = null;
+        }
+        if(throbber) {
+            throbber.style.transition = "opacity .5s";
+            throbber.style.opacity = "1";
+        }
+        if(typeof progressBar === "string") progressBar = document.querySelector(progressBar);
+        
+        if(progressBar) {
+            progressBar.value = 0;
+            progressBar.max = 100;
+        }
+
+        const client = new XMLHttpRequest();
+
+        client.open("GET", url);
+        client.responseType = 'blob';
+        client.onprogress = (event) => {
+            if(!progressBar) return;
+            if(!event.lengthComputable) return;
+            progressBar.max = event.total;
+            progressBar.value = event.loaded;
+        }
+        
+        client.onload = (event) => {
+            const blobAddress = URL.createObjectURL(client.response);
+            resolve(blobAddress);
+            if(throbber) throbber.style.opacity = "0";
+        }
+
+        client.onerror = (event) => {
+            reject(event);
+            if(throbber) throbber.style.opacity = "0";
+        }
+        
+        client.send();
+    })
 }

@@ -11,7 +11,15 @@ use MongoDB\BSON\ObjectId;
 trait ClientFSManager {
     public $fs = null;
     protected $format_table = null;
-    protected $filename_insert_prefix = "";
+    
+    /**
+     * This property is used to assign a path name to the file being uploaded
+     * You should *not* include a / to start or a trailing / at the end of the
+     * pathname.
+     * @var string
+     */
+    public $fs_filename_path = "";
+    public $last_modified_result = null;
     
     // function __construct() {
     //     $this->initFS();
@@ -36,16 +44,26 @@ trait ClientFSManager {
         $this->fs->download($filename);
     }
 
-    public function delete($id) {
+    public function findFiles($query = [], $options = []) {
+        $this->initFS();
+        return $this->fs->find($query, $options);
+    }
+
+    public function findFile($query = [], $options = []) {
+        $this->initFS();
+        return $this->fs->findOne($query, $options);
+    }
+
+    public function delete($id, $skipConfirm = false) {
         $this->initFS();
         $_id = new \MongoDB\BSON\ObjectId($id);
         $result = $this->fs->findOne(["_id" => $_id]);
         if($result === null) throw new NotFound("That file was not found");
-        confirm("Are you sure you want to delete <strong>" . htmlspecialchars($result->filename) . "</strong>?",[]);
+        if($skipConfirm == false) confirm("Are you sure you want to delete <strong>" . htmlspecialchars($result->filename) . "</strong>?",[]);
 
         if($result->thumbnail_id) $this->fs->delete($result->thumbnail_id);
         $result = $this->fs->delete($_id);
-
+        $this->last_modified_result = $result;
         return (string)$_id;
     }
 
@@ -55,12 +73,14 @@ trait ClientFSManager {
             array_push($_ids, new \MongoDB\BSON\ObjectId($id));
         }
         $result = $this->fs->deleteMany(['_id' => ['$in' => $id]]);
+        $this->last_modified_result = $result;
         return $result->getDeletedCount();
     }
 
     public function deleteAllBelongingToId($parent_id, $key = "for") {
         $_id = new ObjectId($parent_id);
         $result = $this->findMany([$key => $_id]);
+        $this->last_modified_result = $result;
         $deleted = 0;
         foreach($result as $doc) {
             $r = $this->delete($doc['_id']);
@@ -69,9 +89,9 @@ trait ClientFSManager {
         return $deleted;
     }
 
-    public function updateSortOrder() {
+    public function updateSortOrder($data = null) {
         if(!$_POST) throw new BadRequest("Malformed request.");
-        $data = $_POST;
+        if(!$data) $data = $_POST;
         if(gettype($data))
         $validated_data = [];
 
@@ -101,6 +121,18 @@ trait ClientFSManager {
 
     /**
      * 
+     * @param mixed $query 
+     * @return void 
+     */
+    public function updateMetadata($query, $data):object {
+        $this->initFS();
+        $result = $this->fs->updateOne($query, $data);
+        $this->last_modified_result = $result;
+        return $result;
+    }
+
+    /**
+     * 
      * @param string|int $key The key of the $_FILES field
      * @param int $index The index of $_FILES to use
      * @return array 
@@ -123,11 +155,12 @@ trait ClientFSManager {
             'tmp_name' => $file['tmp_name'][$index],
         ];
 
-        if($this->fs_filename_path) $file_array['name'] = trim_trailing_slash($this->fs_filename_path)."/$file_array[name]";
+        if(!isset($meta['isThumbnail'])) $file_array['name'] = $this->prefixFilename($file_array['name']);
 
 
         $metadata = getimagesize($file_array['tmp_name']);
         if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($file_array['tmp_name'])];
+        $metadata['mimetype'] = mime_content_type($file_array['tmp_name']);
         $meta = [
             'width' => $metadata[0],
             'height' => $metadata[1],
@@ -175,6 +208,7 @@ trait ClientFSManager {
         $path = ($path) ? "$path/" : "";
         $name           = pathinfo($files[$key]['name'][$index],PATHINFO_FILENAME);
         $extension      = pathinfo($files[$key]['name'][$index],PATHINFO_EXTENSION);
+        
         $thumbnail_name = "$name.$this->thumbnail_suffix.$extension";
         
         if(!$files[$key]['tmp_name'][$index]) throw new BadRequest("Invalid indicies");
@@ -198,24 +232,28 @@ trait ClientFSManager {
 
         // First, let's insert our thumbnail
         $thumb = $this->clientUploadFile($key,1,['isThumbnail' => true], $toInsert, $meta);
-        $thumb_id = $thumb['_id'];
+        $thumb_id = $thumb['id'];
 
         $arbitrary_data = array_merge($arbitrary_data, [
             'thumbnail_id' => $thumb_id,
-            'thumbnail' => $toInsert[$key]['name'][1]]
+            'thumbnail' => $thumb['filename']]
         );
 
         // Now let's insert our actual image
         $returnable = $this->clientUploadFile($key, 0, $arbitrary_data, $toInsert, $meta);
-        if($meta) {
-            $returnable = [
-                'media' => $returnable,
-                'thumb' => $thumb
-            ];
-        }
+        
+        $returnable = [
+            'media' => $returnable,
+            'thumb' => $thumb
+        ];
 
         return $returnable;
 
+    }
+
+    private function prefixFilename($filename) {
+        if($this->fs_filename_path) $filename = trim_trailing_slash($this->fs_filename_path)."/$filename";
+        return $filename;
     }
 
     public function clientUploadImagesAndThumbnails($key,$thumbnail_x, $thumbnail_y = null, $arbitrary_data = [], $files = null, $meta = false) {
@@ -227,6 +265,49 @@ trait ClientFSManager {
             array_push($ids, $this->clientUploadImageThumbnail($key,$index,$thumbnail_x, $thumbnail_y, $arbitrary_data, $files, $meta));
         }
         return $ids;
+    }
+
+    public function renameFile($id, $submittedName = null) {
+        $this->initFS();
+        if(is_null($submittedName)) $submittedName = $_POST['rename'];
+        $_id = new ObjectId($id);
+        $q = ['_id' => $_id];
+
+        $newName = $this->prefixFilename($submittedName);
+        $result = $this->fs->findOne($q);
+
+        $oldExtension = pathinfo($result['filename'], PATHINFO_EXTENSION);
+        $newExtension = pathinfo($newName, PATHINFO_EXTENSION);
+        if(!$newExtension) {
+            $newName .= ".$oldExtension";
+            $newExtension = $oldExtension;
+        } else if($oldExtension !== $newExtension) confirm("WARNING: You're changing the file extension for this file. It may become unreadable. Are you sure you want to continue?", $_POST);
+
+        $update = ['filename' => $newName];
+
+        $thumbnail = $this->fs->findOne(['_id' => $result->thumbnail_id]);
+        $thumbnail_filename = null;
+        if($thumbnail) {
+            $thumbnail_filename = str_replace(".$newExtension", ".$this->thumbnail_suffix.$newExtension", $newName);
+            $update['thumbnail'] = $thumbnail_filename;
+        }
+
+        $modified = $this->updateMetadata($q,[
+            '$set' => $update
+        ]);
+
+        $returnValues = [
+            'name' => "/res/fs$newName",
+        ];
+
+        if($thumbnail_filename) {
+            $modified_thumb = $this->updateMetadata(['_id' => $thumbnail->_id],[
+                '$set' => ['filename' => $thumbnail_filename]
+            ]);
+            $returnValues['thumbnail'] = "/res/fs$thumbnail_filename";
+        }
+        
+        return $returnValues;
     }
 
     /**
@@ -241,7 +322,8 @@ trait ClientFSManager {
      * @return string 
      */
     final public function directoryListing(string $href = "", string $mode = "list", array $query = ['filter' => [], 'options' => []], array $options = []){
-        if($href === "") $href = "/res/fs/";
+        if($href === "") $href = "/res/fs";
+        // if($this->fs_filename_path) $href = trim_trailing_slash($href) . trim_trailing_slash($this->fs_filename_path);
         $options = array_merge([
             'parent' => [],
             'child' => [],
@@ -251,7 +333,7 @@ trait ClientFSManager {
         
         $this->initFS();
         $query['filter'] = array_merge(['isThumbnail' => ['$exists' => false]], $query['filter'] ?? []);
-        $query['options'] = array_merge(['sort' => ['order' => 1]],$query['options'] ?? []);
+        $query['options'] = array_merge(['sort' => ['order' => 1, '_id' => 1]],$query['options'] ?? []);
         
         $docs = $this->fs->find($query['filter'] ?? [],$query['options'] ?? []);
 
@@ -308,6 +390,16 @@ trait ClientFSManager {
                 'tag_start' => function ($value, $href, $lazy = true) {
                     $lazy = ($lazy) ? " loading='lazy'" : "";
                     return "img src='$href".($value->thumbnail ?? $value->filename)."' onclick='lightbox(this)' full-resolution='$href"."$value->filename'$lazy";
+                },
+                'tag_end' => "",
+                'anchor' => fn () => ""
+            ],
+            'limitedGallery' => [
+                'container' => 'div',
+                'class' => 'cobalt--fs-directory-listing cfs--picture-gallery',
+                'tag_start' => function ($value, $href, $lazy = true) {
+                    $lazy = ($lazy) ? " loading='lazy'" : "";
+                    return "img src='$href".($value->thumbnail ?? $value->filename)."' full-resolution='$href"."$value->filename'$lazy";
                 },
                 'tag_end' => "",
                 'anchor' => fn () => ""

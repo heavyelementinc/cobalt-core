@@ -10,6 +10,11 @@ class Mailchimp extends TokenInterface {
     public function setRefresh(): string {
         return "";
     }
+    
+    public function getEditView(): string {
+        return "";
+    }
+    
 
     function getKey():string{
         return $this->__token['key'] ?? "";
@@ -36,8 +41,10 @@ class Mailchimp extends TokenInterface {
         return "application/json";
     }
 
-    function getEndpoint():string {
-        return $this->__token['endpoint'];
+    function getEndpoint():array {
+        return [
+            "endpoint" => $this->__token['endpoint']
+        ];
     }
     
     function setSecret():string {

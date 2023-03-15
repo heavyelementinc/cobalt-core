@@ -7,7 +7,12 @@ class AdditionalUserFields {
         return [];
     }
 
-    public function __get_additional_user_tab():string { 
-        return "";
+    public function __get_additional_user_tabs():array { 
+        return [
+            // "panel-id" => [
+            //     "name" => "Anoher field",
+            //     "view" => "/relative/path/to/view.html",
+            // ]
+        ];
     }
 }

@@ -77,6 +77,27 @@ header nav a.navigation--current {
     color: black; */
 }
 
+.cobalt-user--profile-display {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cobalt-user--profile-display img.cobalt-user--avatar {
+    display: inline-block;
+    height: 2rem;
+    width: 2rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.cobalt-user--profile-display > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .user-panel {
     display: flex;
     color: white;
