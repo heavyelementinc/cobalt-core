@@ -1,5 +1,5 @@
 <?php
-ob_start()
+ob_start();
 $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
 
 /**
