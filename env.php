@@ -1,4 +1,5 @@
 <?php
+ob_start()
 $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
 
 /**
@@ -92,7 +93,6 @@ if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->g
  * */
 define("__APP_SETTINGS__", $application->get_settings());
 
-
 session_name("COBALTID");
 $cobalt_session_started = session_start([
     'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
@@ -105,6 +105,8 @@ if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false &&
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
 if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");
+
+ob_end_clean(); // Prevent any dependencies from polluting our output
 
 /** If we're NOT in a CLI environment, we should import the context processor */
 if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";
