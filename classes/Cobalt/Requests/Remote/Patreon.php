@@ -148,11 +148,20 @@ class Patreon extends API {
     public static function getMetadata(): array {
         return [
             'icon' => "<i name='patreon'></i>",
-            'name' => "Patreon"
+            'name' => "Patreon",
+            'view' => "/admin/api/editors/patreon.html",
         ];
     }
 
     public function testAPI(): bool {
         return true;
     }
+
+    public function sanityCheck($url, $method, $body = null):bool|string {
+        return true;    
+    }
+    // public function errorHandler($error, $message):string {
+    //     if($error->code === 404) return "Not found";
+    //     return $message;
+    // }
 }

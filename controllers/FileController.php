@@ -17,9 +17,15 @@ class FileController extends \Controllers\FileController {
     }
 
     function core_content_shared() {
-        $path = $GLOBALS['router']->uri;
+        global $ROUTER;
+        global $SHARED_CONTENT;
+        $path = $ROUTER->uri;
         // $file = __ENV_ROOT__ . "/shared/$path";
-        $file = find_one_file([__ENV_ROOT__ . "/shared/", ...$GLOBALS['SHARED_CONTENT']], sanitize_path_name($path));
+        $file = find_one_file([
+            __APP_ROOT__ . "/shared/",
+            __ENV_ROOT__ . "/shared/",
+            ...$SHARED_CONTENT
+        ], sanitize_path_name($path));
         if (!file_exists($file)) throw new Exceptions\HTTP\NotFound("The resource could not be located");
         // header('Content-Description: File Transfer');
         // header('Content-Type: application/octet-stream');
@@ -72,11 +78,12 @@ class FileController extends \Controllers\FileController {
 
 
     function plugin_resources($plugin, $match) {
+        global $ACTIVE_PLUGINS;
         $content_dirs = [];
 
-        if (!isset($GLOBALS['ACTIVE_PLUGINS'][$plugin])) throw new \Exceptions\HTTP\NotFound("The resource could not be located");
-        $plugin = $GLOBALS['ACTIVE_PLUGINS'][$plugin];
-        // foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
+        if (!isset($ACTIVE_PLUGINS[$plugin])) throw new \Exceptions\HTTP\NotFound("The resource could not be located");
+        $plugin = $ACTIVE_PLUGINS[$plugin];
+        // foreach ($ACTIVE_PLUGINS as $i => $plugin) {
         //     array_push($content_dirs, $plugin->register_public_content_dir());
         // }
 

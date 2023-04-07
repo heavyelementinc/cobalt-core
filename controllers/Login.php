@@ -35,7 +35,7 @@ class Login {
     }
 
     function handle_email_login_stage_1() {
-        $email = Authentication::handle_email_login();
+        $email = Authentication::handle_email_login($_POST['username']);
         header("X-Redirect: /login/email");
     }
 

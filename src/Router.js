@@ -253,8 +253,8 @@ class Router {
             result = await this.asyncPageRequest(urlData);
         } catch (error) {
             this.navigationEnd();
-            console.warn("There was an error");
         }
+        new AsyncMessageHandler(this.lastAsyncPageLoad, "XHR");
 
         // let result;
         // try{
@@ -315,16 +315,43 @@ class Router {
             const client = new XMLHttpRequest();
             this.lastAsyncPageLoad = client;
             client.withCredentials = true;
+
             client.onload = (event) => {
+                if(client.readyState !== 4) return;
+                if(client.status >= 300) return reject(client);
+                this.lastAsyncRequestClient = client;
                 resolve(JSON.parse(client.response));
                 this.navigationEventReject = null;
             };
+
             client.onprogress = (event) => {
                 this.SPA_indicator.value = event.loaded;
                 this.SPA_indicator.max = event.total;
             }
-            client.onerror = (error) => reject(error);
+
+            // client.onreadystatechange = (event) => {
+            //     switch(client.readyState) {
+            //         case 4:
+            //         case 5:
+            //             reject(client);
+            //             break;
+            //     }
+            // }
+
+            client.onerror = (error) => {
+                reject(client);
+            };
+
+            client.onabort = (error) => {
+                reject(client);
+            }
+
+            client.ontimeout = (event) => {
+                reject(client);
+            }
+
             client.open('GET', `/api/v1/page/?route=${data.pathname}${data.apiSearchParams}`);
+            
             client.send();
         })
     }

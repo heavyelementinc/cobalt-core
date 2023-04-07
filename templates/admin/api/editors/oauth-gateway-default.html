@@ -4,7 +4,7 @@
     <fieldset>
         <legend>Key Data</legend>
         <label>Client ID <help-span value="Your app's client_id"></help-span></label>
-        <input type="string" name="client_id" value="{{token.client_id}}">
+        <input type="string" name="key" value="{{token.key}}">
         
         <label>Project ID</label>
         <input type="text" name="project_id" value="{{token.project_id}}">
@@ -19,10 +19,10 @@
         <input type="url" name="auth_provider_x509_cert_url" value="{{token.auth_provider_x509_cert_url}}">
 
         <label>Client Secret</label>
-        <input-password name="client_secret" value="{{token.client_secret}}"></input-password>
+        <input-password name="secret" value="{{token.secret}}"></input-password>
     
         <label>Redirect URIs</label>
-        <input-array name="redirect_uris" value="{{$token.redirect_uris}}"></input-array>
+        <input-array name="redirect_uris" value="{{$token.redirect_uris}}" allow-custom="true"></input-array>
     </fieldset>
     <button type="submit">Submit</button>
 </form-request>

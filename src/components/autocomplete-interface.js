@@ -121,7 +121,8 @@ class AutoCompleteInterface extends HTMLElement {
         const filter = new RegExp(`(${toSearch})`,'i');
         
         let custom = {};
-        if(this.allowCustom === true) {
+        let allowCustom = string_to_bool(this.getAttribute("allow-custom")) ?? false;
+        if(allowCustom) {
             custom = {
                 value: toSearch,
                 label: toSearch,
@@ -209,6 +210,9 @@ class AutoCompleteInterface extends HTMLElement {
     }
 
     addSearchResult(option, filter){
+        if("label" in option === false) {
+            return;
+        }
         const result = document.createElement("li");
         result.setAttribute("value",option.value);
         result.setAttribute("label",option.label);
@@ -218,7 +222,6 @@ class AutoCompleteInterface extends HTMLElement {
         result.addEventListener("click", e => {
             this.selectSearchResult(e.target);
         });
-
         result.innerHTML = option.label.replace(filter, "<strong>$1</strong>");
         this.searchResults.appendChild(result);
     }

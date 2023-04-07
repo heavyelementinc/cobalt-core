@@ -3,7 +3,11 @@
     flex-wrap: wrap;
     gap: 1em;
     width: 80vw;
-    margin: 0 auto;
+    margin: 2em auto;
+}
+
+#main-posts .cobalt-query-controls {
+    margin-bottom: 2em;
 }
 
     .cobalt-posts--public-index a.cobalt-post--blurb {
@@ -24,7 +28,7 @@
 
 
         .cobalt-posts--public-index .cobalt-post--blurb content {
-            /* max-height: 10vh; */
+            max-height: 10vh;
             margin: 0;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -62,20 +66,20 @@
         font-size: .9em;
     }
 
+    .cobalt-post--header ul > li {
+        display: flex;
+        align-items: center;
+    }
+
     .cobalt-posts--public-index .cobalt-post--blurb:not(.cobalt-post--prominent) .cobalt-post--header ul {
         display:block;
-    } 
-
-
- 
+    }
     
-    .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent {
+    /* .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent {
         width: 100%;
         height: 30vh;
         display:flex;
         min-height: 295px;
-        /* grid-template-columns: 40vh 1fr;
-        grid-template-rows: 25% 25% 25% 25%; */
     }
     
         .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--splash {
@@ -99,13 +103,14 @@
 
         .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--splash.cobalt-post--no-image {
             display: none;
-        }
+        } */
 
 article.cobalt-post, a.cobalt-post:not(.cobalt-post--blurb) {
     max-width:100%;
     padding: 0;
     width: 100%;
-    /* margin: 0 0 2rem; */
+    margin: 2em auto;
+    padding: 0 0 1em;
 }
 
 .cobalt-post--splash {
@@ -143,10 +148,10 @@ article.cobalt-post .cobalt-post--header, content {
 }
 
 .cobalt-post--header ul {
-    display:flex;
+    display: flex;
     list-style: none;
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 1em 0 0em;
     gap: 2ch;
 }
 
@@ -202,7 +207,7 @@ article.cobalt-post + article.cobalt-post {
         width:100%;
         height: 50vh;
     }
-    .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--header {
+    /* .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--header {
         margin-bottom: 1em;
     }
     .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent {
@@ -214,7 +219,7 @@ article.cobalt-post + article.cobalt-post {
         width: 100%;
         flex-grow:1;
         min-height: 30vh;
-    }
+    } */
     .cobalt-posts--public-index .cobalt-post--blurb ul {
         display: flex;
         flex-direction: column;

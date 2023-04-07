@@ -227,7 +227,8 @@ class WebHandler implements RequestHandler {
     function header_nav() {
         return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
         // $links = "";
-        // foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
+        // global $ROUTER:
+        // foreach ($router->routes['get'] as $regex => $route) {
         //     if (!isset($route['header_nav'])) continue;
         //     $href  = $route['header_nav']['href'] ?? $route['original_path'];
         //     $label = $route['header_nav']['label'];
@@ -318,11 +319,12 @@ class WebHandler implements RequestHandler {
 
     var $route_table_cache = "js-precomp/router-table.js";
     function router_table() {
+        global $ROUTER;
         $table_name = str_replace(".js", ".$this->context_mode.js", $this->route_table_cache);
         $cache = new CacheManager($table_name);
         $table_content = "";
         if (app('route_cache_disabled') === false || $GLOBALS['TIME_TO_UPDATE'] || !$cache->cache_exists()) {
-            $table_content = $GLOBALS['router']->get_js_route_table();
+            $table_content = $ROUTER->get_js_route_table();
             $cache->set($table_content, false);
         } else $table_content = $cache->get();
 
@@ -375,6 +377,14 @@ class WebHandler implements RequestHandler {
         // $basic_script = "/core-content/js/$entry";
         $type = gettype($entry);
         if($type === "string") return "/core-content/js/$entry";
+        if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
+        if(key_exists('url', $entry)) return $entry['url'];
+        throw new NotFound("Unable to handle resource $type");
+    }
+
+    function get_css_pathname_from_manifest_entry($entry) {
+        $type = gettype($entry);
+        if($type === "string") return "/core-content/css/$entry";
         if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
         if(key_exists('url', $entry)) return $entry['url'];
         throw new NotFound("Unable to handle resource $type");

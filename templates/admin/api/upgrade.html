@@ -1,0 +1,14 @@
+<h1>{{title}}</h1>
+
+<form-request method="PUT" action="/api/v1/api/key/{{id}}">
+    <fieldset>
+        <legend>Key Data</legend>
+        
+        <label>Username <help-span value="The username of the Git/GitHub account"></help-span></label>
+        <input type="text" name="key" value="{{token.key}}">
+    
+        <label>Token <help-span value="Passwords will not work. This is an access token"></help-span></label>
+        <input-password name="token" value="{{token.token}}"></input-password>
+    </fieldset>
+    <button type="submit">Submit</button>
+</form-request>

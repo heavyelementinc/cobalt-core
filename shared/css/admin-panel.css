@@ -2,9 +2,14 @@
     --admin-panel-width: 200px;
 }
 
+nav#admin-panel a[is="real"][href="/"] {
+    display: flex;
+    justify-content: center;
+}
 nav#admin-panel .cobalt-masthead {
-    width: var(--admin-panel-width);
+    width: calc(var(--admin-panel-width) - 10%);
     height: 150px;
+    max-height: unset;
     object-fit: contain;
 }
 
@@ -16,6 +21,7 @@ nav#admin-panel {
     width: var(--admin-panel-width);
     height: 100%;
     background: var(--project-color-admin-panel-background);
+    z-index: calc(var(--project-modal-z-index) - 1);
 }
 
 #admin-panel > ul {

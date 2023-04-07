@@ -48,7 +48,7 @@ class CurrentSession extends \Drivers\Database {
         $this->default_token_expiration = $this->now + $this->month;
         $this->default_token_refresh = $this->now + $this->day;
 
-        $headers = apache_request_headers();
+        $headers = \apache_request_headers();
         $this->cookie_options = [
             'expires' => $this->default_cookie_expiration,
             'path' => '/',

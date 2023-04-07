@@ -97,7 +97,8 @@ class Route {
         if (!key_exists('handler', $additional)) $additional['handler'] = null;
         else $handler_data = Route::get_js_handler($additional['handler'], $regex, $controller);
         $router_table_address = $GLOBALS['ROUTE_TABLE_ADDRESS'];
-        $context_permission = ($GLOBALS['permission_needed'] !== false) ? $GLOBALS['permission_needed'] : null;
+        $context_permission = __APP_SETTINGS__['context_prefixes'][$router_table_address]['permission'] ?? null;
+        // $context_permission = ($GLOBALS['permission_needed'] !== false) ? $GLOBALS['permission_needed'] : null;
 
         $file = null;
         if (app("enable_debug_routes")) {

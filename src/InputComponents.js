@@ -48,6 +48,7 @@ class InputSwitch extends HTMLElement {
     set value(val) {
         this.checkbox.checked = val;
         this.checked = val;
+        this.setAttribute("checked", JSON.stringify(val));
     }
 
     // get checked() {
@@ -96,6 +97,7 @@ class InputSwitch extends HTMLElement {
         this.clearIntermediateState({ target: this.checkbox });
         this.checkbox.checked = !this.checkbox.checked;
         this.checked = this.checkbox.checked;
+        this.setAttribute("checked", JSON.stringify(this.checked));
         const change = new Event("change");
         this.checkbox.dispatchEvent(change);
         this.dispatchEvent(change);

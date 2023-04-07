@@ -183,8 +183,11 @@ abstract class NormalizationHelpers {
             "long" => "l, F jS Y",
             "12-hour" => "g:i a",
             "24-hour" => "H:i",
-            "seconds" => "g:i:s A"
+            "seconds" => "g:i:s A",
         ];
+        if($format === "relative") {
+            return "<date-span relative='true' value=\"$value\"></date-span>";
+        }
         if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
             $dateTime = $value->toDateTime();

@@ -11,7 +11,8 @@
         "omnipay/paypal": "^3.0",
         "omnipay/stripe": "^3.2",
         "erusev/parsedown-extra": "^0.8.1",
-        "demyanovs/php-highlight": "^1.1"
+        "demyanovs/php-highlight": "^1.1",
+        "phpunit/phpunit": "^10.0"
     },
     "config": {
         "allow-plugins": {

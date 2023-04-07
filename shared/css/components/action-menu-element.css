@@ -55,3 +55,7 @@ inline-menu radio-group {
     flex-direction: column;
 }
 
+inline-menu label {
+    display: inline-block;
+    word-wrap: nowrap;
+}

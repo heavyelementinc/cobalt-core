@@ -37,17 +37,19 @@ class ApiFetch {
             if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
             let result = null;
             result = await fetch(this.uri, send);
+            this.fetchResult = result;
             this.result = await result.json();
 
-            if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
-            if (result.headers.get("X-Refresh")) this.pageRefresh(result.headers.get("X-Refresh"));
-            if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
-            if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
+            // if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
+            // if (result.headers.get("X-Refresh")) this.pageRefresh(result.headers.get("X-Refresh"));
+            // if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
+            // if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
 
             if (result.ok === false) {
                 reject(this.result);
                 await this.handleErrors(result,this.result);
             }
+            new AsyncMessageHandler(this, "ApiFetch", "status");
             // this.result = result;
     
             if("headers" in result) {
@@ -122,20 +124,14 @@ class ApiFetch {
         return await this.send("", "GET", {});
     }
 
+    // For now, we're just going to let this object handle FetchConfirms.
     async handleErrors(result, json) {
-        // const json = await result.json();
-        // this.result = json;
-        
         switch (result.status) {
             case 300:
                 let confirm = new FetchConfirm(json, this);
                 result = await confirm.draw();
                 if (json.error !== "Aborted") break;
-            case 301:
-                router.location = json.message;
                 break;
-            default:
-                throw new FetchError("HTTP Error", result, json, this.uri);
         }
         return json;
     }

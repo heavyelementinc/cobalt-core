@@ -2,6 +2,7 @@
 
 namespace Cobalt\Requests\Remote;
 
+use Cobalt\Requests\Exceptions\FailedSanityCheck;
 use Cobalt\Requests\Tokens\TokenInterface;
 use DateTime;
 use Drivers\UTCDateTime;
@@ -228,17 +229,18 @@ abstract class API extends \Drivers\Database implements APICall {
                 }
             }
         }
-        
-        if($this->sanityCheck($url, $method, $body));
+        $checkResult = $this->sanityCheck($url, $method, $body);
+        if($checkResult !== true) throw new FailedSanityCheck($checkResult);
 
         $client = new Guzzle();
         try{
             $response = $client->request($method, $mutant_url, $data);
         } catch (GuzzleException $e) {
             $error_message = $e->getResponse()->getBody()->getContents();
+            $error_headers = $e->getResponse()->getHeaders();
+            $final_message = $this->errorHandler($e, $error_message, $error_headers);
             // if(is_root()) 
-            throw new HTTPException($error_message);
-            throw new HTTPException($e);
+            throw new HTTPException($final_message);
         }
         $this->parseHeaders($response->getHeaders());
         
@@ -290,8 +292,79 @@ abstract class API extends \Drivers\Database implements APICall {
         return (string)$body;
     }
 
+    /**
+     * Must return TRUE to pass the check, otherwise returns an error message as
+     * a string that will be thrown as a FailedSanityCheck error.
+     * @param mixed $url 
+     * @param mixed $method 
+     * @param mixed $body 
+     * @return true|string
+     */
     function sanityCheck($url, $method, $body = null) {
-        // if($this->)
         return true;
+    }
+
+    /**
+     * Used by the APIManagement controller to map/allow API token editor to database entries
+     * 
+     * Returns a one-dimensional array. These MUST correspond to the keys submitted
+     * in the $_POST request.
+     * @return array 
+     */
+    public function getValidSubmitData():array {
+        // Default supported keys
+        return [
+            'key',
+            'secret',
+            'token',
+            'type',
+            'prefix',
+            'expiration',
+            'endpoint',
+        ];
+    }
+
+    public function errorHandler($error, $message, $headers):string {
+        $codes = [
+            400 => "Bad request",
+            401 => "Unauthorized",
+            402 => "Payment required",
+            403 => "Forbidden",
+            404 => "Not found",
+            405 => "Method not allowed",
+            406 => "Not acceptable",
+            407 => "Proxy authentication required",
+            408 => "Request timeout",
+            409 => "Conflict",
+            410 => "Gone",
+            411 => "Length required",
+            412 => "Precondition failed",
+            413 => "Payload too large",
+            414 => "URI too long",
+            415 => "Unsupported media type",
+            416 => "Range not satisfiable",
+            417 => "Expectation failed",
+            418 => "I'm a teapot",
+            421 => "Misdirected request",
+            422 => "Unprocessable entity",
+        ];
+        $contentType = getHeader('Content-Type', $headers, true);
+        $html = strpos($contentType, "text/html");
+        $json = strpos($contentType, "json");
+        $code = $error->getCode();
+        if( $html !== false && $html >= 0) {
+            $dom = new \DOMDocument;
+            $dom->loadHTML($message);
+            $bodies = $dom->getElementsByTagName('body');
+            $body = iterator_to_array($bodies)[0] ?? null;
+            $main = iterator_to_array($body->getElementsByTagName('main'))[0];
+            if($main) $body = $main;
+            $return_message = trim($body->textContent);
+            if(!$return_message) $return_message = iterator_to_array($dom->getElementsByTagName("title"))[0]->textContent;
+        } else if ($json !== false && $json >= 0) {
+            $return_message = json_encode($message);
+        }
+        if(key_exists($code, $codes)) $return_message .= "\n" . $codes[$code];
+        return $code . "\n" . $return_message;
     }
 }

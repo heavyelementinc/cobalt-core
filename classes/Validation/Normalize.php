@@ -79,7 +79,7 @@ use \Validation\Exceptions\ValidationFailed;
 
 abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator, ArrayAccess {
     protected $__schema = [];
-    protected $__dataset = [];
+    public $__dataset = [];
     protected $__index = [];
     protected $__to_validate = [];
     protected $__normalize_out = true;

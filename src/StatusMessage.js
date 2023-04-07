@@ -21,7 +21,7 @@ class StatusMessage {
     /** @todo add action event updating */
     async update(message, icon = this.icon, action = this.action, type = this.type) {
         const section = this.element.querySelector("section");
-        const ionIcon = this.element.querySelector("ion-icon");
+        const ionIcon = this.element.querySelector("i");
         this.element.setAttribute("name", type);
 
         this.updateClasses();
@@ -37,52 +37,89 @@ class StatusMessage {
     }
 
     decideIcon(icon, type) {
-        if(icon) return icon;
+        // if(icon) return icon;
+        let icons = {
+            "default": "information-slab-circle-outline",
+            "success":   "check-circle-outline",
+            400:       "cancel",
+            "warning": "alert-outline",
+            "error":   "alert-octagon-outline",
+            "auth":           "fingerprint",
+            "authentication": "fingerprint",
+            "user":           "fingerprint",
+            401:              "fingerprint",
+            "heartbeat": "pulse",
+            "money":  "cash",
+            402:      "cash",
+            "bookmark": "bookmark-outline",
+            "pizza":  "pizza",
+            "teapot": "kettle",
+            418:      "kettle",
+            "fire": "fire-alert",
+            451:    "fire-alert",
+            "update": "refresh-circle",
+            "email":  "email-fast",
+            "notification":   "bell-outline",
+            "notify":         "bell-outline",
+            "chat":           "forum-outline",
+            "text":           "forum-outline",
+            "message":        "forum-outline",
+            "fail":    "missing",
+        }
+
+        if(icon in icons) return icons[icon];
+        if(type in icons) return icons[type];
+        return icons.default;
+    }
+
+    oldSwitch() {
         switch(type) {
             case "success":
-                return "checkmark-circle-outline";
+                return "check-circle-outline";
             case "heartbeat":
-                return "pulse-outline";
+                return "pulse";
             case "money":
             case 402:
-                return "cash-outline";
+                return "cash";
             case "bookmark":
                 return "bookmark-outline";
             case "pizza":
-                return "pizza-outline";
+                return "pizza";
             case "teapot":
             case 418:
-                return "cafe-outline";
+                return "kettle";
             case "fire":
             case 451:
-                return "flame-outline";
+                return "fire-alert";
             case "update":
-                return "refresh-circle-outline";
+                return "refresh-circle";
             case "email":
-                return "mail-outline";
+                return "email-fast";
             case "notification":
             case "notify":
-                return "notifications-outline";
+                return "bell-outline";
             case "chat":
             case "text":
             case "message":
-                return "chatbubbles-outline";
+                return "forum-outline";
             case "auth":
             case "authentication":
             case "user":
             case 401:
-                return "finger-print-outline";
+                return "fingerprint";
             case "fail":
             case "missing":
             case 400:
             case type >= 403 && type <= 499:
-                return "ban-outline";
+                return "cancel";
+            case "warning":
+                return "alert-outline";
             case type >= 500 && type <= 599:
             case "error":
-                return "warning-outline";
+                return "alert-octagon-outline";
             case "status":
             default:
-                return "information-circle-outline";
+                return "information-slab-circle-outline";
         }
     }
 
@@ -114,7 +151,7 @@ class MessageHandler {
         message.setAttribute("name",details.type);
         message.classList.add(`status-message`);
         message.setAttribute("data-id",details.id);
-        message.innerHTML = `<ion-icon name='${details.icon}'></ion-icon><section>${details.message}</section>`;
+        message.innerHTML = `<i name='${details.icon}'></i><section>${details.message}</section>`;
         let close_btn = document.createElement("button");
         close_btn.innerHTML = window.closeGlyph;
         // close_btn.addEventListener()

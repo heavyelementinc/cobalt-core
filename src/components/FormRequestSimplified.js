@@ -75,10 +75,12 @@
                 result = await this.send_and_subscribe();
                 resolve(result);
                 this.dispatchEvent(new CustomEvent("formRequestSuccess", {detail: result}));
+                this.dispatchEvent(new CustomEvent("success", {detail: result}));
             } catch (error) {
                 this.working_spinner_off();
                 reject(result);
                 this.dispatchEvent(new CustomEvent("formRequestFail", {detail: result}));
+                this.dispatchEvent(new CustomEvent("failure", {detail: result}));
             }
             this.working_spinner_off();
         });
@@ -89,6 +91,8 @@
             var request = "";
             let data = this.request.build_query();
             this.dispatchEvent(new CustomEvent("formRequestSubmit", {detail: data}));
+            // Do not dispatch a submit event because apparently we're listening for a submit event and it duplicates the send.
+            // this.dispatchEvent(new CustomEvent("submit", {detail: data}));
 
             try {
                 request = await this.request.send(data);
@@ -113,7 +117,6 @@
                 });
                 subscription.addEventListener("error", e => {
                     new StatusError("There was an error");
-                    console.log(e);
                     subscription.close();
                     reject(request);
                 });
@@ -144,13 +147,11 @@
     }
 
     async working_spinner_on() {
-        console.log("Transitioning");
         return new Promise((resolve,reject) => {
             setTimeout(() => {
                 this.additionalContent.dispatchEvent(new Event("transitionend"));
             },1500);
             this.additionalContent.addEventListener("transitionend", () => {
-                console.log("Transition Ended")
                 resolve();
                 setTimeout(() => resolve(),1000);
             },{once: true})
@@ -161,7 +162,6 @@
     async working_spinner_off() {
         return new Promise((resolve,reject) => {
             this.additionalContent.addEventListener("transitionend", () => {
-                console.log("Transition Ended 2")
                 resolve();
                 setTimeout(() => resolve(),1000);
             },{once: true})

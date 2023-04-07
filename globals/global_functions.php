@@ -249,9 +249,10 @@ function str_to_id($str) {
  * @param string $class the class name
  */
 function cobalt_autoload($class) {
+    global $CLASSES_DIR;
     $namespace_to_path = str_replace("\\", "/", $class) . ".php";
-
-    $file = find_one_file($GLOBALS['CLASSES_DIR'], $namespace_to_path) ?? "";
+    
+    $file = find_one_file($CLASSES_DIR, $namespace_to_path) ?? "";
 
     try {
         if ($file !== false) {
@@ -772,9 +773,10 @@ function is_child_dir($base_dir, $path) {
 }
 
 // function get_route_data(string $class, string $method, ?string $routeMethod = "get", string $context = null) {
+    // global $ROUTER;
 //     if($context === null) $context = "web";
 //     $controllerAlias = "$class@$method";
-//     $router = $GLOBALS['router'];
+//     $router = $ROUTER;
 //     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
 //     // if($context !== $router->route_context) {
 //     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
@@ -801,9 +803,9 @@ function is_child_dir($base_dir, $path) {
  * @return string 
  */
 function get_path_from_route(string $class, string $method, array $args = [], ?string $routeMethod = "get", string $context = null) {
+    global $ROUTER;
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
-    $router = $GLOBALS['router'];
     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
     // if($context !== $router->route_context) {
     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
@@ -811,7 +813,7 @@ function get_path_from_route(string $class, string $method, array $args = [], ?s
     // }
     // $routes = $router->routes[$context][$routeMethod];
     $route = null;
-    foreach($router->routes as $routes) {
+    foreach($ROUTER->routes as $routes) {
         foreach($routes[$routeMethod] as $r => $data) {
             if($data['controller'] !== $controllerAlias) continue;
             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
@@ -858,11 +860,11 @@ function route(string $directiveName, array $args = [], array $context = []):str
 }
 
 function validate_route($directiveName, $context) {
+    global $ROUTER;
     $routeMethod = $context['method'] ?? "get";
     $ctx = $context['context'] ?? "web";
     
-    $router = $GLOBALS['router'];
-    $routes = $router->routes[$ctx][$routeMethod];
+    $routes = $ROUTER->routes[$ctx][$routeMethod];
 
     foreach($routes as $r => $data) {
         if($data['controller'] !== $directiveName) continue;
@@ -880,6 +882,7 @@ function validate_route($directiveName, $context) {
  * @param string $directory_group the name of the key
  */
 function get_route_group($directory_group, $misc = []) {
+    global $ROUTER;
     $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
     if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
@@ -889,8 +892,8 @@ function get_route_group($directory_group, $misc = []) {
     
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
     if($misc['excludeWrapper'] === true) $ul = "";
-    $current_route = $GLOBALS['router']->current_route;
-    $list = $GLOBALS['router']->routes;
+    $current_route = $ROUTER->current_route;
+    $list = $ROUTER->routes;
 
     // handleAuxiliaryRoutes($list, $misc, $directory_group);
 
@@ -1255,13 +1258,15 @@ function pretty_rounding($number):string{
 
 function benchmark_start($name) {
     if(!__APP_SETTINGS__['debug']) return;
-    $GLOBALS['BENCHMARK_RESULTS'][$name] = ['start' => microtime(true) * 1000];
+    global $BENCHMARK_RESULTS;
+    $BENCHMARK_RESULTS[$name] = ['start' => microtime(true) * 1000];
 }
 
 function benchmark_end($name) {
     if(!__APP_SETTINGS__['debug']) return;
-    $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] = microtime(true) * 1000;
-    $GLOBALS['BENCHMARK_RESULTS'][$name]['delta'] = $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] - $GLOBALS['BENCHMARK_RESULTS'][$name]['start'];
+    global $BENCHMARK_RESULTS;
+    $BENCHMARK_RESULTS[$name]['end'] = microtime(true) * 1000;
+    $BENCHMARK_RESULTS[$name]['delta'] = $BENCHMARK_RESULTS[$name]['end'] - $BENCHMARK_RESULTS[$name]['start'];
 }
 
 function obscure_email(string $email, int $threshold = 3, string $character = "•"): string {
@@ -1361,13 +1366,18 @@ function country2flag(string $countryCode, ?string $countryName = null): string 
     return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
 }
 
-function getHeader($header) {
+function getHeader($header, $headerList = null, $latest = true) {
+    if($headerList === null) $headerList = getallheaders();
     $toMatch = strtolower($header);
     $headers = [];
-    foreach(getallheaders() as $key => $value){
+    foreach($headerList as $key => $value){
         $headers[strtolower($key)] = $value;
     }
-    if(key_exists($toMatch, $headers)) return $headers[$toMatch];
+    $match = null;
+    if(key_exists($toMatch, $headers)) $match = $headers[$toMatch];
+
+    if(gettype($match) === "array" && $latest) return $match[count($match) - 1];
+    if($match) return $match;
     throw new NoValue("The specified header was not found among the request headers");
 }
 

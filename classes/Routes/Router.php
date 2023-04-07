@@ -101,17 +101,18 @@ class Router {
     // }
 
     function get_routes() {
+        global $ROUTE_TABLE, $ROUTE_TABLE_ADDRESS;
         if($this->router_table_loaded) {
-            $this->routes = $GLOBALS['ROUTE_TABLE'];
+            $this->routes = $ROUTE_TABLE;
             return;
         }
         foreach($this->router_table_list as $context => $value) {
             foreach($value as $table){
-                $GLOBALS['ROUTE_TABLE_ADDRESS'] = $context;
+                $ROUTE_TABLE_ADDRESS = $context;
                 if(file_exists($table)) require_once $table;
             }
         }
-        $this->routes = $GLOBALS['ROUTE_TABLE'];
+        $this->routes = $ROUTE_TABLE;
         $this->router_table_loaded = true;
     }
 

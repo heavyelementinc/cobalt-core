@@ -1,7 +1,4 @@
 <?php
-ob_start();
-$GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
-
 /**
  * env.php - The Cobalt Environment Bootstrapper
  * 
@@ -18,8 +15,11 @@ $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000
  * 
  * @license cobalt-core/license
  * @author Gardiner Bryant <gardiner@heavyelement.io>
- * @copyright 2021 - Heavy Element, Inc.
+ * @copyright 2023 - Heavy Element, Inc.
  */
+
+ob_start();
+$GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
 
 require_once __DIR__ . "/globals/logs.php";
 // Let's make sure our environment is configured properly.
@@ -34,6 +34,7 @@ $app_root = "";
 if (!empty($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../";
 // Rely on the Cobalt CLI to mandate the path to our app
 else if (key_exists("cli_app_root", $GLOBALS)) $app_root = $GLOBALS['cli_app_root'];
+else if (key_exists("unit_test", $GLOBALS)) $app_root = $GLOBALS['unit_test'];
 else die("Cannot establish absolute path to app root"); // Die.
 
 define("__APP_ROOT__", realpath($app_root));
@@ -45,7 +46,7 @@ if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);
 
 // Define a few values that we will use to handle writing output during an exception
 $allowed_to_exit_on_exception = true;
-$write_to_buffer_handled = false;
+$WRITE_TO_BUFFER_HANDLED = false;
 
 require_once __DIR__ . "/globals/global_declarations.php";
 require_once __DIR__ . "/globals/bootstrap.php";

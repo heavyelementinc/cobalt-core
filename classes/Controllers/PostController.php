@@ -23,6 +23,7 @@ abstract class PostController extends Controller {
     protected $permission = "Post_manage_posts";
     protected $publishPermission = "Post_publish_posts";
     protected $permissionGroup = "Post";
+    protected $customTitle = "";
 
     public function initialize($collection, $schemaName = null, $permission_suffix = "") {
         if($schemaName === null) $schemaName =  "\\Cobalt\\Posts\\PostSchema";
@@ -36,7 +37,9 @@ abstract class PostController extends Controller {
 
     public function admin_index() {
         if(!$this->postMan) throw new Exception("You must manually initialize the PostController");
-        $result = $this->postMan->findAllAsSchema(...$this->getParams($this->postMan, []));
+        $result = $this->postMan->findAllAsSchema(...$this->params($this->postMan, [], [
+            'defaultOptions' => ['sort' => ['publicationDate' => -1]]
+        ]));
         $posts = "";
         foreach($result as $post) {
             $posts .= view($post->getTemplate("table"),[
@@ -117,7 +120,9 @@ abstract class PostController extends Controller {
 
     public function index() {
         if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
-        $query = $this->getParams($this->postMan, ['published' => true]);
+        $query = $this->params($this->postMan, ['published' => true], [
+            'defaultOptions' => ['sort' => ['publicationDate' => -1]]
+        ]);
         $docs = $this->postMan->findAllAsSchema(...$query);
 
         $og_image = "";

@@ -35,7 +35,7 @@ message-item{
     /* padding: 15px; */
 }
 
-    message-item ion-icon{
+    message-item i{
         height: var(--height);
         min-height: var(--min-height);
         font-size: 3rem;
@@ -149,8 +149,16 @@ message-item{
     
 }
 
-message-item[name="success"] ion-icon {
+message-item[name="success"] i {
     color: var(--project-color-active);
+}
+
+:is(message-item[name="warning"],message-item.status-message--warning) {
+    border: 1px solid var(--project-color-input-invalid-border);
+}
+
+:is(message-item[name="warning"] i, message-item.status-message--warning i) {
+    color: var(--project-color-input-invalid-border);
 }
 
 :is(message-item[name="error"],message-item.status-message--error) {
@@ -168,7 +176,7 @@ message-item[name="success"] ion-icon {
     color:var(--project-color-input-invalid-border);
 }
 
-:is(message-item[name="error"],message-item.status-message--error) ion-icon {
+:is(message-item[name="error"],message-item.status-message--error) i {
     color: white;
 }
 
@@ -178,7 +186,7 @@ message-item[name="pizza"] {
     border: 3px solid #f8efd9;
 }
 
-    message-item[name="pizza"] ion-icon {
+    message-item[name="pizza"] i {
         color: #b52a04;
     }
 

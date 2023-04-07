@@ -1,4 +1,6 @@
-
+img.cobalt-masthead {
+    max-height: 52px;
+}
 nav ul {
     list-style: none;
     margin: 0;

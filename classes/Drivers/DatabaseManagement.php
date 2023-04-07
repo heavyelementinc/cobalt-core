@@ -5,11 +5,13 @@ namespace Drivers;
 class DatabaseManagement {
     private $db;
 
+    const IGNORED = ["sessions","cron"];
+
     function __construct() {
         $this->db = db_cursor('database', null, false, true);
     }
     
-    public function export($file = null, $talk = false) {
+    public function export($file = null, $talk = false, $ignored = true) {
         if(!$file) $file = app("DB_export_directory");
         $file = __APP_ROOT__ . $file;
         if(!file_exists($file)) mkdir($file, 0777, true);
@@ -21,6 +23,7 @@ class DatabaseManagement {
         foreach($collections as $collection) {
             $whole_collection = [];
             $name = $collection->getName();
+            if($ignored === true && in_array($name, $this::IGNORED)) continue;
             $count = $this->db->{$name}->count([]);
             $result = $this->db->{$name}->find([],['limit' => $count + 1]);
             if($talk) printf($name . " contains $count document(s)");

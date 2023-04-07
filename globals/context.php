@@ -37,12 +37,18 @@ if ($route_context !== "web") {
 }
 
 // Invoke our context processor.
+/**
+ * @global \Handlers\RequestHandler
+ */
 $context_processor = new $processor();
 
 if (!is_a($context_processor, "Handlers\RequestHandler")) {
     if (app("debug")) die("Context processor must be an instance of Handlers\RequestHandler");
     else die("Error");
 }
+
+define("__APP_CONTEXT__", __APP_ROOT__ . "/app_context.php");
+if(file_exists(__APP_CONTEXT__)) require_once __APP_CONTEXT__;
 
 // We use _stage_bootstrap as a means of keeping track of where we are in the
 // bootstrapping process. This gives us insight we can later use to handle any
@@ -66,14 +72,14 @@ try {
 
 
     // The router takes care of much of the rest of this process.
-    $router = new Routes\Router($route_context);
+    $ROUTER = new Routes\Router($route_context);
 
     // Create the routing table for the current context so that the Cobalt init
     // script has something to bind its routes to.
-    $router->init_route_table();
+    $ROUTER->init_route_table();
 
     // We load our routing tables for the current context
-    $router->get_routes();
+    $ROUTER->get_routes();
 
     $context_processor->_stage_init(app("context_prefixes")[$route_context]);
     $context_processor->_stage_bootstrap['_stage_init'] = true;
@@ -81,9 +87,9 @@ try {
     /** @global string PATH contains either an empty string the URI ends in '/'
      * or "../" if the URI ends without '/' also available in rendering engine 
      * as {{PATH}} */
-    $GLOBALS['PATH'] = "";
+    $PATH = "";
     /** @global array $current_route_meta contains the discovered route's metadata */
-    $current_route_meta = $router->discover_route();
+    $current_route_meta = $ROUTER->discover_route();
 
     benchmark_end("router_setup");
     benchmark_start("context_setup");
@@ -97,7 +103,7 @@ try {
     benchmark_end("context_setup");
     benchmark_start("controller_execution");
 
-    $router_result = $router->execute_route();
+    $router_result = $ROUTER->execute_route();
     $context_processor->_stage_execute($router_result);
     $context_processor->_stage_bootstrap['_stage_execute'] = true;
 
@@ -116,17 +122,17 @@ try {
 }
 
 benchmark_end("controller_execution");
-
+ob_clean();
 // Let's finally output the result:
 if($context_result !== null) {
     echo $context_result;
-    $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['end'] = microtime(true) * 1000;
-    $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['delta'] = $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['end'] - $GLOBALS['BENCHMARK_RESULTS']['env_invoke']['start'];
+    $BENCHMARK_RESULTS['env_invoke']['end'] = microtime(true) * 1000;
+    $BENCHMARK_RESULTS['env_invoke']['delta'] = $BENCHMARK_RESULTS['env_invoke']['end'] - $BENCHMARK_RESULTS['env_invoke']['start'];
 
     $global_benchmarks = "";
     if(app('debug') && isset($context_processor->encoding_mode) && $context_processor->encoding_mode === "text/html") {
-        if($GLOBALS['TIME_TO_UPDATE']) $global_benchmarks .= "<script>console.warn('Cobalt Engine Bootstrap Completed')</script>";
-        $global_benchmarks .= view("/debug/benchmarks.html",['results' => str_replace("\"","\\\"",json_encode($GLOBALS['BENCHMARK_RESULTS']))]);
+        if($TIME_TO_UPDATE) $global_benchmarks .= "<script>console.warn('Cobalt Engine Bootstrap Completed')</script>";
+        $global_benchmarks .= view("/debug/benchmarks.html",['results' => str_replace("\"","\\\"",json_encode($BENCHMARK_RESULTS))]);
         echo $global_benchmarks;
     }
     ob_flush();

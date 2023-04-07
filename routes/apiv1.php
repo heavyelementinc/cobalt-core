@@ -76,6 +76,11 @@ if (app('debug')) {
         'requires_cors' => false,
         'permission' => 'Auth_allow_editing_users'
     ]);
+}
+
+if(app("enable_debug_routes")) {
+    Route::post("/debug/exception/{type}?", "DebugError@api_throw_error");
+    Route::put("/debug/control-headers/...", "Debug@control_headers");
 
     Route::post("/debug/upload/", "Debug@upload_test");
     Route::post("/debug/upload-and-watch/", "Debug@image_test");
@@ -94,10 +99,6 @@ if (app('debug')) {
     Route::s_post("/debug/file-upload/multi","DebugFiles@multi_file_upload");
     Route::s_post("/debug/file-upload/arbitrary-data","DebugFiles@extra_metadata");
     Route::delete("/debug/file-upload/{id}","DebugFiles@delete");
-
-    Route::put("/debug/control-headers/...", "Debug@control_headers");
-    // Route::fs("/debug/file-upload/);
-
 }
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {

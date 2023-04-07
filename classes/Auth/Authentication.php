@@ -167,8 +167,8 @@ class Authentication {
         return $result;
     }
 
-    static function handle_email_login() {
-        $uname = $_POST['username'];
+    static function handle_email_login($email) {
+        $uname = $email;
         if(!$uname) throw new BadRequest("Unspecified username");
 
         $crud = new UserCRUD();

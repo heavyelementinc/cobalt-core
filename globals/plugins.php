@@ -19,14 +19,14 @@ try {
     ];
 
     $PERMISSIONS = [];
-    $GLOBALS['SHARED_CONTENT'] = [];
+    $SHARED_CONTENT = [];
     $PACKAGES = ['js' => [], 'css' => []];
 
     foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
         array_push($TEMPLATE_PATHS, $plugin->register_templates());
         $PERMISSIONS = array_merge($PERMISSIONS, $plugin->register_permissions());
         array_push($GLOBALS['CLASSES_DIR'], $plugin->register_dependencies());
-        array_push($GLOBALS['SHARED_CONTENT'], $plugin->register_shared_content_dir());
+        array_push($SHARED_CONTENT, $plugin->register_shared_content_dir());
         $PACKAGES['js']  = array_merge($PACKAGES['js'],  $plugin->register_packages('js'));
         $PACKAGES['css'] = array_merge($PACKAGES['css'], $plugin->register_packages('css'));
 

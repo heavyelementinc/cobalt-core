@@ -260,13 +260,13 @@ function relativeTime(prev, current = null, mode = "string", limit = "day") {
             break;
         case (diff < month):
             // return `${} day ago`;
-            qualifier = "About";
+            // qualifier = "About";
             quantity = Math.round(diff / day);
             unit = "day";
             break;
         case (diff < year):
             // return `About ${} months ago`;
-            qualifier = "About";
+            // qualifier = "About";
             quantity = Math.round(diff / month);
             unit = "month";
             break;

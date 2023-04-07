@@ -1,0 +1,1 @@
+Files stored in the /shared directory are accessible via the /core-content/ endpoint. You may override any of the core shared files by placing them here. File overrides must have the same path and filename and match the exact casing as well.

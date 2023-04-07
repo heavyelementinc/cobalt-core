@@ -3,9 +3,10 @@
         "common": [
             "Preferences.js",
             "global_functions.js",
-            "sortable.js",
             "Modal.js",
             "StatusMessage.js",
+            "AsyncMessageHandler.js",
+            "sortable.js",
             "ApiFetch.js",
             "ActionMenu.js",
             "components/custom-button.js",

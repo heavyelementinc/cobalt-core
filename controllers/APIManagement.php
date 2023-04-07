@@ -28,14 +28,18 @@ class APIManagement {
         if(!key_exists($name,$files)) throw new NotFound("That does not exist");
         
         $thing = $files[$name]['namespace'] . "\\" . $name;
-
+        
         $api = new $thing();
-        $token = $api->authorizationToken(null, true);
+
+        $tk = $api->findOne(["token_name" => $api::class]);
+        $tkIface = $api->getIfaceName();
+
+        $token = new $tkIface($tk);
 
         add_vars([
             'title' => $thing::getMetadata()['name'],
             'id' => $name,
-            'token' => $token
+            'token' => $tk
         ]);
 
         $template = "/admin/api/key.html";
@@ -80,20 +84,20 @@ class APIManagement {
 
         $map = $manager->getValidSubmitData();
         $mutant = [];
+        $submit = $_POST;
         foreach($map as $key) {
-            $mutant[$key] = $_POST[$key];
+            if(!key_exists($key, $submit)) $submit[$key] = null;
+            $mutant[$key] = $submit[$key];
         }
-        // $mutant = [
-        //     'key'    => $_POST['key'],
-        //     'secret' => $_POST['secret'],
-        //     'token'    => $_POST['token'],
-        //     'type'   => $_POST['authorization'],
-        //     'prefix' => $_POST['prefix'],
-        //     'expiration' => $_POST['expiration'],
-        //     'endpoint' => $_POST['endpoint'],
-        // ];
+        
 
-        $result = $manager->updateToken($mutant);
+        $result = $manager->updateOne([
+            'token_name' => $manager::class
+        ], [
+            '$set' => $mutant
+        ], [
+            'upsert' => true
+        ]);
         
         try {
             $error = $manager->testAPI();

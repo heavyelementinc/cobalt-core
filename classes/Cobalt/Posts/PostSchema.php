@@ -42,7 +42,7 @@ class PostSchema extends \Validation\Normalize {
             'publicationDate' => [
                 'get' => fn ($val) => $this->get_date($val),
                 'set' => fn ($val) => $this->make_date($val . " " . $this->__to_validate['publicationTime']),
-                'display' => fn ($val) => $this->get_date($val, 'verbose'),
+                'display' => fn ($val) => $this->get_date($val, 'relative'),
             ],
             'publicationTime' => [
                 'get' => fn () => $this->get_date($this->__dataset->publicationDate, "24-hour"),
