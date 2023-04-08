@@ -156,3 +156,23 @@ if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel")
     ]);
     Route::get("/contact-form/{id}", "ContactForm@read");
 }
+
+
+if(app("Customizations_enabled")) {
+    Route::get("/customizations/update/{id}", "Customizations@modify_customization",[
+        'permission' => 'Customizations_update_parameters'
+    ]);
+
+    Route::get("/customizations/edit/{id}", "Customizations@editor", [
+        'permission' => 'Customizations_modify'
+    ]);
+
+    Route::get("/customizations/{group}?", "Customizations@index", [
+        'permission' => 'Customizations_modify',
+        'anchor' => [
+            'name' => 'Customizations',
+            'href' => '/customizations/',
+        ],
+        'navigation' => ['settings_panel']
+    ]);
+}

@@ -746,3 +746,22 @@ function getBlobWithLoadingBar(url, throbber, progressBar) {
         client.send();
     })
 }
+
+function copyToClipboard(valueToCopy) {
+    const element = document.createElement("input");
+    document.body.appendChild(element);
+    element.value = valueToCopy;
+    element.select();
+    element.setSelectionRange(0, valueToCopy.length + 1);
+
+    navigator.clipboard.writeText(element.value);
+    
+    document.body.removeChild(element);
+
+    const message = new StatusMessage({
+        message: "Copied text to clipboard",
+        duration: 4000
+    })
+
+    // setTimeout(() => message.close(), 4000);
+}

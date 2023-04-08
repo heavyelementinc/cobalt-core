@@ -97,6 +97,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'uppercase',  // Upper cases the entire string
         'lowercase',  // Lower cases the entire string
         'gmt',
+        'immutable',
     ];
 
     protected $__global_fields = [];
@@ -559,6 +560,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __proto_gmt($val, $field) {
         if($val instanceof UTCDateTime) $val = $val->toDateTime()->getTimestamp();
         return date('r', $val);
+    }
+
+    private function __proto_immutable($val, $field) {
+        if(in_array($field, $this->__dataset) && $this->__dataset[$field]) return " readonly=\"readonly\"";
+        return "";
     }
 
     /** Allows us to specify in the schema an alternate display method

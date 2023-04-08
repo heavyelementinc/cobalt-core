@@ -77,8 +77,10 @@ use Exceptions\HTTP\NotFound;
 
 class Render {
     public $body = "";
+    public $stock_vars = [];
     public $vars = [];
     const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    public $custom;
     public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
     public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
@@ -106,8 +108,11 @@ class Render {
                 'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
             ],
             'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
-            'og_template' => "/parts/opengraph/default.html"
+            'og_template' => "/parts/opengraph/default.html",
+            // 'custom' => new CustomizationManager(),
         ];
+
+        // $this->custom = new CustomizationManager();
     }
 
     /**
@@ -272,6 +277,8 @@ class Render {
     }
 
     function lookup_value($name, $process = true) {
+        // $custom = "custom.";
+        // if($name === "custom") $this->custom->{str_replace("custom.","",$name)};
         $lookup = \lookup_js_notation($name, $this->vars);
         if ($process) return $this->process_vars($lookup);
         return $lookup;

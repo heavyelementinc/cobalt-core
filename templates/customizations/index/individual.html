@@ -1,0 +1,12 @@
+<flex-row>
+    <flex-cell><a href="/admin/customizations/edit/{{doc._id}}">{{doc.name}}</a></flex-cell>
+    <flex-cell class="value-container">{{doc.value.display}}</flex-cell>
+    <flex-cell><code>&#123;&#123;custom.{{doc.unique_name}}&#125;&#125;</code></flex-cell>
+    <flex-cell><a href="/admin/customizations/{{doc.group}}">{{doc.group}}</a></flex-cell>
+    <flex-cell style="width: 20px">
+        <action-menu type="options">
+            <option onclick='copyToClipboard("&#123;&#123;custom.{{doc.unique_name}}&#125;&#125;")'>Copy slug to clipboard</option>
+            <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
+        </action-menu>
+    </flex-cell>
+</flex-row>

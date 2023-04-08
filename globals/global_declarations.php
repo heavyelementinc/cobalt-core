@@ -1,4 +1,5 @@
 <?php
+
 global $TEMPLATE_PATHS;
 $TEMPLATE_PATHS = [
     __APP_ROOT__ . "/private/templates/",
@@ -30,3 +31,6 @@ $CLASSES_DIR = [
 /** @global ?UserSchema */
 global $session;
 $session = null;
+
+global $WEB_PROCESSOR_VARS;
+$WEB_PROCESSOR_VARS = [];

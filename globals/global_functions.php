@@ -367,6 +367,7 @@ function set_template($path) {
  * @return void
  */
 function add_vars($vars) {
+    if(key_exists('custom', $vars)) throw new Exception("You may not override the `custom` var.");
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
         return;
@@ -470,6 +471,10 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
                 $temp_path = get_temp_path($path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
                 return $mutant;
+            }
+            if (is_a($mutant, "\\Cobalt\\Customization\\CustomizationManager")) {
+                $result = $mutant->{$key};
+                return $result;
             }
             if (!isset($mutant->{$key})) break; // Break if we can't find the property
             $mutant = $mutant->{$key};

@@ -117,3 +117,7 @@ if(__APP_SETTINGS__['PaymentGateways_enabled']) {
 
 Route::s_put("/api/key/{service}",  "APIManagement@update", ['permission' => 'API_manage_keys']);
 Route::s_post("/api/key/{service}", "APIManagement@parse",  ['permission' => 'API_manage_keys']);
+
+Route::s_post("/customizations/update/{id}?", "Customizations@update", ['permission' => 'Customizations_modify']);
+Route::s_post("/customizations/upload/{id}?", "Customizations@uploadFile", ['permission' => 'Customizations_modify']);
+Route::s_delete("/customizations/{id}", "Customizations@deleteItem", ['permission' => 'Customizations_delete']);

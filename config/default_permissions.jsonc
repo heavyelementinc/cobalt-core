@@ -96,5 +96,33 @@
         "dangerous": true,
         "default": false,
         "ring": 1
+    },
+    "Customizations_create": {
+        "group": "Customization",
+        "label": "Allow the user to create arbitrary customized content (requires the modify privilege as well).",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_modify": {
+        "group": "Customization",
+        "label": "Allow the user to modify the values of customized content",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_delete": {
+        "group": "Customization",
+        "label": "Allow the user to delete existing customized content",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_update_parameters": {
+        "group": "Customization",
+        "label": "Allow the user to modify customized content",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
     }
 }

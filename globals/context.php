@@ -18,13 +18,13 @@ ob_start();
  * @global $route_context Stores the value of the route context
  */
 $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
-
 try {
     /** @global $auth Access the Authentication class */
     $auth = new Auth\Authentication();
 } catch (Exception $e) {
     die($e->getMessage());
 }
+$WEB_PROCESSOR_VARS['custom'] = new Cobalt\Customization\CustomizationManager();
 
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
 $processor = "Handlers\WebHandler";

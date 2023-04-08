@@ -262,6 +262,30 @@
         "default": true
     },
 
+    "Customizations_enabled": {
+        "default": true,
+        "directives": {},
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Enable Customization Framework <help-span value='Enables customization'></help-span>",
+            "subgroup": "Customization"
+        },
+        "validate": {
+            "type": "bool"
+        }
+    },
+    "error_on_missing_customization": {
+        "default": true,
+        "directives": {},
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Error on missing Customzations <help-span value='When enabled, the CustomizationManager will throw an Exception if a value is missing.'></help-span>",
+            "subgroup": "Customization"
+        },
+        "validate": {
+            "type": "bool"
+        }
+    },
     "CobaltEvents_enabled": {
         "default": true,
         "directives": {

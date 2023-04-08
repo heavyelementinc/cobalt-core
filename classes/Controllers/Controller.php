@@ -16,6 +16,7 @@ class Controller {
     protected $filter = [];
     protected $options = [];
     protected $searchFieldName = false;
+    protected $searchQuery = [];
 
     protected $controlMethod = "GET";
 
@@ -44,8 +45,14 @@ class Controller {
         $this->limitOverride = $limitOverride;
     }
 
-    public function enableSearchField(string $searchName) {
+    public function enableSearchField(string $searchName, ?array $query = null) {
         $this->searchFieldName = $searchName;
+        if($query === null) $query = [$searchName => $_GET[$searchName]];
+        // $this->searchQuery = $query;
+        if(!key_exists($searchName, $_GET)) return;
+
+        $this->allowedFilters[$searchName] = $query;
+        $this->filterOverride = $query;
     }
 
     /**
@@ -94,10 +101,10 @@ class Controller {
      */
     final public function parseFilterAndOptions(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = [], $defaultOptions = null): array {
         $this->manager = $manager;
-        $this->filterOverride = $filterOverride;
-        $this->defaultOptions = $defaultOptions;
-        $this->allowedFilters = $allowedFilters;
-        $this->allowedOptions = $allowedOptions;
+        $this->filterOverride = array_merge($this->filterOverride ?? [], $filterOverride);
+        $this->defaultOptions = array_merge($this->defaultOptions ?? [], $defaultOptions);
+        $this->allowedFilters = array_merge($this->allowedFilters ?? [], $allowedFilters);
+        $this->allowedOptions = array_merge($this->allowedOptions ?? [], $allowedOptions);
         $this->filter = $this->getFilters($allowedFilters);
         $this->options = $this->getOptions($allowedOptions, $this->defaultOptions);
         return [array_merge($this->filter, $this->filterOverride), $this->options];
@@ -189,7 +196,7 @@ class Controller {
         $searchField = "";
         if($this->searchFieldName) {
             $populated = ($_GET[$this->searchFieldName]) ? htmlspecialchars($_GET[$this->searchFieldName]) : "";
-            $searchField = "<input type='search' name='$this->searchFieldName' value='$populated'>";
+            $searchField = "<input type='search' name='$this->searchFieldName' value='$populated' placeholder='Search...'>";
         }
         
         return "<form class='cobalt-query-controls' method='".$this->controlMethod."'>$searchField $previousButton $pageNumber $nextButton</form>";
@@ -218,8 +225,19 @@ class Controller {
 
         $pageNumber = "";
         if($withPageNumber) $pageNumber = "<span>$currentPage / $pageCount</span>";
+        
+        $searchField = "";
+        if($this->searchFieldName) {
+            $populated = ($_GET[$this->searchFieldName]) ? htmlspecialchars($_GET[$this->searchFieldName]) : "";
+            $searchField = "<input type='search' name='$this->searchFieldName' value='$populated' placeholder='Search...'>";
+        }
 
-        return "<div class='cobalt-query-controls'>$previousLink $pageNumber $nextLink</div>";
+        $icon = "magnify";
+
+        $formField = "";
+        if($searchField) $formField = "<form>$searchField<button type='submit' native><i name='$icon'></i></button></form>";
+
+        return "$formField<div class='cobalt-query-controls'>$previousLink $pageNumber $nextLink</div>";
 
     }
 
