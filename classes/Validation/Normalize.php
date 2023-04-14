@@ -134,6 +134,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $this->init_schema();
 
         $this->__dataset = array_merge($this->default_values(), doc_to_array($this->__dataset));
+
+        $this->__normalize_data();
         // Only enable pronoun prototypes if the 'pronoun_set' key is in the schema.
         // Do we actually want this?
         if (key_exists('pronoun_set', $this->__schema)) {
@@ -202,6 +204,42 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     /**
+     * Pass validated values and this will return an array of operators
+     * Any key that exists in the schema will use the $set operator unless
+     * the field's schema entry has an `operator` key set.
+     * 
+     * The `operator` key must match a MongoDB Top Level Operator!
+     * 
+     * @param mixed $validated 
+     * @return array 
+     */
+    function __operators($validated) {
+        $result = [];
+        foreach($validated as $field => $value) {
+            if(!key_exists($field, $this->__schema)) continue;
+            if(!key_exists('operator', $this->__schema[$field])) {
+                if(!key_exists('$set', $result)) $result['$set'] = [];
+                $result['$set'][$field] = $value;
+                continue;
+            }
+            $operator = $this->__schema[$field]['operator'];
+            
+            switch(gettype($operator)) {
+                case "string":
+                    if(!key_exists($operator, $result)) $result[$operator] = [];
+                    $result[$operator][$field] = $value;
+                    break;
+                case is_callable($operator):
+                    $r = $operator($field, $value);
+                    $operator = key($r);
+                    if(!key_exists($operator, $result)) $result[$operator] = [];
+                    $result[$operator] = array_merge($result[$operator], $r[$operator]);
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Validation routine.
      * 
      * @alias __validate
@@ -248,6 +286,12 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     public function __normalize($value) {
         $this->__normalize_out = $value;
+    }
+
+    public function __normalize_data() {
+        foreach($this->__schema as $field => $methods) {
+            if(key_exists('each', $methods)) $this->__dataset[$field] = $this->subdocument($this->__dataset[$field], $methods['each']);
+        }
     }
 
     /**
@@ -373,10 +417,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         // WTF is this doing?!?
         if ($this->__normalize_out === false) return $value;
 
-        if (isset($this->__schema[$name]['each']) && !isset($this->__schema[$name]['get'])) {
-            $subdoc = new Subdocument($value, $this->__schema[$name]['each'], $this);
-            return iterator_to_array($subdoc);
-        }
+        // if (isset($this->__schema[$name]['each']) && !isset($this->__schema[$name]['get'])) {
+        //     $subdoc = new Subdocument($value, $this->__schema[$name]['each'], $this);
+        //     return iterator_to_array($subdoc);
+        // }
 
         if($pos) return $value;
         return $this->__callable($value, $name); // Return the value

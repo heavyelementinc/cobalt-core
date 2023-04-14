@@ -101,10 +101,10 @@ class Controller {
      */
     final public function parseFilterAndOptions(\Drivers\Database &$manager, array $filterOverride, array $allowedFilters = [], $allowedOptions = [], $defaultOptions = null): array {
         $this->manager = $manager;
-        $this->filterOverride = array_merge($this->filterOverride ?? [], $filterOverride);
-        $this->defaultOptions = array_merge($this->defaultOptions ?? [], $defaultOptions);
-        $this->allowedFilters = array_merge($this->allowedFilters ?? [], $allowedFilters);
-        $this->allowedOptions = array_merge($this->allowedOptions ?? [], $allowedOptions);
+        $this->filterOverride = array_merge($this->filterOverride ?? [], $filterOverride ?? []);
+        $this->defaultOptions = array_merge($this->defaultOptions ?? [], $defaultOptions ?? []);
+        $this->allowedFilters = array_merge($this->allowedFilters ?? [], $allowedFilters ?? []);
+        $this->allowedOptions = array_merge($this->allowedOptions ?? [], $allowedOptions ?? []);
         $this->filter = $this->getFilters($allowedFilters);
         $this->options = $this->getOptions($allowedOptions, $this->defaultOptions);
         return [array_merge($this->filter, $this->filterOverride), $this->options];

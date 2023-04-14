@@ -328,6 +328,19 @@ function cobalt_autoload($class) {
     }
 }
 
+function get_controller($controllerName, $instanced = false) {
+    $locations = [
+        __APP_ROOT__ . "/controllers",
+        __ENV_ROOT__ . "/controllers",
+    ];
+
+    $found = find_one_file($locations,"$controllerName.php");
+    if($found === false) throw new HTTPException("Could not locate requested controller");
+    require_once $found;
+    if(!$instanced) return $controllerName;
+    return new $found();
+}
+
 /** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
  * @deprecated use new *set_template("/path/to/template.html")*
  * @param string $path The path name relative to TEMPLATE_PATHS
@@ -734,8 +747,17 @@ function view_each(string $template, Iterator|array $docs, string $var_name = 'd
 
 function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
     $array = [];
-    foreach($docs as $index => $doc){
-        $array[$index] = view($template, [$var_name => $doc]);
+    $d = $docs;
+    if(gettype($docs) === "array") {
+        if(key_exists($var_name, $docs)) $d = $docs[$var_name];
+    } else {
+        $d = iterator_to_array($d);
+    }
+    foreach($d as $index => $doc){
+        $array[$index] = view($template, array_merge(
+            $docs,
+            [$var_name => $doc]
+        ));
     }
     return $array;
 }

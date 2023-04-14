@@ -50,6 +50,7 @@ class UserCRUD extends \Drivers\Database {
         ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
         $perms = array_fill_keys($permissions, $status);
+        
         return $this->findAllAsSchema(
             [
                 '$or' => [

@@ -25,7 +25,14 @@ class CustomizationManager extends \Drivers\Database {
         if(key_exists($name, $this->cache)) return $this->cache[$name];
         // Optimization technique: only return the value
         $val = $this->getCustomizationByUniqueName($name, ['projection' => ['value' => 1]]);
-        $this->cache[$name] = $val->value[count($val->value) - 1];
+        $ct = 0;
+        try {
+            $ct = count($val->value);
+        } catch( \TypeError $e){
+            $ct = 0;
+        }
+
+        $this->cache[$name] = $val->value[$ct - 1] ?? "";
         return $this->cache[$name];
     }
 

@@ -6,6 +6,9 @@
         <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
     </action-menu>
 </header-group>
+<div>
+    {{!doc.description.md}}
+</div>
 <form-request method="POST" action="/api/v1/customizations/update/{{doc._id}}" {{!doc.newDocAutosave}}>
     <fieldset>
         <ul class="list-panel">
