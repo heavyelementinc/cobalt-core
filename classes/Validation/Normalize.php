@@ -128,6 +128,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             ],
             'newDocAutosaveFieldset' => [
                 'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=fieldset",
+            ],
+            'newDocMethod' => [
+                'callback' => fn () => ($this->isEmptyDoc) ? "POST" : "PUT"
             ]
         ];
         
@@ -664,7 +667,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             case "array":
                 $v = [];
                 foreach($val as $o) {
-                    $v[$o] = $o;
+                    $v[(string)$o] = $o;
                 }
                 $valid = array_merge($v ?? [], $valid ?? []);
                 $type = gettype($val);
@@ -772,7 +775,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     public function jsonSerialize() {
-        if (!$this->__dataset) throw new \Exception("This normalizer has not been supplied with iterable data");
+        if (!$this->__dataset) return []; // throw new \Exception("This normalizer has not been supplied with iterable data");
 
         $mutant = [];
         foreach ($this->__dataset as $name => $value) {

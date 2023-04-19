@@ -456,4 +456,17 @@ abstract class NormalizationHelpers {
         if($user) return new UserSchema($user);
         return null;
     }
+
+    /**
+     * Pass an array of ObjectIds to get the string values instead
+     * @param mixed $ids 
+     * @return void 
+     */
+    function filter_ids($_ids){
+        $ids = [];
+        foreach($_ids as $_id) {
+            array_push($ids, (string)$_id);
+        }
+        return $ids;
+    }
 }

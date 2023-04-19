@@ -281,10 +281,27 @@ class AutoComplete extends HTMLElement {
         this.clearButton.style.display = "none";
     }
 
-    handleSearchKeyUp(e) {
+    async handleSearchKeyUp(e) {
         e.preventDefault();
         let toSearch = e.target.value;
         let tempOpts = { ...this.options };
+
+        if(this.url) {
+            const api = new ApiFetch(this.url, this.getAttribute("method") || "GET", {});
+            const opts = await api.send({search: toSearch});
+            tempOpts = {};
+            for(const el in opts) {
+                if(typeof opts === "object" && "search" in opts && "label" in opts) {
+                    tempOpts[el] = opts[el];
+                } else {
+                    tempOpts[el] = {
+                        search: opts[el],
+                        label: opts[el]
+                    };
+                }
+            }
+        }
+
         if (this.allowCustomInputs === true && toSearch !== "") tempOpts[toSearch] = {
             "search": toSearch,
             "label": toSearch,

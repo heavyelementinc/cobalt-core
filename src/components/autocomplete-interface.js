@@ -184,10 +184,27 @@ class AutoCompleteInterface extends HTMLElement {
         this.searchResults.innerHTML = "";
     }
 
-    filterOptions(filter, custom = {}) {
+    async filterOptions(filter, custom = {}) {
         const val = this.value;
         const opts = this.options;
         let finalOptions = [];
+
+        // if(this.url) {
+        //     const api = new ApiFetch(this.url, this.getAttribute("method") || "GET", {});
+        //     const opts = await api.send({search: toSearch});
+        //     finalOptions = {};
+        //     for(const el in opts) {
+        //         if(typeof opts === "object" && "search" in opts && "label" in opts) {
+        //             finalOptions[el] = opts[el];
+        //         } else {
+        //             finalOptions[el] = {
+        //                 search: opts[el],
+        //                 label: opts[el]
+        //             };
+        //         }
+        //     }
+        // }
+
         for(const i of opts) {
             const attr = i.getAttribute("value");
             // Let's exclude current values

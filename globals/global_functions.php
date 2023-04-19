@@ -755,7 +755,7 @@ function view_array(string $template, Iterator|array $docs, string $var_name = '
     }
     foreach($d as $index => $doc){
         $array[$index] = view($template, array_merge(
-            $docs,
+            $d,
             [$var_name => $doc]
         ));
     }
