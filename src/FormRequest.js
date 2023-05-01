@@ -172,8 +172,28 @@ class FormRequest {
             // if(!list[i].validity_check()) 
             query[list[i].element.getAttribute("name")] = list[i].value;
         }
+        for (var i in query) {
+            var lastChar = i.length - 1;
+            if(i[lastChar] !== "]") continue;
+            if(i[lastChar - 1] !== "[") continue;
+            query[i] = this.getNamedArrayValue(i);
+        }
         if (this.autosave && this.include) query.include = this.include;
         return query;
+    }
+
+    getNamedArrayValue(name) {
+        const newName = name.substring(0, name.length - 2);
+        const query = document.querySelectorAll(`[name="${name}"]`);
+        let value = [];
+        for(const i of query) {
+            if(i.type === "checkbox" || i.type === "radio") {
+                if(i.checked) value.push(i.value);
+            } else {
+                value.push(i.value);
+            }
+        }
+        return value.join(",");
     }
 
     errorHandler(error, result = null, post = null) {

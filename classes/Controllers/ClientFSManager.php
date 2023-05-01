@@ -20,6 +20,16 @@ trait ClientFSManager {
      */
     public $fs_filename_path = "";
     public $last_modified_result = null;
+
+    public function setFilenamePath($path) {
+        $start = 0;
+        $end = null;
+        if($path[0] === "/") $start = 1;
+        if($path[strlen($path) - 1] === "/") $end = -1;
+        $mutant = substr($path, $start, $end);
+        $this->fs_filename_path = $mutant;
+        return $this->fs_filename_path;
+    }
     
     // function __construct() {
     //     $this->initFS();

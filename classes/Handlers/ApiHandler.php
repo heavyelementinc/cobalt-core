@@ -108,10 +108,17 @@ class ApiHandler implements RequestHandler {
 
         $incoming_content_type = isset($_SERVER['CONTENT_TYPE']) ? trim($_SERVER['CONTENT_TYPE']) : '';
 
-        /** Check if our content is in JSON format and get it if it is. */
-        if ($incoming_content_type === $this->content_type) {
-            $incoming_stream = trim(file_get_contents("php://input"));
+        $is_json = false;
+
+        switch($incoming_content_type) {
+            case ($incoming_content_type === $this->content_type):
+            case preg_match("/json/", strtolower($incoming_content_type)) === 1:
+                $is_json = true;
+                break;
         }
+
+        /** Check if our content is in JSON format and get it if it is. */
+        if ($is_json) $incoming_stream = trim(file_get_contents("php://input"));
 
         $multipart_form_data = "multipart/form-data;";
         // $form_data = "Content-Disposition: form-data;";

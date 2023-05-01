@@ -36,6 +36,13 @@ abstract class CRUDController extends Controller {
     /**
      * Fields required include:
      * 
+     * [
+     *      'index' => [
+     *          'view' => '/path/to/view.html',
+     *          'each' => '/path/to/other-view.html',
+     *      ]
+     * ]
+     * 
      * @return array 
      */
     abstract static function get_controller_data(): array;
@@ -60,7 +67,7 @@ abstract class CRUDController extends Controller {
         $mutant = $schema->__validate($_POST);
         $result = $this->manager->insertOne($mutant);
         $insertedId = $result->getInsertedId();
-        $route = route("$this->name@edit", ['id' => (string)$insertedId]);
+        $route = route("$this->name@edit", [(string)$insertedId]);
         header("X-Redirect: $route");// . (string)$insertedId);
         return $insertedId;
     }
@@ -97,7 +104,9 @@ abstract class CRUDController extends Controller {
     
 
     public function index() {
-        $params = $this->params($this->manager, []);
+        $search = $this->controller_data['index']['search'] ?? null;
+        if($search) $this->enableSearchField(...$search);
+        $params = $this->params($this->manager, $this->controller_data['index']['filters'] ?? [], $this->controller_data['index']['filter_misc'] ?? []);
         $result = $this->manager->findAllAsSchema(...$params);
         
         $elements = view_each(
@@ -114,10 +123,10 @@ abstract class CRUDController extends Controller {
         // }
 
         add_vars([
-            'title' => $this->controller_data['index']['title'] ?? $this->name,
-            'elements'   => $elements,
-            'pagination' => $this->getPaginationLinks(),
-            'href'  => route("$this->name@new_document"),
+            'title'       => $this->controller_data['index']['title'] ?? $this->name,
+            'elements'    => $elements,
+            'pagination'  => $this->getPaginationLinks(),
+            'href'        => route("$this->name@new_document"),
         ]);
         return set_template($this->controller_data['index']['view'] ?? "/CRUD/admin/index.html");
     }
@@ -144,7 +153,7 @@ abstract class CRUDController extends Controller {
             'name'     => $this->name,
         ]);
         
-        return set_template($this->controller_data['new']['view']  ?? "/CRUD/admin/edit.html");
+        return set_template($this->controller_data['new']['view'] ?? "/CRUD/admin/edit.html");
     }
 
     /** ============================================= */
@@ -165,10 +174,10 @@ abstract class CRUDController extends Controller {
         $options = self::permissions($options);
 
         
-        Route::post(  "$mutant/create", "$class@create", $options['create']);
+        Route::post(   "$mutant/create", "$class@create", $options['create']);
         if($options['getable']) Route::get("$mutant/{id}", "$mutant@read", $options['read']);
-        Route::put(   "$mutant/update/{id}", "$class@update", $options['update']);
-        Route::delete("$mutant/delete/{id}", "$class@delete", $options['delete']);
+        Route::post("$mutant/update/{id}", "$class@update", $options['update']);
+        Route::delete( "$mutant/delete/{id}", "$class@delete", $options['delete']);
     }
 
     static function admin(?string $prefix = null, ?array $options = null) {
@@ -181,7 +190,7 @@ abstract class CRUDController extends Controller {
             "$mutant", 
             "$class@index", 
             array_merge([
-                'anchor' => ['name' => $permissions['anchor'] ?? $class],
+                'anchor' => ['name' => $opts['index']['anchor'] ?? $class],
                 'navigation' => ['admin_panel']
             ], $permissions['update'] ?? [],
             $opts['index']['options'] ?? []

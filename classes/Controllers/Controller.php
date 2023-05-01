@@ -47,7 +47,7 @@ class Controller {
 
     public function enableSearchField(string $searchName, ?array $query = null) {
         $this->searchFieldName = $searchName;
-        if($query === null) $query = [$searchName => $_GET[$searchName]];
+        if($query === null) $query = [$searchName => new \MongoDB\BSON\Regex($_GET[$searchName], "ig")];
         // $this->searchQuery = $query;
         if(!key_exists($searchName, $_GET)) return;
 
@@ -237,7 +237,7 @@ class Controller {
         $formField = "";
         if($searchField) $formField = "<form>$searchField<button type='submit' native><i name='$icon'></i></button></form>";
 
-        return "$formField<div class='cobalt-query-controls'>$previousLink $pageNumber $nextLink</div>";
+        return "$formField<div class='cobalt-query-controls'>$previousLink $pageNumber $nextLink ($count total)</div>";
 
     }
 

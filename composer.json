@@ -12,7 +12,8 @@
         "omnipay/stripe": "^3.2",
         "erusev/parsedown-extra": "^0.8.1",
         "demyanovs/php-highlight": "^1.1",
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^10.0",
+        "cboden/ratchet": "^0.4.4"
     },
     "config": {
         "allow-plugins": {

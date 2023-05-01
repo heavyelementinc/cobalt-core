@@ -251,6 +251,7 @@ class Router {
             // We are doing these in reverse order because we want our app's 
             // controllers to override the core's controllers.
             $controller_file = find_one_file($controller_search, "$controller_name.php");
+            if(!$controller_file) die("Controller not found");
         } catch (\Exception $e) {
             // throw new NotImplemented("Controller $controller_name not found.");
             // header("HTTP/")

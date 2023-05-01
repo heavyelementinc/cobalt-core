@@ -104,7 +104,7 @@ class AutoCompleteInterface extends HTMLElement {
         });
     }
 
-    keyUpListener(e) {
+    async keyUpListener(e) {
         this.updatePosition();
         if("key" in e && Object.keys(this.specialKeys).includes(e.key)) {
             const result = this[this.specialKeys[e.key].callback](e.key, e);
@@ -130,7 +130,7 @@ class AutoCompleteInterface extends HTMLElement {
             };
         }
 
-        let workingOptions = this.filterOptions(filter, custom);
+        let workingOptions = await this.filterOptions(filter, custom) ?? [];
 
         for(const i of workingOptions) {
             this.addSearchResult(i,filter);

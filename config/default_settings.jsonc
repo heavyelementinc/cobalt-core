@@ -710,6 +710,13 @@
                     "api_access": false,
                     "prefix": "/streams/"
                 },
+                "websocket": {
+                    "processor": "Handlers\\WebsSocketHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/websocket"
+                },
                 "web": {
                     "processor": "Handlers\\WebHandler",
                     "exception_mode": "web",

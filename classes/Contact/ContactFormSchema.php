@@ -38,7 +38,7 @@ class ContactFormSchema extends Normalize {
             "read_status" => [
                 "get" => function () {
                     $id = session("_id");
-                    if(!property_exists($this->__dataset,"read")) return "unread";
+                    if(!key_exists("read", $this->__dataset)) return "unread";
                     // if(!key_exists("read",$this->__dataset)) return "unread";
                     $array = $this->__dataset['read'];
                     return in_array($id, $array);

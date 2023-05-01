@@ -1184,6 +1184,47 @@ function fetch_and_save($url) {
 }
 
 /**
+ * 
+ * @param mixed $remote_url 
+ * @param mixed $path 
+ * @return bool true on success, false on failure
+ */
+function fetch_remote_file($remote_url, $path):bool {
+    $result = copy($remote_url, $path);
+    return $result;
+    // return file_put_contents($path, $result);
+
+    // $dir            =   $path;
+    // $fileName       =   basename($remote_url);
+    // $saveFilePath   =   $dir . $fileName;
+    // $ch = curl_init($remote_url);
+    // $fp = fopen($path, 'wb');
+    // curl_setopt($ch, CURLOPT_FILE, $fp);
+    // curl_setopt($ch, CURLOPT_HEADER, 0);
+    // $result = curl_exec($ch);
+    // curl_close($ch);
+    // fclose($fp);
+    // return $result;
+
+    // //This is the file where we save the information
+    // $fp = fopen($path, 'w+');
+    // //Here is the file we are downloading, replace spaces with %20
+    // $ch = curl_init(str_replace(" ","%20",$remote_url));
+    // // make sure to set timeout to a high enough value
+    // // if this is too low the download will be interrupted
+    // curl_setopt($ch, CURLOPT_TIMEOUT, 600);
+    // // write curl response to file
+    // curl_setopt($ch, CURLOPT_FILE, $fp); 
+    // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    // // get curl response
+    // $result = curl_exec($ch); 
+    // curl_close($ch);
+    // fclose($fp);
+
+    // return $result;
+}
+
+/**
  * This function returns the maximum files size that can be uploaded 
  * in PHP
  * @return int File size in bytes

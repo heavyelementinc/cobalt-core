@@ -101,12 +101,14 @@ abstract class Database {
         return null;
     }
 
-    final function findAllAsSchema($filter, array $options = [], $schema = null) {
+    final function findAllAsSchema($filter, array $options = [], $schema = null, $idsAsKeys = false) {
         $results = $this->find($filter, $options);
         $processed = [];
         foreach($results as $i => $result) {
             $_schema = $schema ?? $this->get_schema_name($result);
-            $processed[$i] = new $_schema($result);
+            $key = $i;
+            if($idsAsKeys) $key = (string)$result->_id ?? $i;
+            $processed[$key] = new $_schema($result);
         }
         return $processed;
     }
