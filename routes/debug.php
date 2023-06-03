@@ -18,6 +18,8 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => "Notification"]
     ]);
 
+    Route::s_post("/push-test/{recipient}?", "Notifications@pushNotification");
+
     Route::get("/server-control", "Debug@status_modal", [
         'navigation' => ['debug_async'],
         'anchor' => ['name' => "Server Control Headers"]

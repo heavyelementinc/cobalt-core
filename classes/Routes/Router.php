@@ -21,6 +21,7 @@
 
 namespace Routes;
 
+use Cobalt\Extensions\Extensions;
 use Exception;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
@@ -54,51 +55,34 @@ class Router {
         $contexts = app('context_prefixes');
         //  = array_fill_keys(array_keys($contexts), []);
 
+        global $ROUTE_TABLE;
+
+        
+        Extensions::invoke("register_controller_dir", $this->registered_plugin_controllers);
         foreach($contexts as $context => $data) {
-            $GLOBALS['ROUTE_TABLE'][$context] = [
+            $ROUTE_TABLE[$context] = [
                 'get'    => [],
                 'post'   => [],
                 'put'    => [],
                 'delete' => [],
             ];
 
+            $results = [];
+            Extensions::invoke("register_routes", $context, $results);
             // Make a list of all the routes we need to load
             $this->router_table_list[$context] = [
+                ...$results,
                 __ENV_ROOT__ . "/routes/$context.php",
                 __APP_ROOT__ . "/routes/$context.php",
                 // __APP_ROOT__ . "/private/routes/$context.php",
             ];
-            
-            foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
-                $result = $plugin->register_routes($context);
-                if ($result) array_push($this->router_table_list[$context], $result);
-                $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
-            }
+
         }
 
         $this->router_table_initialized = true;
         // array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
 
     }
-
-    // function init_route_table() {
-    //     /** Export our route table to the global space, we use this to specify where
-    //      * we should look for our routes.
-    //      */
-    //     $GLOBALS['ROUTE_TABLE_ADDRESS'] = $this->route_context . "_routes";
-    //     if (!isset($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']])) $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']] = [];
-    //     $this->router_table_list = [
-    //         __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
-    //     ];
-
-    //     foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
-    //         $result = $plugin->register_routes($this->route_context);
-    //         if ($result) array_push($this->router_table_list, $result);
-    //         $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
-    //     }
-
-    //     array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
-    // }
 
     function get_routes() {
         global $ROUTE_TABLE, $ROUTE_TABLE_ADDRESS;
@@ -116,28 +100,6 @@ class Router {
         $this->router_table_loaded = true;
     }
 
-    // function get_routes() {
-    //     /** Check if we're supposed to cache our routes
-    //      *  @todo Complete the table_from_cache functionality */
-    //     if (app('route_cache_enabled') && $this->table_from_cache()) {
-    //         return;
-    //     }
-
-    //     try {
-    //         /** Get a list of route tables that exist */
-    //         $route_tables = files_exist($this->router_table_list);
-    //     } catch (\Exception $e) {
-    //         /** If there are no routes available, die with a nice message */
-    //         die("Could not load route for context $GLOBALS[route_context]");
-    //     }
-
-    //     /** Execute each router table we found */
-    //     foreach ($route_tables as $table) {
-    //         require_once $table;
-    //     }
-
-    //     $this->routes = $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']];
-    // }
 
     /** @todo complete this */
     function table_from_cache() {

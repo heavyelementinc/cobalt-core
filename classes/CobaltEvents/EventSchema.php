@@ -164,7 +164,8 @@ class EventSchema extends \Validation\Normalize {
             ],
             'start_time' => [
                 'get' => 'get_time',
-                'set' => fn ($val) => $this->set_time($val, 'start')
+                'set' => fn ($val) => $this->set_time($val, 'start'),
+                'display' => fn () => relative_time($this->__dataset['start_time'])
             ],
             'end_date' => [
                 'get' => fn () => $this->get_date($this->__dataset['end_time'],'input'),
@@ -172,7 +173,21 @@ class EventSchema extends \Validation\Normalize {
             ],
             'end_time' => [
                 'get' => 'get_time',
-                'set' => fn ($val) => $this->set_time($val, 'end')
+                'set' => fn ($val) => $this->set_time($val, 'end'),
+                'display' => fn () => relative_time($this->__dataset['end_time'])
+            ],
+            'happening_now' => [
+                'get' => function () {
+                    $now = new \DateTime();
+                    $start = $this->__dataset['start_time']->toDateTime();
+                    $greater_than_start = ($now > $start);
+
+                    $end = $this->__dataset['end_time']->toDateTime();
+                    $less_than_end = ($now < $end);
+                    return $greater_than_start && $less_than_end;
+                },
+                'set' => false,
+                'display' => fn () => ($this->happening_now) ? "<span class='events--happening-now events--active-event'></span>" : "<span class='events--happening-now'></span>"
             ],
             'advanced.included_paths' => [
                 'set' => 'relative_pathnames',
@@ -194,6 +209,14 @@ class EventSchema extends \Validation\Normalize {
             "changes_override" => [
                 'get' => fn ($val) => $val,
                 'set' => fn ($val) => $this->boolean_helper($val)
+            ],
+            "advanced.public_index" => [
+                'get' => fn ($val) => $val,
+                'valid' => [
+                    'false'  => 'Unlisted (default)',
+                    'true'   => 'Displayed, if also marked as "Public"',
+                    'always' => 'Displayed, regardless of "Public" status',
+                ]
             ]
         ];
     }

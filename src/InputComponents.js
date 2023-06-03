@@ -126,20 +126,20 @@ class InputSwitch extends HTMLElement {
 
 customElements.define("input-switch", InputSwitch);
 
-class SwitchContainer extends HTMLElement {
-    connectedCallback() {
-        this.switch = this.querySelector("input-switch");
+// class SwitchContainer extends HTMLElement {
+//     connectedCallback() {
+//         this.switch = this.querySelector("input-switch");
 
-        this.addEventListener("click", (e) => {
-            for(const i of e.path) {
-                if(i.tagName === "INPUT-SWITCH") return;
-            }
-            this.switch.value = !this.switch.value;
-        });
-    }
-}
+//         this.addEventListener("click", (e) => {
+//             for(const i of e.path) {
+//                 if(i.tagName === "INPUT-SWITCH") return;
+//             }
+//             this.switch.value = !this.switch.value;
+//         });
+//     }
+// }
 
-customElements.define("switch-container", SwitchContainer);
+// customElements.define("switch-container", SwitchContainer);
 
 /**
  * radio-groups support the following attributes:
@@ -196,8 +196,9 @@ class LoadingSpinner extends HTMLElement {
     }
 
     dashes() {
-        const height = this.getAttribute("height") ?? "calc(2em * 4)",
-        width = this.getAttribute("width") ?? "calc(2em * 4)"
+        const size = this.getAttribute("scale") ?? "1em";
+        const height =  size,
+        width = size;
         return `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 100 100" version="1.1" id="svg1091"><circle class="spinner-dashes" style="fill:none;stroke:${getComputedStyle(this).color};stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1" id="path1964" cx="50" cy="50" r="43.098995" /></svg>`
     }
 

@@ -1,15 +1,18 @@
-<div class='hbox'>
-    <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+<hgroup>
+    <div class="vbox">
+        <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+        <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
+    </div>
     <action-menu title="Manage User">
         <option method="DELETE" action="/api/v1/user/{{user_account._id}}/avatar" dangerous>Reset Avatar to Default</option>
         <option method="DELETE" action="/api/v1/user/{{user_account._id}}/delete" dangerous>Delete {{user_account.fname}}</option>
     </action-menu>
-</div>
-    <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
+</hgroup>
 
     <tab-nav id="tab-list--parent">
         <nav>
             <a href="#basics" class="tab-nav--current-content">Basic Info</a>
+            <a href="#push">Notifications</a>
             <a href="#permissions">Permissions</a>
             <!-- <a href="#statistics">Stats</a> -->
             {{!additional_button}}
@@ -52,6 +55,7 @@
                     </fieldset>
                 </form-request>
         </section>
+        {{!notifications}}
         <section id="permissions" class="drawer-list--item">
             <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{user_account._id}}/permissions"
                 autosave="autosave">

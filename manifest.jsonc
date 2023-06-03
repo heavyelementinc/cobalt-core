@@ -32,14 +32,15 @@
             "Slideshow2.js",
             "InputClasses.js",
             "FormRequest.js",
-            "components/FormRequestSimplified.js",
+            "components/FormRequestElement.js",
             "InputComponents.js",
             "AsyncButton.js",
             "UserMenu.js",
             "Events.js",
             "PaginatedContainer.js",
             "AudioPlayer.js",
-            "CobaltScrollManager.js"
+            "CobaltScrollManager.js",
+            "PushNotifications.js"
         ],
         "web": [
 

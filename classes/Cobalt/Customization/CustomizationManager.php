@@ -55,7 +55,7 @@ class CustomizationManager extends \Drivers\Database {
         $value = $this->getCustomizationValue($name);
         if(!$value) {
             if(app("debug")) trigger_error("The customization $name is referenced by not set.", E_USER_NOTICE);
-            if(app("error_on_missing_customization")) throw new \Exception("Missing customization value!");
+            if(app("error_on_missing_customization")) throw new \Exception("Missing customization value '$name'!");
         }
 
         return $value;

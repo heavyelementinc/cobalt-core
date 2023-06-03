@@ -3,6 +3,8 @@
 use \Auth\UserCRUD;
 use Auth\UserSchema;
 use \Auth\UserValidate;
+use Cobalt\Notifications\PushNotifications;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
@@ -16,6 +18,49 @@ class UserAccounts extends \Controllers\Pages {
         $validated = $GLOBALS['auth']->permissions->validate($id, $permissions);
         // $GLOBALS['auth']->permissions->update_permissions($permissions, $id);
         return $validated;
+    }
+
+    function update_push($id) {
+        $_id = new ObjectId($id);
+        $ua = new UserCRUD();
+        $user = $ua->findOneAsSchema(['_id' => $_id]);
+        if(!$user) throw new NotFound("Resource does not exist");
+        $push = new PushNotifications();
+        $updateable = [];
+        foreach($_POST as $type => $value) {
+            if(!key_exists($type, $push->valid)) throw new BadRequest("Bad request data");
+            if(!is_bool($value)) throw new BadRequest("Value is invalid");
+            if(!$push->is_elligible($user, $type)) throw new Unauthorized("This resource is inelligible for the requested update");
+            
+            $updateable["$push->ua_push_types.$type"] = $value;
+        }
+        
+        $result = $ua->updateOne(['_id' => $_id],[
+            '$set' => $updateable
+        ]);
+        return $updateable;
+    }
+
+    function update_my_push() {
+        return $this->update_push((string)session('_id'));
+    }
+
+    function update_my_push_enrollment($status) {
+        $_id = session('_id');
+        if(!$_id) throw new Unauthorized("You must be logged in.");
+        $push = new PushNotifications();
+        switch($status) {
+            case "subscribed":
+            case "subscribe":
+                $result = $push->enrollPushKeys($_id, $_POST);
+                break;
+            case "unsubscribed":
+            case "unsubscribe":
+            default:
+                $result = $push->revokePushKeys($_id, $_POST);
+                break;
+        }
+        return $result;
     }
 
     /* Working Jun 10 2021 */
@@ -109,9 +154,11 @@ class UserAccounts extends \Controllers\Pages {
 
     function me() {
         $session = session();
+        $push = new PushNotifications();
         add_vars([
             'title' => "$session->fname $session->lname",
-            'doc' => $session
+            'doc' => $session,
+            'notifications' => $push->render_push_opt_in_form_values($session),
         ]);
 
         set_template("/authentication/user-self-service-panel.html");

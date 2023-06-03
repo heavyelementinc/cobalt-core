@@ -1,1 +1,3 @@
-<async-button method="PUT" action="/api/v1/settings/default/{{setting}}"><ion-icon name="refresh-circle"></ion-icon></async-button>
+<action-menu type="options">
+    <option method="PUT" action="/api/v1/settings/default/{{setting}}" icon="backspace-outline">Revert to default value</option>
+</async-button>

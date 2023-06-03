@@ -10,10 +10,11 @@ class CoreSettingsPanel extends Controller {
     private $requiresRoot = ['Cache &amp; Debug'];
     private $settings = null;
 
-    function settings_index() {
+    function settings_index($subset = null) {
         // $this->settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"));
-        $GLOBALS['app']->bootstrap();
-        $this->settings = $GLOBALS['app']->instances;
+        global $app;
+        $app->bootstrap();
+        $this->settings = $app->instances;
 
         $setting_groups = [];
         $setting_tables = [];

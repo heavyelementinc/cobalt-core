@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Notifications\PushNotifications;
 use Contact\ContactManager;
 use Controllers\Controller;
 use Exceptions\HTTP\HTTPException;
@@ -55,7 +56,7 @@ class ContactForm extends Controller {
         $validator = new \Contact\ContactFormValidator();
         $mutant = $validator->validate($_POST);
         $mutant = array_merge($mutant, [
-            "ip" => $_SERVER['REMOTE_ADDR'],
+            "ip" => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'],
             "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"],
             "date"  => new \MongoDB\BSON\UTCDateTime()
         ]);
@@ -94,20 +95,29 @@ class ContactForm extends Controller {
         $backend = new ContactManager();
 
         $throttle = iterator_to_array($backend->find(['ip' => $mutant['ip']], ['sort' => ['date' => -1]]));
-        if(count($throttle) > 3) {
-            $now = (new \MongoDB\BSON\UTCDateTime())->toDateTime()->getTimestamp();
-            $then = $throttle[0]->date->toDateTime()->getTimestamp();
-            if($now - $then <= app("Contact_form_submission_throttle")) {
-                sleep(5);
-                throw new TooManyRequests("Looks like you've already submitted a few.");
-            }
-        }
+        // if(count($throttle) > 3) {
+        //     $now = (new \MongoDB\BSON\UTCDateTime())->toDateTime()->getTimestamp();
+        //     $then = $throttle[0]->date->toDateTime()->getTimestamp();
+        //     if($now - $then <= app("Contact_form_submission_throttle")) {
+        //         sleep(5);
+        //         throw new TooManyRequests("Looks like you've already submitted a few.");
+        //     }
+        // }
 
         try {
             $result = $backend->insertOne($mutant);
         } catch (\Exception $e) {
             throw new ServiceUnavailable("An unknown error occurred");
         }
+
+        $push = new PushNotifications();
+        $push->push(
+            'Contact Submission',
+            "Someone has filled out the {{app.app_name}} contact form!",
+            ['contact_form_new'],
+            ['path' => "/admin/contact-form/".(string)$result->getInsertedId()]
+        );
+        
         assert(app("Contact_form_notify_on_new_submission") === false);
         if(app("Contact_form_notify_on_new_submission")) {
             // $notify = new Notification1_0Schema([

@@ -1,0 +1,19 @@
+<flex-row>
+    <flex-cell>
+        <a href="{{doc.uuid}}">{{doc.meta.name}}</a>
+    </flex-cell>
+    <flex-cell>
+        {{doc.repository}}
+    </flex-cell>
+    <flex-cell>
+        {{settings}}
+    </flex-cell>
+    <flex-cell>
+        {{permissions}}
+    </flex-cell>
+    <flex-cell>
+        {{path}}
+    </flex-cell>
+    <!-- <flex-cell>{{doc.meta.description}}</flex-cell> -->
+    <flex-cell style="min-width:50px"><input-switch checked="{{$doc.active}}" disabled="disabled" tiny></input-switch></flex-cell>
+</flex-row>

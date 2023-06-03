@@ -91,7 +91,7 @@ abstract class Database {
     }
 
     final function distinct($field,$filter = []) {
-        return $this->collection->distinct($field,$filter);
+        return $this->collection->distinct($field, $filter);
     }
 
     final function findOneAsSchema($filter, array $options = [], $schema = null) {

@@ -38,8 +38,18 @@ abstract class CRUDController extends Controller {
      * 
      * [
      *      'index' => [
-     *          'view' => '/path/to/view.html',
-     *          'each' => '/path/to/other-view.html',
+     *          'view'    => '/path/to/view.html', // required
+     *          'each'    => '/path/to/other-view.html', // required
+     *          'anchor'  => 'SomeName' // defaults to Controller's ClassName,
+     *          'options' => [] // defaults to empty array
+     *      ],
+     *      'edit' => [
+     *          'view'    => '/path/to/edit.html', // required, path to edit form
+     *          'title'   => '', // defaults to index->title or 'Edit'
+     *          'options' => [], // defaults to empty array
+     *      ],
+     *      'new' => [
+     *          'view'    => '', // defaults to edit->view, required if edit->view not specified
      *      ]
      * ]
      * 
@@ -134,9 +144,9 @@ abstract class CRUDController extends Controller {
     public function edit($id) {
         $doc = $this->read($id);
         add_vars([
-            'title' => $this->controller_data['index']['title'] ?? 'Edit',
+            'title' => $this->controller_data['edit']['title'] ?? $this->controller_data['index']['title'] ?? 'Edit',
             'endpoint' => route("$this->name@update") . "$id",
-            'method' => 'PUT',
+            'method' => 'POST',
             'doc' => $doc,
         ]);
         return set_template($this->controller_data['edit']['view']  ?? "/CRUD/admin/edit.html");
@@ -153,7 +163,7 @@ abstract class CRUDController extends Controller {
             'name'     => $this->name,
         ]);
         
-        return set_template($this->controller_data['new']['view'] ?? "/CRUD/admin/edit.html");
+        return set_template($this->controller_data['new']['view'] ?? $this->controller_data['edit']['view'] ?? "/CRUD/admin/edit.html");
     }
 
     /** ============================================= */

@@ -2,6 +2,8 @@
 
 use Auth\Permissions;
 use Auth\UserCRUD;
+use Cobalt\Notifications\PushNotifications;
+use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
 class User {
@@ -48,6 +50,10 @@ class User {
         ],
         "expire" => [
             'description' => "expire login tokens",
+            'context_required' => true
+        ],
+        "notify" => [
+            'description' => "[user_id] Send a test notification to a specific user OR all root users",
             'context_required' => true
         ]
     ];

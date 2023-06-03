@@ -13,7 +13,10 @@
 
 namespace Auth;
 
+use Cobalt\Extensions\Extensions;
 use Exception;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\Error;
 
 class CurrentSession extends \Drivers\Database {
 
@@ -141,15 +144,20 @@ class CurrentSession extends \Drivers\Database {
         // app("require_https_login_and_cookie") &&
         if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("No token");
         try {
+
+            $session = [
+                $this->cookie_name => $this->token_value,
+                'user_id' => $this->__id($user_id),
+                'refresh' => $this->default_token_refresh,
+                'expires' => $this->default_token_expiration,
+                'persist' => filter_var($stay_logged_in, FILTER_VALIDATE_BOOLEAN)
+            ];
+
+            Extensions::invoke("session_creation", $session);
+
             $result = $this->updateOne(
                 [$this->cookie_name => $this->token_value],
-                ['$set' => [
-                    $this->cookie_name => $this->token_value,
-                    'user_id' => $this->__id($user_id),
-                    'refresh' => $this->default_token_refresh,
-                    'expires' => $this->default_token_expiration,
-                    'persist' => filter_var($stay_logged_in, FILTER_VALIDATE_BOOLEAN)
-                ]],
+                ['$set' => $session],
                 ['upsert' => true]
             );
         } catch (\Exception $e) {

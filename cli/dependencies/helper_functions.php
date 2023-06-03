@@ -38,7 +38,7 @@ function dbg($var) {
 function cli_to_bool($input, $defaultToYes = false) {
     $allowed = ['y', 'yes', 'true', 'on', 'enable', 'enabled'];
     if ($defaultToYes) array_push($allowed, "");
-    return in_array(strtolower($input), $allowed);
+    return in_array(trim(strtolower($input)), $allowed);
 }
 
 function confirm_message($message, $default = false, $additional = "") {
@@ -144,6 +144,12 @@ function fmt($str, $type = "normal", $back = "normal") {
 
 function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
     if ($lvl > $GLOBALS['cli_verbosity']) return;
+    $date = date('Y-m-d');
+    $logpath = __APP_ROOT__ . "/ignored/logs/cobalt-$date.log";
+    $resource = fopen($logpath, "a");
+    fwrite($resource, "[".date(DATE_RFC2822)."] {$message}\n");
+    fclose($resource);
+    if(!function_exists("say")) return;
     $m = fmt("[LOG $lvl]", 'i');
     $m .= " " . fmt($message, $type, $back);
     print($m . "\n");

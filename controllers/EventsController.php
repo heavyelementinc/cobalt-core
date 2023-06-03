@@ -5,6 +5,8 @@ use CobaltEvents\EventSchema;
 use Exceptions\HTTP\NotFound;
 
 class EventsController {
+    var $events;
+
     function __construct() {
         $this->events = new \CobaltEvents\EventManager();
     }
@@ -17,6 +19,19 @@ class EventsController {
         //     array_push($toReturn, iterator_to_array(new \CobaltEvents\EventSchema($result)));
         // }
         // return $toReturn;
+    }
+
+    function public_index() {
+        $results = $this->events->getPublicListing();
+
+        if($results) $views = view_each('/cobalt_events/public-event-listing.html', $results);
+        else $views = "There are no events yet. Check back later.";
+        
+        add_vars([
+            'title' => 'Events',
+            'events' => $views
+        ]);
+        set_template("/cobalt_events/public-index.html");
     }
 
     function list_events() {

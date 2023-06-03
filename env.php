@@ -66,15 +66,17 @@ require_once $composer;
 // And then define our own autoload function (specified in global_functions.php)
 spl_autoload_register("cobalt_autoload", true);
 
-try {
-    // Load our ACTIVE plugins.
-    require_once __ENV_ROOT__ . "/globals/plugins.php";
-} catch (Exception $e) {
-    die($e->getMessage());
-}
+// try {
+//     // Load our ACTIVE plugins.
+//     require_once __ENV_ROOT__ . "/globals/plugins.php";
+// } catch (Exception $e) {
+//     die($e->getMessage());
+// }
+
+require_once __ENV_ROOT__ . "/globals/extensions.php";
 
 try {
-    $application = new \Cobalt\Settings\Settings();
+    $application = new \Cobalt\Settings\Settings(config()['bootstrap_mode'] ?? COBALT_BOOSTRAP_AS_NEEDED);
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {

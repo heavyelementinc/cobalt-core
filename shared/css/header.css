@@ -198,6 +198,19 @@ header nav a.navigation--current {
   color: var(--project-color-button-text);
 }
 
+:is(hgroup, header-group, headline-group) {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--project-color-inactive);
+}
+
+:is(hgroup, header-group, headline-group) action-menu {
+    margin-left: auto;
+    margin-bottom: auto;
+}
+
 @media only screen and (max-width:35em) {
     #nav-menu-spawn {
         display: flex;

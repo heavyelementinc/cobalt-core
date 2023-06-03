@@ -1,6 +1,7 @@
 <?php
 
 use Cobalt\Notifications\NotificationManager;
+use Cobalt\Notifications\PushNotifications;
 use Controllers\Controller;
 use MongoDB\BSON\ObjectId;
 
@@ -18,6 +19,15 @@ class Notifications extends Controller {
         return $this->ntfy->sendNotification($_POST);
     }
 
+    function pushNotification($recipient = null) {
+        if(!$recipient || $recipient === "root") $recipient = 'root';
+        else $recipient = new ObjectId($recipient);
+
+        $push = new PushNotifications();
+        $push->push('Test Subject', 'Hello {{user.fname}}, this is a test of your push notifications.', $recipient, ['details' => "Here's a secret message from uncharted space"]);
+        echo "\"Test\"";
+        exit;
+    }
 
     function debug() {
         $notification = new \Cobalt\Notifications\Notification1_0Schema([

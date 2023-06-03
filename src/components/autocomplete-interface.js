@@ -90,8 +90,9 @@ class AutoCompleteInterface extends HTMLElement {
             this.keyUpListener(e);
         });
 
-        this.AutocompleteSearchField.addEventListener("focusin", (e) => {
+        this.AutocompleteSearchField.addEventListener("focusin", async (e) => {
             this.hasFocus = true;
+            await this.createSearchResults("", {}, true);
             this.appendSearchResults();
             clearTimeout(this.timeout);
         });
@@ -130,7 +131,11 @@ class AutoCompleteInterface extends HTMLElement {
             };
         }
 
-        let workingOptions = await this.filterOptions(filter, custom) ?? [];
+        await this.createSearchResults(filter, custom);
+    }
+
+    async createSearchResults(filter, custom = {}, all = false) {
+        let workingOptions = await this.filterOptions(filter, custom, false) ?? [];
 
         for(const i of workingOptions) {
             this.addSearchResult(i,filter);
@@ -184,7 +189,7 @@ class AutoCompleteInterface extends HTMLElement {
         this.searchResults.innerHTML = "";
     }
 
-    async filterOptions(filter, custom = {}) {
+    async filterOptions(filter, custom = {}, all = false) {
         const val = this.value;
         const opts = this.options;
         let finalOptions = [];
@@ -216,7 +221,7 @@ class AutoCompleteInterface extends HTMLElement {
                     if(val === attr) continue;
                     break;
             }
-            if(filter.test(i.innerText)) finalOptions.push({
+            if(filter.test(i.innerText) || all) finalOptions.push({
                 value: attr,
                 label: i.innerText,
                 custom: false

@@ -1,3 +1,4 @@
+window.Cobalt = {};
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
 var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 

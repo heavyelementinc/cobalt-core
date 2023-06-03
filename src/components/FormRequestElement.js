@@ -69,7 +69,12 @@
             this.request.reset_errors();
             if (allowDangerous) this.request.headers['X-Confirm-Dangerous'] = "true";
             else delete this.request.headers['X-Confirm-Dangerous'];
-    
+            const evt = this.dispatchEvent(new CustomEvent("submit", {detail: this.request, cancelable: true}));
+            if(evt === false) {
+                this.working_spinner_off();
+                this.dispatchEvent(new CustomEvent("abort"), {detail: this.request});
+                return;
+            }
             let result = {};
             try {
                 result = await this.send_and_subscribe();

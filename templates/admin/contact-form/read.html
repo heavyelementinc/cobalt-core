@@ -1,10 +1,12 @@
-<h1>Contact Form Submission</h1>
-<div class='hrow'>
-    <date>{{doc.date.display}}</date>
-    <menu>
-        <async-button method="DELETE" action="/api/v1/contact/delete/{{doc._id}}">Delete</async-button>
-    </menu>
-</div>
+<hgroup>
+    <div class='hrow'>
+        <h1>Contact Form Submission</h1>
+        <date>{{doc.date.display}}</date>
+    </div>
+    <action-menu>
+        <option method="DELETE" action="/api/v1/contact/delete/{{doc._id}}">Delete</option>
+    </action-menu>
+</hgroup>
 <flex-table>
     <flex-row>
         <flex-header>Name</flex-header>

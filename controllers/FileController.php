@@ -1,5 +1,7 @@
 <?php
 
+use Cobalt\Extensions\Extensions;
+use Cobalt\Notifications\PushNotifications;
 use Controllers\ClientFSManager;
 
 class FileController extends \Controllers\FileController {
@@ -20,9 +22,12 @@ class FileController extends \Controllers\FileController {
         global $ROUTER;
         global $SHARED_CONTENT;
         $path = $ROUTER->uri;
+        $extensions = [];
+        Extensions::invoke("register_shared_dir", $extensions);
         // $file = __ENV_ROOT__ . "/shared/$path";
         $file = find_one_file([
             __APP_ROOT__ . "/shared/",
+            ...$extensions ?? [],
             __ENV_ROOT__ . "/shared/",
             ...$SHARED_CONTENT
         ], sanitize_path_name($path));
@@ -30,6 +35,7 @@ class FileController extends \Controllers\FileController {
         // header('Content-Description: File Transfer');
         // header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+        // header('Content-Disposition: inline');
         // header('Expires: 0');
         $mime = mime_content_type($file);
         if (pathinfo($file, PATHINFO_EXTENSION) === "css") $mime = "text/css";
@@ -46,9 +52,12 @@ class FileController extends \Controllers\FileController {
         if ($cache->exists) {
             $file = $cache->file_path;
         } else {
+            $extensions = [];
+            Extensions::invoke("get_js_dirs", $extensions);
             $files = files_exist([
                 __APP_ROOT__ . "/src/$match",
-                __ENV_ROOT__ . "/src/$match"
+                ...$extensions,
+                __ENV_ROOT__ . "/src/$match",
             ], false);
             if (!count($files))  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
             $file = $files[0];
@@ -57,6 +66,24 @@ class FileController extends \Controllers\FileController {
         header("Content-Type: application/javascript;charset=UTF-8");
         $this->get_etag($file);
         readfile($file);
+        exit;
+    }
+
+    function service_worker() {
+        $file = find_one_file([
+            __APP_ROOT__ . "/src/",
+            __ENV_ROOT__ . "/src/"
+        ], "ServiceWorker.js");
+
+        header("Content-Type: application/javascript;charset=UTF-8");
+        $this->get_etag($file);
+        readfile($file);
+        exit;
+    }
+
+    function vapid_pub_key(){
+        header("Content-Type: application/json;charset=UTF-8");
+        echo json_encode((new PushNotifications())->vapid_keys->keyset->publicKey);
         exit;
     }
 
@@ -110,7 +137,7 @@ class FileController extends \Controllers\FileController {
     }
 
     function manifest() {
-        $content = with("/parts/manifest.site");
+        $content = view("/parts/site.webmanifest");
         header('Content-Type: text/json');
         header('Content-Length: ' . strlen($content) * 8);
         echo $content;

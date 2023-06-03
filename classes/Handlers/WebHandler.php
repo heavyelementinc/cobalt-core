@@ -21,6 +21,7 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Cobalt\Notifications\PushNotifications;
 use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
@@ -59,6 +60,7 @@ class WebHandler implements RequestHandler {
     private $template_main_content = "";
 
     private $context_mode = null;
+    private $push_handler = null;
 
     function __construct() {
         $this->web_manifest = get_all_where_available([
@@ -495,7 +497,8 @@ class WebHandler implements RequestHandler {
     function load_template($template_name) {
         $ext = pathinfo($template_name, PATHINFO_EXTENSION);
         $session_template_name = str_replace($ext, "session.$ext", $template_name);
-        $templates = $GLOBALS['TEMPLATE_PATHS'];
+        global $TEMPLATE_PATHS;
+        $templates = $TEMPLATE_PATHS;
         // [__APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
         // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",]
 

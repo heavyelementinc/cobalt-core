@@ -25,13 +25,17 @@ if (app('Auth_logins_enabled')) {
     }
     
     Route::s_post("/user/me/", "UserAccounts@update_me");
-    Route::s_delete("/user/{id}/avatar", "UserAccounts@delete_avatar");
+    Route::s_put("/user/me/push",          "UserAccounts@update_my_push");
+    Route::s_post("/user/me/push/enrollment/{state}","UserAccounts@update_my_push_enrollment");
+    Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
     Route::s_put("/user/{id}/permissions", "UserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
-    Route::s_put("/user/{id}/update",     "UserAccounts@update_basics",     ['permission' => 'Auth_allow_editing_users']);
-    Route::s_put("/user/{id}/password",   "UserAccounts@update_basics",   ['permission' => 'Auth_allow_editing_users']);
-    Route::s_post("/user/{id}/avatar",   "UserAccounts@update_basics",   ['permission' => 'Auth_allow_editing_users']);
-    Route::s_put("/user/password",        "UserAccounts@change_my_password", ['permission' => 'self']);
-    Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",   ['permission' => 'Auth_allow_deleting_users']);
+    Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    Route::s_put("/user/{id}/push",        "UserAccounts@update_push",        ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_put("/user/{id}/push/enrollment", "UserAccounts@update_push_enrollment", ['permission' => 'Auth_allow_editing_users']);
+    Route::s_put("/user/{id}/password",    "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    Route::s_post("/user/{id}/avatar",     "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    Route::s_put("/user/password",         "UserAccounts@change_my_password", ['permission' => 'self']);
+    Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
 
     Route::s_put("/settings/update/", "CoreSettingsPanel@update", [
         'permission' => 'Auth_modify_cobalt_settings'
@@ -52,8 +56,8 @@ if (app('Web_main_content_via_api')) {
 
 if (app('API_contact_form_enabled')) {
     Route::post("/contact", "ContactForm@contact_submit");
-    Route::s_put("/contact/read-status/{id}", "ContactForm@read_status");
-    Route::s_delete("/contact/delete/{id}", "ContactForm@delete");
+    Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
+    Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
 }
 
 if (app("CobaltEvents_enabled")) {
@@ -66,9 +70,9 @@ if (app("CobaltEvents_enabled")) {
     ]);
 }
 
-if (app("Plugin_enable_plugin_support")) {
-    Route::s_post("/plugin/enable/{plugin}", "CoreApi@modify_plugin_state", ['permission' => 'Plugins_allow_management']);
-}
+
+Route::s_post("/extensions/{uuid}/info",    "Extensions@modify_extension_state",   ['permission' => 'Extensions_allow_management']);
+Route::s_post("/extensions/{uuid}/options", "Extensions@modify_extension_options", ['permission' => 'Extensions_allow_management']);
 
 if (app('debug')) {
     Route::get("/hello_world/{something}/{machina}?", "HelloWorld@do_it", [ // Hello World test route

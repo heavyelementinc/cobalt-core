@@ -13,10 +13,12 @@
  */
 
 use Demyanovs\PHPHighlight\Highlighter;
+use Drivers\UTCDateTime as DriversUTCDateTime;
 use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use Validation\Exceptions\NoValue;
 
@@ -356,10 +358,8 @@ function add_template($path) {
  */
 function set_template($path) {
     try {
-        $templates = files_exist([
-            __APP_ROOT__ . "/templates/$path",
-            __ENV_ROOT__ . "/templates/$path",
-        ]);
+        global $TEMPLATE_PATHS;
+        $templates = files_exist($TEMPLATE_PATHS);
     } catch (\Exception $e) {
         throw new NotFound("Template not found");
     }
@@ -706,6 +706,14 @@ function view(string $template, array $vars = []):string {
     if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
     $render->set_vars($vars);
     $render->from_template($template);
+    return $render->execute();
+}
+
+function view_from_string(string $view, array $vars = []):string {
+    $render = new \Render\Render();
+    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
+    $render->set_vars($vars);
+    $render->set_body($view, 'string');
     return $render->execute();
 }
 
@@ -1287,8 +1295,32 @@ function sanitize_path_name($path) {
     return str_replace(["../"], "", $path);
 }
 
-function relative_time($date, $now = null) {
-    if (!$now) $now = time();
+function relative_time($time = false, $now = null, $limit = 86400, $format = "M jS g:i A") {
+    if($time instanceof UTCDateTime || $time instanceof DriversUTCDateTime) $time = $time->toDateTime();
+    if($time instanceof DateTime) $time = $time->getTimestamp();
+    if (empty($time) || (!is_string($time) && !is_numeric($time))) $time = time();
+    else if (is_string($time)) $time = strtotime($time);
+
+    if(is_null($now)) $now = time();
+    $relative = '';
+
+    if ($time === $now) $relative = 'now';
+    elseif ($time > $now) $relative = 'in the future';
+    else {
+        $diff = $now - $time;
+
+        if ($diff >= $limit) $relative = date($format, $time);
+        elseif ($diff < 60) {
+            $relative = 'less than one minute ago';
+        } elseif (($minutes = ceil($diff/60)) < 60) {
+            $relative = $minutes.' minute'.(((int)$minutes === 1) ? '' : 's').' ago';
+        } else {
+            $hours = ceil($diff/3600);
+            $relative = 'about '.$hours.' hour'.(((int)$hours === 1) ? '' : 's').' ago';
+        }
+    }
+
+    return $relative;
 }
 
 function pretty_rounding($number):string{
@@ -1362,8 +1394,7 @@ function obscure_email(string $email, int $threshold = 3, string $character = "â
 
 function set_up_db_config_file(string $database, string $user, string $password, string $addr = "localhost", string $port = "27017", string $ssl = "false", string $sslFile = "", string $invalidCerts = "false", ?string $path = null) {
     $path = $path ?? $GLOBALS['db_config'];
-    file_put_contents($path,"
-<?php
+    return file_put_contents($path,"<?php
 /**
  * This is the bootstrap config file. We use this to
  * Set up our database access. This file is read every
@@ -1484,4 +1515,18 @@ function createJWT(array $header, array $payload, $secret) {
     $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
 
     return $jwt;
+}
+
+function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
+    if ($lvl > $GLOBALS['cli_verbosity']) return;
+    $date = date('Y-m-d');
+    $logpath = __APP_ROOT__ . "/ignored/logs/";
+    if(!is_dir($logpath)) mkdir($logpath, 0777, true);
+    $resource = fopen($logpath . "cobalt-$date.log", "a");
+    fwrite($resource, "[".date(DATE_RFC2822)."] {$message}\n");
+    fclose($resource);
+    if(!function_exists("say")) return;
+    $m = fmt("[LOG $lvl]", 'i');
+    $m .= " " . fmt($message, $type, $back);
+    print($m . "\n");
 }

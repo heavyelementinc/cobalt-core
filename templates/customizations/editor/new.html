@@ -1,9 +1,9 @@
-<header-group>
+<hgroup>
     <h1>{{title}}</h1>
     <action-menu>
         <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
     </action-menu>
-</header-group>
+</hgroup>
 <form-request method="POST" action="/api/v1/customizations/update/{{doc._id}}" {{!doc.newDocAutosave}}>
     <fieldset>
         <ul class="list-panel">

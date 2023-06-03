@@ -52,7 +52,8 @@ class CobaltSetting {
     }
 
     function directive_public($value) {
-        $GLOBALS['PUBLIC_SETTINGS'][$this->name] = $value;
+        define_public_js_setting($this->name, $value);
+        // $GLOBALS['PUBLIC_SETTINGS'][$this->name] = $value;
         return $value;
     }
 

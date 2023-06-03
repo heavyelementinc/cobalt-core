@@ -1,43 +1,131 @@
-<h1>{{title}}</h1>
-<ul class="list-panel">
-    <li>
-        <form-request action="/api/v1/settings/update/" method="PUT" autosave="autosave">
-            <label>Application name</label>
-            <input type="text" name="app_name" value="{{app.app_name}}">
-        </form-request>
-    </li>
-    <li>
-        <form-request action="/api/v1/settings/update/" method="PUT" autosave="autosave">
-            <label>Short name</label>
-            <input type="text" name="app_short_name" value="{{app.app_short_name}}">
-        </form-request>
-    </li>
-    <li>
-        <form-request action="/api/v1/settings/update/" method="PUT" autosave="autosave">
-            <switch-container>
-                <label>Display logo</label>
-                <input-switch name="display_masthead" checked="{{app.display_masthead}}"></input-switch>
-            </switch-container>
-        </form-request>
-    </li>
-    <li>
-        <form-request id="logo-updater" action="/api/v1/settings/update/" method="POST" autosave="autosave" class="hbox">
-            <img src="{{app.logo.thumb.filename}}" width="100" height="100">
-            <div style="margin-left: 1em">
-                <label style="display:block">Logo</label>
-                <div class="hbox">
-                    <input type="file" name="logo">
-                    <action-menu title="Options">
-                        <option method="PUT" action="/api/v1/settings/default/logo">Reset Logo</option>
-                    </action-menu>
-                </div>
-            </div>
-        </form-request>
-    </li>
-</ul>
-
-{{$app.logo}}
-
+<hgroup>
+    <h1>{{title}}</h1>
+</hgroup>
+<tab-nav>
+    <nav>
+        <a href="#details"><i name="application-settings-outline"></i> Details</a>
+        <a href="#logo"><i name="bow-tie"></i> Logo</a>
+        <a href="#theme"><i name="palette"></i> Theme</a>
+    </nav>
+    <form-request id="details" action="/api/v1/settings/update/" method="PUT" autosave="autosave">
+        <hgroup><h2><i name="application-settings-outline"></i> Details</h2></hgroup>
+        <fieldset>
+            <legend>Application Details</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Application name</label>
+                    <small>The application name is used in countless places throughout this app. Choose it wisely!</small>
+                    <input type="text" name="app_name" value="{{app.app_name}}">
+                </li>
+                <li>
+                    <label>Short name</label>
+                    <small>If you do not explicitly set a different short name, then the value will inherit from the application name above.</small>
+                    <input type="text" name="app_short_name" value="{{app.app_short_name}}">
+                </li>
+                <li>
+                    <switch-container>
+                        <input-switch name="display_masthead" checked="{{app.display_masthead}}"></input-switch>
+                        <label>Display logo as public masthead</label>
+                    </switch-container>
+                    <small style="width:100%">Generally speaking, this value to should be set to "on."</small>
+                </li>
+            </ul>
+        </fieldset>
+    </form-request>
+    <form-request id="logo" action="/api/v1/settings/update/" method="POST" autosave="autosave" class="hbox">
+        <hgroup><h2><i name="bow-tie"></i> Logo</h2>
+        <action-menu title="Options">
+            <option method="PUT" action="/api/v1/settings/default/logo">Reset Logo</option>
+        </action-menu></hgroup>
+        <fieldset>
+            <legend>Upload a New Logo</legend>
+            <ul class="list-panel">
+                <li>
+                        <img src="{{app.logo.thumb.filename}}" width="100" height="100">
+                        <div style="margin-left: 1em">
+                            <label style="display:block">Logo</label>
+                            <div class="hbox">
+                                <input type="file" name="logo">
+                            </div>
+                        </div>
+                    </form-request>
+                </li>
+            </ul>
+        </fieldset>
+        <details>
+            <summary>Logo Details</summary>
+            <pre>
+                {{!app.logo.json_pretty}}
+            </pre>
+        </details>
+    </form-request>
+    <form-request id="theme">
+        <hgroup><h2><i name="palette"></i> Theme</h2></hgroup>
+        <fieldset>
+            <legend>Base Theme</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Primary Theme</label>
+                    <div class="hbox">
+                        <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;">Light <i name="brightness-5"></i></span>
+                        <input-switch name="dark_theme_enabled" disabled="disabled" tiny style="margin: 0 .5rem 0"></input-switch>
+                        <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;"><i name="brightness-4"></i> Dark</span>
+                    </div>
+                </li>
+            </ul>
+        </fieldset>
+        <fieldset>
+            <legend>Accent Colors</legend>
+            <ul class="list-panel">
+                <li>
+                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
+                        <div>
+                            <label>Background Color</label>
+                            <small>This value is used as the background color
+                                for the HTML body. It also is used to derive the
+                                color for odd table backgrounds, 
+                            </small>
+                        </div>
+                        <input type="color" name="background" value="white" disabled>
+                    </div>
+                </li>
+                <li>
+                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
+                        <div>
+                            <label>Primary Accent Color</label>
+                            <small>This color is used to as the banner header
+                                color. It's also used to derive all button, 
+                                input, and other color values.</small>
+                        </div>
+                        <input type="color" name="accent" value="white" disabled>
+                    </div>
+                </li>
+                <!-- <li>
+                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
+                        <div>
+                            <label>"Valid" Color</label>
+                            <small>This color is used in places where a valid
+                                action has taken place or a request completed
+                                successfully.</small>
+                        </div>
+                        <input type="color" name="valid" value="white" disabled>
+                    </div>
+                </li>
+                <li>
+                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
+                        <div>
+                            <label>"Invalid" Color</label>
+                            <small>This color is used to as the banner header
+                                color. It's also used to derive all button, 
+                                input, and other color values.</small>
+                        </div>
+                        <input type="color" name="invalid" value="white" disabled>
+                    </div>
+                </li> -->
+            </ul>
+        </fieldset>
+    </fieldset>
+</tab-nav>
 
 <style>
     form-request > img {
@@ -45,14 +133,18 @@
         object-fit:contain;
         max-width: 100px;
     }
-    .list-panel li:nth-of-type(even) {
-        background: white;
-    }
+
     .list-panel form-request {
         width:100%;
     }
     .list-panel form-request > * {
         width:100%;
         box-sizing: border-box;
+    }
+    input[type=color] {
+        display: block;
+        height: 3em;
+        width: 3em;
+        margin-left: auto
     }
 </style>

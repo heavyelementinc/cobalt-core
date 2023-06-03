@@ -715,7 +715,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     private function __proto_json_pretty($val, $field) {
-        return json_encode($val, JSON_PRETTY_PRINT);
+        return json_encode($val, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
     }
 
     private function __proto_md($val, $field) {

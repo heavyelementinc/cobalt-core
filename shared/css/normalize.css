@@ -390,6 +390,7 @@ ul.list-panel {
     margin-top: .5rem;
     border: 1px solid var(--project-color-input-border-nofocus);
     border-radius: 4px;
+    /* background: var(--project-calendar-cell-other-bg) */
 }
 
 #permissions h2 {
@@ -408,7 +409,7 @@ ul.list-panel {
 }
 
 .list-panel li:nth-of-type(odd) {
-    background: var(--project-calendar-cell-other-bg);
+    background: var(--project-color-table-bg-even);
 }
 
 .list-panel li:first-of-type{
@@ -433,6 +434,10 @@ ul.list-panel {
 
 .list-panel input-switch {
     margin: 0 1rem 0 0;
+}
+
+.list-panel li small {
+    display: block;
 }
 
 @media only screen and (max-width: 900px) {

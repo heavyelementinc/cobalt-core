@@ -27,6 +27,7 @@
 
 namespace Cobalt\Settings;
 
+use Cobalt\Extensions\Extensions;
 use Exception;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
 use Validation\Exceptions\ValidationFailed;
@@ -59,8 +60,10 @@ class Settings extends \Drivers\Database {
     public $definitions;
     public $instances;
     public $raw_decode;
+    public $manifest_raw_decode;
     public $default_values;
     public $update_settings;
+    public $manifest_build_cache;
 
     // const __SETTINGS__ = [
     //     __ENV_ROOT__ . "/config/flags.jsonc",
@@ -68,7 +71,7 @@ class Settings extends \Drivers\Database {
     //     __APP_ROOT__ . "/ignored/config/custom_settings.jsonc",
     // ];
 
-    function __construct($bootstrap = true) {
+    function __construct($bootstrap = false) {
         // Instance our parent class
         parent::__construct();
 
@@ -77,6 +80,7 @@ class Settings extends \Drivers\Database {
         $this->__settings = $this->fetchCachedSettings();
         $bootstrap_required = $this->isBootstrapRequired($bootstrap);
         if ($bootstrap_required) $this->bootstrap();
+        else $this->fetchPublicSettings();
     }
 
     function get_settings() {
@@ -87,7 +91,8 @@ class Settings extends \Drivers\Database {
         return "CobaltSettings";
     }
 
-    final public function isBootstrapRequired($bootstrap = false) {
+    final public function isBootstrapRequired($mode = false) {
+        $bootstrap = $this->bootstrap_mode($mode);
         // If we're forced to do a bootstrap, do it.
         if($bootstrap) return true;
         // If there are no settings, do a bootstrap
@@ -99,6 +104,11 @@ class Settings extends \Drivers\Database {
         // If the cachedk max_m_time is less than the current max_m_time, do a bootstrap
         if($this->__settings->Meta->max_m_time < $this->max_m_time) return true;
         // Otherwise, we don't need to bootstrap.
+        return false;
+    }
+
+    final public function bootstrap_mode($mode) {
+        if($mode === COBALT_BOOSTRAP_ALWAYS) return true;
         return false;
     }
 
@@ -162,6 +172,9 @@ class Settings extends \Drivers\Database {
         ['upsert' => true]);
         $this->__settings = $this->fetchCachedSettings();
 
+        global $PUBLIC_SETTINGS;
+        $this->updatePublicSettings($PUBLIC_SETTINGS);
+
         return;
     }
 
@@ -195,6 +208,8 @@ class Settings extends \Drivers\Database {
                 if(!file_exists($file)) continue;
                 $this->raw_decode[$file] = jsonc_decode(file_get_contents($file), true, 512, JSON_ERROR_SYNTAX);
             }
+
+            Extensions::invoke("register_settings_definitions", $this->raw_decode, $this->manifest_raw_decode);
 
             $values = [];
             $definitions = [];
@@ -276,15 +291,40 @@ class Settings extends \Drivers\Database {
         return iterator_to_array($array[0]);
     }
 
+    public function fetchPublicSettings() {
+        $cache = $this->findOne([
+            'Meta.type' => 'public_js_cache'
+        ]);
+        unset($cache['Meta']);
+        foreach($cache as $field => $value) {
+            define_public_js_setting($field, $value);
+        }
+    }
+
+    public function updatePublicSettings($settings) {
+        $this->updateOne([
+            'Meta.type' => 'public_js_cache'
+        ],
+        [
+            '$set' => $settings
+        ],
+        [
+            'upsert' => true
+        ]);
+    }
+
     public function bootstrapManifestData() {
         // TODO: remove TIME_TO_UPDATE global
         $GLOBALS['TIME_TO_UPDATE'] = true;
         $final = [];
+
         foreach($this::__MANIFESTS__ as $file) {
-            foreach(get_json($file) as $type => $data) {
+            $this->manifest_raw_decode[] = get_json($file);
+            foreach($this->manifest_raw_decode[count($this->manifest_raw_decode) - 1] as $type => $data) {
                 $this->manifest_combine($type, $data, $final);
             }
         }
+
         foreach($final as $type => $data) {
             (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
         }

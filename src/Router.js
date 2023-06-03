@@ -33,7 +33,7 @@ class Router {
 
         document.addEventListener("navigationEvent", (e) => {
             // if (this.first_run) return;
-            console.info("Navigation event")
+            // console.info("Navigation event")
             this.navigation_event(e);
             this.find_current_navlist_item();
         });
@@ -70,7 +70,7 @@ class Router {
 
     /**
      * @param location The location we're heading to
-     */
+    */
     go() {
         let location = arguments.pop(),
             args = arguments;
@@ -144,7 +144,7 @@ class Router {
                     if("modalState" in event.state) return;
                     if("url" in event.state || "alwaysReloadOnForward" in event.state) this.handle_SPA_navigation(event.state.url, event)
                 } 
-                else console.log(event);
+                // else console.log(event);
             });
             forms = document.querySelectorAll(this.formSelector);
         } else {
@@ -235,7 +235,7 @@ class Router {
         this.SPA_indicator.classList.add("navigation-start");
         
         let state = {...history.state};
-        console.log(state);
+        // console.log(state);
         if(state !== null) {
             // Before we move on to the next page, we need to save the scroll position
             // of the page so we can restore it in the event of a popstate

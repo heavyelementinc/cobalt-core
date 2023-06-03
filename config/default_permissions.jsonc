@@ -21,6 +21,20 @@
         "default": false,
         "ring": 1
     },
+    "Contact_form_submissions_access": {
+        "group": "Admin",
+        "label": "Allows the user to access submissions to the contact form",
+        "dangerous": false,
+        "default": false,
+        "ring": 3
+    },
+    "Contact_form_submissions_modify": {
+        "group": "Admin",
+        "label": "Allows the user to delete submissions to the contact form",
+        "dangerous": true,
+        "default": false,
+        "ring": 3
+    },
     "Debug_access": {
         "group": "Admin",
         "label": "Access to debug tools for web developers.<help-span value='Most people do NOT need this.'></help-span>",
@@ -76,13 +90,14 @@
         "dangerous": true,
         "default": false
     },
-    "Plugins_allow_management": {
-        "group": "Plugins",
+    "Extensions_allow_management": {
+        "group": "Extensions",
         "label": "Allows the user to manage plugins. This is VERY dangerous.",
         "dangerous": true,
         "default": false,
         "ring": 1
     },
+
     "API_manage_keys": {
         "group": "API",
         "label": "Allow the user to manage API keys",

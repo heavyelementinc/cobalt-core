@@ -16,8 +16,11 @@ use Auth\UserValidate;
 use Auth\UserSchema;
 use Cobalt\Token;
 use DateTime;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use PhpParser\Node\Expr\Cast\Object_;
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {

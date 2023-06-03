@@ -8,7 +8,10 @@
     <flex-cell>
         <code>{{doc.email}}</code>
     </flex-cell>
-    <flex-cell>
-        <async-button class="toggle-read-status" method="PUT" action="/api/v1/contact/read-status/{{doc._id}}" value="{{doc.read_status_inverted}}">{{doc.read_status_inverted.display}}</async-button>
+    <flex-cell style="width: 20px">
+        <action-menu type="options">
+            <option class="toggle-read-status" method="PUT" action="/api/v1/contact/read-status/{{doc._id}}" value="{{doc.read_status_inverted}}" style="text-transform: capitalize">{{doc.read_status_inverted.display}}</option>
+            <option method="DELETE" action="/api/v1/contact/delete/{{doc._id}}">Delete</option>
+        </action-menu>
     </flex-cell>
 </flex-row>

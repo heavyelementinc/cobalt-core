@@ -37,6 +37,16 @@ fieldset:has(legend:first-child + ul.list-panel:last-child) {
   border: none;
 }
 
+fieldset:has(ul.directory--group) {
+  padding-bottom: .5em;
+  margin-bottom: 1em;
+  border-bottom: 1px solid var(--project-color-inactive);
+}
+
+fieldset ul.directory--group {
+  padding-left: 1em;
+}
+
 /* 
 :is(form-request,login-form-request) > section.form-request--actual{
   position: relative;

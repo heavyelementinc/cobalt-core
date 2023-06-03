@@ -20,7 +20,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input-text, input, textarea, input-password, button[native], action-menu {
+input-wrapper, input-text, input, textarea, input-password, button[native], [role='button'], action-menu {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -121,7 +121,7 @@ input:disabled, textarea:disabled {
 
 /** BUTTON LINKS **/
 
-.button, button {
+.button, button, [role='button'] {
   --btn-normal: var(--project-color-button-init);
   --btn-text: var(--project-color-button-text);
   --btn-hover: var(--project-color-button-hover);
@@ -137,9 +137,19 @@ input:disabled, textarea:disabled {
   box-sizing: border-box;
 }
 
-button {
+.button,[role='button'] {
   border-radius: 0;
-  border: 1px solid var(--project-color-input-border-nofocus)
+  border: 1px solid var(--project-color-input-border-nofocus);
+  display: inline-flex;
+  justify-content: center;
+  cursor: normal;
+  user-select: none;
+}
+
+:is(.button, button, [role='button']) loading-spinner{
+  font-size: 1em;
+  height: 1em;
+  width: 1em;
 }
 
 a.button {
@@ -162,7 +172,7 @@ a.button {
   border: 1px solid;
 }
 
-.button:hover,button:hover, action-menu:hover {
+.button:hover,button:hover, action-menu:hover, [role='button'] {
   background-color: var(--btn-hover);
   color: var(--btn-hover-text);
 }
