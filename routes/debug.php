@@ -64,7 +64,7 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => "Action Menu"]
     ]);
 
-    Route::get("/colors/{id}", "Debug@colors", [
+    Route::get("/colors/{id}?", "Debug@colors", [
         'navigation' => ['debug_components'],
         'anchor' => [
             'href' => '/colors/',

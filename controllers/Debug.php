@@ -2,6 +2,7 @@
 
 use Cobalt\Requests\Remote\Twitter;
 use Cobalt\Requests\Remote\YouTube;
+use Cobalt\Style\SchemeGenerator;
 use Exceptions\HTTP\BadRequest;
 use Render\Render;
 use MikeAlmond\Color;
@@ -313,21 +314,29 @@ class Debug extends \Controllers\Pages {
     }
 
     function colors($color = "fe329e") {
+        $cobalt = new SchemeGenerator($color);
+
+        $style_values = $cobalt->derive_style_colors_from_accent();
+
+
         $color = \MikeAlmond\Color\Color::fromHex($color);
         $generator = new \MikeAlmond\Color\PaletteGenerator($color);
         $luminance = $generator->monochromatic(10);
-        $adjacent = $generator->adjacent();
-        $palette = $generator->tetrad();
+        $adjacent  = $generator->adjacent();
+        $palette   = $generator->tetrad();
 
-        $html = $this->color_sample($luminance, 'l');
-        $html .= $this->color_sample($adjacent, 'a');
-        $html .= $this->color_sample($palette, 'p');
+        $html  = $this->color_sample($luminance, 'l');
+        $html .= $this->color_sample($adjacent,  'a');
+        $html .= $this->color_sample($palette,   'p');
 
 
         add_vars([
-            'main' => $html
+            'accent' => $color,
+            'swatch' => $cobalt->get_swatch_divs(),
+            'palettegenerator' => $html,
+            'cobalt' => $style_values,
         ]);
-        set_template("/parts/main.html");
+        set_template("/debug/colors.html");
     }
 
     private function color_sample($colors, $label) {
