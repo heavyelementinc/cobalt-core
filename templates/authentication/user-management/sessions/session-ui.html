@@ -1,0 +1,102 @@
+<div id="cobalt-session-manager">
+    {{!html}}
+</div>
+<style>
+    #cobalt-session-manager {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    #cobalt-session-manager .cobalt-session {
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+        border: 1px solid var(--project-color-inactive);
+        /* background: var(--project-body-background); */
+        margin: .5em 1em;
+        padding: 1em;
+        gap: .75em;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        order: 2;
+        border-radius: .5em;
+    }
+
+    #cobalt-session-manager .cobalt-session.session--current-session {
+        order: 1;
+    }
+
+    #cobalt-session-manager .cobalt-session.session--current-session h1:after {
+        content: " (this session)";
+    }
+
+    #cobalt-session-manager .cobalt-session .platform-icon {
+        position: relative;
+    }
+
+    #cobalt-session-manager .cobalt-session i.client {
+        font-size: 8em;
+        width: 1em;
+        height: 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #cobalt-session-manager .cobalt-session i.platform {
+        font-size: 3em;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        text-shadow: 1px 1px 0 white,1px -1px 0 white,-1px 1px 0 white,-1px -1px 0 white;
+    }
+
+    #cobalt-session-manager .cobalt-session :is(.vbox, ul.list-panel) {
+        flex-grow: 1;
+        padding: 0;
+        margin: 0;
+    }
+
+    #cobalt-session-manager .cobalt-session h1 {
+        font-size: 1.2em;
+    }
+
+    #cobalt-session-manager .cobalt-session ul.list-panel label {
+        font-size: .8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    #cobalt-session-manager .cobalt-session ul.list-panel li {
+        position: relative;
+    }
+
+    #cobalt-session-manager .cobalt-session ul.list-panel li div {
+        margin-right: auto;
+        width: 50%;
+    }
+
+    #cobalt-session-manager .cobalt-session ul.list-panel li div label {
+        display: block;
+    }
+
+    #cobalt-session-manager .cobalt-session ul.list-panel action-menu {
+        position: absolute;
+        top: .4rem;
+        right: 0;
+        font-size: 1.5rem;
+    }
+
+    #cobalt-session-manager .cobalt-session .hgroup {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0;
+        border-bottom: none;
+        padding: 0;
+        flex-grow:1;
+        width: 100%;
+    }
+
+</style>

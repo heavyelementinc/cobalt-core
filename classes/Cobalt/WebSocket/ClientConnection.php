@@ -11,7 +11,7 @@ use Auth\UserSchema;
  * @property bool $associate_with_user_session - if `true` then the static::user will be an instance of UserSchema or null
  * @property ?UserSchema $user - null or UserSchema use isUser() for true/false
  */
-class Client {
+class ClientConnection {
     public $resourceId;
     public array $requestHeaders;
     public string $ipAddress;
@@ -26,5 +26,7 @@ class Client {
         $this->requestHeaders = $requestHeaders;
     }
 
-
+    public function disconnect() {
+        
+    }
 }

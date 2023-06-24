@@ -167,4 +167,3 @@ class PushNotificationEnrollmentButton extends CustomButton {
 
 window.Cobalt.PushNotificationInstance = new PushNotifications();
 customElements.define("push-enrollment-button", PushNotificationEnrollmentButton);
-

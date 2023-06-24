@@ -1,0 +1,37 @@
+<form-request method="PUT" action="/api/notifications/{{ntfy._id}}/update">
+    <fieldset>
+        <ul class="list-panel">
+            <li>
+                <label>Body</label>
+                <textarea name="body">{{ntfy.body}}</textarea>
+            </li>
+            <li>
+                <label>Sent</label>
+                <date-span value="{{ntfy.sent.raw}}"></date-span>
+            </li>
+            <li>
+                <label>From</label>
+                {{!from.uname}}
+            </li>
+            <li>
+                <label>Action</label>
+                <input name="action.path" value="{{action.path}}">
+            </li>
+            <li>
+                <label>To:</label>
+                <input-object-array name="for.user">
+                    <var>{{$ntfy.for.user}}</var>
+                    <template>
+                        <label>Username</label><br>
+                        <input name="id.uname" readonly="readonly"><br>
+                        <label><input-switch name="seen"></input-switch> Seen</label><br>
+                        <label><input-switch name="read"></input-switch> Read</label>
+                    </template>
+                </input-object-array>
+            </li>
+        </ul>
+
+        <!-- <button type="submit">Save</button> -->
+    </fieldset>
+</form-request>
+{{!json}}

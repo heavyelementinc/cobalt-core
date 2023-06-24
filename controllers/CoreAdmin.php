@@ -1,5 +1,6 @@
 <?php
 
+use Auth\SessionManager;
 use \Auth\UserSchema;
 use MongoDB\BSON\ObjectId;
 use Cobalt\Payments\PaymentGateway;
@@ -30,6 +31,7 @@ class CoreAdmin {
             <flex-header>Email</flex-header>
             <flex-header>Groups</flex-header>
             <flex-header>Verified</flex-header>
+            <flex-header style='width:20px'></flex-header>
         </flex-row>";
         foreach ($collection->find([]) as $user) {
             $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
@@ -69,11 +71,15 @@ class CoreAdmin {
                 'endpoint' => '/api/v1/user/{{user_account._id}}/push',
                 'push_options' => $push->render_push_opt_in_form_values($user),
             ]),
+            'sessions' => (new SessionManager())->session_manager_ui_by_user_id($user->_id)
         ]);
 
         try {
             $auth = new \Auth\AdditionalUserFields();
             $additional = $auth->__get_additional_user_tabs();
+            foreach($additional as $user => $value) {
+                if($value['name'][0].$value['name'][1] !== "<i") $additional[$user]['name'] = "<i name='card-bulleted-outline'></i> " . $value['name'];
+            }
         } catch (\Error $e) {
             $additional = "";
         }

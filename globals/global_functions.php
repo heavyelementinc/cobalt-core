@@ -18,6 +18,9 @@ use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Reauthorize;
+use Exceptions\HTTP\Unauthorized;
+use Handlers\ApiHandler;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use Validation\Exceptions\NoValue;
@@ -480,15 +483,18 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
         /** If it's an object, we'll check if the key exists and set the value
          * of $mutant to the found property */
         if ($type === "object") {
+            $mutated_path = null;
+            if (is_a($mutant, "\\Cobalt\\Customization\\CustomizationManager")) {
+                $mutant = $mutant->getCustomizationValue($key);
+                $mutated_path = str_replace("custom.$key", "value", $path_map);
+            }
+
             if (is_a($mutant, "\Validation\Normalize")) {
-                $temp_path = get_temp_path($path_map, $key);
+                $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
                 return $mutant;
             }
-            if (is_a($mutant, "\\Cobalt\\Customization\\CustomizationManager")) {
-                $result = $mutant->{$key};
-                return $result;
-            }
+            
             if (!isset($mutant->{$key})) break; // Break if we can't find the property
             $mutant = $mutant->{$key};
             $break = false;
@@ -1136,9 +1142,45 @@ function confirm($message, $data, $okay = "Continue", $dangerous = true) {
     try {
         $header = getHeader("X-Confirm-Dangerous");
         if($header) return true;
-    } catch (Exception $e) {       
+    } catch (Exception $e) {
         throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
     }
+}
+
+/**
+ * 
+ * @param string $message - Prompt the client will display with the reauth request
+ * @param mixed $resubmit - Data the client must return to complete the reauth request
+ * @return true         - This function will only ever return true, it will throw an exception in any failure case
+ * @throws Unauthorized - If the user is not logged in
+ * @throws Reauthorize  - If the user must reauthorize or fails a password verification
+ */
+function reauthorize($message = "You must re-authroize your account", $resubmit) {
+    // Check if session doesn't exist
+    if(!session()) throw new Unauthorized("You must be logged in");
+    $reauth_session_name = 'last_reauthorized';
+    
+    try {
+        // Check if the X-Reauthorization header is set
+        $reauth = getHeader("X-Reauthorization");
+    } catch(Exception $e) {
+        $reauth = false;
+    }
+
+    if($reauth) {
+        $password_plain_text = base64_decode($reauth);
+        $session_pword = session('pword');
+        if(!password_verify($password_plain_text, $session_pword)) throw new Reauthorize($message, $resubmit);
+        $_SESSION[$reauth_session_name] = time();
+        return true;
+    }
+    // Check if the session meets the minimum reauth timeline
+    if(!isset($_SESSION[$reauth_session_name]) || time() - $_SESSION[$reauth_session_name] >= app("Auth_reauth_timeout")) {
+        throw new Reauthorize($message, $resubmit);
+    }
+
+    // If everything checks out, return true;
+    return true;
 }
 
 
@@ -1465,7 +1507,7 @@ function country2flag(string $countryCode, ?string $countryName = null): string 
     return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
 }
 
-function getHeader($header, $headerList = null, $latest = true) {
+function getHeader($header, $headerList = null, $latest = true, $exception = true) {
     if($headerList === null) $headerList = getallheaders();
     $toMatch = strtolower($header);
     $headers = [];
@@ -1477,7 +1519,8 @@ function getHeader($header, $headerList = null, $latest = true) {
 
     if(gettype($match) === "array" && $latest) return $match[count($match) - 1];
     if($match) return $match;
-    throw new NoValue("The specified header was not found among the request headers");
+    if($exception) throw new NoValue("The specified header was not found among the request headers");
+    return null;
 }
 
 function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
@@ -1517,16 +1560,24 @@ function createJWT(array $header, array $payload, $secret) {
     return $jwt;
 }
 
-function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
-    if ($lvl > $GLOBALS['cli_verbosity']) return;
-    $date = date('Y-m-d');
-    $logpath = __APP_ROOT__ . "/ignored/logs/";
-    if(!is_dir($logpath)) mkdir($logpath, 0777, true);
-    $resource = fopen($logpath . "cobalt-$date.log", "a");
-    fwrite($resource, "[".date(DATE_RFC2822)."] {$message}\n");
-    fclose($resource);
-    if(!function_exists("say")) return;
-    $m = fmt("[LOG $lvl]", 'i');
-    $m .= " " . fmt($message, $type, $back);
-    print($m . "\n");
+if(!function_exists("log_item")) {
+    function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
+        if ($lvl > $GLOBALS['cli_verbosity']) return;
+        $date = date('Y-m-d');
+        $logpath = __APP_ROOT__ . "/ignored/logs/";
+        if(!is_dir($logpath)) mkdir($logpath, 0777, true);
+        $resource = fopen($logpath . "cobalt-$date.log", "a");
+        fwrite($resource, "[".date(DATE_RFC2822)."] {$message}\n");
+        fclose($resource);
+        if(!function_exists("say")) return;
+        $m = fmt("[LOG $lvl]", 'i');
+        $m .= " " . fmt($message, $type, $back);
+        print($m . "\n");
+    }
+}
+
+function update(string $query, array $value) {
+    global $context_processor;
+    if($context_processor instanceof ApiHandler === false) return;
+    $context_processor->update_instructions[] = ['target' => $query, ...$value];
 }

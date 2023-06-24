@@ -15,12 +15,25 @@
         <hgroup><h2><i name="card-account-details-outline"></i> Your {{app.app_name}} Profile</h2></hgroup>
         <div class="hbox" style="align-items:start">
             <fieldset>
+                <legend>Avatar</legend>
+                <ul class="list-panel">
+                    <li>
+                        <label>Avatar</label>
+                        {{!doc.avatar.display}}
+                        <input type="file" accept="image/svg+xml,image/*" name="avatar">
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset>
                 <legend>Details</legend>
                 <ul class="list-panel">
                     <li>
                         <label>Name</label>
-                        <input type="text" name="fname" for="#fname" value="{{doc.fname}}" placeholder="First Name">
-                        <input type="text" name="lname" for="#lname" value="{{doc.lname}}" placeholder="Last Name">
+
+                        <div class="hbox" style="flex-wrap:nowrap; flex-grow: 1; gap: 1em;">
+                            <input type="text" name="fname" for="#fname" value="{{doc.fname}}" placeholder="First Name">
+                            <input type="text" name="lname" for="#lname" value="{{doc.lname}}" placeholder="Last Name">
+                        </div>
                     </li>
                     <li>
                         <label>Username</label>
@@ -32,26 +45,17 @@
                     </li>
                 </ul>
             </fieldset>
-            <fieldset>
-                <legend>Avatar</legend>
-                <ul class="list-panel">
-                    <li>
-                        <label>Avatar</label>
-                        {{!doc.avatar.display}}
-                        <input type="file" accept="image/svg+xml,image/*" name="avatar">
-                    </li>
-                </ul>
-            </fieldset>
         </div>
     </form-request>
     <form-request id="password" method="POST" action="/api/v1/user/me/">
         <hgroup><h2><i name="shield-lock-open"></i> Account Security</h2></hgroup>
+        {{!2fa}}
         <fieldset>
             <legend>Password Update</legend>
             <ul class="list-panel">
                 <li>
                     <label>Password</label>
-                    <input type="password">
+                    <input-password type="password" name="password"></input-password>
                 </li>
             </ul>
         </fieldset>

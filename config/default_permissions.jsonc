@@ -84,6 +84,20 @@
         "default": false,
         "ring": 2
     },
+    "Addressee_query": {
+        "group": "Notifications",
+        "label": "Able to query for username and first/last name.<help-span value='This is used as part of the notification system.'></help-span>",
+        "dangerous": false,
+        "default": true,
+        "ring": 9
+    },
+    "Notifications_can_access_any_notification": {
+        "group": "Notifications",
+        "label": "Able to access any notification<help-span value='Typically, a user can only access a notification if they wrote it or it is addressed to them.'></help-span>",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
     "CobaltEvents_crud_events": {
         "group": "Admin",
         "label": "Create, delete, or modify Cobalt Events.",

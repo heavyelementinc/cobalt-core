@@ -15,11 +15,11 @@ class ClientList implements Iterator, Countable {
     protected int $index = 0;
     protected array $clients = [];
 
-    public function connect(Client $client) {
+    public function connect(ClientConnection $client) {
         array_push($this->clients, $client);
     }
 
-    public function disconnect(Client $client) {
+    public function disconnect(ClientConnection $client) {
         foreach($this->clients as $c) {
             if($client->resourceId !== $c->resourceId) continue;
             unset($this->clients[$c]);

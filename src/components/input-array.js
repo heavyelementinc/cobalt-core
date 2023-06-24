@@ -13,6 +13,7 @@ class InputArray extends AutoCompleteInterface {
         super();
         this.readonly = false;
         this.tags = null;
+        this.action = this.getAttribute("action");
         this.allowCustom = string_to_bool(this.getAttribute("allow-custom")) ?? false;
         this.excludeCurrent = string_to_bool(this.getAttribute("exclude-current")) ?? true;
     }
@@ -102,7 +103,7 @@ class InputArray extends AutoCompleteInterface {
         if(!compare_arrays(this.was,this.values)) {
             console.log("input-array is firing a change event",{was: this.was, is: this.values});
             this.dispatchEvent(new Event("input"));
-            this.dispatchEvent(new Event("change"));
+            // this.dispatchEvent(new Event("change"));
         }
         this.was = [ ...this.values ?? []];
     }
@@ -118,10 +119,9 @@ class InputArray extends AutoCompleteInterface {
         for(const i of opts) {
             validOpts[i.value] = i.innerHTML;
         }
-
+        this.tags.innerHTML = "";
         // Loop through the argument values of this element and select them
         for(const i of val) {
-            this.deselectOption(i);
             if(Object.keys(validOpts).includes(i)) {
                 this.selectOption(i);
                 continue;
@@ -155,6 +155,7 @@ class InputArray extends AutoCompleteInterface {
             const val = this.value;
             val.push(e.detail.value);
             this.value = val;
+            this.dispatchEvent(new Event("change", {...e, target: this}));
         })
     }
 
@@ -167,11 +168,13 @@ class InputArray extends AutoCompleteInterface {
         el.setAttribute("selected","selected");
     }
 
+    // Called when removing the option from the array
     deselectOption(value) {
         let el = this.querySelector(`option[value='${value}']`);
         if(!el) return;
         el.removeAttribute("selected");
         this.removeTag(el);
+        this.dispatchEvent(new Event("change", {target: this}));
     }
 
 
@@ -232,3 +235,161 @@ class InputArray extends AutoCompleteInterface {
 }
 
 customElements.define("input-array", InputArray);
+
+
+class InputUserArray extends InputArray {
+
+    constructor(){ 
+        super();
+        this.tagLabels = {};
+    }
+
+    // connectedCallback() {
+    //     super.connectedCallback();
+    // }
+
+    renderOptions(opts) {
+        let finalOptions = [];
+        for(const el in opts) {
+            const label = this.drawLabel(opts[el],opts);
+            finalOptions[el] = {
+                search: label,
+                label: label,
+                value: opts[el]._id.$oid
+            }
+        }
+        // this.options = finalOptions;
+        return finalOptions;
+    }
+
+    updateTags(val = null) {
+        // Get the value of the element
+        if(val === null) val = this.value;
+        // Convert this.options to an object
+        const validOpts = this.tagLabels;
+        
+        // Loop through the argument values of this element and select them
+        for(const i of val) {
+            this.removeTag(i);
+            if(Object.keys(validOpts).includes(i)) {
+                this.selectOption(i);
+                continue;
+            }
+        }
+    }
+
+    initAutocomplete() {
+        const field = this.getAutocompleteSearchField();
+        this.appendChild(field);
+
+        this.addEventListener("autocompleteselect",(e) => {
+            const val = this.value;
+            val.push(e.detail.value);
+            this.value = val;
+            this.tagLabels[val] = e.detail.label;
+        })
+    }
+
+    
+
+
+
+
+    drawLabel(values) {
+        return `
+            <div class="cobalt-user--profile-display">
+                <img src="${values.avatar.thumb.filename}" class="cobalt-user--avatar">
+                <div class='vbox'>
+                    <span>${values.fname} ${values.lname}</span>
+                    <span title='${values._id.$oid}'>@${values.uname}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    drawTag(i){
+        if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
+        if(this.tags === null) return;
+        let tag = document.createElement("input-array-tag");
+        tag.setAttribute("value", i.value);
+        tag.innerHTML = `<label>${this.drawLabel(i)}</label>`;
+        this.initTagButton(tag);
+        this.tags.appendChild(tag);
+    }
+
+}
+
+customElements.define("input-user-array", InputUserArray);
+
+class InputUser extends AutoCompleteInterface {
+
+    constructor() {
+        super();
+        this.user = null;
+    }
+
+    connectedCallback() {
+        // super.connectedCallback();
+        this.searchField = this.getAutocompleteSearchField();
+        this.appendChild(this.searchField);
+        this.addEventListener("autocompleteselect", e => {
+            this.setValue(e.detail);
+        });
+    }
+
+    get value() {
+        if(this.user) return this.user.getAttribute('value');
+        return "";
+    }
+
+    renderOptions(opts) {
+        let finalOptions = [];
+        for(const el in opts) {
+            const label = this.drawLabel(opts[el],opts);
+            finalOptions[el] = {
+                search: label.outerHTML,
+                label: label.outerHTML,
+                value: opts[el]._id.$oid
+            }
+        }
+        // this.options = finalOptions;
+        return finalOptions;
+    }
+
+    drawLabel(values) {
+        let user = document.createElement("div");
+        user.classList.add("cobalt-user--profile-display");
+        user.setAttribute("value", values.value);
+
+        user.innerHTML = `
+            <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
+            <div class='vbox'>
+                <span>${values.fname} ${values.lname}</span>
+                <span class='username'>@${values.uname}</span>
+            </div>
+        `;
+        
+        return user;
+    }
+
+    setValue(values) {
+        this.user = document.createElement("div");
+        this.user.innerHTML = values.label;
+        this.user.style.flexGrow = "1";
+        this.user.setAttribute("value", values.value);
+        this.appendChild(this.user);
+        this.classList.add("value");
+
+        this.clearButton = document.createElement("button");
+        this.clearButton.innerHTML = "<i name='backspace'></i>";
+        this.clearButton.addEventListener("click", e => {
+            this.removeChild(this.user);
+            this.removeChild(this.clearButton);
+            this.classList.remove("value");
+        });
+        this.appendChild(this.clearButton);
+    }
+
+}
+
+customElements.define("input-user", InputUser);

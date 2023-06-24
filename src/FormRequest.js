@@ -309,6 +309,7 @@ class LoginFormRequest extends FormRequest {
         
         delete data.username;
         delete data.password;
+
         const post = new ApiFetch(this.action, this.method, { headers: headers });
         try {
             var result = await post.send(data, {});
@@ -320,7 +321,5 @@ class LoginFormRequest extends FormRequest {
 
         this.onsuccess = new CustomEvent("requestSuccess", { detail: result });
         this.form.dispatchEvent(this.onsuccess);
-        // if (result.login === "successful") window.location.reload();
-        // console.log(result)
     }
 }

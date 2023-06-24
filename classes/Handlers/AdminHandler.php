@@ -46,6 +46,7 @@ class AdminHandler extends WebHandler {
         // $panel .= ;
         $panel .= "</ul>";
         $panel .= "<ul class='settings-panel--footer'>";
+        $panel .= (__APP_SETTINGS__['Notifications_system_enabled']) ? "<notify-button></notify-button>" : "";
         $panel .= ($customize) ? "<a class='admin-panel--customize-link' href='$customize' rel='Customize Panel' title='Customize Panel'><i name='application-edit-outline'></i><span class='contextual contextual--hover'>Customize</span></a>" : "";
         $panel .= ($settings) ? "<a class='admin-panel--settings-link' href='$settings' rel='Settings Panel' title='Settings Panel'><i name='cog'></i><span class='contextual contextual--hover'>Settings</span></a>" : "";
         $panel .= "</ul>";

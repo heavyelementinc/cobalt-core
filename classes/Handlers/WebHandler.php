@@ -50,6 +50,7 @@ class WebHandler implements RequestHandler {
         "@footer_credits@" => "",
         "@script_content@" => "",
         "@session_panel@"  => "",
+        "@notify_panel@"   => "",
     ];
 
     private $main_content_replacement = "@main_content@";
@@ -290,6 +291,11 @@ class WebHandler implements RequestHandler {
 
     function script_content() {
         return $this->cache_handler($this->script_cache_name, "generate_script_content");
+    }
+
+    function notify_panel() {
+        if(!__APP_SETTINGS__['Notifications_system_enabled']) return "";
+        return view('/cobalt/notifications/panel.html');
     }
 
     var $style_cache_name = "template-precomp/style.html";

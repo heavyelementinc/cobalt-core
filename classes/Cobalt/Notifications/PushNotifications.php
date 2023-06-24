@@ -68,6 +68,10 @@ class PushNotifications {
 
     function push($subject, $message, $recipient_classes = [], $data = []) {
         $recipients = $this->fetch_recipients($recipient_classes);
+        $this->dispatch($subject, $message, $recipients, $data);
+    }
+
+    function dispatch($subject, $message, $recipients, $data = []) {
         $auth = [
             "VAPID" => [
                 'subject'    => $_SERVER['SERVER_NAME'],// ?? app("domain_name"),

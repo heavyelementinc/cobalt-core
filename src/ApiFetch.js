@@ -16,10 +16,12 @@ class ApiFetch {
         this.result = null;
         this.abortController = null;
         this.reject = null;
+        console.warn("WARNING! The 'ApiFetch' class has been deprecated and is being phased out in a future version of Cobalt Engine! Use 'AsyncFetch' instead!");
     }
 
     // fetch requests are now abortable!
     async send(data = "") {
+        console.warn("WARNING! This app is using ApiFetch to fetch data! This class has been deprecated! Use AsyncFetch instead!");
         return new Promise(async (resolve, reject) => {
             this.reject = reject;
             this.abortController = new AbortController();
@@ -38,16 +40,13 @@ class ApiFetch {
             let result = null;
             result = await fetch(this.uri, send);
             this.fetchResult = result;
-            this.result = await result.json();
-
-            // if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
-            // if (result.headers.get("X-Refresh")) this.pageRefresh(result.headers.get("X-Refresh"));
-            // if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
-            // if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
+            if(result.headers.get('Content-Type').match(/json/i)) this.result = await result.json();
+            else this.result = result.text();
 
             if (result.ok === false) {
                 reject(this.result);
                 await this.handleErrors(result,this.result);
+                return new AsyncMessageHandler(this, "ApiFetch", "error");
             }
             new AsyncMessageHandler(this, "ApiFetch", "status");
             // this.result = result;
@@ -154,7 +153,7 @@ class ApiFile extends ApiFetch {
         headers = {},
         progressBar = null,
     }) {
-        super(uri, method, { format, cache, asJSON, credentials, headers });
+    super(uri, method, { format, cache, asJSON, credentials, headers });
         this.progressBar = progressBar;
     }
 
@@ -236,21 +235,5 @@ class FetchError extends Error {
     statusMessage() {
         if("error" in this.result && this.result.error) new StatusError({message: this.result.error, id: this.url, type: this.result.code});
         else new StatusError({message:"An unknown error occurred", id: this.url});
-    }
-}
-
-class FetchConfirm {
-    constructor(data, original_fetch) {
-        this.returnValues = data;
-        this.fetch = original_fetch;
-    }
-
-    async draw() {
-        let confirm = await modalConfirm(this.returnValues.error, this.returnValues.okay, "Cancel", this.returnValues.dangerous);
-        if (confirm === false) return { json: () => { return { status: 400, error: "Aborted", data: false } } };
-        console.log(this.returnValues.data)
-        this.fetch.headers = { ...this.fetch.headers, ...this.returnValues.data.headers };
-        const result = await this.fetch.send(this.returnValues.data.return);
-        return { json: () => result };
     }
 }

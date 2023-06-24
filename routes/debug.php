@@ -41,6 +41,11 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => "Input Test"]
     ]);
 
+    Route::get('/new-form-request', 'Debug@new_form_request',[
+        'navigation' => ['debug_components'],
+        'anchor' => ['name' => 'New Form Request Test']
+    ]);
+
     
     Route::get("/loading", "Debug@debug_loading", [
         'navigation' => ['debug_components'],

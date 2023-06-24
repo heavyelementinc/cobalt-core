@@ -1,0 +1,34 @@
+<fieldset id="enrollment-pane" class="cobalt-two-factor--enrollment">
+    <legend>Enroll in Two-Factor Authentication</legend>
+    <div class="hbox">
+        <div class="vbox">
+            <p>Step 1: Scan the QR code with your TOTP App<help-span value="FreeOTP+, Google Authenticator, etc"></help-span> to get started.</p>
+            {{!qr}}
+            <copy-span value="{{secret}}"></copy-span>
+        </div>
+        <!-- <hr> -->
+        <form-request method="PUT" action="/api/v1/me/totp/enroll">
+            <p>Step 2: Use your TOTP app to generate a one-time password and submit it using field below.</p>
+            <label>One-time Password</label>
+            <input name="verification" placeholder="e.g 012345">
+            <button type="submit" native>Submit</button>
+        </form-request>
+    </div>
+</fieldset>
+
+<style>
+    .cobalt-two-factor--enrollment .hbox{
+        flex-wrap: nowrap;
+        gap: 1em;
+    }
+    .cobalt-two-factor--enrollment .hbox :is(.vbox, form-request) {
+        display: flex;
+        height: 100%;
+        width: 50%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: center;
+        flex-grow: 1;
+    }
+</style>

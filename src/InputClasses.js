@@ -349,6 +349,7 @@ var classMap = {
     button: InputClass_button,
     number: InputClass_number,
     array: InputClass_array,
+    userArray: InputClass_array,
     objectArray: InputClass_object_array,
     tagSelect: InputClass_tag_select,
     radioGroup: InputClass_radiogroup,

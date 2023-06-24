@@ -73,6 +73,7 @@ class Extensions extends \Drivers\Database {
      *   * `meta`          - An object containing name, description, and icon
      *   * `meta.author`   - The name of the author of this extension
      *   * `meta.name`     - The name of
+     *   * `grants`        - Object of objects {"method_name": {"required": true}}
      * @param mixed $manifest 
      * @param mixed $ext_dir 
      * @return void 
@@ -168,6 +169,76 @@ class Extensions extends \Drivers\Database {
         $this->initialized_extensions[] = new $extension_literal($manifest);
     }
 
+    public function get_grants($extension) {
+        $html = "";
+        foreach($extension['grants'] as $method => $meta) {
+            $required = "required--" . json_encode($meta['required'] ?? false);
+            $checked = ($this->has_grant($extension, $method)) ? "check-circle-outline" : "shield-outline";
+            $m = $this->valid_grants[$method];
+            $html .= "<li class='$required'><i class='state' name='$checked'></i> <label> {$m['name']}</label></li>";
+        }
+        return view("/cobalt/extensions/security-grants.html",['html' => $html, 'ext' => $extension]);
+    }
+
+    public function has_grant($ext, $method) {
+        if(!key_exists($method, $this->valid_grants)) throw new Exception("That grant does not exist");
+        return ($ext->grants->{$method} ?? $this->valid_grants[$method]['default']) ? true : false;
+    }
+
+    public $valid_grants = [
+        'register_settings_definition' => [
+            'name' => "Register extension's settings with application",
+            'icon' => 'knob',
+            'default' => true
+        ],
+        'register_routes' => [
+            'name' => "Register extension routes",
+            'icon' => 'router',
+            'default' => true
+        ],
+        'register_controller_dir' => [
+            'name' => "Define route controllers",
+            'icon' => 'application-braces',
+            'default' => true
+        ],
+        'register_classes_dir' => [
+            'name' => "Register classes",
+            'icon' => 'code-braces',
+            'default' => true
+        ],
+        'register_shared_dir' => [
+            'name' => "Register shared content (CSS, other assets)",
+            'icon' => 'border-style',
+            'default' => true
+        ],
+        'get_js_dirs' => [
+            'name' => "Register JavaScript files",
+            'icon' => 'code-json',
+            'default' => true
+        ],
+        'register_templates_dir' => [
+            'name' => "Register template directory",
+            'icon' => 'application-brackets-outline',
+            'default' => true
+        ],
+        
+        'register_permissions' => [
+            'name' => "Define extension-specific permissions",
+            'icon' => 'shield-key',
+            'default' => true
+        ],
+        'login_process' => [
+            'name' => "Intercept the login process",
+            'icon' => 'key-chain',
+            'default' => false
+        ],
+        "session_creation" => [
+            'name' => "Modify user session login data before storage",
+            'icon' => 'login',
+            'default' => false
+        ]
+    ];
+
     /**
      * Calling methods from an extension is easy:
      * 
@@ -195,4 +266,5 @@ class Extensions extends \Drivers\Database {
         global $EXTENSION_MANAGER;
         return $EXTENSION_MANAGER->count(['is_extension' => true]);
     }
+
 }

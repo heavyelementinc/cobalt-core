@@ -55,7 +55,7 @@ function __app_context($app = ""){
         log_item("App context found as directory name.");
         $context_found = $file.$app;
     }
-    if(!$context_found) throw new Exception("Could not establish context for $app","e");
+    if(!$context_found) throw new Exception("Could not establish context for $app");
 
     $GLOBALS['cli_app_root'] = $context_found;
     require __CLI_ROOT__ . "/../env.php";

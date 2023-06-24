@@ -1,7 +1,7 @@
 <hgroup>
     <h1>{{title}}</h1>
     <action-menu>
-        <option onclick='copyToClipboard("&#123;&#123;custom.{{doc.unique_name}}&#125;&#125;")'>Copy slug to clipboard</option>
+        <option onclick='copyToClipboard("&#123;&#123;!custom.{{doc.unique_name}}.embed&#125;&#125;")'>Copy slug to clipboard</option>
         <option onclick='modalForm("/admin/customizations/update/{{doc._id}}",{})'>Update parameters</option>
         <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
     </action-menu>
@@ -23,6 +23,16 @@
                         <input type='file' name="value" accept="image/*" for="#preview">
                     </div>
                     <img id="preview" src="{{doc.value.display}}" style="height: 92px; width: 200px; object-fit: contain; border: 1px solid lightgray">
+                </div>
+            </li>
+            <li>
+                <div>
+                    <label>Width</label>
+                    <input name="meta.display_width" value="{{doc.meta.display_width}}">
+                </div>
+                <div>
+                    <label>Height</label>
+                    <input name="meta.display_height" value="{{doc.meta.display_height}}">
                 </div>
             </li>
         </ul>

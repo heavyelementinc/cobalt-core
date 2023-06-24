@@ -12,7 +12,7 @@ class CobaltEvents {
         }
         this.hasAnotherEventBeenShown = false;
         this.hasAnExclusiveEventBeenShown = false;
-        this.api = new ApiFetch('/api/v1/cobalt-events/current/', 'GET', {});
+        this.api = new AsyncFetch('/api/v1/cobalt-events/current/', 'GET', {});
         this.init();
     }
 

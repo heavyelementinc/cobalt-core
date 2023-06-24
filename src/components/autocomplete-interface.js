@@ -46,8 +46,11 @@ class AutoCompleteInterface extends HTMLElement {
         this.searchResults = null;
         this.displayResultsUntilSelection = string_to_bool(this.getAttribute("static-results")) ?? false;
         this.excludeCurrentValues = string_to_bool(this.getAttribute("exclude-current")) ?? false;
+        this.action = this.getAttribute("action") ?? null;
+        this.minimumRemoteQueryLength = this.getAttribute("min") ?? 3;
         this.hasFocus = false;
         this.timeout = null;
+        this.actionAbort = null;
     }
 
     getAutocompleteSearchField() {
@@ -135,7 +138,19 @@ class AutoCompleteInterface extends HTMLElement {
     }
 
     async createSearchResults(filter, custom = {}, all = false) {
-        let workingOptions = await this.filterOptions(filter, custom, false) ?? [];
+        let workingOptions;
+        if(this.action) {
+            clearTimeout(this.actionAbort);
+            this.actionAbort = setTimeout(async () => {
+                workingOptions = await this.filterOptions(filter, custom, false) ?? [];
+                for(const i of workingOptions) {
+                    this.addSearchResult(i,filter);
+                }
+            }, 400);
+            return;
+        }
+
+        workingOptions = await this.filterOptions(filter, custom, false) ?? [];
 
         for(const i of workingOptions) {
             this.addSearchResult(i,filter);
@@ -177,7 +192,7 @@ class AutoCompleteInterface extends HTMLElement {
     selectSearchResult(target) {
         let val = target.getAttribute("value"),
             label = target.getAttribute("label");
-        this.dispatchEvent(new CustomEvent("autocompleteselect",{detail: {value: val,label}}));
+        this.dispatchEvent(new CustomEvent("autocompleteselect",{detail: {value: val, label}}));
         this.clearResults();
         clearTimeout(this.timeout);
     }
@@ -191,27 +206,20 @@ class AutoCompleteInterface extends HTMLElement {
 
     async filterOptions(filter, custom = {}, all = false) {
         const val = this.value;
-        const opts = this.options;
+        let opts = this.options ?? [];
         let finalOptions = [];
 
-        // if(this.url) {
-        //     const api = new ApiFetch(this.url, this.getAttribute("method") || "GET", {});
-        //     const opts = await api.send({search: toSearch});
-        //     finalOptions = {};
-        //     for(const el in opts) {
-        //         if(typeof opts === "object" && "search" in opts && "label" in opts) {
-        //             finalOptions[el] = opts[el];
-        //         } else {
-        //             finalOptions[el] = {
-        //                 search: opts[el],
-        //                 label: opts[el]
-        //             };
-        //         }
-        //     }
-        // }
+        if(this.action) {
+            let remoteQueryValue = this.AutocompleteSearchField.value;
+            if(remoteQueryValue.length >= this.minimumRemoteQueryLength) {
+                const api = new ApiFetch(`${this.action}?search=${remoteQueryValue}`, this.getAttribute("method") || "GET", {});
+                opts = await api.send();
+                finalOptions = this.renderOptions(opts);
+            }
+        }
 
         for(const i of opts) {
-            const attr = i.getAttribute("value");
+            const attr = i.value || i._id?.$oid || i.getAttribute("value");
             // Let's exclude current values
             switch(typeof val) {
                 case "object":
@@ -228,6 +236,21 @@ class AutoCompleteInterface extends HTMLElement {
             });
         }
         finalOptions.push(custom);
+        return finalOptions;
+    }
+
+    renderOptions(opts) {
+        let finalOptions = [];
+        for(const el in opts) {
+            if(typeof opts === "object" && "search" in opts && "label" in opts) {
+                finalOptions[el] = opts[el];
+            } else {
+                finalOptions[el] = {
+                    search: opts[el],
+                    label: opts[el]
+                };
+            }
+        }
         return finalOptions;
     }
 
@@ -257,6 +280,7 @@ class AutoCompleteInterface extends HTMLElement {
     }
 
     updatePosition() {
+        if(!this.searchResults) this.appendSearchResults();
         const offset = get_offset(this);
         this.searchResults.style.top = (offset.bottom - 1) + "px";
         this.searchResults.style.left = (offset.x + 4) + "px";

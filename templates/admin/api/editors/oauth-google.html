@@ -24,7 +24,7 @@
         <input-password name="secret" value="{{token.secret}}"></input-password>
     
         <label>Redirect URIs</label>
-        <input-array name="redirect_uris" value="{{$token.redirect_uris}}" allow-custom="true"></input-array>
+        <input-array name="redirect_uris" allow-custom="true">{{!token.redirect_uris.options}}</input-array>
     </fieldset>
     <button type="submit">Submit</button>
 </form-request>

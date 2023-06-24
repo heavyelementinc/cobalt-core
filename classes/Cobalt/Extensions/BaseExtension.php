@@ -64,7 +64,12 @@ abstract class BaseExtension {
     //     if($set instanceof \MongoDB\Model\BSONArray) $set->getArrayCopy();
     // }
 
-    function session_creation($permission) {}
+    /**
+     * Modify the $session values you'd like to store as part of this session.
+     * @param mixed $permission 
+     * @return void
+     */
+    function session_creation(&$session) {}
 
 
 }

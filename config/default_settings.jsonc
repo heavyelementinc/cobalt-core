@@ -437,6 +437,18 @@
             "type": "boolean"
         }
     },
+    "Notifications_enable_push_notifications": {
+        "default": true,
+        "meta": {
+            "group": "Features",
+            "subgroup": "Notifications",
+            "name": "Enable push notifications to be dispatched",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
     "Notifications_in_session_panel": {
         "default": true,
         "meta": {
@@ -930,6 +942,12 @@
     },
     "Auth_session_days_until_expiration": {
         "default": 90
+    },
+    "Auth_reauth_timeout": {
+        "default": 600 // 10 minutes in seconds
+    },
+    "TwoFactorAuthentication_enabled": {
+        "default": true
     },
     "Renderer_parse_for_multiline_functions": {
         // When true, the trailing semicolon is REQUIRED.

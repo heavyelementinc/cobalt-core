@@ -4,4 +4,11 @@
     <flex-cell>{{user.email}}</flex-cell>
     <flex-cell><a href="manage/{{user._id}}#permissions">{{!groups}}</a></a></flex-cell>
     <flex-cell>{{$user.verified}}</flex-cell>
+    <flex-cell style="width:20px">
+        <action-menu title="Manage User" type="options">
+            <option method="DELETE" action="/api/v1/user/{{user._id}}/delete" dangerous>Delete "{{user.fname}}"</option>
+            <option method="PUT" action="/api/v1/user/{{user._id}}/update" value="{&quot;flags.password_reset_required&quot;:&quot;true&quot;}">Force password reset</option>
+            <option method="PUT" action="/api/v1/user/{{user._id}}/update" value="{&quot;flags.locked&quot;: true}">Lock user account</option>
+        </action-menu>    
+    </flex-cell>
 </flex-row>

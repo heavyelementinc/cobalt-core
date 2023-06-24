@@ -1,6 +1,6 @@
 window.Cobalt = {};
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-user[name], input-array[name], input-user-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -766,3 +766,27 @@ function copyToClipboard(valueToCopy) {
 
     // setTimeout(() => message.close(), 4000);
 }
+
+function removeNearest(element, ancestorSelector) {
+    let ancestor = element.closest(ancestorSelector);
+    ancestor.parentNode.removeChild(ancestor);
+}
+
+function promiseTimeout(callback, value) {
+    return Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(callback());
+        }, value);
+    })
+}
+
+function getTabId() {
+    if (window.sessionStorage.tabId) {
+        return window.sessionStorage.tabId;
+    }
+    const tabId = Math.floor(Math.random() * 1000000) + Math.floor(Math.random() * 1000000);
+    window.sessionStorage.tabId = tabId;
+    return tabId;
+}
+
+getTabId();

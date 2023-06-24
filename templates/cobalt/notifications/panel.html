@@ -1,0 +1,25 @@
+<div class="notifications--notifications-panel" aria-hidden="true">
+    <hgroup>
+        <h1>Notifications</h1>
+    </hgroup>
+    <div class="hbox">
+        <action-menu>
+            <option onclick="window.Cobalt.NotificationsPanel.updatePanelContent()">Refresh</option>
+            <option method="PUT" action="/api/notifications/me/read-all">Mark all as 'read'</option>
+        </action-menu>
+    </div>
+    <ul class="notifications--list">
+        <li>Nothing here.</li>
+    </ul>
+    <form-request class="notifications--send" method="POST" action="/api/notifications/send">
+        <fieldset>
+            <legend>Send Notification</legend>
+            <input-user name="for.user[]" placeholder="Recipient" method="GET" action="/api/notifications/addressees"></input-user>
+            <button class="input-user-duplicate"><i name="plus-circle"></i></button>
+            <split-field>
+                <textarea name="body" placeholder="Message body"></textarea>
+                <button type="submit"><i name="send"></i></button>
+            </split-field>
+        </fieldset>
+    </form-request>
+</div>

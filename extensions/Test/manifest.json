@@ -25,5 +25,10 @@
         "vars": {
             "web": {}
         }
+    },
+    "grants": {
+        "login_process": {
+            "required": true
+        }
     }
 }

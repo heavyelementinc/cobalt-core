@@ -27,6 +27,10 @@ if (app('Auth_logins_enabled')) {
     Route::s_post("/user/me/", "UserAccounts@update_me");
     Route::s_put("/user/me/push",          "UserAccounts@update_my_push");
     Route::s_post("/user/me/push/enrollment/{state}","UserAccounts@update_my_push_enrollment");
+    if(app("TwoFactorAuthentication_enabled")) {
+        Route::s_put("/me/totp/enroll",    "UserAccounts@totp_enroll");
+        Route::s_delete("/me/totp/unenroll", "UserAccounts@totp_unenroll");
+    }
     Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
     Route::s_put("/user/{id}/permissions", "UserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
     Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
@@ -48,6 +52,9 @@ if (app('Auth_logins_enabled')) {
     Route::s_put("/settings/default/{name}", "CoreSettingsPanel@reset_to_default", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
+
+    Route::s_delete("/sessions/{id}", "UserAccounts@log_out_session_by_id");
+    
 }
 
 if (app('Web_main_content_via_api')) {

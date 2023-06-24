@@ -32,10 +32,19 @@ class Customizations extends \Controllers\Controller {
         $result = $this->man->findAllAsSchema(...$this->params($this->man,$query));
         if(has_permission("Customizations_create")) $create_button = '<a href="/admin/customizations/edit/new" class="floater--new-item"></a>';
 
+        $table = "";
+        foreach($result as $doc) {
+            $table .= view('/customizations/index/individual.html',[
+                'doc' => $doc, 
+                'embed' => ($doc['type'] === "text") ? "" : ".embed",
+                'exclaim' => ($doc['type'] === "text") ? "" : "!",
+            ]);
+        }
+
         add_vars([
             'title' => 'Customizations',
             'pagination' => $this->getPaginationLinks(),
-            'table' => view_each('/customizations/index/individual.html',$result),
+            'table' => $table,
             'create_button' => $create_button,
         ]);
 
@@ -84,8 +93,10 @@ class Customizations extends \Controllers\Controller {
             }
         }
 
-        $validate = new CustomSchema();
+        $resource = $this->man->findOne(['_id' => $_id]);
 
+        $validate = new CustomSchema();
+        if($resource) $validate->allowNameCollision($resource['unique_name']);
         $valid = $validate->validate($_POST);
         
         $update = $this->process_values($valid);

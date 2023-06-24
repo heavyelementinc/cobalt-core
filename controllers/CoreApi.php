@@ -27,7 +27,7 @@ class CoreApi extends \Controllers\Pages {
         // Set up context processor
         $contextProcessor = app("context_prefixes")[$route_context]['processor'];
         $processor = new $contextProcessor();
-        $processor->no_write_on_destruct();
+        if(method_exists($processor, "no_write_on_destruct")) $processor->no_write_on_destruct();
 
         // Initialize the processor
         $processor->_stage_init(app("context_prefixes")[$route_context]);
@@ -43,10 +43,11 @@ class CoreApi extends \Controllers\Pages {
 
         // 
         $router_result = $ROUTER->execute_route($current_route_meta[0], $method, $route_context);
-        $processor->_stage_execute($router_result);
+        $body = $processor->_stage_execute($router_result);
         $processor->_stage_bootstrap['_stage_execute'] = true;
         $processor->_stage_bootstrap['_stage_output'] = true;
-        $body = $processor->process();
+        if(method_exists($processor, 'process')) $body = $processor->process();
+
         if($current_route_meta[1]['cache_control'] === false) {
             header("Cache-Control: ");
         }

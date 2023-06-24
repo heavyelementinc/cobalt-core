@@ -1,0 +1,39 @@
+{
+    "uuid": "2333ab93-53bc-4691-b9a3-99b3895ea1c1",
+    "version": "1.0",
+    "extension_api": "1.0",
+    "class": "TwoFactorAuthentication",
+    "entrypoint": "extension.php",
+    "name": "Two-Factor Authentication",
+    "repository": "https://heavyelement.io/",
+    "meta": {
+        "description": "The Two-Factor Authentication extension is designed to set make it simple to implement 2FA in your Cobalt applications"
+    },
+    "settings": {
+        "TwoFactorAuthentcation_enabled": {
+            "default": true
+        }
+    },
+    "permissions": {
+        
+    },
+    "public": {
+        "js": {
+            "web": []
+        },
+        "css": {
+            "web": []
+        },
+        "vars": {
+            "web": {}
+        }
+    },
+    "grants": {
+        "login_process": {
+            "required": true
+        }
+    },
+    "requirements": {
+        
+    }
+}

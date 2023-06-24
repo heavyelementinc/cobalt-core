@@ -6,7 +6,7 @@ use Cobalt\Settings\Settings as CobaltSettings;
  * @todo Do not display help items that require environment context if in pre-env
  */
 class Settings {
-
+    var $settings;
     public $help_documentation = [
         'modified' => [
             'description' => "List all settings that have been modified by the user",
@@ -35,7 +35,7 @@ class Settings {
     ];
 
     function __construct() {
-        $this->settings = new CobaltSettings(true);
+        $this->settings = @new CobaltSettings(true);
     }
 
     public function list() {

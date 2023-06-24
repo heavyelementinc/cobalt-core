@@ -21,3 +21,15 @@
         <option method="PUT" action="/api/v1/debug/control-headers/">Pizza Error</option>
     </split-button>
 </fieldset>
+
+<fieldset>
+    <legend>Confirmation Dialog</legend>
+    <async-button method="PUT" action="/api/v1/debug/control-headers/confirm">Confirm</async-button>
+    <div id="confirm-confirmation">Nothing done yet</div>
+</fieldset>
+
+<fieldset>
+    <legend>Reauthorization Dialog</legend>
+    <async-button method="PUT" action="/api/v1/debug/control-headers/revalidate">Revalidate</async-button>
+    <div id="revalidate-confirmation">Click the button to reauthorize your session</div>
+</fieldset>

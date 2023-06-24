@@ -14,12 +14,17 @@ try {
 
     Extensions::invoke("register_permissions", $PERMISSIONS);
 
-    Extensions::invoke("register_shared_content_dir", $SHARED_CONTENT);
+    Extensions::invoke("register_shared_dir", $SHARED_CONTENT);
     // $EXTENSION_MANAGER::extension_call("register_classes", $TEMPLATE_PATHS);
 } catch (Exception $e) {
     die("EXTENSION ERROR: " . $e->getMessage());
 }
 
+/**
+ * Returns the global extension manager which can be accessed:
+ *   extensions()::invoke("some_method", $SOME_VALUE);
+ * @return Extensions 
+ */
 function extensions():\Cobalt\Extensions\Extensions {
     global $EXTENSION_MANAGER;
     return $EXTENSION_MANAGER;

@@ -35,6 +35,8 @@ class ExtensionsController extends Controller {
         $view = $ext->view ?? "/cobalt/extensions/view.html";
         if(!$ext['last_updated']) $ext['last_updated'] = filemtime($ext['install_path']) * 1000;
 
+        $grants = extensions()->get_grants($ext);
+
         add_vars([
             'title' => $ext->meta->name ?? $ext->class,
             'path' => extensions()->sanitize_install_path($ext['install_path']),
@@ -42,6 +44,7 @@ class ExtensionsController extends Controller {
             'options_view' => view($ext->options_view ?? "/cobalt/extensions/options_view.html", ['doc' => $ext]),
             'settings_link' => "",
             'settings_form' => "",
+            'grants' => $grants,
         ]);
 
         set_template($view);

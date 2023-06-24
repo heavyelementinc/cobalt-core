@@ -168,14 +168,7 @@ trait ClientFSManager {
         if(!isset($meta['isThumbnail'])) $file_array['name'] = $this->prefixFilename($file_array['name']);
 
 
-        $metadata = getimagesize($file_array['tmp_name']);
-        if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($file_array['tmp_name'])];
-        $metadata['mimetype'] = mime_content_type($file_array['tmp_name']);
-        $meta = [
-            'width' => $metadata[0],
-            'height' => $metadata[1],
-            'mimetype' => $metadata['mimetype'],
-        ];
+        $meta = $this->getMetadata($file_array['tmp_name']);
 
         $arbitrary_data = array_merge($arbitrary_data, ['meta' => $meta]);
 
@@ -425,6 +418,97 @@ trait ClientFSManager {
                 'anchor' => fn () => ""
             ]
         ];
+    }
+
+    /**
+     * 
+     * @param mixed $file_array 
+     * @return void 
+     */
+    public function getMetadata($path_to_file): array {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $path_to_file);
+        finfo_close($finfo);
+        $type = explode("/",$mime_type);
+
+        switch($type[0]) {
+            case ($mime_type === "image/svg+xml"):
+                return $this->getSVGMetadata($path_to_file, $mime_type);
+            case "image":
+                return $this->getImageMetadata($path_to_file, $mime_type);
+            case "video":
+                return $this->getVideoMetadata($path_to_file, $mime_type);
+            case "audio":
+                return $this->getAudioMetadata($path_to_file, $mime_type);
+        }
+
+        return ['mimetype' => $mime_type];
+    }
+
+    public function getImageMetadata($path_to_file, $mime_type = null) {
+        if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
+        
+        $metadata = getimagesize($path_to_file);
+        if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($path_to_file)];
+        $metadata['mimetype'] = mime_content_type($path_to_file);
+        $meta = [
+            'width' => $metadata[0],
+            'height' => $metadata[1],
+            'mimetype' => $metadata['mimetype'],
+        ];
+        return $meta;
+    }
+
+    public function getVideoMetadata($path_to_file, $mime_type = null) {
+        if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
+
+        $id3 = new \getID3();
+        $info = $id3->analyze($path_to_file);
+        
+        $meta = [
+            'width' => $info['video']['resolution_x'],
+            'height' => $info['video']['resolution_y'],
+            'seconds' => $info['playtime_seconds'],
+            'codec' => $info['video']['fourcc_lookup'],
+            'framerate' => $info['video']['framerate'],
+            'rotation' => $info['video']['rotate'],
+            'audio' => $info['audio'],
+            'mimetype' => $mime_type,
+        ];
+
+        return $meta;
+    }
+
+    public function getAudioMetadata($path_to_file, $mime_type = null) {
+        if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
+        
+        $id3 = new \getID3();
+        $info = $id3->analyze($path_to_file);
+        
+        $meta = $info['audio'];
+        $meta['mimetype'] = $mime_type;
+        $meta['seconds'] = $info['playtime_seconds'];
+        return $meta;
+    }
+
+    private function getSVGMetadata($path_to_file, $mime_type = null) {
+        if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
+        
+        $xml = simplexml_load_file($path_to_file);
+        $attrs = $xml->attributes();
+
+        return [
+            'width'    => substr((string)$attrs->width,0,-2),
+            'height'   => substr((string)$attrs->height,0,-2),
+            'mimetype' => $mime_type
+        ];
+    }
+
+    private function getMimeType($path_to_file) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $path_to_file);
+        finfo_close($finfo);
+        return $mime_type;
     }
 
 }

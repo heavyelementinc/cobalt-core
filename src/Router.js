@@ -351,7 +351,9 @@ class Router {
             }
 
             client.open('GET', `/api/v1/page/?route=${data.pathname}${data.apiSearchParams}`);
-            
+
+            // client.setRequestHeader('X-Include', "fulfillment,update,notification");
+
             client.send();
         })
     }

@@ -8,6 +8,7 @@
     <nav>
         <a href="#info"><i name="information-outline"></i> Basic Info</a>
         <a href="#options"><i name="tune-vertical"></i> Options</a>
+        <a href="#security"><i name="security"></i> Security</a>
     </nav>
     <form-request id="info" method="POST" action="/api/v1/extensions/{{doc.uuid}}/info" autosave="true">
         <ul class="list-panel">
@@ -48,4 +49,7 @@
     <form-request id="options" method="POST" action="/api/v1/extensions/{{doc.uuid}}/options" autosave="form">
         {{!options_view}}
     </form-request>
+    <div id="security">
+        {{!grants}}
+    </div>
 </tab-nav>

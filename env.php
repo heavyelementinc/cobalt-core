@@ -76,7 +76,8 @@ spl_autoload_register("cobalt_autoload", true);
 require_once __ENV_ROOT__ . "/globals/extensions.php";
 
 try {
-    $application = new \Cobalt\Settings\Settings(config()['bootstrap_mode'] ?? COBALT_BOOSTRAP_AS_NEEDED);
+    //TODO: fix settings cache so it doesn't need to bootstrap every time!
+    $application = new \Cobalt\Settings\Settings(COBALT_BOOSTRAP_ALWAYS);//config()['bootstrap_mode'] ?? COBALT_BOOSTRAP_AS_NEEDED);
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
@@ -100,7 +101,7 @@ session_name("COBALTID");
 $cobalt_session_started = session_start([
     'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
     // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
-    // 'cookie_secure' => !__APP_SETTINGS__['require_https_login_and_cookie']
+    // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
 
 if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");

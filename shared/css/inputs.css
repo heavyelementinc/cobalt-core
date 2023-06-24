@@ -20,7 +20,7 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input-text, input, textarea, input-password, button[native], [role='button'], action-menu {
+input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -119,6 +119,43 @@ input:disabled, textarea:disabled {
   background: var(--project-color-input-disabled);
 }
 
+input-user {
+  display: flex;
+  padding: 0;
+  align-items: center;
+  overflow: hidden;
+}
+
+input-user fieldset.autocomplete--search-container{
+  padding:0;
+  margin: 0;
+  border: none;
+  flex-grow: 1;
+}
+
+input-user button {
+  background: inherit;
+}
+
+input-user.value fieldset.autocomplete--search-container {
+  display: none;
+}
+
+input-user [type='search'] {
+  border: none;
+}
+
+input-user .cobalt-user--profile-display {
+  margin-left: .5em;
+  font-size: .95rem;
+}
+
+input-user .cobalt-user--profile-display .username {
+  font-size: .8rem;
+  color: var(--project-color-input-border-nofocus)
+}
+
+
 /** BUTTON LINKS **/
 
 .button, button, [role='button'] {
@@ -187,7 +224,7 @@ a.button {
   cursor: zoom-in;
 }
 
-input-array {
+:is(input-array, input-user-array){
   display: inline-flex;
   flex-direction: column;
   border: 1px solid var(--project-color-input-border-nofocus);
@@ -199,11 +236,12 @@ input-array {
   box-sizing: border-box;
 }
 
-  fieldset > input-array{
+  fieldset > :is(input-array, input-user-array){
     width: 100%;
   }
 
-  :is(form-request) input-array fieldset, input-array fieldset{
+  :is(form-request) :is(input-array, input-user-array) fieldset,
+  :is(input-array, input-user-array) fieldset{
     display: flex;
     flex-wrap: wrap;
     flex-grow:1;
@@ -217,27 +255,27 @@ input-array {
     max-width: 100%;
   }
 
-  :is(input-array:disabled,input-array[disabled]) :is(.autocomplete--search-container, input-array-tag) {
+  :is(input-array:disabled,input-array[disabled], input-user-array[disabled]) :is(.autocomplete--search-container, input-array-tag) {
     background-color: var(--project-color-input-disabled);
     pointer-events: none;
   }
 
-  :is(input-array:disabled, input-array[disabled]) :is(input-array-tag input[type="button"]) {
+  :is(input-array:disabled, input-array[disabled], input-user-array[disabled]) :is(input-array-tag input[type="button"]) {
     display: none;
   }
 
-  input-array fieldset:empty{
+  :is(input-array, input-user-array) fieldset:empty{
     text-align: center;
   }
 
-  input-array fieldset:empty:before{
+  :is(input-array, input-user-array) fieldset:empty:before{
     content:"Use the field below to add items to this list";
     font-style:italic;
     opacity: .6;
     font-size: .6em;
   }
 
-  input-array input[type="search"]{
+  :is(input-array, input-user-array) input[type="search"]{
     border: none;
     border-radius: unset;
     font-size: .9rem;
@@ -245,7 +283,7 @@ input-array {
     margin:0;
   }
 
-  input-array input[type="search"]:focus{
+  :is(input-array, input-user-array) input[type="search"]:focus{
     background: var(--project-color-input-background);
   }
 
@@ -265,7 +303,7 @@ input-array {
     width:100%;
   }
 
-  input-array optgroup, input-array option{
+  :is(input-array, input-user-array) optgroup, :is(input-array, input-user-array) option{
     display: none;
   }
 
@@ -282,7 +320,7 @@ input-array {
     width: calc(100% - .2rem);
     top:100%;
     left:.1rem;
-    z-index: var(--project-modal-z-index);
+    z-index: calc(var(--project-modal-z-index) + 100);
     box-sizing: border-box;
   }
 
@@ -356,7 +394,8 @@ input-array-tag{
   }
 
   input-array-item input[type='button'],
-  input-array-tag input[type='button']{
+  input-array-tag input[type='button'],
+  input-user > button{
     font-size: .8rem;
     color: var(--project-color-input-border-nofocus);
     border: none;
@@ -366,7 +405,8 @@ input-array-tag{
     height: 100%;
   }
 
-  input-array-tag input[type='button']:hover {
+  input-array-tag input[type='button']:hover,
+  input-user > input[type='button'] {
     background-color:var(--project-color-problem);
     color:white;
   }

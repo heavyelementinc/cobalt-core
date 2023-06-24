@@ -452,9 +452,9 @@ abstract class NormalizationHelpers {
     function user($id):?UserSchema {
         $crud = new UserCRUD();
         $_id = $crud->__id($id);
-        $user = $crud->findOne(['_id' => $_id]);
-        if($user) return new UserSchema($user);
-        return null;
+        $user = $crud->findOneAsSchema(['_id' => $_id]);
+        // if($user) return new UserSchema($user);
+        return $user;
     }
 
     /**

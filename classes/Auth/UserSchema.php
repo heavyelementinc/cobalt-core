@@ -22,6 +22,7 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\UTCDateTime;
 use PhpToken;
+use SessionHandler;
 
 class UserSchema extends \Validation\Normalize {
     use ClientFSManager;
@@ -88,6 +89,12 @@ class UserSchema extends \Validation\Normalize {
                 'tag' => 'input-switch',
                 'attributes' => [],
                 'label' => 'Require password reset on next login'
+            ],
+            'flags.locked' => [
+                'set' => function ($val) {
+                    $val = $this->boolean_helper($val);
+                    return $val;
+                }
             ],
             'token' => [
                 'get' => fn($val) => $val,

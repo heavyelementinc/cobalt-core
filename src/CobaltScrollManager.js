@@ -178,7 +178,7 @@ class CobaltScrollManager {
         element.classList.add("cobalt-parallax--bg-parallax");
 
         const position = element.getAttribute("parallax-start-position") ?? "top";
-        element.style.backgroundPosition = `center ${position}`;
+        element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${position}`;
 
     }
 
@@ -187,7 +187,7 @@ class CobaltScrollManager {
         let y = Math.round(x * 100) / 100;
         // console.log({x,y,data});
         (data.offset ?? 0)
-        element.style.backgroundPosition = `center ${y}px`;
+        element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${y}px`;
     }
 
     parallaxPositionInit(element, data) {

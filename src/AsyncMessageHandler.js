@@ -3,7 +3,7 @@
  * to the fetch error
  */
 class AsyncMessageHandler {
-    constructor(obj, type = "fetch", mode = "status") {
+    constructor(fetch, type = "fetch", mode = "status") {
         this.status = 0;
         this.statusText = "";
         this.responseType = "";
@@ -37,15 +37,19 @@ class AsyncMessageHandler {
             case 'apifetch':
                 method = "normalizeApiFetchError";
                 break;
+            case 4:
+            case "asyncfetch":
+                method = "normalizeAsyncFetchError";
+                break;
         }
-        this.object = obj;
-        this.process(obj, method);
+        this.fetch = fetch;
+        this.process(this.fetch, method);
     }
 
     async process(obj, method) {
         this.responseBody = await this[method](obj);
         this.handleHeaderMessaging();
-        if(obj.status >= 300) this.handleError();
+        if(obj.response.status >= 300) this.handleError();
     }
 
     async normalizeXhrError(data) {
@@ -85,10 +89,26 @@ class AsyncMessageHandler {
         this.headers = this._getHeaderObject(data.fetchResult);
         return await data.result;
     }
-
+    
     _getHeaderObject(data) {
         const object = {};
         for( const h of data.headers.entries()){
+            object[h[0]] = h[1];
+        }
+        return object;
+    }
+
+    async normalizeAsyncFetchError(data) {
+        this.status = data.response.status;
+        this.statusText = data.response.statusText;
+        this.uri = data.uri;
+        this.headers = this._getAsyncHeaders(data.response);
+        return data.resolved.fulfillment || data.resolved;
+    }
+
+    _getAsyncHeaders(request) {
+        const object = {};
+        for( const h of request.headers.entries()) {
             object[h[0]] = h[1];
         }
         return object;
@@ -101,6 +121,8 @@ class AsyncMessageHandler {
             'x-status':   'xstatus',
             'x-modal':    'xmodal',
             'x-next-request': 'xnextrequest',
+            'x-confirm': 'xconfirm',
+            'x-reauthorization-request': 'xreauthrequest',
         };
         for(const h of Object.keys(headers)) {
             if(h in this.headers === false) continue;
@@ -166,7 +188,7 @@ class AsyncMessageHandler {
 
     xstatus(params) {
         new StatusMessage({
-            id:      this.object.uri,
+            id:      this.fetch.uri,
             type:    params.tag,
             message: params.message,
         });
@@ -176,10 +198,10 @@ class AsyncMessageHandler {
         let modalContainer;
         try{
             parsed = JSON.parse(params.message.trim());
-            if("id" in parsed === false) parsed.id = this.object.uri;
+            if("id" in parsed === false) parsed.id = this.fetch.uri;
             modalContainer = new Modal({...parsed});
         } catch(Error) {
-            if("id" in params === false) params.id = this.object.uri;
+            if("id" in params === false) params.id = this.fetch.uri;
             if("tag" in params === false) params.tag = "warning";
             modalContainer = new Modal({
                 id: params.id,
@@ -191,6 +213,19 @@ class AsyncMessageHandler {
         modalContainer.draw();
     }
 
+    async xconfirm() {
+        this.errorHandled = true;
+        let confirm = new FetchConfirm(this.responseBody, this.fetch);
+        result = await confirm.draw();
+        if(this.responseBody.error !== "Aborted") return;
+    }
+
+    async xreauthrequest() {
+        this.errorHandled = true;
+        let password = new FetchReauth(this.responseBody, this.fetch);
+        result = await password.draw();
+        if(this.responseBody.error !== "Aborted") return;
+    }
 }
 
 class GenericHTTPError {
@@ -239,5 +274,44 @@ class FourHundred extends GenericHTTPError{
 class FiveHundred extends GenericHTTPError {
     constructor(error, mode) {
         super(error, mode);
+    }
+}
+
+class FetchConfirm {
+    constructor(data, original_fetch) {
+        this.returnValues = data;
+        this.fetch = original_fetch;
+    }
+
+    async draw() {
+        let confirm = await modalConfirm(this.returnValues.error, this.returnValues.okay, "Cancel", this.returnValues.dangerous);
+        if (confirm === false) return { json: () => { return { status: 400, error: "Aborted", data: false } } };
+
+        this.fetch.requestHeaders = { ...this.fetch.requestHeaders, ...this.returnValues.data.requestHeaders, "X-Confirm-Dangerous": "true" };
+        const result = await this.fetch.submit(this.returnValues.data.return);
+        return { json: () => result };
+    }
+}
+
+class FetchReauth {
+    constructor(data, fetch) {
+        this.data = data;
+        this.fetch = fetch;
+    }
+
+    async draw() {
+        let confirm = await modalConfirm(`${this.data.error}
+            <form-request>
+                <fieldset>
+                    <legend>Password</legend>
+                    <input-password name="password"></input-password>
+                </fieldset>
+            </form-request>`, this.data.okay, "Cancel", this.data.dangerous);
+        const password = document.querySelector('modal-box input-password[name="password"]').value;
+        if(confirm === false) return { json: () => {return {status: 400, error: "Aborted", data: false }}};
+
+        this.fetch.requestHeaders = {...this.fetch.requestHeaders, ...this.data.data.requestHeaders, "X-Reauthorization": `${btoa(password)}`};
+        const result = await this.fetch.submit(this.data.data.return);
+        return {json:() => result};
     }
 }

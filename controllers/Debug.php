@@ -102,6 +102,14 @@ class Debug extends \Controllers\Pages {
         set_template("/debug/settings/container.html");
     }
 
+    function new_form_request() {
+        add_vars([
+            'title' => 'New Form Request Test'
+        ]);
+
+        return set_template('/debug/new-form-request.html');
+    }
+
     function debug_router() {
         // $routes = json_encode($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']],JSON_PRETTY_PRINT);
 
@@ -210,7 +218,7 @@ class Debug extends \Controllers\Pages {
         $validator = new \Validation\ExampleSchema();
 
         $result = $validator->__validate($_POST);
-
+        // update('input[name="name"]:closest(new-form-request)', ['remove' => true]);
         return $result;
     }
 
@@ -227,6 +235,13 @@ class Debug extends \Controllers\Pages {
         ]);
 
         set_template("/debug/modal-template.html");
+    }
+
+    function x_modal() {
+        $body = json_encode([
+            "body" => "This is a <strong>body test</strong>"
+        ]);
+        header("X-Modal: $body");
     }
 
     function slow_response($delay = 10) {
@@ -535,7 +550,15 @@ class Debug extends \Controllers\Pages {
         return set_template("/debug/server-control-headers.html");
     }
 
-    function control_headers() {
+    function control_headers($method = null) {
+
+        switch($method) {
+            case "confirm":
+                return $this->confirm_test();
+            case "revalidate":
+                return $this->revalidate_test();
+        }
+
         switch($_POST['method']) {
             case "modal":
                 $method = "X-Modal:";
@@ -573,5 +596,21 @@ class Debug extends \Controllers\Pages {
         header("$method @$_POST[type] $message");
 
         return ['message' => $message];
+    }
+
+    private function confirm_test(){
+        update("#confirm-confirmation", ['innerHTML' => 'Confirmation pending...']);
+        confirm("Are you sure you want to complete this test?", $_POST);
+
+        update('#confirm-confirmation', ['innerHTML' => 'You took the action']);
+        return 1;
+    }
+
+    private function revalidate_test(){
+        update("#revalidate-confirmation", ['innerHTML' => 'Revalidation pending...']);
+        reauthorize("Are you sure you want to complete this test?", $_POST);
+
+        update('#revalidate-confirmation', ['innerHTML' => 'You validated yourself']);
+        return 1;
     }
 }

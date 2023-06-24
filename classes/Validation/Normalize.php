@@ -96,6 +96,8 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'capitalize', // Capitalizes the first letter of a string
         'uppercase',  // Upper cases the entire string
         'lowercase',  // Lower cases the entire string
+        'embed',      // Convert value into an HTML tag based on metadata or file extension
+        'last',       // Select the last element of an array
         'gmt',
         'immutable',
     ];
@@ -265,7 +267,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      * @throws ValidationFailed 
      */
     public function __validate($data, $createSubset = true) {
-        $this->__to_validate = $data;
+        $this->__to_validate = &$data;
         if ($createSubset) $schema = $this->get_schema_subset(array_keys($data));
         else $schema = $this->init_schema();
         $this->issues = [];
@@ -275,8 +277,13 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 // Run the setter function by assigning value which can throw issues
                 $this->{$name} = (isset($this->__to_validate[$name])) ? $this->__to_validate[$name] : null;
             } catch (ValidationIssue $e) { // Handle issues
-                if (!isset($this->issues[$name])) $this->issues[$name] = $e->getMessage();
-                else $this->issues[$name] .= "\n" . $e->getMessage();
+                if (!isset($this->issues[$name])) {
+                    $this->issues[$name] = $e->getMessage();
+                    update("[name='$name']", ['message' => $e->getMessage(), 'invalid' => true]);
+                }
+                else {
+                    $this->issues[$name] .= "\n" . $e->getMessage();
+                }
             } catch (ValidationFailed $e) { // Handle subdoc failure
                 $this->issues[$name] = $e->data;
             }
@@ -523,8 +530,13 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
 
     protected function subdocument($value, $schema) {
-        $doc = new Subdocument($value, $schema, $context);
-        return $doc->__validate($value);
+        $doc = new Subdocument($value, $schema, $this);
+        // $subdoc = [];
+        // foreach($doc->__schema as $field => $f) {
+        //     $subdoc[$field] = $doc->{$field};
+        // }
+        // return $subdoc;
+        return $doc;//$doc->__validate($value);
     }
 
     protected function each($schema, $data) {
@@ -544,9 +556,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     private function initialize_schema() {
-        foreach ($this->__schema as $fieldname => $methods) {
+        foreach ($this->__schema as $fieldname => $directives) {
             $this->find_method($fieldname, "get");
             $this->find_method($fieldname, "set");
+            if(key_exists("default", $directives)) $this->__dataset[$fieldname] = $directives['default'];
             // if(key_exists('serialize', $methods)) {
             //     array_push($this->__index);
             // }
@@ -622,7 +635,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     private function __proto_display($val, $field) {
         if (isset($this->__schema[$field]['display'])) {
-            return $this->__schema[$field]['display']($val, $field);
+            $fn = $this->__schema[$field]['display'];
+            if(is_callable($fn)) return $fn($val, $field);
+            return $fn;
         } else if (isset($this->__schema[$field]['valid'])) {
             $valid = $this->__schema[$field]['valid'];
             if (is_callable($valid)) $valid = $valid($val, $field);
@@ -719,7 +734,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     private function __proto_md($val, $field) {
-        if (!$val) $val = $this->{$field};
+        $val = $this->{$field};
         if (!$val) return "";
         return from_markdown($val);
     }
@@ -740,6 +755,56 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     private function __proto_lowercase($val, $field) {
         return strtolower($val);
+    }
+
+    private function __proto_last($val, $field) {
+        if(!is_array($val)) return $val;
+        return $val[count($val) - 1];
+    }
+
+    private function __proto_embed($val, $field) {
+        if(isset($this->__dataset['meta'])) {
+            return $this->embed_from_meta($val, $field);
+        }
+        return $this->embed_from_value($val, $field);
+    }
+
+    private function embed_from_meta($val, $field) {
+        $type = $this->__dataset['type'];
+        // if(!$type) return $this->embed_from_value($val, $field);
+        $mimetype = $this->__dataset['meta']['meta']['mimetype'] ?? $this->__dataset['meta']['mimetype'];
+        $pos = explode("/",$mimetype);
+        $sub = $pos[0];
+        $enc = $pos[1];
+        $rt = $this->{'value'};
+        if(is_array($rt)) {
+            $rt = $rt[count($rt) - 1];
+        }
+        $w = $this->__dataset['meta']['display_width'] ?? $this->__dataset['meta']['width'] ?? $this->__dataset['meta']['meta']['width'];
+        $h = $this->__dataset['meta']['display_height'] ?? $this->__dataset['meta']['height'] ?? $this->__dataset['meta']['meta']['height'];
+        switch(strtolower($type)) {
+            case "image":
+                $rt = "<img src='$rt' width=\"$w\" height=\"$h\">";
+                break;
+            case "video":
+                $rt = "<video width=\"$w\" height=\"$h\" ".$this->{'meta.controls.display'}.$this->{'meta.loop.display'}.$this->{'meta.autoplay.display'}.$this->{'meta.mute.display'}."><source src='$rt' type='$mimetype'></video>";
+                break;
+            case "audio":
+                $rt = "<audio ".$this->{'meta.mute.display'}.$this->{'meta.loop.display'}.$this->{'meta.controls.display'}."><source src='$rt' type='$mimetype'></audio>";
+                break;
+            case "href":
+                $fs = $this->{'meta.allowfullscreen'};
+                $allow = $this->{'meta.allow'};
+                $title = $this->{'meta.title'};
+                $rt = "<iframe src=\"$rt\" name=\"$enc\" scrolling=\"no\" frameborder=\"0\" width=\"$w\" height=\"$h\" $fs $allow $title></iframe>";
+                break;
+        }
+
+        return $rt;
+    }
+
+    private function embed_from_value($val, $field) {
+        return $val;
     }
 
     function get_pronoun_table() {
@@ -779,6 +844,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
         $mutant = [];
         foreach ($this->__dataset as $name => $value) {
+            // if($value instanceof Subdocument) {
+            //     $mutant[$name] = $value->__all_fields();
+            //     continue;
+            // }
             $mutant[$name] = $this->__get($name);
         }
         foreach($this->__schema as $name => $data) {
@@ -830,7 +899,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     public function add_to_schema($to_add) {
         $this->__schema = array_merge($to_add, $this->__schema);
-        $this->__index = array_keys($this->__schema);
+        $this->__index  = array_keys($this->__schema);
     }
 
 

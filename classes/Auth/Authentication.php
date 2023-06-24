@@ -54,14 +54,19 @@ class Authentication {
             if (!\password_verify($password, $user['pword'])) throw new \Exceptions\HTTP\Unauthorized($stock_message);
         }
 
+        $login_state = 10;
+        if($user['tfa']['enabled']) $login_state = 0;
+
         /** Update the user's session information */
-        $result = $this->session->login_session($user['_id'], $stay_logged_in);
+        $result = $this->session->login_session($user['_id'], $stay_logged_in, $login_state);
 
         /** If the session couldn't be updated, we throw an error */
         if (!$result) throw new \Exceptions\HTTP\BadRequest("An unknown error occured.");
 
+        // If $loginState === 0, send an update() for TFA login
+
         return [
-            'login' => 'successful'
+            'login' => $login_state
         ];
     }
 

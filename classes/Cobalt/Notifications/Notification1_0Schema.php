@@ -1,6 +1,9 @@
 <?php
 
 namespace Cobalt\Notifications;
+
+use Drivers\UTCDateTime;
+
 /**
  * * subject
  * * body
@@ -38,6 +41,7 @@ class Notification1_0Schema extends \Validation\Normalize {
             ],
             'class' => [
                 // The schema's class name.
+                'get' => fn ($val) => $val ?? '\\Cobalt\\Notifications\\Notification1_0Schema',
                 'set' => fn ($val) => $this::class
             ],
             'type' => [],
@@ -47,7 +51,7 @@ class Notification1_0Schema extends \Validation\Normalize {
                     $id = (string)session()['_id'];
                     $me = "";
                     foreach($val as $user){
-                        if((string)$user['user'] !== $id) continue;
+                        if((string)$user !== $id) continue;
                         $me = "you";
                         break;
                     }
@@ -74,15 +78,55 @@ class Notification1_0Schema extends \Validation\Normalize {
                 }
             ],
             'for.user' => [
-                'get' => fn ($val) => $this->user($val),
-                'set' => fn ($val) => $this->user_id($val),
+                // 'get' => function ($val) {
+                //     $users = [];
+                //     foreach($val as $id) {
+                //         $users = [
+                //             'id' => $this->user($id),
+                //             'read' => false
+                //         ];
+                //     }
+                //     return $users;
+                // },
+                // 'set' => function ($val) {
+                //     $users = [];
+                //     foreach($val as $id) {
+                //         $users[] = $this->user_id($id);
+                //     }
+                //     return $users;
+                // },
+                'each' => [
+                    'id' => [
+                        'get' => fn ($val) => $this->user($val),
+                        'set' => fn ($val) => $this->user_id($val),
+                    ],
+                    'seen' => [
+                        'set' => fn ($val) => $this->boolean_helper($val),
+                    ],
+                    'read' => [
+                        'set' => fn ($val) => $this->boolean_helper($val),
+                    ]
+                ]
             ],
             'for.read' => [
-                'set' => fn ($val) => $this->boolean_helper($val)
+                'get' => function () {
+                    $s_id = (string)session('_id');
+                    $value = false;
+                    foreach($this->__dataset['for']['user'] as $user) {
+                        if((string)$user['id'] == $s_id) {
+                            if($user['read']) $value = true;
+                            break;
+                        }
+                    }
+                    return $value;
+                },
+                'display' => function () {
+                    return ($this->{'for.read'}) ? "<i name='email-open' title='Read'></i>" : "<i name='email' title='Unread'></i>";
+                },
             ],
-            'for.recieved' => [
-                'get' => fn ($val) => $this->get_date($val, 'relative'),
-                'set' => fn ($val) => $this->make_date($val)
+            'for.readInverse' => [
+                'get' => fn () => !$this->{'for.read'},
+                'display' => fn () => ($this->{'for.readInverse'}) ? "read" : "unread"
             ],
             // We need a way to make notifications actionable
             'action' => [

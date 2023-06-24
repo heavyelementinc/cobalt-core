@@ -20,6 +20,8 @@
 
 namespace Handlers;
 
+use Cobalt\Notifications\NotificationManager;
+
 class ApiHandler implements RequestHandler {
     private $methods_from_stdin = ['POST', 'PUT', 'PATCH', 'DELETE'];
     private $content_type = "application/json; charset=utf-8";
@@ -31,6 +33,8 @@ class ApiHandler implements RequestHandler {
     public $allowed_origins = null;
     public $router_result = null;
     public $_stage_bootstrap = [];
+    public $update_instructions = [];
+    public $events = [];
 
     function __construct() {
         $this->http_mode = (is_secure()) ? "https" : "http";
@@ -61,23 +65,60 @@ class ApiHandler implements RequestHandler {
 
     public function _stage_output($context_output = "") {
         $return_value = [];
-        // $result = getHeader('X-Update-Client-State');
-        /** TODO: Finish X-Update-Client-State */
-        if (key_exists('X-Update-Client-State', $this->headers) || key_exists('x-update-client-state', $this->headers)) $return_value = [
-            'response' => $this->router_result,
-            'settings' => $GLOBALS['app']->public_settings,
-            // 'user' => [
-            //     'uname' => session('uname')
-            // ]
-        ];
-        else $return_value = $this->router_result;
-        
-        /** Prepare for API request loading progress bar */
-        $json = json_encode($return_value);
-        header("Content-Length: " . strlen($json));
 
+        $return_value = $this->fulfillmentHandling($this->router_result);
+        
+        $content_type = headers_list()['Content-Type'] ?? headers_list()['content-type'];
+        if(preg_match("/json/", strtolower($content_type))) {
+            /** Prepare for API request loading progress bar */
+            $json = json_encode($return_value);
+            header("Content-Length: " . strlen($json));
+        } else if (preg_match('/image/', strtolower($content_type))) {
+            // exit;
+        } else if(gettype($return_value) !== "string") {
+            $json = json_encode($return_value);
+            header("Content-Length: " . strlen($json));
+        } else {
+            $json = $return_value;
+            // header("Content-Length: " . strlen($json));
+        }
+        
         /** Echo the result to the output buffer */
         return $json;
+    }
+
+    private function fulfillmentHandling($router_result) {
+        $header = getHeader('X-Include', null, true, false);
+        if($header === null) return $router_result;
+        
+        $include = explode(",",$header);
+
+        $supported_types = ['update', 'events', 'notification', 'settings'];
+        $result = [
+            'fulfillment' => $router_result,
+        ];
+        foreach($include as $method) {
+            if(!in_array($method, $supported_types)) continue;
+            $result[$method] = $this->{$method}();
+        }
+        return $result;
+    }
+
+    private function update() {
+        return $this->update_instructions;
+    }
+
+    private function events() {
+        return [];
+    }
+
+    private function settings() {
+        return $GLOBALS['app']->public_settings;
+    }
+
+    private function notification() {
+        $ntfy = new NotificationManager();
+        return $ntfy->getUnreadNotificationCountForUser();
     }
 
     public function _public_exception_handler($e) {
@@ -170,7 +211,9 @@ class ApiHandler implements RequestHandler {
         header("Access-Control-Allow-Origin: $allowed_origin");
         header("Access-Control-Allow-Credentials: true");
         header("Access-Control-Allow-Methods: $allowed_methods");
-        header("Content-Type: " . $this->content_type);
+        $current_headers = headers_list();
+        if(key_exists('Content-Type',$current_headers) || key_exists('content-type', $current_headers)) $this->content_type = $current_headers['Content-Type'] ?? $current_headers['content-type'];
+        else header("Content-Type: " . $this->content_type);
     }
 
     function cors_error() {
