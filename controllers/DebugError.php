@@ -17,7 +17,7 @@ class DebugError {
         $types = [
             'button' => "",
             'anchor' => "",
-            'form' => "",
+            'form' => "<form-request method='POST' action='/api/v1/debug/exception/'><fieldset><legend>Form Request</legend><select name='type'>",
             'option' => "",
         ];
         foreach($exceptions as $exception) {
@@ -28,6 +28,7 @@ class DebugError {
             $types['form'] .= $generative[2];
             $types['option'] .= $generative[3];
         }
+        $types['form'] .= "</select><button type='submit'>Submit</button></fieldset></form-request>";
         add_vars(array_merge([
             'titles' => "Exceptions debugging",
         ],$types));
@@ -40,7 +41,7 @@ class DebugError {
         return [
             "<async-button method='POST' action='/api/v1/debug/exception/$name'>$name</async-button>",
             "<li><a href='/debug/exception/$name'>$name</a></li>",
-            "<form-request method='POST' action='/api/v1/debug/exception/'><fieldset><legend>$name</legend><input type='text' name='type' value='$name'><button type='submit'>Submit</button></fieldset></form-request>",
+            "<option value='$name'>$name</option>",
             "<option method='POST' action='/api/v1/debug/exception/$name'>$name</option>",
         ];
     }

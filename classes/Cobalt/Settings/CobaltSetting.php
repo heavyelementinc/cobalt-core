@@ -111,11 +111,12 @@ class CobaltSetting {
                 $this->toCache['vars-web']["$type-family"] = $v['family'];
             }
         }
-        if($this->name === "css-vars") {
-            foreach ($value as $type => $v) {
-                $this->toCache['root-style'] .= "--project-$type: $v;\n";
-            }
-        }
+        // if($this->name === "css-vars") {
+        //     if(!$value) $value = $this->allSettings['css-vars'];
+        //     foreach ($value as $type => $v) {
+        //         $this->toCache['root-style'] .= "--project-$type: $v;\n";
+        //     }
+        // }
         return $value;
     }
 

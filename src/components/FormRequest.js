@@ -19,6 +19,20 @@ class NewFormRequest extends HTMLElement {
         this.fileUploadFields = [];
         this.fieldsRequiringFeedback = [];
         this.feedbackTracker = [];
+        this.originalState = {};
+        this.childrenReady = false;
+        this.childWebComponentPromises = [];
+    }
+
+    get unsavedChanges() {
+        if(["true","confirm-unsaved",null].includes(this.getAttribute("confirm-unsaved")) == false) return false;
+        if(this.childrenReady === false) return false;
+        const currentValue = this.value;
+        for(const i in currentValue) {
+            if(i in this.originalState === false) return true;
+            if(this.originalState[i] !== currentValue[i]) return true;
+        }
+        return false;
     }
 
     connectedCallback() {
@@ -28,7 +42,26 @@ class NewFormRequest extends HTMLElement {
             const data = this.buildSubmission(event);
             this.submit(data, event);
         });
+        
+        const elements = this.querySelectorAll(universal_input_element_query);
+        for(const node of elements) {
+            if(!isRegisteredWebComponent(node.tagName)) continue;
+            let resolver = null;
+            this.childWebComponentPromises.push(new Promise(resolve => {
+                resolver = resolve
+            }))
+            node.addEventListener("componentready", () => {
+                resolver(true);
+            }, {once: true})
+        }
+        
+        this.initOriginalState();
+    }
 
+    async initOriginalState() {
+        await Promise.all(this.childWebComponentPromises);
+        this.originalState = this.value;
+        this.childrenReady = true;
     }
 
     disconnectedCallback() {
@@ -36,10 +69,11 @@ class NewFormRequest extends HTMLElement {
     }
 
     get value() {
+        if(this.childrenReady !== true) console.warn("This element has children that are not ready!", this);
         const elements = this.querySelectorAll(universal_input_element_query);
         let value = {};
         for(const input of elements) {
-            value[input.name ?? input.getAttribute("name")] = input.value;
+            value[input.name ?? input.getAttribute("name")] = this.getFieldValue(input)//.value;
         }
         return value;
     }
@@ -58,6 +92,7 @@ class NewFormRequest extends HTMLElement {
         let result = {};
         try{
             result = await api.submit(data || this.buildSubmission({target: null}));
+            this.originalState = this.value;
         } catch(error) {
             this.handleAsyncErrorEvent(error, event);
         }
@@ -98,13 +133,13 @@ class NewFormRequest extends HTMLElement {
                 return;
             case "element":
             case "autosave":
-                submit[target.name || target.getAttribute("name")] = target.value;
+                submit[target.name || target.getAttribute("name")] = this.getFieldValue(target);//.value;
                 this.fieldsRequiringFeedback.push(target);
                 break;
             case "fieldset":
                 const fieldset = target.closest("fieldset");
                 for(const el of fieldset.querySelectorAll(universal_input_element_query)) {
-                    submit[el.name || target.getAttribute("name")] = el.value;
+                    submit[el.name || target.getAttribute("name")] = this.getFieldValue(el);//.value;
                 }
                 this.fieldsRequiringFeedback.push(fieldset);
                 break;
@@ -239,6 +274,18 @@ class NewFormRequest extends HTMLElement {
 
     attributeChangedCallback(attribute, old, newValue) {
         console.log({attribute, old, newValue})
+    }
+
+    getFieldValue(field) {
+        if(field.tagName === "INPUT") {
+            switch(field.type) {
+                case "number":
+                    return Number(field.value);
+                default:
+                    return field.value;
+            }
+        }
+        return field.value;
     }
 }
 

@@ -619,19 +619,35 @@ class Debug extends \Controllers\Pages {
 
     function new_route_group() {
         $route_group = [
+            "<h2>Basic</h2>",
             (new RouteGroup("main_navigation", ""))->render(),
-            (new RouteGroup("admin_panel", ""))->render(),
-            (new RouteGroup("advanced_settings", "", true))->render(),
-            (new RouteGroup("application_settings", ""))->render()
+            "<h2>ID test <code>test-id</code></h2>",
+            (new RouteGroup("admin_panel", ""))->setID("test-id")->render(),
+            "<h2>Classes <code>class-test</code></h2>",
+            (new RouteGroup("advanced_settings", "", true))->setClasses(['class-test'])->render(),
+            "<h2>Icon Panel</h2>",
+            (new RouteGroup("advanced_settings", "", true))->setIconPanel(true)->render(),
+            "<h2>Classes from string</h2>",
+            (new RouteGroup("application_settings", ""))->setClassesFromString("class-test other-class")->render(),
+            "<h2>Render Depth: 2</h2>",
+            (new RouteGroup("debug_demo", "", false))->setSubmenuDepth(2)->setSubmenuVisibilty(true)->render(),
+            "<h2>External Link Test</h2>",
         ];
 
-        $rt = new RouteGroup("presentation_settings", "");
-        $rt->setExcludeWrappers(true);
-        $route_group[] = implode($rt->render());
+        $route_group[] = (new RouteGroup("presentation_settings", ""))->setExternalLinks([
+            [
+                'href'  => 'https://heavyelement.io/',
+                'label' => 'Heavy Element',
+                'order' => 1
+            ]
+        ])->render();
+
+        $route_group[] = "<h2>Excluded Wrappers</h2>";
+        $route_group[] = (new RouteGroup("presentation_settings", ""))->setExcludeWrappers(true)->render();
         add_vars([
             'title' => 'Route Group Test',
             'main' => implode("",$route_group),
         ]);
-        return set_template("/parts/main.html");
+        return set_template("/debug/route-group-test.html");
     }
 }

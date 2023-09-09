@@ -179,6 +179,7 @@ input-user .cobalt-user--profile-display .username {
   border: 1px solid var(--project-color-input-border-nofocus);
   display: inline-flex;
   justify-content: center;
+  align-items: center;
   cursor: normal;
   user-select: none;
 }

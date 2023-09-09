@@ -6,6 +6,7 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\ServiceUnavailable;
 
 class Mailchimp extends Controller {
+    var $mc;
     function __construct() {
         $this->mc = new RemoteMailchimp();
     }

@@ -1,5 +1,5 @@
 /**
- * Author: Gardiner Bryant
+ * @author Gardiner Bryant
  * 
  * This class does three things;
  *      * provides background image scrolling
@@ -128,7 +128,10 @@ class CobaltScrollManager {
     }
 
     animLoop() {
-        if(this.allowUpdate === false) return;
+        if(this.allowUpdate === false) {
+            console.warn("The animLoop function returned because allowUpdate was `false`");
+            return;
+        }
         const scrollHeight = (window.scrollY + window.innerHeight);
         this.visibleScrollPosition =  scrollHeight - this.innerScrollOffset;
         if(document.body.scrollHeight - scrollHeight < (this.innerScrollOffset > .5)) this.visibleScrollPosition = document.body.scrollHeight;

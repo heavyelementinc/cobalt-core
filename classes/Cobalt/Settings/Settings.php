@@ -326,6 +326,7 @@ class Settings extends \Drivers\Database {
             $this->manifest_raw_decode[] = get_json($file);
         }
 
+        // This isn't necessary because we're already getting the manifest_raw_decode during the settings invocation!
         // extensions()::invoke("register_public_manifest", $this->manifest_raw_decode);
 
         $final = new ManifestEntry();
@@ -333,6 +334,8 @@ class Settings extends \Drivers\Database {
             $final->addManifest(($data instanceof BSONDocument) ? doc_to_array($data) : $data);
         }
         $data = $final->getFinalizedData();
+        // $data['css-vars'] = $data['vars']['web'];
+        // unset($data['vars']['web']);
         // foreach($final as $type => $data) {
         //     (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
         // }

@@ -164,7 +164,7 @@ if (app("enable_debug_routes")) {
     ]);
 
     Route::get("/youtube", "Debug@youtube", [
-        'navigation' => ['debug'],
+        'navigation' => ['debug', 'debug_demo'],
         'anchor' => ['name' => "YouTube"]
     ]);
 
@@ -185,7 +185,22 @@ if (app("enable_debug_routes")) {
     }
 
     Route::get("/new-route-group", "Debug@new_route_group", [
-        'navigation' => ['debug'],
-        'anchor' => ['name' => "New Route Group Test"]
+        'navigation' => [
+            'debug',
+            'debug_demo' => [
+                'submenu_group' => 'admin_panel'
+            ]
+        ],
+        'anchor' => ['name' => "New Route Group Test"],
+    ]);
+
+    Route::get("/router-test/...", "ClientRouterTest@test", [
+        'navigation' => [
+            'debug'
+        ],
+        'anchor' => [
+            'name' => 'New Router Test',
+            'href' => '/router-test/'
+        ]
     ]);
 }

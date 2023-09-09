@@ -197,7 +197,7 @@ class WebHandler implements RequestHandler {
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
         $settings .= $this->getRouteBoundaries();
         $vars = "";
-        foreach(__APP_SETTINGS__["vars-" . $this->meta_selector] as $var => $value) {
+        foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
             $vars .= "--project-$var: $value;\n";
         }
         foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
@@ -450,7 +450,7 @@ class WebHandler implements RequestHandler {
         $link_tags = "";
         $compiled = "";
         $debug = app("debug");
-        foreach (app("css-$this->meta_selector") as $package) {
+        foreach (__APP_SETTINGS__["css"][$this->meta_selector] as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",

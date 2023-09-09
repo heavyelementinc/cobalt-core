@@ -154,3 +154,71 @@ function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
     $m .= " " . fmt($message, $type, $back);
     print($m . "\n");
 }
+
+function get_image_function($image_data) {
+    $valid_types = [
+        IMG_GIF => ['imagecreatefromgif', 'imagegif'],
+        IMG_JPG => ['imagecreatefromjpeg', 'imagejpeg'],
+        3       => ['imagecreatefrompng', 'imagepng'],
+        IMG_PNG => ['imagecreatefrompng', 'imagepng'],
+        IMG_WBMP => ['imagecreatefromwbmp', 'imagewbmp'],
+        IMG_XPM => ['imagecreatefromxpm', 'imagexpm'],
+        IMG_WEBP => ['imagecreatefromwebp', 'imagewebp'],
+        IMG_BMP => ['imagecreatefrombmp', 'imagebmp'],
+    ];
+    $valid_types = [
+        "image/bmp" => ['imagecreatefrombmp', 'imagebmp'],
+        "image/gif" => ['imagecreatefromgif', 'imagegif'],
+        "image/jpeg" => ['imagecreatefromjpeg', 'imagejpeg'],
+        "image/png" => ['imagecreatefrompng', 'imagepng'],
+        "image/wbmp" => ['imagecreatefromwbmp', 'imagewbmp'],
+        "image/xpm" => ['imagecreatefromxpm', 'imagexpm'],
+        "image/webp" => ['imagecreatefromwebp', 'imagewebp'],
+    ];
+    if (key_exists($image_data["mime"], $valid_types)) return $valid_types[$image_data["mime"]];
+    return null;
+}
+
+function image_average_color($path_to_image_file, $null_on_failure = true) { 
+    $size = @getimagesize($path_to_image_file);
+    if($size === false) {
+        if($null_on_failure) return null;    
+        else throw new Exception("Not a valid image");
+    } 
+    $fn = @get_image_function($size);
+    if(!$fn) {
+        if($null_on_failure) return null;
+        else throw new Exception("Invalid image processing function or mimetype");
+    }
+    $img = $fn($path_to_image_file);
+    // $img = @imagecreatefromstring(file_get_contents($imageFile)); 
+
+    if(!$img) {
+        if($null_on_failure) return null;
+        else throw new Exception("Cannot open image file");
+    }
+
+    $scaled = imagescale($img, 1, 1, IMG_BICUBIC);
+    $index = imagecolorat($scaled, 0, 0);
+    $rgb = imagecolorsforindex($scaled, $index);
+
+    return sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+
+    // for($x = 0; $x < $size[0]; $x += $granularity) {
+    //     for($y = 0; $y < $size[1]; $y += $granularity) {
+    //         $thisColor = imagecolorat($img, $x, $y);
+    //         $rgb = imagecolorsforindex($img, $thisColor);
+    //         $red = round(round(($rgb['red'] / 0x33)) * 0x33);
+    //         $green = round(round(($rgb['green'] / 0x33)) * 0x33);
+    //         $blue = round(round(($rgb['blue'] / 0x33)) * 0x33);
+    //         $thisRGB = sprintf('%02X%02X%02X', $red, $green, $blue);
+    //         if(array_key_exists($thisRGB, $colors)) {
+    //             $colors[$thisRGB]++;
+    //         } else {
+    //             $colors[$thisRGB] = 1;
+    //         }
+    //     }
+    // }
+    // arsort($colors);
+    // return array_slice(array_keys($colors), 0, $number_of_colors);
+} 

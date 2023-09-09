@@ -93,6 +93,14 @@ class CustomSchema extends Normalize {
                 'get' => fn($val) => $val ?? $this->__dataset['meta']['height'] ?? $this->__dataset['meta']['meta']['height'],
                 'set' => fn($val) => (is_numeric($val)) ? (int)$val : throw new ValidationIssue("Must be numerical value"),
             ],
+            "meta.accent_color" => [
+                'get' => fn($val) => $val ?? $this->__dataset['meta']['accent_color'] ?? $this->__dataset['meta']['meta']['accent_color'],
+                'set' => fn($val) => ($this->hex_color($val)) ? (int)$val : throw new ValidationIssue("Must be a hex color"),
+            ],
+            "meta.contrast_color" => [
+                'get' => fn($val) => $val ?? $this->__dataset['meta']['contrast_color'] ?? $this->__dataset['meta']['meta']['contrast_color'],
+                'set' => fn($val) => ($this->hex_color($val)) ? (int)$val : throw new ValidationIssue("Must be a hex color"),
+            ],
             'meta.controls' => [
                 'get' => fn($val) => $this->getDefault($val,'meta.controls'),
                 'set' => fn ($val) => $this->boolean_helper($val),

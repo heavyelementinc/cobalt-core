@@ -2,6 +2,10 @@ window.Cobalt = {};
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
 var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-user-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 
+function isRegisteredWebComponent(tag) {
+    return !!customElements.get(tag.toLowerCase());
+}
+
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
     if (setting === null) return document.GLOBAL_SETTINGS;
@@ -74,6 +78,8 @@ async function logOutConfirm() {
     let result = await api.send(null, {})
     if (result.result) window.location.reload();
 }
+
+
 
 async function confirmModal(message, yes = "Okay", no = "Cancel") {
     const modal = new Modal({
@@ -256,6 +262,60 @@ function modalView(url, close = "Close") {
             }
         })
         modal.draw();
+    });
+}
+
+async function dialogViewReplace(url) {
+    const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
+    dialog.draw();
+    const previous = Cobalt.router.location.currentRoute;
+    dialog.addEventListener("modalclose", evt => {
+        Cobalt.router.replaceState(previous);
+    });
+    const result = await Cobalt.router.replaceState(url, {target: dialog, updateProperty: "body"});
+    return result;
+}
+
+async function dialogView(url) {
+    const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
+    dialog.draw();
+    const result = await Cobalt.router.popState(url, {target: dialog, updateProperty: "body"});
+    return result;
+}
+
+/**
+ * @param string string to test
+ * @param pattern  pattern to test
+ * @returns bool
+ */
+function matches(string, pattern) {
+    let regex = pattern;
+    if(typeof regex === "string") regex = new RegExp(pattern);
+    const match = string.match(regex);
+    if (match === null) return false;
+    if (match.length <= 0) return false;
+    return true;
+}
+
+// async function dialogView(url, close = "Close") {
+//     const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
+//     dialog.draw();
+//     const previous = Cobalt.router.location.currentRoute;
+//     dialog.addEventListener("modalclose", evt => {
+//         Cobalt.router.replaceState(previous);
+//     });
+//     const result = await Cobalt.router.replaceState(url, {target: dialog, updateProperty: "body"});
+//     return result;
+// }
+
+function dialogConfirm(message, confirmLabel = "Okay", cancelLabel = "Cancel") {
+    return new Promise(resolve => {
+        const dialog = new Dialog({close_btn: false});
+        dialog.addCloseButton(cancelLabel);
+        dialog.addConfirmButton(confirmLabel);
+        dialog.addEventListener("modalconfirm", e => resolve(true));
+        dialog.addEventListener("modalcancel", e => resolve(false));
+        dialog.draw(message)
     });
 }
 

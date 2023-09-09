@@ -1,7 +1,7 @@
 <?php
 use Cobalt\Extensions\Extensions;
+$EXTENSION_MANAGER = new Extensions();
 try {
-    $EXTENSION_MANAGER = new Extensions();
     $EXTENSION_MANAGER->initialize_active_extensions();
 
     Extensions::invoke("register_templates_dir", $TEMPLATE_PATHS);
@@ -26,5 +26,6 @@ try {
  */
 function extensions():\Cobalt\Extensions\Extensions {
     global $EXTENSION_MANAGER;
+    if(!$EXTENSION_MANAGER) return new Extensions();
     return $EXTENSION_MANAGER;
 }

@@ -3,6 +3,7 @@
 use Cobalt\Customization\CustomizationManager;
 use Cobalt\Customization\CustomSchema;
 use Controllers\ClientFSManager;
+use Drivers\FileSystem;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
@@ -133,7 +134,10 @@ class Customizations extends \Controllers\Controller {
         if(!$verify) throw new NotFound("Resource is unavailable");
         $data = $_POST;
         if($_FILES['value']) {
-            $data = $this->clientUploadFile('value', 0, ['for' => $_id]);
+            $data = $this->clientUploadFile('value', 0, [
+                'for' => $_id,
+                'customization' => true,
+            ]);
         } else {
             throw new BadRequest("Unexpected data in request.");
         }
@@ -155,5 +159,57 @@ class Customizations extends \Controllers\Controller {
         $result = $this->man->deleteOne(['_id' => $_id]);
         update("[action='/api/v1/customizations/$id']", ['remove' => "[action='/api/v1/customizations/$id']:closest(flex-row)"]);
         return $result->getDeletedCount();
+    }
+
+    // function deleteImage($id = null ){
+    //     $_id = new ObjectId($id);
+    //     $fs = new FileSystem();
+    //     $result = $fs->findOne(['_id' => $_id]);
+    //     $fs->delete($_id);
+    // }
+
+    function list() {
+        $all = $this->man->findAllAsSchema([
+            // ['meta.custom' => true]
+            'type' => 'image'
+        ], [
+            'limit' => 300
+        ]);
+
+        $opts = [];
+        $keys = [];
+
+        foreach($all as $opt) {
+            $opts[(string)$opt['_id']] = $opt;
+            array_push($keys, $opt->_id);
+        }
+
+        $fs = new FileSystem();
+
+        $files = $fs->find([
+            'for' => ['$in' => $keys]
+        ], [
+            'limit' => 400
+        ]);
+
+        $html = [];
+        foreach($files as $option) {
+            $key = "orphan";
+            if(key_exists((string)$option->for, $opts)) $key = (string)$option->for;
+            $current_status = ((string)$option->_id === $key) ? "current-selection--this" : "orphan";
+            if(!key_exists($key, $html)) $html[$key] = "<div><h1>".$opts[$key]->name ." | $key</h1>";
+            $html[$key] .= "<a href='/admin/customizations/edit/$option->for' class='block-link $current_status' style=\"background-image:url('/res/fs/$option->filename'); color: ".$option->meta->contrast_color.";background-color: ".$option->meta->accent_color.";\">
+                <action-menu type='options'>
+                    <option method='DELETE' action='/api/v1/customizations/attachment/$option->_id/'>Delete</option>
+                </action-menu>
+            </a>";
+        }
+        
+        add_vars([
+            'title' => "Listing all custom files",
+            'html' => implode($html) . "</div>"
+        ]);
+
+        return set_template('/customizations/index/list.html');
     }
 }

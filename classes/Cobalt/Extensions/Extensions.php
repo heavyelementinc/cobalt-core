@@ -251,6 +251,7 @@ class Extensions extends \Drivers\Database {
      */
     static function invoke($method_name, &$arg1 = null, &$arg2 = null, &$arg3 = null, &$arg4 = null, &$arg5 = null) {
         global $EXTENSION_MANAGER;
+        if(!$EXTENSION_MANAGER) return;
 
         if(!$method_name) new \Exception("No method name provided.");
         

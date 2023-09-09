@@ -19,7 +19,8 @@ class MobileNavMenu{
         this.initMobileNav();
 
         if(app("Mobile_nav_menu_closes_on_anchor_link_click")) this.anchorLinkListeners();
-        
+
+        document.addEventListener("navigationstart", e => this.close());
     }
 
     initMobileNav() {

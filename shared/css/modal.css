@@ -117,3 +117,65 @@ modal-button-row {
       background: var(--project-color-action-danger);
   }
 
+
+.modal-dialog--container {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / .7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button.modal-dialog--close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: none;
+    background: transparent;
+    color: white;
+}
+
+button.modal-dialog--close:hover{
+    background: transparent;
+    color: white;
+}
+
+modal-dialog {
+    display: flex;
+    flex-direction: column;
+    min-height: 20vh;
+    max-height: 80vh;
+    min-width: 20vw;
+    max-width: 80vw;
+    background-color: white;
+    background-color: var(--project-body-background);
+}
+
+.modal-dialog--content::-webkit-scrollbar {
+    display: none;
+}
+
+.modal-dialog--content {
+    padding: 1em;
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+modal-dialog menu {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+modal-dialog menu li {
+    width: calc(100% / var(--modal-chrome-count));
+}
+
+modal-dialog menu li button {
+    width: 100%;
+    border-radius: 0;
+}

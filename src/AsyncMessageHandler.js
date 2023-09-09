@@ -49,7 +49,7 @@ class AsyncMessageHandler {
     async process(obj, method) {
         this.responseBody = await this[method](obj);
         this.handleHeaderMessaging();
-        if(obj.response.status >= 300) this.handleError();
+        if(this.status >= 300) this.handleError();
     }
 
     async normalizeXhrError(data) {

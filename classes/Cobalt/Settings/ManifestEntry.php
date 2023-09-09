@@ -39,14 +39,15 @@ class ManifestEntry {
             $final[$type] = [];
             foreach($directives as $context => $data) {
                 if(in_array($context, ['common', 'append'])) continue;
-                if(is_associative_array($data)) $final[$type][$context] = array_merge($this->dataInProgress[$type]['common'] ?? [], $data, $this->dataInProgress[$type]['append'] ?? []);
+                $isAssocArray = is_associative_array($data);
+                if($isAssocArray) $final[$type][$context] = array_merge($this->dataInProgress[$type]['common'] ?? [], $data, $this->dataInProgress[$type]['append'] ?? []);
                 
                 $result = $this->dataInProgress[$type]['common'] ?? [];
                 $result = $this->appendValuesToArray($result, $data);
                 $result = $this->appendValuesToArray($result, $this->dataInProgress[$type]['append'] ?? []);
                 // $result += $data;
                 // $result += $this->dataInProgress[$type]['append'] ?? [];
-                $final[$type][$context] = array_reverse(array_unique(array_reverse($result)));
+                if(!$isAssocArray) $final[$type][$context] = array_reverse(array_unique(array_reverse($result)));
             }
         }
         return $final;

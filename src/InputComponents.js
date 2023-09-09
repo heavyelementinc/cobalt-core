@@ -13,6 +13,7 @@ class LoginForm extends HTMLElement {
         this.addEventListener("requestFailure", async e => {
             await wait_for_animation(this, "status-message--no")
         })
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     getRequest() {
@@ -74,7 +75,7 @@ class InputSwitch extends HTMLElement {
         if (['indeterminate', 'unknown', 'null', 'maybe'].includes(this.checked)) this.checkbox.indeterminate = true;
         // Init our listeners for this element
         this.initListeners();
-        
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     /** Initialize the listeners on this element */
@@ -176,6 +177,10 @@ class RadioGroup extends HTMLElement {
         return this.getAttribute("name") || this.querySelector(`[type='radio']`).name || this.querySelector(`[type='radio'][name]`).name;
     }
 
+    connectedCallback() {
+        this.dispatchEvent(new CustomEvent("componentready"));
+    }
+
     updateSelected(selected) {
         let updateQuery = "";
         if (this.name) updateQuery = `[name="${this.name}"]`
@@ -244,6 +249,7 @@ class DisplayDate extends HTMLElement {
         this.relative = this.getAttribute("relative") || "false";
 
         if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     getValue() {
@@ -336,6 +342,7 @@ class InputObjectArray extends HTMLElement {
             this.value = [];
         }
         this.dispatchEvent(new CustomEvent("ObjectArrayReady"));
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     initInterface() {
@@ -502,7 +509,9 @@ class HelpSpan extends HTMLElement {
 
         this.addEventListener("mouseout", e => {
             this.detatch();
-        })
+        });
+
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     attach() {
@@ -602,6 +611,7 @@ class CopySpan extends HTMLElement {
 
     connectedCallback() {
         this.button.innerHTML = this.clipboard(window.getComputedStyle(this, null).getPropertyValue('font-size'));
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     get value() {
@@ -786,6 +796,7 @@ class InputNumber extends HTMLElement {
         // this.realField.disabled = this.getAttribute("disabled");
         this.value = this.getAttribute("value");
         this.appendChild(this.realField);
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     get value() {

@@ -102,7 +102,6 @@ class FileController extends \Controllers\FileController {
         exit;
     }
 
-
     function plugin_resources($plugin, $match) {
         global $ACTIVE_PLUGINS;
         $content_dirs = [];

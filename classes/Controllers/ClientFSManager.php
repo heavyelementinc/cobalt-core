@@ -6,6 +6,7 @@ use Drivers\FileSystem;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
+use MikeAlmond\Color\Color;
 use MongoDB\BSON\ObjectId;
 
 trait ClientFSManager {
@@ -451,10 +452,22 @@ trait ClientFSManager {
         $metadata = getimagesize($path_to_file);
         if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($path_to_file)];
         $metadata['mimetype'] = mime_content_type($path_to_file);
+        // $avg = \image_average_color($path_to_file, true);
+        $img = imagecreatefromstring(file_get_contents($path_to_file));
+        $scaled = imagescale($img, 1, 1);
+        if($scaled !== false) {
+            $index = imagecolorat($scaled, 0, 0);
+            $rgb = imagecolorsforindex($scaled, $index);
+    
+            $avg = sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+        } else $avg = "#fff";
+
         $meta = [
             'width' => $metadata[0],
             'height' => $metadata[1],
             'mimetype' => $metadata['mimetype'],
+            'accent_color' => $avg,
+            'contrast_color' => (Color::fromHex($avg)->isDark()) ? "#FFFFFF" : "#000000"
         ];
         return $meta;
     }

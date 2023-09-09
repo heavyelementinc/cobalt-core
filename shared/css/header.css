@@ -11,6 +11,7 @@ body > header {
     display: flex;
     background: var(--project-color-header-branding);
     align-items: center;
+    z-index: calc(var(--project-modal-z-index) - 2);
 }
 
 header nav ul {
@@ -29,9 +30,42 @@ header nav ul li {
     box-shadow: 0px 2px 0px currentColor
 }
 
-.directory--group .directory--submenu {
+.directory--group:not(.subgroup--display) .directory--submenu {
     display: none;
     z-index: calc(var(--project-modal-z-index) - 1);
+}
+
+.directory--group.directory--icon-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1em;
+    list-style: none;
+    margin: 1em;
+    padding: unset;
+}
+
+.directory--group.directory--icon-panel li a{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-weight: normal;
+    text-decoration: none;
+    height: 5.5rem;
+    width: 5.5rem;
+    padding: 1em;
+    border-radius: .5rem;
+    background-color: white;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.directory--group.directory--icon-panel a i {
+    font-size: 5rem;
 }
 
 .directory--group .unread {

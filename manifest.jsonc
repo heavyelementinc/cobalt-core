@@ -4,6 +4,7 @@
             "Preferences.js",
             "global_functions.js",
             "Modal.js",
+            "Cobalt/CobaltModal.js",
             "StatusMessage.js",
             "AsyncMessageHandler.js",
             "sortable.js",
@@ -28,7 +29,6 @@
             "components/action-menu-element.js",
             "components/NotificationsPanel.js",
             "components/input-text.js",
-            "components/FormRequest.js",
             "DateConverter.js",
             "TabbedUI.js",
             "Slideshow.js",
@@ -55,6 +55,7 @@
             "protected/EventManager.js"
         ],
         "append": [
+            "components/FormRequest.js",
             "main.js",
             "app.js",
             "Cobalt/MobileNavMenu.js",
