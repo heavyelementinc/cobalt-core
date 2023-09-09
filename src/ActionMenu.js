@@ -125,11 +125,11 @@ class ActionMenu {
         action.loading.start()
         let result = null;
         let requestData = null;
-        const api = new ApiFetch(action.request.action, action.request.method,{});
+        const api = new AsyncFetch(action.request.action, action.request.method,{});
         if("method" in action.request && "action" in action.request) {
             try {
                 const toSubmit = this.toSubmit(action, event);
-                requestData = await api.send(toSubmit);
+                requestData = await api.submit(toSubmit);
                 // event.target.dispatchEvent(new Event("load", {detail: {requestData}}));
                 if("original" in action) action.original.dispatchEvent(new Event("load", {detail: {action, event, result: requestData}}))
             } catch (error) {
@@ -251,7 +251,7 @@ class ActionMenu {
         if(target.parentNode.tagName === "BUTTON") target = target.parentNode
         if(this.attachTo) target = this.attachTo;
         else {
-            target = this.event.target.closest("button, input[type='button'], input[type='submit'], async-button, split-button");
+            target = this.event.target.closest("button, input[type='button'], input[type='submit'], async-button, split-button") ?? target;
         }
 
         switch(type) {

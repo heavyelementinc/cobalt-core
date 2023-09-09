@@ -172,6 +172,10 @@ class RadioGroup extends HTMLElement {
         node.checked = true;
     }
 
+    get name() {
+        return this.getAttribute("name") || this.querySelector(`[type='radio']`).name || this.querySelector(`[type='radio'][name]`).name;
+    }
+
     updateSelected(selected) {
         let updateQuery = "";
         if (this.name) updateQuery = `[name="${this.name}"]`
@@ -767,3 +771,65 @@ class ProgressBar extends HTMLElement {
 }
 
 customElements.define("progress-bar", ProgressBar);
+
+class InputNumber extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.realField = document.createElement("input");
+        this.realField.type = "number";
+        this.realField.min = this.getAttribute("min");
+        this.realField.max = this.getAttribute("max");
+        this.realField.pattern = this.getAttribute("pattern");
+        // this.realField.disabled = this.getAttribute("disabled");
+        this.value = this.getAttribute("value");
+        this.appendChild(this.realField);
+    }
+
+    get value() {
+        const val = this.realField.value;
+        if(val === "") return Number(this.getAttribute('default')) || 0;
+        return Number(this.realField.value);
+    }
+
+    set value(number) {
+        this.realField.value = number;
+    }
+
+    get name() {
+        return this.getAttribute("name");
+    }
+    
+    set name(name) {
+        this.setAttribute("name", name);
+    }
+
+    get disabled() {
+        return this.realField.getAttribute("aria-disabled");
+    }
+
+    set disabled(value) {
+        this.realField.ariaDisabled = value;
+        this.realField.disabled = value;
+    }
+
+    get min() {
+        return this.realField.min;
+    }
+
+    set min(value) {
+        this.realField.min = value;
+    }
+
+    get max() {
+        return this.realField.max;
+    }
+
+    set max(value) {
+        this.realField.max = value;
+    }
+}
+
+customElements.define("input-number", InputNumber);

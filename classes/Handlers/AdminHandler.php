@@ -29,7 +29,7 @@ class AdminHandler extends WebHandler {
         $customize = route("Customizations@index");
         $userPanel = view('/admin/users/session-panel.html',[]);
         // [
-        //     'settings' => ($settings) ? "<option icon='cog' onclick=\"router.location = ''; return true;\">Settings</option>" : ""
+        //     'settings' => ($settings) ? "<option icon='cog' onclick=\"Cobalt.router.location = ''; return true;\">Settings</option>" : ""
         // ]
 
         $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";

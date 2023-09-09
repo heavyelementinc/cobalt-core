@@ -66,7 +66,7 @@ class Customizations extends \Controllers\Controller {
             'title' => $result->name ?? "New Customization",
             'group_options' => $this->man->group_options(),
             'doc' => $result,
-            'value' => $result->value[count($result->value ?? []) - 1] ?? ""
+            'value' => $result->value ?? ""
         ]);
 
         $view = $result->getTemplate($edit);
@@ -111,17 +111,17 @@ class Customizations extends \Controllers\Controller {
     private function process_values($valid) {
         $update = ['$set' => $valid];
 
-        if(key_exists('value', $valid)) {
-            $update['$push'] = [
-                'value' => $valid['value'],
-                'session' => [
-                    'session_id' => session('_id'),
-                    'time' => new UTCDateTime(),
-                ]
-            ];
-            unset($update['$set']['value']);
-            if(empty($update['$set'])) unset($update['$set']);
-        }
+        // if(key_exists('value', $valid)) {
+        //     $update['$push'] = [
+        //         'value' => $valid['value'],
+        //         'session' => [
+        //             'session_id' => session('_id'),
+        //             'time' => new UTCDateTime(),
+        //         ]
+        //     ];
+        //     unset($update['$set']['value']);
+        //     if(empty($update['$set'])) unset($update['$set']);
+        // }
         return $update;
     }
 
@@ -152,7 +152,8 @@ class Customizations extends \Controllers\Controller {
         $_id = new ObjectId($id);
         $search = $this->man->findOne(['_id' => $_id]);
         if(!$search) throw new NotFound("That resource is not available");
-        $result = $this->man->deleteOne(['_id' => $id]);
+        $result = $this->man->deleteOne(['_id' => $_id]);
+        update("[action='/api/v1/customizations/$id']", ['remove' => "[action='/api/v1/customizations/$id']:closest(flex-row)"]);
         return $result->getDeletedCount();
     }
 }

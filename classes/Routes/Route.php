@@ -122,18 +122,22 @@ class Route {
             'max-age' => '604800',
             'type' => 'private',
         ];
-
+        $nat_order = count($GLOBALS['ROUTE_TABLE'][$router_table_address][$type]);
         /** Store our route data in the full route table. */
         $GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex] = [
             // Original pathname
-            'original_path' => $path,
+            'original_path' => $path,     // The path defined by the Route::<method> argument (no root context!)
+            'real_path' => $real_path,    // The real path includes the root context (/admin, etc)
+            'real_regex' => $real_regex,  // The regex for the path "%^\/admin\/project\/?"
+            'context' => $router_table_address, // The context type
+            'context_root' => substr($path_prefix,0,-1), // The context root path
 
             // The PHP controller name
-            'controller' => $controller,
+            'controller' => $controller,  // The controller "ProjectAdmin@newProject"
 
             // The var names that will be parsed out of the URI
-            'uri_var_names' => $var_names[1],
-            'uri_var_types' => [], // Unused?
+            'uri_var_names' => $var_names[1],  // The names of variables found in the route
+            'uri_var_types' => [], // Unused? 
 
             // The client-side controller (in JavaScript)
             'handler'    => $additional['handler'],
@@ -152,19 +156,34 @@ class Route {
 
             // Admin panel name
             'panel_name' => $additional['name'] ?? null,
-            'route_file' => $file,
+            'route_file' => $file,   // The route.php file and the line number it was defined on!
+            
             // API authentication stuff
             'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
+            
             // Cache Control stuff is only honored by API page requests
             'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control),
-            'real_path' => $real_path,
-            'real_regex' => $real_regex,
             'unread' => $additional['unread'] ?? fn () => null,
             'require_session' => $additional['require_session'] ?? !app("Web_normally_open_pages"),
+
+            // Info that route groups need
+            'nat_order' => $nat_order,
         ];
         
         if(!key_exists($controller, $GLOBALS['ROUTE_LOOKUP_CACHE'])) {
             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controller] = $real_path;
+        }
+
+        if(!empty($GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex]['navigation'])) self::map_route_groups($GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex]);
+    }
+
+    static function map_route_groups(&$value) {
+        global $ROUTE_GROUPS;
+        foreach($value['navigation'] as $index => $navItem) {
+            $group = $navItem;
+            if(gettype($group) === "array") $group = $index;
+            if(!key_exists($group,$ROUTE_GROUPS)) $ROUTE_GROUPS[$group] = [];
+            $ROUTE_GROUPS[$group][] = &$value;
         }
     }
 

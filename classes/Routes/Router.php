@@ -56,9 +56,7 @@ class Router {
         //  = array_fill_keys(array_keys($contexts), []);
 
         global $ROUTE_TABLE;
-
         
-        Extensions::invoke("register_controller_dir", $this->registered_plugin_controllers);
         foreach($contexts as $context => $data) {
             $ROUTE_TABLE[$context] = [
                 'get'    => [],
@@ -205,9 +203,11 @@ class Router {
         $controller_search = [
             __APP_ROOT__ . "/controllers",
             __APP_ROOT__ . "/private/controllers",
-            ...array_values($this->registered_plugin_controllers),
+            // ...array_values($this->registered_plugin_controllers),
             __ENV_ROOT__ . "/controllers"
         ];
+
+        extensions()::invoke("register_controller_dir", $controller_search);
 
         try {
             // We are doing these in reverse order because we want our app's 
@@ -244,12 +244,21 @@ class Router {
         
     }
 
+    public $router_js_table = [
+        __APP_ROOT__ . "/controllers/client/",
+        __APP_ROOT__ . "/private/controllers/client/",
+        __ENV_ROOT__ . "/controllers/client/",
+    ];
+
     /** @todo Fix terrible nested loops/logic */
     function get_js_route_table() {
         $table = [];
         $prefix = "";
         if ($GLOBALS['route_context']) $prefix = "^" . app("context_prefixes")[$GLOBALS['route_context']]['prefix'];
         $prefix = substr($prefix, 0, -1);
+
+        extensions()::invoke("register_client_controllers",$this->router_js_table);
+
         foreach($this->routes as $context => $methods) {
             foreach ($methods as $method => $routes) {
                 foreach ($routes as $path => $route) {
@@ -263,23 +272,20 @@ class Router {
                     }
                     if($hasHandler === false) continue;
 
-                    $files = \files_exist([
-                        __APP_ROOT__ . "/controllers/client/$handler",
-                        __APP_ROOT__ . "/private/controllers/client/$handler",
-                        __ENV_ROOT__ . "/controllers/client/$handler",
-                    ], false);
-                    if(empty($files)){
-                        if(isset($route['handler'])) throw new Exception("The router table specfied a client controller but the file was not found");
-                        else continue;
+                    if(isset($route['handler'])) {
+                        $file = find_one_file($this->router_js_table, $route['handler']);
+                        if(!$file) throw new Exception("The router table specfied a client controller but the file was not found");
+
+                        $real_regex = $route['real_regex'];
+                        // if ($prefix !== "" && $path[0] == "^") $real_regex = substr($real_regex, 2);
+                        $index1 = 0;
+                        $index2 = 0;
+                        if ($real_regex[0] === "%") $index1 = 1;
+                        if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
+                        $real_regex = substr($real_regex, $index1, $index2);
+                        array_push($table, "\n'$real_regex': " . file_get_contents($file));
+                        continue;
                     }
-                    $real_regex = $route['real_regex'];
-                    // if ($prefix !== "" && $path[0] == "^") $real_regex = substr($real_regex, 2);
-                    $index1 = 0;
-                    $index2 = 0;
-                    if ($real_regex[0] === "%") $index1 = 1;
-                    if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
-                    $real_regex = substr($real_regex, $index1, $index2);
-                    array_push($table, "\n'$real_regex': " . file_get_contents($files[0]));
                 }
             }
         }

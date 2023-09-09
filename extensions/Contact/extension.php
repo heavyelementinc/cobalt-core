@@ -2,7 +2,7 @@
 
 namespace Cobalt\Extensions;
 
-class Test extends BaseExtension {
+class ContactForm extends BaseExtension {
 
     public function initialize($manifest): void {
         // Do something to initialize your plugin here.

@@ -36,6 +36,9 @@ if(file_exists($db_config)) {
         'db_invalidCerts' => false,
         'bootstrap_mode'  => fn ($val) => ($val === COBALT_BOOSTRAP_AS_NEEDED || $val === COBALT_BOOSTRAP_ALWAYS),
         'safe_mode'       => fn ($val) => is_bool($val),
+        'timezone'        => function ($value) {
+            return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
+        }
     ];
 
     // Default values allow the config file to omit any value with the following
@@ -49,6 +52,7 @@ if(file_exists($db_config)) {
         'db_invalidCerts' => false,
         'bootstrap_mode'  => COBALT_BOOSTRAP_AS_NEEDED,
         'safe_mode'       => false,
+        'timezone'        => 'America/New_York'
     ];
 
     foreach($sanity_check as $key => $value) {
@@ -61,6 +65,8 @@ if(file_exists($db_config)) {
         if($value !== false && is_callable($value) && !$value($CONFIG[$key])) die("config.php validation failed. Key `$key` contains invalid data.");
         // if($CONFIG[$key] == false) unset($CONFIG[$key]);
     }
+
+    date_default_timezone_set($CONFIG['timezone']);
 }
 
 /**

@@ -1,6 +1,6 @@
 window.Cobalt = {};
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-user[name], input-array[name], input-user-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-user-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -384,6 +384,25 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
     if (!element) return;
     return new Promise((resolve, reject) => {
         element.addEventListener("animationend", e => {
+            resolve();
+            callback(element);
+            if (removeClass) element.classList.remove(animationClass);
+            clearTimeout(timeout);
+        }, { once: true });
+        if (typeof animationClass === "string") animationClass = [animationClass];
+        element.classList.add(...animationClass);
+        if (element.style.animationPlayState !== "running") element.style.animationPlayState = "running";
+        let timeout = setTimeout(() => {
+            resolve();
+            if (removeClass) element.classList.remove(animationClass);
+        }, maxDuration);
+    });
+}
+
+async function wait_for_transition(element, animationClass, removeClass = true, maxDuration = 2000, callback = (element) => { }) {
+    if (!element) return;
+    return new Promise((resolve, reject) => {
+        element.addEventListener("transitionend", e => {
             resolve();
             callback(element);
             if (removeClass) element.classList.remove(animationClass);
@@ -790,3 +809,21 @@ function getTabId() {
 }
 
 getTabId();
+
+class Rt {
+    get location() {
+        this.warn();
+        return Cobalt.router.location.URL.pathname;
+    }
+
+    set location(loc) {
+        this.warn();
+        Cobalt.router.location = loc;
+    }
+
+    warn() {
+        console.warn("Your app is using a deprecated Cobalt API! Please change any reference to `router.location` to utilize `Cobalt.router.location`");
+    }
+}
+
+window.router = new Rt();

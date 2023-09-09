@@ -87,9 +87,15 @@ class FlexTable extends HTMLElement {
                 const style = getComputedStyle(cell);
                 const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
                 context.font = font;
-                const {
+                let {
                     width
                 } = context.measureText(cell.innerText);
+
+                const actionMenu = cell.querySelector("action-menu");
+                if(actionMenu) {
+                    if(["options", "option"].includes(actionMenu.getAttribute("type"))) width += get_offset(actionMenu).w;
+                    else width += get_offset(actionMenu).w;
+                }
                 
                 if(width > this.maxWidths[index]) this.maxWidths[index] = Math.ceil(width);
             }

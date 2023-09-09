@@ -183,4 +183,9 @@ if (app("enable_debug_routes")) {
     if(is_root()) {
         Route::get("/php", "Debug@phpinfo");
     }
+
+    Route::get("/new-route-group", "Debug@new_route_group", [
+        'navigation' => ['debug'],
+        'anchor' => ['name' => "New Route Group Test"]
+    ]);
 }

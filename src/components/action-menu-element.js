@@ -109,6 +109,9 @@ class ActionMenuElement extends HTMLElement {
 
 customElements.define("action-menu", ActionMenuElement);
 
+/** The InlineMenu hides/shows its children when the inline-menu button is active.
+ *  This is useful if you want to have visually hidden form elements, such as advanced filters for a GET request
+ */
 class InlineMenu extends HTMLElement {
     constructor() {
         super();

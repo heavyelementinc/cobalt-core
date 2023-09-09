@@ -64,12 +64,12 @@ class WebHandler implements RequestHandler {
     private $push_handler = null;
 
     function __construct() {
-        $this->web_manifest = get_all_where_available([
-            __ENV_ROOT__ . "/manifest.jsonc",
-            __ENV_ROOT__ . "/manifest.json",
-            __APP_ROOT__ . "/manifest.jsonc",
-            __APP_ROOT__ . "/manifest.json"
-        ]);
+        // $this->web_manifest = get_all_where_available([
+        //     __ENV_ROOT__ . "/manifest.jsonc",
+        //     __ENV_ROOT__ . "/manifest.json",
+        //     __APP_ROOT__ . "/manifest.jsonc",
+        //     __APP_ROOT__ . "/manifest.json"
+        // ]);
         /** If we're in a web context, load the HTML body. This is so that we can
          * request just the main-content of a page via API later.
          */
@@ -193,8 +193,9 @@ class WebHandler implements RequestHandler {
 
 
     function app_settings() {
+        $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
-
+        $settings .= $this->getRouteBoundaries();
         $vars = "";
         foreach(__APP_SETTINGS__["vars-" . $this->meta_selector] as $var => $value) {
             $vars .= "--project-$var: $value;\n";
@@ -205,6 +206,15 @@ class WebHandler implements RequestHandler {
         
         $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;
+    }
+
+    function getRouteBoundaries() {
+        $boundaries = [];
+        foreach(__APP_SETTINGS__['context_prefixes'] as $context => $data) {
+            $trailing_slash = ($data['prefix'][strlen($data['prefix']) - 1] === "/") ? "?" : "";
+            $boundaries["^".preg_quote($data['prefix'])."$trailing_slash"] = $data['prefix'];
+        }
+        return "<script id='route-boundaries' type='application/json'>" . json_encode($boundaries) . "</script>";
     }
 
     var $header_template = "parts/header.html";
@@ -346,7 +356,7 @@ class WebHandler implements RequestHandler {
         $debug = app("debug");
 
         // Load packages from manifest
-        foreach (app("js-$this->meta_selector") as $package) {
+        foreach (app("js.$this->meta_selector") as $package) {
             if ($debug) {
                 $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
             } else {

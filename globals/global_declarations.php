@@ -54,3 +54,10 @@ function define_public_js_setting($name, $value) {
     global $PUBLIC_SETTINGS;
     $PUBLIC_SETTINGS[$name] = $value;
 }
+
+$ROUTE_GROUPS = [];
+
+function getRouteGroups() {
+    global $ROUTE_GROUPS;
+    return $ROUTE_GROUPS;
+}

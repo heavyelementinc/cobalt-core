@@ -74,7 +74,7 @@ modal-box#login-modal>section {
 #login-form-container input[type="username"], #login-form-container input[type="password"] {
   width: 100%;
   box-sizing: border-box;
-  font-family: var(--project-head-family);
+  /* font-family: var(--project-head-family); */
   padding: .35rem;
   margin-bottom: 1rem;
   font-size: 1.15rem;

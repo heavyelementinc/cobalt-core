@@ -27,8 +27,8 @@ class ExtensionsController extends Controller {
     }
 
     function extension($id) {
-        // $_id = new ObjectId($id);
-        $ext = extensions()->findOne(['uuid' => $id]);
+        $_id = new ObjectId($id);
+        $ext = extensions()->findOne(['_id' => $_id]);
 
         if(!$ext) throw new NotFound("The requested extension does not exist!");
         
@@ -50,18 +50,25 @@ class ExtensionsController extends Controller {
         set_template($view);
     }
 
-    function modify_extension_state($uuid) {
+    function modify_extension_state($id) {
         $EXTENSION_MANAGER = extensions();
+
+        $_id = new ObjectId($id);
         if(!isset($_POST['active'])) throw new BadRequest("Unexpected data contained in request.");
-        $ext = $EXTENSION_MANAGER->updateOne(['uuid' => $uuid], ['$set' => ['active' => $_POST['active']]]);
+        $ext = $EXTENSION_MANAGER->updateOne(['_id' => $_id], ['$set' => ['active' => $_POST['active']]]);
         return $ext->getModifiedCount();
     }
 
     // TODO: Add validation
-    function modify_extension_options($uuid) {
+    function modify_extension_options($id) {
         $EXTENSION_MANAGER = extensions();
-
-        $ext = $EXTENSION_MANAGER->updateOne(['uuid' => $uuid], ['$set' => $_POST]);
+        $_id = new ObjectId($id);
+        $ext = $EXTENSION_MANAGER->updateOne(['_id' => $_id], ['$set' => $_POST]);
         return $ext->getModifiedCount();
+    }
+
+    function rebuild_database() {
+        extensions()->build_extension_list();
+        header("X-Refresh: now");
     }
 }

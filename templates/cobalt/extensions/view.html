@@ -10,7 +10,7 @@
         <a href="#options"><i name="tune-vertical"></i> Options</a>
         <a href="#security"><i name="security"></i> Security</a>
     </nav>
-    <form-request id="info" method="POST" action="/api/v1/extensions/{{doc.uuid}}/info" autosave="true">
+    <form-request id="info" method="POST" action="/api/v1/extensions/{{doc._id}}/info" autosave="true">
         <ul class="list-panel">
             <li>
                 <label><strong>Author</strong></label>
@@ -46,7 +46,7 @@
             </li>
         </ul>
     </form-request>
-    <form-request id="options" method="POST" action="/api/v1/extensions/{{doc.uuid}}/options" autosave="form">
+    <form-request id="options" method="POST" action="/api/v1/extensions/{{doc._id}}/options" autosave="form">
         {{!options_view}}
     </form-request>
     <div id="security">

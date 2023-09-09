@@ -3,7 +3,9 @@
         <h1>{{title}}</h1>
         <cite>Last rebuild: <date-span value="{{extman.options.last_rebuild}}"></date-span></cite>
     </div>
-    
+    <action-menu>
+        <option method="POST" action="/api/v1/extensions/rebuild">Rebuild Database</option>
+    </action-menu>
 </hgroup>
 <flex-table>
     <flex-row>

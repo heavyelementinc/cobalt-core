@@ -78,8 +78,9 @@ if (app("CobaltEvents_enabled")) {
 }
 
 
-Route::s_post("/extensions/{uuid}/info",    "Extensions@modify_extension_state",   ['permission' => 'Extensions_allow_management']);
-Route::s_post("/extensions/{uuid}/options", "Extensions@modify_extension_options", ['permission' => 'Extensions_allow_management']);
+Route::s_post("/extensions/{uuid}/info",    "ExtensionsController@modify_extension_state",   ['permission' => 'Extensions_allow_management']);
+Route::s_post("/extensions/{uuid}/options", "ExtensionsController@modify_extension_options", ['permission' => 'Extensions_allow_management']);
+Route::s_post("/extensions/rebuild", "ExtensionsController@rebuild_database", ['permission' => 'Extensions_allow_management']);
 
 if (app('debug')) {
     Route::get("/hello_world/{something}/{machina}?", "HelloWorld@do_it", [ // Hello World test route

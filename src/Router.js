@@ -130,10 +130,10 @@ class Router {
         let forms;
         if(allLinks) {
             let url = location.toString();
-            history.replaceState({
-                title: document.title,
-                url: url,
-            },'',url);
+            // history.replaceState({
+            //     title: document.title,
+            //     url: url,
+            // },'',url);
             links = document.querySelectorAll(this.linkSelector);
             window.addEventListener("hashchange",(event) => {
                 // console.info("Hashchange triggered", event);
@@ -252,6 +252,7 @@ class Router {
         try {
             result = await this.asyncPageRequest(urlData);
         } catch (error) {
+            result = error;
             this.navigationEnd();
         }
         new AsyncMessageHandler(this.lastAsyncPageLoad, "XHR");
@@ -318,9 +319,13 @@ class Router {
 
             client.onload = (event) => {
                 if(client.readyState !== 4) return;
-                if(client.status >= 300) return reject(client);
+                if(client.status >= 300) {
+                    if(client.getResponseHeader("Content-Type").match(/html/i)) return reject({title: "Error", body: client.response, client});
+                    return reject(client);
+                }
                 this.lastAsyncRequestClient = client;
-                resolve(JSON.parse(client.response));
+                if(client.getResponseHeader("Content-Type").match(/html/i)) resolve({main: client.response, title: "Unknown"});
+                else resolve(JSON.parse(client.response));
                 this.navigationEventReject = null;
             };
 
@@ -434,4 +439,4 @@ class Router {
 
 }
 
-var router = new Router();
+// var router = new Router();

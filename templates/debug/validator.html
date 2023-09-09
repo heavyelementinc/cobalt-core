@@ -1,65 +1,95 @@
-<new-form-request method="POST" action="/api/v1/debug/validator" @csrf_attribute(); style="display:block;background-color:white">
-    <fieldset>
-        <legend>Test</legend>
-        <ul class="list-panel">
-            <li>
-                <label>Your Name</label>
-                <input type="name" name="name" value="{{document.name}}">
-            </li>
-            <li>
-                <label>Email</label>
-                <input type="email" name="email" value="{{document.email}}">
-            </li>
-            <li>
-                <label>Phone Number</label>
-                <input type="phone" name="phone" value="{{document.phone}}">
-            </li>
-            <li>
-                <label>Pronoun Set</label>
-                <select name="pronoun_set">{{!document.pronoun_set.options}}</select>
-                <ul>
-                    <li>Pronoun_set Prototype</li>
-                    <li>{{document.pronoun_set.they}}</li>
-                    <li>{{document.pronoun_set.them}}</li>
-                    <li>{{document.pronoun_set.their}}</li>
-                    <li>{{document.pronoun_set.theirs}}</li>
-                    <li>{{document.pronoun_set.themselves}}</li>
-                    <li>Document Property</li>
-                    <li>{{document.they}}</li>
-                    <li>{{document.them}}</li>
-                    <li>{{document.their}}</li>
-                    <li>{{document.theirs}}</li>
-                    <li>{{document.themselves}}</li>
-                </ul>
-            </li>
-            <li>
-                <label>Region</label>
-                <input-array name="region" multiselect="true" value="{{document.region}}">
-                    {{!document.region.options}}
-                    <option value="invalid">Invalid Option</option>
-                </input-array>
-            </li>
-            <li>
-                <label>Number of items</label>
-                <input type="text" name="order_count" value="{{document.order_count}}">
-            </li>
-            <li>
-                <input-object-array name="test" value="{{document.test}}">
-                    <template>
-                        <li>
-                            <label>Foo</label>
-                            <input name="foo">
-                            <label>Bar</label>
-                            <input name="bar">
-                        </li>
-                    </template>
-                </input-object-array>
-            </li>
-        </ul>
-    </fieldset>
-    <input type="submit" value="Submit">
-</new-form-request>
-
+<div class="hbox">
+    <form-request method="POST" action="/api/v1/debug/validator" style="display:block;background-color:white">
+        <h1>Entire Form</h1>
+        <fieldset>
+            <legend>Test</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Pronoun Set</label>
+                    <select name="pronoun_set">{{!document.pronoun_set.options}}</select>
+                </li>
+                <li>
+                    <label>Region</label>
+                    <input-array name="region" multiselect="true" value="{{document.region}}">
+                        {{!document.region.options}}
+                        <option value="invalid">Invalid Option</option>
+                    </input-array>
+                </li>
+                <li>
+                    <label>Number of items</label>
+                    <input type="text" name="order_count" value="{{document.order_count}}">
+                </li>
+            </ul>
+        </fieldset>
+        <input type="submit" value="Submit"><div id="result">&nbsp;</div>
+    </form-request>
+    
+    <form-request method="POST" action="/api/v1/debug/validator" autosave="fieldset">
+        <h1>Autosave Fieldset</h1>
+        <fieldset>
+            <legend>Test</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Your Name</label>
+                    <input type="name" name="name" value="{{document.name}}">
+                </li>
+                <li>
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{document.email}}">
+                </li>
+                <li>
+                    <label>Phone Number</label>
+                    <input type="phone" name="phone" value="{{document.phone}}">
+                </li>
+            </ul>
+        </fieldset>
+    </form-request>
+    <form-request method="POST" action="/api/v1/debug/validator" autosave="element">
+        <fieldset>
+            <h1>Autosave Element</h1>
+            <legend>Test</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Region</label>
+                    <input-array name="region" multiselect="true" value="{{document.region}}">
+                        {{!document.region.options}}
+                        <option value="invalid">Invalid Option</option>
+                    </input-array>
+                </li>
+                <li>
+                    <label>Number of items</label>
+                    <input type="text" name="order_count" value="{{document.order_count}}">
+                </li>
+                <li>
+                    <input-object-array name="test" value="{{document.test}}" style="max-width: 300px">
+                        <template>
+                            <li>
+                                <label>Foo</label>
+                                <input name="foo">
+                                <label>Bar</label>
+                                <input name="bar">
+                            </li>
+                        </template>
+                    </input-object-array>
+                </li>
+            </ul>
+        </fieldset>
+    </form-request>
+</div>
+<ul>
+    <li>Pronoun_set Prototype</li>
+    <li>{{document.pronoun_set.they}}</li>
+    <li>{{document.pronoun_set.them}}</li>
+    <li>{{document.pronoun_set.their}}</li>
+    <li>{{document.pronoun_set.theirs}}</li>
+    <li>{{document.pronoun_set.themselves}}</li>
+    <li>Document Property</li>
+    <li>{{document.they}}</li>
+    <li>{{document.them}}</li>
+    <li>{{document.their}}</li>
+    <li>{{document.theirs}}</li>
+    <li>{{document.themselves}}</li>
+</ul>
 <form-request method="POST" action="/api/v1/debug/confirm">
     <input type="hidden" name="hidden" value="Some value">
     <input type="submit" value="Confirm">

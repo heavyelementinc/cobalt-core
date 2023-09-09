@@ -24,11 +24,11 @@
 <script>
     window.addEventListener("DOMContentLoaded",() => {
         const list = document.querySelector("#sortable");
-        const sortable = new Sortable(list.children, list.children);
+        const sortable = new Sortable(list.children, list.children, list);
         sortable.initialize();
 
         const landscape = document.querySelector("#landscape");
-        const sortable2 = new Sortable(landscape.children, landscape.children);
+        const sortable2 = new Sortable(landscape.children, landscape.children, landscape);
         sortable2.options({mode: 'landscape'});
         sortable2.initialize();
     });

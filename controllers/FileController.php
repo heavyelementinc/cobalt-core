@@ -53,14 +53,13 @@ class FileController extends \Controllers\FileController {
             $file = $cache->file_path;
         } else {
             $extensions = [];
-            Extensions::invoke("get_js_dirs", $extensions);
-            $files = files_exist([
-                __APP_ROOT__ . "/src/$match",
+            Extensions::invoke("register_js_dirs", $extensions);
+            $file = find_one_file([
+                __APP_ROOT__ . "/src/",
                 ...$extensions,
-                __ENV_ROOT__ . "/src/$match",
-            ], false);
-            if (!count($files))  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
-            $file = $files[0];
+                __ENV_ROOT__ . "/src/",
+            ], $match);
+            if (!$file)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
         }
 
         header("Content-Type: application/javascript;charset=UTF-8");

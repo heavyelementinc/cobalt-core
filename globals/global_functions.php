@@ -125,6 +125,10 @@ function merge() {
     return array_merge(...$list);
 }
 
+function array_append(&$array) {
+    
+}
+
 /**
  * Check if the current user has permission.
  *
@@ -922,7 +926,7 @@ function validate_route($directiveName, $context) {
  * 
  * @param string $directory_group the name of the key
  */
-function get_route_group($directory_group, $misc = []) {
+function get_route_group_old($directory_group, $misc = []) {
     global $ROUTER;
     $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
     if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
@@ -938,28 +942,50 @@ function get_route_group($directory_group, $misc = []) {
 
     // handleAuxiliaryRoutes($list, $misc, $directory_group);
 
+    $group_to_process = [];
+
     foreach($list as $context => $methods) {
         foreach($methods as $method => $routes) {
+            $nat_order = -1;
             foreach ($routes as $r => $route) {
                 $groups = $route['navigation'] ?? false;
                 if (!$groups) continue;
-                // If we get here, we know we [probably] have an array
-        
                 // Now we check if the directory group is in $groups or the key exists
                 // If both are FALSE, then we skip list assembly.
                 if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
                 if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-                $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
-                if(key_exists('unread',$route)) $info['unread'] = $route['unread'];
-                if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
-                if ($r === $current_route) $info['attributes'] = 'class="current--route"';
-                $ul .= build_directory_item($info, $misc['with_icon'], $context);
-        
+                $nat_order++;
+                $group_to_process[] = [...$route, ...['r' => $r, 'context' => $context, 'current_nav_group' => $directory_group, 'nat_order' => $nat_order]];
             }
         }
     }
+
+    uasort($group_to_process, function ($a, $b) {
+        $order_a = $a['anchor']['order'] ?? $a['navigation'][$a['current_nav_group']]['order'] ?? $a['nat_order'];
+        $order_b = $b['anchor']['order'] ?? $b['navigation'][$b['current_nav_group']]['order'] ?? $b['nat_order'];
+        return $order_a - $order_b;
+    });
+
+    foreach($group_to_process as $key => $route) {
+        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+        if(key_exists('unread',$route)) $info['unread'] = $route['unread'];
+        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
+        if ($route['r'] === $current_route) $info['attributes'] = 'class="current--route"';
+        $ul .= build_directory_item($info, $misc['with_icon'], $route['context']);
+    }
+
     $wrapper = ($misc['excludeWrapper']) ? "" : "</ul>";
     return $ul . $wrapper;
+}
+
+function get_route_group($directory_group, $misc = []) {
+    global $ROUTER;
+    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
+    $rtGrp = new \Routes\RouteGroup($directory_group, $ROUTER->current_route ?? "",$misc['with_icon']);
+    $rtGrp->setID($misc['id']);
+    $rtGrp->setClassesFromString($misc['classes']);
+    $rtGrp->setExcludeWrappers($misc['excludeWrapper']);
+    return $rtGrp->render();
 }
 
 // TODO: Fix this
@@ -1011,8 +1037,8 @@ function auxRouteHandler($route, $group) {
 
 function build_directory_item($item, $icon = false, $context = "") {
     $prefix = "";
+    $icon = "";
     if ($icon) $icon = "<i name='$item[icon]'></i>";
-    else $icon = "";
     $attributes = $item["attributes"] ?? '';
     if ($context !== "web") {
         $prefix = app('context_prefixes')[$context]['prefix'];

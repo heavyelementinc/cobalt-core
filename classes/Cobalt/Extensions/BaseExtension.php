@@ -15,20 +15,26 @@ abstract class BaseExtension {
         $this->ready = true;
     }
 
+    abstract public function initialize($manifest):void;
+
     function register_templates_dir(&$paths) {
-        $paths[] = __APP_ROOT__ . "$this->path/templates/";
+        $paths[] = "$this->path/templates/";
     }
 
     function register_classes_dir(&$paths) {
-        $paths[] = __APP_ROOT__ . "$this->path/classes/";
+        $paths[] = "$this->path/classes/";
     }
     
     function register_controller_dir(&$controller_list) {
-        $controller_list[] = __APP_ROOT__ . "$this->path/controllers/";
+        $controller_list[] = "$this->path/controllers/";
+    }
+
+    function register_client_controllers(&$client_controllers) {
+        $client_controllers[] = "$this->path/controllers/client/";
     }
 
     function register_routes($context, &$routes) {
-        $route = __APP_ROOT__ . "$this->path/routes/$context.php";
+        $route = "$this->path/routes/$context.php";
         if(file_exists($route)) $routes[] = $route;
     }
 
@@ -39,12 +45,17 @@ abstract class BaseExtension {
     }
 
     function register_shared_dir(&$paths) {
-        $paths[] = __APP_ROOT__ . "$this->path/shared/";
+        $paths[] = "$this->path/shared/";
+    }
+
+    function register_js_dirs(&$paths) {
+        $paths[] = "$this->path/src/";
     }
 
     function register_settings_definitions(&$definitions, &$manifest) {
-        if(count($this->manifest->settings)) $definitions[__APP_ROOT__ . $this->path . '/manifest.json'] = $this->manifest['settings'];
-        if(!count($this->manifest->public)) return;
+        if(count($this->manifest->settings)) $definitions[$this->path . '/manifest.json'] = doc_to_array($this->manifest['settings']);
+        if($this->manifest->public) $manifest[] = $this->manifest->public;
+        return;
         $m = [];
 
         foreach($this->manifest->public as $k => $v) {

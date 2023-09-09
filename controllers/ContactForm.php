@@ -42,6 +42,12 @@ class ContactForm extends Controller {
 
         $conMan->read_for_user($_id, session());
 
+        $unread = (new ContactManager())->get_unread_count_for_user(session());
+        $update = "innerHTML";
+        $query = "[href=\"/admin/contact-form/\"] .unread";
+        if($unread === 0) $unread = "";
+        update($query, [$update => $unread]);
+
         return set_template("/admin/contact-form/read.html");
     }
     

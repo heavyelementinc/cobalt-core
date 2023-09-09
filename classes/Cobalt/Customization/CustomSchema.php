@@ -29,6 +29,10 @@ class CustomSchema extends Normalize {
             'name' => 'Audio',
             'view' => '/customizations/editor/audio.html',
         ],
+        'color' => [
+            'name' => 'Color',
+            'view' => '/customizations/editor/color.html',
+        ]
     ];
 
     var $new_view = "/customizations/editor/new.html";
@@ -74,6 +78,7 @@ class CustomSchema extends Normalize {
                 },
                 'set' => fn ($val) => $this->process_value($val),
                 'display' => function ($val) {
+                    if(gettype($val) === "string") return $val;
                     return $val[count($val ?? []) - 1] ?? "";
                 }
             ],

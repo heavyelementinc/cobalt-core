@@ -2,6 +2,7 @@
 
 namespace Cobalt\Extensions;
 
+use Cobalt\Extensions\Exceptions\ExtensionNotReady;
 use Cobalt\Extensions\Exceptions\ManifestException;
 use Exception;
 use MongoDB\BSON\ObjectId;
@@ -37,24 +38,25 @@ class Extensions extends \Drivers\Database {
             }
 
             $sanitized = $this->sanitize_install_path($current->install_path,"","");
-            if(!in_array($sanitized, $this->directories)) $this->unregister_extension($current->_id);
+            // if(!in_array($sanitized, $this->directories)) $this->unregister_extension($current->_id);
         }
 
         $ext_list = [];
         foreach($this->directories as $dir) {
             foreach(\scandir($dir) as $d) {
                 if($d[0] === ".") continue;
-                $ext_list[] = $d;
+                $ext_list[] = $dir . $d;
             }
         }
 
         $extensions_found = 0;
 
         foreach($ext_list as $ext_dir) {
-            $ext_path = "$dir/$ext_dir";
-            if(!is_dir($ext_path)) continue;
+            // $ext_path = str_replace("//", "/","$dir/$ext_dir");
+            $ext_path = $ext_dir;
+            if(!is_dir($ext_path)) throw new Exception("Could not find extension directory");
             $man_path = $ext_path . "/manifest.json";
-            if(!file_exists($man_path)) continue;
+            if(!file_exists($man_path)) throw new ExtensionNotReady("Extension $ext_dir is missing a manifest");
             $manifest = get_json($man_path);
             $this->manifest_sanity_check($manifest, $ext_path);
             $this->register_extension($manifest);
@@ -166,7 +168,9 @@ class Extensions extends \Drivers\Database {
     public function initialize_extension($manifest) {
         require_once "$manifest[install_path]/$manifest[entrypoint]";
         $extension_literal = "\\Cobalt\\Extensions\\$manifest[class]";
+        $count = count($this->initialized_extensions);
         $this->initialized_extensions[] = new $extension_literal($manifest);
+        $this->initialized_extensions[$count]->initialize($manifest);
     }
 
     public function get_grants($extension) {
@@ -211,7 +215,7 @@ class Extensions extends \Drivers\Database {
             'icon' => 'border-style',
             'default' => true
         ],
-        'get_js_dirs' => [
+        'register_js_dirs' => [
             'name' => "Register JavaScript files",
             'icon' => 'code-json',
             'default' => true
@@ -250,8 +254,9 @@ class Extensions extends \Drivers\Database {
 
         if(!$method_name) new \Exception("No method name provided.");
         
+        
         foreach($EXTENSION_MANAGER->initialized_extensions as $ext) {
-            if(!method_exists($ext, $method_name)) continue;
+            if(!method_exists($ext, $method_name)) throw new Exception("There is no '$method_name' extension endpoint.");
             if(!$ext->ready) throw new Exceptions\ExtensionNotReady($ext::class . " is not ready. This is probably because the extension has a constructor that fails to explicitly call its parent constructor");
             $ext->{$method_name}($arg1, $arg2, $arg3, $arg4, $arg5);
         }

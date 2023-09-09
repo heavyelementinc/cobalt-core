@@ -113,6 +113,11 @@ class UserAccounts extends \Controllers\Pages {
             }
         }
         $validated = $ua->updateUser($id, $update);
+        
+        if(key_exists('avatar', $update)) {
+            update("#profile-picture .cobalt-user--avatar", ['attributes' => ['src' => "/res/fs/".$validated['avatar']['thumb']['filename']]]);
+        }
+
         return $validated;
     }
 
@@ -224,6 +229,9 @@ class UserAccounts extends \Controllers\Pages {
                 // Ignore it if we can't delete the avatar.
                 header("HTTP/1.1 200 OK");
             }
+            update(".cobalt-user--avatar", ['attributes' => ['src' => "/res/fs/".$validated['avatar']['thumb']['filename']]]);
+        } else {
+            unset($validated['avatar']);
         }
 
         $user = new UserCRUD();

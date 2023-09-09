@@ -1,4 +1,4 @@
-img.cobalt-masthead {
+header img.cobalt-masthead {
     max-height: 52px;
 }
 nav ul {
@@ -23,6 +23,10 @@ header nav ul li {
 
 .directory--group li {
     position: relative;
+}
+
+.directory--group a.navigation--current {
+    box-shadow: 0px 2px 0px currentColor
 }
 
 .directory--group .directory--submenu {

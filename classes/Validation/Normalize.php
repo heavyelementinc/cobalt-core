@@ -83,6 +83,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     protected $__index = [];
     protected $__to_validate = [];
     protected $__normalize_out = true;
+    protected $__isEmptyDoc = true;
     protected $__prototypes = [
         'raw',        // Returns the un-normalized value for the field
         'valid',      // Returns the valid options for selectable data
@@ -113,26 +114,32 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
         
+        if(empty($data) || is_null($data)) {
+            $this->__isEmptyDoc = true;
+        } else {
+            $this->__isEmptyDoc = false;
+        }
+        
         $this->__normalize($normalize_get);
 
         $this->__global_fields = [
             'isEmptyDoc' => [
-                'callback' => fn () => (count($this->__dataset) < 1)
+                'callback' => fn () => $this->__isEmptyDoc
             ],
             'newDocDisabled' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? " disabled=disabled" : "",   // Check if there are any files
+                'callback' => fn () => ($this->__isEmptyDoc) ? " disabled=disabled" : "",   // Check if there are any files
             ],
             'newDocSubmit' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "<button type=submit>Submit</button>" : "",
+                'callback' => fn () => ($this->__isEmptyDoc) ? "<button type=submit>Submit</button>" : "",
             ],
             'newDocAutosave' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=autosave",
+                'callback' => fn () => ($this->__isEmptyDoc) ? "" : " autosave=autosave",
             ],
             'newDocAutosaveFieldset' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=fieldset",
+                'callback' => fn () => ($this->__isEmptyDoc) ? "" : " autosave=fieldset",
             ],
             'newDocMethod' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "POST" : "PUT"
+                'callback' => fn () => ($this->__isEmptyDoc) ? "POST" : "PUT"
             ]
         ];
         

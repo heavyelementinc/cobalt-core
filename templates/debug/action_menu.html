@@ -1,10 +1,75 @@
 <button class="fixed">Spawn Fixed Menu</button>
 <pre class="context">Context-based action menu</pre>
-<section style="height:100vh;display:flex;flex-direction: column; justify-content: flex-end;">
+<div>
+    <inline-menu>
+        <p>This element keeps its children inside the itself (unlike an action menu)</p>
+        <label><input type="radio"> This is an inline menu</label>
+        <label><input type="text" name="name"></label>
+    </inline-menu>
+</div>
+<div>
+    <hgroup>
+        <h1>Here's a headline</h1>
+        <action-menu>
+            <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+        </action-menu>
+    </hgroup>
+    <flex-table>
+        <flex-row>
+            <flex-header>Column 1</flex-header>
+            <flex-header>Column 2</flex-header>
+            <flex-header></flex-header>
+        </flex-row>
+        <flex-row>
+            <flex-cell>Here's a cell</flex-cell>
+            <flex-cell>Here's another cell</flex-cell>
+            <flex-cell>
+                <action-menu type="options">
+                    <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+                </action-menu>
+            </flex-cell>
+        </flex-row>
+        <flex-row>
+            <flex-cell>Here's a new row</flex-cell>
+            <flex-cell>We've got yet another row</flex-cell>
+            <flex-cell>
+                <action-menu type="options">
+                    <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+                </action-menu>
+            </flex-cell>
+        </flex-row>
+    </flex-table>
+    <flex-table>
+        <flex-row>
+            <flex-header>Column 1</flex-header>
+            <flex-header>Column 2</flex-header>
+            <flex-header></flex-header>
+        </flex-row>
+        <flex-row>
+            <flex-cell>Here's a cell</flex-cell>
+            <flex-cell>Here's another cell</flex-cell>
+            <flex-cell>
+                <action-menu>
+                    <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+                </action-menu>
+            </flex-cell>
+        </flex-row>
+        <flex-row>
+            <flex-cell>Here's a new row</flex-cell>
+            <flex-cell>We've got yet another row</flex-cell>
+            <flex-cell>
+                <action-menu>
+                    <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+                </action-menu>
+            </flex-cell>
+        </flex-row>
+    </flex-table>
+</div>
+<div style="height:100vh;display:flex;flex-direction: column; justify-content: flex-end;">
     <button class="context">Spawn Fixed Menu</button>
     <pre class="context">Context-based action menu</pre>
-</section>
-<section style="height:50vh"></section>
+</div>
+
 <script>
     const fixed = document.querySelectorAll(".fixed");
     const context = document.querySelectorAll(".context");

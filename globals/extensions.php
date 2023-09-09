@@ -15,7 +15,6 @@ try {
     Extensions::invoke("register_permissions", $PERMISSIONS);
 
     Extensions::invoke("register_shared_dir", $SHARED_CONTENT);
-    // $EXTENSION_MANAGER::extension_call("register_classes", $TEMPLATE_PATHS);
 } catch (Exception $e) {
     die("EXTENSION ERROR: " . $e->getMessage());
 }

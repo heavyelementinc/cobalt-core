@@ -30,6 +30,8 @@ namespace Cobalt\Settings;
 use Cobalt\Extensions\Extensions;
 use Exception;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
@@ -60,7 +62,7 @@ class Settings extends \Drivers\Database {
     public $definitions;
     public $instances;
     public $raw_decode;
-    public $manifest_raw_decode;
+    public $manifest_raw_decode = [];
     public $default_values;
     public $update_settings;
     public $manifest_build_cache;
@@ -153,7 +155,9 @@ class Settings extends \Drivers\Database {
             }
         }
 
-        $toCache = array_merge($toCache, $this->bootstrapManifestData());
+        $details = $this->bootstrapManifestData();
+
+        $toCache = array_merge($toCache, $details);
         
         // Get the ID of the cached settings
         $id = $this->__settings->_id;
@@ -314,6 +318,28 @@ class Settings extends \Drivers\Database {
     }
 
     public function bootstrapManifestData() {
+        $GLOBALS['TIME_TO_UPDATE'] = true;
+        
+        // Load our manifests
+        foreach($this::__MANIFESTS__ as $file) {
+            // $index = count($this->manifest_raw_decode);
+            $this->manifest_raw_decode[] = get_json($file);
+        }
+
+        // extensions()::invoke("register_public_manifest", $this->manifest_raw_decode);
+
+        $final = new ManifestEntry();
+        foreach($this->manifest_raw_decode as $data) {
+            $final->addManifest(($data instanceof BSONDocument) ? doc_to_array($data) : $data);
+        }
+        $data = $final->getFinalizedData();
+        // foreach($final as $type => $data) {
+        //     (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
+        // }
+        return $data;
+    }
+    
+    public function oldbootstrapManifestData() {
         // TODO: remove TIME_TO_UPDATE global
         $GLOBALS['TIME_TO_UPDATE'] = true;
         $final = [];

@@ -14,16 +14,25 @@ class NewFormRequest extends HTMLElement {
     constructor() {
         super();
         this.validAutoSaveValues = ['false', 'element', 'autosave', 'fieldset', 'form'];
+        
         this.abort = () => {}; // Call to abort request
+        this.fileUploadFields = [];
+        this.fieldsRequiringFeedback = [];
+        this.feedbackTracker = [];
     }
 
     connectedCallback() {
         this.initSubmissionListeners();
-        if(!this.submitButton) this.setAttribute("autosave", "element");
+        if(!this.submitButton && !this.autoSave) this.autoSave = "form"; // Default forms without a save button to autosave
         this.addEventListener("submission", event => {
             const data = this.buildSubmission(event);
             this.submit(data, event);
         });
+
+    }
+
+    disconnectedCallback() {
+        this.removeFeedback()
     }
 
     get value() {
@@ -46,7 +55,12 @@ class NewFormRequest extends HTMLElement {
         api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));
 
         this.abort = api.abort;
-        await api.submit(data || this.buildSubmission({target: null}));
+        let result = {};
+        try{
+            result = await api.submit(data || this.buildSubmission({target: null}));
+        } catch(error) {
+            this.handleAsyncErrorEvent(error, event);
+        }
         this.abort = () => {};
     }
 
@@ -62,18 +76,21 @@ class NewFormRequest extends HTMLElement {
 
     initAutoSaveListeners() {
         function autoSaveListener(event) {
-            if(this.autoSave) this.dispatchEvent(new CustomEvent("submission", event));
+            if(this.autoSave) this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element: event.target || event.currentTarget || event.srcElement}}));
         }
         const elements = this.querySelectorAll(universal_input_element_query);
         for(const el of elements) {
+            if(["file", "files"].includes(el.type)) this.fileUploadFields.push(el);
             el.removeEventListener("change", autoSaveListener.bind(this));
             el.addEventListener("change", autoSaveListener.bind(this));
         }
     }
 
     buildSubmission(event) {
-        if(event.target === null) return this.value;
-        if(event.target === this.submitButton) return this.value;
+        this.fieldsRequiringFeedback = [];
+        let target = event.detail?.element || event.target || event.currentTarget || event.srcElement;
+        if(target === null) return this.value;
+        if(target === this.submitButton) return this.value;
         let submit = {};
         switch(this.autoSave) {
             case "none":
@@ -81,32 +98,124 @@ class NewFormRequest extends HTMLElement {
                 return;
             case "element":
             case "autosave":
-                submit[event.target.name || event.target.getAttribute("name")] = event.target.value;
+                submit[target.name || target.getAttribute("name")] = target.value;
+                this.fieldsRequiringFeedback.push(target);
                 break;
             case "fieldset":
-                const fieldset = event.target.closest("fieldset");
+                const fieldset = target.closest("fieldset");
                 for(const el of fieldset.querySelectorAll(universal_input_element_query)) {
-                    submit[el.name || event.target.getAttribute("name")] = el.value;
+                    submit[el.name || target.getAttribute("name")] = el.value;
                 }
+                this.fieldsRequiringFeedback.push(fieldset);
                 break;
             case "form":
             default:
                 submit = this.value;
+                this.fieldsRequiringFeedback.push(this);
                 break;
         }
-        return submit;
+        return (this.fileUploadFields.length === 0) ? submit : this.encodeFormData(submit);
+    }
+
+    encodeFormData(data) {
+        const form = new FormData();
+        form.append("json_payload", JSON.stringify(data));
+        if(typeof data !== "object") return form;
+        
+        for( const field in data ) {
+            const fields = this.querySelectorAll(`[name='${field}'][type='files'],[name='${field}'][type='file']`);
+            if(!fields) continue;
+            for( const el of fields ) {
+
+                for( const file of el.files){
+                    form.append(`${el.name}[]` || 'files[]', file);
+                    this.totalUploadSize += parseFloat(file.size);
+                }
+            }
+        }
+
+        return form;
     }
 
     handleAsyncSubmitEvent(e, submission = {}) {
+        if(this.feedback) {
+            this.applyFeedback(e);
+        }
         this.dispatchEvent(new Event("submit", {...e, submitter: submission.target || null}));
     }
 
     handleAsyncErrorEvent(e, submission = {}) {
+        this.removeFeedback(e);
         this.dispatchEvent(new Event("error", e));
     }
 
     handleAsyncDoneEvent(e, submission = {}) {
+        this.removeFeedback(e);
         this.dispatchEvent(new CustomEvent("done", e));
+    }
+
+    applyFeedback(event) {
+        this.fieldsRequiringFeedback.forEach(e => {
+            switch(e.tagName) {
+                case "FIELDSET":
+                case "FORM-REQUEST":
+                    this.createFeedback(e, 'center');
+                    break;
+                case "INPUT-SWITCH":
+                    this.createFeedback(e, "center");
+                    break;
+                default:
+                    this.createFeedback(e, 'top-right');
+            }
+        });
+    }
+
+    async createFeedback(target, type, padding = 5) {
+
+        const validTypes = ['top-right', 'center'];
+        if(!validTypes.includes(type)) type = validTypes[0];
+        target.setAttribute("disabled", "disabled");
+        target.ariaDisabled = true;
+        const offsets = get_offset(target);
+        console.log(offsets);
+        
+        const feedback = document.createElement("loading-spinner");
+        feedback.classList.add("form-request--feedback");
+        feedback.style.position = "absolute";
+        feedback.style.height = `1em`;
+        document.body.appendChild(feedback);
+        const feedbackSizing = get_offset(feedback);
+
+        await wait_for_animation(feedback, "feedback-add");
+
+        let x, y;
+        switch(type) {
+            case "center":
+                x = offsets.x + (offsets.w * .5) - (feedbackSizing.w * .5);
+                y = offsets.y + (offsets.h * .5) - (feedbackSizing.h * .5);
+                break;
+            default:
+                x = offsets.x + offsets.w - padding - feedbackSizing.w;
+                y = offsets.y + (feedbackSizing.h / 2);
+        }
+        
+        feedback.style.left = `${x}px`;
+        feedback.style.top  = `${y}px`;
+
+        this.feedbackTracker.push(feedback);
+    }
+
+    removeFeedback() {
+        this.feedbackTracker.forEach(e => {
+            e.parentNode.removeChild(e);
+        });
+        this.fieldsRequiringFeedback.forEach(async e => {
+            await wait_for_animation(e, "feedback-remove");
+            e.removeAttribute("disabled");
+            e.ariaDisabled = false;
+        });
+        this.feedbackTracker = [];
+        this.fieldsRequiringFeedback = [];
     }
 
     get autoSave() {
@@ -119,6 +228,18 @@ class NewFormRequest extends HTMLElement {
         if(!this.validAutoSaveValues.includes(value)) throw new TypeError(`"${value}" is not a valid property`);
         this.setAttribute("autosave", value);
     }
+
+    get feedback() {
+        return JSON.parse(this.getAttribute("feedback") || "true");
+    }
+
+    set feedback(fdbk) {
+        this.setAttribute("feedback", (['true', 'false'].includes(fdbk)) ? fdbk : "true");
+    }
+
+    attributeChangedCallback(attribute, old, newValue) {
+        console.log({attribute, old, newValue})
+    }
 }
 
-customElements.define("new-form-request", NewFormRequest);
+customElements.define("form-request", NewFormRequest);

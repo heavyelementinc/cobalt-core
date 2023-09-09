@@ -109,15 +109,15 @@ class Modal {
         }
         this.close_button(); // Add our close button
 
-        // Set a window 
-        window.router.modalState();
-        history.pushState({ page: 1, isModalState: true }, this.modalTitle || document.title, "");
-        window.addEventListener("popstate", e => {
-            if (this.container.parentNode !== null) this.close(e)
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-        }, { once: true })
+        // TODO: Allow modal windows to listen for popStates
+        // window.router.modalState();
+        // history.pushState({ page: 1, isModalState: true }, this.modalTitle || document.title, "");
+        // window.addEventListener("popstate", e => {
+        //     if (this.container.parentNode !== null) this.close(e)
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        //     e.stopImmediatePropagation();
+        // }, { once: true })
 
 
         // Handle animation stuff

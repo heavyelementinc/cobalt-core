@@ -388,6 +388,7 @@ class Render {
 
     function render_template_error($funct, $message, $lineNum, $strpos, $template) {
         header("HTTP/1.1 500 Internal Server Error");
+        header("Content-Type: text/html");
         // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
         $safe = htmlspecialchars($template);
         $safe = str_replace($funct,"<code class='error'>$funct</code>",$safe);

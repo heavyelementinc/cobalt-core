@@ -99,10 +99,11 @@ class AsyncMessageHandler {
     }
 
     async normalizeAsyncFetchError(data) {
-        this.status = data.response.status;
-        this.statusText = data.response.statusText;
-        this.uri = data.uri;
-        this.headers = this._getAsyncHeaders(data.response);
+        this.status = data.client.status;
+        this.statusText = data.client.statusText;
+        this.responseType = data.getHeader('Content-Type');
+        this.uri = data.action;
+        this.headers = data.responseHeaders;
         return data.resolved.fulfillment || data.resolved;
     }
 
@@ -174,12 +175,12 @@ class AsyncMessageHandler {
     }
 
     xredirect(params) {
-        router.location = params.message;
+        Cobalt.router.location = params.message;
     }
 
     xrefresh(params) {
         if("message" in params == false) params.message = "now";
-        if(params.message === "now") return router.location = router.location;
+        if(params.message === "now") return Cobalt.router.location = router.location;
         // this.statusMessage(`@refresh Refreshing page in ${value} seconds`);
         // setTimeout(() => {
         //     router.location = router.location

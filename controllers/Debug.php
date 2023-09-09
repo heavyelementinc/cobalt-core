@@ -6,6 +6,7 @@ use Cobalt\Style\SchemeGenerator;
 use Exceptions\HTTP\BadRequest;
 use Render\Render;
 use MikeAlmond\Color;
+use Routes\RouteGroup;
 
 class Debug extends \Controllers\Pages {
 
@@ -207,6 +208,7 @@ class Debug extends \Controllers\Pages {
                 ['bar' => 'Baz test',]
             ]
         ]);
+        
         add_vars([
             'title' => 'Form Validation Test',
             'document' => $document
@@ -216,8 +218,9 @@ class Debug extends \Controllers\Pages {
 
     function validate_test_form() {
         $validator = new \Validation\ExampleSchema();
-
         $result = $validator->__validate($_POST);
+        header("X-Status: @key $_POST[name] was validated");
+        update("#result", ['innerHTML' => $_POST['name']." was validated"]);
         // update('input[name="name"]:closest(new-form-request)', ['remove' => true]);
         return $result;
     }
@@ -612,5 +615,23 @@ class Debug extends \Controllers\Pages {
 
         update('#revalidate-confirmation', ['innerHTML' => 'You validated yourself']);
         return 1;
+    }
+
+    function new_route_group() {
+        $route_group = [
+            (new RouteGroup("main_navigation", ""))->render(),
+            (new RouteGroup("admin_panel", ""))->render(),
+            (new RouteGroup("advanced_settings", "", true))->render(),
+            (new RouteGroup("application_settings", ""))->render()
+        ];
+
+        $rt = new RouteGroup("presentation_settings", "");
+        $rt->setExcludeWrappers(true);
+        $route_group[] = implode($rt->render());
+        add_vars([
+            'title' => 'Route Group Test',
+            'main' => implode("",$route_group),
+        ]);
+        return set_template("/parts/main.html");
     }
 }

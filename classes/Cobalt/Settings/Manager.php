@@ -9,12 +9,13 @@ use Iterator;
 class Manager implements ArrayAccess, Iterator {
     
     function __construct($values) {
-        $this->index = 0;
+        // $this->index = 0;
         if(gettype($values) !== "array") throw new Exception("Values are not an array");
         $this->__values = $values;
     }
 
     private $__values = [];
+    private $index = 0;
 
     function __get($name) {
         if(!isset($this->__values[$name])) throw new Exception ("$name is not a recognized setting");
@@ -39,7 +40,8 @@ class Manager implements ArrayAccess, Iterator {
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {
-        return $this->__values[$offset] = $value;
+        // return 
+        $this->__values[$offset] = $value;
     }
 
     public function offsetUnset(mixed $offset): void {
