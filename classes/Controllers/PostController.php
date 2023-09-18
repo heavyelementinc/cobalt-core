@@ -231,7 +231,7 @@ abstract class PostController extends Controller {
 
     function RSS_feed() {
         if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
-        $query = $this->getParams($this->postMan, ['published' => true], [], ['sort', 'page'], ['sort' => ['publicationDate' => -1]]);
+        $query = $this->getParams($this->postMan, ['published' => true], [], ['sort', 'page'], ['sort' => ['publicationDate' => -1], 'limit' => 10]);
         $docs = $this->postMan->findAllAsSchema(...$query);
 
         header('Content-Type: application/rss+xml; charset=utf-8');

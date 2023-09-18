@@ -68,6 +68,9 @@ class PostSchema extends \Validation\Normalize {
                 'display' => function ($val) {
                     return str_replace(['<a',"</a"], ['<strong','</strong'], from_markdown($this->{"excerpt"}));
                 },
+                'attrs' => function ($val) {
+                    return substr($val, 0, $this->soft_char_cap);
+                }
             ],
             'postType' => [
                 'get' => fn ($val) => $val ?? "Posts",
