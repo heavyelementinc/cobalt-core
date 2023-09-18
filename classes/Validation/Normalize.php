@@ -100,6 +100,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'lowercase',  // Lower cases the entire string
         'embed',      // Convert value into an HTML tag based on metadata or file extension
         'last',       // Select the last element of an array
+        'strip',      // Converts text to markdown and then strips the tags. Should give plain text.
         'gmt',
         'immutable',
     ];
@@ -623,6 +624,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             return $this->__dataset[$field];
         }
         return '';
+    }
+
+    private function __proto_strip($val, $field) {
+        return markdown_to_plaintext($val);
     }
 
     private function __proto_gmt($val, $field) {

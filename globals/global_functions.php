@@ -560,6 +560,11 @@ function from_markdown(?string $string, bool $untrusted = true) {
     );
 }
 
+function markdown_to_plaintext(?string $string) {
+    $md = from_markdown($string);
+    return strip_tags($md);
+}
+
 /**
  * random_string
  *

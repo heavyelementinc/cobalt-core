@@ -69,7 +69,7 @@ class PostSchema extends \Validation\Normalize {
                     return str_replace(['<a',"</a"], ['<strong','</strong'], from_markdown($this->{"excerpt"}));
                 },
                 'attrs' => function ($val) {
-                    return $val ?? $this->__dataset['body'];
+                    return markdown_to_plaintext($val ?? $this->__dataset['body.strip']);
                 }
             ],
             'postType' => [
