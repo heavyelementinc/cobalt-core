@@ -5,9 +5,11 @@
         <link>https://{{app.domain_name}}</link>
         <description>{{app.Posts_rss_feed_description}}</description>
         <image>
-            <url>https://{{app.domain_name}}</url>
+            <url>https://{{app.domain_name}}{{app.logo.thumb.filename}}</url>
             <title>{{app.Posts_rss_feed_name}}</title>
             <link>https://{{app.domain_name}}</link>
+            <width>{{app.logo.thumb.meta.width}}</width>
+            <height>{{app.logo.thumb.meta.height}}</height>
         </image>
         <language>en-us</language>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
