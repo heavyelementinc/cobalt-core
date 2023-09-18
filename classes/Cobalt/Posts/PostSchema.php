@@ -45,7 +45,7 @@ class PostSchema extends \Validation\Normalize {
                 'display' => fn ($val) => $this->get_date($val, 'relative'),
             ],
             'publicationTime' => [
-                'get' => fn () => $this->get_date($this->__dataset->publicationDate, "24-hour"),
+                'get' => fn () => $this->get_date($this->__dataset['publicationDate'], "24-hour"),
                 'set' => false,
             ],
             'body' => [],
@@ -79,6 +79,14 @@ class PostSchema extends \Validation\Normalize {
                     $val = $this->default_image;
                     if(!$val) return "";
                     return "style=\"background-image:url('".$val."'); background-position: ".$this->{'alignment.position'}."\" bg-splash";
+                },
+            ],
+            'rss_attachment' => [
+                'attrs' => function ($val) {
+                    $this->initFS();
+                    $results = $this->fs->findOne(['for' => $this->_id],['sort' => ['order' => 1]]);
+                    if(!$results) return "";
+                    return "url=\"http://".app("domain_name")."$this->public_link/attachment/$results->filename\" length=\"".$results->length."\" type=\"".$results->meta->mimetype."\"";
                 }
             ],
             'no_image' => [

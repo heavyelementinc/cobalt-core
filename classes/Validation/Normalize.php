@@ -92,6 +92,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'json',       // Converts the data to JSON
         'json_pretty',// Pretty prints JSON
         'display',    // Display lets us pretty-fy output in our schema
+        'attrs',      // Returns HTML attributes
         'length',     // The length of a string, the number of elements in an array
         'md',         // Parses markdown into HTML
         'capitalize', // Capitalizes the first letter of a string
@@ -673,6 +674,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             return $this->__schema[$field]['valid'];
         }
         return [];
+    }
+
+    private function __proto_attrs($val, $field) {
+        if(!isset($this->__schema[$field]['attrs'])) return $val;
+        return $this->__schema[$field]['attrs']($val);
     }
 
     /** Returns a list of HTML options */
