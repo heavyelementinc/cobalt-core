@@ -26,6 +26,11 @@ class PostSchema extends \Validation\Normalize {
                     $man = new UserCRUD();
                     $author = $man->findOneAsSchema(['_id' => new ObjectId($val)]);
                     return $author->nametag;
+                },
+                'attrs' => function ($val) {
+                    $man = new UserCRUD();
+                    $author = $man->findOneAsSchema(['_id' => new ObjectId($val)]);
+                    return $author->display_name;
                 }
             ],
             'title' => [],

@@ -3,7 +3,7 @@
             <link>https://{{app.domain_name}}{{doc.public_link}}</link>
             <guid>https://{{app.domain_name}}{{doc.public_link}}</guid>
             <description>{{doc.excerpt}}</description>
-            <author>{{doc.author.display}}</author>
+            <author>{{doc.author.attrs}}</author>
             <pubDate>{{doc.publicationDate.gmt}}</pubDate>
             <enclosure {{!doc.rss_attachment.attrs}} />
         </item>
