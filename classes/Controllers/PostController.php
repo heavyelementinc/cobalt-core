@@ -127,12 +127,16 @@ abstract class PostController extends Controller {
 
         $og_image = "";
         $og_title = __APP_SETTINGS__ . "";
-        $og_body = __APP_SETTINGS__['app_name'] . " news and updates feature the kinds of";
+        $og_body = "Find " . count($docs) ."+ articles at ". __APP_SETTINGS__['app_name'] . ".";
 
         $posts = "";
+        $first_item = null;
 
         foreach($docs as $index => $doc) {
-            if($index === 0) $doc->prominent = true;
+            if($index === 0) {
+                $doc->prominent = true;
+                $first_item = $doc;
+            }
             if(isset($_SESSION['Posts_display_type'])) $doc->prominent = $_SESSION['Posts_display_type'];
             $posts .= view($doc->getTemplate('blurb'), [
                 'post' => $doc,
@@ -145,6 +149,8 @@ abstract class PostController extends Controller {
             'title' => $this->postMan->get_public_name(),
             'posts' => $posts,
             'controls' => $this->getPaginationLinks(true),
+            'first' => $first_item,
+            'og_template' => '/posts/parts/og_landing.html',
         ]);
 
         set_template((new PostManager())->getTemplate('public'));
@@ -182,7 +188,8 @@ abstract class PostController extends Controller {
             'title' => htmlspecialchars($post->title),
             'unpublished' => $unpublished,
             'post' => $post,
-            'edit' => $edit
+            'edit' => $edit,
+            'og_template' => '/posts/parts/og_individual.html'
         ]);
 
         set_template((new PostManager())->getTemplate('post'));
