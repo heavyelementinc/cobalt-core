@@ -163,12 +163,22 @@ class RadioGroup extends HTMLElement {
     }
 
     get value() {
+        this.ariaInvalid = false;
         const node = this.querySelector("[type='radio']:checked");
+        if(!node) {
+            if(this.props.required || this.getAttribute("required") !== "false") {
+                this.ariaInvalid = true;
+                throw new Error("This field is required");
+            }
+            return "";
+        }
         return node.value;
     }
 
     set value(val) {
+        this.ariaInvalid = false;
         const node = this.querySelector(`[type='radio'][value='${val}']`);
+        if(!node && !val) return;
         if(!node) throw new Error("No button with specified value");
         node.checked = true;
     }
