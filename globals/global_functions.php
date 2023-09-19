@@ -541,23 +541,46 @@ function get_temp_path($path, $key) {
  */
 function from_markdown(?string $string, bool $untrusted = true) {
     if(!$string) return "";
+
+    // [$string, $placeholders, $replacements] = parse_embeds($string);
+
     $md = new ParsedownExtra();
     $md->setSafeMode($untrusted);
+    $parsed = $md->text($string);
+
+    $parsed = youtube_embedder($parsed);
+    // $ytMatch = ["/&lt;img.*src=['\"].*(youtube).*v=[a-zA-Z0-9.*['\"].*&gt;/", "/<img.*src=['\"].*(youtube).*['\"].*>/"];
+
+    // foreach($ytMatch as $url) {
+    //     $matches = [];
+    //     preg_replace($url, $parsed, $matches);
+
+    //     $parsed = str_replace($match[0], , $parsed);
+    // }
+
     // Implmentented reddit's ^ for superscript. Only works one word at a time.
     return preg_replace(
         [
             "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
             "/\^(\w)/",
+            
             // "/<img src=['\"]()['\"])/"
             // "/&lt;a(\s*[='\(\)]*.*)&gt;(.*)&lt;\/a&gt;/",
         ],
         [
             "<sup>$1</sup>",
             "<sup>$1</sup>",
+
             // "<a$1>$2</a>",
         ],
-        $md->text($string)
+        $parsed
     );
+}
+
+function youtube_embedder($html){
+    $regExp = "/!youtube:([^#&?<>]*)/";
+    $match = preg_replace($regExp, '<figure class="content-embed"><iframe width="560" height="315" src="https://www.youtube.com/embed/$1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></figure>', $html);
+    return $match;
 }
 
 function markdown_to_plaintext(?string $string) {

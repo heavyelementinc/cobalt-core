@@ -351,8 +351,8 @@
     "API_contact_form_enabled": {
         "default": false,
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Enable Contact Form",
             "type": "input-switch"
         },
@@ -364,8 +364,8 @@
     "Contact_form_interface": {
         "default": "panel",
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Contact Form Backend",
             "type": "select"
         },
@@ -381,8 +381,8 @@
     "Contact_form_submission_throttle": {
         "default": 500,
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Minumum number of seconds between contact form submissions (based on IP address)",
             "type": "input"
         },
@@ -394,8 +394,8 @@
     "Contact_form_success_message": {
         "default": "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Contact Form Success Message",
             "type": "input"
         },
@@ -407,13 +407,122 @@
     "Contact_form_notify_on_new_submission": {
         "default": false,
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Send admins a notification when new notifications are received",
             "type": "input-switch"
         },
         "validate": {
             "type": "boolean"
+        }
+    },
+
+    "PublicContact_name": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Name</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_phone": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Phone Number</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_fax": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Fax Number</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_email": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Email Address</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_street_address1": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Street Address 1</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_street_address2": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Street Address 2</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_state": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>State</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_zip": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Zip Code</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_country": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Country</b>",
+            "type": "input"
+        },
+        "validate": {
+            
         }
     },
 
