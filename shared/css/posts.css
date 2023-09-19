@@ -108,9 +108,13 @@
 article.cobalt-post, a.cobalt-post:not(.cobalt-post--blurb) {
     max-width:100%;
     padding: 0;
-    width: 100%;
+    width: 120ch;
     margin: 2em auto;
     padding: 0 0 1em;
+}
+
+.cobalt-post figure {
+    text-align: center;
 }
 
 .cobalt-post--splash {
@@ -206,6 +210,13 @@ article.cobalt-post + article.cobalt-post {
     .cobalt-posts--public-index a.cobalt-post--blurb {
         width:100%;
         height: 50vh;
+    }
+
+    .cobalt-post :is(figure, figure iframe) {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
     }
     /* .cobalt-posts--public-index .cobalt-post--blurb.cobalt-post--prominent .cobalt-post--header {
         margin-bottom: 1em;
