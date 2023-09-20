@@ -116,7 +116,11 @@ class RouteGroup {
         $grp = $groups[$this->groupName];
         array_push($grp, ...$this->externalLinkCache);
         uasort($grp,
-            fn ($a, $b) => $a['anchor']['order'] ?? $a['navigation'][$this->groupName]['order'] ?? $a['nat_order'] - $b['anchor']['order'] ?? $b['navigation'][$this->groupName]['order'] ?? $b['nat_order']
+            function ($a, $b) {
+                $a_val = $a['navigation'][$this->groupName]['order'] ?? $a['anchor']['order'] ?? $a['nat_order'];
+                $b_val = $b['navigation'][$this->groupName]['order'] ?? $b['anchor']['order'] ?? $b['nat_order'];
+                return $a_val - $b_val;
+            }
         );
         return $grp;
     }

@@ -123,6 +123,11 @@ class Route {
             'type' => 'private',
         ];
         $nat_order = count($GLOBALS['ROUTE_TABLE'][$router_table_address][$type]);
+        // if(key_exists($regex, $GLOBALS['ROUTE_TABLE'][$router_table_address][$type])) {
+        //     $nat_order = $GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex]['nat_order'];
+        //     // Let's explicitly delete the previously created route so there's no ambiguity.
+        //     unset($GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex]);
+        // }
         /** Store our route data in the full route table. */
         $GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex] = [
             // Original pathname
@@ -183,7 +188,7 @@ class Route {
             $group = $navItem;
             if(gettype($group) === "array") $group = $index;
             if(!key_exists($group,$ROUTE_GROUPS)) $ROUTE_GROUPS[$group] = [];
-            $ROUTE_GROUPS[$group][] = &$value;
+            $ROUTE_GROUPS[$group][$value['real_regex']] = &$value;
         }
     }
 
