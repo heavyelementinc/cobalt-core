@@ -75,7 +75,7 @@ class CobaltScrollManager {
                 e.style.backgroundSize = "100lvh";
                 e.style.setProperty("-webkit-background-size", "140lvh");
                 e.style.backgroundAttachment = "scroll";
-                e.style.backgroundColor = "red";
+                // e.style.backgroundColor = "red";
                 // e.style.backgroundPosition 
             }
             this.parallaxElements.push({
