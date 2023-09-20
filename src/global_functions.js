@@ -751,6 +751,7 @@ function reflow() {
 }
 
 function iOS() {
+    if("platform" in navigator === false) return (navigator.userAgent.includes("Mac") && "ontouchend" in document);
     return [
       'iPad Simulator',
       'iPhone Simulator',
@@ -758,7 +759,7 @@ function iOS() {
       'iPad',
       'iPhone',
       'iPod'
-    ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    ].includes(navigator.platform);
 }
 
 function imagePromise(url) {

@@ -23,8 +23,7 @@
 
 class CobaltScrollManager {
     constructor(querySelector = null, modifier = 2) {
-        // Let's not do any parallax on iOS.
-        if(iOS()) return this;
+        this.useiOSWorkaround = iOS();
 
         this.allowUpdate = false; // The bool that controls the animation loop
         this.simultaneousDelayValue = 50;
@@ -33,6 +32,14 @@ class CobaltScrollManager {
         
         this.parallaxElements = []; // The elements to be updated
         this.modifier = modifier;
+
+        if(this.useiOSWorkaround) {
+            // Let's warn to the console that we've detected iOS
+            console.warn("Warning: you're using a browser that does not properly support parallax scrolling. Workaround may cause undocumented behavior");
+            this.modifier = 4;
+            // console.log({scrollModifier: this.modifier});
+            this.iOSWorkaroundViewportHeight = cssToPixel("30vh");
+        }
 
         this.debug = app("Parallax_enable_debug") ?? false;
 
@@ -63,11 +70,19 @@ class CobaltScrollManager {
         for(const e of nodes) {
             // Let's store our elements in the parallaxElements property
             const mode = this.getMode(e.getAttribute("parallax-mode"));
+            const offsets = get_offset(e);
+            if(this.useiOSWorkaround) {
+                e.style.backgroundSize = "100lvh";
+                e.style.setProperty("-webkit-background-size", "140lvh");
+                e.style.backgroundAttachment = "scroll";
+                e.style.backgroundColor = "red";
+                // e.style.backgroundPosition 
+            }
             this.parallaxElements.push({
                 mode,
                 speed: Math.abs(e.getAttribute("parallax-speed") ?? this.modifier),
                 offset: e.getAttribute("parallax-offset") ?? (this.getPageOffset(e)) * -1,
-                dimensions: get_offset(e),
+                dimensions: offsets,
                 element: e
             });
             this[mode + "Init"](e, this.parallaxElements[this.parallaxElements.length - 1]);
@@ -188,6 +203,10 @@ class CobaltScrollManager {
     parallaxBackground(element, data) {
         let x = element.getBoundingClientRect().top / (element.getAttribute("parallax-speed") ?? this.modifier);
         let y = Math.round(x * 100) / 100;
+        if(this.useiOSWorkaround) {
+            y += element.scrollTop;
+            y -= this.iOSWorkaroundViewportHeight;
+        }
         // console.log({x,y,data});
         (data.offset ?? 0)
         element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${y}px`;
