@@ -89,11 +89,30 @@ class AsyncFetch extends EventTarget {
         return formData;
     }
 
+    /**
+     * 
+     * @param {ProgressEvent} event 
+     * @param {XMLHttpRequest} client 
+     * @param {function} resolve 
+     * @returns {void}
+     * @resolves the fetch request's resolved details (if in JSON)
+     * @emits done
+     */
     _onload(event, client, resolve) {
         this.response = client.response;
+        if(client.status !== 200) {
+            const nonOkResponse = this.handleNonOkResponse(event, client, resolve);
+            if(nonOkResponse === true) return true;
+        }
         // Parse the response data
-        if(this.getHeader('Content-Type').match(/json/i)) this.resolved = JSON.parse(client.response);
-        else this.resolved = client.response;
+        if(this.getHeader('Content-Type')?.match(/json/i)) this.resolved = JSON.parse(client.response);
+        else {
+            try {
+                JSON.parse(client.response);
+            } catch (e) {
+                this.resolved = client.response;
+            }
+        }
 
         if(client.status >= 299) {
             return this._communicatedError(event);
@@ -110,6 +129,22 @@ class AsyncFetch extends EventTarget {
         }));
         resolve(this.resolved.fulfillment || this.resolved);
         this.reject = null;
+    }
+
+    /**
+     * 
+     * @param {ProgressEvent} event 
+     * @param {XMLHttpRequest} client 
+     * @param {function} resolve 
+     * @return {true} do not call resolve without also returning true from this function!
+     */
+    handleNonOkResponse(event, client, resolve) {
+        switch(client.status) {
+            case 204:
+                this.responseHeaders['Content-Type'] = "none";
+                return false;
+        }
+        return false;
     }
 
     _onreadystatechange(statechange) {
