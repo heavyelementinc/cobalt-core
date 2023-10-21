@@ -1111,6 +1111,13 @@ function schema_group_element($tag, $attributes, $label = "") {
     return "<$tag$attributes>";
 }
 
+/** Convert seconds to pretty string */
+function prettify_seconds(int $seconds) {
+    $date = new DateTime("00:00:00");
+    $date->modify("+ $seconds seconds");
+    return $date->format("g\h i\m");// . "h " . $date->format("i") . "m";
+}
+
 /** Convert cents to dollars with decimal fomatting (not prepended by a "$" dollar sign)
  * @param int $cents 
  * @return string the dollar value as a string

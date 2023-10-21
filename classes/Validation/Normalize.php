@@ -68,6 +68,7 @@
 namespace Validation;
 
 use ArrayAccess;
+use Countable;
 use Exception;
 use Iterator;
 use JsonSerializable;
@@ -77,7 +78,7 @@ use \Validation\Exceptions\NoValue;
 use \Validation\Exceptions\ValidationIssue;
 use \Validation\Exceptions\ValidationFailed;
 
-abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator, ArrayAccess {
+abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator, ArrayAccess, Countable {
     protected $__schema = [];
     public $__dataset = [];
     protected $__index = [];
@@ -92,6 +93,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'json',       // Converts the data to JSON
         'json_pretty',// Pretty prints JSON
         'display',    // Display lets us pretty-fy output in our schema
+        'class',      // A definable prototype function that is meant for use in attributes
         'attrs',      // Returns HTML attributes
         'length',     // The length of a string, the number of elements in an array
         'md',         // Parses markdown into HTML
@@ -602,14 +604,19 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         // If $pos is false we know there's no prototype
         if ($pos === false) return false;
         $proto = substr($name, $pos += 1); // $proto = "options"
-        if (!in_array($proto, $this->__prototypes)) return false;
-        return [substr($name, 0, $pos - 1), $proto]; // ['value', 'options']
+        $field = substr($name, 0, $pos - 1);
+        if (in_array($proto, $this->__prototypes)) return [$field, $proto]; // ['value', 'options']
+        if (key_exists($field, $this->__schema) && key_exists($proto, $this->__schema[$field])) return [$field, $proto];
+        return false;
     }
 
 
     private function __execute_prototype($value, $fieldname, $prototype) {
         $method_name = "__proto_$prototype";
-        if (method_exists($this, $method_name)) return $this->{$method_name}($value, $fieldname);
+        $got = $value;
+        if(isset($this->__schema[$fieldname]['get'])) $got = $this->__schema[$fieldname]['get']($value, $fieldname);
+        if (method_exists($this, $method_name)) return $this->{$method_name}($got, $fieldname, $value);
+        if (key_exists($fieldname, $this->__schema) && key_exists($prototype, $this->__schema[$fieldname])) return $this->__schema[$fieldname][$prototype]($got, $fieldname, $value);
         return "";
         // if (isset($this->__schema[$fieldname][$prototype])) {
         //     return $this->__schema[$fieldname][$prototype]($value, $fieldname);
@@ -660,6 +667,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         }
         if($val instanceof \MongoDB\BSON\UTCDateTime) return $this->get_date($val, 'verbose');
         return $val;
+    }
+
+    private function __proto_class($val, $field) {
+        if(!isset($this->__schema[$field]['class'])) return "";
+        return $this->__schema[$field]['class']($this->{$field}, $field);
     }
     
     private function __proto_display_array_items($values, $valid) {
@@ -977,5 +989,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         }
 
         return $mutant;
+    }
+
+    /** COUNTABLE */
+
+    public function count():int {
+        return count($this->__dataset);
     }
 }
