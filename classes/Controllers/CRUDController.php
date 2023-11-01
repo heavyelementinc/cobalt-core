@@ -211,7 +211,7 @@ abstract class CRUDController extends Controller {
         );
         Route::get("$mutant/edit/{id}/", "$class@edit",  array_merge(
             $permissions['update'],
-            $opts['new']['options'] ?? []
+            $opts['edit']['options'] ?? []
         ));
         // Route::get("$mutant/")
     }

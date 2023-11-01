@@ -174,11 +174,11 @@ class AsyncMessageHandler {
         }
     }
 
-    xredirect(params) {
+    xredirect(params) { // ✅
         Cobalt.router.location = params.message;
     }
 
-    xrefresh(params) {
+    xrefresh(params) { // ✅
         if("message" in params == false) params.message = "now";
         if(params.message === "now") return Cobalt.router.location = router.location;
         // this.statusMessage(`@refresh Refreshing page in ${value} seconds`);
@@ -195,7 +195,7 @@ class AsyncMessageHandler {
         });
     }
     
-    xmodal(params) {
+    xmodal(params) {  // ✅
         let modalContainer;
         try{
             parsed = JSON.parse(params.message.trim());
@@ -214,7 +214,7 @@ class AsyncMessageHandler {
         modalContainer.draw();
     }
 
-    async xconfirm() {
+    async xconfirm() {  // ✅
         this.errorHandled = true;
         let confirm = new FetchConfirm(this.responseBody, this.fetch);
         result = await confirm.draw();

@@ -344,7 +344,7 @@ class UserSchema extends \Validation\Normalize {
 
     function displayAvatar($val) {
         $link = $this->avatar;
-        $meta = $val['thumb']['meta'];
+        $meta = $val['thumb']['meta'] ?? ['width' => 0, 'height' => 0];
         $img = "<img src='$link' class='cobalt-user--avatar' width='$meta[width]' height='$meta[height]'>";
         return $img;
     }

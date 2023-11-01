@@ -90,6 +90,7 @@ function say($str, $type = "normal", $formatted = false) {
  * @return string 
  */
 function fmt($str, $type = "normal", $back = "normal") {
+    if(!$GLOBALS['fmt_allowed']) return $str;
     $fmt = "";
     $arr = [
         'b' => '1m'

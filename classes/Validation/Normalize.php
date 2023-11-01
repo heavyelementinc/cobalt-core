@@ -252,6 +252,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                     $result[$operator] = array_merge($result[$operator], $r[$operator]);
             }
         }
+        
         return $result;
     }
 

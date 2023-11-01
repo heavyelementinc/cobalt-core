@@ -225,7 +225,7 @@ class Modal {
             // UNIMPLEMENTED What color should the button be?
             let color = c.color | "var(--project-gray)";
             let classes = "modal-button";
-            if (c.dangerous) classes = " modal--button-dangerous";
+            if (c.dangerous) classes = "modal--button-dangerous";
             // Create our button element
             // We use actual HTML button elements for accessibility and tab indexing
             const element = document.createElement("button");

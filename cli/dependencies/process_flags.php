@@ -36,6 +36,10 @@ $flags = [
     '--verbose' => [
         'description' => 'Sets the verbosity level of the CLI. Use digits 0 through 2',
         'exe' => '__verbosity',
+    ],
+    '--plain-output' => [
+        'description' => 'Prevents the fmt() function from modifying output',
+        'exe' => '__plain_output'
     ]
 ];
 
@@ -65,6 +69,10 @@ $GLOBALS['cli_verbosity'] = 0;
 function __verbosity($number){
     $GLOBALS['cli_verbosity'] = (int)$number;
     log_item("Verbosity set to $number");
+}
+$GLOBALS['fmt_allowed'] = true;
+function __plain_output() {
+    $GLOBALS['fmt_allowed'] = false;
 }
 
 __process_flags();

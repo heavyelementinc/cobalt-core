@@ -135,7 +135,6 @@ class Router {
                 return [$preg_pattern, $directives];
             }
         }
-
         if ($this->current_route === null) throw new NotFound("No route discovered.");
     }
 

@@ -1,3 +1,9 @@
+a.custom-element-edit-link {
+    color: inherit;
+    font-size: .7em;
+    vertical-align: super;
+}
+
 async-button{
     transition: padding 1s;
 }

@@ -54,7 +54,7 @@ class FileSystem {
         $mime = mime_content_type($stream);
         header("Content-Type: $mime");
         header("Content-Length: $metadata->length");
-        if(isset($_GET['nocache'])) header("Cache-Control: no-cache");
+        // if(isset($_GET['nocache'])) header("Cache-Control: no-cache");
 
         fpassthru($stream);
 

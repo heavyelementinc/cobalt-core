@@ -1384,6 +1384,14 @@ function async_cobalt_command($command, $context = true, $log = "/dev/null") {
     return $pid;
 }
 
+function cobalt_command($command, $context = true, $stripControlCharacters = false) {
+    $shell = __ENV_ROOT__ . "/core.sh";
+    if ($context) $shell = __APP_ROOT__ . "/cobalt.sh";
+    if($stripControlCharacters) $shell .= " --plain-output";
+    $result = shell_exec("sh $shell $command");
+    return $result;
+}
+
 function plural($number, string $suffix = "s") {
     if ($number == 1) return "";
     return $suffix;
@@ -1638,8 +1646,44 @@ if(!function_exists("log_item")) {
     }
 }
 
+/**
+ * Implemented values
+ *   value
+ *   innerHTML
+ *   outerHTML
+ *   invalid
+ *   remove - will remove any single element that matches query OR a node list
+ *   message - will provide a message to the end user. It will look like a ValidationIssue
+ *   src - update the src attribute for an img tag
+ *   attribute - update arbitrary attribute
+ *   attributes - update a list of attributes
+ *   style - update a list of styles
+ *   
+ * 
+ * @param string $query 
+ * @param array $value 
+ * @return void 
+ */
 function update(string $query, array $value) {
     global $context_processor;
     if($context_processor instanceof ApiHandler === false) return;
     $context_processor->update_instructions[] = ['target' => $query, ...$value];
+}
+
+/**
+ * Supply a custom content group name and this function will return a hyperlink
+ * for authorized user accounts where they can edit content.
+ * 
+ * Use this to manually place an edit link for groups of like content.
+ * @param string $group 
+ * @return string 
+ * @throws Exception 
+ */
+function edit_link($group) {
+    try {
+        if(!has_permission("Customizations_modify", null, null, false)) return "";
+    } catch (\Exceptions\HTTP\Unauthorized $e) {
+        return "";
+    }
+    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i></a>";
 }

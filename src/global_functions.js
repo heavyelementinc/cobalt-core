@@ -176,12 +176,12 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous
     });
 }
 
-async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "", event = null }) {
+async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "", type = "text", event = null }) {
     if (pattern) pattern = ` pattern="${pattern}" required`;
     if (value) value = ` value="${value.replace("\"", "&quot;")}"`;
     return new Promise((resolve, reject) => {
         const modal = new Modal({
-            body: `<p>${message}</p><input type="text" name="modalInputField"${pattern}${value}>`,
+            body: `<p>${message}</p><input type="${type}" name="modalInputField"${pattern}${value}>`,
             classes: "modal-window--input",
             event: event,
             chrome: {

@@ -27,6 +27,15 @@ class AsyncFetch extends EventTarget {
         this.data = "";
         this.response = null; // The raw response from the fetch request
         this.resolved = null; // The resolved data from the request
+        this.headerDirectiveMap = {
+            'x-status': XStatus,
+            'x-modal': XModal,
+            'x-redirect': XRedirect,
+            'x-refresh': XRefresh,
+            'x-confirm': XConfirm,
+            'x-reauthorization': XReauth,
+        }
+        this.headerReactions = {};
     }
 
     submit(data = {}) {
@@ -100,6 +109,8 @@ class AsyncFetch extends EventTarget {
      */
     _onload(event, client, resolve) {
         this.response = client.response;
+        this.setResponseHeaders(client.getAllResponseHeaders());
+        this.dispatchHeaderDirectives();
         if(client.status !== 200) {
             const nonOkResponse = this.handleNonOkResponse(event, client, resolve);
             if(nonOkResponse === true) return true;
@@ -114,11 +125,11 @@ class AsyncFetch extends EventTarget {
             }
         }
 
-        if(client.status >= 299) {
+        if(client.status >= 300) {
             return this._communicatedError(event);
         }
 
-        new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
+        // new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
 
         this.dispatchEvent(new CustomEvent("done", {
@@ -163,6 +174,7 @@ class AsyncFetch extends EventTarget {
 
     _onerror(error) {
         const client = this._getClient(error);
+        console.warn("There was an error with the XHR request");
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
         this.reject(error);
@@ -187,6 +199,7 @@ class AsyncFetch extends EventTarget {
 
     _communicatedError(err) {
         const client = this._getClient(err);
+        // this.
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
         this.reject(client);
@@ -200,6 +213,10 @@ class AsyncFetch extends EventTarget {
         return await this.submit();
     }
 
+    setRequestHeader(name, value) {
+        this.requestHeaders[name] = value;
+    }
+
     setResponseHeaders(value) {
         this.responseHeaders = {};
         for(const header of value.split("\r\n")) {
@@ -211,84 +228,20 @@ class AsyncFetch extends EventTarget {
         return this.responseHeaders;
     }
 
+    dispatchHeaderDirectives() {
+        for(const headerName in this.responseHeaders) {
+            if(headerName in this.headerDirectiveMap === false) continue;
+            this.headerReactions[headerName] = new this.headerDirectiveMap[headerName](this.responseHeaders[headerName], headerName, this);
+            this.headerReactions[headerName].execute();
+
+        }
+    }
+
     getHeader(name) {
         return this.responseHeaders[name.toLowerCase()] || null;
     }
 
 }
-
-// async submit(data = "") {
-//     this.data = data;
-//     return new Promise(async (resolve, reject) => {
-//         // Let's set up our request so it's cancelable
-//         this.reject = reject;
-//         this.abortController = new AbortController();
-
-//         const submit = new Event("submit"); // Prepare the submit event
-//         this.dispatchEvent(submit, {detail: this}); 
-//         if(submit.defaultPrevented) {
-//             // Cancel the submit if the event was prevented
-//             this.dispatchEvent(new CustomEvent("aborted", {detail: this}));
-//             return false;
-//         } 
-        
-//         // Prepare our fetch object
-//         let send = {
-//             method: this.method,
-//             credentials: 'include',
-//             cache: this.cache,
-//             headers: {
-
-//                 ...this.requestHeaders
-//             },
-//             signal: this.abortController.signal
-//         }
-//         if(this.method !== "GET") send.body = (this.asJSON) ? JSON.stringify(data) : data;
-//         try {
-//             this.response = await fetch(this.action, send);
-//         } catch (error) {
-//             console.log(error);
-//             this.response = error;
-//         }
-
-//         // Parse the response data
-//         if(this.response.headers.get('Content-Type').match(/json/i)) this.resolved = await this.response.json()
-//         else this.resolved = await this.response.text();
-
-//         if(this.response.ok === false) {
-//             new AsyncMessageHandler(this, "AsyncFetch", "error"); // Process headers
-//             new AsyncUpdate(this); // Handle update instructions
-            
-//             // If the result of our request has an error, process the error
-//             this.dispatchEvent(new Event("error"), {
-//                 detail: {
-//                     fulfillment: this.resolved.fulfillment || this.resolved,
-//                     resource: this
-//                 }
-//             });
-//             reject(this.resolved.fulfillment || this.resolved);
-            
-//             return;
-//         }
-        
-//         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
-//         new AsyncUpdate(this); // Handle update instructions
-
-//         this.dispatchEvent(new CustomEvent("done"), {
-//             detail: {
-//                 fulfillment: this.resolved.fulfillment || this.resolved,
-//                 resource: this
-//             }
-//         });
-
-//         // Resolve this promise
-//         resolve(this.resolved.fulfillment || this.resolved);
-
-//         // Clean up
-//         this.reject = null;
-//         this.abortController = null;
-//     });
-// }
 
 async function get(url) {
     const api = new AsyncFetch(url, "GET", {});
@@ -392,6 +345,10 @@ class AsyncUpdate {
         el.addEventListener("focusin", e => messageElement.dispatchEvent(new Event("click", e)), {once: true});
     }
 
+    fn_src(el, value, instructions) {
+        el.src = value;
+    }
+
     fn_attribute(el, value, instructions) {
         this.fn_attributes(el, value, instructions);
     }
@@ -435,4 +392,179 @@ function appendElementInformation(element, value, instructions) {
     document.body.appendChild(el);
     wait_for_animation(el, "form-request--issue-fade-in");
     return el;
+}
+
+class HeaderDirective {
+    constructor(headerContent, name, xhrRequest) {
+        this.props = {
+            content: null,
+            rawContent: headerContent,
+            method: xhrRequest.method,
+            action: xhrRequest.action,
+            name,
+            tag: null,
+            tagArguments: [],
+            xhrRequest,
+        };
+        // this.content = headerContent;
+        this.parseTag();
+    }
+
+    get content() {
+        return this.props.content ?? this.props.rawContent;
+    }
+
+    set content(headerContent) {
+        this.props.content = headerContent ?? null;
+    }
+
+    get tag() {
+        return this.props.tag;
+    }
+
+    get tagArgs() {
+        return this.props.tagArguments;
+    }
+
+    get method() {
+        return this.props.method;
+    }
+
+    get action() {
+        return this.props.action;
+    }
+
+    get identifier() {
+        return `${this.props.method}__${this.props.action.replace('/',"_")}`;
+    }
+
+
+    execute() {
+
+    }
+
+    parseTag() {
+        if(this.content[0] !== "@") return;
+        const tagRegex = /@(\w*)(\(.*\))?/;
+        const tagMatch = this.props.rawContent.match(tagRegex);
+        if(tagMatch[1]) this.props.tag = tagMatch[1];
+        this.props.content = this.props.rawContent.replace(tagMatch[0], "").trim();
+
+        if(tagMatch.length >= 3) this.parseTagArguments(tagMatch[2]);
+    }
+
+    parseTagArguments(argMatch) {
+        if(!argMatch) return;
+        // // const originalTag = tag;
+        // const operandStartChar = tag.indexOf("(");
+        // const args = tag.substring(operandStartChar);
+        // const mutatedTag = args.replace(args, "");
+        let parsedArguments = [];
+        
+        try {
+            parsedArguments = JSON.parse(argMatch.replace("(", "[").replace(")","]"));
+        } catch (error) {
+            return this.props.tagArguments = args;
+        }
+
+        // this.props.tag = mutatedTag;
+        this.props.tagArguments = parsedArguments;
+    }
+
+    tagToIcon() {
+
+    }
+}
+
+class XStatus extends HeaderDirective {
+    execute() {
+        new StatusMessage({message: this.content, id: this.identifier, icon: this.tagToIcon()});
+    }
+}
+
+/**
+ * Supported tags:
+ * @view - followed by the path to load
+ * none  - followed by the body content
+ */
+class XModal extends HeaderDirective {
+    execute() {
+        switch(this.tag) {
+            case "view":
+                modalView(this.content, "Close");
+                break;
+            case null:
+            default:
+                const modal = new Modal({id: this.identifier, body: this.content, close_btn: true});
+                modal.draw();
+        }
+    }
+}
+
+/**
+ * Supported tags:
+ * @wait({int})
+ * @delay({int}) alias of @wait
+ */
+class XRedirect extends HeaderDirective {
+    execute() {
+        if(this.tag !== null) Cobalt.router.location = this.content;
+        switch(this.tag) {
+            case "delay":
+            case "wait":
+                new StatusMessage({message: `Redirecting in ${this.tagArgs[0]} seconds`});
+                setTimeout(() => {
+                    Cobalt.router.location = this.content;
+                }, this.tagArgs[0] * 1000);
+        }
+    }
+}
+
+/** Supported tags
+ * @now           - no parameters, executes refresh now. (deprecated "now" as the header content)
+ * @wait({num})   - a number (in seconds) to wait before refreshing the page. A status message is displayed
+ * @silent({num}) - exactly the same as @wait, except it does not display a status message
+*/
+class XRefresh extends HeaderDirective {
+    execute() {
+        switch(this.tag) {
+            case "now":
+            case this.content === "now":
+                Cobalt.router.location = location.pathname;
+                break;
+            case "wait":
+                new StatusMessage({message: `Refreshing in ${wait} seconds`});
+            case "silent": 
+            default:
+                let wait = this.tagArgs[0] || Number(this.content);
+                setTimeout( () => {
+                    Cobalt.router.location = location.pathname;
+                }, wait * 1000);
+        }
+    }
+}
+
+class XConfirm extends HeaderDirective { 
+    async execute() {
+        const xhr = this.props.xhrRequest;
+        const responseBody = JSON.parse(xhr.response);
+        const fulfillment = responseBody.fulfillment;
+        let confirm = await modalConfirm(fulfillment.error, fulfillment.data.okay, "Cancel", fulfillment.data.dangerous);
+        if(confirm === false) return;
+
+        xhr.setRequestHeader('X-Confirm-Dangerous', 'true');
+        return await xhr.submit(fulfillment.data.return);
+    }
+}
+
+class XReauth extends HeaderDirective {
+    async execute() {
+        const xhr = this.props.xhrRequest;
+        const responseBody = JSON.parse(xhr.response);
+        const fulfillment = responseBody.fulfillment;
+        let password = await modalInput("Please supply your password to verify your identity", {okay: fulfillment.data.okay, cancel: "cancel"});
+        xhr.setRequestHeader("X-Reauthorization", btoa(password));
+        const result = await xhr.submit(fulfillment.data.return);
+        return result;
+    }
 }
