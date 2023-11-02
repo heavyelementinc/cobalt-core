@@ -318,26 +318,50 @@ class AsyncUpdate {
 
     fn_value(el, value, instructions) {
         if("value" in el) el.value = value;
+        else console.warn("Element lacks 'value' property", el);
     }
 
     fn_innerHTML(el, value, instructions) {
         if("innerHTML" in el) el.innerHTML = value;
     }
 
+    fn_innerText(el, value, instructions) {
+        if("innerText" in el) el.innerText = value;
+        else console.warn("Element lacks 'innerText' property", el)
+    }
+
     fn_outerHTML(el, value, instructions) {
-        if("outerHTML" in el) el.fn_outerHTML = value;
+        if("outerHTML" in el) el.outerHTML = value;
     }
 
     fn_invalid(el, value, instructions) {
-        if("ariaInvalid" in el) el.ariaInvalid = value;
-        el.addEventListener("focusin", el => el.ariaInvalid = null, {once: true});
+        // if("ariaInvalid" in el) el.ariaInvalid = value;
+        el.forEach(e => {
+            e.ariaInvalid = value;
+            e.addEventListener("focusin", e => e.ariaInvalid = null, {once: true});
+        });
+
+    }
+
+    fn_disabled(el, value, instructions) {
+        if(value) {
+            el.ariaDisabled = false;
+            return el.disabled = false;
+        }
+        el.ariaDisabled = true;
+        return el.disabled = true;
     }
 
     fn_remove(el, value, instructions) {
         if(typeof value === "string") el = this.getElement(value);
+
+
+
         if(el instanceof NodeList || Array.isArray(el)) el.forEach(e => e.parentNode.removeChild(e));
         
-        el.parentNode.removeChild(el)
+        if(el.constructor.name === "Array") {
+            el.forEach(e => e.parentNode?.removeChild(e))
+        } else el.parentNode.removeChild(el)
     }
 
     fn_message(el, value, instructions) {
@@ -508,15 +532,27 @@ class XModal extends HeaderDirective {
  */
 class XRedirect extends HeaderDirective {
     execute() {
-        if(this.tag !== null) Cobalt.router.location = this.content;
         switch(this.tag) {
             case "delay":
             case "wait":
                 new StatusMessage({message: `Redirecting in ${this.tagArgs[0]} seconds`});
                 setTimeout(() => {
-                    Cobalt.router.location = this.content;
+                    this.redirect();
                 }, this.tagArgs[0] * 1000);
+                break;
+            default:
+                this.redirect();
         }
+    }
+
+    redirect() {
+        Cobalt.router.location = this.content;
+    }
+}
+
+class XReplace extends XRedirect {
+    redirect() {
+        Cobalt.router.replaceState({}, )
     }
 }
 

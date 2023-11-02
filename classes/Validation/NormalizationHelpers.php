@@ -174,7 +174,7 @@ abstract class NormalizationHelpers {
         return $date->timestamp;
     }
 
-    final protected function get_date($value, $format = "input") {
+    final function get_date($value, $format = "input") {
         if(!$value) return "";
         $shorthands = [
             'input' => "Y-m-d",

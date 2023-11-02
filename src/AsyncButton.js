@@ -10,6 +10,10 @@ class AsyncButton extends CustomButton{
     }
 
     submit() {
+        if(this.disabled === true) {
+            this.shakeNo();
+            return;
+        }
         this.ariaInvalid = false;
         const api = new AsyncFetch(this.getAttribute("action") || this.getAttribute("href"), this.getAttribute("method") ?? "POST", {});
         api.addEventListener("submit", e => this.startSpinner.bind(this));

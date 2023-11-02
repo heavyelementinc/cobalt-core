@@ -8,7 +8,7 @@ class ActionMenu {
         event.preventDefault();
         this.event = event;
         this.title = title;
-        this.mode = mode || (window.matchMedia("only screen and (max-width: 900px)").matches) ? "modal" : "element";
+        this.mode = mode || (window.matchMedia("only screen and (max-width: 35em)").matches) ? "modal" : "element";
         this.withIcons = withIcons;
         this.toggle = false;
         this.attachTo = attachTo;

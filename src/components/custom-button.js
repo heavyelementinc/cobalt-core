@@ -1,6 +1,18 @@
 class CustomButton extends HTMLElement {
     constructor() {
         super();
+        this.props = {
+            disabled: false
+        }
+    }
+    
+    get disabled() {
+        return this.ariaDisabled || false;
+    }
+
+    set disabled(state) {
+        if(typeof state === "boolean") state = Boolean(state);
+        this.ariaDisabled = state;
     }
 
     connectedCallback() {

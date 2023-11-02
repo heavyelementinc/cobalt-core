@@ -1,0 +1,18 @@
+<async-button method="GET" class="disabled-target" action="/api/v1/header-tests/status">Get Status</async-button>
+<async-button id="style"   class="disabled-target" method="GET" action="/api/v1/header-tests/style">Style</async-button>
+
+<async-button method="GET" class="disabled-target" action="/api/v1/header-tests/value">Random Value</async-button>
+<form-request>
+    <ul class="list-panel">
+        <li><input type="text" id="field1" class="disabled-target"></li>
+        <li><input type="number" class="field2 disabled-target"></li>
+        <li><span class="field2 disabled-target"></span></li>
+    </ul>
+</form-request>
+
+
+<async-button id="style" class="disabled-target" method="GET" action="/api/v1/header-tests/innerHTML">Update Inner HTML</async-button>
+<async-button id="style" class="disabled-target" method="GET" action="/api/v1/header-tests/outerHTML">Update Outer HTML <help-span value="This will fully replace the div below and the 'Update Inner HTML' button won't work again until you refresh this page"></help-span></async-button>
+<div id="html-target">Replace this content.</div>
+
+<async-button id="disable-button" method="GET" action="/api/v1/header-tests/disabled/?state=true">Disable</async-button>

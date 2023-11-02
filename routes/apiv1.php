@@ -111,6 +111,8 @@ if(app("enable_debug_routes")) {
     Route::s_post("/debug/file-upload/multi","DebugFiles@multi_file_upload");
     Route::s_post("/debug/file-upload/arbitrary-data","DebugFiles@extra_metadata");
     Route::delete("/debug/file-upload/{id}","DebugFiles@delete");
+
+    Route::get("/header-tests/{response}", "DebugHeaders@response");
 }
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {

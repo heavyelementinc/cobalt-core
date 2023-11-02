@@ -20,6 +20,12 @@ if (app("enable_debug_routes")) {
 
     Route::s_post("/push-test/{recipient}?", "Notifications@pushNotification");
 
+    
+    Route::get("/header-tests", "DebugHeaders@page",[
+        'navigation' => ['debug_async'],
+        'anchor' => ['name' => "Header Test"]
+    ]);
+
     Route::get("/server-control", "Debug@status_modal", [
         'navigation' => ['debug_async'],
         'anchor' => ['name' => "Server Control Headers"]
