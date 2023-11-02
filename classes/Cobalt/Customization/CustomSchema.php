@@ -32,6 +32,10 @@ class CustomSchema extends Normalize {
         'color' => [
             'name' => 'Color',
             'view' => '/customizations/editor/color.html',
+        ],
+        'series' => [
+            'name' => 'Series',
+            'view' => '/customizations/editor/series.html',
         ]
     ];
 
@@ -84,6 +88,12 @@ class CustomSchema extends Normalize {
             ],
             'meta' => [
                 // Other metadata for this value
+            ],
+            'meta.series_edit_template' => [
+
+            ],
+            'meta.series_display_template' => [
+
             ],
             'meta.display_width' => [
                 'get' => fn($val) => $val ?? $this->__dataset['meta']['width'] ?? $this->__dataset['meta']['meta']['width'],
