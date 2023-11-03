@@ -13,6 +13,10 @@ class CustomSchema extends Normalize {
             'name' => 'Text',
             'view' => '/customizations/editor/text.html'
         ],
+        'markdown' => [
+            'name' => 'Markdown',
+            'view' => '/customizations/editor/markdown.html'
+        ],
         'image' => [
             'name' => 'Image',
             'view' => '/customizations/editor/image.html'

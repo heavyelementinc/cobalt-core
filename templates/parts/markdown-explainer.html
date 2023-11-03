@@ -9,6 +9,10 @@
 ##### Headline 5</pre>
         </li>
         <li class="hbox">
+            <label>Headline with custom ID <help-span value="Use the same headline syntax as above. Now, when you visit the page this markdown lives on, you can add the text inside the brackets to the end of the URL (including the hash mark) and your browser will automatically scroll to this headline!"></help-span></label>
+            <pre># Headline 1 {#custom-id}</pre>
+        </li>
+        <li class="hbox">
             <label>Paragraphs <help-span value="Ensure there's an empty line between paragraphs"></help-span></label>
             <pre>Lorem ipsum dolor imset ati
 
@@ -49,11 +53,11 @@ Consectetur adipisicing elit. Quia, blanditiis.</pre>
 1. List Item 2</pre>
         </li>
         <li class="hbox">
-            <label>Inline Code</label>
+            <label>Inline Code <help-span value="Note that the this is the backtick (it's next to the 1 key on your keyboard, it's the unshifted ~ tilde key) and not a single or double quote"></help-span></label>
             <pre>Lorem `ipsum dolor` dolor set ati</pre>
         </li>
         <li class="hbox">
-            <label>Code Block</label>
+            <label>Code Block <help-span value="Note that block quotes require three backticks (```) at the beginning and three at the end of your code block."></help-span></label>
             <pre>```
 var lorem = "ipsum"
 if(lorem && !dolor) {

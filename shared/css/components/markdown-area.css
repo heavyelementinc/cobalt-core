@@ -1,0 +1,42 @@
+markdown-area .editor-toolbar .fa:before{
+    font-family: "Material Design Icons";
+    font-size: 1.5em;
+}
+
+markdown-area .editor-toolbar .fa-bold:before {
+    content: "\F0264";
+}
+markdown-area .editor-toolbar .fa-italic:before {
+    content: "\F0277";
+}
+markdown-area .editor-toolbar .fa-header:before {
+    content: "\F0274";
+}
+markdown-area .editor-toolbar .fa-quote-left:before {
+    content: "\F0757";
+}
+markdown-area .editor-toolbar .fa-list-ul:before {
+    content: "\F0279";
+}
+markdown-area .editor-toolbar .fa-list-ol:before {
+    content: "\F027B";
+}
+markdown-area .editor-toolbar .fa-link:before {
+    content: "\F0337";
+}
+
+markdown-area .editor-toolbar .fa-picture-o:before {
+    content: "\F02EB";
+}
+markdown-area .editor-toolbar .fa-eye:before {
+    content: "\F06D0";
+}
+markdown-area .editor-toolbar .fa-columns:before {
+    content: "\F08DF";
+}
+markdown-area .editor-toolbar .fa-arrows-alt:before {
+    content: "\F0293";
+}
+markdown-area .editor-toolbar .fa-question-circle:before {
+    content: "\F02D7";
+}
