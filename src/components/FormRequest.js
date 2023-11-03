@@ -199,13 +199,17 @@ class NewFormRequest extends HTMLElement {
                 case "INPUT-SWITCH":
                     this.createFeedback(e, "center");
                     break;
+                case "TEXTAREA":
+                    // Dumb hack because of how SimpleMDE handles text input
+                    if(e.closest("markdown-area") !== null) break;
+                case "MARKDOWN-AREA":
                 default:
                     this.createFeedback(e, 'top-right');
             }
         });
     }
 
-    async createFeedback(target, type, padding = 5) {
+    async createFeedback(target, type, padding = 5, disable = true) {
 
         const validTypes = ['top-right', 'center'];
         if(!validTypes.includes(type)) type = validTypes[0];
@@ -220,8 +224,6 @@ class NewFormRequest extends HTMLElement {
         feedback.style.height = `1em`;
         document.body.appendChild(feedback);
         const feedbackSizing = get_offset(feedback);
-
-        await wait_for_animation(feedback, "feedback-add");
 
         let x, y;
         switch(type) {
@@ -238,16 +240,16 @@ class NewFormRequest extends HTMLElement {
         feedback.style.top  = `${y}px`;
 
         this.feedbackTracker.push(feedback);
+
+        await wait_for_animation(feedback, "feedback-add");
     }
 
     removeFeedback() {
-        this.feedbackTracker.forEach(e => {
-            e.parentNode.removeChild(e);
-        });
-        this.fieldsRequiringFeedback.forEach(async e => {
-            await wait_for_animation(e, "feedback-remove");
+        this.fieldsRequiringFeedback.forEach(async (e, i) => {
             e.removeAttribute("disabled");
             e.ariaDisabled = false;
+            await wait_for_animation(e, "feedback-remove");
+            this.feedbackTracker[i]?.parentNode.removeChild(this.feedbackTracker[i])
         });
         this.feedbackTracker = [];
         this.fieldsRequiringFeedback = [];

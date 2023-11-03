@@ -3,10 +3,9 @@ class MarkdownArea extends HTMLElement {
         super();
         this.props = {
             originalTextContent: "",
-            changed: false
+            changed: false,
         }
         this.editor = null;
-
     }
 
     connectedCallback() {
@@ -24,6 +23,10 @@ class MarkdownArea extends HTMLElement {
         });
         // this.value = this.props.originalTextContent;
 
+        // this.editor.addEventListener("change", e => {
+        //     e.stopPropagation();
+        // });
+
         this.editor.codemirror.on("change", e => {
             this.props.changed = true;
         });
@@ -35,7 +38,7 @@ class MarkdownArea extends HTMLElement {
 
     triggerAutosaveChangeEvent() {
         if(this.props.changed === false) return;
-        this.dispatchEvent(new Event("change", {}));
+        const event = this.dispatchEvent(new Event("change", {}));
         this.props.changed = false;
     }
 
@@ -46,6 +49,15 @@ class MarkdownArea extends HTMLElement {
     set value(val) {
         if(this.editor) return this.editor.value(val);
         this.props.originalTextContent = val;
+    }
+
+    get disabled() {
+        return this.props.disabled;
+    }
+
+    set disabled(val) {
+        if(typeof val !== "boolean") val = Boolean(val);
+        this.props.disabled = val;
     }
 }
 

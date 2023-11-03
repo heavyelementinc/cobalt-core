@@ -115,7 +115,7 @@ input:focus, textarea:focus {
   box-shadow: none;
 }
 
-input:disabled, textarea:disabled {
+input:disabled, textarea:disabled, markdown-area[aria-disabled="true"], markdown-area[aria-disabled="true"] .CodeMirror {
   background: var(--project-color-input-disabled);
 }
 
