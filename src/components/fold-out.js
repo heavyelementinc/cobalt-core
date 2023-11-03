@@ -28,6 +28,13 @@ class FoldOut extends HTMLElement {
             this.toggleState();
         });
     }
+    
+    get title() {
+        let label = this.getAttribute("label");
+        if(!label) label = this.getAttribute("title");
+        if(!label) return "Expand";
+        return label;
+    }
 
     getState() {
         if(this.classList.contains(this.toggleClass)) return true;
