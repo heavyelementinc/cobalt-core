@@ -175,6 +175,10 @@ abstract class NormalizationHelpers {
     }
 
     final function get_date($value, $format = "input") {
+        return $this->convert_date($value, $format);
+    }
+
+    final function convert_date($value, $format = "input") {
         if(!$value) return "";
         $shorthands = [
             'input' => "Y-m-d",

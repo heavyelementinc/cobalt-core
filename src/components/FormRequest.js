@@ -238,6 +238,9 @@ class NewFormRequest extends HTMLElement {
         
         feedback.style.left = `${x}px`;
         feedback.style.top  = `${y}px`;
+        if(offsets.zIndex && offsets.zIndex !== "auto") {
+            feedback.style.zIndex = Number(offsets.zIndex) + 10;
+        }
 
         this.feedbackTracker.push(feedback);
 
@@ -246,8 +249,10 @@ class NewFormRequest extends HTMLElement {
 
     removeFeedback() {
         this.fieldsRequiringFeedback.forEach(async (e, i) => {
-            e.removeAttribute("disabled");
-            e.ariaDisabled = false;
+            setTimeout(() => {
+                e.removeAttribute("disabled");
+                e.ariaDisabled = false;
+            }, 200);
             await wait_for_animation(e, "feedback-remove");
             this.feedbackTracker[i]?.parentNode.removeChild(this.feedbackTracker[i])
         });

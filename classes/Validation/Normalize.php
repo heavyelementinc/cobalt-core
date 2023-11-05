@@ -615,7 +615,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __execute_prototype($value, $fieldname, $prototype) {
         $method_name = "__proto_$prototype";
         $got = $value;
-        if(isset($this->__schema[$fieldname]['get'])) $got = $this->__schema[$fieldname]['get']($value, $fieldname);
+        try{ 
+            if(isset($this->__schema[$fieldname]['get'])) $got = $this->__schema[$fieldname]['get']($value, $fieldname) ?? $value;
+        } catch (\Error $e) {
+            
+        }
         if (method_exists($this, $method_name)) return $this->{$method_name}($got, $fieldname, $value);
         if (key_exists($fieldname, $this->__schema) && key_exists($prototype, $this->__schema[$fieldname])) return $this->__schema[$fieldname][$prototype]($got, $fieldname, $value);
         return "";

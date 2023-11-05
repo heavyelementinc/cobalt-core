@@ -30,7 +30,7 @@ class ContactFormSchema extends Normalize {
             ],
             "date" => [
                 "set" => fn() => new UTCDateTime(),
-                "display" => fn($val) => $this->get_date($val, "verbose")
+                "display" => fn($val) => $this->convert_date($val, "verbose")
             ],
             "ip" => [
                 "set" => fn() => ""
