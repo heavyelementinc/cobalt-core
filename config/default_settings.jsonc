@@ -262,6 +262,10 @@
         "default": true
     },
 
+    "Mailchimp_api_signup_route": {
+        "default": false
+    },
+
     "Customizations_enabled": {
         "default": true,
         "directives": {},

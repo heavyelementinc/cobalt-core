@@ -106,7 +106,7 @@ class NotificationManager extends \Drivers\Database {
 
         $this->addresseeDataStructure($content);
         
-        $content['from'] = session('_id');
+        $content['from'] = $content['from'] ?? session('_id');
         $content['type']  = $normalizer->{'type'};
         $content['ip']    = $normalizer->{'ip'};
         $content['token'] = $normalizer->{'token'};
@@ -117,7 +117,7 @@ class NotificationManager extends \Drivers\Database {
 
         $validated['sent']  = new UTCDateTime();
         
-        $addToSet['for.user'] = ['$each' => $validated['for.user']];
+        $addToSet['for.user'] = ['$each' => $validated['for.user']->__dataset];
         unset($validated['for.user']);
 
         $result = $this->updateOne(

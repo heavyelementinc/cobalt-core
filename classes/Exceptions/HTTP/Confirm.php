@@ -12,7 +12,7 @@ class Confirm extends HTTPException {
 
     function __construct($message, $data, $okay = "Continue", $dangerous = true, $required_header = ['X-Confirm-Dangerous' => "true"]) {
         header("X-Confirm: Multiple choices");
-        parent::__construct($message);
+        parent::__construct("Confirm", $message);
         $this->data = [
             'return' => $data,
             'headers' => $required_header,

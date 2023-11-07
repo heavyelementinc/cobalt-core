@@ -128,6 +128,10 @@ if(__APP_SETTINGS__['PaymentGateways_enabled']) {
     Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);
 }
 
+if(app("Mailchimp_api_signup_route")) {
+    Route::post("/mailchimp/onboard", "Mailchimp@onboard");
+}
+
 
 Route::s_put("/api/key/{service}",  "APIManagement@update", ['permission' => 'API_manage_keys']);
 Route::s_post("/api/key/{service}", "APIManagement@parse",  ['permission' => 'API_manage_keys']);

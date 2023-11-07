@@ -18,7 +18,7 @@ namespace Validation\Exceptions;
 class ValidationFailed extends \Exceptions\HTTP\BadRequest {
     public $status_code = 422;
     function __construct($message, $data = []) {
-        parent::__construct($message);
+        parent::__construct("Bad Request", $message);
         $this->data = $data;
     }
 }
