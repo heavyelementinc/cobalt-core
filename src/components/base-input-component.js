@@ -4,6 +4,10 @@
  */
 
 class BaseInput extends HTMLElement {
+    constructor() {
+        super();
+        this.setAttribute("__custom-input", "true");
+    }
     base_observed() {
         return [];
     }

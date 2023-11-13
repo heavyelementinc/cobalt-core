@@ -36,6 +36,7 @@
         this.pattern = this.getAttribute("pattern") || "";
         this.placeholder = this.getAttribute("placeholder") || "Search";
         this.limit = 0;
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
@@ -305,6 +306,7 @@ class InputArrayItem extends HTMLElement {
         super();
         this.readonly = this.getAttribute("readonly");
         this.init();
+        this.setAttribute("__custom-input", "true");
     }
 
     get value() {

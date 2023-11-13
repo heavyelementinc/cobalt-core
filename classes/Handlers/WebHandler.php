@@ -30,6 +30,10 @@ class WebHandler implements RequestHandler {
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
+    var $encoding_mode;
+    var $renderer;
+    var $_stage_bootstrap;
+
 
     /** The `body.html` is scanned for these specific tags and then the 
      * corresponding methods are called and their results are stored with the 
@@ -116,7 +120,10 @@ class WebHandler implements RequestHandler {
         unset($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
 
         // Get the message string and data
-        $message = $e->getMessage();
+        $message = $e->name ?? "Unknown Error";
+
+        if(method_exists($e, "publicMessage")) $message = $e->publicMessage();
+
         $data = $e->data;
 
         // Get the default template for this error type:
@@ -130,8 +137,9 @@ class WebHandler implements RequestHandler {
         }
 
         // If we're in debug mode, let's embed the actual error message
-        $embed = "";
-        if (app('debug')) $embed = "<pre class=\"error--message\">Status code:\n\n$message\n\n" . \json_encode($data) . "</pre>";
+        $embed = "$message";
+        if(__APP_SETTINGS__['debug_exceptions_publicly']) $embed .= "<pre class=\"error--message\">" . base64_encode($e->getMessage()) . "</pre>";
+
         $this->add_vars([
             'title' => $e->status_code,
             'message' => $message,

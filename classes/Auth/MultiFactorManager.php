@@ -49,7 +49,7 @@ class MultiFactorManager {
     }
 
     function enroll_user(UserSchema $user, string $passwd) {
-        if(!$this->verify_otp($user, $passwd)) throw new Unauthorized("There was an error validating the provided one-time password");
+        if(!$this->verify_otp($user, $passwd)) throw new Unauthorized("OTP verification failed","There was an error validating the provided one-time password");
         $crud = new UserCRUD();
         $backups = $this->generate_backup_codes();
         $passwords = [];

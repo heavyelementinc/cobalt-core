@@ -112,6 +112,12 @@
     "display_masthead": {
         "default": true
     },
+    "Landing_page_home_route_options": {
+        "default": {
+            "anchor": {"name": "Home"},
+            "navigation": ["main_navigation"]
+        }
+    },
     /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
         "default": false,
@@ -1176,7 +1182,8 @@
         "default": true,
         "definition": "Debug",
         "meta": {
-            "group": "Cache &amp; Debug",
+            "group": "Developer",
+            "subgroup": "Debug",
             "name": "Debug status",
             "type": "input-switch"
         },
@@ -1184,7 +1191,19 @@
             "type": "boolean"
         }
     },
-
+    "debug_exceptions_publicly": {
+        "default": false,
+        "meta": {
+            "group": "Developer",
+            "subgroup": "Debug",
+            "name": "Output detailed exception data publicly via route context handlers. DANGEROUS!",
+            "dangerous": true,
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
     "Database_fs_enabled": {
         "default": true
     },

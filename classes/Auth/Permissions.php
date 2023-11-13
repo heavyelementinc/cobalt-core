@@ -125,7 +125,7 @@ class Permissions extends Database {
             $perms[$type][$n] = [$name, $value];
         }
 
-        if ($ring > $level) throw new Unauthorized("You can't grant privilege levels higher than your own.");
+        if ($ring > $level) throw new Unauthorized("You can't grant privilege levels higher than your own.", "You can't do that.");
 
         $result = [[], []];
         if (isset($perms['permissions'])) $result[0] = $this->update_permissions($perms['permissions'], $include);
@@ -139,8 +139,8 @@ class Permissions extends Database {
 
         foreach ($permissions as $name => $permission) {
             if (preg_match("/^permissions\./",$name)) $name = preg_replace("/^permissions\./","",$name);
-            if (!key_exists($name, $this->valid)) throw new BadRequest("Your request contained unexpected data.");
-            if (!is_bool($permission[1])) throw new BadRequest("Your request contained unexpected data.");
+            if (!key_exists($name, $this->valid)) throw new BadRequest("Authenticated account is missing the '$name' permission","Your request contained unexpected data.");
+            if (!is_bool($permission[1])) throw new BadRequest("'$name' must be a boolean value", "Your request contained unexpected data.");
 
             $valid += [$permission[0] => $permission[1]];
         }
@@ -180,7 +180,7 @@ class Permissions extends Database {
                 );
             } else if ((string)$user['_id'] === (string)session('_id')) {
                 $remaining = $this->count(['groups' => 'root']) - 1;
-                if ($remaining === 0) throw new Unauthorized("You're the only root user and therefore you cannot remove yourself from this group.");
+                if ($remaining === 0) throw new Unauthorized("There must always be at least one root user in a Cobalt application","You're the only root user and therefore you cannot remove yourself from this group.");
                 \confirm(
                     "<h1>Hold on...</h1>
                     <p>You're about to revoke your own root privileges!</p>
@@ -200,8 +200,8 @@ class Permissions extends Database {
         foreach ($groups as $group => $data) {
             $key = '$addToSet';
             if ($data[1] === false) $key = '$pull';
-            if (!in_array($group, $this->groups)) throw new BadRequest("Your request contained unexpected data.");
-            if ($key === '$addToSet') array_push($query[$key]['groups']['$each'], $group);;
+            if (!in_array($group, $this->groups)) throw new BadRequest("'$group' is an invalid group","Your request contained unexpected data.");
+            if ($key === '$addToSet') array_push($query[$key]['groups']['$each'], $group);
             if ($key === '$pull') array_push($query[$key]['groups']['$in'], $group);
             $return[$data[0]] = (bool)$data[1];
             foreach ($this->valid as $perm => $meta) {
@@ -214,14 +214,14 @@ class Permissions extends Database {
         if (count($query['$addToSet']['groups']['$each']) === 0) unset($query['$addToSet']);
         if (count($query['$pull']['groups']['$in']) === 0) unset($query['$pull']);
 
-        if (count($query) === 0) throw new BadRequest("Your request contained unexpected data.");
+        if (count($query) === 0) throw new BadRequest("No valid groups were provided.","Your request contained unexpected data.");
 
         $result = $this->updateOne(
             ['_id' => $this->__id($user_id)],
             $query
         );
 
-        if ($result->getModifiedCount() !== 1) throw new BadRequest("Matched " . $result->getMatchedCount() . " and failed to update.");
+        if ($result->getModifiedCount() !== 1) throw new BadRequest("Matched " . $result->getMatchedCount() . " and failed to update.", "Failed to add user to group.");
         return $return;
     }
 

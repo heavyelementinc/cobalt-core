@@ -12,7 +12,7 @@ class Reauthorize extends HTTPException {
 
     function __construct($message, $data, $okay = "Continue", $required_header = ['X-Reauthorization' => "true"]) {
         header("X-Reauthorization-Request: Password");
-        parent::__construct($message);
+        parent::__construct("Reauthorize", $message);
         $this->data = [
             'return' => $data,
             'headers' => $required_header,

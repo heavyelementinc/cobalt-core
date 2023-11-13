@@ -1,6 +1,7 @@
 class AsyncButton extends CustomButton{
     constructor() {
         super();
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {

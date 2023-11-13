@@ -3,6 +3,10 @@ use Routes\Route;
 
 /** Debug routes are for testing purposes and should not be enabled in production */
 if (app("enable_debug_routes")) {
+    Route::get("/new-render/{user_input}?", "DebugRenderer@render", [
+        'navigation' => ['debug_settings'],
+        'anchor' => ['name' => 'Render Test', 'href' => '/new-render/']
+    ]);
     Route::get("/", "Debug@debug_directory");
     Route::get("/settings","Debug@settings",[
         'navigation' => ['debug_settings'],

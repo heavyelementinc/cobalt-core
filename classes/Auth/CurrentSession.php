@@ -142,7 +142,7 @@ class CurrentSession extends \Drivers\Database {
         // $count = $this->count($query);
         // if ($count === 0) return true;
         // app("require_https_login_and_cookie") &&
-        if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("No token");
+        if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("There was no token specified");
         try {
 
             $session = [
@@ -166,7 +166,7 @@ class CurrentSession extends \Drivers\Database {
         } catch (\Exception $e) {
             throw new \Exceptions\HTTP\Error("Failed to create session");
         }
-        if ($result->getUpsertedCount() === 0 && $result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
+        if ($result->getUpsertedCount() === 0 && $result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("No session document was created or modified","You're already logged in.");
         return true;
     }
 

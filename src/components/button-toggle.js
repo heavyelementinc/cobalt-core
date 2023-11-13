@@ -6,6 +6,7 @@ class ButtonToggle extends HTMLButtonElement {
         this.addEventListener("click", () => {
             this.value = !this.value;
         });
+        this.setAttribute("__custom-input", "true");
     }
 
     setState(state = null) {

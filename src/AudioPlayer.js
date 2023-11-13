@@ -5,6 +5,7 @@
     constructor() {
         super();
         // this.shadowRoot = true;
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {

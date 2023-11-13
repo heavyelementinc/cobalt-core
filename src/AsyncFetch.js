@@ -10,7 +10,8 @@ class AsyncFetch extends EventTarget {
         asJSON = true,
         credentials = true,
         cache = "default",
-        headers = {}
+        headers = {},
+        form = null,
     }) {
         super();
         this.action = action;
@@ -23,6 +24,7 @@ class AsyncFetch extends EventTarget {
         this.abortController = null;
         this.reject = null;
         this.totalUploadSize = 0;
+        this.form = null;
         
         this.data = "";
         this.response = null; // The raw response from the fetch request
@@ -310,6 +312,7 @@ class AsyncUpdate {
                 console.warn(`Unsupported update directive: ${directive}`);
                 continue;
             }
+            // if(directive === `fn_invalid` && el.closest("form-request") !== this.form) continue;
             for(const el of elements) {
                 this[directive](el, instructions[i], instructions);
             }
@@ -335,12 +338,10 @@ class AsyncUpdate {
     }
 
     fn_invalid(el, value, instructions) {
-        // if("ariaInvalid" in el) el.ariaInvalid = value;
-        el.forEach(e => {
-            e.ariaInvalid = value;
-            e.addEventListener("focusin", e => e.ariaInvalid = null, {once: true});
-        });
-
+        if("ariaInvalid" in el) {
+            el.ariaInvalid = value;
+            el.addEventListener("focusin", e => e.ariaInvalid = null, {once: true});
+        }
     }
 
     fn_disabled(el, value, instructions) {

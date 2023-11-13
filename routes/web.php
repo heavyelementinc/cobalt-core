@@ -6,10 +6,7 @@ if(app("UGC_enable_user_generated_content")) {
     Route::get(trim_trailing_slash(app("UGC_retrieval_endpoint")) . "/{file_id}", "UGC@retrieve");
 }
 
-Route::get("/", "Pages@index", [
-    'anchor' => ['name' => 'Home'],
-    'navigation' => ['main_navigation']
-]);
+Route::get("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']);
 
 Route::get("/res/fs/...","FileController@download");
 

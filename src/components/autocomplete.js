@@ -40,6 +40,7 @@ class AutoComplete extends HTMLElement {
         this.placeholder = "Start typing...";
         this.customElementClass = "input-array--list-custom";
         this.arrowKeySelectionIndex = -1;
+        this.setAttribute("__custom-input", "true");
     }
 
     get value() {

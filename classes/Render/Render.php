@@ -73,15 +73,18 @@
 
 namespace Render;
 
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\NotFound;
 
 class Render {
     public $body = "";
     public $stock_vars = [];
     public $vars = [];
-    const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    // const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)(\(.*\))?";
     public $custom;
     public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
+
     public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
     public $multiline_function = "/@(\w+)\((.*[\w\[\]\"',\r\n]*)\);/mU";
@@ -267,8 +270,32 @@ class Render {
                     $process_vars = false;
                     break;
             }
+            $arguments = [];
+            // Let's decide if we have a function call and strip that call from the lookup name
+            if($args = $replacements[2][$i]) {
+                $ex = explode(".",$name);
+                $function = array_pop($ex);
+                $arguments = $this->parse_funct_args(substr($args, 1,-1), $function, $replacements[2][$i]);//json_decode("[".substr($args, 1, -1)."]");
+                $name = implode(".",$ex);
+            }
 
             $replace[$i] = $this->lookup_value($name, $process_vars);
+
+            if($replace[$i] instanceof \Cobalt\SchemaPrototypes\SchemaResult) {
+                $replace[$i]->htmlSafe($is_inline_html);
+                $is_inline_html = true;
+                if($function) {
+                    // if(!$args) $args = [];
+                    $replace[$i] = $replace[$i]->{$function}(...$arguments);
+                } else {
+                    $replace[$i] = $replace[$i]->getValue();
+                }
+            }
+
+            if($replace[$i] instanceof \Cobalt\Schema) {
+                user_error("Schemas shouldn't make it to this point!", E_USER_WARNING);
+            }
+
             if ($is_inline_json) $replace[$i] = json_encode($replace[$i], $is_pretty_print); // Convert to JSON
             if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i], $options); // < = &lt;
             // if (gettype($replace[$i]) === "object") $replace[$i] = "[object]";
@@ -292,6 +319,7 @@ class Render {
                 $value = \json_encode($val); // Is this what we want?
                 break;
             case "object":
+                if(is_a($val, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) return $val;
                 if (method_exists($val, "__toString")) {
                     $value = (string)$val;
                     break;
@@ -332,12 +360,13 @@ class Render {
         $mutant = $subject;
         foreach ($functions[1] as $i => $funct) {
             if (!is_callable($funct)) $this->debug_template($funct, $functions[2][$i], $functions[0][$i], "@$funct() is not callable", $i, $subject);
-            try{
-                $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
-            } catch (\Exception $e) {
-                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], "@$funct() was supplied malformed parameters", $i, $subject);
-            }
-            $mutant_vars = $this->functs_get_vars($args);
+            // try{
+            //     $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
+            // } catch (\Exception $e) {
+            //     $this->debug_template($functions[0][$i], "@$funct() was supplied malformed parameters", $subject);
+            // }
+            // $mutant_vars = $this->functs_get_vars($args);
+            $mutant_vars = $this->parse_funct_args($functions[2][$i], $funct, $functions[0][$i]);
             
             // We want to include the current context's variables when @view is called
             // from inside a template, so we add a special case. Fun.
@@ -345,9 +374,9 @@ class Render {
             try{
                 $result = $funct(...$mutant_vars);
             } catch (\Exception $e) {
-                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], $e->getMessage(), $i, $subject);
+                $this->debug_template($functions[0][$i], $e->getMessage(), $subject);
             } catch (\Error $e) {
-                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], $e->getMessage(), $i, $subject);
+                $this->debug_template($functions[0][$i], $e->getMessage(), $subject);
             }
             // If we run the 'set' callable, then we want to update our current vars with 
             // the values set just set.
@@ -357,7 +386,16 @@ class Render {
         return $mutant;
     }
 
-    function functs_get_vars($vars) {
+    function parse_funct_args($args, $funct_name, $originalName, $errorMessage = "was supplied malformed parameters", ):array {
+        try{
+            $args = \json_decode("[" . $args . "]", true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Exception $e) {
+            // $this->debug_template($originalName, "$funct_name() $errorMessage");
+        }
+        return $this->functs_get_vars($args);
+    }
+
+    function functs_get_vars($vars):array {
         $mutant = [];
         foreach ($vars as $value) {
             if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
@@ -366,7 +404,7 @@ class Render {
         return $mutant;
     }
 
-    function debug_template($funct, $args, $errorToHighlight, $message, $index, $body) {
+    function debug_template($errorToHighlight, $message, $body) {
         // $strpos = \strpos($GLOBALS['TEMPLATE_CACHE'][$this->name], $funct);
         // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
         $errorToHighlight = preg_quote($errorToHighlight);

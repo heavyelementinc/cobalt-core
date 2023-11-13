@@ -18,18 +18,19 @@ class HTTPException extends \Exception {
         */
     ];
     public $exit = false;
-    public $name = "";
+    public $name = "Unknown Error";
     public $clientMessage = "";
 
     function __construct($message, $clientMessage = null, $data = null) {
         $this->mode = $GLOBALS['route_context'] ?? "cli";
         $this->clientMessage = $clientMessage;
+        if($clientMessage === true) $this->clientMessage = $message;
         $this->exit = $GLOBALS['allowed_to_exit_on_exception'] ?? false;
         $this->data = $data;
 
         // Check if we're being passed the old way way order and fix it
         if(gettype($clientMessage) === "array" && $data === null) {
-            $this->clientMessage = "An exception occurred.";
+            $this->clientMessage = "";
             $this->data = $clientMessage;
         }
 
@@ -49,8 +50,11 @@ class HTTPException extends \Exception {
     }
 
     public function publicMessage() {
-        if(app("debug")) return $this->getMessage();
-        return $this->clientMessage;
+        // if(app("debug")) return $this->getMessage();
+        $message =  $this->clientMessage;
+        if(!$message) $message = $this->name;
+        if(!$message) $message = get_class($this);
+        return $message;
     }
 
     public function api_execute($message, $data) {

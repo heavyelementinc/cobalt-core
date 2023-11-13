@@ -6,6 +6,7 @@ class MarkdownArea extends HTMLElement {
             changed: false,
         }
         this.editor = null;
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {

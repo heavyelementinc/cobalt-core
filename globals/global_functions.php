@@ -488,12 +488,17 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
          * of $mutant to the found property */
         if ($type === "object") {
             $mutated_path = null;
+
+            if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) {
+                return $mutant;
+            }
+
             if (is_a($mutant, "\\Cobalt\\Customization\\CustomizationManager")) {
                 $mutant = $mutant->getCustomizationValue($key);
                 $mutated_path = str_replace("custom.$key", "value", $path_map);
             }
 
-            if (is_a($mutant, "\Validation\Normalize")) {
+            if (is_a($mutant, "\\Cobalt\\Schema") || is_a($mutant, "\Validation\Normalize")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
                 return $mutant;

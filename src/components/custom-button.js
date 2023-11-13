@@ -4,6 +4,7 @@ class CustomButton extends HTMLElement {
         this.props = {
             disabled: false
         }
+        this.setAttribute("__custom-input", "true");
     }
     
     get disabled() {

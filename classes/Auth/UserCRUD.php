@@ -17,6 +17,7 @@ use Auth\UserSchema;
 use Cobalt\Token;
 use DateTime;
 use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
@@ -98,7 +99,7 @@ class UserCRUD extends \Drivers\Database {
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
-        if ($result->getModifiedCount() !== 1) throw new \Exception("Failed to update fields");
+        if ($result->getModifiedCount() !== 1) throw new HTTPException("Failed to update fields", true);
         return new UserSchema($mutant);
     }
 

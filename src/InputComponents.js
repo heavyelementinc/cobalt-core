@@ -39,7 +39,7 @@ class InputSwitch extends HTMLElement {
         this.checkbox.checked = this.checked;
 
         this.thumb = document.createElement("span");
-
+        this.setAttribute("__custom-input", "true");
     }
 
     get value() {
@@ -160,6 +160,7 @@ class RadioGroup extends HTMLElement {
         if (first) this.name = first.getAttribute("name");
         if (this.selected) this.updateSelected(this.selected);
         else if (this.default) this.updateSelected(this.default);
+        this.setAttribute("__custom-input", "true");
     }
 
     get value() {
@@ -336,6 +337,7 @@ class InputObjectArray extends HTMLElement {
 
         this.fieldItems = [];
         // this.initInterface();
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
@@ -617,6 +619,7 @@ class CopySpan extends HTMLElement {
             this.copy();
         })
         this.appendChild(this.button);
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
@@ -795,6 +798,7 @@ customElements.define("progress-bar", ProgressBar);
 class InputNumber extends HTMLElement {
     constructor() {
         super();
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {

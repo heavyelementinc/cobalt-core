@@ -2,6 +2,7 @@ class SplitButton extends HTMLElement {
     constructor() {
         super();
         this.initObserver();
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {

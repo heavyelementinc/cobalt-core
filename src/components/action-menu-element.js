@@ -9,6 +9,7 @@ class ActionMenuElement extends HTMLElement {
         this.stopPropagation = this.hasAttribute("stop-propagation");
         this.setAttribute("aria-pressed", "false");
         this.setAttribute("aria-role", "button");
+        this.setAttribute("__custom-input", "true");
         this.initListeners();
     }
 

@@ -83,7 +83,7 @@ class NewFormRequest extends HTMLElement {
         const action  = this.getAttribute('action');
         const enctype = this.getAttribute('enctype') ?? "application/json; charset=utf-8";
         
-        const api = new AsyncFetch(action, method, {format: enctype});
+        const api = new AsyncFetch(action, method, {format: enctype, form: this});
         api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
         api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
         api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));

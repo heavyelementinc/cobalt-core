@@ -127,13 +127,14 @@ class EventSchema extends \Validation\Normalize {
                 ]
             ],
             'btnColor' =>  [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-button-color"),
+                'get' => function ($val) {
+                    return $this->get_color($val, "vars-web.events-button-color", "#000000");
+                },
                 'set' => function ($val) {
                     return $val;
                 },
                 'display' => function ($val) {
-                    return $this->hex_color($val ?? app("vars-web.events-button-color"),app("vars-web.events-button-color"));
-                    // ($val) ? $this->hex_color($val ?? app("vars-web.events-button-color"), app("vars-web.events-button-color")) : ""
+                    return $this->hex_color($this->get_color($val, "vars-web.events-button-color", "#000000"),$this->get_color($val, "vars-web.events-button-color", "#000000"));
                 },
             ],
             'btnTextColor' => [
@@ -142,7 +143,7 @@ class EventSchema extends \Validation\Normalize {
                     $color = $this->get_best_contrast($this->btnColor);
                     return $color;
                 },
-                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? app("vars-web.events-button-text"), app("vars-web.events-button-text")) : "",
+                'display' => fn ($val) => ($val) ? $this->hex_color($this->get_color($val, "vars-web.events-button-text","#000000"), $this->get_color($val, "vars-web.events-button-text", "#000000")) : "",
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],
@@ -272,5 +273,9 @@ class EventSchema extends \Validation\Normalize {
             $options[$v] = $v;
         }
         return $options;
+    }
+
+    function get_color($val, $setting, $fallback = "#000000") {
+        return $val ?? __APP_SETTINGS__[$setting] ?? $fallback;
     }
 }

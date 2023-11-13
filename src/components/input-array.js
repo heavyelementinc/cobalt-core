@@ -16,6 +16,7 @@ class InputArray extends AutoCompleteInterface {
         this.action = this.getAttribute("action");
         this.allowCustom = string_to_bool(this.getAttribute("allow-custom")) ?? false;
         this.excludeCurrent = string_to_bool(this.getAttribute("exclude-current")) ?? true;
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
@@ -242,6 +243,7 @@ class InputUserArray extends InputArray {
     constructor(){ 
         super();
         this.tagLabels = {};
+        this.setAttribute("__custom-input", "true");
     }
 
     // connectedCallback() {

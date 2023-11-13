@@ -20,7 +20,8 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field {
+/* input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field  */
+input, textarea, button[native], [role='button'], [__custom-input] {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -40,10 +41,11 @@ input-wrapper, input-text, input-user, input, textarea, input-password, button[n
     border: unset;
   }
 
-  input[invalid],
+  /* input[invalid],
   textarea[invalid],
-  :is(input-wrapper, input-password, input-text) input[invalid],
-  input-array[invalid] {
+  :is(input-wrapper, input-password, input-text) input[invalid]
+  input-array[invalid]  */
+  :is(input, textarea, button[native], [role='button'], [__custom-input])[aria-invalid="true"]{
     border: 1px solid var(--project-color-input-invalid-border);
     background: var(--project-color-input-invalid-bg);
   }
@@ -247,7 +249,7 @@ a.button {
     flex-wrap: wrap;
     flex-grow:1;
     min-height: 2rem;
-    border: 0;
+    /* border: 0; */
     border-bottom: 1px solid var(--project-color-input-border-nofocus);
     background: var(--project-color-input-disabled);
     margin: 0;

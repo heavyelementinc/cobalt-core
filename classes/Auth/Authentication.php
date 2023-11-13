@@ -46,12 +46,12 @@ class Authentication {
 
         /** If we don't have a user account after our query has run, then the client
          * submitted a username/email address that hasn't been registered, yet. */
-        if ($user === null) throw new \Exceptions\HTTP\Unauthorized($stock_message);
+        if ($user === null) throw new \Exceptions\HTTP\Unauthorized("No user found", $stock_message);
 
         /** Allow the user to login via token */
         if(!$skip_password_check) {
             /** Check if our password verification has failed and throw an error if it did */
-            if (!\password_verify($password, $user['pword'])) throw new \Exceptions\HTTP\Unauthorized($stock_message);
+            if (!\password_verify($password, $user['pword'])) throw new \Exceptions\HTTP\Unauthorized("Password verification failed", $stock_message);
         }
 
         $login_state = 10;
@@ -61,7 +61,7 @@ class Authentication {
         $result = $this->session->login_session($user['_id'], $stay_logged_in, $login_state);
 
         /** If the session couldn't be updated, we throw an error */
-        if (!$result) throw new \Exceptions\HTTP\BadRequest("An unknown error occured.");
+        if (!$result) throw new \Exceptions\HTTP\BadRequest("The session could not be updated", $stock_message);
 
         // If $loginState === 0, send an update() for TFA login
 
@@ -100,7 +100,7 @@ class Authentication {
 
         // If the user is not logged in, they obviously don't have permission
         if ($throw_no_session === false && !$user) return false;
-        if (!$user) throw new \Exceptions\HTTP\Unauthorized("You're not logged in.", ['login' => true]);
+        if (!$user) throw new \Exceptions\HTTP\Unauthorized("No authenticated user", "You're not logged in.", ['login' => true]);
 
         // If the permission is a boolean true AND we've made it here, we're 
         // logged in, so we're good to go, right?
@@ -115,7 +115,7 @@ class Authentication {
 
         // If user account requires a password reset, a PasswordUpdateRequired
         // error is thrown.
-        if (($user->flags['password_reset_required'] ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("You must update your password.");
+        if (($user->flags['password_reset_required'] ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("This authenticated user has the 'password reset' flag set, a password reset is required.", "You must update your password.");
 
         // app('Auth_require_verified_status') && 
 
@@ -150,16 +150,16 @@ class Authentication {
 
     static function handle_login() {
         $auth = null;
-
+        $stock_message = "Request is missing authentication";
         // Check if the authentication values exist
         if (app('API_authentication_mode') === "headers") {
             try{
                 $auth = getHeader("Authentication");
             } catch (Exception $e) {
-                throw new BadRequest("Request is missing Authentication");
+                throw new BadRequest("No 'Authentication' header found.", $stock_message);
             }
         } else {
-            if (!key_exists('Authentication', $_POST)) throw new BadRequest("Request is missing Authentication");
+            if (!key_exists('Authentication', $_POST)) throw new BadRequest("The POST body is missing the 'Authentication' field", $stock_message);
             $auth = $_POST['Authentication'];
         }
 
@@ -174,7 +174,7 @@ class Authentication {
 
     static function handle_email_login($email) {
         $uname = $email;
-        if(!$uname) throw new BadRequest("Unspecified username");
+        if(!$uname) throw new BadRequest("Username field was not specified","Username is missing");
 
         $crud = new UserCRUD();
         $user = $crud->getUserByUnameOrEmail($uname);

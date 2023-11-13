@@ -51,6 +51,7 @@ class AutoCompleteInterface extends HTMLElement {
         this.hasFocus = false;
         this.timeout = null;
         this.actionAbort = null;
+        this.setAttribute("__custom-input", "true");
     }
 
     getAutocompleteSearchField() {
