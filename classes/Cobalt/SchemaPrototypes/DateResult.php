@@ -2,7 +2,7 @@
 
 namespace Cobalt\SchemaPrototypes;
 
-class SchemaDateResult extends SchemaResult {
+class DateResult extends SchemaResult {
     protected $type = "date";
     
     public function display():string {

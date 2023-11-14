@@ -43,9 +43,12 @@ class DatabaseManagement {
         }
         $filepath = $file . $this->get_backup_file_name();
         if($talk) printf("Writing file... ");
-        file_put_contents($filepath, json_encode($db_backup));
+        if(!is_writable($filepath)) return say(" file path is not writeable!", "e");
+        if(file_put_contents($filepath, json_encode($db_backup)) === false) return say(" writing $filepath failed!", "e");
+        if(!file_exists($filepath)) return say(" an unknown error occurred. $filepath does not exist.");
         if($talk) say(" done", "i");
-        return "Written to \"$filepath\"";
+        if($talk) say("$filepath ". filesize($filepath) / 1024 . "Kb", 'i');
+        return;
     }
 
     function get_backup_file_name() {
@@ -54,6 +57,7 @@ class DatabaseManagement {
     }
 
     public function import($filename, $talk = false, $caution = true) {
+        if(!file_exists($filename)) return say("File `$filename` does not exist.", "e");
         $contents = json_decode(file_get_contents($filename),true);
         $count = count($contents);
         if($talk) say("Loaded $count collections from file", "i");

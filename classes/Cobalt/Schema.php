@@ -5,7 +5,7 @@ namespace Cobalt;
 use ArrayAccess;
 use Cobalt\SchemaPrototypes\ArrayResult;
 use Cobalt\SchemaPrototypes\BooleanResult;
-use Cobalt\SchemaPrototypes\SchemaDateResult;
+use Cobalt\SchemaPrototypes\DateResult;
 use Cobalt\SchemaPrototypes\NumberResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\StringResult;
@@ -43,15 +43,14 @@ use TypeError;
  */
 abstract class Schema implements Persistable, Iterator, ArrayAccess {
     private ObjectId $id;
-    private UTCDateTime $createdAt;
+    private $createdAt;
     public array $__dataset = [];
     private int $__current_index = 0;
     private array $__schema;
 
     function __construct() {
         $this->id = new ObjectID;
-        $this->createdAt = new UTCDateTime;
-        $this->__schema = $this->__get_schema();
+        $this->__initialize_schema();
     }
 
     function __toString():string {
@@ -59,6 +58,15 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
     }
 
     abstract function __get_schema():array;
+
+    private function __initialize_schema() {
+        $this->__schema = [];
+        $schema = $this->__get_schema();
+        foreach($schema as $fieldName => $values) {
+            if(is_array($values)) $this->__schema[$fieldName] = $values;
+            if($values instanceof SchemaResult) $this->__schema[$fieldName] = ['type' => $values];
+        }
+    }
 
     public function __isset($name):bool {
         if(key_exists($name, $this->__schema)) return true;
@@ -105,7 +113,7 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
                         $result = new ArrayResult();
                         break;
                     case "\\MongoDB\\BSON\\UTCDateTime":
-                        $result = new SchemaDateResult();
+                        $result = new DateResult();
                         break;
                     case "\\Cobalt\\Schema":
                         return $lookup;
@@ -174,21 +182,25 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
     function bsonSerialize(): array|\stdClass|Document {
         $serializationResult = array_merge($this->__dataset, [
             '_id' => $this->id,
-            'createdAt' => $this->createdAt,
         ]);
         return $serializationResult;
     }
 
     function bsonUnserialize(array $data): void {
-        $this->__schema = $this->__get_schema();
+        $this->__initialize_schema();
         $this->id = $data['_id'];
-        $this->createdAt = $data['createdAt'];
         $this->__dataset = $data;
     }
 
-    function ingest(array $data):Schema {
+    /**
+     * 
+     * @param array|Iterable $data 
+     * @return Schema 
+     */
+    function ingest($data):Schema {
+        if(is_iterable($data) && !is_array($data)) $data = doc_to_array($data);
+        if(!is_array($data)) throw new TypeError('$data must be an array or convertable into an array');
         if(!isset($data['_id'])) $data['_id'] = new ObjectId();
-        if(!isset($data['createdAt'])) $data['createdAt'] = new UTCDateTime();
 
         $this->bsonUnserialize($data);
         return $this;

@@ -59,8 +59,13 @@ $app_env = __APP_ROOT__ . "/app_env.php";
 if(file_exists($app_env)) require_once $app_env;
 
 // Import Composer's autoload
-$composer = __DIR__ . "/vendor/autoload.php";
-if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the cobalt-core directory as your webserver user");
+$composer = __APP_ROOT__ . "/vendor/autoload.php";
+$__dependency_dir = "app root";
+if (!file_exists($composer) && !file_exists(__APP_ROOT__ . "/composer.json")) {
+    $composer = __ENV_ROOT__ . "/vendor/autoload.php";
+    $__dependency_dir = "cobalt-core";
+}
+if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the $__dependency_dir directory as your webserver user");
 require_once $composer;
 
 // And then define our own autoload function (specified in global_functions.php)

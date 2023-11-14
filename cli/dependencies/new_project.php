@@ -254,7 +254,7 @@ class NewProject{
 
     function __np_create_ignored(){
         print(" -> Creating ignored files... ");
-        file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/");
+        file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/\nvendor/");
         @mkdir($this->new_project_dir . "/ignored");
         touch($this->new_project_dir . "/ignored/settings.json");
         return true;
