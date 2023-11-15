@@ -1,5 +1,5 @@
 {
-    navigation_callback: () => {
+    onload: () => {
         let buttons = document.querySelectorAll("async-button:is(.toggle-read-status)"),
         unread = "read-status--unread",
         read = "read-status--read",

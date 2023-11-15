@@ -1,5 +1,5 @@
 {
-    navigation_callback: () => {
+    onload: () => {
         const logoUpdate = document.querySelector("#logo-updater");
         const logoTarget = logoUpdate.querySelector("img");
         console.log({logoUpdate, logoTarget})

@@ -13,7 +13,7 @@ class ContactForm extends Controller {
 
     function index() {
         $conMan = new ContactManager();
-        $results = $conMan->findAllAsSchema(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
+        $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
         $lines = $this->docsToViews($results, "/admin/contact-form/index-item.html");
         add_vars([
             'title' => 'Contact Form Submissions',
@@ -37,7 +37,7 @@ class ContactForm extends Controller {
         
         add_vars([
             'title' => "Contact",
-            'doc' => $conMan->findOneAsSchema(['_id' => $_id])
+            'doc' => $conMan->findOne(['_id' => $_id])
         ]);
 
         $conMan->read_for_user($_id, session());

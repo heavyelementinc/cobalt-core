@@ -1,4 +1,3 @@
-
 class RouteObject {
     constructor(route) {
         window.router_entities = {};
@@ -90,10 +89,12 @@ class RouteObject {
             this.match = true;
             this.regex = rt;
             this.callbacks = (router_table[regex]) ? {...router_table[regex]} : {};
-            for(const deprecated of [['navigation_callback', 'onload'], ['exit_callback', 'onnavigateend']]) {
+            for(const deprecated of [['navigation_callback', 'onload'], ['exit_callback', 'beforeunload']]) {
                 if(deprecated[0] in router_table[regex] === false) continue;
                 delete this.callbacks[deprecated[0]];
-                this.callbacks[deprecated[1]] = router_table[regex][deprecated[0]];
+                this.callbacks[deprecated[1]] = () => {
+                    router_table[regex][deprecated[0]];
+                }
                 console.warn(`DEPRECATED: A route uses a deprecated callback "${deprecated[0]}" and was automatically upgraded to "${deprecated[1]}". You should change this soon.`, regex);
             }
             this.requiresReload = this.crossesCurrentBoundary;
@@ -120,7 +121,13 @@ class ClientRouter extends EventTarget{
             // location: new RouteObject(window.location.pathname),
             routeBoundaries: JSON.parse(document.querySelector("#route-boundaries").innerText)
         }
-        this.lastLocationChangeEvent = {}
+        this.lastLocationChangeEvent = {};
+        /**
+         * Here, we set the value of the last page request equal to window.__ in order to
+         * preserve the variables exported publicly by the Cobalt Engine for the first page load
+         * @property Stores the last navigation event result
+         */
+        this.lastPageRequestResult = window.__;
         this.mode = "spa";
         this.firstRun = true;
         this.setPushStateMode();
@@ -161,8 +168,6 @@ class ClientRouter extends EventTarget{
     }
 
     async navigate(route) {
-
-
         const forms = document.querySelectorAll("form-request");
         for(const f of forms) {
             if(f.unsavedChanges) {
@@ -199,9 +204,11 @@ class ClientRouter extends EventTarget{
         let result = {};
         try {
             if(!this.skipRequest) result = await api.submit();
+            this.lastPageRequestResult = result;
         } catch(error) {
             this.progressBar.classList.remove("navigation-start");
             this.dispatchEvent(new CustomEvent("navigateerror", {detail: {error, route: this.route}}));
+            this.lastPageRequestResult = {};
             return;
         }
         
@@ -319,22 +326,33 @@ class ClientRouter extends EventTarget{
             if(!this.previousRoute) return false;
             if("callbacks" in this.previousRoute === false) return false;
             // if("exit_callback" in this.previousRoute.callbacks) this.previousRoute.callbacks.exit_callback(...this.previousRoute.variables);
-            if("onnavigateend" in this.previousRoute.callbacks) this.previousRoute.callbacks.onnavigateend(...this.previousRoute.variables);
+            if("onnavigateend" in this.previousRoute.callbacks) this.previousRoute.callbacks.onnavigateend(e, ...this.previousRoute.variables);
         });
 
         this.addEventListener("load", e => {
             if(!this.route) return false;
             if("callbacks" in this.route === false) return false;
             // if("navigation_callback" in this.route.callbacks) this.route.callbacks.navigation_callback(...this.route.variables);
-            if("onload" in this.route.callbacks) this.route.callbacks.onload(...this.route.variables);
+            if("onload" in this.route.callbacks) this.route.callbacks.onload(e, ...this.route.variables);
+        });
+
+        this.addEventListener("navigationstart", e => {
+            if(!this.route) return false;
+            if("callbacks" in this.route === false) return false;
+
+            if("beforeunload" in this.route.callbacks) this.route.callbacks.beforeunload(e, ...this.route.variables);
+            return false;
         });
 
         this.addEventListener("navigateerror", e => {
             if(!this.route) return false;
             if("callbacks" in this.route === false) return false;
-            if("onnavigateerror" in this.route.callbacks) this.route.callbacks.onnavigateerror(e.detail.error);
+            if("onnavigateerror" in this.route.callbacks) this.route.callbacks.onnavigateerror(e, e.detail.error);
         });
 
+        /**
+         * This listener intercepts the browser history events and applys them
+         */
         window.addEventListener("popstate", e => {            
             if(!e.state) return;
 

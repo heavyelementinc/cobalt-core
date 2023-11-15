@@ -6,9 +6,11 @@ use ArrayAccess;
 use Cobalt\SchemaPrototypes\ArrayResult;
 use Cobalt\SchemaPrototypes\BooleanResult;
 use Cobalt\SchemaPrototypes\DateResult;
+use Cobalt\SchemaPrototypes\IdResult;
 use Cobalt\SchemaPrototypes\NumberResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\StringResult;
+use Exceptions\HTTP\BadRequest;
 use Iterator;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
@@ -16,7 +18,8 @@ use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\Document;
 use PgSql\Lob;
 use TypeError;
-
+use Validation\Exceptions\ValidationFailed;
+use Validation\Exceptions\ValidationIssue;
 
 /**
  * Schema
@@ -41,12 +44,11 @@ use TypeError;
  * 
  * @package Cobalt
  */
-abstract class Schema implements Persistable, Iterator, ArrayAccess {
+abstract class Schema extends Validation implements Persistable, Iterator, ArrayAccess {
     private ObjectId $id;
-    private $createdAt;
     public array $__dataset = [];
     private int $__current_index = 0;
-    private array $__schema;
+    protected array $__schema;
 
     function __construct() {
         $this->id = new ObjectID;
@@ -59,7 +61,7 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
 
     abstract function __get_schema():array;
 
-    private function __initialize_schema() {
+    function __initialize_schema():void {
         $this->__schema = [];
         $schema = $this->__get_schema();
         foreach($schema as $fieldName => $values) {
@@ -79,14 +81,11 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
         
         $lookup = lookup_js_notation($name, $this->__dataset, false);
 
-        // if(key_exists($name, $this->__schema) 
-        //     && key_exists("get", $this->__schema[$name])
-        //     && is_callable($this->__schema[$name]['get'])
-        // ) return $this->__schema[$name]['get']($lookup, $name);
+        return $this->datatype_persistance($name, $lookup);
+    }
 
-        $type = gettype($lookup);
-
-        // \Cobalt\SchemaPrototypes\SchemaResult $result;
+    function datatype_persistance($name, $value):SchemaResult {
+        $type = gettype($value);
 
         switch($type) {
             case (key_exists($name, $this->__schema) 
@@ -108,15 +107,18 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
             case "boolean":
                 $result = new BooleanResult();
             case "object":
-                switch(get_class($lookup)) {
+                switch(get_class($value)) {
                     case "\\MongoDB\\BSON\\Array":
                         $result = new ArrayResult();
                         break;
                     case "\\MongoDB\\BSON\\UTCDateTime":
                         $result = new DateResult();
                         break;
+                    case "\\MongoDB\\BSON\\ObjectId":
+                        $result = new IdResult();
+                        break;
                     case "\\Cobalt\\Schema":
-                        return $lookup;
+                        return $value;
                 }
             default:
                 $result = new SchemaResult();
@@ -125,7 +127,7 @@ abstract class Schema implements Persistable, Iterator, ArrayAccess {
 
         $result->setName($name);
         $result->setSchema($this->__schema[$name]);
-        $result->setValue($lookup);
+        $result->setValue($value);
         $result->datasetReference($this);
 
         return $result;

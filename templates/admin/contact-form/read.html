@@ -1,7 +1,7 @@
 <hgroup>
     <div class='hrow'>
         <h1>Contact Form Submission</h1>
-        <date>{{doc.date.display}}</date>
+        <date>{{doc.date.format("verbose")}}</date>
     </div>
     <action-menu>
         <option method="DELETE" action="/api/v1/contact/delete/{{doc._id}}">Delete</option>
@@ -18,15 +18,15 @@
     </flex-row>
     <flex-row>
         <flex-header>Email</flex-header>
-        <flex-cell><a href="mailto:{{doc.email}}">{{doc.email}}</a></flex-cell>
+        <flex-cell><a href="mailto:{{doc.email}}">{{doc.email.toLower()}}</a></flex-cell>
     </flex-row>
     <flex-row>
         <flex-header>Phone</flex-header>
-        <flex-cell><a href="tel:{{doc.phone}}">{{doc.phone}}</a></flex-cell>
+        <flex-cell><a href="tel:{{doc.phone}}">{{doc.phone.format()}}</a></flex-cell>
     </flex-row>
     <flex-row>
         <flex-header>Method</flex-header>
-        <flex-cell>{{doc.preferred.display}}</flex-cell>
+        <flex-cell>{{doc.preferred.display()}}</flex-cell>
     </flex-row>
     <flex-row>
         <flex-header>Source IP</flex-header>
@@ -36,5 +36,5 @@
 
 <h2>Message</h2>
 <blockquote>
-    {{!doc.additional.md}}
+    {{doc.additional.md()}}
 </blockquote>

@@ -8,4 +8,8 @@ class PhoneNumberResult extends StringResult {
     function validate() {
 
     }
+
+    function format($format = "(ddd) ddd-dddd") {
+        return phone_number_format($this->getValue(), $format);
+    }
 }

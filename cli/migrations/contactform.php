@@ -22,11 +22,11 @@ class contactform extends Migration {
     }
 
     public function runOne($document) {
+        $id = $document['_id'];
         unset($document['_id']);
-        unset($document['createdAt']);
         $doc = (new Persistance())->ingest($document);
-        $result = $this->insertOne($doc);
-        $this->updateCounts($result);
-        return $this->deleteOne(['_id' => $document['_id']],);
+        $this->updateCounts($this->insertOne($doc));
+        $result = $this->deleteOne(['_id' => $id]);
+        return $result;
     }
 }

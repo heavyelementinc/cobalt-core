@@ -73,11 +73,13 @@
 
 namespace Render;
 
+use BadFunctionCallException;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\NotFound;
 
 class Render {
     public $body = "";
+    public $name = "";
     public $stock_vars = [];
     public $vars = [];
     // const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
@@ -237,6 +239,9 @@ class Render {
             $operator = $name[0];
             $options = ENT_QUOTES;
             $process_vars = true;
+            $ex = null;
+            $function = null;
+            $arguments = null;
 
             /** Check if this variable is supposed to be inline HTML (as denoted by the "!")
              * if it is, we need to remove the exclamation point from the name */
@@ -286,7 +291,11 @@ class Render {
                 $is_inline_html = true;
                 if($function) {
                     // if(!$args) $args = [];
-                    $replace[$i] = $replace[$i]->{$function}(...$arguments);
+                    try {
+                        $replace[$i] = $replace[$i]->{$function}(...$arguments);
+                    } catch(BadFunctionCallException $e) {
+                        $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
+                    }
                 } else {
                     $replace[$i] = $replace[$i]->getValue();
                 }

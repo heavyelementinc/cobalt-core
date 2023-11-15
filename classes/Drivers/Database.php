@@ -94,6 +94,13 @@ abstract class Database {
         return $this->collection->distinct($field, $filter);
     }
 
+    /**
+     * @deprecated 
+     * @param mixed $filter 
+     * @param array $options 
+     * @param mixed $schema 
+     * @return object|null 
+     */
     final function findOneAsSchema($filter, array $options = [], $schema = null) {
         $result = $this->findOne($filter,$options);
         if(!$schema) $schema = $this->get_schema_name($result);
@@ -101,6 +108,14 @@ abstract class Database {
         return null;
     }
 
+    /**
+     * @deprecated 
+     * @param mixed $filter 
+     * @param array $options 
+     * @param mixed $schema 
+     * @param bool $idsAsKeys 
+     * @return object[] 
+     */
     final function findAllAsSchema($filter, array $options = [], $schema = null, $idsAsKeys = false) {
         $results = $this->find($filter, $options);
         $processed = [];

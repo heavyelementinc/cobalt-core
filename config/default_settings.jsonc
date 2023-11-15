@@ -267,6 +267,12 @@
     "API_CORS_enable_other_origins": {
         "default": true
     },
+    "Validation_exclude_unregistered_keys_by_default": {
+        "default": true
+    },
+    "Validation_strict_data_submission_policy_by_default": {
+        "default": true
+    },
 
     "Mailchimp_api_signup_route": {
         "default": false

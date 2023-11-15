@@ -413,8 +413,9 @@ function get_exportable_vars() {
     return $GLOBALS['EXPORTED_PUBLIC_VARS'];
 }
 
-function get_exportables_as_json() {
-    return json_encode($GLOBALS['EXPORTED_PUBLIC_VARS']);
+function get_exportables_as_json($encode = 0) {
+    if($encode === true) $encode = JSON_HEX_APOS;
+    return base64_encode(json_encode($GLOBALS['EXPORTED_PUBLIC_VARS'], $encode | JSON_PRETTY_PRINT));
 }
 
 $GLOBALS['TEMPLATE_BINDINGS'] = [

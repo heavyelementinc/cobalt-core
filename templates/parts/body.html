@@ -28,7 +28,7 @@
     @router_table@
     <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{app.version}}">
     <script>
-        window.__ = JSON.parse('@get_exportables_as_json()');
+        window.__ = JSON.parse(atob('@get_exportables_as_json(true);'));
     </script>
 </head>
 

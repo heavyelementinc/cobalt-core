@@ -25,8 +25,8 @@ class SchemaResult implements \Stringable {
         $this->originalValue = $value;
     }
 
-    function setSchema(array $schema):void {
-        $this->schema = $schema;
+    function setSchema(?array $schema):void {
+        $this->schema = $schema ?? [];
     }
 
     function datasetReference(Schema $schema):void {
@@ -40,10 +40,10 @@ class SchemaResult implements \Stringable {
     function __call($name, $arguments) {
         if(key_exists($name, $this->schema) && is_callable($this->schema[$name])) {
             if($arguments) return $this->schema[$name]($this->getValue(), $this, ...$arguments);
-            return $this->schema[$name]();
+            return $this->schema[$name]($this->getValue(), $this);
         }
-        if(method_exists($this, $name)) return $this->{$name}($this->getValue(), $this, ...$arguments);
-        throw new \BadFunctionCallException("Function `$name` does not exist");
+        if(method_exists($this, $name)) return $this->{$name}($this->getValue($this->getValue(), $this), $this, ...$arguments);
+        throw new \BadFunctionCallException("Function `$name` does not exist on `$this->name`");
     }
 
     /**
@@ -183,6 +183,10 @@ class SchemaResult implements \Stringable {
                     else $items[] = $v;
                 }
                 return implode(", ", $items);
+            default:
+                if(in_array($val, $valid)) return $valid[$val];
+                if(in_array($this->value, $valid)) return $valid[$this->value];
+                return (string)$val ?? "";
         }
     }
 }

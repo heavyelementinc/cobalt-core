@@ -19,8 +19,16 @@ class StringResult extends SchemaResult implements ArrayAccess{
         return strtoupper($this->value);
     }
 
+    public function toUppercase() {
+        return $this->uppercase();
+    }
+
     public function lowercase() {
         return strtolower($this->value);
+    }
+
+    public function toLower() {
+        return $this->lowercase();
     }
 
     public function last() {
@@ -32,6 +40,7 @@ class StringResult extends SchemaResult implements ArrayAccess{
         $valid = $this->valid();
         if(key_exists($val, $valid)) return $valid[$val];
         if(key_exists($this->value, $valid)) return $valid[$this->value];
+        return (string)$val;
     }
 
 
