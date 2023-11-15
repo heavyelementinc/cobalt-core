@@ -215,6 +215,7 @@ class AsyncMessageHandler {
     }
 
     async xconfirm() {  // ✅
+        if(this.fetch.constructor.name === "AsyncFetch") return true;
         this.errorHandled = true;
         let confirm = new FetchConfirm(this.responseBody, this.fetch);
         result = await confirm.draw();

@@ -135,14 +135,20 @@ class ActionMenu {
             } catch (error) {
                 console.log(api);
                 action.loading.error(error);
-                if(api.result.code === 300) {
+                if(api.client.status === 300) {
                     this.closeMenu();
-                    return true;
+                    const promise = new Promise((resolve, reject) => {
+                        api.addEventListener("done", e => {
+                            resolve(e.detail);
+                        });
+                    });
+                    await promise;
+                    if(!promise) return;
+                    requestData = api.resolved.fulfillment;
+                } else {
+                    if("original" in action) action.original.dispatchEvent(new Event("error", {detail: {action, event, result: api.result}}))
+                    return;
                 }
-                new StatusError({message: api.result.message, icon: "ion-warning"});
-
-                if("original" in action) action.original.dispatchEvent(new Event("error", {detail: {action, event, result: api.result}}))
-                return;
             }
         }
         try {

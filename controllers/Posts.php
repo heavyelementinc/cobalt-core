@@ -30,6 +30,7 @@ class Posts extends PostController {
         $this->download($filename);
     }
 
+
     function defaultImage($id) {
         $_id = new ObjectId($id);
         $this->initFS();
@@ -43,6 +44,10 @@ class Posts extends PostController {
                 'default_image' => $result->filename
             ]
         ]);
+
+        $doc = $this->postMan->findOneAsSchema(['_id' => $result->for]);
+
+        update("#default_image", ['style' => ['background-image' => "url('$doc->default_image')"]]);
 
         return $result;
     }

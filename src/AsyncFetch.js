@@ -1,4 +1,5 @@
 /**
+ * @emits resubmission - When a confirmation dialog (or another header directive) causes the fetch request to be resubmitted
  * @emits submit  - When a request is being performed
  * @emits aborted - When the submit is prevented or .abort() is called
  * @emits error   - When a request has an error
@@ -587,7 +588,8 @@ class XConfirm extends HeaderDirective {
         const responseBody = JSON.parse(xhr.response);
         const fulfillment = responseBody.fulfillment;
         let confirm = await modalConfirm(fulfillment.error, fulfillment.data.okay, "Cancel", fulfillment.data.dangerous);
-        if(confirm === false) return;
+        if(confirm === false) return xhr.dispatchEvent(new CustomEvent("resubmission", {detail: false}));
+        xhr.dispatchEvent(new CustomEvent("resubmission", {detail: true}));
 
         xhr.setRequestHeader('X-Confirm-Dangerous', 'true');
         return await xhr.submit(fulfillment.data.return);
