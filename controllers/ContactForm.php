@@ -59,21 +59,23 @@ class ContactForm extends Controller {
     }
 
     function contact_submit() {
-        $validator = new \Contact\ContactFormValidator();
-        $mutant = $validator->validate($_POST);
+        $className = __APP_SETTINGS__['Contact_form_validation_classname'];
+        $persistance = new $className();
+        $mutant = $persistance->validate($_POST);
         $mutant = array_merge($mutant, [
             "ip" => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'],
             "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"],
             "date"  => new \MongoDB\BSON\UTCDateTime()
         ]);
+        $persistance->ingest($mutant);
         switch(app("Contact_form_interface")) {
             case "SMTP":
-                $result = $this->contactSMTP($mutant);
+                $result = $this->contactSMTP($persistance);
                 header("X-Status: @info " . app("Contact_form_success_message"));
                 break;
             case "panel":
             default:
-                $id = $this->contactPanel($mutant);
+                $id = $this->contactPanel($persistance);
                 header("X-Status: @info " . app("Contact_form_success_message"));
                 return $id;
                 break;
@@ -115,16 +117,18 @@ class ContactForm extends Controller {
         } catch (\Exception $e) {
             throw new ServiceUnavailable("An unknown error occurred");
         }
-
-        $push = new PushNotifications();
-        $push->push(
-            'Contact Submission',
-            "Someone has filled out the {{app.app_name}} contact form!",
-            ['contact_form_new'],
-            ['path' => "/admin/contact-form/".(string)$result->getInsertedId()]
-        );
+        try{
+            $push = new PushNotifications();
+            $push->push(
+                'Contact Submission',
+                "Someone has filled out the {{app.app_name}} contact form!",
+                ['contact_form_new'],
+                ['path' => "/admin/contact-form/".(string)$result->getInsertedId()]
+            );
+        } catch (\Exception $e) {
+            
+        }
         
-        assert(app("Contact_form_notify_on_new_submission") === false);
         if(app("Contact_form_notify_on_new_submission")) {
             // $notify = new Notification1_0Schema([
             //     'subject' => 'New contact form submission',

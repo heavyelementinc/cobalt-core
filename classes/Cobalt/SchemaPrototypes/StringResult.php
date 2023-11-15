@@ -3,7 +3,13 @@
 namespace Cobalt\SchemaPrototypes;
 
 use ArrayAccess;
+use Validation\Exceptions\ValidationIssue;
 
+/**
+ * Custom schema entries:
+ * 'char_limit' - @int The max length of the value. If it's not specified, the string can be any length.
+ * @package Cobalt\SchemaPrototypes
+ */
 class StringResult extends SchemaResult implements ArrayAccess{
     protected $type = "string";
 
@@ -61,5 +67,27 @@ class StringResult extends SchemaResult implements ArrayAccess{
 
     public function offsetUnset(mixed $offset): void {
         return;
+    }
+
+    function character_limit($value) {
+        if(!key_exists('char_limit', $this->schema)) return $value;
+        $length = strlen($value);
+        $max = $this->schema['char_limit'];
+        if($length <= $max) return $value;
+        throw new ValidationIssue("This may not be greater than $max characters long");
+    }
+    
+    function restricted_chars($value) {
+        if(!key_exists('illegal_chars', $this->schema)) return $value;
+        $illegal = str_split($this->schema['illegal_chars']);
+        $mutant = str_replace($illegal, "", $value);
+        if($mutant !== $value) throw new ValidationIssue("This entry contains illegal characters.");
+        return $value;
+    }
+    
+    function filter($value) {
+        $this->character_limit($value);
+        $this->restricted_chars($value);
+        return $value;
     }
 }

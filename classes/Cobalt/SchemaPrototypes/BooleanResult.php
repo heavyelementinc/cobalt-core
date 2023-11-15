@@ -2,6 +2,8 @@
 
 namespace Cobalt\SchemaPrototypes;
 
+use Validation\Exceptions\ValidationIssue;
+
 class BooleanResult extends SchemaResult {
     protected $type = "boolean";
     
@@ -20,4 +22,11 @@ class BooleanResult extends SchemaResult {
         return ($this->getValue()) ? "true" : "false";
     }
 
+    function filter($value) {
+        if(is_bool($value)) return $value;
+        if(\filter_var($value, FILTER_VALIDATE_BOOL)) {
+            return (in_array($value, [1, '1', 'true', 'on', 'yes'])) ? true : false;
+        }
+        throw new ValidationIssue("This value is not a boolean value, nor can it be unambiguously converted to a boolean value.");
+    }
 }

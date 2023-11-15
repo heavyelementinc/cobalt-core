@@ -65,7 +65,13 @@ abstract class Schema extends Validation implements Persistable, Iterator, Array
         $this->__schema = [];
         $schema = $this->__get_schema();
         foreach($schema as $fieldName => $values) {
-            if(is_array($values)) $this->__schema[$fieldName] = $values;
+            if(is_array($values)) {
+                if(key_exists(0, $values) && $values[0] instanceof SchemaResult) {
+                    $values['type'] = $values[0];
+                    unset($values[0]);
+                }
+                $this->__schema[$fieldName] = $values;
+            }
             if($values instanceof SchemaResult) $this->__schema[$fieldName] = ['type' => $values];
         }
     }

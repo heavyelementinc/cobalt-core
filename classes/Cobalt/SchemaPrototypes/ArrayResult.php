@@ -5,6 +5,7 @@ namespace Cobalt\SchemaPrototypes;
 use ArrayAccess;
 use Iterator;
 use MongoDB\Model\BSONArray;
+use Validation\Exceptions\ValidationIssue;
 
 class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
     protected $type = "array";
@@ -56,5 +57,10 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
 
     public function rewind(): void {
         $this->__index = 0;
+    }
+
+    function filter($value) {
+        if(!is_array($value)) throw new ValidationIssue("Value must be an array");
+        return $value;
     }
 }

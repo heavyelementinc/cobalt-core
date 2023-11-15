@@ -393,7 +393,9 @@
             }
         }
     },
-
+    "Contact_form_validation_classname": {
+        "default": "\\Contact\\Persistance"
+    },
     "Contact_form_submission_throttle": {
         "default": 500,
         "meta": {

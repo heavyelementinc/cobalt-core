@@ -7,6 +7,8 @@ use Cobalt\SchemaPrototypes\BooleanResult;
 use Cobalt\SchemaPrototypes\DateResult;
 use Cobalt\SchemaPrototypes\EmailAddressResult;
 use Cobalt\SchemaPrototypes\EnumResult;
+use Cobalt\SchemaPrototypes\IpResult;
+use Cobalt\SchemaPrototypes\MarkdownResult;
 use Cobalt\SchemaPrototypes\PhoneNumberResult;
 use Cobalt\SchemaPrototypes\StringResult;
 
@@ -14,20 +16,30 @@ class Persistance extends Schema {
 
     public function __get_schema(): array {
         return [
-            "name" => new StringResult,
-            "organization" => new StringResult,
+            "name" => [
+                new StringResult,
+                'char_limit' => 150,
+            ],
+            "organization" => [
+                new StringResult,
+                'char_limit' => 150,
+                'illegal_chars' => '<>'
+            ],
             "email" => new EmailAddressResult,
             "phone" => new PhoneNumberResult,
             "preferred" => [
-                "type" => new EnumResult,
+                new EnumResult,
                 'valid' => [
                     'email' => "Email",
                     'phone' => "Phone"
                 ]
             ],
-            "additional" => new StringResult,
+            "additional" => [
+                new MarkdownResult,
+                'char_limit' => 1800
+            ],
             "read" => [
-                'type' => new BooleanResult,
+                new BooleanResult,
                 'validate' => function ($val, $ref) {
                     return $ref->isBoolean($val);
                 },
@@ -36,8 +48,8 @@ class Persistance extends Schema {
                     return "unread";
                 }
             ],
-            "date" =>  new DateResult,
-            "ip" => new StringResult,
+            "date" => new DateResult,
+            "ip" => new IpResult,
         ];
     }
 

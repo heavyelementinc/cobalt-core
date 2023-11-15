@@ -7,7 +7,7 @@ use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
 abstract class Validation {
-    protected array $__issues;
+    protected array $__issues = [];
     protected array $__schema;
     protected bool $__excludeUnregisteredKeys = __APP_SETTINGS__['Validation_exclude_unregistered_keys_by_default'];
     protected bool $__strictDataSubmissionPolicy = __APP_SETTINGS__['Validation_strict_data_submission_policy_by_default'];
@@ -37,7 +37,7 @@ abstract class Validation {
         }
         $result = $this->datatype_persistance($field, $value);
         try {
-            $validated = $result->validate();
+            $validated = $result->filter($value);
         } catch (ValidationIssue $e) { // Handle issues
             if (!isset($this->__issues[$field])) {
                 $this->__issues[$field] = $e->getMessage();
