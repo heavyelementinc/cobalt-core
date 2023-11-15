@@ -104,6 +104,17 @@ class PostSchema extends \Validation\Normalize {
             'alignment.position' => [
                 'get' => fn ($val) => $val ?? "center center",
                 'set' => fn ($val) => $this->setAlignment($val),
+                'valid' => [
+                    "center center" => "Background Centered",
+                    "center left"   => "Center Left",
+                    "center right"  => "Center Right",
+                    "top left"      => "Top Left",
+                    "top center"    => "Top Center",
+                    "top right"     => "Top Right",
+                    "bottom left"   => "Bottom Left",
+                    "bottom center" => "Bottom Center",
+                    "bottom right"  => "Bottom Right",
+                ]
             ],
             'alignment.parallax' => [
                 'get' => fn ($val) => $val ?? false,

@@ -175,8 +175,8 @@ class RouteGroup {
             $color = $entry['navigation'][$this->groupName]['icon_color'] ?? $entry['anchor']['icon_color'] ?? "";
             if($color) {
                 $lin = "linear-gradient";
-                if(substr($color, 0, strlen($lin)) === $lin) $color = " style=\"background: $color;background-clip:text;-webkit-text-fill-color:transparent;text-fill-color:transparent;\"";
-                else $color = " style='color:$color'";
+                // if(substr($color, 0, strlen($lin)) === $lin) $color = " style=\"background: $color;background-clip:text;-webkit-text-fill-color:transparent;text-fill-color:transparent;\"";
+                // $color = " style='color:$color'";
             }
         // }
         return "<i name='{$icon}'$color></i> ";
