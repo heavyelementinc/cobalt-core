@@ -1,6 +1,6 @@
 window.Cobalt = {};
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], markdown-area[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-user-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], markdown-area[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
 
 function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());

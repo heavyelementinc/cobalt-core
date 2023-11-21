@@ -25,8 +25,8 @@ class contactform extends Migration {
         $id = $document['_id'];
         unset($document['_id']);
         $doc = (new Persistance())->ingest($document);
-        $this->updateCounts($this->insertOne($doc));
-        $result = $this->deleteOne(['_id' => $id]);
+        $result = $this->updateOne(['_id' => $id], ['$set' => $doc]);
+        // $result = $this->deleteOne(['_id' => $id]);
         return $result;
     }
 }

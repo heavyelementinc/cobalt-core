@@ -4,6 +4,7 @@ use Cobalt\Notifications\PushNotifications;
 use Contact\ContactManager;
 use Controllers\Controller;
 use Exceptions\HTTP\HTTPException;
+use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\ServiceUnavailable;
 use Exceptions\HTTP\TooManyRequests;
 use Mail\SendMail;
@@ -34,10 +35,11 @@ class ContactForm extends Controller {
     function read($id) {
         $conMan = new ContactManager();
         $_id = $conMan->__id($id);
-        
+        $found = $conMan->findOne(['_id' => $_id]);
+        if(!$found) throw new NotFound("Not found", "That resource does not exist");
         add_vars([
             'title' => "Contact",
-            'doc' => $conMan->findOne(['_id' => $_id])
+            'doc' => $found,
         ]);
 
         $conMan->read_for_user($_id, session());

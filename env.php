@@ -40,6 +40,23 @@ else die("Cannot establish absolute path to app root"); // Die.
 define("__APP_ROOT__", realpath($app_root));
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
+$cobaltlogpath = __APP_ROOT__ . "/ignored/logs/" . date("Y-m-d-") . "cobalt.log";
+define("COBALT_LOG_MESSAGE", 0);
+define("COBALT_LOG_NOTICE", 1);
+define("COBALT_LOG_WARNING", 2);
+define("COBALT_LOG_ERROR", 3);
+
+function cobalt_log($source, $string, $level = COBALT_LOG_MESSAGE) {
+    $levels = ['MESSAGE','NOTICE ','WARNING',' ERROR '];
+    global $cobaltlogpath;
+    $logpath = pathinfo($cobaltlogpath, PATHINFO_DIRNAME);
+    $logfile = $cobaltlogpath;
+    if(!is_dir($logpath)) mkdir($logpath, 0777, true);
+    $resource = fopen($logfile, "a+");
+    fwrite($resource,PHP_EOL."[".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string));
+    fclose($resource);
+}
+
 // Let's ensure that the ignored config directory exists
 $ignored_config_dir = __APP_ROOT__ . "/ignored/config/";
 if (!file_exists($ignored_config_dir)) mkdir($ignored_config_dir, 0777, true);

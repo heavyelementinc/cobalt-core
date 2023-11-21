@@ -292,16 +292,17 @@ class Render {
                 if($function) {
                     // if(!$args) $args = [];
                     try {
+                        // if(__APP_SETTINGS__['Renderer_debug_process']) $replace[$i]->setDebugTarget();
                         $replace[$i] = $replace[$i]->{$function}(...$arguments);
                     } catch(BadFunctionCallException $e) {
                         $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
                     }
                 } else {
-                    $replace[$i] = $replace[$i]->getValue();
+                    $replace[$i] = $replace[$i];//->getValue();
                 }
             }
 
-            if($replace[$i] instanceof \Cobalt\Schema) {
+            if($replace[$i] instanceof \Cobalt\PersistanceMap) {
                 user_error("Schemas shouldn't make it to this point!", E_USER_WARNING);
             }
 
@@ -309,6 +310,15 @@ class Render {
             if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i], $options); // < = &lt;
             // if (gettype($replace[$i]) === "object") $replace[$i] = "[object]";
         }
+
+        if(__APP_SETTINGS__['Renderer_debug_process']) {
+            $result = "";
+            foreach($search as $i => $var) {
+                $result .= str_replace($var, $replace[$i], $subject);
+            }
+            return $result;
+        }
+
         return str_replace($search, $replace, $subject);
     }
 

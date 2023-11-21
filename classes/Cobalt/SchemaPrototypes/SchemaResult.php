@@ -2,7 +2,7 @@
 
 namespace Cobalt\SchemaPrototypes;
 
-use Cobalt\Schema;
+use Cobalt\PersistanceMap;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
 use stdClass;
@@ -13,7 +13,7 @@ class SchemaResult implements \Stringable {
     protected $type = "mixed";
     protected string $name;
     protected $schema;
-    protected Schema $__dataset;
+    protected PersistanceMap $__reference;
     protected bool $asHTML = false;
 
     function setName(string $name) {
@@ -29,18 +29,19 @@ class SchemaResult implements \Stringable {
         $this->schema = $schema ?? [];
     }
 
-    function datasetReference(Schema $schema):void {
-        $this->__dataset = $schema;
+    function datasetReference(PersistanceMap &$schema):void {
+        $this->__reference = $schema;
     }
 
     function __toString():string {
-        return $this->getValue();
+        return $this->getValue() ?? "";
     }
 
     function __call($name, $arguments) {
-        if(key_exists($name, $this->schema) && is_callable($this->schema[$name])) {
-            if($arguments) return $this->schema[$name]($this->getValue(), $this, ...$arguments);
-            return $this->schema[$name]($this->getValue(), $this);
+        $schema = $this->schema;
+        if(key_exists($name, $schema) && is_callable($schema[$name])) {
+            if($arguments) return $schema[$name]($this->getValue(), $this, ...$arguments);
+            return $schema[$name]($this->getValue(), $this);
         }
         if(method_exists($this, $name)) return $this->{$name}($this->getValue($this->getValue(), $this), $this, ...$arguments);
         throw new \BadFunctionCallException("Function `$name` does not exist on `$this->name`");
@@ -57,7 +58,7 @@ class SchemaResult implements \Stringable {
     }
 
     public function getValue(): mixed {
-        if(key_exists('get', $this->schema) && is_callable($this->schema['get'])) $result = $this->schema['get']();
+        if(key_exists('get', $this->schema) && is_callable($this->schema['get'])) $result = $this->schema['get']($this->value, $this);
         else $result = $this->getRaw();
         if($this->asHTML === false && gettype($this->value) === "string") $result = htmlspecialchars($result);
         return $result;

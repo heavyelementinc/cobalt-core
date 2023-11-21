@@ -43,6 +43,7 @@ class Extensions extends \Drivers\Database {
 
         $ext_list = [];
         foreach($this->directories as $dir) {
+            if(!is_dir($dir)) continue;
             foreach(\scandir($dir) as $d) {
                 if($d[0] === ".") continue;
                 $ext_list[] = $dir . $d;
@@ -142,6 +143,7 @@ class Extensions extends \Drivers\Database {
         if($rebuild == null) return true;
         $last = $this->options->last_rebuild->toDateTime()->getTimestamp();
         foreach($this->directories as $dir) {
+            if(!file_exists($dir)) continue;
             $mtime = filemtime($dir);
             if(!$mtime) continue;
             if($last > $mtime) return true;

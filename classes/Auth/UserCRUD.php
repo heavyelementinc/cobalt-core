@@ -76,6 +76,10 @@ class UserCRUD extends \Drivers\Database {
         ], $options);
     }
 
+    final function getRootUsers() {
+        return iterator_to_array($this->find(['groups' => 'root']));
+    }
+
     final function findUserByToken(string $name, string $token):?UserSchema {
         $result = $this->findOneAsSchema([
             'token.name' => $name,

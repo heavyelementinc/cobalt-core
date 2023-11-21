@@ -74,6 +74,11 @@ function say($str, $type = "normal", $formatted = false) {
     print($fmt . " \n");
 }
 
+function say_quietly($str, $type = "normal", $formatted = false) {
+    if(!$GLOBALS['fmt_allowed']) return "";
+    say($str, $type, $formatted);
+}
+
 /**
  * Available types:
  *   * `b` - Bold

@@ -346,10 +346,16 @@ class InputObjectArray extends HTMLElement {
             try {
                 this.value = JSON.parse(this.getAttribute("value")) || [];
             } catch (e) {
-                console.warn("Field has invalid parse data", this);
+                throw new Error("Failed to parse JSON from 'value' attribute");
             }
         } else if (json && "innerText" in json) {
-            try { this.value = JSON.parse(json.innerText) || [] } catch (error) { }
+            let js = [];
+            try {
+                js = JSON.parse(json.innerText) || [];
+            } catch (error) {
+                throw new Error("Failed to parse JSON from <var> tag");
+            }
+            this.value = js;
         } else {
             this.value = [];
         }

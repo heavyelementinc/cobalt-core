@@ -91,6 +91,13 @@
         "default": true,
         "ring": 9
     },
+    "Notifications_can_send_notification": {
+        "group": "Notifications",
+        "label": "Able to send a notification",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
     "Notifications_can_access_any_notification": {
         "group": "Notifications",
         "label": "Able to access any notification<help-span value='Typically, a user can only access a notification if they wrote it or it is addressed to them.'></help-span>",

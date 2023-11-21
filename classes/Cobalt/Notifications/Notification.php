@@ -2,72 +2,62 @@
 
 namespace Cobalt\Notifications;
 
-use MongoDB\BSON\ObjectId;
-use MongoDB\BSON\UTCDateTime;
-use MongoDB\Model\BSONDocument;
+use Cobalt\PersistanceMap;
+use Cobalt\SchemaPrototypes\ArrayResult;
+use Cobalt\SchemaPrototypes\DateResult;
+use Cobalt\SchemaPrototypes\EnumResult;
+use Cobalt\SchemaPrototypes\IpResult;
+use Cobalt\SchemaPrototypes\MarkdownResult;
+use Cobalt\SchemaPrototypes\PersistanceMapResult;
+use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\SchemaPrototypes\UserIdArrayResult;
+use Cobalt\SchemaPrototypes\UserIdResult;
 
-class Notification implements MongoDB\BSON\Persistable {
-    /**
-     * @var string $subject - The subject of this notification. Unused?
-     */
-    private string $subject;
-    /**
-     * @var string $body - The body content. Stored as markdown.
-     */
-    private string $body;
+class Notification extends PersistanceMap {
 
-    private string $class = '\\Cobalt\\Notifications\\Notification1_0Schema';
-    private string $type;
-    
-    private bool $system_message;
-
-    /* ===== AUTOMATICALLY SET FIELDS ===== */
-    private UTCDateTime $sent;
-    private ?ObjectId $from;
-    private string $ip;
-    private string $token;
-
-    function __construct(?BSONDocument $doc = null) {
-        if($doc) $this->fromStorage($doc);
-    }
-    
-    function fromStorage(BSONDocument $document):Notification {
-        
-        return $this;
-    }
-
-    function toStorable():array {
+    public function __get_schema(): array {
         return [
-
+            'from' => [
+                new UserIdResult("Notifications_can_send_notification"),
+                'nullable' => true
+            ],
+            'for' => [
+                new ArrayResult,
+                'each' => new NotificationAddresseeResult
+            ],
+            'read_status' => new ArrayResult,
+            'subject' => [
+                new StringResult,
+                'char_limit' => 80
+            ],
+            'body' => [
+                new MarkdownResult
+            ],
+            /** Automatically set by the sendNotification method */
+            'action' => new NotificationActionSchema,
+            'type' => [
+                new EnumResult,
+                'valid' => [
+                    0 => "Notification"
+                ],
+            ],
+            'sent' => [
+                new DateResult,
+            ],
+            'ip' => [
+                new IpResult,
+                'nullable' => true
+            ],
+            'template' => [
+                'get' => fn ($val) => $val ?? "/cobalt/notifications/notification-1.0.html"
+            ]
+            // 'token' => new StringResult,
+            // 'version' => new StringResult,
         ];
     }
 
-    function addRecipient($username_or_email, $id = null) {
-        if($id) {
-            
-        }
+    function getUserIdsByUsernames() {
+
     }
 
-    private function getUser($username)
-
-    function set_body($body) {
-        $this->body = $body;
-    }
-
-    function get_body() {
-        return $this->body;
-    }
-
-    function set_subject($sub) {
-        $this->subject = $sub;
-    }
-
-    function get_subject(){
-        return $this->subject;
-    }
-
-    function set_class($class) {
-        if()
-        $this->class = $class;
-    }
 }

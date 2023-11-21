@@ -3,6 +3,7 @@ namespace Cobalt;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\BadRequest;
+use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
@@ -13,7 +14,7 @@ abstract class Validation {
     protected bool $__strictDataSubmissionPolicy = __APP_SETTINGS__['Validation_strict_data_submission_policy_by_default'];
 
     abstract function __initialize_schema():void;
-    abstract function datatype_persistance($name, $value):SchemaResult;
+    abstract function __toResult(string $name, mixed $value, ?array $schema):SchemaResult|ObjectId;
 
     public function validate(array $toValidate) {
         if(!$this->__schema) $this->__initialize_schema();
@@ -35,7 +36,7 @@ abstract class Validation {
         if($this->__excludeUnregisteredKeys) {
             if(!key_exists($field, $this->__schema)) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
         }
-        $result = $this->datatype_persistance($field, $value);
+        $result = $this->__toResult($field, $value, $this->__schema[$field]['name']);
         try {
             $validated = $result->filter($value);
         } catch (ValidationIssue $e) { // Handle issues

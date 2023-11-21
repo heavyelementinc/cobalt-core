@@ -154,7 +154,7 @@ class RouteGroup {
         $classes = $this->getClasses($entry);
         $unread = $this->getUnread($entry);
         if($link === $this->currentRt) $classes[] = "navigation--current";
-        if($entry['externalLink']) $classes[] = "external-link";
+        if(isset($entry['externalLink'])) $classes[] = "external-link";
         return "{$this->listItemTags[0]}<a href=\"$link\" class=\"".implode(" ", $classes)."\">{$icon}{$label}{$unread}</a>{$submenu}{$this->listItemTags[1]}\n";
     }
 

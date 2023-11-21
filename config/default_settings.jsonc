@@ -790,6 +790,9 @@
     "version": {
         "default": "0.0"
     },
+    "Schema_hydration_on_unserialize": {
+        "default": true
+    },
     /* API Routes consist of prefixes for URI path names. These prefixes are 
     used to load the appropriate routing table and tell the engine which 
     processor to use to handle the request. */
@@ -982,6 +985,12 @@
     },
     "Render_strict_variable_parsing": {
         "default": false
+    },
+    "Render_use_v2_engine": {
+        "default": false
+    },
+    "RenderV2_throw_template_exception_on_no_value": {
+        "default": true
     },
     /* A meta setting which will disable ALL user account settings. Anything
     that requires privileges, has to do with user accounts, or sessions should

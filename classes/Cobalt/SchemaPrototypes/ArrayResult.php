@@ -3,17 +3,69 @@
 namespace Cobalt\SchemaPrototypes;
 
 use ArrayAccess;
+use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Iterator;
 use MongoDB\Model\BSONArray;
 use Validation\Exceptions\ValidationIssue;
 
 class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
+    use ResultTranslator;
     protected $type = "array";
     protected $__index = 0;
 
     function setValue($value):void {
-        if($value instanceof BSONArray) $this->value = $value->getArrayCopy();
-        $this->value = $value;
+        $array = $value;
+        if($value instanceof BSONArray) $array = $value->getArrayCopy();
+
+        $array = $this->__each($array, $this->__reference);
+
+        $this->value = $array;
+    }
+
+    function eachToView(string $view, array $vars = []):string {
+        $html = "";
+        $fn = "view_from_string";
+        if(template_exists($view)) $fn = "view";
+        foreach($this->value as $val) {
+            $html .= $fn($view, array_merge($vars,['doc' => $val]));
+        }
+        return $html;
+    }
+
+    function push() {
+        $each = null;
+        if(isset($this->schema['each'])) $each = $this->schema['each'];
+
+        $args = func_get_args();
+
+        if($each && $each instanceof SchemaResult) {
+            array_push($this->value, ...$this->__each($args, $this->__reference, count($this->value)));
+            return;
+        }
+        
+        array_push($this->value, ...$args);
+    }
+
+    function pop() {
+        return array_pop($this->value);
+    }
+
+    function shift() {
+        return array_shift($this->value);
+    }
+
+    function unshift() {
+        $each = null;
+        if(isset($this->schema['each'])) $each = $this->schema['each'];
+
+        $args = func_get_args();
+
+        if($each && $each instanceof SchemaResult) {
+            array_unshift($this->value, ...$this->__each($args, $this->__reference, count($this->value)));
+            return;
+        }
+
+        array_unshift($this->value, ...$args);
     }
 
     function join($delimiter) {

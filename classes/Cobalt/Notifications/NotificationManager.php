@@ -92,50 +92,36 @@ class NotificationManager extends \Drivers\Database {
         return $this->setReadState($id, $user, $state, "seen");
     }
     
-    public function sendNotification($content) {
-
-        $id = $content['_id'] ?? null;
-        unset($content['_id']);
+    public function sendNotification(Notification $note) {
+        $id = $note->_id ?? null;
 
         $allowUpsert = true;
-        if($id !== null) $allowUpsert = false;
-
-        $schema = $this->get_schema_name($content);
+        // if($id !== null) $allowUpsert = false;
+        if(!isset($note->type)) $note->type = 0;
         
-        $normalizer = new $schema();
-
-        $this->addresseeDataStructure($content);
+        $note->ip   = $_SERVER['X-FORWARDED-FOR'] ?? $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['REMOTE_ADDR'];
+        $note->sent = new UTCDateTime();
         
-        $content['from'] = $content['from'] ?? session('_id');
-        $content['type']  = $normalizer->{'type'};
-        $content['ip']    = $normalizer->{'ip'};
-        $content['token'] = $normalizer->{'token'};
-        // $content['action'] = $content['action'] ?? $this->deriveAction($validated, $normalizer);
-        
-        // Execute validation
-        $validated = $normalizer->__validate($content);
-
-        $validated['sent']  = new UTCDateTime();
-        
-        $addToSet['for.user'] = ['$each' => $validated['for.user']->__dataset];
-        unset($validated['for.user']);
+        // $addToSet['for'] = ['$each' => $note->for];
+        // unset($validated['for']);
 
         $result = $this->updateOne(
             ['_id' => new ObjectId($id)],
             [
-                '$set' => $validated,
-                '$addToSet' => $addToSet
+                '$set' => $note,
+                // '$addToSet' => $addToSet
             ],
             ['upsert' => $allowUpsert]
         );
 
-        $id = $result->getUpsertedId();
+        $upserted_id = $result->getUpsertedId();
+        // cobalt_log('sendNotification', 'Notification sent');
         
         // if(app("Notifications_enable_push_notifications")) {
         //     $this->dispatchPushNotifications($id);
         // }
         
-        return $result->getModifiedCount();
+        return $upserted_id || $id;
     }
 
     public function addresseeDataStructure(&$content) {        
@@ -160,7 +146,7 @@ class NotificationManager extends \Drivers\Database {
     // }
 
     public function renderNotification($notificationData) {
-        return view($notificationData->getTemplate(),['ntfy' => $notificationData]);
+        return view($notificationData->template,['ntfy' => $notificationData]);
     }
 
     public function updateRecipientMeta($notificationId, $user = null, $meta) {

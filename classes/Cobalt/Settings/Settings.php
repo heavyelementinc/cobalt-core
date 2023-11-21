@@ -198,6 +198,7 @@ class Settings extends \Drivers\Database {
         $max_m_time = 0;
         // $this->mtime_candidates = scandir(__ENV_ROOT__ . "/routes/");
         foreach ($this::__DEFINITIONS__ as $file) {
+            if(!file_exists($file)) continue;
             $mtime = filemtime($file);
             if ($mtime === false) continue;
             if ($mtime > $max_m_time) $max_m_time = $mtime;
@@ -230,6 +231,7 @@ class Settings extends \Drivers\Database {
 
     private function parseSetting(&$values, &$def, $settings, $filename) {
         $detect_definition = ['default','directives','meta'];
+        if(!is_iterable($settings)) return;
         foreach($settings as $name => $data) {
             $isDefinition = $this->isDefinition($data);
             if(gettype($data) == "array") {

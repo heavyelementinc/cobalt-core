@@ -1,6 +1,7 @@
 <?php
 
 use Auth\UserCRUD;
+use Cobalt\Notifications\Notification;
 use Cobalt\Notifications\NotificationManager;
 use Cobalt\Notifications\PushNotifications;
 use Controllers\Controller;
@@ -108,39 +109,52 @@ class Notifications extends Controller {
     }
 
     function debug() {
-        $notification = new \Cobalt\Notifications\Notification1_0Schema([
-            '_id' => new ObjectId(),
-            'version' => '1.0',
-            'subject' => 'Hello, World',
-            'body'    => "Here's some **markdown** to use for a test",
-            'sent'    => strtotime("-1 day") * 1000,
-            'from'    => session()["_id"],
-            'for'     => [
-                // [
-                //     'user' => "8888888888888888",
-                //     'read' => false,
-                //     'recieved' => new \MongoDB\BSON\UTCDateTime(1661612937423)
-                // ],
-                [
-                    'user' => session()["_id"],
-                    'read' => false,
-                    'recieved' => new \MongoDB\BSON\UTCDateTime(1661612937423)
-                ]
-            ],
-            'action' => [
-                // 'path'    => "/",
-                'route'   => 'CoreAdmin@individual_user_management_panel',
-                'params'  => [
-                    session()['_id']
-                ],
+        $note = new Notification();
+        $note->subject = "Hello, World";
+        $note->body = "Here's some **markdown** to use for a test";
+        $note->from = null;
+        $note->for = [session()['_id']];
+        $note->action = [
+            'route' => 'CoreAdmin@individual_user_management_panel',
+            'params' => [
+                session()['_id']
             ]
-        ]);
+        ];
+
+        
+        // [
+        //     '_id' => new ObjectId(),
+        //     'version' => '1.0',
+        //     'subject' => 'Hello, World',
+        //     'body'    => "Here's some **markdown** to use for a test",
+        //     'sent'    => strtotime("-1 day") * 1000,
+        //     'from'    => session()["_id"],
+        //     'for'     => [
+        //         // [
+        //         //     'user' => "8888888888888888",
+        //         //     'read' => false,
+        //         //     'recieved' => new \MongoDB\BSON\UTCDateTime(1661612937423)
+        //         // ],
+        //         [
+        //             'user' => session()["_id"],
+        //             'read' => false,
+        //             'recieved' => new \MongoDB\BSON\UTCDateTime(1661612937423)
+        //         ]
+        //     ],
+        //     'action' => [
+        //         // 'path'    => "/",
+        //         'route'   => 'CoreAdmin@individual_user_management_panel',
+        //         'params'  => [
+        //             session()['_id']
+        //         ],
+        //     ]
+        // ];
 
         $ntfy = new NotificationManager();
 
         add_vars([
             'title' => "Notifications Debug",
-            'notifications' => $ntfy->renderNotification($notification)
+            'notifications' => $ntfy->renderNotification($note)
         ]);
 
         set_template("debug/notifications.html");

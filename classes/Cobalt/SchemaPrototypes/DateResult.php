@@ -2,6 +2,10 @@
 
 namespace Cobalt\SchemaPrototypes;
 
+use DateTime;
+use MongoDB\BSON\UTCDateTime;
+use Validation\Exceptions\ValidationIssue;
+
 class DateResult extends SchemaResult {
     protected $type = "date";
     
@@ -30,6 +34,13 @@ class DateResult extends SchemaResult {
             return date($format, $value);
         }
         return date($format, $value / 1000);
+    }
+
+    public function filter($value) {
+        if($value instanceof UTCDateTime) return $value;
+        if($value instanceof DateTime) return new UTCDateTime($value->format('u'));
+        if(!in_array(gettype($value), ["int",'double'])) throw new ValidationIssue("Invalid date and time");
+        return new UTCDateTime($value * 1000);
     }
 
 }

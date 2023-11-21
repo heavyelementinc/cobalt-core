@@ -12,6 +12,7 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Cobalt\Renderer\Render;
 use Demyanovs\PHPHighlight\Highlighter;
 use Drivers\UTCDateTime as DriversUTCDateTime;
 use Exceptions\HTTP\Confirm;
@@ -24,6 +25,7 @@ use Handlers\ApiHandler;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use Validation\Exceptions\NoValue;
+use Validation\Exceptions\ValidationIssue;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -171,6 +173,7 @@ function get_all_where_available($paths, $merged = true, $throwOnFail = false) {
         } catch (Exception $e) {
             throw new Exception("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""], $path) . '`');
         }
+        if(!isset($available[$key])) continue;
         if($available[$key] === null || $available[$key] === []) unset($available[$key]);
     }
     if ($merged) return array_merge(...$available);
@@ -356,14 +359,15 @@ function get_controller($controllerName, $instanced = false) {
  * @return void
  */
 function add_template($path) {
-    set_template($path);
+    return set_template($path);
 }
 
 /** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
  * @param string $path The path name relative to TEMPLATE_PATHS
+ * @deprecated Setting a global template is deprecated behavior! Return a view() from your controller instead!
  * @return void
  */
-function set_template($path) {
+function set_template($path, $vars = []) {
     try {
         global $TEMPLATE_PATHS;
         $templates = files_exist($TEMPLATE_PATHS);
@@ -371,7 +375,7 @@ function set_template($path) {
         throw new NotFound("Template not found");
     }
     $GLOBALS['WEB_PROCESSOR_TEMPLATE'] = $path;
-    return $templates[0];
+    return view($path, $vars);
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
@@ -499,7 +503,12 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
                 $mutated_path = str_replace("custom.$key", "value", $path_map);
             }
 
-            if (is_a($mutant, "\\Cobalt\\Schema") || is_a($mutant, "\Validation\Normalize")) {
+            if(is_a($mutant, "\\Cobalt\\PersistanceMap")) {
+                $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
+                if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+            }
+
+            if (is_a($mutant, "\Validation\Normalize")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
                 return $mutant;
@@ -660,7 +669,8 @@ function build_object_from_paths($object) {
 }
 
 function is_secure() {
-    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'])) return true;
+    
+    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'] ?? "")) return true;
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || $_SERVER['SERVER_PORT'] == 443;
 }
@@ -746,10 +756,16 @@ function maybe_with($template, $vars = []) {
  * @return string Processed template
  */
 function view(string $template, array $vars = []):string {
-    $render = new \Render\Render();
-    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
-    $render->set_vars($vars);
-    $render->from_template($template);
+    if(__APP_SETTINGS__['Render_use_v2_engine']) {
+        $render = new Render();
+        $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
+        $render->getBodyFromTemplate($template);
+    } else {
+        $render = new \Render\Render();
+        if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
+        $render->set_vars($vars);
+        $render->from_template($template);
+    }
     return $render->execute();
 }
 

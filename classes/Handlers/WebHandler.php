@@ -22,9 +22,12 @@ namespace Handlers;
 
 use \Cache\Manager as CacheManager;
 use Cobalt\Notifications\PushNotifications;
+use Cobalt\Renderer\Debugger;
+use Cobalt\Renderer\Exceptions\TemplateException;
 use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
+use Render\Render;
 
 class WebHandler implements RequestHandler {
     public $template_cache_dir = "templates";
@@ -33,6 +36,7 @@ class WebHandler implements RequestHandler {
     var $encoding_mode;
     var $renderer;
     var $_stage_bootstrap;
+    protected string $mainTemplateFilename;
 
 
     /** The `body.html` is scanned for these specific tags and then the 
@@ -84,7 +88,8 @@ class WebHandler implements RequestHandler {
         } else {
             $this->template_body = $this->main_content_replacement;
         }
-        $this->renderer = new \Render\Render();
+        if(__APP_SETTINGS__['Render_use_v2_engine']) $this->renderer = new \Cobalt\Renderer\Render();
+        else $this->renderer = new Render();
     }
 
     /** INTERFACE REQUIREMENTS */
@@ -100,8 +105,10 @@ class WebHandler implements RequestHandler {
     }
 
     public function _stage_execute($router_result = "") {
-        if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
-        if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
+        $this->template_main_content = $router_result;
+        // if($router_result)
+        // if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
+        // if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
     }
 
     public function _stage_output($context_result) {
@@ -505,6 +512,7 @@ class WebHandler implements RequestHandler {
     }
 
     function main_content_from_template($template) {
+
         /** Load the template in question */
         $this->template_main_content = $this->load_template($template);
 
@@ -536,6 +544,8 @@ class WebHandler implements RequestHandler {
 
         if (!$candidates) throw new NotFound("Cannot find that file");
 
+        $this->mainTemplateFilename = $candidates;
+
         return file_get_contents($candidates);
     }
 
@@ -565,11 +575,21 @@ class WebHandler implements RequestHandler {
     }
 
     function process() {
-        if (isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) $this->main_content_from_template($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
-        if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
-        if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
-        $this->renderer->set_body($this->template_body);
-        $this->renderer->set_vars($this->template_vars);
-        return $this->renderer->execute();
+        if($this->template_main_content) {
+            $this->template_body = str_replace($this->main_content_replacement, $this->template_main_content, $this->template_body);
+        } else {
+            if (isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) $this->main_content_from_template($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
+        }
+        try{ 
+            if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
+            if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
+            $this->renderer->set_body($this->template_body);
+            if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
+            $this->renderer->set_vars($this->template_vars);
+            return $this->renderer->execute();
+        } catch (TemplateException $e) {
+            $debug = new Debugger($e);
+            return $debug->render();
+        }
     }
 }

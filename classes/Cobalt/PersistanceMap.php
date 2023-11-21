@@ -3,20 +3,14 @@
 namespace Cobalt;
 
 use ArrayAccess;
-use Cobalt\SchemaPrototypes\ArrayResult;
-use Cobalt\SchemaPrototypes\BooleanResult;
-use Cobalt\SchemaPrototypes\DateResult;
-use Cobalt\SchemaPrototypes\IdResult;
-use Cobalt\SchemaPrototypes\NumberResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
-use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Exceptions\HTTP\BadRequest;
 use Iterator;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\Document;
-use PgSql\Lob;
 use TypeError;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
@@ -44,14 +38,23 @@ use Validation\Exceptions\ValidationIssue;
  * 
  * @package Cobalt
  */
-abstract class Schema extends Validation implements Persistable, Iterator, ArrayAccess {
-    private ObjectId $id;
+abstract class PersistanceMap extends Validation implements Persistable, Iterator, ArrayAccess {
+    use ResultTranslator;
+    protected $id;
     public array $__dataset = [];
     private int $__current_index = 0;
     protected array $__schema;
+    protected bool $__validateOnSet = true;
 
+    /**
+     * TODO: Implement hydration
+     * @var array
+     */
+    protected array $__hydrated = [];
+    protected bool $__hydrate = __APP_SETTINGS__['Schema_hydration_on_unserialize'];
+    
     function __construct() {
-        $this->id = new ObjectID;
+        $this->id = new ObjectId;
         $this->__initialize_schema();
     }
 
@@ -77,70 +80,35 @@ abstract class Schema extends Validation implements Persistable, Iterator, Array
     }
 
     public function __isset($name):bool {
+        if($name === "_id") return true;
         if(key_exists($name, $this->__schema)) return true;
         if(key_exists($name, $this->__dataset)) return true;
         return false;
     }
 
-    public function __get($name):SchemaResult {
+    public function __get($name):PersistanceMap|SchemaResult|ObjectId {
         if(!$this->__schema) throw new TypeError("This Schema has not been initialized");
+        if($name === "_id") return $this->id;
         
+        if(key_exists($name, $this->__hydrated)) return $this->__hydrated[$name];
         $lookup = lookup_js_notation($name, $this->__dataset, false);
-
-        return $this->datatype_persistance($name, $lookup);
-    }
-
-    function datatype_persistance($name, $value):SchemaResult {
-        $type = gettype($value);
-
-        switch($type) {
-            case (key_exists($name, $this->__schema) 
-                && key_exists('type', $this->__schema[$name])
-                && $this->__schema[$name]['type'] instanceof SchemaResult
-            ):
-                $result = $this->__schema[$name]['type'];
-                break;
-            case "string":
-                $result = new StringResult();
-                break;
-            case "integer":
-            case "number":
-                $result = new NumberResult();
-                break;
-            case "array":
-                $result = new ArrayResult();
-                break;
-            case "boolean":
-                $result = new BooleanResult();
-            case "object":
-                switch(get_class($value)) {
-                    case "\\MongoDB\\BSON\\Array":
-                        $result = new ArrayResult();
-                        break;
-                    case "\\MongoDB\\BSON\\UTCDateTime":
-                        $result = new DateResult();
-                        break;
-                    case "\\MongoDB\\BSON\\ObjectId":
-                        $result = new IdResult();
-                        break;
-                    case "\\Cobalt\\Schema":
-                        return $value;
-                }
-            default:
-                $result = new SchemaResult();
-                break;
-        }
-
-        $result->setName($name);
-        $result->setSchema($this->__schema[$name]);
-        $result->setValue($value);
-        $result->datasetReference($this);
-
-        return $result;
+        $this->__hydrated[$name] = $this->__toResult($name, $lookup, $this->__schema[$name] ?? []);
+        
+        return $this->__hydrated[$name];
     }
 
     public function __set($name, mixed $value):void {
-
+        if(!$this->__validateOnSet) $this->__dataset[$name] = $value;
+        
+        $result = $this->{$name};
+        if($result instanceof SchemaResult) {
+            $mutant = $result->filter($value);
+            $this->__dataset[$name] = $mutant;
+            if(isset($this->__hydrated[$name])) $this->__hydrated[$name]->setValue($mutant);
+        } elseif ($result instanceof PersistanceMap) {
+            $this->__dataset[$name] = $value;
+            if(isset($this->__hydrated[$name])) $this->__hydrated[$name]->ingest($value);
+        }
     }
 
     private function __get_prototype($name):array {
@@ -181,31 +149,39 @@ abstract class Schema extends Validation implements Persistable, Iterator, Array
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {
-        $this->__dataset[$offset] = $value;
+    $this->__dataset[$offset] = $value;
         return;
     }
 
     public function offsetUnset(mixed $offset): void { }
 
     function bsonSerialize(): array|\stdClass|Document {
-        $serializationResult = array_merge($this->__dataset, [
-            '_id' => $this->id,
-        ]);
+        $serializationResult = $this->__dataset;
         return $serializationResult;
     }
 
     function bsonUnserialize(array $data): void {
         $this->__initialize_schema();
         $this->id = $data['_id'];
+        unset($data['_id']);
         $this->__dataset = $data;
+        if($this->__hydrate) return;
+        foreach($this->__schema as $k => $v) {
+            $r = lookup_js_notation($k, $data, false);
+            $this->__hydrated[$k] = $this->__toResult($k, $r, $v);
+        }
+    }
+
+    function enableHydration(bool $value):void {
+        $this->__hydrate = $value;
     }
 
     /**
      * 
      * @param array|Iterable $data 
-     * @return Schema 
+     * @return PersistanceMap 
      */
-    function ingest($data):Schema {
+    function ingest($data):PersistanceMap {
         if(is_iterable($data) && !is_array($data)) $data = doc_to_array($data);
         if(!is_array($data)) throw new TypeError('$data must be an array or convertable into an array');
         if(!isset($data['_id'])) $data['_id'] = new ObjectId();

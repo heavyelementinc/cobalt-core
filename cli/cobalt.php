@@ -4,6 +4,8 @@
 
 if( version_compare(phpversion(), '8.1.0', '<=') ) die("Your version of PHP must be version 8.1 or above. Your version: " . phpversion());
 
+ini_set('xdebug.start_with_request', 'trigger');
+
 define('__CLI_ROOT__', __DIR__);
 
 /** Import our helper functions */

@@ -18,6 +18,7 @@ namespace Drivers;
 use MongoDB\BSON\ObjectId;
 use Drivers\UTCDateTime;
 use Validation\Exceptions\ValidationFailed;
+use Validation\Normalize;
 
 abstract class Database {
     public $db = null;
@@ -101,7 +102,7 @@ abstract class Database {
      * @param mixed $schema 
      * @return object|null 
      */
-    final function findOneAsSchema($filter, array $options = [], $schema = null) {
+    function findOneAsSchema($filter, array $options = [], $schema = null) {
         $result = $this->findOne($filter,$options);
         if(!$schema) $schema = $this->get_schema_name($result);
         if($result) return new $schema($result);
@@ -116,7 +117,7 @@ abstract class Database {
      * @param bool $idsAsKeys 
      * @return object[] 
      */
-    final function findAllAsSchema($filter, array $options = [], $schema = null, $idsAsKeys = false) {
+    function findAllAsSchema($filter, array $options = [], $schema = null, $idsAsKeys = false) {
         $results = $this->find($filter, $options);
         $processed = [];
         foreach($results as $i => $result) {

@@ -2,20 +2,25 @@
 
 namespace Contact;
 
-use Cobalt\Schema;
-use Cobalt\SchemaPrototypes\BooleanResult;
+use Cobalt\PersistanceMap;
+use Cobalt\SchemaPrototypes\ArrayResult;
 use Cobalt\SchemaPrototypes\DateResult;
 use Cobalt\SchemaPrototypes\EmailAddressResult;
 use Cobalt\SchemaPrototypes\EnumResult;
+use Cobalt\SchemaPrototypes\IdResult;
 use Cobalt\SchemaPrototypes\IpResult;
 use Cobalt\SchemaPrototypes\MarkdownResult;
 use Cobalt\SchemaPrototypes\PhoneNumberResult;
 use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\SchemaPrototypes\UserIdArrayResult;
+use Cobalt\SchemaPrototypes\UserIdResult;
 
-class Persistance extends Schema {
+class Persistance extends PersistanceMap {
 
     public function __get_schema(): array {
-        return [
+        $addtl = new AdditionalContactFields();
+        $fields = $addtl->__get_schema();
+        $schema = [
             "name" => [
                 new StringResult,
                 'char_limit' => 150,
@@ -39,9 +44,10 @@ class Persistance extends Schema {
                 'char_limit' => 1800
             ],
             "read" => [
-                new BooleanResult,
-                'validate' => function ($val, $ref) {
-                    return $ref->isBoolean($val);
+                new UserIdArrayResult,
+                'getUsers' => function ($val, $ref) {
+                    if(!has_permission('Contact_form_submissions_modify', null, null, false)) return "";
+                    return $ref->eachToView("{{doc.uname}}");
                 },
                 'status' => function ($val, $ref) {
                     if($val) return "read";
@@ -51,6 +57,8 @@ class Persistance extends Schema {
             "date" => new DateResult,
             "ip" => new IpResult,
         ];
+        $schema += $fields;
+        return $schema;
     }
 
 }

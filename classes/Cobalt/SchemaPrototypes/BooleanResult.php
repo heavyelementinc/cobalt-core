@@ -15,7 +15,7 @@ class BooleanResult extends SchemaResult {
             if(key_exists($str, $valid)) return $valid[$str];
             if(key_exists($val, $valid)) return $valid[$val];
         }
-        return $val;
+        return $str;
     }
 
     public function __toString(): string {

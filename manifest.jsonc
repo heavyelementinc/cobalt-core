@@ -18,6 +18,7 @@
             "components/split-button.js",
             "components/button-toggle.js",
             "components/input-array.js",
+            "components/input-datetime.js",
             "components/autocomplete.js",
             "components/input-password.js",
             "components/cobalt-carousel.js",
