@@ -845,6 +845,18 @@ function credit_card_form(array|object $data = [],$shipping = false):string {
     ]);
 }
 
+function url_fragment_sanitize(string $value):string {
+    $mutant = strtolower($value);
+    // Remove any character that isn't alphanumerical and replace it with a dash
+    $mutant = preg_replace("/([^a-z0-9])/", "-", $mutant);
+    // Remove any consecutive dash
+    $mutant = preg_replace("/(-){2,}/", "", $mutant);
+
+    if (!$mutant || $mutant === "-") throw new ValidationIssue("\"$value\" is not suitable to transform into a URL fragment");
+
+    return $mutant;
+}
+
 /** Compare two pathnames
  * 
  * $base_dir is used to substr $path after they have both been canonincalized.
