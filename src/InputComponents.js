@@ -813,6 +813,10 @@ class InputNumber extends HTMLElement {
         this.realField.min = this.getAttribute("min");
         this.realField.max = this.getAttribute("max");
         this.realField.pattern = this.getAttribute("pattern");
+        this.realField.addEventListener("change", e => {
+            e.stopPropagation();
+            this.dispatchEvent(new Event("change"));
+        })
         // this.realField.disabled = this.getAttribute("disabled");
         this.value = this.getAttribute("value");
         this.appendChild(this.realField);
