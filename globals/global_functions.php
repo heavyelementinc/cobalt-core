@@ -506,6 +506,7 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
             if(is_a($mutant, "\\Cobalt\\PersistanceMap")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+                if($looked_up . "$temp_path" === $path_map) return $mutant;
             }
 
             if (is_a($mutant, "\Validation\Normalize")) {
