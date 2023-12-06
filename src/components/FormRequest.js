@@ -13,7 +13,7 @@
 class NewFormRequest extends HTMLElement {
     constructor() {
         super();
-        this.validAutoSaveValues = ['false', 'none', 'element', 'autosave', 'fieldset', 'form'];
+        this.validAutoSaveValues = ['false', 'none', 'element', 'field', 'autosave', 'fieldset', 'form'];
         
         this.abort = () => {}; // Call to abort request
         this.getMethods = ["GET", "NAVIGATE"];
@@ -39,7 +39,7 @@ class NewFormRequest extends HTMLElement {
 
     connectedCallback() {
         this.initSubmissionListeners();
-        let defaultValue = "form";
+        let defaultValue = "field";
         if(this.getMethods.includes(this.method)) defaultValue = "none";
         if(!this.submitButton && !this.autoSave) this.autoSave = defaultValue; // Default forms without a save button to autosave
         this.addEventListener("submission", event => {
@@ -158,6 +158,7 @@ class NewFormRequest extends HTMLElement {
             case "false":
                 return;
             case "element":
+            case "field":
             case "autosave":
                 submit[target.name || target.getAttribute("name")] = this.getFieldValue(target);//.value;
                 this.fieldsRequiringFeedback.push(target);
