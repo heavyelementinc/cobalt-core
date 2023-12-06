@@ -61,7 +61,6 @@ class AdminHandler extends WebHandler {
     // function generate_style_meta() {
     //     $link_tags = "";
     //     $compiled = "";
-    //     $debug = app("debug");
     //     foreach (array_merge(app('common-css-packages'), app('admin-css-packages')) as $package) {
     //         $files = files_exist([
     //             __APP_ROOT__ . "/shared/css/$package",

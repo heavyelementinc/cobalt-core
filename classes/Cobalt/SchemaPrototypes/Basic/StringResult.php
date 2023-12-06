@@ -1,8 +1,9 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Validation\Exceptions\ValidationIssue;
 
 /**
@@ -43,7 +44,7 @@ class StringResult extends SchemaResult implements ArrayAccess{
 
     public function display():string {
         $val = $this->getValue();
-        $valid = $this->valid();
+        $valid = $this->getValid();
         if(key_exists($val, $valid)) return $valid[$val];
         if(key_exists($this->value, $valid)) return $valid[$this->value];
         return (string)$val;

@@ -1,14 +1,15 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
 
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Validation\Exceptions\ValidationIssue;
 
 class BooleanResult extends SchemaResult {
     protected $type = "boolean";
     
     public function display():string {
-        $valid = $this->valid();
+        $valid = $this->getValid();
         $val = $this->getValue();
         $str = ($val) ? "true" : "false";
         if(!empty($valid)) {

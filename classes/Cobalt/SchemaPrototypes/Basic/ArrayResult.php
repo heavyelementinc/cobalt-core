@@ -1,8 +1,9 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Iterator;
 use MongoDB\Model\BSONArray;
@@ -109,6 +110,12 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
 
     public function rewind(): void {
         $this->__index = 0;
+    }
+
+    public function valid():bool {
+        $val = $this->getValue();
+        if(key_exists(array_keys($val)[$this->__index], $val)) return true; 
+        return false;
     }
 
     function filter($value) {

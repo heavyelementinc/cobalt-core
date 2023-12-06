@@ -1,8 +1,9 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Compound;
 
 use Auth\UserCRUD;
+use Cobalt\SchemaPrototypes\PersistableResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
@@ -30,7 +31,7 @@ class UserIdResult extends PersistableResult {
         return $this->getValue()->uname;
     }
 
-    public function valid():array {
+    public function getValid():array {
         return [];
     }
 

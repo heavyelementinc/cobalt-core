@@ -155,3 +155,30 @@ main {
 #user-panel-header a {
     color:white;
 }
+
+@media only screen and (max-width: 35em) {
+    :root {
+        --admin-panel-width: 0;
+    }
+    
+    nav#admin-panel{
+        z-index: calc(var(--project-modal-z-index) - 10);
+        translate: -100vw;
+/*         left: -100vw; */
+        width: 100vw;
+        transition: translate .4s;
+    }
+    
+    #admin-panel .settings-panel--footer {
+        width: 100vw;
+    }
+    
+    
+    .js-nav-spawned nav#admin-panel {
+        translate: 0;
+    }
+    
+    #app-header {
+        display: none
+    }
+}

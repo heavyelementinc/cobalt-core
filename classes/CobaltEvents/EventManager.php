@@ -14,7 +14,9 @@ class EventManager extends \Drivers\Database {
     }
 
     public function get_schema_name($doc = []) {
-        return "\CobaltEvents\EventSchema";
+        return "\CobaltEvents\EventMap";
+        
+        // return "\CobaltEvents\EventSchema";
     }
 
     public function getPublicListing() {

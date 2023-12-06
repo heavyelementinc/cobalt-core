@@ -1,6 +1,8 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
+
+use Cobalt\SchemaPrototypes\SchemaResult;
 
 class ObjectResult extends SchemaResult {
     protected $type = "object";

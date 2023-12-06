@@ -371,6 +371,12 @@ class AsyncUpdate {
         el.addEventListener("focusin", e => messageElement.dispatchEvent(new Event("click", e)), {once: true});
     }
 
+    fn_img(el, value, instructions){
+        this.fn_src(el, value.filename)
+        el.height = value.meta.height;
+        el.width = value.meta.width;
+    }
+
     fn_src(el, value, instructions) {
         el.src = value;
     }

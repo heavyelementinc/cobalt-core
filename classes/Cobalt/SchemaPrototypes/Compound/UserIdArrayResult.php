@@ -1,8 +1,9 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Compound;
 
 use Auth\UserCRUD;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;

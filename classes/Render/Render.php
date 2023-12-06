@@ -435,7 +435,7 @@ class Render {
         $linePos = strlen($explosion[$lineNum - 1]);
         // $substr = substr();
         // $message = "";
-        if(app("debug")) $this->render_template_error($errorToHighlight, $message, $lineNum, $linePos, $template);
+        if(app("debug_exceptions_publicly")) $this->render_template_error($errorToHighlight, $message, $lineNum, $linePos, $template);
         $errorMessage = "$message in \"$this->name\" on line $lineNum, column $linePos";
         try{
             throw new \Exception($errorMessage);

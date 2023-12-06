@@ -8,11 +8,15 @@ use Exceptions\HTTP\RangeNotSatisfiable;
 
 class FileSystem {
     // public $db = __APP_SETTINGS__['database'];
-    public $bucket;
+    // public $bucket;
     protected $db = null;
-    protected $client = null;
-    protected $database = null;
-    protected $collection = null;
+    // protected $client = null;
+    // protected $database = null;
+    // protected $collection = null;
+    protected \MongoDB\Client $client;
+    protected \MongoDB\Database $database;
+    protected \MongoDB\GridFS\Bucket $bucket;
+    protected \MongoDB\Collection $collection;
 
     function __construct($database = null) {
         if ($database !== null) $this->db = $database;

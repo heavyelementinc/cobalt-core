@@ -1,7 +1,8 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Compound;
 
+use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Validation\Exceptions\ValidationIssue;
 
 class IpResult extends StringResult {

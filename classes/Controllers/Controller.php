@@ -30,7 +30,7 @@ class Controller {
 
     protected $currentlyAllowedQueryParams = null;
 
-    public $manager = null;
+    public ?\Drivers\Database $manager = null;
     public $allowedFilters = null;
     public $allowedOptions = null;
     public $filterOverride = null;

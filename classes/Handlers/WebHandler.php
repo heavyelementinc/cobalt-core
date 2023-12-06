@@ -239,7 +239,7 @@ class WebHandler implements RequestHandler {
         $masthead = "";
         
         $logo = app("logo.thumb");
-        $meta = $logo->meta;
+        $meta = $logo['meta'];
         $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
         
         $header = $this->load_template($this->header_template);
@@ -426,7 +426,6 @@ class WebHandler implements RequestHandler {
     // function generate_script_content($script_name) {
     //     $script_tags = "";
     //     $compiled = "";
-    //     $debug = app("debug");
     //     foreach (app('packages') as $package) {
     //         if ($debug) {
     //             $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";

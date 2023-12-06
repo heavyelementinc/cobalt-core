@@ -50,7 +50,6 @@ class HTTPException extends \Exception {
     }
 
     public function publicMessage() {
-        // if(app("debug")) return $this->getMessage();
         $message =  $this->clientMessage;
         if(!$message) $message = $this->name;
         if(!$message) $message = get_class($this);

@@ -7,10 +7,12 @@ use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Exceptions\HTTP\BadRequest;
 use Iterator;
+use JsonSerializable;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\Document;
+use stdClass;
 use TypeError;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
@@ -38,13 +40,14 @@ use Validation\Exceptions\ValidationIssue;
  * 
  * @package Cobalt
  */
-abstract class PersistanceMap extends Validation implements Persistable, Iterator, ArrayAccess {
+abstract class PersistanceMap extends Validation implements Persistable, Iterator, ArrayAccess, JsonSerializable {
     use ResultTranslator;
     protected $id;
     public array $__dataset = [];
     private int $__current_index = 0;
     protected array $__schema;
     protected bool $__validateOnSet = true;
+    
 
     /**
      * TODO: Implement hydration
@@ -155,6 +158,7 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
 
     public function offsetUnset(mixed $offset): void { }
 
+    /** @return array */
     function bsonSerialize(): array|\stdClass|Document {
         $serializationResult = $this->__dataset;
         return $serializationResult;
@@ -172,6 +176,16 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
         }
     }
 
+    function jsonSerialize(): mixed {
+        return array_merge(['_id' => $this->id], $this->bsonSerialize(), ['_id' => $this->id]);
+    }
+
+    /**
+     * What is hydration? Hydration instances each field into its corresponding
+     * SchemaResult wrapper at the time of deserialization rather than on demand
+     * @param bool $value 
+     * @return void 
+     */
     function enableHydration(bool $value):void {
         $this->__hydrate = $value;
     }
@@ -182,11 +196,16 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
      * @return PersistanceMap 
      */
     function ingest($data):PersistanceMap {
+        if($data === null) $data = [];
         if(is_iterable($data) && !is_array($data)) $data = doc_to_array($data);
         if(!is_array($data)) throw new TypeError('$data must be an array or convertable into an array');
         if(!isset($data['_id'])) $data['_id'] = new ObjectId();
 
         $this->bsonUnserialize($data);
         return $this;
+    }
+
+    public function getId() {
+        return $this->id;
     }
 }

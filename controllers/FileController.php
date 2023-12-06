@@ -9,7 +9,7 @@ class FileController extends \Controllers\FileController {
     function __construct() {
         if (!app("enable_core_content")) throw new Exceptions\HTTP\NotFound("Shared files are not enabled.");
         $cacheControl = 'Cache-Control: private, ';
-        if (!app("debug")) $cacheControl .= "immutable, ";
+        $cacheControl .= "immutable, ";
         $cacheControl .= "max-age=31536000";
         header($cacheControl);
         header('Pragma: private');

@@ -1,7 +1,8 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Wrapper;
 
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;

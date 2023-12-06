@@ -1,7 +1,8 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Compound;
 
+use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Traits\UniqueValidation;
 use Drivers\Database;
 use Validation\Exceptions\ValidationIssue;

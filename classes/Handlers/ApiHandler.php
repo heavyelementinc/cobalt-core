@@ -123,7 +123,6 @@ class ApiHandler implements RequestHandler {
 
     public function _public_exception_handler($e) {
         // $errorMessage = $e->clientMessage;
-        // if(app("debug")) $errorMessage = $e->getMessage();
         $errorMessage = "Unknown Error";
         if(method_exists($e, "publicMessage")) $errorMessage = $e->publicMessage();
         $this->router_result = [

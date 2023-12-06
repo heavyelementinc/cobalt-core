@@ -3,14 +3,12 @@
 namespace Cobalt\Notifications;
 
 use Auth\UserCRUD;
-use Cobalt\PersistanceMap;
-use Cobalt\SchemaPrototypes\ArrayResult;
+
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
-use MongoDB\BSON\Document;
+
 use MongoDB\BSON\ObjectId;
-use MongoDB\BSON\Persistable;
-use MongoDB\BSON\UTCDateTime;
+
 use stdClass;
 
 class NotificationAddresseeResult extends SchemaResult {

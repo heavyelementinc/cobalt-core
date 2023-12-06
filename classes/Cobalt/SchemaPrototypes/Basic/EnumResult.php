@@ -1,7 +1,8 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
 
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Validation\Exceptions\ValidationIssue;
 
 /**
@@ -13,20 +14,27 @@ use Validation\Exceptions\ValidationIssue;
 class EnumResult extends SchemaResult {
     protected $type = "string";
     public function display():string {
-        $enum = $this->schema['valid'];
+        if(is_callable($this->schema['display'])) return $this->schema['display']($this->getValue(), $this, $this->getValid());
+        $enum = $this->getValid();
         $val = $this->getValue();
         if(in_array($val, $enum)) return $enum[$val];
         if(in_array($this->value, $enum)) return $enum[$this->value];
         return (string)$val;
     }
 
+    public function defaultSchemaValues(array $values = []):array {
+        return [
+            'strict' => true
+        ];
+    }
+
     function filter($value) {
-        $enum = $this->schema['valid'];
+        $enum = $this->getValid();
         $val = $value;
-        if(in_array($val, $enum)) return $enum[$val];
+        if(key_exists($val, $enum)) return $val;
         $message = "Invalid selection";
-        if(!in_array('strict', $this->schema)) throw new ValidationIssue($message);
-        if($this->schema['strict'] === false) throw new ValidationIssue($message);
+        $strict = $this->schema['strict'] || true;
+        if($strict) throw new ValidationIssue($message);
         return $value;
     }
 }

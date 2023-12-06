@@ -112,8 +112,7 @@ class Route {
         $real_path = substr($path_prefix,0,-1) . $path;
         $real_regex = Route::convert_path_to_regex_pattern($real_path);
 
-        if (isset($additional['anchor']) && !isset($additional['anchor']['href'])) {
-            if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
+        if (isset($additional['anchor']) && !isset($additional['anchor']['href'])) {            if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
             $additional['anchor']['href'] = $path;
         }
 

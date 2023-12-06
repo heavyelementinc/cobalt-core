@@ -763,7 +763,7 @@ function view(string $template, array $vars = []):string {
         $render->getBodyFromTemplate($template);
     } else {
         $render = new \Render\Render();
-        if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
+        $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
         $render->set_vars($vars);
         $render->from_template($template);
     }
@@ -1721,4 +1721,47 @@ function edit_link($group) {
         return "";
     }
     return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i></a>";
+}
+
+/**
+ * Will return the $_FILES superglobal to a more sane format:
+ * [
+ *    [0] => Array
+ *        (
+ *             [input_name] => 'example',
+ *             [name]       => 'example.jpg',
+ *             [type]       => 'image/jpeg',
+ *             [tmp_name]   => 'tmp/php8830t4',
+ *             [error]      => 0,
+ *             [size]       => 21509
+ *        )
+ * ]
+ * @return array 
+ */
+function normalize_file_array() {
+    $fileUploadArray = $_FILES;
+    $resultingDataStructure = [];
+    foreach ($fileUploadArray as $input => $infoArr) {
+        $filesByInput = [];
+        $nextIndex = count($filesByInput);
+        foreach ($infoArr as $key => $valueArr) {
+            if (is_array($valueArr)) { // file input "multiple"
+                foreach($valueArr as $i=>$value) {
+                    $filesByInput[$i][$key] = $value;
+                }
+                
+            }
+            else { // -> string, normal file input
+                $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
+                break;
+            }
+        }
+        $filesByInput[$nextIndex]['input_name'] = $input;
+        $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
+    }
+    $filteredFileArray = [];
+    foreach($resultingDataStructure as $file) { // let's filter empty & errors
+        if (!$file['error']) $filteredFileArray[] = $file;
+    }
+    return $filteredFileArray;
 }

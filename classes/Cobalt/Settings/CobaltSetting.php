@@ -14,11 +14,12 @@ class CobaltSetting {
     public $name;
     public $defaultValue;
     public $directives;
+    public $defined;
     public $meta;
     public $validate;
     public $user_modified_settings;
     public $allSettings;
-    public $reference;
+    public \Cobalt\Settings\Settings $reference;
     public $toCache;
     public $aliasedValue;
     
@@ -28,6 +29,7 @@ class CobaltSetting {
         $this->directives   = $definition['directives'];
         $this->meta         = $definition['meta'] ?? null;
         $this->validate     = $definition['validate'];
+        $this->defined      = $definition['defined'];
         $this->user_modified_settings = $user_modified_settings;
         $this->allSettings  = $settings;
 
@@ -131,5 +133,13 @@ class CobaltSetting {
         ];
 
         return $value;
+    }
+
+    /**
+     * Config values will override values in settings.json
+     */
+    function directive_config($value, $data) {
+        if (!isset($GLOBALS['CONFIG'][$data])) return $value;
+        return $GLOBALS['CONFIG'][$data];
     }
 }

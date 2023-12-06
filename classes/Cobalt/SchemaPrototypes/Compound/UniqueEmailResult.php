@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Compound;
 
 use Cobalt\SchemaPrototypes\Traits\EmailValidation;
 use Cobalt\SchemaPrototypes\Traits\UniqueValidation;

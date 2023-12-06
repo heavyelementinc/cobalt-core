@@ -73,7 +73,6 @@ class Upgrade{
     // }
 
     // private function push($repo_path) {
-    //     // if(app("debug")) return say("You seem to be running in production. Are you sure you want to push from production?",'i');
     //     // Init our project
     //     $git = new CzProject\GitPhp\Git;
     //     $repo = $git->open($repo_path);

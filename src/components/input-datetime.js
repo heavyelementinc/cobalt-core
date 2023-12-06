@@ -7,35 +7,37 @@ class InputDateTime extends HTMLElement {
             dateInput: null,
             timeInput: null,
         }
-        this.setAttribute("__custom-input", "true");
+        
+        this.datePicker = document.createElement("date-picker");
+        this.addEventListener("click", e => {
+            this.toggleDatePicker();
+        })
     }
 
     connectedCallback() {
+        this.setAttribute("__custom-input", "true");
+        document.body.appendChild(this.datePicker);
+
         this.innerHTML = "";
         this.initUI();
-        if(this.hasAttribute('value')) this.value = this.getAttribute("value");
-    }
-
-    initUI() {
-        if(!this.props.dateInput) this.props.dateInput = document.createElement("input");
-        this.props.dateInput.type = "date";
-        this.props.dateInput.addEventListener("change", e => {
-            e.stopPropagation();
-            this.setValueFromChangeCallback();
-        });
-        if(!this.props.timeInput) this.props.timeInput = document.createElement("input");
-        this.props.timeInput.type = "time";
-        this.props.timeInput.addEventListener("change", e => {
-            e.stopPropagation();
-            this.setValueFromChangeCallback();
+        this.datePicker.hide();
+        this.datePicker.addEventListener("dateselect", (e) => {
+            this.value = e.detail;
+            this.datePicker.hide();
+            this.dispatchEvent(new Event("change"));
         });
 
-        this.appendChild(this.props.dateInput);
-        this.appendChild(this.props.timeInput);
+        // this.addEventListener("focus", () => {
+        //     this.datePicker.show();
+            
+        // });
+        // this.addEventListener("blur", () => {
+        //     this.datePicker.hide();
+        // });
     }
 
-    setValueFromChangeCallback() {
-        this.value = this.fromString(this.props.dateInput.value + " " + this.props.timeInput.value);
+    disconnectedCallback() {
+        this.datePicker.parentNode.removeChild(this.datePicker); // Clean up
     }
 
     observedAttributes() {
@@ -43,11 +45,25 @@ class InputDateTime extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if(name === "value") this.value = newValue;
+        switch(name) {
+            case "value":
+                this.value = newValue;
+                break;
+        }
     }
 
+
     get value() {
-        return this.props.value;
+        if(!this.props.value) return null;
+        if(this.props.value.toString() === 'Invalid Date') return null;
+        switch(this.to) {
+            case "milliseconds":
+                return this.props.value.getTime();
+            case "ISO 8601":
+                return this.props.value.toISOString();
+            default:
+                return this.props.value;
+        }
     }
 
     set value(val) {
@@ -56,10 +72,85 @@ class InputDateTime extends HTMLElement {
         this.updateUI(this.props.value);
     }
 
+    get from() {
+        let attr = this.getAttribute("from") || this.getAttribute("type") || "ISO 8601";
+        return attr || "milliseconds";
+    }
+
+    get to() {
+        let attr = this.getAttribute("to") || this.getAttribute("format") || "ISO 8601";
+        return attr;
+    }
+
+    initUI() {
+        this.pickerButton = document.createElement("button");
+        this.pickerButton.innerHTML = "<i name='chevron-down'></i>";
+        // this.pickerButton.addEventListener("click", e => {
+        //     this.toggleDatePicker();
+        // });
+
+        if(!this.props.dateInput) this.props.dateInput = document.createElement("input");
+        this.props.dateInput.type = "date";
+        
+        this.props.dateInput.addEventListener("change", e => {
+            e.stopPropagation();
+            this.storeValueFromChangeCallback();
+        });
+
+        if(!this.props.timeInput) this.props.timeInput = document.createElement("input");
+        this.props.timeInput.type = "time";
+        this.props.timeInput.addEventListener("change", e => {
+            e.stopPropagation();
+            this.storeValueFromChangeCallback();
+        });
+
+        this.appendChild(this.props.dateInput);
+        this.appendChild(this.props.timeInput);
+        this.appendChild(this.pickerButton);
+
+        if(this.hasAttribute('value')) this.value = this.getAttribute("value");
+    }
+
     updateUI(value) {
+        if(!value) return;
         if(!this.props.dateInput) this.initUI();
-        this.props.dateInput.value = `${value.getFullYear()}-${this.prefixSingleDigits(value.getMonth() + 1)}-${this.prefixSingleDigits(value.getDate())}`;
-        this.props.timeInput.value = `${this.prefixSingleDigits(value.getHours())}:${this.prefixSingleDigits(value.getMinutes())}`;
+        const date = `${value.getFullYear()}-${this.prefixSingleDigits(value.getMonth() + 1)}-${this.prefixSingleDigits(value.getDate())}`;
+        this.props.dateInput.value = date;
+        const time = `${this.prefixSingleDigits(value.getHours())}:${this.prefixSingleDigits(value.getMinutes())}`;
+        this.props.timeInput.value = time;
+    }
+
+    toggleDatePicker() {
+        if(this.datePicker.hidden === true) {
+            // console.log(this.props.value)
+            this.datePicker.show();
+            this.datePicker.value = this.props.value || new Date();
+            this.setDatePickerPosition();
+            return;
+        }
+        this.datePicker.hide();
+    }
+
+    setDatePickerPosition() {
+        const offsets = get_offset(this);
+        this.datePicker.style.top = `${offsets.y + offsets.h}px`;
+        this.datePicker.style.left = `${offsets.x}px`;
+        this.datePicker.style.position = "absolute";
+        const pickerOffset = get_offset(this.datePicker);
+        const scrollH = window.innerHeight + window.scrollY;
+        if(pickerOffset.bottom > scrollH) this.datePicker.style.top = `${offsets.y - pickerOffset.h}px`;
+    }
+
+
+    storeValueFromChangeCallback() {
+        let date = this.props.dateInput.value;
+        let time = this.props.timeInput.value;
+        let datetime = "";
+        datetime += date;
+        if(datetime) datetime = `${datetime} `
+        datetime += time;
+        this.value = this.fromString(`${datetime}`);
+        this.dispatchEvent(new Event("change"));
     }
 
     prefixSingleDigits(digit) {
@@ -69,6 +160,7 @@ class InputDateTime extends HTMLElement {
     }
 
     parseValue(val) {
+        if(val instanceof Date) return val;
         switch(this.from) {
             case "string":
                 return this.fromString(val);
@@ -77,27 +169,35 @@ class InputDateTime extends HTMLElement {
             case "time":
             case "unix":
                 return this.fromSeconds(val);
-            case "microsectonds":
+            case "milliseconds":
+                return this.fromMilliseconds(val);
             case "u":
                 return this.fromMicroseconds(val);
+            case "ISO 8601":
+            default:
+                return new Date(val);
         }
-    }
-
-    get from() {
-        let attr = this.getAttribute("from") || this.getAttribute("type") || "microseconds";
-        return attr || "microseconds";
     }
 
     fromSeconds(val) {
         return new Date(val * 1000);
     }
 
+    fromMilliseconds(val) {
+        const date = new Date();
+        date.setTime(Number(val));
+        return date;
+    }
+
     fromMicroseconds(val) {
-        return new Date(val);
+        const date = new Date();
+        date.setTime(Number(val) / 1000);
+        return date;
     }
 
     fromString(val) {
-        return new Date(val);
+        const date = new Date(val);
+        return date;
     }
 }
 

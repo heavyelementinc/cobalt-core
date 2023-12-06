@@ -3,15 +3,13 @@
 namespace Cobalt\Notifications;
 
 use Cobalt\PersistanceMap;
-use Cobalt\SchemaPrototypes\ArrayResult;
-use Cobalt\SchemaPrototypes\DateResult;
-use Cobalt\SchemaPrototypes\EnumResult;
-use Cobalt\SchemaPrototypes\IpResult;
-use Cobalt\SchemaPrototypes\MarkdownResult;
-use Cobalt\SchemaPrototypes\PersistanceMapResult;
-use Cobalt\SchemaPrototypes\StringResult;
-use Cobalt\SchemaPrototypes\UserIdArrayResult;
-use Cobalt\SchemaPrototypes\UserIdResult;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\SchemaPrototypes\Basic\EnumResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Cobalt\SchemaPrototypes\Compound\IpResult;
+use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
+use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 
 class Notification extends PersistanceMap {
 

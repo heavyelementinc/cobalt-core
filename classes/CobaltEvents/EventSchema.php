@@ -107,19 +107,19 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             "bgColor" => [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-background"),
+                'get' => fn ($val) => ($val) ? $val : __APP_SETTINGS__["vars-web.events-banner-background"],
                 'set' => 'hex_color',
-                'display' => fn ($val) => $this->hex_color($val, app("vars-web.events-banner-background")),
+                'display' => fn ($val) => $this->hex_color($val, __APP_SETTINGS__["vars-web.events-banner-background"]),
             ],
             "txtColor" =>  [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-text"),
+                'get' => fn ($val) => ($val) ? $val : __APP_SETTINGS__["vars-web.events-banner-text"],
                 'set' => function ($val) {
                     return $this->contrast_color($val, $this->__dataset['bgColor']);
                 },
-                'display' => fn ($val) => $this->hex_color($val ?? app("vars-web.events-banner-text"), app("vars-web.events-banner-text")),
+                'display' => fn ($val) => $this->hex_color($val ?? __APP_SETTINGS__["vars-web.events-banner-text"], __APP_SETTINGS__["vars-web.events-banner-text"]),
             ],
             "txtJustification" => [
-                'get' => fn ($val) => $val ?? app("CobaltEvents_default_h1_alignment"),
+                'get' => fn ($val) => $val ?? __APP_SETTINGS__["CobaltEvents_default_h1_alignment"],
                 'valid' => [
                     "space-between" => "<i name='format-align-left'></i>",
                     "center" => "<i name='format-align-center'></i>",

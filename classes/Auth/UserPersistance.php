@@ -3,15 +3,14 @@
 namespace Auth;
 
 use Cobalt\PersistanceMap;
-use Cobalt\SchemaPrototypes\ArrayResult;
-use Cobalt\SchemaPrototypes\BooleanResult;
-use Cobalt\SchemaPrototypes\DateResult;
-use Cobalt\SchemaPrototypes\EmailAddressResult;
-use Cobalt\SchemaPrototypes\StringResult;
-use Cobalt\SchemaPrototypes\UploadResult;
-use Cobalt\SchemaPrototypes\UniqueResult;
-use Cobalt\SchemaPrototypes\EncryptedResult;
-use Cobalt\SchemaPrototypes\ObjectResult;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\Basic\BooleanResult;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\SchemaPrototypes\Basic\ObjectResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Cobalt\SchemaPrototypes\Basic\UploadResult;
+use Cobalt\SchemaPrototypes\Compound\EmailAddressResult;
+use Cobalt\SchemaPrototypes\Compound\UniqueResult;
 
 class UserPersistance extends PersistanceMap {
 

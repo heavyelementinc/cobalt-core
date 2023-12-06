@@ -55,7 +55,7 @@ try {
     $kernel = new $kernel_name();
 
     if (!is_a($kernel, "Cobalt\Kernel\Request")) {
-        if (app("debug")) die("Context processor must be an instance of Cobalt\Kernel\Request");
+        if (app("debug_exceptions_publicly")) die("Context processor must be an instance of Cobalt\Kernel\Request");
         else die("Error");
     }
 

@@ -15,7 +15,11 @@ class ContactForm extends Controller {
     function index() {
         $conMan = new ContactManager();
         $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
-        $lines = $this->docsToViews($results, "/admin/contact-form/index-item.html");
+        $lines = "";
+        foreach($results as $doc) {
+            $lines .= view("/admin/contact-form/index-item.html", ['doc' => $doc]);
+        }
+        // $lines = $this->docsToViews($results, );
         add_vars([
             'title' => 'Contact Form Submissions',
             'lines' => $lines

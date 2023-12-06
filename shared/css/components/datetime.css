@@ -1,0 +1,128 @@
+input-datetime > input {
+    border: none;
+    padding: 0;
+    pointer-events: none;
+}
+
+input-datetime:hover {
+    border: 1px solid var(--project-color-input-text-color);
+}
+
+input-datetime > button {
+    border: none;
+    background: none;
+    padding: 0;
+    display: inline-block;
+    height: 100%;
+    color: var(--project-color-input-border-nofocus);
+}
+
+input-datetime:hover > button {
+    color: var(--project-color-input-border);
+    background: var(--project-color-input-border-nofocus);
+}
+
+date-picker {
+    /* display: grid; */
+    position: absolute;
+    z-index: var(--project-modal-z-index);
+/*     --size: 50px; */
+    background: var(--project-color-input-background);
+    padding: 1rem;
+    box-shadow: var(--project-box-shadow);
+}
+
+date-picker[hidden='false'] {
+    display: block;
+}
+
+date-picker hgroup {
+    min-width: 220px;
+    justify-content: center;
+    align-items: center;
+    gap: .5ch;
+    /*! padding: 0; */
+    margin: 0;
+}
+
+date-picker hgroup .year-selector {
+    width: 5ch;
+}
+
+date-picker hgroup :is(select, input) {
+    background: unset;
+    border: 1px solid transparent;
+    padding: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+date-picker :is(hgroup button, button.set) {
+    padding: 0;
+    border: unset;
+    width: 20px;
+    height: 30px;
+    margin: 0 auto 0 0;
+    background: transparent;
+    color: var(--project-color-input-border-nofocus)
+}
+
+date-picker:hover :is(hgroup button, button.set) {
+    color: black;
+}
+
+date-picker hgroup button:last-of-type {
+    margin: 0 0 0 auto;
+}
+
+date-picker h1 {
+    font-size: 1.3rem;
+    text-align: center;
+    margin: 0;
+}
+
+date-picker ol.calendar {
+    list-style: none;
+    display: grid;
+    margin: 0;
+    padding: 0;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+date-picker ol.calendar li {
+    aspect-ratio: 1 / 1;
+    /*! border: 1px solid gray; */
+    width: var(--size);
+    height: var(--size);
+    background: var(--project-calendar-cell-bg);
+    color: var(--project-calendar-cell-txt);
+}
+
+date-picker ol.calendar li.inactive {
+    color: var(--project-color-input-border-nofocus);
+}
+
+date-picker ol.calendar li.today {
+    font-weight: bold;
+}
+
+date-picker ol.calendar li:is(.header, .selected) {
+    background: var(--project-color-input-border-nofocus);
+    color: var(--project-calendar-header-text);
+    font-weight: bold;
+}
+
+date-picker .calendar button {
+    background: unset;
+    width: 100%;
+    height: 100%;
+    border: 1px solid transparent;
+    padding: 0;
+    font-weight: normal;
+    font-family: var(--project-body-family);
+    color: inherit;
+}
+
+date-picker .calendar .header button {
+    font-weight: bold;
+}

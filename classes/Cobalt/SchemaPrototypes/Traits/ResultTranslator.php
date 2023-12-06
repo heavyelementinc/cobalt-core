@@ -3,14 +3,14 @@
 namespace Cobalt\SchemaPrototypes\Traits;
 
 use Cobalt\PersistanceMap;
-use Cobalt\SchemaPrototypes\ArrayResult;
-use Cobalt\SchemaPrototypes\BooleanResult;
-use Cobalt\SchemaPrototypes\DateResult;
-use Cobalt\SchemaPrototypes\IdResult;
-use Cobalt\SchemaPrototypes\NumberResult;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\Basic\BooleanResult;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\PersistanceMapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
-use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use MongoDB\BSON\ObjectId;
 
 trait ResultTranslator {

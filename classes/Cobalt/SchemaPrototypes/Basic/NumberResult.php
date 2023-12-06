@@ -1,8 +1,10 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
+use Cobalt\SchemaPrototypes\SchemaResult;
+use Validation\Exceptions\ValidationIssue;
 
 class NumberResult extends SchemaResult implements ArrayAccess{
     protected $type = "number";
@@ -78,6 +80,18 @@ class NumberResult extends SchemaResult implements ArrayAccess{
 
     public function offsetUnset(mixed $offset): void {
         return;
+    }
+
+    public function filter($value) {
+        switch(gettype($value)) {
+            case "string":
+                return is_numeric($value) ? $value : throw new ValidationIssue("The value supplied is not numerical");
+            case "integer":
+            case "double":
+            case "float":
+                return $value;
+        }
+        throw new ValidationIssue("The supplied value is not numeric");
     }
 
         /** Currently, these do not behave as expected because

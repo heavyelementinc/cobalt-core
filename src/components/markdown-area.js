@@ -16,11 +16,14 @@ class MarkdownArea extends HTMLElement {
         <div class='toolbar'></div>
         <textarea class='editor'>${this.props.originalTextContent}</textarea>
         `
+        this.addEventListener("change", e => {
+            e.preventDefault();
+        })
+
         this.editor = new SimpleMDE({
             autoDownloadFontAwesome: false,
             element: this.querySelector(".editor"),
             placeholder: this.getAttribute("placeholder"),
-
         });
         // this.value = this.props.originalTextContent;
 

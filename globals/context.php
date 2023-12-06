@@ -43,7 +43,7 @@ if ($route_context !== "web") {
 $context_processor = new $processor();
 
 if (!is_a($context_processor, "Handlers\RequestHandler")) {
-    if (app("debug")) die("Context processor must be an instance of Handlers\RequestHandler");
+    if (app("debug_exceptions_publicly")) die("Context processor must be an instance of Handlers\RequestHandler");
     else die("Error");
 }
 

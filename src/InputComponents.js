@@ -1,28 +1,28 @@
-class LoginForm extends HTMLElement {
-    connectedCallback() {
-        // super.connectedCallback();
-        this.button = this.querySelector("button[type='submit']");
-        this.getRequest();
-        this.button.addEventListener('click', e => this.request.send(e));
-        this.addEventListener('keyup', e => {
-            if (e.key === "Enter") this.request.send(e)
-        })
-        this.addEventListener("requestSuccess", e => {
-            window.location.reload();
-        })
-        this.addEventListener("requestFailure", async e => {
-            await wait_for_animation(this, "status-message--no")
-        })
-        this.dispatchEvent(new CustomEvent("componentready"));
-    }
+// class LoginForm extends HTMLElement {
+//     connectedCallback() {
+//         // super.connectedCallback();
+//         this.button = this.querySelector("button[type='submit']");
+//         this.getRequest();
+//         this.button.addEventListener('click', e => this.request.send(e));
+//         this.addEventListener('keyup', e => {
+//             if (e.key === "Enter") this.request.send(e)
+//         })
+//         this.addEventListener("requestSuccess", e => {
+//             window.location.reload();
+//         })
+//         this.addEventListener("requestFailure", async e => {
+//             await wait_for_animation(this, "status-message--no")
+//         })
+//         this.dispatchEvent(new CustomEvent("componentready"));
+//     }
 
-    getRequest() {
-        this.request = new LoginFormRequest(this, {});
-    }
+//     getRequest() {
+//         this.request = new LoginFormRequest(this, {});
+//     }
 
-}
+// }
 
-customElements.define("login-form-request", LoginForm);
+// customElements.define("login-form-request", LoginForm);
 
 
 class InputSwitch extends HTMLElement {
@@ -39,7 +39,7 @@ class InputSwitch extends HTMLElement {
         this.checkbox.checked = this.checked;
 
         this.thumb = document.createElement("span");
-        this.setAttribute("__custom-input", "true");
+        // this.setAttribute("__custom-input", "true");
     }
 
     get value() {

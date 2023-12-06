@@ -121,6 +121,9 @@
     /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
         "default": false,
+        "directives": {
+            "config": "enable_debug_routes"
+        },
         "meta": {
             "group": "Cache &amp; Debug",
             "name": "Enable debug routes",
@@ -271,9 +274,11 @@
         "default": true
     },
     "Validation_strict_data_submission_policy_by_default": {
-        "default": true
+        "default": false
     },
-
+    "UploadResult_default_thumbnail": {
+        "default": [450, null]
+    },
     "Mailchimp_api_signup_route": {
         "default": false
     },
@@ -605,6 +610,7 @@
     "Mail_username": {
         "default": "",
         "directives": {
+            "config": "smtp_username",
             "env": "MAIL_USERNAME"
         },
         "meta": {
@@ -617,7 +623,10 @@
 
     "Mail_password": {
         "default": "",
-        "directives": {"env": "MAIL_PASSWORD"},
+        "directives": {
+            "config": "smtp_password",
+            "env": "MAIL_PASSWORD"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup": "Mail",
@@ -632,6 +641,7 @@
     "Mail_smtp_host": {
         "default": "",
         "directives":{
+            "config": "smtp_host",
             "env": "MAIL_SMTP_HOST"
         },
         "meta": {
@@ -644,7 +654,10 @@
 
     "Mail_port": {
         "default": 587,
-        "directives":{"env": "MAIL_PORT"},
+        "directives":{
+            "config": "smtp_port",
+            "env": "MAIL_PORT"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -658,7 +671,10 @@
     
     "Mail_smtp_auth": {
         "default": true,
-        "directives": {"env": "MAIL_AUTH"},
+        "directives": {
+            "config": "smtp_auth",
+            "env": "MAIL_AUTH"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -672,7 +688,9 @@
 
     "Mail_reply_to_address": {
         "default": "",
-        "directives":{"alias": "Mail_from_address"},
+        "directives":{
+            "alias": "Mail_from_address"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -687,7 +705,9 @@
     },
     "Mail_reply_to_name": {
         "default": "",
-        "directives":{"alias": "app_short_name"},
+        "directives":{
+            "alias": "app_short_name"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -702,7 +722,10 @@
     
     "Mail_from_address": {
         "default": "",
-        "directives":{"alias": "Mail_username"},
+        "directives":{
+            "config": "smtp_from_address",
+            "alias": "Mail_username"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -712,7 +735,10 @@
     },
     "Mail_from_name": {
         "default": "",
-        "directives":{"alias": "app_short_name"},
+        "directives":{
+            "config": "smtp_from_name",
+            "alias": "app_short_name"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -1188,9 +1214,6 @@
         "default": "default"
     },
     /* 
-    If debugging is TRUE, then a bunch of things happen. 
-        - core/apiv1.php will add a HelloWorld route
-        - HTTPExceptions used to display an B64 value of the exception message
     If debugging is FALSE, then:
         - The WebHandler will cache a concat of all JS files in `packages`
         - The WebHandler will cache a concat of all CSS files in `css-packages`
@@ -1210,6 +1233,9 @@
     },
     "debug_exceptions_publicly": {
         "default": false,
+        "directives": {
+            "config": "debug_exceptions_publicly"
+        },
         "meta": {
             "group": "Developer",
             "subgroup": "Debug",

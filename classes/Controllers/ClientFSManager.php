@@ -10,7 +10,7 @@ use MikeAlmond\Color\Color;
 use MongoDB\BSON\ObjectId;
 
 trait ClientFSManager {
-    public $fs = null;
+    public ?FileSystem $fs = null;
     protected $format_table = null;
     
     /**

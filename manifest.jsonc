@@ -18,6 +18,7 @@
             "components/split-button.js",
             "components/button-toggle.js",
             "components/input-array.js",
+            "components/datepicker.js",
             "components/input-datetime.js",
             "components/autocomplete.js",
             "components/input-password.js",
@@ -37,8 +38,6 @@
             "Slideshow.js",
             "Slideshow2.js",
             "InputClasses.js",
-            "FormRequest.js",
-            "components/FormRequestElement.js",
             "InputComponents.js",
             "AsyncButton.js",
             "UserMenu.js",
@@ -69,6 +68,7 @@
     "css": {
         "common": [
             "components/autocomplete.css",
+            "components/datetime.css",
             "components/tag-select.css",
             "components/fold-out.css",
             "components/split-button.css",

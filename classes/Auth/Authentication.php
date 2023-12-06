@@ -150,7 +150,7 @@ class Authentication {
 
     static function handle_login() {
         $auth = null;
-        $stock_message = "Request is missing authentication";
+        $stock_message = "Request is missing valid credentials";
         // Check if the authentication values exist
         if (app('API_authentication_mode') === "headers") {
             try{
@@ -158,13 +158,13 @@ class Authentication {
             } catch (Exception $e) {
                 throw new BadRequest("No 'Authentication' header found.", $stock_message);
             }
+            // Decode and split the credentials
+            $credentials = explode(":", base64_decode($auth));
         } else {
-            if (!key_exists('Authentication', $_POST)) throw new BadRequest("The POST body is missing the 'Authentication' field", $stock_message);
-            $auth = $_POST['Authentication'];
+            // if (!key_exists('Authentication', $_POST)) throw new BadRequest("The POST body is missing the 'Authentication' field", $stock_message);
+            // $auth = $_POST['Authentication'];
+            $credentials = [$_POST['username'], $_POST['password']];
         }
-
-        // Decode and split the credentials
-        $credentials = explode(":", base64_decode($auth));
 
         // Log in the user using the credentials provided. If invalid credentials
         // then login_user will throw an exception.

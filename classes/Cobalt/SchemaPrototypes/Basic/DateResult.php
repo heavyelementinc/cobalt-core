@@ -1,14 +1,22 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes;
+namespace Cobalt\SchemaPrototypes\Basic;
+
+use Cobalt\SchemaPrototypes\SchemaResult;
 
 use DateTime;
 use MongoDB\BSON\UTCDateTime;
+use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 
 class DateResult extends SchemaResult {
     protected $type = "date";
     
+    public function getValue():mixed {
+        if($this->value instanceof UTCDateTime) return $this->value->toDateTime()->format('c');
+        return "";
+    }
+
     public function display():string {
         return $this->format("verbose");
     }
@@ -37,10 +45,25 @@ class DateResult extends SchemaResult {
     }
 
     public function filter($value) {
+        if(!$value) {
+            if($this->__isRequired()) throw new ValidationIssue("A date is required");
+            if($this->__isNullable()) return null;
+            throw new ValidationContinue("This field is not nullable, we're not doing anything.");
+        }
+        // $value = new DateTime($value);
         if($value instanceof UTCDateTime) return $value;
-        if($value instanceof DateTime) return new UTCDateTime($value->format('u'));
-        if(!in_array(gettype($value), ["int",'double'])) throw new ValidationIssue("Invalid date and time");
-        return new UTCDateTime($value * 1000);
+        if($value instanceof DateTime) return new UTCDateTime($value->format('u') * 1000);
+        $type = gettype($value);
+        switch($type) {
+            case "string":
+                // $date = new DateTime();
+                // $date->
+                return new UTCDateTime(strtotime($value) * 1000);
+            // case "integer":
+        }
+        throw new ValidationIssue("Unexpected date");
+        // if(!in_array($type, ["integer",'double'])) throw new ValidationIssue("Invalid date and time");
+        // return new UTCDateTime($value * 1000);
     }
 
 }

@@ -3,6 +3,8 @@
 namespace Controllers;
 
 use Exception;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use Routes\Route;
 
@@ -11,7 +13,7 @@ abstract class CRUDController extends Controller {
     var $initialized = false;
 
     public $name;
-    public $manager;
+    public ?\Drivers\Database $manager;
     public ?array $controller_data;
 
     const PERMISSIONS = [
@@ -40,7 +42,7 @@ abstract class CRUDController extends Controller {
      *      'index' => [
      *          'view'    => '/path/to/view.html', // required
      *          'each'    => '/path/to/other-view.html', // required
-     *          'anchor'  => 'SomeName' // defaults to Controller's ClassName,
+     *          'anchor'  => 'SomeName', // defaults to Controller's ClassName,
      *          'options' => [] // defaults to empty array
      *      ],
      *      'edit' => [
@@ -74,7 +76,11 @@ abstract class CRUDController extends Controller {
     public function create(): \MongoDB\BSON\ObjectId {
         $schemaName = $this->manager->get_schema_name($_POST);
         $schema = new $schemaName();
-        $mutant = $schema->__validate($_POST);
+        if(is_a($schema, "\\Validation\\Normalize")) {
+            $mutant = $schema->__validate($_POST);
+        } else if (is_a($schema, "\\Cobalt\\PersistanceMap")) {
+            $mutant = $schema->validate($_POST);
+        }
         $result = $this->manager->insertOne($mutant);
         $insertedId = $result->getInsertedId();
         $route = route("$this->name@edit", [(string)$insertedId]);
@@ -82,20 +88,28 @@ abstract class CRUDController extends Controller {
         return $insertedId;
     }
 
-    public function read($id): \Validation\Normalize {
+    public function read($id): \Cobalt\PersistanceMap|\Validation\Normalize {
         $schemaName = $this->manager->get_schema_name($_POST ?? $_GET);
         $result = $this->manager->findOne(['_id' => new ObjectId($id)]);
+        if(is_a($result, "\\Cobalt\\PersistanceMap")) return $result;
         return ($result) ? new $schemaName($result) : null;
     }
 
-    public function update($id): \Validation\Normalize {
+    public function update($id): \Cobalt\PersistanceMap|\Validation\Normalize {
         $schemaName = $this->manager->get_schema_name($_POST);
         $schema = new $schemaName();
-        $mutant = $schema->__validate($_POST);
-        $update  = $schema->__operators($mutant);
+        if(is_a($schema, "\\Validation\\Normalize")) {
+            $mutant = $schema->__validate($_POST);
+            $update  = $schema->__operators($mutant);
+        } else if (is_a($schema, "\\Cobalt\\PersistanceMap")) {
+            $mutant = $schema->validate($_POST);
+            $update = $schema->operators($mutant);
+        }
+        
         $query = ['_id' => new ObjectId($id)];
         $result = $this->manager->updateOne($query, $update, ['upsert' => false]);
-        return $this->read($query['_id']);
+        if($result->getMatchedCount() === 0) throw new NotFound("No document matched request", "No found");
+        return $this->read($id);
     }
 
     public function delete($id) {
@@ -119,12 +133,13 @@ abstract class CRUDController extends Controller {
         $params = $this->params($this->manager, $this->controller_data['index']['filters'] ?? [], $this->controller_data['index']['filter_misc'] ?? []);
         $result = $this->manager->findAllAsSchema(...$params);
         
+        add_vars([
+            'route' => route("$this->name@edit")
+        ]);
+
         $elements = view_each(
             $this->controller_data['index']['each'] ?? "/CRUD/admin/default-list-item.html", 
-            [
-                'route' => route("$this->name@edit"),
-                'doc' => $result
-            ],
+            $result,
             'doc',
             ""
         );
@@ -138,7 +153,7 @@ abstract class CRUDController extends Controller {
             'pagination'  => $this->getPaginationLinks(),
             'href'        => route("$this->name@new_document"),
         ]);
-        return set_template($this->controller_data['index']['view'] ?? "/CRUD/admin/index.html");
+        return view($this->controller_data['index']['view'] ?? "/CRUD/admin/index.html");
     }
 
     public function edit($id) {
@@ -146,10 +161,12 @@ abstract class CRUDController extends Controller {
         add_vars([
             'title' => $this->controller_data['edit']['title'] ?? $this->controller_data['index']['title'] ?? 'Edit',
             'endpoint' => route("$this->name@update") . "$id",
+            'autosave' => 'autosave="autosave"',
+            'submit_button' => '',
             'method' => 'POST',
             'doc' => $doc,
         ]);
-        return set_template($this->controller_data['edit']['view']  ?? "/CRUD/admin/edit.html");
+        return view($this->controller_data['edit']['view']  ?? "/CRUD/admin/edit.html");
     }
 
     public function new_document() {
@@ -158,12 +175,14 @@ abstract class CRUDController extends Controller {
         add_vars([
             'title'    => "New $this->name",
             'doc'      => new $schema([]),
+            'autosave' => 'autosave="none"',
+            'submit_button' => '<button type="submit">Submit</button>',
             'endpoint' => route("$this->name@create"),
             'method'   => "POST",
             'name'     => $this->name,
         ]);
         
-        return set_template($this->controller_data['new']['view'] ?? $this->controller_data['edit']['view'] ?? "/CRUD/admin/edit.html");
+        return view($this->controller_data['new']['view'] ?? $this->controller_data['edit']['view'] ?? "/CRUD/admin/edit.html");
     }
 
     /** ============================================= */
@@ -197,7 +216,7 @@ abstract class CRUDController extends Controller {
         $opts = static::get_controller_data() ?? [];
         
         Route::get(
-            "$mutant", 
+            "$mutant/", 
             "$class@index", 
             array_merge([
                 'anchor' => ['name' => $opts['index']['anchor'] ?? $class],

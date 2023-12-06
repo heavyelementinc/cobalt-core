@@ -1,5 +1,5 @@
 /**
- * @attribute method   - The method to use when submitting data
+ * @attribute method   - The method to use when submitting data, use the special "NAVIGATE" to submit a traditional GET request
  * @attribute action   - The endpoint to submit data to
  * @attribute autosave - [false, element, autosave, fieldset, form] If no submit button is found, then defaults to "element"
  * @attribute enctype  - "application/json; charset=utf-8"
@@ -13,9 +13,11 @@
 class NewFormRequest extends HTMLElement {
     constructor() {
         super();
-        this.validAutoSaveValues = ['false', 'element', 'autosave', 'fieldset', 'form'];
+        this.validAutoSaveValues = ['false', 'none', 'element', 'autosave', 'fieldset', 'form'];
         
         this.abort = () => {}; // Call to abort request
+        this.getMethods = ["GET", "NAVIGATE"];
+        this.postMethods = ["POST","PUT","DELETE"];
         this.fileUploadFields = [];
         this.fieldsRequiringFeedback = [];
         this.feedbackTracker = [];
@@ -37,7 +39,9 @@ class NewFormRequest extends HTMLElement {
 
     connectedCallback() {
         this.initSubmissionListeners();
-        if(!this.submitButton && !this.autoSave) this.autoSave = "form"; // Default forms without a save button to autosave
+        let defaultValue = "form";
+        if(this.getMethods.includes(this.method)) defaultValue = "none";
+        if(!this.submitButton && !this.autoSave) this.autoSave = defaultValue; // Default forms without a save button to autosave
         this.addEventListener("submission", event => {
             const data = this.buildSubmission(event);
             this.submit(data, event);
@@ -83,6 +87,10 @@ class NewFormRequest extends HTMLElement {
         const action  = this.getAttribute('action');
         const enctype = this.getAttribute('enctype') ?? "application/json; charset=utf-8";
         
+        if(this.getMethods.includes(method.toLocaleUpperCase())) {
+            return this.submitGetRequest(data, event);
+        }
+
         const api = new AsyncFetch(action, method, {format: enctype, form: this});
         api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
         api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
@@ -98,6 +106,24 @@ class NewFormRequest extends HTMLElement {
         }
         this.abort = () => {};
     }
+
+    submitGetRequest(data, event) {
+        let encodedPairs = [];
+        for(const key in data) {
+            encodedPairs.push(
+                `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
+            );
+        }
+        const fullUrl = `${this.getAttribute("action")}?${encodedPairs.join("&")}`;
+        const method = this.getAttribute("method");
+        switch(method.toLocaleUpperCase()) {
+            case "NAVIGATE":
+                return location = fullUrl;
+            case "GET":
+            default:
+                return Cobalt.router.location = fullUrl;
+        }
+    }    
 
     initSubmissionListeners() {
         this.initSubmitButton();
@@ -262,7 +288,7 @@ class NewFormRequest extends HTMLElement {
 
     get autoSave() {
         let value = this.getAttribute("autosave") ?? "false";
-        if(value === "false" || !this.validAutoSaveValues.includes(value)) return false;
+        if(value === "false" || value === "none" || !this.validAutoSaveValues.includes(value)) return false;
         return value;
     }
 
@@ -297,3 +323,33 @@ class NewFormRequest extends HTMLElement {
 }
 
 customElements.define("form-request", NewFormRequest);
+
+// class LoginFormRequest extends NewFormRequest {
+//     async submit() {
+//         if (this.asJSON === false) return;
+//         let error_container = this.form.querySelector(".error");
+//         error_container.innerText = "";
+
+//         let data = this.build_query();
+//         let headers = {};
+//         const encoded = btoa(`${data.username}:${data.password}`);
+//         headers = { ...this.headers, "Authentication": encoded }
+//         data.Authentication = encoded;
+        
+//         delete data.username;
+//         delete data.password;
+//         const post = new ApiFetch(this.action, this.method, { headers: headers });
+//         try {
+//             var result = await post.send(data, {});
+//         } catch (error) {
+//             // error_container.innerText = error.result.error
+//             this.errorHandler(error);
+//             return;
+//         }
+
+//         this.onsuccess = new CustomEvent("requestSuccess", { detail: result });
+//         this.form.dispatchEvent(this.onsuccess);
+//         // if (result.login === "successful") window.location.reload();
+//         // console.log(result)
+//     }
+// }
