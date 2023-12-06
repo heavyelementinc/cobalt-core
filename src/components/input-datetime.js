@@ -82,30 +82,42 @@ class InputDateTime extends HTMLElement {
         return attr;
     }
 
+    get tz() {
+        let attr = this.getAttribute("tz") || Intl.DateTimeFormat().resolvedOptions().timeZone;
+        return attr;
+    }
+
+    get locale() {
+        let attr = this.getAttribute("locale") || Intl.DateTimeFormat().resolvedOptions().locale;
+        return attr;
+    }
+
     initUI() {
         this.pickerButton = document.createElement("button");
         this.pickerButton.innerHTML = "<i name='chevron-down'></i>";
         // this.pickerButton.addEventListener("click", e => {
         //     this.toggleDatePicker();
         // });
+        this.props.dateInput = document.createElement("time")
+        this.props.dateInput.innerHTML = "No date selected";
 
-        if(!this.props.dateInput) this.props.dateInput = document.createElement("input");
-        this.props.dateInput.type = "date";
+        // if(!this.props.dateInput) this.props.dateInput = document.createElement("input");
+        // this.props.dateInput.type = "date";
         
-        this.props.dateInput.addEventListener("change", e => {
-            e.stopPropagation();
-            this.storeValueFromChangeCallback();
-        });
+        // this.props.dateInput.addEventListener("change", e => {
+        //     e.stopPropagation();
+        //     this.storeValueFromChangeCallback();
+        // });
 
-        if(!this.props.timeInput) this.props.timeInput = document.createElement("input");
-        this.props.timeInput.type = "time";
-        this.props.timeInput.addEventListener("change", e => {
-            e.stopPropagation();
-            this.storeValueFromChangeCallback();
-        });
+        // if(!this.props.timeInput) this.props.timeInput = document.createElement("input");
+        // this.props.timeInput.type = "time";
+        // this.props.timeInput.addEventListener("change", e => {
+        //     e.stopPropagation();
+        //     this.storeValueFromChangeCallback();
+        // });
 
         this.appendChild(this.props.dateInput);
-        this.appendChild(this.props.timeInput);
+        // this.appendChild(this.props.timeInput);
         this.appendChild(this.pickerButton);
 
         if(this.hasAttribute('value')) this.value = this.getAttribute("value");
@@ -115,9 +127,9 @@ class InputDateTime extends HTMLElement {
         if(!value) return;
         if(!this.props.dateInput) this.initUI();
         const date = `${value.getFullYear()}-${this.prefixSingleDigits(value.getMonth() + 1)}-${this.prefixSingleDigits(value.getDate())}`;
-        this.props.dateInput.value = date;
-        const time = `${this.prefixSingleDigits(value.getHours())}:${this.prefixSingleDigits(value.getMinutes())}`;
-        this.props.timeInput.value = time;
+        this.props.dateInput.innerHTML = value.toLocaleString(this.locale, {timeZone: this.tz});
+        // const time = `${this.prefixSingleDigits(value.getHours())}:${this.prefixSingleDigits(value.getMinutes())}`;
+        // this.props.timeInput.value = time;
     }
 
     toggleDatePicker() {
@@ -144,11 +156,11 @@ class InputDateTime extends HTMLElement {
 
     storeValueFromChangeCallback() {
         let date = this.props.dateInput.value;
-        let time = this.props.timeInput.value;
+        // let time = this.props.timeInput.value;
         let datetime = "";
         datetime += date;
         if(datetime) datetime = `${datetime} `
-        datetime += time;
+        // datetime += time;
         this.value = this.fromString(`${datetime}`);
         this.dispatchEvent(new Event("change"));
     }
