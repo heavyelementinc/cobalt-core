@@ -1,23 +1,35 @@
 <?php
+/**
+ * The ArrayResult is a basic prototype that wraps an Array.
+ *  
+ * @package Cobalt\SchemaPrototypes
+ * @author Gardiner Bryant, Heavy Element
+ * @copyright 2023 Heavy Element
+ */
 
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Iterator;
 use MongoDB\Model\BSONArray;
 use Validation\Exceptions\ValidationIssue;
 
 class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
-    use ResultTranslator;
+    use ResultTranslator, Fieldable;
     protected $type = "array";
     protected $__index = 0;
+    
+    public function field($classes = "", $misc = []) {
+        return $this->inputArray($classes, $misc);
+    }
 
     function setValue($value):void {
         $array = $value;
         if($value instanceof BSONArray) $array = $value->getArrayCopy();
-
+        if(empty($value)) $array = $this->schema['default'];
         $array = $this->__each($array, $this->__reference);
 
         $this->value = $array;
@@ -33,6 +45,27 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         return $html;
     }
 
+    public function display():string {
+        $value = $this->getValue();
+        $valid = $this->getValid();
+        $result = "<ul>";
+        foreach($value as $key) {
+            switch(gettype($valid)) {
+                case "array":
+                    if(key_exists($key, $valid)) $result[] = "<li>$valid[$key]</li>";
+                    break;
+                case "object":
+                    if(is_a($valid, "ArrayAccess")) $result[] = "<li>$valid[$key]</li>";
+                    break;
+                default:
+                    $result[] = "<li>$key</li>";
+                    break;
+            }
+        }
+
+        return $result;
+    }
+
     function push() {
         $each = null;
         if(isset($this->schema['each'])) $each = $this->schema['each'];
@@ -45,6 +78,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         }
         
         array_push($this->value, ...$args);
+        return $this->getValue();
     }
 
     function pop() {
@@ -67,10 +101,17 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         }
 
         array_unshift($this->value, ...$args);
+        return $this->getValue();
     }
 
     function join($delimiter) {
         return implode($delimiter, $this->getValue());
+    }
+
+    function last() {
+        $val = $this->getValue();
+        $v = count($val);
+        return $val[$v - 1];
     }
 
     public function __toString():string {
@@ -119,7 +160,10 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
     }
 
     function filter($value) {
-        if(!is_array($value)) throw new ValidationIssue("Value must be an array");
+        if(!is_array($value)) {
+            // if(is_a())
+            throw new ValidationIssue("Value must be an array");
+        }
         return $value;
     }
 }

@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * The SchemaResult is a base class that adds prototypical behavior to PHP.
+ * 
+ * SchemaResults work best with PersistanceMaps and schema directives. PersistanceMaps
+ * utilize MongoDB driver persistance to store and recall documents as PHP classes.
+ * 
+ * You can think of PersistanceMaps as a means of storing methods and metadata
+ * alongside the values in a database.
+ * 
+ * All SchemaResults share 
+ * 
+ * By convention, functions defined as `public` denote prototype functions for
+ * this class.
+ *  
+ * @package Cobalt\SchemaPrototypes
+ * @author Gardiner Bryant, Heavy Element
+ * @copyright 2023 Heavy Element
+ */
+
 namespace Cobalt\SchemaPrototypes;
 
 use Cobalt\PersistanceMap;
@@ -14,7 +33,8 @@ use stdClass;
  *  * `md_preserve_tags` => `bool` determines if the markdown parser should preserve HTML tags
  * @package Cobalt\SchemaPrototypes 
  * */
-class SchemaResult implements \Stringable {
+class SchemaResult implements \Stringable
+{
     protected $value;
     protected $originalValue;
     protected $type = "mixed";
@@ -23,22 +43,71 @@ class SchemaResult implements \Stringable {
     protected PersistanceMap $__reference;
     protected bool $asHTML = false;
 
-    public function getValue(): mixed {
-        if(key_exists('get', $this->schema) && is_callable($this->schema['get'])) $result = $this->schema['get']($this->value, $this);
+    /**
+     * Get the *processed* value of this method. This will return the
+     * raw value passed through any defined `get` directive **AND** 
+     * will mutate the value via the htmlspecialchars value if the
+     * `asHTML` property is set to `false`.
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        if (key_exists('get', $this->schema) && is_callable($this->schema['get'])) $result = $this->schema['get']($this->value, $this);
         else $result = $this->getRaw();
-        if($this->asHTML === false && gettype($this->value) === "string") $result = htmlspecialchars($result);
+        if ($this->asHTML === false && gettype($this->value) === "string") $result = htmlspecialchars($result);
         return $result;
     }
 
-    public function getRaw(): mixed {
+    /**
+     * Set the value of this item. This should *not* be confused with
+     * the 'set' directive which is used for validation purposes
+     * @param mixed $value 
+     * @return void 
+     */
+    function setValue(mixed $value): void
+    {
+        $this->originalValue = $value;
+        if ($value === null) $this->value = $this->schema['default'];
+        else $this->value = $value;
+    }
+
+    /**
+     * When $enableAsHTML is `false`, htmlspecialchars will be applied
+     * to this variable.
+     * @param bool $enableAsHTML 
+     * @return void 
+     */
+    public function htmlSafe(bool $enableAsHTML)
+    {
+        $this->asHTML = $enableAsHTML;
+    }
+
+    /**
+     * GetRaw will return the raw value with no processing whatsoever.
+     * If no value is stored, hydration is turned off, or if the value
+     * is dynamically derived from the `get` directive, this will be nullish.
+     * @return mixed
+     */
+    public function getRaw(): mixed
+    {
         return $this->value;
     }
 
-    public function md() {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    public function raw()
+    {
+        return $this->getRaw();
+    }
+
+    public function md()
+    {
         $val = $this->getValue();
         $asHtml = $this->asHTML;
-        if($this->schema['md_preserve_tags'] === true) $asHtml = true;
-        switch($this->type) {
+        if ($this->schema['md_preserve_tags'] === true) $asHtml = true;
+        switch ($this->type) {
             case "array":
                 $val = $this->join(", ");
             case "string":
@@ -47,36 +116,52 @@ class SchemaResult implements \Stringable {
         }
     }
 
-    public function raw() {
-        return $this->getRaw();
-    }
-
-    public function getValid():array {
+    /**
+     * Get the list of valid values for this field. This is defined by the 
+     * `valid` array or delta function directive.
+     * 
+     * `valid` delta directives MUST return an array or iterable.
+     * 
+     * @return array
+     */
+    public function getValid(): array
+    {
         // if ($field === "pronoun_set") return $this->valid_pronouns();
         if (isset($this->schema['valid'])) {
-            if(is_callable($this->schema['valid'])) return $this->valid($this->getValid(), $this);
+            if (is_callable($this->schema['valid'])) {
+                $val = $this->valid([], $this);
+                if (is_array($val)) return $val;
+                if (is_iterable($val)) return iterator_to_array($val);
+                throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
+            }
             return $this->schema['valid'];
         }
         return [];
     }
 
-    public function list($delimiter = ", "):string {
-        return implode($delimiter, $this->getValid());
-    }
-
-    public function options():string {
+    /**
+     * The `options` method will return an string of <option> tags based on
+     * the return value of the `getValid()` method. The current value of this
+     * field will have the `selected="selected"` attribute set.
+     * 
+     * This is useful for the native <select> element, the <input-array> component,
+     * and the <input-autocomplete> component.
+     * @return string
+     */
+    public function options(): string
+    {
         $valid = $this->getValid();
         $val = $this->getValue() ?? $this->value;
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
 
         $type = gettype($val);
 
-        switch($type) {
-            // case $val instanceof \MongoDB\Model\BSONArray:
-            //     $val = $val->getArrayCopy();
+        switch ($type) {
+                // case $val instanceof \MongoDB\Model\BSONArray:
+                //     $val = $val->getArrayCopy();
             case "array":
                 $validValue = [];
-                foreach($val as $o) {
+                foreach ($val as $o) {
                     $validValue[(string)$o] = $o;
                 }
                 $valid = array_merge($validValue ?? [], $valid ?? []);
@@ -97,6 +182,8 @@ class SchemaResult implements \Stringable {
             $selected = "";
             switch ($type) {
                 case "string":
+                case "integer":
+                case "double":
                     $selected = ($val == $validKey) ? "selected='selected'" : "";
                     break;
                 case "object":
@@ -113,79 +200,86 @@ class SchemaResult implements \Stringable {
         return $options;
     }
 
-    public function json($pretty = false):string {
-        return json_encode($this->value, ($pretty) ? 0 : JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+
+    public function list($delimiter = ", "): string
+    {
+        return implode($delimiter, $this->getValid());
     }
 
-    public function json_pretty():string {
+    /**
+     * This function returns the value serialized as JSON
+     * @param bool $pretty if set to pretty then JSON_PRETTY_PRING and JSON_UNESCAPED_SLASHES will be passed to `json_encode`
+     * @return string
+     */
+    public function json($pretty = false): string
+    {
+        return json_encode($this->value, ($pretty) ? 0 : JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    public function json_pretty(): string
+    {
         return $this->json(true);
     }
 
-    public function field($classes = "", $misc = []) {
-        $misc = $this->defaultFieldData($misc);
-        $name = $this->name;
-        if(key_exists('name', $misc)) $name = $misc['name'];
-        $value = $this->getValue();
-        return "<input type=\"$this->type\" class=\"$classes\" name=\"$name\"$misc[data]\" value=\"". htmlspecialchars($value) ."\">";
-    }
-
-    public function defaultFieldData($misc) {
-        $data = array_merge([
-            'id' => '',
-            
-            'data' => $misc['data'] ?? [],
-        ],$misc);
-        $d = "";
-        foreach($data['data'] as $k => $v) {
-            $d .= "data-".htmlspecialchars($k)."=\"".htmlspecialchars($v)."\"";
-        }
-        $data['data'] = $d;
-        return $data;
-    }
-
-    public function length():int|float|null {
-        switch($this->type) {
+    /**
+     * Depending on the defined `type` property, the this function will
+     * return different results.
+     *  * Strings return the character count
+     *  * Numbers return the string-ified character count of the number
+     *  * Arrays and other countables return the result of `count($var)`
+     *  * Any other value types return null
+     * @return int|null the length the string or countable
+     */
+    public function length(): int|null
+    {
+        switch ($this->type) {
             case "string":
                 return strlen($this->getValue());
             case "number":
                 return strlen((string)$this->getValue());
             default:
                 $val = $this->getValue();
-                if(is_countable($val)) return count($val);
+                if (is_countable($val)) return count($val);
                 return null;
         }
     }
 
-    public function display():string {
+    /**
+     * The display function will return 
+     * 
+     *  * For UploadResult, the embed function will be returned using the default `media` value
+     *  * For Enums, Numbers, and Strings, the enumerated public `valid` value will be returned *or* the actual value if the key doesn't exist 
+     *  * For an ArrayResult the enumerated values for each array element, joined with a ", "
+     */
+    public function display(): string
+    {
         $valid = $this->getValid();
         $type = $this->type;
         $val = $this->getValue();
-        switch($type) {
+        switch ($type) {
             case "upload":
                 return $this->embed();
             case "object":
-                if(is_a($val, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) {
+                if (is_a($val, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) {
                     return $val->getValue();
                 }
-                if(!is_iterable($val)) {
+                if (!is_iterable($val)) {
                     return json_encode($val);
                 }
             case "array":
                 $items = [];
-                foreach($this->getValue() as $v) {
-                    if(key_exists($v, $valid)) $items[] = $valid[$v];
+                foreach ($this->getValue() as $v) {
+                    if (key_exists($v, $valid)) $items[] = $valid[$v];
                     else $items[] = $v;
                 }
                 return implode(", ", $items);
             default:
-                if(in_array($val, $valid)) return $valid[$val];
-                if(in_array($this->value, $valid)) return $valid[$this->value];
+                if (in_array($val, $valid)) return $valid[$val];
+                if (in_array($this->value, $valid)) return $valid[$this->value];
                 return (string)$val ?? "";
         }
     }
 
-
-    
     /**
      * Sets the name of the schema item. By convention, this should be the 
      * [name='<some_name>'] attribute. Also, by convention, this should use
@@ -197,25 +291,24 @@ class SchemaResult implements \Stringable {
         $this->name = $name;
     }
 
-    /**
-     * This sets the value of this item. This should *not* be confused with
-     * the 'set' directive which is used for validation purposes
-     * @param mixed $value 
-     * @return void 
-     */
-    function setValue(mixed $value):void {
-        $this->originalValue = $value;
-        if($value === null) $this->value = $this->schema['default'];
-        else $this->value = $value;
-    }
+    final const universalSchemaDirectives = [
+        'default' => null,
+        'nullable' => false,
+        'required' => false,
+        'md_preserve_tags' => false,
+    ];
 
     /**
      * Stores the list of schema directives for this item
      * @param null|array $schema 
      * @return void 
      */
-    function setSchema(?array $schema):void {
-        $this->schema = array_merge($this->defaultSchemaValues(), $schema ?? []);
+    function setSchema(?array $schema): void {
+        $this->schema = array_merge(
+            self::universalSchemaDirectives,
+            $this->defaultSchemaValues(),
+            $schema ?? []
+        );
     }
 
     /**
@@ -226,12 +319,7 @@ class SchemaResult implements \Stringable {
      * @return array 
      */
     function defaultSchemaValues(array $data = []): array {
-        return array_merge([
-            'default' => null,
-            'nullable' => false,
-            'required' => false,
-            'md_preserve_tags' => false,
-        ], $data);
+        return $data;
     }
 
     /**
@@ -239,21 +327,21 @@ class SchemaResult implements \Stringable {
      * @param PersistanceMap $schema 
      * @return void 
      */
-    function datasetReference(PersistanceMap &$schema):void {
-    $this->__reference = $schema;
+    function datasetReference(PersistanceMap &$schema): void {
+        $this->__reference = $schema;
     }
 
-    function __toString():string {
+    function __toString(): string {
         return $this->getValue() ?? "";
     }
 
     function __call($name, $arguments) {
         $schema = $this->schema;
-        if(key_exists($name, $schema) && is_callable($schema[$name])) {
-            if($arguments) return $schema[$name]($this->getValue(), $this, ...$arguments);
+        if (key_exists($name, $schema) && is_callable($schema[$name])) {
+            if ($arguments) return $schema[$name]($this->getValue(), $this, ...$arguments);
             return $schema[$name]($this->getValue(), $this);
         }
-        if(method_exists($this, $name)) return $this->{$name}($this->getValue($this->getValue(), $this), $this, ...$arguments);
+        if (method_exists($this, $name)) return $this->{$name}($this->getValue($this->getValue(), $this), $this, ...$arguments);
         throw new \BadFunctionCallException("Function `$name` does not exist on `$this->name`");
     }
 
@@ -283,20 +371,10 @@ class SchemaResult implements \Stringable {
         return $this->coalece_directive('nullable');
     }
 
-    protected function coalece_directive($field, $defaultsTo = false):bool{ 
-        if(!isset($this->schema[$field])) return $defaultsTo;
+    protected function coalece_directive($field, $defaultsTo = false): bool {
+        if (!isset($this->schema[$field])) return $defaultsTo;
         $req = $this->schema[$field];
-        if(gettype($req) === "boolean") return $req;
+        if (gettype($req) === "boolean") return $req;
         return $defaultsTo;
-    }
-
-    /**
-     * Text safety means that htmlspecialchars will be applied
-     * to this variable if it's a string
-     * @param bool $enableAsHTML 
-     * @return void 
-     */
-    public function htmlSafe(bool $enableAsHTML) {
-        $this->asHTML = $enableAsHTML;
     }
 }

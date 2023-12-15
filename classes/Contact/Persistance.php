@@ -3,17 +3,14 @@
 namespace Contact;
 
 use Cobalt\PersistanceMap;
-use Cobalt\SchemaPrototypes\ArrayResult;
-use Cobalt\SchemaPrototypes\DateResult;
-use Cobalt\SchemaPrototypes\EmailAddressResult;
-use Cobalt\SchemaPrototypes\EnumResult;
-use Cobalt\SchemaPrototypes\IdResult;
-use Cobalt\SchemaPrototypes\IpResult;
-use Cobalt\SchemaPrototypes\MarkdownResult;
-use Cobalt\SchemaPrototypes\PhoneNumberResult;
-use Cobalt\SchemaPrototypes\StringResult;
-use Cobalt\SchemaPrototypes\UserIdArrayResult;
-use Cobalt\SchemaPrototypes\UserIdResult;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\SchemaPrototypes\Basic\EnumResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Cobalt\SchemaPrototypes\Compound\EmailAddressResult;
+use Cobalt\SchemaPrototypes\Compound\IpResult;
+use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
+use Cobalt\SchemaPrototypes\Compound\PhoneNumberResult;
+use Cobalt\SchemaPrototypes\Compound\UserIdArrayResult;
 
 class Persistance extends PersistanceMap {
 

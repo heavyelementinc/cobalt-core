@@ -30,6 +30,10 @@ input, textarea, button[native], [role='button'], [__custom-input] {
   color: var(--project-color-input-text-color);
 }
 
+input[type='color'] {
+  padding: .1rem;
+}
+
   :is(input-wrapper, input-password) :is(input, button) {
     border: unset;
     background: unset;
@@ -225,6 +229,28 @@ a.button {
 
 .lightbox-zoom {
   cursor: zoom-in;
+}
+
+input-binary {
+  display: inline-flex;
+  
+}
+
+input-binary option {
+  display: none;
+}
+
+input-binary tag-container button {
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: 1px solid var(--project-color-input-background-focus);
+}
+
+input-binary tag-container :is(button)[aria-pressed='true'] {
+  border: 1px solid var(--project-color-input-border-focus);
+  background: var(--project-color-input-background);
 }
 
 :is(input-array, input-user-array){
@@ -738,4 +764,53 @@ progress.spa-loading-indicator.navigation-start {
   z-index: calc(var(--project-modal-z-index) * 100);
   top: -4px;
   opacity: 1;
+}
+
+input-binary {
+  display: inline-flex;
+}
+
+input-binary option {
+  display: none;
+}
+
+input-binary tag-container button {
+  all: revert;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: var(--project-color-input-disabled);
+  color: var(--project-color-input-border-nofocus);
+  border-radius: .2rem;
+  margin: .1rem;
+  font-size: .8em;
+}
+
+input-binary tag-container button:before {
+  content: "";
+  display: inline-block;
+  height: .6em;
+  width: .6em;
+  margin-right: .3em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+input-binary tag-container button[aria-pressed='true'] {
+  border: 1px solid var(--project-color-input-border-focus);
+  background: #FFF;
+    color: black;
+}
+
+input-binary tag-container button[aria-pressed='true']:before {
+  background-color: currentcolor;
+}
+
+ol.binary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ol.binary-list li:not(.active){
+  opacity: .2;
 }

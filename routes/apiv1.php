@@ -113,6 +113,7 @@ if(app("enable_debug_routes")) {
     Route::delete("/debug/file-upload/{id}","DebugFiles@delete");
 
     Route::get("/header-tests/{response}", "DebugHeaders@response");
+    Route::post("/proto/", "SchemaDebug@filter_test");
 }
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {

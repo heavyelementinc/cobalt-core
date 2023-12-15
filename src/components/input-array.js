@@ -237,6 +237,73 @@ class InputArray extends AutoCompleteInterface {
 
 customElements.define("input-array", InputArray);
 
+class InputBinary extends HTMLElement {
+    constructor() {
+        super();
+        this.props = {
+            options: [],
+            tags: document.createElement("tag-container")
+        }
+        this.setAttribute("__custom-input", "true");
+    }
+
+    connectedCallback() {
+        this.props.options = this.querySelectorAll("option");
+        this.props.tags.innerHTML = "";
+        this.appendChild(this.props.tags);
+        for(const opt of this.props.options) {
+            this.props.tags.appendChild(this.createTag(opt));
+        }
+    }
+
+    createTag(data) {
+        const tag = document.createElement("button");
+        tag.value = Number(data.value);
+        tag.ariaPressed = false;
+        if(data.getAttribute("selected") === "selected") tag.ariaPressed = true;
+        tag.innerHTML = data.innerHTML;
+        // tag.dataset = data.dataset;
+        
+        tag.addEventListener("click", e => {
+            tag.ariaPressed = !JSON.parse(tag.ariaPressed);
+            this.dispatchEvent(new CustomEvent("change"));
+        });
+
+        return tag;
+    }
+
+    get value() {
+        const tags = this.props.tags.querySelectorAll("button");
+        let value = 0;
+        for(const tag of tags) {
+            if(JSON.parse(tag.ariaPressed) === false) continue;
+            value += Number(tag.value);
+        }
+        return value;
+    }
+
+    set value(val) {
+        const tags = this.props.tags.querySelectorAll("button");
+        for(const tag of tags) {
+            tag.ariaPressed = false;
+            if(tag.storedValue & val) tag.ariaPressed = true;
+        }
+    }
+
+    get readonly() {
+        const val = this.getAttribute("readonly");
+        
+        return val ?? false;
+    }
+
+    set readonly(bool) {
+        if(typeof bool === "boolean") throw new TypeError("Must be a boolean");
+
+        this.setAttribute("readonly", JSON.stringify(bool));
+    }
+}
+
+customElements.define("input-binary", InputBinary);
 
 class InputUserArray extends InputArray {
 

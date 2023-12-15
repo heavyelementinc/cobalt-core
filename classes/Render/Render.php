@@ -75,7 +75,9 @@ namespace Render;
 
 use BadFunctionCallException;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Exception;
 use Exceptions\HTTP\NotFound;
+use TypeError;
 
 class Render {
     public $body = "";
@@ -296,6 +298,8 @@ class Render {
                         $replace[$i] = $replace[$i]->{$function}(...$arguments);
                     } catch(BadFunctionCallException $e) {
                         $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
+                    } catch(TypeError $e) {
+                        $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
                     }
                 } else {
                     $replace[$i] = $replace[$i];//->getValue();
@@ -303,7 +307,9 @@ class Render {
             }
 
             if($replace[$i] instanceof \Cobalt\PersistanceMap) {
-                user_error("Schemas shouldn't make it to this point!", E_USER_WARNING);
+                $this->debug_template($replacements[0][1], "", $subject);
+                throw new Exception("PersistanceMap shouldn't get to this point");
+                // user_error("Schemas shouldn't make it to this point!", E_USER_WARNING);
             }
 
             if ($is_inline_json) $replace[$i] = json_encode($replace[$i], $is_pretty_print); // Convert to JSON
@@ -426,7 +432,7 @@ class Render {
     function debug_template($errorToHighlight, $message, $body) {
         // $strpos = \strpos($GLOBALS['TEMPLATE_CACHE'][$this->name], $funct);
         // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
-        $errorToHighlight = preg_quote($errorToHighlight);
+        // $errorToHighlight = preg_quote($errorToHighlight);
         $strpos = \strpos($body, $errorToHighlight);
         $template = $body;
         $substr = substr($template, 0, $strpos);
@@ -450,6 +456,7 @@ class Render {
         $safe = htmlspecialchars($template);
         $safe = str_replace($funct,"<code class='error'>$funct</code>",$safe);
         echo "<h1>Cobalt Template Debugger</h1>";
+        echo "<h2 style='font-family: monospace;'>Filename: " . $this->name . "</h2>";
         echo "<code>".$message . " in \"$this->name\" on line $lineNum, column " . $strpos."</code>";
         echo "<pre>";
         foreach(explode("\n",$safe) as $number => $line) {

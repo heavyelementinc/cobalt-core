@@ -56,13 +56,14 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
     protected array $__hydrated = [];
     protected bool $__hydrate = __APP_SETTINGS__['Schema_hydration_on_unserialize'];
     
-    function __construct() {
+    function __construct($document = null) {
         $this->id = new ObjectId;
         $this->__initialize_schema();
+        if($document !== null) $this->ingest($document);
     }
 
     function __toString():string {
-        return (string)$this->id;
+        return ""; // (string)$this->id;
     }
 
     abstract function __get_schema():array;

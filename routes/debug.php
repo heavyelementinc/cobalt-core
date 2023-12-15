@@ -213,4 +213,37 @@ if (app("enable_debug_routes")) {
             'href' => '/router-test/'
         ]
     ]);
+
+    // Route::get("/proto/...", "SchemaDebug@schemaresult",[
+    //     'navigation' => [
+    //         'debug_prototypes'
+    //     ],
+    //     'anchor' => ['name' => 'SchemaDebug', 'href' => "/proto/"]
+    // ]);
+    Route::get("/proto/array", "SchemaDebug@arrayresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Array Prototype']
+    ]);
+    
+    Route::get("/proto/binary", "SchemaDebug@binaryresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Binary Prototype']
+    ]);
+
+    Route::get("/proto/bool", "SchemaDebug@boolresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Boolean Prototype']
+    ]);
+    Route::get("/proto/date", "SchemaDebug@dateresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Date Prototype']
+    ]);    
 }

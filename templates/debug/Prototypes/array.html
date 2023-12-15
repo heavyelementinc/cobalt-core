@@ -1,0 +1,44 @@
+@set("title", "Array Prototype");
+<h1>{{title}}</h1>
+
+<table>
+    <tr>
+        <td>Value: </td><td>{{type.array.json()}}</td>
+    </tr>
+    <tr>
+        <td>Display: </td><td>{{type.array.display()}}</td>
+    </tr>
+    <tr>
+        <td>Join: </td><td>{{type.array.join("... ")}}</td>
+    </tr>
+    <tr>
+        <td>Push: </td><td>{{$type.array.push("push")}}</td>
+    </tr>
+    <tr>
+        <td>Pop: </td><td>{{type.array.pop()}}</td>
+    </tr>
+    <tr>
+        <td>Shift: </td><td>{{type.array.shift()}}</td>
+    </tr>
+    <tr>
+        <td>Unshift: </td><td>{{$type.array.unshift()}}</td>
+    </tr>
+    <tr>
+        <td>Array Select: </td><td>{{type.array.1}}</td>
+    </tr>
+    <tr>
+        <td>Array Last: </td><td>{{type.array.last()}}</td>
+    </tr>
+</table>
+
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Filter Result</label>
+            {{type.array.field()}}
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

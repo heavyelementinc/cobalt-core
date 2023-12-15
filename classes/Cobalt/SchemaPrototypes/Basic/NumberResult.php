@@ -4,10 +4,20 @@ namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
 
 class NumberResult extends SchemaResult implements ArrayAccess{
+    use Fieldable;
     protected $type = "number";
+
+    public function defaultSchemaValues(array $data = []): array
+    {
+        return array_merge([
+            'min' => null,
+            'max' => null,
+        ], $data);
+    }
 
     public function add($operand) {
         return $this->getValue() + $operand;
@@ -83,15 +93,31 @@ class NumberResult extends SchemaResult implements ArrayAccess{
     }
 
     public function filter($value) {
+        $pass = false;
         switch(gettype($value)) {
             case "string":
-                return is_numeric($value) ? $value : throw new ValidationIssue("The value supplied is not numerical");
+                if(is_numeric($value)) $pass = true;
+                break;
             case "integer":
             case "double":
             case "float":
-                return $value;
+                $pass = true;
+                break;
         }
-        throw new ValidationIssue("The supplied value is not numeric");
+
+        if(!$pass) throw new ValidationIssue("The supplied value is not numeric");
+        $min = $this->schema['min'];
+        $max = $this->schema['max'];
+        if($min !== null && $value < $min) throw new ValidationIssue("Supplied value is lower than minimum ($min)");
+        if($max !== null && $value > $max) throw new ValidationIssue("Supplied value is grearer than maximum ($max)");
+        return $value;
+    }
+
+    public function field($classes = "", $misc = []):string {
+        $tag = $misc['tag'] ?? 'input';
+        $type = $misc['type'] ?? $this->type;
+
+        return "<$tag " . $this->defaultFieldData($misc);
     }
 
         /** Currently, these do not behave as expected because

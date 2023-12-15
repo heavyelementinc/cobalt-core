@@ -59,7 +59,7 @@ class HexColorResult extends SchemaResult {
         $darkContrast = $dark->luminosityContrast($color);
         $light = Color::fromHex($light);
         $lightContrast = $light->luminosityContrast($color);
-        if($lightContrast > $darkContrast) return $light->getHex();
-        return $dark->getHex();
+        if($lightContrast > $darkContrast) return "#" . $light->getHex();
+        return "#" . $dark->getHex();
     }
 }

@@ -180,6 +180,20 @@ function get_all_where_available($paths, $merged = true, $throwOnFail = false) {
     return $available;
 }
 
+// function scan_dir_all(array $paths, $contexts = [__ENV_ROOT__, __APP_ROOT__]):array {
+//     $results = [];
+//     foreach($paths as $path) {
+        
+//         $dir = scandir($path);
+//         $r = [];
+//         foreach($dir as $d) {
+            
+//         }
+
+//     }
+//     return array_unique(array_merge(...$results));
+// }
+
 /** Hand this function an array of files that might exist and this function will
  *  return an array of file paths that exist */
 function files_exist_the_hard_way($arr, $error_on_empty = true) {

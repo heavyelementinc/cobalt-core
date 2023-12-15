@@ -142,7 +142,7 @@ split-button button.split-button--additional-options:hover {
     width: 3rem;
 }
 
-:is(button, async-button, input[type="button"])[aria-pressed='true'] {
+button[aria-pressed='true'], :is(async-button, input[type="button"])[aria-pressed='true'] {
     background: var(--project-color-button-text);
     color: var(--project-color-button-init);
 }

@@ -35,6 +35,10 @@ class UploadResult extends SchemaResult{
      */
     protected string|bool $filename = "";
     
+    public function display():string {
+        return $this->embed();
+    }
+
     public function embed($embedSize = "media", array $misc = []) {
         $misc = array_merge([
             'class' => "",

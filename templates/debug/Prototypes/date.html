@@ -1,0 +1,29 @@
+@set("title", "Date Prototype");
+<h1>{{title}}</h1>
+
+<table>
+    <tr>
+        <td>Value: </td><td>{{type.date}}</td>
+    </tr>
+    <tr>
+        <td>JSON: </td><td>{{type.date.json()}}</td>
+    </tr>
+    <tr>
+        <td>Display: </td><td>{{type.date.display()}}</td>
+    </tr>
+    <tr>
+        <td>Format: </td><td>{{type.date.format("input")}}</td>
+    </tr>
+</table>
+
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Filter Result</label>
+            {{type.date.field()}}
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

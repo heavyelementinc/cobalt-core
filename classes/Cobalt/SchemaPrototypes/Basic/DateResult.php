@@ -3,18 +3,38 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
-
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use DateTime;
 use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 
 class DateResult extends SchemaResult {
+    use Fieldable;
+
     protected $type = "date";
     
+    public function field($class = "", $misc = []) {
+        return $this->inputDate($class, $misc);
+    }
+    
     public function getValue():mixed {
-        if($this->value instanceof UTCDateTime) return $this->value->toDateTime()->format('c');
-        return "";
+        $value = $this->value;
+        if($this->value instanceof UTCDateTime) $value = $this->value->toDateTime();
+        if(key_exists("get", $this->schema) && is_callable($this->schema['get'])) $value = $this->schema['get'];
+        return $value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getValue()->format('c');
+    }
+
+    public function setValue($value):void {
+        $this->originalValue = $value;
+        if ($value === null) $this->value = $this->schema['default'];
+        else if($value instanceof UTCDateTime) $this->value = $value->toDateTime();
+        else $this->value = $value;
     }
 
     public function display():string {
@@ -41,7 +61,11 @@ class DateResult extends SchemaResult {
             $value = $dateTime->format("U");
             return date($format, $value);
         }
-        return date($format, $value / 1000);
+        return date($format, $value->format("u") / 1000);
+    }
+
+    public function relative($strtoparse) {
+        
     }
 
     public function filter($value) {

@@ -14,7 +14,7 @@ use Validation\Exceptions\ValidationIssue;
 class StringResult extends SchemaResult implements ArrayAccess{
     protected $type = "string";
 
-    public function length():int|float|null {
+    public function length():int|null {
         return strlen($this->value);
     }
 
@@ -45,8 +45,10 @@ class StringResult extends SchemaResult implements ArrayAccess{
     public function display():string {
         $val = $this->getValue();
         $valid = $this->getValid();
-        if(key_exists($val, $valid)) return $valid[$val];
-        if(key_exists($this->value, $valid)) return $valid[$this->value];
+        if(is_array($valid)) {
+            if(key_exists($val, $valid)) return $valid[$val];
+            if(key_exists($this->value, $valid)) return $valid[$this->value];
+        }
         return (string)$val;
     }
 
