@@ -254,17 +254,23 @@ class InputBinary extends HTMLElement {
         for(const opt of this.props.options) {
             this.props.tags.appendChild(this.createTag(opt));
         }
+        if(this.value === 0 && this.hasAttribute("value")) {
+            console.warn('Input fields should not use the "value" attribute');
+            this.value = Number(this.getAttribute('value'));
+        }
     }
 
     createTag(data) {
         const tag = document.createElement("button");
         tag.value = Number(data.value);
+        tag.storedValue = Number(data.value);
         tag.ariaPressed = false;
         if(data.getAttribute("selected") === "selected") tag.ariaPressed = true;
         tag.innerHTML = data.innerHTML;
         // tag.dataset = data.dataset;
         
         tag.addEventListener("click", e => {
+            if(this.readonly) return;
             tag.ariaPressed = !JSON.parse(tag.ariaPressed);
             this.dispatchEvent(new CustomEvent("change"));
         });
@@ -291,9 +297,11 @@ class InputBinary extends HTMLElement {
     }
 
     get readonly() {
-        const val = this.getAttribute("readonly");
-        
-        return val ?? false;
+        if(!this.hasAttribute("readonly")) return false;
+        return true;
+        // const val = this.getAttribute("readonly") ?? ""; 
+        // if(['',"readonly", "true"].includes(val.toLowerCase())) return true;
+        // return false;
     }
 
     set readonly(bool) {

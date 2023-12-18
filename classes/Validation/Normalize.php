@@ -453,9 +453,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
         if (is_callable($method_name)) {
             // Run the value through the getter function
-            $value = $method_name($value, $name);
+            $value = $method_name($value, $name, $this);
         } else if (method_exists($this, $method_name)) {
-            $value = $this->{$method_name}($value, $name);
+            $value = $this->{$method_name}($value, $name, $this);
         }
         return $value;
     }
@@ -616,7 +616,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $method_name = "__proto_$prototype";
         $got = $value;
         try{ 
-            if(isset($this->__schema[$fieldname]['get'])) $got = $this->__schema[$fieldname]['get']($value, $fieldname) ?? $value;
+            if(isset($this->__schema[$fieldname]['get'])) $got = $this->__schema[$fieldname]['get']($value, $fieldname, $this) ?? $value;
         } catch (\Error $e) {
             
         }
@@ -661,13 +661,13 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     private function __proto_display($val, $field) {
         if (isset($this->__schema[$field]['display'])) {
             $fn = $this->__schema[$field]['display'];
-            if(is_callable($fn)) return $fn($val, $field);
+            if(is_callable($fn)) return $fn($val, $field, $this);
             return $fn;
         } else if (isset($this->__schema[$field]['valid'])) {
             $valid = $this->__schema[$field]['valid'];
-            if (is_callable($valid)) $valid = $valid($val, $field);
+            if (is_callable($valid)) $valid = $valid($val, $field, $this);
             $type = gettype($val);
-            if ($type === "object" || $type === "array") return $this->__proto_display_array_items($val, $valid);
+            if ($type === "object" || $type === "array") return $this->__proto_display_array_items($val, $valid, $this);
             if (key_exists($val, $valid)) return $valid[$val];
         }
         if($val instanceof \MongoDB\BSON\UTCDateTime) return $this->get_date($val, 'verbose');

@@ -130,7 +130,7 @@ abstract class CRUDController extends Controller {
     public function index() {
         $search = $this->controller_data['index']['search'] ?? null;
         if($search) $this->enableSearchField(...$search);
-        $params = $this->params($this->manager, $this->controller_data['index']['filters'] ?? [], $this->controller_data['index']['filter_misc'] ?? []);
+        $params = $this->params($this->manager, $this->controller_data['index']['filters'] ?? [], array_merge($this->controller_data['index']['filter_misc'] ?? [], $this->controller_data['index']['query_options'] ?? []));
         $result = $this->manager->findAllAsSchema(...$params);
         
         add_vars([

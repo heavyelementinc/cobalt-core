@@ -37,7 +37,7 @@ class FileSystem {
      * @param array $options 
      * @return never Creating a download for the client will exit this application!
      */
-    final public function download(string $filename, $options = ['revision' => 0]): never {
+    final public function download(string $filename, $options = ['revision' => -1]): never {
         ob_clean();
         try{
             $stream = $this->getStream("/".$filename, $options);
@@ -119,7 +119,7 @@ class FileSystem {
     /** Will return a stream. To send the file to the client
      * @return resource File stream
      */
-    final public function getStream(string $filename, $options = ['revision' => 0]) {
+    final public function getStream(string $filename, $options = ['revision' => -1]) {
         return $this->bucket->openDownloadStreamByName($filename, $options);
     }
 

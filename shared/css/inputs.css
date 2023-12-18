@@ -245,7 +245,15 @@ input-binary tag-container button {
   place-items: center;
   pointer-events: auto;
   border: 1px solid var(--project-color-input-border-nofocus);
-  background: 1px solid var(--project-color-input-background-focus);
+  background: var(--project-color-input-background-focus);
+}
+
+input-binary[readonly] {
+  background: var(--project-color-input-disabled);
+}
+
+input-binary[readonly] button {
+  pointer-events: none;
 }
 
 input-binary tag-container :is(button)[aria-pressed='true'] {
