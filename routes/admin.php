@@ -43,7 +43,6 @@ Route::get("/me/", "UserAccounts@me",
         'anchor' => ['name' => 'Cobalt Settings', 'icon' => 'gear']
     ]);
 
-
 /** 
 *  ========================================================
 *  ================ PRESENTATION SETTINGS =================
@@ -175,6 +174,7 @@ Route::get("/me/", "UserAccounts@me",
         ]);
     }
 
+
     // Route::get("/settings/cron", "CoreAdmin@cron_panel",[
     //     // 'permission' => 'API_manage_keys',
     //     'anchor' => [
@@ -198,6 +198,18 @@ Route::get("/me/", "UserAccounts@me",
         'permission' => 'API_manage_keys',
     ]);
 
+    
+    if(__APP_SETTINGS__['Enable_database_import_export'] === true) {
+        Route::get("/database/", "DBMgmt@ui", [
+            'permission' => 'Database_database_export',
+            'anchor' => [
+                'name' => 'DB Management',
+                'icon' => 'database-arrow-up-outline',
+            ],
+            'navigation' => ['advanced_settings']
+        ]);
+    }
+
 /** 
 *  ========================================================
 *  ================ MISCELLANEOUS ROUTES ==================
@@ -219,3 +231,4 @@ if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel")
     ]);
     Route::get("/contact-form/{id}", "ContactForm@read", ['permission' => 'Contact_form_submissions_access']);
 }
+

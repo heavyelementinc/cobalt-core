@@ -307,6 +307,9 @@
             "type": "bool"
         }
     },
+    "Enable_database_import_export": {
+        "default": true
+    },
     "CobaltEvents_enabled": {
         "default": true,
         "directives": {

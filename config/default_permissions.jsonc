@@ -160,5 +160,19 @@
         "dangerous": true,
         "default": false,
         "ring": 1
+    },
+    "Database_database_export": {
+        "group": "Admin",
+        "label:": "Allow the user to export database files",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Database_database_import": {
+        "group": "Admin",
+        "label:": "Allow the user to import database files",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
     }
 }

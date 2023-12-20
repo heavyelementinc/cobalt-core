@@ -77,7 +77,18 @@ class NewFormRequest extends HTMLElement {
         const elements = this.querySelectorAll(universal_input_element_query);
         let value = {};
         for(const input of elements) {
-            value[input.name ?? input.getAttribute("name")] = this.getFieldValue(input)//.value;
+            let name = input.name ?? input.getAttribute("name");
+            let length = name.length;
+            let appendToArray = false;
+            if(name[length - 1] === "]" && name[length - 2] === "[") {
+                appendToArray = true;
+                name = name.substring(0, length - 2);
+                if(!value[name]) value[name] = [];
+                if(Array.isArray(value[name]) === false) value[name] = [value[name]];
+                if(input.type === "checkbox" && !input.checked) continue;
+            }
+            if(appendToArray) value[name].push(this.getFieldValue(input));
+            else value[name] = this.getFieldValue(input)//.value;
         }
         return value;
     }

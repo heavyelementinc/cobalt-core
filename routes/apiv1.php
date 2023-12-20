@@ -143,3 +143,9 @@ if(app("Customizations_enabled")) {
     Route::s_delete("/customizations/{id}", "Customizations@deleteItem", ['permission' => 'Customizations_delete']);
     Route::s_delete("/customizations/attachment/{id}", "Customizations@delete", ['permission' => 'Customizations_delete']);
 }
+
+if(__APP_SETTINGS__['Enable_database_import_export']) {
+    Route::s_post('/database/export/','DBMgmt@download', [
+        'permission' => 'Database_database_export',
+    ]);
+}
