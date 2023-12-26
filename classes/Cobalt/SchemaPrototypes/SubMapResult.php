@@ -4,7 +4,7 @@ namespace Cobalt\SchemaPrototypes;
 
 use Cobalt\PersistanceMap;
 
-class PersistanceMapResult extends PersistableResult {
+class SubMapResult extends SchemaResult {
     
     protected PersistanceMap $__map;
 

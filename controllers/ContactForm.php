@@ -25,7 +25,7 @@ class ContactForm extends Controller {
             'lines' => $lines
         ]);
 
-        return set_template("/admin/contact-form/index.html");
+        return view("/admin/contact-form/index.html");
     }
 
     function read_status($id) {
@@ -68,11 +68,10 @@ class ContactForm extends Controller {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
         $persistance = new $className();
         $mutant = $persistance->validate($_POST);
-        $mutant = array_merge($mutant, [
-            "ip" => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'],
-            "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"],
-            "date"  => new \MongoDB\BSON\UTCDateTime()
-        ]);
+        $mutant['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        $mutant["token"] = $_SERVER["HTTP_X_CSRF_MITIGATION"];
+        $mutant["date"]  = new \MongoDB\BSON\UTCDateTime();
+
         $persistance->ingest($mutant);
         switch(app("Contact_form_interface")) {
             case "SMTP":

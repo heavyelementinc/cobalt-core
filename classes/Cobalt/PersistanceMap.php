@@ -3,8 +3,11 @@
 namespace Cobalt;
 
 use ArrayAccess;
+use Cobalt\SchemaPrototypes\PersistanceMapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
+use Exception;
 use Exceptions\HTTP\BadRequest;
 use Iterator;
 use JsonSerializable;
@@ -47,7 +50,6 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
     private int $__current_index = 0;
     protected array $__schema;
     protected bool $__validateOnSet = true;
-    
 
     /**
      * TODO: Implement hydration
@@ -78,6 +80,14 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
                     unset($values[0]);
                 }
                 $this->__schema[$fieldName] = $values;
+            }
+            if($this instanceof SubMapResult) {
+                if(!isset($this->__schema['schema'])) throw new Exception("PersistanceMapResult does not have a specified schema");
+                if(!isset($this->__schema['map'])) {
+                    $this->__schema['map'] = new SubMap();
+                    $this->__schema['map']->__set_schema($this->__schema['schema']);
+                }
+                // $this->__map = $this->__schema['schema'];
             }
             if($values instanceof SchemaResult) $this->__schema[$fieldName] = ['type' => $values];
         }

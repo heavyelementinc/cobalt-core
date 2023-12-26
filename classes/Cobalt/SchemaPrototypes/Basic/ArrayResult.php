@@ -48,7 +48,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
     public function display():string {
         $value = $this->getValue();
         $valid = $this->getValid();
-        $result = "<ul>";
+        $result = [];
         foreach($value as $key) {
             switch(gettype($valid)) {
                 case "array":
@@ -63,7 +63,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
             }
         }
 
-        return $result;
+        return "<ul>" . implode("",$result) . "</ul>";
     }
 
     function push() {
