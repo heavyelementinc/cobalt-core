@@ -1782,3 +1782,43 @@ function normalize_file_array() {
     }
     return $filteredFileArray;
 }
+
+
+/**
+ * Given this structure:
+ * [
+ *    "key" => [
+ *       "value" => [
+ *           "nested" => true
+ *       ],
+ *       "other" => false
+ *    ],
+ *    ...
+ * ]
+ * 
+ * This function will return:
+ * [
+ *    "key.value.nested" => true,
+ *    "key.other" => false,
+ *    ...
+ * ]
+ * @param mixed $array 
+ * @param string $toplevel 
+ * @return void 
+ */
+// function flatten_array_to_js_notation($array, $toplevel = null) {
+//     $flattened = [];
+//     // if($toplevel) $toplevel = "$toplevel.";
+//     foreach($array as $key => $val) {
+//         $mutant = [];
+//         if(is_object($val) && $val instanceof jsonSerializable) {
+//             $val = $val->__jsonSerialize();
+//         }
+//         if(is_array($val)) {
+//             $val = flatten_array_to_js_notation($array, $key);
+//             continue;
+//         }
+//         // $newkey = $toplevel.$key;
+//         $flattened[$newkey] = 
+//     }
+// }
