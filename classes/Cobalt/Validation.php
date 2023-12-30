@@ -20,13 +20,14 @@ abstract class Validation {
     abstract function __initialize_schema():void;
     abstract function __toResult(string $name, mixed $value, ?array $schema):SchemaResult|ObjectId;
 
+    public $__validatedFields = [];
+
     public function validate(array $toValidate) {
         if(!$this->__schema) $this->__initialize_schema();
 
-        $mutant = [];
         foreach($toValidate as $field => $value) {
             try {
-                $mutant[$field] = $this->validate_field($field, $value);
+                $this->__validatedFields[$field] = $this->validate_field($field, $value);
             } catch (ValidationContinue $e) {
                 continue;
             } catch (SchemaExcludesUnregisteredKeys $e) {
@@ -36,7 +37,7 @@ abstract class Validation {
         }
         if(count($this->__issues) !== 0) throw new ValidationFailed("Validation failed.", $this->__issues);
 
-        $this->ingest($mutant);
+        $this->ingest($this->__validatedFields);
         $this->setValidationState(true);
         return $this;
     }
@@ -47,7 +48,7 @@ abstract class Validation {
         }
         $result = $this->__toResult($field, $value, $this->__schema[$field]);
         try {
-            if(!$value) {
+            if($value === null) {
                 if($result->__isRequired()) throw new ValidationIssue("This field is required");
                 throw new ValidationContinue("This field is empty and it's not required. Continuing.");
             }

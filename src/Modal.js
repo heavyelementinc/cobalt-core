@@ -103,9 +103,9 @@ class Modal {
 
         // Append our modal container and its children to the DOM
         document.querySelector("body").appendChild(this.container);
-        if (!this.zIndex && event) {
-            const spawnIndex = spawn_priority(event);
-            if (spawnIndex) this.container.style.zIndex = spawnIndex + document.querySelectorAll("modal-container").length;
+        if (!this.zIndex) {
+            // const spawnIndex = spawn_priority(event);
+            // if (spawnIndex) this.container.style.zIndex = spawnIndex + document.querySelectorAll("modal-container").length;
         }
         this.close_button(); // Add our close button
 

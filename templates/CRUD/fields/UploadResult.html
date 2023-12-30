@@ -1,0 +1,30 @@
+<div class="upload-field hbox {{qname}}-upload-target">
+    {{field.embedEditor("media")}}
+    <div>
+        <input type="file" name="{{name}}">
+        <flex-table>
+            <flex-row>
+                <flex-header>Filename</flex-header>
+                <flex-cell><copy-span class="filename-target" value="{{filename}}"></copy-span></flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-header>Dimensions</flex-header>
+                <flex-cell><span class="width-target">{{width}}</span>x<span class="height-target">{{height}}</span></flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-header>Colors</flex-header>
+                <flex-cell>
+                    <label><input type="color" class="accent-target" name="{{name}}.accent_color" value="{{val.media.meta.accent_color}}"> Accent Color</label>
+                    <label><input type="color" class="contrast-target" name="{{name}}.contrast_color" value="{{val.media.meta.contrast_color}}"> Contrast Color</label>
+                </flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-header>Thumbnail?</flex-header>
+                <flex-cell class="thumb-target">
+                    {{hasThumbnail}}
+                </flex-cell>
+            </flex-row>
+        </flex-table>
+        <fold-out label="Raw">{{field.json_pretty()}}</fold-out>
+    </div>
+</div>

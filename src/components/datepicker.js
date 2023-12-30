@@ -78,6 +78,8 @@ class DatePicker extends HTMLElement {
     }
 
     set value(date) {
+        if(!date) date = new Date();
+        if(date.toString() === "Invalid Date") date = new Date();
         this.date = date;
         this.currentYear = this.date.getFullYear();
         this.currentMonth = this.date.getMonth();

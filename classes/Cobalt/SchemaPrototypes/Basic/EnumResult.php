@@ -3,6 +3,7 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
 
 /**
@@ -12,13 +13,19 @@ use Validation\Exceptions\ValidationIssue;
  */
 
 class EnumResult extends SchemaResult {
+    use Fieldable;
+
+    function field($type = "select", $misc = []) {
+        return $this->select($misc['class'] ?? "", $misc);
+    }
+
     protected $type = "string";
     public function display():string {
         if(is_callable($this->schema['display'])) return $this->schema['display']($this->getValue(), $this, $this->getValid());
         $enum = $this->getValid();
         $val = $this->getValue();
-        if(in_array($val, $enum)) return $enum[$val];
-        if(in_array($this->value, $enum)) return $enum[$this->value];
+        if(key_exists($val, $enum)) return $enum[$val];
+        if(key_exists($this->value, $enum)) return $enum[$this->value];
         return (string)$val;
     }
 

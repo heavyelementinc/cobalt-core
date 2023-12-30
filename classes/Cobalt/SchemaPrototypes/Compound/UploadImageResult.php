@@ -10,28 +10,68 @@ class UploadImageResult extends UploadResult {
             [
                 'class' => "",
                 'alt' => $this->name,
-                'data' => array_merge([
-                    "media-id" => $this->value["media"]['ref'],
-                    "ref-id" => $this->value[$embedSize]['ref'] ?? $this->value['media']['ref']
-                ], $misc['data'] ?? []),
+                'lightbox' => false,
+                'data' => [],
             ],
             $misc
         );
         $class = $misc['class'];
+        $misc['data'] = array_merge([
+            "media-src" => $this->value["media"]['filename'],
+            "media-id" => $this->value["media"]['ref'],
+            "ref-id" => $this->value[$embedSize]['ref'] ?? $this->value['media']['ref']
+        ], $misc['data'] ?? []);
+
+        $lightbox = "";
+        if($misc['lightbox']) {
+            $lightboxGroup = ($misc['lightbox']) ? ",true" : ",false";
+            $misc['data']['group'] = $misc['lightbox'];
+            $lightbox = " onclick=\"shadowbox(this$lightboxGroup)\"";
+        }
+
         $data = $this->dataToEmbedTags($misc['data'] ?? []);
-        $title = $misc['title'] ? "title=\"".htmlspecialchars($misc['title'])."\"" : "";
-        $alt = $misc['alt'] ? "alt=\"$misc[alt]\"" : "";
-        $value = $this->value[$embedSize] ?? $this->value['media'] ?? $this->schema['default'][$embedSize] ?? $this->schema['default']['media'];
+        $title = $misc['title'] ? " title=\"".htmlspecialchars($misc['title'])."\"" : "";
+        $alt = $misc['alt'] ? " alt=\"$misc[alt]\"" : "";
+        
+        $value = (isset($this->value->__dataset)) ? $this->value->__dataset[$embedSize] : $this->value[$embedSize] ?? $this->value['media'] ?? $this->schema['default'][$embedSize] ?? $this->schema['default']['media'];
         
         $type = $value['type'];
         
-        $w = $value['meta']['display_width'] ?? $value['meta']['width'] ?? $value['meta']['meta']['width'];
-        $h = $value['meta']['display_height'] ?? $value['meta']['height'] ?? $value['meta']['meta']['height'];
-
-        return "<img class=\"result-embed $class\" src='$value[filename]' width=\"$w\" height=\"$h\" $alt $title>";
+        $w = $value['meta']['width']  ?? $value['meta']['meta']['width'];
+        $h = $value['meta']['height'] ?? $value['meta']['meta']['height'];
+        
+        return "<img class=\"result-embed $class\" src='$value[filename]'$lightbox width=\"$w\" height=\"$h\" ".$alt.$title.$data.">";
     }
 
     public function embedEditor($embedSize, array $misc = []) {
-        return "<cobalt-fs>".$this->embed($embedSize, $misc)."</cobalt-fs>";
+        return "<image-editor>".$this->embed($embedSize, $misc)."</image-editor>";
+    }
+
+    function filter($value) {
+        $result = parent::filter($value);
+        $targetName = "." . $this->queriableName($this->name) . "-upload-target";
+        update("$targetName img.result-embed", ['src' => $result['media']['filename']]);
+        update("$targetName .filename-target", ['value' => $result['media']['filename']]);
+        update("$targetName .width-target", ['innerText' => $result['media']['meta']['width']]);
+        update("$targetName .height-target", ['innerText' => $result['media']['meta']['height']]);
+        update("$targetName .accent-target", ['value' =>    $result['media']['meta']['accent_color']]);
+        update("$targetName .contrast-target", ['value' => $result['media']['meta']['contrast_color']]);
+        return $result;
+    }
+
+    public function field() {
+        $val = $this->getValue();
+        return view("CRUD/fields/UploadResult.html",[
+            'field' => $this,
+            'qname' => $this->queriableName($this->name),
+            'name' => $this->name,
+            'val' => $val,
+            'filename' => $val->media->filename,
+            'width' => $val->media->meta->width,
+            'height' => $val->media->meta->height,
+            'accent' => $this->media->meta->accent_color,
+            'color' => $this->media->meta->contrast_color,
+            'hasThumbnail' => $this->name,
+        ]);
     }
 }

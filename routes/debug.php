@@ -245,5 +245,11 @@ if (app("enable_debug_routes")) {
             'debug_prototypes'
         ],
         'anchor' => ['name' => 'Date Prototype']
-    ]);    
+    ]);
+    Route::get("/proto/submap", "SchemaDebug@submapresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'SubMap Prototype']
+    ]);
 }

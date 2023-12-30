@@ -2,15 +2,11 @@
 
 namespace Cobalt\SchemaPrototypes\Basic;
 
-use Cobalt\SchemaPrototypes\SchemaResult;
-
+use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Traits\ImageManipulation;
+use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Drivers\BinaryStorage;
-use Exception;
 use Exceptions\HTTP\BadRequest;
-use MongoDB\BSON\Document;
-use MongoDB\BSON\Persistable;
-use stdClass;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 
@@ -19,10 +15,11 @@ use Validation\Exceptions\ValidationIssue;
  *  * `thumbnail` => [int <width>, ?int <height>] or `false` to prevent thumbnail generation
  *  * `filename`  => `false` generates unique filename, `true` preserves user-supplied filename, <string> specifies the desired filename
  *  * `required`  => `true` 
- *  * `limit`     => [int 1] the number of files to upload
+ *  * `limit`     => [int 1] the number of files to upload,
+ *  * `formats`   => UNIMPLEMENTED!
  * @package Cobalt\SchemaPrototypes
  */
-class UploadResult extends SchemaResult{
+class UploadResult extends SubMapResult{
     use BinaryStorage;
     use ImageManipulation;
     protected $value = [];
@@ -53,7 +50,7 @@ class UploadResult extends SchemaResult{
         $title = $misc['title'] ? "title=\"".htmlspecialchars($misc['title'])."\"" : "";
         $alt = $misc['alt'] ? "alt=\"$misc[alt]\"" : "";
         $value = $this->value[$embedSize] ?? $this->value['media'];
-        if(!$value) return "Nothing embedable";
+        // if(!$value) return "Nothing embedable";
         $type = $value['type'];
         // if(!$type) return $this->embed_from_value($val, $field);
         $mimetype = $value['meta']['meta']['mimetype'] ?? $value['meta']['mimetype'];
@@ -76,7 +73,9 @@ class UploadResult extends SchemaResult{
                 $allow = $value['meta']['allow'];
                 $title = $value['meta']['title'];
                 return "<iframe class=\"$class\" src=\"$rt\" name=\"$enc\" scrolling=\"no\" frameborder=\"0\" width=\"$w\" height=\"$h\" $fs $allow $title></iframe>";
-                
+            case "image":
+            default:
+                return "<img class=\"$class\" src=\"$value[filename]\" width=\"$w\" height=\"$h\" style=\"background-color: ".$value['meta']['accent']."\">";
         }
 
         return $rt;
@@ -89,7 +88,6 @@ class UploadResult extends SchemaResult{
         }
         return $tags;
     }
-
 
     function setValue($value):void {
         if(!$value) $this->value = [];
@@ -109,21 +107,24 @@ class UploadResult extends SchemaResult{
     }
 
     function defaultSchemaValues(array $data = []): array {
+        $defaultValue = new DefaultUploadSchema([
+            'media' => [
+                'ref' => '',
+                'filename' => '/core-content/img/default.jpg',
+                'meta' => [
+                    'heght' => 150,
+                    'width' => 150,
+                ]
+            ],
+            'isset' => false
+        ]);
+        
         return [
             'filename'  => false, // Preserve filename? False will generate a new filename
             'thumbnail' => __APP_SETTINGS__['UploadResult_default_thumbnail'],
             'required'  => false,
             'limit'     => 1,
-            'default'   => [
-                'media' => [
-                    'ref' => '',
-                    'filename' => '/core-content/img/default.jpg',
-                    'meta' => [
-                        'height' => 150,
-                        'width' => 150
-                    ]
-                ]
-            ],
+            'default'   => $defaultValue,
         ];
     }
 
@@ -171,16 +172,18 @@ class UploadResult extends SchemaResult{
         $file['media'] = $this->store($filename[0], array_merge($result, $map));
         $file['media']['filename'] = "/res/fs/" . $filename[0];
         $mainResourceId = $file['media']['ref'];
-        
+
         if(isset($this->schema['thumbnail'])) {
             if(mime_content_type($result['tmp_name']) !== "image/svg+xml") {
                 $file['thumb'] = $this->storeThumbnail($filename[1], $result, ['for' => $mainResourceId]);;
                 $file['thumb']['filename'] = "/res/fs/" . $filename[1];
             }
         }
+
+        $result = new DefaultUploadSchema($file);
         
-        $this->setValue($file);
-        return $file;
+        $this->setValue($result);
+        return $result;
     }
 
 
@@ -191,6 +194,7 @@ class UploadResult extends SchemaResult{
         $addtl = $this->getAdditionalData($filename, $data, $additional_data);
         $addtl['meta'] = $this->__getMetadata($pathToFile);
         $result = $this->__store($data['tmp_name'], $filename, $addtl);
+        
         return array_merge($addtl, ['ref' => $result]);
     }
 

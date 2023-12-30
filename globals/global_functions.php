@@ -13,6 +13,7 @@
  */
 
 use Cobalt\Renderer\Render;
+use Controllers\CRUDController;
 use Demyanovs\PHPHighlight\Highlighter;
 use Drivers\UTCDateTime as DriversUTCDateTime;
 use Exceptions\HTTP\Confirm;
@@ -520,6 +521,7 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
             if(is_a($mutant, "\\Cobalt\\PersistanceMap")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+                if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\SubMapResult")) return lookup_js_notation($temp_path, $mutant);
                 if($looked_up . "$temp_path" === $path_map) return $mutant;
             }
 
@@ -1161,7 +1163,8 @@ function schema_group_element($tag, $attributes, $label = "") {
 }
 
 /** Convert seconds to pretty string */
-function prettify_seconds(int $seconds) {
+function prettify_seconds(?int $seconds) {
+    if(!$seconds) return "";
     $date = new DateTime("00:00:00");
     $date->modify("+ $seconds seconds");
     return $date->format("g\h i\m");// . "h " . $date->format("i") . "m";

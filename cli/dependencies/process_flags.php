@@ -39,8 +39,12 @@ $flags = [
     ],
     '--plain-output' => [
         'description' => 'Prevents the fmt() function from modifying output',
-        'exe' => '__plain_output'
-    ]
+        'exe' => '__plain_output',
+    ],
+    '--safe-mode' => [
+        'description' => 'Prevents extensions and their associated commands from being loaded',
+        'exe' => '__safe_mode',
+    ],
 ];
 
 
@@ -73,6 +77,10 @@ function __verbosity($number){
 $GLOBALS['fmt_allowed'] = true;
 function __plain_output() {
     $GLOBALS['fmt_allowed'] = false;
+}
+$GLOBALS['safe_mode'] = false;
+function __safe_mode() {
+    $GLOBALS['safe_mode'] = true;
 }
 
 __process_flags();

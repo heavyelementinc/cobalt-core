@@ -137,6 +137,10 @@ async function lightbox(origin, animate = true) {
     return modal;
 }
 
+async function shadowbox(element, group = false) {
+    
+}
+
 /**
  * An async modal confirm. If you await modalConfirm(), a promise will be
  * returned and when resolved, will be either true or false.
@@ -888,3 +892,10 @@ class Rt {
 }
 
 window.router = new Rt();
+
+function upload_field_update(element) {
+    const name = element.name;
+    const container = element.closest(`.upload-field`);
+    const previewTarget = container.querySelector("img");
+    // previewTarget.src = 
+}

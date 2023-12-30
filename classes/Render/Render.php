@@ -116,6 +116,7 @@ class Render {
             ],
             'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
             'og_template' => "/parts/opengraph/default.html",
+            // 'extensions' => extensions(),
             // 'custom' => new CustomizationManager(),
         ];
 

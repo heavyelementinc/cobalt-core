@@ -3,16 +3,20 @@
 namespace Cobalt\SchemaPrototypes;
 
 use Cobalt\PersistanceMap;
+use Cobalt\SubMap;
 
 class SubMapResult extends SchemaResult {
     
-    protected PersistanceMap $__map;
-
-    function __construct(PersistanceMap $map) {
-        $this->__map = $map;
+    function filter($value) {
+        return $this->value->validate($value);
     }
 
-    function filter($value) {
-        return $this->__map->validate($value);
+    // function setName(string $name) {
+    //     // TODO: Set the appropriate name
+    // }
+
+    function setValue(mixed $value): void {
+        $this->originalValue = $value;
+        $this->value = new SubMap($value, $this->schema->schema ?? []);
     }
 }

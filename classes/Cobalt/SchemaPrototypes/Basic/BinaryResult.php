@@ -74,7 +74,7 @@ class BinaryResult extends SchemaResult {
         return implode(", ", $array);
     }
 
-    public function list($operand = "&"):string {
+    public function list($operand = "&", $exclusive = false):string {
         $valid = $this->getValid();
         $value = $this->getValue();
         $list = "<ol class='binary-list'>";
@@ -98,6 +98,7 @@ class BinaryResult extends SchemaResult {
                     if($value ^ ~$bit) $active = "class='not'";
                     break;
             }
+            if(!$active && $exclusive) continue;
             $list .= "<li $active data-bit=\"$bit\">$label</li>";
         }
         return $list . "</ol>";

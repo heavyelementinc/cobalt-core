@@ -2,11 +2,14 @@
 namespace Cobalt\Extensions;
 
 use ArrayObject;
+use MongoDB\BSON\Document;
+use MongoDB\Model\BSONDocument;
 
 abstract class BaseExtension {
     var $manifest;
     var $ready = false;
     var string $path = "";
+    var string $cmd_dir = "cli_commands/";
 
     function __construct($manifest) {
         $this->manifest = $manifest;
@@ -16,6 +19,22 @@ abstract class BaseExtension {
     }
 
     abstract public function initialize($manifest):void;
+
+    function register_cli_command_dir(&$paths) {
+        $paths[] = "$this->path/$this->cmd_dir";
+    }
+
+    function register_cli_commands(&$commands) {
+        $commands = array_merge($commands, hydrate_command_paths("$this->path/$this->cmd_dir"));
+        // $scandir = scandir("$this->path/$this->cmd_dir");
+        // if(!$scandir) return;
+        // $paths = [];
+        // foreach($scandir as $cmd) {
+        //     if($cmd === "." || $cmd === "..") continue;
+        //     $paths[] = "$this->path/$cmd";
+        // }
+        // $commands = array_merge($commands, $paths);
+    }
 
     function register_templates_dir(&$paths) {
         $paths[] = "$this->path/templates/";
@@ -40,8 +59,9 @@ abstract class BaseExtension {
 
     function register_permissions(&$permissions) {
         $perms = $this->manifest->permissions;
-        if($perms instanceof \MongoDB\Model\BSONArray) $perms->getArrayCopy();
-        array_push($permissions, ... $perms ?? []);
+        if($perms instanceof \MongoDB\Model\BSONArray) $perms = $perms->getArrayCopy();
+        if($perms instanceof BSONDocument) $perms = $perms->getArrayCopy();
+        array_merge($permissions, $perms ?? []);
     }
 
     function register_shared_dir(&$paths) {

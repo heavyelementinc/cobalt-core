@@ -2,10 +2,19 @@
 
 namespace Cobalt;
 
-class SubMap extends PersistanceMap {
-    private $__stored;
+use MongoDB\BSON\ObjectId;
 
-    function __set_schema(array $value):void {
+class SubMap extends PersistanceMap {
+    private array $__stored;
+
+    function __construct($document = null, array $schema= []) {
+        $this->id = new ObjectId;
+        $this->__store_schema($schema);
+        $this->__initialize_schema();
+        if($document !== null) $this->ingest($document);
+    }
+
+    function __store_schema(array $value):void {
         $this->__stored = $value;
     }
 

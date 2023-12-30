@@ -7,6 +7,8 @@ $commands = $argv;
 require_once __CLI_ROOT__ . "/dependencies/Command.php";
 require_once __CLI_ROOT__ . "/dependencies/process_flags.php";
 
+define("VALID_COMMANDS", enumerate_valid_commands());
+
 array_shift($commands); // ["project","init","--something"]
 $lower = array_shift($commands);  // $lower = "project"; $command = ["init","--something"];
 $cmd = ucfirst($lower); // Uppercase the FIRST LETTER of the command
@@ -20,18 +22,21 @@ if (empty($cmd)) {
     $subcmd = "all";
 }
 
-$cmd_file = __CLI_ROOT__ . "/commands/$cmd.php";
-if (!file_exists($cmd_file)) {
-    if (!defined("__APP_ROOT__")) {
-        say("Unrecognized command", "e");
-        exit;
-    }
-    $cmd_file = __APP_ROOT__ . "/cli/commands/$cmd.php";
-    if (!file_exists($cmd_file)) {
-        say("Unrecognized command", "e");
-        exit;
-    }
+// $cmd_file = __CLI_ROOT__ . "/commands/$cmd.php";
+
+$command_paths = [];
+
+if(!key_exists($cmd, VALID_COMMANDS)) {
+    say("Unknown command. Aborting.", "e");
+    exit;
 }
+
+if(!key_exists('path', VALID_COMMANDS[$cmd])) {
+    say("Enumeration error. Aborting.", "e");
+    exit;
+}
+
+$cmd_file = VALID_COMMANDS[$cmd]['path'];
 
 log_item("Loading command dependency");
 require_once $cmd_file;

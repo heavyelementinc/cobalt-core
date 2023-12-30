@@ -21,6 +21,7 @@
 
 namespace Cobalt\SchemaPrototypes;
 
+use Cobalt\PersistanceException\DirectiveException;
 use Cobalt\PersistanceMap;
 use Exception;
 use MongoDB\BSON\Document;
@@ -31,6 +32,7 @@ use stdClass;
  *  * `default` => [null], the default value of the an element
  *  * `valid`   => [array], an enumerated list of valid values
  *  * `md_preserve_tags` => `bool` determines if the markdown parser should preserve HTML tags
+ *  * `private` => `bool` prevents a field from being serialized to JSON and prevents typecasting to string (returns "")
  * @package Cobalt\SchemaPrototypes 
  * */
 class SchemaResult implements \Stringable
@@ -52,7 +54,9 @@ class SchemaResult implements \Stringable
      */
     public function getValue(): mixed
     {
-        if (key_exists('get', $this->schema) && is_callable($this->schema['get'])) $result = $this->schema['get']($this->value, $this);
+        $result = $this->value;
+        if ($result === null && $this->schema['default']) $result = $this->schema['default'];
+        if (key_exists('get', $this->schema ?? []) && is_callable($this->schema['get'])) $result = $this->schema['get']($result, $this);
         else $result = $this->getRaw();
         if ($this->asHTML === false && gettype($this->value) === "string") $result = htmlspecialchars($result);
         return $result;
@@ -213,6 +217,7 @@ class SchemaResult implements \Stringable
      */
     public function json($pretty = false): string
     {
+        if($this->__isPrivate()) return "";
         return json_encode($this->value, ($pretty) ? 0 : JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
@@ -332,6 +337,7 @@ class SchemaResult implements \Stringable
     }
 
     function __toString(): string {
+        if($this->__isPrivate()) return "";
         return $this->getValue() ?? "";
     }
 
@@ -343,6 +349,26 @@ class SchemaResult implements \Stringable
         }
         if (method_exists($this, $name)) return $this->{$name}($this->getValue($this->getValue(), $this), $this, ...$arguments);
         throw new \BadFunctionCallException("Function `$name` does not exist on `$this->name`");
+    }
+    
+    /**
+     * Directive methods will always be called with the following arguments:
+     *  [$this->getValue(), $this, ...[other_args]]
+     * @param mixed $directiveName - The name of the directive to fetch
+     * @param bool $throwOnFail - If the directive does not exist, return `null` if `false` or throw a `DirectiveException` if `true`
+     * @return mixed returns the value of the directive callable *or* the directive literal value
+     * @throws DirectiveException 
+     */
+    public function getDirective($directiveName, $throwOnFail = false) {
+        if(!key_exists($directiveName, $this->schema)) {
+            if($throwOnFail) throw new DirectiveException("Undefined value");
+            return null;
+        }
+        if(is_callable($this->schema[$directiveName])) {
+            $args = func_get_args();
+            return $this->schema[$directiveName]($this->getValue(), $this, ...array_slice($args, 2));
+        }
+        return $this->schema[$directiveName];
     }
 
     function __get($path) {
@@ -371,10 +397,24 @@ class SchemaResult implements \Stringable
         return $this->coalece_directive('nullable');
     }
 
-    protected function coalece_directive($field, $defaultsTo = false): bool {
+    function __isPrivate(): bool {
+        return $this->coalece_directive('private');
+    }
+
+    /**
+     * Coaleces a directive value into either true or false
+     * @param string $field 
+     * @param bool $defaultsTo 
+     * @return bool 
+     */
+    protected function coalece_directive(string $field, bool $defaultsTo = false): bool {
         if (!isset($this->schema[$field])) return $defaultsTo;
         $req = $this->schema[$field];
         if (gettype($req) === "boolean") return $req;
-        return $defaultsTo;
+        return !!$req;
+    }
+
+    protected function queriableName($name) {
+        return str_replace(".", "__", $name);
     }
 }

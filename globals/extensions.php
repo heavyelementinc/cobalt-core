@@ -1,8 +1,12 @@
 <?php
 use Cobalt\Extensions\Extensions;
-$EXTENSION_MANAGER = new Extensions();
 try {
-    $EXTENSION_MANAGER->initialize_active_extensions();
+    define("EXTENSION_MANAGER", new Extensions());
+} catch (\MongoDB\Driver\Exception\ConnectionTimeoutException $e) {
+    die("No database connection available. Check your config.php file.");
+}
+try {
+    EXTENSION_MANAGER->initialize_active_extensions();
 
     Extensions::invoke("register_templates_dir", $TEMPLATE_PATHS);
     $TEMPLATE_PATHS[] = __ENV_ROOT__ . "/templates/";
@@ -25,7 +29,11 @@ try {
  * @return Extensions 
  */
 function extensions():\Cobalt\Extensions\Extensions {
-    global $EXTENSION_MANAGER;
-    if(!$EXTENSION_MANAGER) return new Extensions();
-    return $EXTENSION_MANAGER;
+    // if(!$EXTENSION_MANAGER) return new Extensions();
+    return EXTENSION_MANAGER;
+}
+
+function invoke(string $className, string $methodName):mixed {
+    $extMan = extensions();
+    return $extMan::invoke_one($className, $methodName, ...func_get_args());
 }

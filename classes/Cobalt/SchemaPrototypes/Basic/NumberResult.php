@@ -16,6 +16,7 @@ class NumberResult extends SchemaResult implements ArrayAccess{
         return array_merge([
             'min' => null,
             'max' => null,
+            'pattern' => null,
         ], $data);
     }
 
@@ -69,6 +70,11 @@ class NumberResult extends SchemaResult implements ArrayAccess{
         return min($this->getValue(), func_get_args());
     }
 
+    public function format($decimals = 0, $decimal_separator = ".", $thousands_separator = ",") {
+        $fmt = number_format($this->getValue(), $decimals, $decimal_separator, $thousands_separator);
+        return $fmt;
+    }
+
     public function __toString(): string {
         return (string)$this->getValue();
     }
@@ -116,8 +122,12 @@ class NumberResult extends SchemaResult implements ArrayAccess{
     public function field($classes = "", $misc = []):string {
         $tag = $misc['tag'] ?? 'input';
         $type = $misc['type'] ?? $this->type;
+        $min = ($this->schema['min']) ? " min=\"".$this->schema['min']."\"" : "";
+        $max = ($this->schema['max']) ? " max=\"".$this->schema['max']."\"" : "";
+        $pattern = ($this->schema['pattern']) ? " pattern=\"".$this->schema['pattern']."\"" : "";
 
-        return "<$tag " . $this->defaultFieldData($misc);
+        // return "<$tag " . $this->defaultFieldData($misc);
+        return "<input-number name=\"$this->name\" value=\"".$this->getValue()."\"".$min.$max.$pattern."></input-number>";
     }
 
         /** Currently, these do not behave as expected because

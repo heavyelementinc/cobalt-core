@@ -6,6 +6,7 @@ use Cobalt\Extensions\Exceptions\ExtensionNotReady;
 use Cobalt\Extensions\Exceptions\ManifestException;
 use Exception;
 use MongoDB\BSON\ObjectId;
+use TypeError;
 
 class Extensions extends \Drivers\Database {
     var bool $safe_mode = false;
@@ -252,13 +253,13 @@ class Extensions extends \Drivers\Database {
      * @return void 
      */
     static function invoke($method_name, &$arg1 = null, &$arg2 = null, &$arg3 = null, &$arg4 = null, &$arg5 = null) {
-        global $EXTENSION_MANAGER;
-        if(!$EXTENSION_MANAGER) return;
+        // EXTENSION_MANAGER;
+        if(!EXTENSION_MANAGER) return;
 
         if(!$method_name) new \Exception("No method name provided.");
         
         
-        foreach($EXTENSION_MANAGER->initialized_extensions as $ext) {
+        foreach(EXTENSION_MANAGER->initialized_extensions as $ext) {
             if(!method_exists($ext, $method_name)) throw new Exception("There is no '$method_name' extension endpoint.");
             if(!$ext->ready) throw new Exceptions\ExtensionNotReady($ext::class . " is not ready. This is probably because the extension has a constructor that fails to explicitly call its parent constructor");
             $ext->{$method_name}($arg1, $arg2, $arg3, $arg4, $arg5);
@@ -266,13 +267,23 @@ class Extensions extends \Drivers\Database {
     }
 
     static function get_active_count() {
-        global $EXTENSION_MANAGER;
-        return count($EXTENSION_MANAGER->initialized_extensions);
+        return count(EXTENSION_MANAGER->initialized_extensions);
     }
     
     static function get_total_count() {
-        global $EXTENSION_MANAGER;
-        return $EXTENSION_MANAGER->count(['is_extension' => true]);
+        return EXTENSION_MANAGER->count(['is_extension' => true]);
     }
 
+    static function invoke_one(string $extension, string $method) {
+        foreach(EXTENSION_MANAGER->initialized_extensions as $ext) {
+            if($ext::class === $extension) {
+                $args = func_get_args();
+                array_pop($args);
+                array_pop($args);
+                return $ext->$method(...$args);
+            }
+        }
+
+        throw new TypeError("Failed to call method `$method` on undefined extension $extension");
+    }
 }

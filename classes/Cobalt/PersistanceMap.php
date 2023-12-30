@@ -3,6 +3,7 @@
 namespace Cobalt;
 
 use ArrayAccess;
+use Cobalt\PersistanceException\DirectiveException;
 use Cobalt\SchemaPrototypes\PersistanceMapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\SubMapResult;
@@ -15,6 +16,7 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\Document;
+use SchemaDebug;
 use stdClass;
 use TypeError;
 use Validation\Exceptions\ValidationFailed;
@@ -50,6 +52,7 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
     private int $__current_index = 0;
     protected array $__schema;
     protected bool $__validateOnSet = true;
+    protected bool $__strictFind = false; // If strictFind is true, only fields defined in __schema will be searched
 
     /**
      * TODO: Implement hydration
@@ -95,9 +98,65 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
 
     public function __isset($name):bool {
         if($name === "_id") return true;
+        if(key_exists($name, $this->__hydrated)) return true;
         if(key_exists($name, $this->__schema)) return true;
         if(key_exists($name, $this->__dataset)) return true;
+
+        if(strpos($name, ".")) return $this->__isset_deep($name);
+
         return false;
+    }
+
+    public function __isset_deep($name):bool {
+        $result = $this->__deepFind($name);
+        if(gettype($result) === "array") {
+            if(!key_exists($name, $this->__hydrated)) $this->__hydrated[$name] = $result[0];
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * __deepFind will iteratively search through this tree
+     * @param string $name 
+     * @return array|false 
+     */
+    public function __deepFind(string $name):array|false {
+        $exploded = explode(".",$name);
+        
+        $currentField = $exploded[0];
+        $childPath = implode(".", array_slice($exploded, 1));
+        if(isset($this->__schema[$currentField])) return [
+            $this->__deepFindGetter($this->$currentField ?? $this->__schema[$currentField]['default'] ?? "",
+            $childPath, $name),
+            'schema',
+            $currentField
+        ];
+        if(isset($this->__schema[$childPath])) return [
+            $this->__deepFindGetter($this->{$childPath} ?? $this->__schema[$childPath]['default'] ?? "",
+            $childPath, $name),
+            'schema',
+            $childPath
+        ];
+        if($this->__strictFind) return false;
+        if(isset($this->__dataset[$currentField])) return [
+            $this->__deepFindGetter($this->__dataset[$currentField], $childPath, $name),   'dataset', $currentField];
+        if(isset($this->__dataset[$childPath])) return [$this->__deepFindGetter($this->__dataset[$childPath], $childPath, $name), 'dataset', $childPath];
+
+        return false;
+    }
+
+    public function __deepFindGetter($value, $path, $originalName) {
+        if(is_a($value, "\\Cobalt\\SchemaPrototypes\\SubMapResult")) $value = $value->getRaw();
+        if(is_a($value[0], "\\Cobalt\\SubMap")) {
+            $value = $value[0]->__deepFind($path);
+            if(!$value) return false;
+            $value[2] = $originalName;
+            return $value;
+        }
+        if(is_a($value, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) {
+            return $value;
+        }
     }
 
     public function __get($name):PersistanceMap|SchemaResult|ObjectId {
@@ -116,9 +175,18 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
         
         $result = $this->{$name};
         if($result instanceof SchemaResult) {
+            // Let's perform our validation routine.
             $mutant = $result->filter($value);
+
+            // Let's check if the dev has provided a `store` directive
+            if(key_exists("store", $this->__schema[$name])) {
+                // We're doing this manually so we can throw an error if it's not callable.
+                if(!is_callable($this->__schema[$name]['store'])) throw new DirectiveException("To specify the `store` directive for `$this->name`, it must be of type `callable`");
+                $mutant = $this->__schema[$name]['store']($mutant, $this);
+            }
             $this->__dataset[$name] = $mutant;
             if(isset($this->__hydrated[$name])) $this->__hydrated[$name]->setValue($mutant);
+            
         } elseif ($result instanceof PersistanceMap) {
             $this->__dataset[$name] = $value;
             if(isset($this->__hydrated[$name])) $this->__hydrated[$name]->ingest($value);
@@ -188,7 +256,13 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
     }
 
     function jsonSerialize(): mixed {
-        return array_merge(['_id' => $this->id], $this->bsonSerialize(), ['_id' => $this->id]);
+        $array = array_merge(['_id' => $this->id], $this->bsonSerialize(), ['_id' => $this->id]);
+        $mutant = [];
+        foreach($array as $field => $val) {
+            if($val instanceof SchemaResult && $val->__isPrivate()) continue;
+            $mutant[$field] = $val;
+        }
+        return $mutant;
     }
 
     /**

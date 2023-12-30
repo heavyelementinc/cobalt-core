@@ -81,8 +81,9 @@ abstract class CRUDController extends Controller {
         } else if (is_a($schema, "\\Cobalt\\PersistanceMap")) {
             $mutant = $schema->validate($_POST);
         }
-        $result = $this->manager->insertOne($mutant);
-        $insertedId = $result->getInsertedId();
+        $id = new ObjectId();
+        $result = $this->manager->updateOne(['_id' => $id],['$set' => $mutant], ['upsert' => true]);
+        $insertedId = $result->getUpsertedId();
         $route = route("$this->name@edit", [(string)$insertedId]);
         header("X-Redirect: $route");// . (string)$insertedId);
         return $insertedId;
@@ -112,10 +113,11 @@ abstract class CRUDController extends Controller {
         return $this->read($id);
     }
 
-    public function delete($id) {
+    public function destroy($id) {
         confirm("Are you sure you want to delete this entry?", $_POST, "Yes");
         $_id = new ObjectId($id);
         $result = $this->manager->deleteOne(['_id' => $_id]);
+        header("X-Redirect: " . route("$this->name@index"));
         return $result->getDeletedCount();
     }
 
@@ -163,9 +165,11 @@ abstract class CRUDController extends Controller {
             'endpoint' => route("$this->name@update") . "$id",
             'autosave' => 'autosave="autosave"',
             'submit_button' => '',
+            'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@destroy")."$id\" dangerous=\"true\">Delete</option>",
             'method' => 'POST',
             'doc' => $doc,
         ]);
+        
         return view($this->controller_data['edit']['view']  ?? "/CRUD/admin/edit.html");
     }
 
@@ -176,7 +180,9 @@ abstract class CRUDController extends Controller {
             'title'    => "New $this->name",
             'doc'      => new $schema([]),
             'autosave' => 'autosave="none"',
+            'style'    => 'display:none;',
             'submit_button' => '<button type="submit">Submit</button>',
+            'delete_option'   => '',
             'endpoint' => route("$this->name@create"),
             'method'   => "POST",
             'name'     => $this->name,
@@ -206,7 +212,7 @@ abstract class CRUDController extends Controller {
         Route::post(   "$mutant/create", "$class@create", $options['create']);
         if($options['getable']) Route::get("$mutant/{id}", "$mutant@read", $options['read']);
         Route::post("$mutant/update/{id}", "$class@update", $options['update']);
-        Route::delete( "$mutant/delete/{id}", "$class@delete", $options['delete']);
+        Route::delete( "$mutant/delete/{id}", "$class@destroy", $options['delete']);
     }
 
     static function admin(?string $prefix = null, ?array $options = null) {

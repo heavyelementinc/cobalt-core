@@ -42,6 +42,14 @@ class StringResult extends SchemaResult implements ArrayAccess{
         return $this->value[count($this->value) - 1];
     }
 
+    public function field():string {
+        return "<input type=\"Text\" name=\"$this->name\" value=\"".$this->getValue()."\">";
+    }
+
+    public function substring(string $start, ?string $length = null, array $options = []) {
+        return substr($this->getValue(), $start, $length);
+    }
+
     public function display():string {
         $val = $this->getValue();
         $valid = $this->getValid();

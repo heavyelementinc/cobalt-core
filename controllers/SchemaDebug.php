@@ -1,7 +1,12 @@
 <?php
 
 use Cobalt\PersistanceMapTest;
+use Cobalt\SchemaPrototypes\Basic\BinaryResult;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\SubMapResult;
 use MongoDB\BSON\UTCDateTime;
 
 class SchemaDebug {
@@ -11,18 +16,23 @@ class SchemaDebug {
     {
         $this->values = [
             'array' => [
-                'test', 
+                'test',
                 'value1',
                 'super2',
                 'no-op'
             ],
             'binary' => 0b1010101010,
             'bool' => true,
-            'date' => [
-                new UTCDateTime(),
-                'from' => 'milliseconds',
-                'to' => 'milliseconds'
-            ],
+            'date' => (new UTCDateTime())->toDateTime()->format('u'),
+            'submap' => [
+                'headline' => 'Some headline',
+                'subheadline' => 'Sub headline',
+                'map' => 0b01101,
+                'nested' => [
+                    'data1' => 1,
+                    'data2' => 'Aleph'
+                ]
+            ]
         ];
         $this->test = new PersistanceMapTest();
         $this->test->ingest($this->values);
@@ -53,6 +63,12 @@ class SchemaDebug {
 
     function dateresult() {
         return view('/debug/Prototypes/date.html', [
+            'type' => $this->test
+        ]);
+    }
+
+    function submapresult() {
+        return view('/debug/Prototypes/submap.html', [
             'type' => $this->test
         ]);
     }

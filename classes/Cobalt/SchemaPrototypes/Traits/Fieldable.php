@@ -41,7 +41,9 @@ trait Fieldable {
                 break;
         }
 
-        $formatted = $this->getValue()->format($fmt);
+        $value = $this->getValue();
+        $formatted = "";
+        if($value) $formatted = $value->format($fmt);
 
         if($misc['from'] === "milliseconds") $formatted * 1000;
 

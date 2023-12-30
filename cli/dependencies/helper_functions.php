@@ -227,4 +227,33 @@ function image_average_color($path_to_image_file, $null_on_failure = true) {
     // }
     // arsort($colors);
     // return array_slice(array_keys($colors), 0, $number_of_colors);
-} 
+}
+
+function enumerate_valid_commands():array {
+    $extMan = null;
+    $commands = hydrate_command_paths(__CLI_ROOT__ . "/commands/");
+
+    if(defined("__APP_ROOT__")) {
+        $commands = array_merge($commands, hydrate_command_paths(__APP_ROOT__ . "/cli/commands/"));
+        $extMan = extensions();
+    }
+
+    if($extMan) $extMan::invoke("register_cli_commands",$commands);
+
+    return $commands;
+}
+
+function hydrate_command_paths($scandir):array {
+    $scanResult = scandir($scandir);
+    if($scanResult === false) return [];
+    $cmd = [];
+    foreach($scanResult as $file) {
+        if($file === "." || $file === "..") continue;
+        if(pathinfo($file, PATHINFO_EXTENSION) !== "php") continue;
+        $name = pathinfo($file, PATHINFO_FILENAME);
+        $cmd[$name] = [
+            'path' => "$scandir/$file"
+        ];
+    }
+    return $cmd;
+}
