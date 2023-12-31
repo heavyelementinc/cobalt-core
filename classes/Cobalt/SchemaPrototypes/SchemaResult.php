@@ -27,6 +27,7 @@ use Exception;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
 use stdClass;
+use TypeError;
 
 /** ## `SchemaResult` schema directives
  *  * `default` => [null], the default value of the an element
@@ -339,6 +340,23 @@ class SchemaResult implements \Stringable
     function __toString(): string {
         if($this->__isPrivate()) return "";
         return $this->getValue() ?? "";
+    }
+
+    function cast($type) {
+        switch(strtolower($type)) {
+            case "string":
+                return (string)$this->getValue();
+            case "int":
+            case "integer":
+                return (int)$this->getValue();
+            case "float":
+            case "double":
+                return (float)$this->getValue();
+            case "array":
+                return (array)$this->getValue();
+            default:
+                throw new TypeError("Cannot cast '$this->name' to type $type");
+        }
     }
 
     function __call($name, $arguments) {

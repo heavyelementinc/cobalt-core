@@ -43,6 +43,7 @@ abstract class CRUDController extends Controller {
      *          'view'    => '/path/to/view.html', // required
      *          'each'    => '/path/to/other-view.html', // required
      *          'anchor'  => 'SomeName', // defaults to Controller's ClassName,
+     *          'vars'    => [], // List of functions
      *          'options' => [] // defaults to empty array
      *      ],
      *      'edit' => [
@@ -136,7 +137,8 @@ abstract class CRUDController extends Controller {
         $result = $this->manager->findAllAsSchema(...$params);
         
         add_vars([
-            'route' => route("$this->name@edit")
+            'route' => route("$this->name@edit"),
+            
         ]);
 
         $elements = view_each(
@@ -168,6 +170,7 @@ abstract class CRUDController extends Controller {
             'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@destroy")."$id\" dangerous=\"true\">Delete</option>",
             'method' => 'POST',
             'doc' => $doc,
+            ...$this->get_vars($doc, "edit"),
         ]);
         
         return view($this->controller_data['edit']['view']  ?? "/CRUD/admin/edit.html");
@@ -186,10 +189,26 @@ abstract class CRUDController extends Controller {
             'endpoint' => route("$this->name@create"),
             'method'   => "POST",
             'name'     => $this->name,
+            ...$this->get_vars($schema, "new"),
         ]);
         
         return view($this->controller_data['new']['view'] ?? $this->controller_data['edit']['view'] ?? "/CRUD/admin/edit.html");
     }
+
+    public function get_vars($doc, $mode):array {
+        $vars = [];
+
+        foreach($this->controller_data[$mode] ?? [] as $field => $funct) {
+            if(!is_callable($funct)) {
+                $vars[$field] = $funct;
+                continue;
+            }
+            $vars[$field] = $funct($doc);
+        }
+
+        return $vars;
+    }
+
 
     /** ============================================= */
     /** ============================================= */

@@ -57,12 +57,42 @@ class InputDateTime extends HTMLElement {
         if(!this.props.value) return null;
         if(this.props.value.toString() === 'Invalid Date') return null;
         switch(this.to) {
+            case "string":
+                return this.props.value.toString();
+            case "seconds":
+            case "php":
+            case "time":
+            case "unix":
+                return this.props.value.getTime() / 1000;
             case "milliseconds":
                 return this.props.value.getTime();
+            case "u":
+                return this.props.value.getTime() * 1000;
             case "ISO 8601":
-                return this.props.value.toISOString();
             default:
-                return this.props.value;
+                return this.props.value.toISOString();
+            // default:
+            //     return this.props.value;
+        }
+    }
+
+    parseValue(val) {
+        if(val instanceof Date) return val;
+        switch(this.from) {
+            case "string":
+                return this.fromString(val);
+            case "seconds":
+            case "php":
+            case "time":
+            case "unix":
+                return this.fromSeconds(val);
+            case "milliseconds":
+                return this.fromMilliseconds(val);
+            case "u":
+                return this.fromMicroseconds(val);
+            case "ISO 8601":
+            default:
+                return new Date(val);
         }
     }
 
@@ -171,25 +201,7 @@ class InputDateTime extends HTMLElement {
         return string;
     }
 
-    parseValue(val) {
-        if(val instanceof Date) return val;
-        switch(this.from) {
-            case "string":
-                return this.fromString(val);
-            case "seconds":
-            case "php":
-            case "time":
-            case "unix":
-                return this.fromSeconds(val);
-            case "milliseconds":
-                return this.fromMilliseconds(val);
-            case "u":
-                return this.fromMicroseconds(val);
-            case "ISO 8601":
-            default:
-                return new Date(val);
-        }
-    }
+   
 
     fromSeconds(val) {
         return new Date(val * 1000);

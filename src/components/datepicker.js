@@ -84,6 +84,7 @@ class DatePicker extends HTMLElement {
         this.currentYear = this.date.getFullYear();
         this.currentMonth = this.date.getMonth();
         this.dateValue = this.makeDateString(date);
+        this.timeValue = this.makeTimeString(date);
         this.render();
     }
 
@@ -206,6 +207,10 @@ class DatePicker extends HTMLElement {
 
     makeDateString(date) {
         return `${date.getFullYear()}-${this.formatNumber(date.getMonth() + 1)}-${this.formatNumber(date.getDate())}`;
+    }
+
+    makeTimeString(date) {
+        return `${this.formatNumber(date.getHours())}:${this.formatNumber(date.getMinutes)}`;
     }
 
     formatNumber(num) {

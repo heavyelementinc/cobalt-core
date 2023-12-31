@@ -8,7 +8,7 @@ use Validation\Exceptions\ValidationIssue;
 
 /**
  * Custom schema entries:
- * 'char_limit' - @int The max length of the value. If it's not specified, the string can be any length.
+ * 'max' - @int The max length of the value. If it's not specified, the string can be any length.
  * @package Cobalt\SchemaPrototypes
  */
 class StringResult extends SchemaResult implements ArrayAccess{
@@ -81,9 +81,9 @@ class StringResult extends SchemaResult implements ArrayAccess{
     }
 
     function character_limit($value) {
-        if(!key_exists('char_limit', $this->schema)) return $value;
+        if(!key_exists('max', $this->schema)) return $value;
         $length = strlen($value);
-        $max = $this->schema['char_limit'];
+        $max = $this->schema['max'];
         if($length <= $max) return $value;
         throw new ValidationIssue("This may not be greater than $max characters long");
     }
