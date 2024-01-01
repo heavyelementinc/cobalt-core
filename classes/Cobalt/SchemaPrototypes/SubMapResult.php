@@ -15,8 +15,19 @@ class SubMapResult extends SchemaResult {
     //     // TODO: Set the appropriate name
     // }
 
+    function setSchema(?array $schema): void {
+        $this->schema = array_merge(
+            self::universalSchemaDirectives,
+            $this->defaultSchemaValues(),
+            $schema ?? []
+        );
+        $this->value->schema
+    }
+
     function setValue(mixed $value): void {
         $this->originalValue = $value;
-        $this->value = new SubMap($value, $this->schema->schema ?? []);
+        $this->value = new SubMap(null, $this->schema['schema'] ?? []);
+        $this->value->ingest($value);
     }
+
 }

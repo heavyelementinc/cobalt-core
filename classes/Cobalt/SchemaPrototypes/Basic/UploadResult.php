@@ -89,10 +89,10 @@ class UploadResult extends SubMapResult{
         return $tags;
     }
 
-    function setValue($value):void {
-        if(!$value) $this->value = [];
-        else $this->value = $value;
-    }
+    // function setValue($value):void {
+    //     if(!$value) $this->value = [];
+    //     else $this->value = $value;
+    // }
 
     /**
      * Stores the list of schema directives for this item

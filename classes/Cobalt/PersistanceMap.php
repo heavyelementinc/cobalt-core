@@ -58,7 +58,7 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
      * TODO: Implement hydration
      * @var array
      */
-    protected array $__hydrated = [];
+    public array $__hydrated = [];
     protected bool $__hydrate = __APP_SETTINGS__['Schema_hydration_on_unserialize'];
     
     function __construct($document = null) {
@@ -97,66 +97,74 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
     }
 
     public function __isset($name):bool {
+        if($this->__setChecker($name, $this->__strictFind)) return true;
+        
+        if(strpos($name, ".")) return $this->__isset_deep($name)[1];
+
+        return false;
+    }
+
+    public function __setChecker($name, $fromDataset) {
         if($name === "_id") return true;
         if(key_exists($name, $this->__hydrated)) return true;
         if(key_exists($name, $this->__schema)) return true;
-        if(key_exists($name, $this->__dataset)) return true;
-
-        if(strpos($name, ".")) return $this->__isset_deep($name);
-
+        if($fromDataset && key_exists($name, $this->__dataset)) return true;
         return false;
     }
 
-    public function __isset_deep($name):bool {
-        $result = $this->__deepFind($name);
-        if(gettype($result) === "array") {
-            if(!key_exists($name, $this->__hydrated)) $this->__hydrated[$name] = $result[0];
-            return true;
-        }
-        return false;
-    }
+    public function __isset_deep(string $name):?array {
+        $pathExploded = explode(".", $name);
+        $currentPath = "";
+        $currentCandidate = [$this, false];
+        $fromDataset = $this->__strictFind;
 
-    /**
-     * __deepFind will iteratively search through this tree
-     * @param string $name 
-     * @return array|false 
-     */
-    public function __deepFind(string $name):array|false {
-        $exploded = explode(".",$name);
+        $foundIn = "";
         
-        $currentField = $exploded[0];
-        $childPath = implode(".", array_slice($exploded, 1));
-        if(isset($this->__schema[$currentField])) return [
-            $this->__deepFindGetter($this->$currentField ?? $this->__schema[$currentField]['default'] ?? "",
-            $childPath, $name),
-            'schema',
-            $currentField
-        ];
-        if(isset($this->__schema[$childPath])) return [
-            $this->__deepFindGetter($this->{$childPath} ?? $this->__schema[$childPath]['default'] ?? "",
-            $childPath, $name),
-            'schema',
-            $childPath
-        ];
-        if($this->__strictFind) return false;
-        if(isset($this->__dataset[$currentField])) return [
-            $this->__deepFindGetter($this->__dataset[$currentField], $childPath, $name),   'dataset', $currentField];
-        if(isset($this->__dataset[$childPath])) return [$this->__deepFindGetter($this->__dataset[$childPath], $childPath, $name), 'dataset', $childPath];
+        while(count($pathExploded) > 0) {
+            $shiftable = array_shift($pathExploded);
+            $dot = "";
+            if($currentPath) $dot = ".";
+            if($shiftable) $currentPath .= $dot.$shiftable;
 
-        return false;
+            $remainingPath = $currentPath . "." . implode(".", $pathExploded);
+
+            $map = [$currentCandidate[0], null];
+
+            if($map[0] instanceof SchemaResult) {
+                $map = $this->__handleSchemaPrototype($map[0], $currentPath, $remainingPath, $fromDataset);
+            }
+
+            if($map[0] instanceof PersistanceMap) {
+                $map = $this->__handlePersistanceMap($map[0], $currentPath, $remainingPath, $fromDataset);
+            }
+            
+            if($map[1] === true) {
+                $currentCandidate = $map;
+                $foundIn .= ($foundIn) ? ".$currentPath" : $currentPath;
+                $currentPath = "";
+                continue;
+            }
+            $fromDataset = false;
+        }
+
+        if($currentCandidate[1] === true) {
+            $this->__rehydrate($foundIn, $currentCandidate[0]);
+            return $currentCandidate;
+        }
+        return null;
     }
 
-    public function __deepFindGetter($value, $path, $originalName) {
-        if(is_a($value, "\\Cobalt\\SchemaPrototypes\\SubMapResult")) $value = $value->getRaw();
-        if(is_a($value[0], "\\Cobalt\\SubMap")) {
-            $value = $value[0]->__deepFind($path);
-            if(!$value) return false;
-            $value[2] = $originalName;
-            return $value;
-        }
-        if(is_a($value, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) {
-            return $value;
-        }
+    private function __handlePersistanceMap(PersistanceMap $candidate, $path, $remainingPath, $fromDataset = false) {
+        if($candidate->__setChecker($path, $fromDataset)) return [$candidate->__hydrated[$path] || $candidate->__dataset[$path], true];
+        if($candidate->__setChecker($remainingPath, $fromDataset)) return [$candidate->__hydrated[$remainingPath] || $candidate->__dataset[$remainingPath], true];
+        return [$candidate, false];
+    }
+
+    private function __handleSchemaPrototype(SchemaResult $candidate, $path, $remainingPath) {
+        if($candidate instanceof SubMapResult) return [
+            $candidate->getRaw(), null
+        ];
+        return [$candidate, null];
     }
 
     public function __get($name):PersistanceMap|SchemaResult|ObjectId {
@@ -165,9 +173,9 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
         
         if(key_exists($name, $this->__hydrated)) return $this->__hydrated[$name];
         $lookup = lookup_js_notation($name, $this->__dataset, false);
-        $this->__hydrated[$name] = $this->__toResult($name, $lookup, $this->__schema[$name] ?? []);
+        $this->__hydrated[$name] = $this->__rehydrate($name, $lookup);//$this->__toResult($name, $lookup, $this->__schema[$name] ?? []);
         
-        return $this->__hydrated[$name];
+        return $lookup;
     }
 
     public function __set($name, mixed $value):void {
@@ -248,10 +256,11 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
         $this->id = $data['_id'];
         unset($data['_id']);
         $this->__dataset = $data;
-        if($this->__hydrate) return;
+        if(!$this->__hydrate) return;
         foreach($this->__schema as $k => $v) {
             $r = lookup_js_notation($k, $data, false);
-            $this->__hydrated[$k] = $this->__toResult($k, $r, $v);
+            $this->__rehydrate($k, $r);
+            // $this->__hydrated[$k] = $this->__toResult($k, $r, $v);
         }
     }
 
@@ -273,6 +282,11 @@ abstract class PersistanceMap extends Validation implements Persistable, Iterato
      */
     function enableHydration(bool $value):void {
         $this->__hydrate = $value;
+    }
+
+    function __rehydrate(string $field, mixed $value): void {
+        // if(key_exists($this->__hydrated))
+        $this->__hydrated[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
     }
 
     /**

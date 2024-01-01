@@ -10,7 +10,9 @@ use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\PersistanceMapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
+use Cobalt\SubMap;
 use MongoDB\BSON\ObjectId;
 
 trait ResultTranslator {
@@ -19,7 +21,7 @@ trait ResultTranslator {
 
         switch($type) {
             case $value instanceof PersistanceMap:
-                $result = $schema['type'] ?? new PersistanceMapResult($value);
+                $result = $schema['type'] ?? new SubMapResult($value);
                 break;
             case (isset($schema['type'])
                 && $schema['type'] instanceof SchemaResult
@@ -50,7 +52,7 @@ trait ResultTranslator {
                         $result = new IdResult();
                         break;
                     case "\\Cobalt\\PersistanceMap":
-                        return new PersistanceMapResult($value);
+                        return new SubMapResult($value);
                 }
             default:
                 $result = new SchemaResult();
@@ -64,7 +66,6 @@ trait ResultTranslator {
         $result->datasetReference($ref);
 
         $result->setValue($value);
-
 
         return $result;
     }

@@ -2,10 +2,7 @@
 
 namespace Cobalt\SchemaPrototypes\Wrapper;
 
-use Cobalt\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
-use Cobalt\SchemaPrototypes\Basic\EnumResult;
-use Cobalt\SchemaPrototypes\Basic\FakeResult;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
@@ -23,6 +20,7 @@ class DefaultUploadSchema extends SubMap {
             'media.meta.contrast_color' => new HexColorResult,
             'media.meta.mimetype' => new StringResult,
 
+            'thumb' => new ArrayResult,
             'thumb.ref' => new IdResult,
             'thumb.filename' => new StringResult,
             'thumb.meta.height' => new NumberResult,

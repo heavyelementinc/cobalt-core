@@ -8,6 +8,7 @@ class Shopify extends API {
 
     public function getOrders($status = "any", $fulfillment_status = "unfulfilled", $limit = 50, ?string $ids = null) {
         $endpoint = "https://".$this->token->key.".myshopify.com/admin/api/2022-10/orders.json?";
+        $endpoint = "https://".$this->token->key.".myshopify.com/admin/api/2023-10/orders.json?";
         $requested_limit = $limit;
         if($requested_limit > $this::API_HARD_LIMIT) $requested_limit = $this::API_HARD_LIMIT;
         $query = [
@@ -36,7 +37,7 @@ class Shopify extends API {
     public function getOrder($id, ?array $fields = null) {
         $queryString = "";
         if($fields) $queryString = "?" . http_build_query(['fields' => implode(",",$fields)]);
-        return $this->get("https://".$this->token->key.".myshopify.com/admin/api/2022-10/orders/$id.json$queryString");
+        return $this->get("https://".$this->token->key.".myshopify.com/admin/api/2023-10/orders/$id.json$queryString");
     }
     
     public function getOrdersByIds(array $ids) {

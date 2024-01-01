@@ -64,13 +64,13 @@ class UploadImageResult extends UploadResult {
         return view("CRUD/fields/UploadResult.html",[
             'field' => $this,
             'qname' => $this->queriableName($this->name),
-            'name' => $this->name,
-            'val' => $val,
-            'filename' => $val->media->filename,
-            'width' => $val->media->meta->width,
-            'height' => $val->media->meta->height,
-            'accent' => $this->media->meta->accent_color,
-            'color' => $this->media->meta->contrast_color,
+            'name'  => $this->name,
+            'val'   => $val,
+            'filename' => $val->__dataset['media']['filename'],
+            'width'    => $val->__dataset['media']['meta']['width'],
+            'height'   => $val->__dataset['media']['meta']['height'],
+            'accent'   => $val->__dataset['media']['meta']['accent_color'],
+            'color'    => $val->__dataset['media']['meta']['contrast_color'],
             'hasThumbnail' => $this->name,
         ]);
     }

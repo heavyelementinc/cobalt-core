@@ -112,10 +112,10 @@ class NumberResult extends SchemaResult implements ArrayAccess{
         }
 
         if(!$pass) throw new ValidationIssue("The supplied value is not numeric");
-        $min = $this->schema['min'];
-        $max = $this->schema['max'];
+        $min = $this->getDirective('min');
+        $max = $this->getDirective('max');
         if($min !== null && $value < $min) throw new ValidationIssue("Supplied value is lower than minimum ($min)");
-        if($max !== null && $value > $max) throw new ValidationIssue("Supplied value is grearer than maximum ($max)");
+        if($max !== null && $value > $max) throw new ValidationIssue("Supplied value is greater than maximum ($max)");
         return $value;
     }
 
