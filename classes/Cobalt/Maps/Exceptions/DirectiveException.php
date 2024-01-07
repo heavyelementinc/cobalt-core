@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\PersistanceException;
+namespace Cobalt\Maps\Exceptions;
 
 use Exception;
 

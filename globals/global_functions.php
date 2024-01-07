@@ -283,7 +283,11 @@ function cobalt_autoload($class) {
 
     try {
         if ($file !== false) {
-            require_once $file;
+            try{
+                require_once $file;
+            } catch (ParseError $e) {
+                die("Syntax error");
+            }
             return;
         }
         $controllers_special_case = '/Controllers/';
@@ -518,10 +522,10 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
                 $mutated_path = str_replace("custom.$key", "value", $path_map);
             }
 
-            if(is_a($mutant, "\\Cobalt\\PersistanceMap")) {
+            if(is_a($mutant, "\\Cobalt\\Maps\\GenericMap")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
-                if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\SubMapResult")) return lookup_js_notation($temp_path, $mutant);
+                if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\MapResult")) return lookup_js_notation($temp_path, $mutant);
                 if($looked_up . "$temp_path" === $path_map) return $mutant;
             }
 

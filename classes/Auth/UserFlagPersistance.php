@@ -2,7 +2,7 @@
 
 namespace Auth;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\PersistanceMap;
 
 class UserFlagPersistance extends PersistanceMap{
 

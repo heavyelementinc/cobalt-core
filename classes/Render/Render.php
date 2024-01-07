@@ -74,6 +74,7 @@
 namespace Render;
 
 use BadFunctionCallException;
+use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
 use Exceptions\HTTP\NotFound;
@@ -307,7 +308,7 @@ class Render {
                 }
             }
 
-            if($replace[$i] instanceof \Cobalt\PersistanceMap) {
+            if($replace[$i] instanceof GenericMap) {
                 $this->debug_template($replacements[0][1], "", $subject);
                 throw new Exception("PersistanceMap shouldn't get to this point");
                 // user_error("Schemas shouldn't make it to this point!", E_USER_WARNING);

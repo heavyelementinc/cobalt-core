@@ -121,7 +121,7 @@ abstract class Database {
     function findAllAsSchema($filter, array $options = [], $schema = null, $idsAsKeys = false) {
         $results = $this->find($filter, $options);
         $schemaTest = $this->get_schema_name();
-        if(is_a(new $schemaTest, "\\Cobalt\\PersistanceMap")) return iterator_to_array($results);
+        if(is_a(new $schemaTest, "\\Cobalt\\Maps\\GenericMap")) return iterator_to_array($results);
         $processed = [];
         foreach($results as $i => $result) {
             $_schema = $schema ?? $this->get_schema_name($result);

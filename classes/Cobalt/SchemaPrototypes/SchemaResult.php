@@ -21,8 +21,9 @@
 
 namespace Cobalt\SchemaPrototypes;
 
-use Cobalt\PersistanceException\DirectiveException;
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\Exceptions\DirectiveException;
+use Cobalt\Maps\GenericMap;
+use Cobalt\Maps\PersistanceMap;
 use Exception;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
@@ -43,7 +44,7 @@ class SchemaResult implements \Stringable
     protected $type = "mixed";
     protected string $name;
     protected $schema;
-    protected PersistanceMap $__reference;
+    protected GenericMap $__reference;
     protected bool $asHTML = false;
 
     /**
@@ -53,8 +54,7 @@ class SchemaResult implements \Stringable
      * `asHTML` property is set to `false`.
      * @return mixed
      */
-    public function getValue(): mixed
-    {
+    public function getValue(): mixed {
         $result = $this->value;
         if ($result === null && $this->schema['default']) $result = $this->schema['default'];
         if (key_exists('get', $this->schema ?? []) && is_callable($this->schema['get'])) $result = $this->schema['get']($result, $this);
@@ -69,8 +69,7 @@ class SchemaResult implements \Stringable
      * @param mixed $value 
      * @return void 
      */
-    function setValue(mixed $value): void
-    {
+    function setValue(mixed $value): void {
         $this->originalValue = $value;
         if ($value === null) $this->value = $this->schema['default'];
         else $this->value = $value;
@@ -82,8 +81,7 @@ class SchemaResult implements \Stringable
      * @param bool $enableAsHTML 
      * @return void 
      */
-    public function htmlSafe(bool $enableAsHTML)
-    {
+    public function htmlSafe(bool $enableAsHTML) {
         $this->asHTML = $enableAsHTML;
     }
 
@@ -93,8 +91,7 @@ class SchemaResult implements \Stringable
      * is dynamically derived from the `get` directive, this will be nullish.
      * @return mixed
      */
-    public function getRaw(): mixed
-    {
+    public function getRaw(): mixed {
         return $this->value;
     }
 
@@ -102,13 +99,11 @@ class SchemaResult implements \Stringable
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
 
-    public function raw()
-    {
+    public function raw() {
         return $this->getRaw();
     }
 
-    public function md()
-    {
+    public function md() {
         $val = $this->getValue();
         $asHtml = $this->asHTML;
         if ($this->schema['md_preserve_tags'] === true) $asHtml = true;
@@ -129,8 +124,7 @@ class SchemaResult implements \Stringable
      * 
      * @return array
      */
-    public function getValid(): array
-    {
+    public function getValid(): array {
         // if ($field === "pronoun_set") return $this->valid_pronouns();
         if (isset($this->schema['valid'])) {
             if (is_callable($this->schema['valid'])) {
@@ -153,8 +147,7 @@ class SchemaResult implements \Stringable
      * and the <input-autocomplete> component.
      * @return string
      */
-    public function options(): string
-    {
+    public function options(): string {
         $valid = $this->getValid();
         $val = $this->getValue() ?? $this->value;
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
@@ -206,8 +199,7 @@ class SchemaResult implements \Stringable
     }
 
 
-    public function list($delimiter = ", "): string
-    {
+    public function list($delimiter = ", "): string {
         return implode($delimiter, $this->getValid());
     }
 
@@ -216,14 +208,12 @@ class SchemaResult implements \Stringable
      * @param bool $pretty if set to pretty then JSON_PRETTY_PRING and JSON_UNESCAPED_SLASHES will be passed to `json_encode`
      * @return string
      */
-    public function json($pretty = false): string
-    {
+    public function json($pretty = false): string {
         if($this->__isPrivate()) return "";
         return json_encode($this->value, ($pretty) ? 0 : JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
-    public function json_pretty(): string
-    {
+    public function json_pretty(): string {
         return $this->json(true);
     }
 
@@ -236,8 +226,7 @@ class SchemaResult implements \Stringable
      *  * Any other value types return null
      * @return int|null the length the string or countable
      */
-    public function length(): int|null
-    {
+    public function length(): int|null {
         switch ($this->type) {
             case "string":
                 return strlen($this->getValue());
@@ -257,8 +246,7 @@ class SchemaResult implements \Stringable
      *  * For Enums, Numbers, and Strings, the enumerated public `valid` value will be returned *or* the actual value if the key doesn't exist 
      *  * For an ArrayResult the enumerated values for each array element, joined with a ", "
      */
-    public function display(): string
-    {
+    public function display(): string {
         $valid = $this->getValid();
         $type = $this->type;
         $val = $this->getValue();
@@ -317,6 +305,10 @@ class SchemaResult implements \Stringable
         );
     }
 
+    function getSchema(): ?array {
+        return $this->schema;
+    }
+
     /**
      * A function that supplies the default schema directives for a given
      * SchemaResult type. By convention, all valid directives should be
@@ -330,10 +322,10 @@ class SchemaResult implements \Stringable
 
     /**
      * Sets a reference to the parent PersistanceMap definition
-     * @param PersistanceMap $schema 
+     * @param GenericMap $schema 
      * @return void 
      */
-    function datasetReference(PersistanceMap &$schema): void {
+    function datasetReference(GenericMap &$schema): void {
         $this->__reference = $schema;
     }
 
@@ -355,7 +347,7 @@ class SchemaResult implements \Stringable
             case "array":
                 return (array)$this->getValue();
             default:
-                throw new TypeError("Cannot cast '$this->name' to type $type");
+                throw new TypeError("Cannot cast '$this->name' to type `$type`");
         }
     }
 

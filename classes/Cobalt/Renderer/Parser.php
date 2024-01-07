@@ -89,7 +89,7 @@ class Parser {
                 $this->mutant = $this->mutant->getCustomizationValue($needle);
                 $this->currentPath = str_replace("custom.$needle", "value", $this->label);
                 break;
-            case "\\Cobalt\\PersistanceMap":
+            case "\\Cobalt\\Maps\\GenericMap":
             case "\\Validation\\Normalize":
                 $temp_path = $this->getTempPath($mutated_path ?? $this->label, $needle);
                 if(isset($haystack->{$temp_path})) $this->mutant = $haystack->{$temp_path};

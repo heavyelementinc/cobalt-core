@@ -2,7 +2,7 @@
 
 namespace Contact;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;

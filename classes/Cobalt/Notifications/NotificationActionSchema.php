@@ -2,7 +2,6 @@
 
 namespace Cobalt\Notifications;
 
-use Cobalt\PersistanceMap;
 use Cobalt\SchemaPrototypes\ArrayResult;
 use Cobalt\SchemaPrototypes\IpResult;
 use Cobalt\SchemaPrototypes\PersistableResult;

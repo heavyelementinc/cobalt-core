@@ -2,7 +2,7 @@
 
 namespace Drivers;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\ServiceUnavailable;
@@ -54,7 +54,7 @@ trait BinaryStorage {
         }
     }
 
-    final public function __updateFile(string $filename, array|PersistanceMap|SchemaResult|Document $data) {
+    final public function __updateFile(string $filename, array|GenericMap|SchemaResult|Document $data) {
         $this->__initFS();
         $this->__collection->updateOne(
             ['name' => $filename],

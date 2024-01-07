@@ -2,7 +2,7 @@
 
 namespace Auth;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\DateResult;

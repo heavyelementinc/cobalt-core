@@ -2,7 +2,7 @@
 
 namespace Cobalt\Posts;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\PersistanceMap;
 
 class PostPersistance extends PersistanceMap {
 

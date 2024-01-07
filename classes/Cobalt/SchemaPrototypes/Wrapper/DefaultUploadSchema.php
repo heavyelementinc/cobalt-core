@@ -2,13 +2,13 @@
 
 namespace Cobalt\SchemaPrototypes\Wrapper;
 
+use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
-use Cobalt\SubMap;
 
-class DefaultUploadSchema extends SubMap {
+class DefaultUploadSchema extends GenericMap {
 
     public function __get_schema(): array {
         return [

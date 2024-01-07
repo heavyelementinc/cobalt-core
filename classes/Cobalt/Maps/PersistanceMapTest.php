@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt;
+namespace Cobalt\Maps;
 
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;

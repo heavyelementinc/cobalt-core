@@ -2,6 +2,7 @@
 
 namespace Controllers;
 
+use Cobalt\Maps\GenericMap;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
@@ -90,20 +91,20 @@ abstract class CRUDController extends Controller {
         return $insertedId;
     }
 
-    public function read($id): \Cobalt\PersistanceMap|\Validation\Normalize {
+    public function read($id): GenericMap|\Validation\Normalize {
         $schemaName = $this->manager->get_schema_name($_POST ?? $_GET);
         $result = $this->manager->findOne(['_id' => new ObjectId($id)]);
-        if(is_a($result, "\\Cobalt\\PersistanceMap")) return $result;
+        if(is_a($result, "\\Cobalt\\Maps\\GenericMap")) return $result;
         return ($result) ? new $schemaName($result) : null;
     }
 
-    public function update($id): \Cobalt\PersistanceMap|\Validation\Normalize {
+    public function update($id): GenericMap|\Validation\Normalize {
         $schemaName = $this->manager->get_schema_name($_POST);
         $schema = new $schemaName();
         if(is_a($schema, "\\Validation\\Normalize")) {
             $mutant = $schema->__validate($_POST);
             $update  = $schema->__operators($mutant);
-        } else if (is_a($schema, "\\Cobalt\\PersistanceMap")) {
+        } else if (is_a($schema, "\\Cobalt\\Maps\\GenericMap")) {
             $mutant = $schema->validate($_POST);
             $update = $schema->operators($mutant);
         }

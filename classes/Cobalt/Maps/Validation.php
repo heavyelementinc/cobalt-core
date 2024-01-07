@@ -1,5 +1,5 @@
 <?php
-namespace Cobalt;
+namespace Cobalt\Maps;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\BadRequest;
@@ -122,5 +122,5 @@ abstract class Validation {
         $this->__datasetValidated = $state;
     }
 
-    abstract function ingest(array $values):PersistanceMap;
+    abstract function ingest(array $values):GenericMap;
 }

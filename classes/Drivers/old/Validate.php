@@ -28,6 +28,7 @@ namespace CRUD;
 
 use \Exceptions\HTTP\BadRequest;
 use \CRUD\Exceptions\ValidationFailed;
+use Exception;
 
 class Validate {
 

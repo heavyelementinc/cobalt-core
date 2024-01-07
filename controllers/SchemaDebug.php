@@ -1,6 +1,6 @@
 <?php
 
-use Cobalt\PersistanceMapTest;
+use Cobalt\Maps\PersistanceMapTest;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;

@@ -2,6 +2,7 @@
 
 namespace Cobalt\SchemaPrototypes\Basic;
 
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Traits\ImageManipulation;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
@@ -19,7 +20,7 @@ use Validation\Exceptions\ValidationIssue;
  *  * `formats`   => UNIMPLEMENTED!
  * @package Cobalt\SchemaPrototypes
  */
-class UploadResult extends SubMapResult{
+class UploadResult extends MapResult {
     use BinaryStorage;
     use ImageManipulation;
     protected $value = [];

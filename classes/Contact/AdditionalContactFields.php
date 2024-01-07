@@ -2,7 +2,7 @@
 
 namespace Contact;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\BooleanResult;
 
 class AdditionalContactFields extends PersistanceMap{

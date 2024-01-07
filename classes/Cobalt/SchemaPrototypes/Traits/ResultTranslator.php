@@ -2,26 +2,25 @@
 
 namespace Cobalt\SchemaPrototypes\Traits;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\GenericMap;
+use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
-use Cobalt\SchemaPrototypes\PersistanceMapResult;
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
-use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
-use Cobalt\SubMap;
 use MongoDB\BSON\ObjectId;
 
 trait ResultTranslator {
-    function __toResult(string $name, mixed $value, ?array $schema, ?PersistanceMap $ref = null):SchemaResult|ObjectId {
+    function __toResult(string $name, mixed $value, ?array $schema, ?GenericMap $ref = null):SchemaResult|ObjectId {
         $type = gettype($value);
 
         switch($type) {
-            case $value instanceof PersistanceMap:
-                $result = $schema['type'] ?? new SubMapResult($value);
+            case $value instanceof GenericMap:
+                $result = $schema['type'] ?? new MapResult($value);
                 break;
             case (isset($schema['type'])
                 && $schema['type'] instanceof SchemaResult
@@ -51,8 +50,8 @@ trait ResultTranslator {
                     case "\\MongoDB\\BSON\\ObjectId":
                         $result = new IdResult();
                         break;
-                    case "\\Cobalt\\PersistanceMap":
-                        return new SubMapResult($value);
+                    case "\\Cobalt\\Maps\\GenericMap":
+                        return new MapResult($value);
                 }
             default:
                 $result = new SchemaResult();
@@ -70,7 +69,7 @@ trait ResultTranslator {
         return $result;
     }
 
-    private function __each(?Iterable $elements, PersistanceMap $ref, $startingIndex = 0) {
+    private function __each(?Iterable $elements, GenericMap $ref, $startingIndex = 0) {
         if(!$elements) return [];
         if(!isset($this->schema['each'])) return $elements;
         if($this->schema['each'] instanceof SchemaResult) {

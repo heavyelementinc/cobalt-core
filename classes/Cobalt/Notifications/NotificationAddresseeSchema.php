@@ -2,7 +2,7 @@
 
 namespace Cobalt\Notifications;
 
-use Cobalt\PersistanceMap;
+use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\BooleanResult;
 use Cobalt\SchemaPrototypes\DateResult;
 use Cobalt\SchemaPrototypes\EnumResult;
