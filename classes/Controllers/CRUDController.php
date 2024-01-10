@@ -8,6 +8,7 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use Routes\Route;
+use Validation\Normalize;
 
 abstract class CRUDController extends Controller {
     
@@ -78,13 +79,15 @@ abstract class CRUDController extends Controller {
     public function create(): \MongoDB\BSON\ObjectId {
         $schemaName = $this->manager->get_schema_name($_POST);
         $schema = new $schemaName();
-        if(is_a($schema, "\\Validation\\Normalize")) {
+        if($schema instanceof Normalize) {
             $mutant = $schema->__validate($_POST);
-        } else if (is_a($schema, "\\Cobalt\\PersistanceMap")) {
+            $operators = $schema->__operators($mutant);
+        } else if ($schema instanceof GenericMap) {
             $mutant = $schema->validate($_POST);
+            $operators = $schema->operators($mutant);
         }
         $id = new ObjectId();
-        $result = $this->manager->updateOne(['_id' => $id],['$set' => $mutant], ['upsert' => true]);
+        $result = $this->manager->updateOne(['_id' => $id], $operators, ['upsert' => true]);
         $insertedId = $result->getUpsertedId();
         $route = route("$this->name@edit", [(string)$insertedId]);
         header("X-Redirect: $route");// . (string)$insertedId);
