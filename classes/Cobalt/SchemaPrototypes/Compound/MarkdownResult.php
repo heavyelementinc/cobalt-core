@@ -4,13 +4,19 @@ namespace Cobalt\SchemaPrototypes\Compound;
 
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 use Validation\Exceptions\ValidationIssue;
 
 class MarkdownResult extends StringResult {
     protected $type = "string";
 
-    public function substring(string $start, ?string $length = null, array $options = []) {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    
+    #[Prototype]
+    protected function substring(string $start, ?string $length = null, array $options = []) {
         // Establish our options
         $opts = array_merge([
             'markdown' => false,
@@ -28,7 +34,8 @@ class MarkdownResult extends StringResult {
         return $substr;
     }
 
-    public function strip_formatting() {
+    #[Prototype]
+    protected function strip_formatting() {
         return strip_tags(from_markdown($this->getValue(), false));
     }
 

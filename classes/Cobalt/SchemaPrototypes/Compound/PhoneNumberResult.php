@@ -4,11 +4,17 @@ namespace Cobalt\SchemaPrototypes\Compound;
 
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class PhoneNumberResult extends StringResult {
     protected $type = "string";
 
-    function format($format = "(ddd) ddd-dddd") {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    
+    #[Prototype]
+    protected function format($format = "(ddd) ddd-dddd") {
         return phone_number_format($this->getValue(), $format);
     }
 

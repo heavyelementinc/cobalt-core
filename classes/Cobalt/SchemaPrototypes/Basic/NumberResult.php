@@ -6,6 +6,7 @@ use ArrayAccess;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class NumberResult extends SchemaResult implements ArrayAccess{
     use Fieldable;
@@ -20,31 +21,41 @@ class NumberResult extends SchemaResult implements ArrayAccess{
         ], $data);
     }
 
-    public function add($operand) {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    #[Prototype]
+    protected function add($operand) {
         return $this->getValue() + $operand;
     }
 
-    public function subtract($operand, $largerFromSmaller = true) {
+    #[Prototype]
+    protected function subtract($operand, $largerFromSmaller = true) {
         $sub = $this->getValue() - $operand;
         return ($largerFromSmaller) ? abs($sub) : $sub;
     }
 
-    public function multiply($operand) {
+    #[Prototype]
+    protected function multiply($operand) {
         return $this->getValue() * $operand;
     }
 
-    public function divide($operand, $largerFromSmaller = true) {
+    #[Prototype]
+    protected function divide($operand, $largerFromSmaller = true) {
         $val = $this->getValue();
         if($largerFromSmaller === true) [$val, $operand] = $this->sort($operand, SORT_DESC);
         return $val / $operand;
     }
 
-    public function divideFrom($operand) {
+    #[Prototype]
+    protected function divideFrom($operand) {
         $val = $this->getValue();
         return $operand / $val;
     }
 
-    public function percent($operand, $scale = 100, $round = false) {
+    #[Prototype]
+    protected function percent($operand, $scale = 100, $round = false) {
         $larger = $this->getValue();
         $smaller = $operand;
         $result = ($larger / $smaller) * $scale;
@@ -52,25 +63,30 @@ class NumberResult extends SchemaResult implements ArrayAccess{
         return $result;
     }
 
-    public function modulo($operand) {
+    #[Prototype]
+    protected function modulo($operand) {
         return $this->getValue() % $operand;
     }
 
-    public function sort($number, $order = SORT_ASC) {
+    #[Prototype]
+    protected function sort($number, $order = SORT_ASC) {
         $sortable = [$this->getValue(), $number];
         sort($sortable, $order);
         return $sortable;
     }
     
-    public function max() {
+    #[Prototype]
+    protected function max() {
         return max($this->getValue(), func_get_args());
     }
 
-    public function min() {
+    #[Prototype]
+    protected function min() {
         return min($this->getValue(), func_get_args());
     }
 
-    public function format($decimals = 0, $decimal_separator = ".", $thousands_separator = ",") {
+    #[Prototype]
+    protected function format($decimals = 0, $decimal_separator = ".", $thousands_separator = ",") {
         $fmt = number_format($this->getValue(), $decimals, $decimal_separator, $thousands_separator);
         return $fmt;
     }
@@ -119,7 +135,8 @@ class NumberResult extends SchemaResult implements ArrayAccess{
         return $value;
     }
 
-    public function field($classes = "", $misc = []):string {
+    #[Prototype]
+    protected function field($classes = "", $misc = []):string {
         $tag = $misc['tag'] ?? 'input';
         $type = $misc['type'] ?? $this->type;
         $min = ($this->schema['min']) ? " min=\"".$this->schema['min']."\"" : "";

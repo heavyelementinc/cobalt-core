@@ -7,16 +7,16 @@ use Cobalt\Maps\GenericMap;
 class MapResult extends SchemaResult {
     
     function filter($value) {
-        return $this->value->validate($value);
+    return $this->value->validate($value);
     }
 
-    // function __isset($path)
-    // {
-    //     $val = $this->getValue();
-    //     if(isset($val)) return true;
-    //     return false;
-    // }
+    function __isset($path) {
+        return $this->value->__isset($path);
+    }
 
+    public function jsonSerialize(): mixed {
+        return $this->originalValue;
+    }
     // function setName(string $name) {
     //     // TODO: Set the appropriate name
     // }

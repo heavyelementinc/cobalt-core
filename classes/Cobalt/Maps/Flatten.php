@@ -2,7 +2,10 @@
 
 namespace Cobalt\Maps;
 
+use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
+
 class Flatten {
+    use ResultTranslator;
     /**
      * Flatten a multi-dimensional associative array with dots.
      *
@@ -72,6 +75,53 @@ class Flatten {
                 $array[$key] = [];
             }
 
+            $array = &$array[$key];
+        }
+
+        $array[array_shift($keys)] = $value;
+
+        return $array;
+    }
+
+    function undotInflat($array, $schema) {
+        $results = [];
+
+        foreach ($array as $key => $value) {
+            static::inflate($results, $key, $value, $schema[$key] ?? []);
+        }
+
+        return $results;
+    }
+    
+    /**
+     * @throws
+     * @param mixed $array 
+     * @param mixed $originalKey 
+     * @param mixed $value 
+     * @param array $schema 
+     * @return mixed 
+     */
+    function inflate(&$array, $originalKey, $value, $schema = []) {
+        if (is_null($originalKey)) {
+            return $array = $value;
+        }
+
+        $keys = explode('.', $originalKey);
+
+        foreach ($keys as $i => $key) {
+            if (count($keys) === 1) {
+                break;
+            }
+
+            unset($keys[$i]);
+
+            // If the key doesn't exist at this depth, we will just create an empty array
+            // to hold the next value, allowing us to create the arrays to hold final
+            // values at the correct depth. Then we'll keep digging into the array.
+            if (! isset($array[$key]) || ! is_array($array[$key])) {
+                $array[$key] = $this->__toResult($key, [], $schema);
+            }
+            $schema = &$schema[$key] ?? $key[$originalKey] ?? [];
             $array = &$array[$key];
         }
 

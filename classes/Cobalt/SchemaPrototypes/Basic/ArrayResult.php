@@ -15,16 +15,14 @@ use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Iterator;
 use MongoDB\Model\BSONArray;
+use Traversable;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
-class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
+class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Traversable{
     use ResultTranslator, Fieldable;
     protected $type = "array";
     protected $__index = 0;
-    
-    public function field($classes = "", $misc = []) {
-        return $this->inputArray($classes, $misc);
-    }
 
     function setValue($value):void {
         $array = $value;
@@ -44,8 +42,18 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         }
         return $html;
     }
+    
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
 
-    public function display():string {
+    #[Prototype]
+    private function field($classes = "", $misc = []) {
+        return $this->inputArray($classes, $misc);
+    }
+
+    #[Prototype]
+    protected function display():string {
         $value = $this->getValue();
         $valid = $this->getValid();
         $result = [];
@@ -66,7 +74,8 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         return "<ul>" . implode("",$result) . "</ul>";
     }
 
-    function push() {
+    #[Prototype]
+    protected function push() {
         $each = null;
         if(isset($this->schema['each'])) $each = $this->schema['each'];
 
@@ -81,15 +90,18 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         return $this->getValue();
     }
 
-    function pop() {
+    #[Prototype]
+    protected function pop() {
         return array_pop($this->value);
     }
 
-    function shift() {
+    #[Prototype]
+    protected function shift() {
         return array_shift($this->value);
     }
 
-    function unshift() {
+    #[Prototype]
+    protected function unshift() {
         $each = null;
         if(isset($this->schema['each'])) $each = $this->schema['each'];
 
@@ -104,14 +116,24 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
         return $this->getValue();
     }
 
-    function join($delimiter) {
+    #[Prototype]
+    protected function join($delimiter) {
         return implode($delimiter, $this->getValue());
     }
 
-    function last() {
+    #[Prototype]
+    protected function last() {
         $val = $this->getValue();
         $v = count($val);
         return $val[$v - 1];
+    }
+
+
+
+    function valid():bool {
+        $val = $this->getValue();
+        if(key_exists(array_keys($val)[$this->__index], $val)) return true; 
+        return false;
     }
 
     public function __toString():string {
@@ -151,12 +173,6 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator{
 
     public function rewind(): void {
         $this->__index = 0;
-    }
-
-    public function valid():bool {
-        $val = $this->getValue();
-        if(key_exists(array_keys($val)[$this->__index], $val)) return true; 
-        return false;
     }
 
     function filter($value) {

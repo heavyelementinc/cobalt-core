@@ -138,7 +138,8 @@ async function lightbox(origin, animate = true) {
 }
 
 async function shadowbox(element, group = false) {
-    
+    const box = new Shadowbox(group, element);
+    box.initUI();
 }
 
 /**

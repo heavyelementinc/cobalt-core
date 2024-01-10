@@ -5,7 +5,8 @@ namespace Cobalt\SchemaPrototypes\Basic;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
- 
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+
 // TODO, convert element
 
 class BinaryResult extends SchemaResult {
@@ -20,33 +21,6 @@ class BinaryResult extends SchemaResult {
             return $value;
         }
         throw new ValidationIssue("Must be a binary value");
-    }
-
-    public function getValid():array {
-        if($this->hydratedValid !== null) return $this->hydratedValid;
-        $valid = array_values(parent::getValid());
-        $final = [];
-        for($i = 0; $i < count($valid); $i++) {
-            $final[1 << $i] = $valid[$i];
-        }
-        $this->hydratedValid = $final;
-        return $final;
-    }
-
-    public function options():string {
-        $valid = $this->getValid();
-        $value = $this->getValue();
-        $html = "";
-        foreach($valid as $key => $val) {
-            $selected = "";
-            if($value & $key) $selected = " selected=\"selected\"";
-            $html .= "<option value=\"$key\"$selected>$val</option>";
-        }
-        return $html;
-    }
-
-    public function field($class = "", $misc = []) {
-        return $this->inputBinary($class, $misc);
     }
 
     function setValue(mixed $value): void {
@@ -64,7 +38,43 @@ class BinaryResult extends SchemaResult {
         return $computed;
     }
 
-    public function display():string {
+    public function getValid():array {
+        if($this->hydratedValid !== null) return $this->hydratedValid;
+        $valid = array_values(parent::getValid());
+        $final = [];
+        for($i = 0; $i < count($valid); $i++) {
+            $final[1 << $i] = $valid[$i];
+        }
+        $this->hydratedValid = $final;
+        return $final;
+    }
+
+
+    
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    #[Prototype]
+    protected function options():string {
+        $valid = $this->getValid();
+        $value = $this->getValue();
+        $html = "";
+        foreach($valid as $key => $val) {
+            $selected = "";
+            if($value & $key) $selected = " selected=\"selected\"";
+            $html .= "<option value=\"$key\"$selected>$val</option>";
+        }
+        return $html;
+    }
+
+    #[Prototype]
+    protected function field($class = "", $misc = []) {
+        return $this->inputBinary($class, $misc);
+    }
+
+    #[Prototype]
+    protected function display():string {
         $valid = $this->getValid();
         $value = $this->getValue();
         $array = [];
@@ -74,7 +84,8 @@ class BinaryResult extends SchemaResult {
         return implode(", ", $array);
     }
 
-    public function list($operand = "&", $exclusive = false):string {
+    #[Prototype]
+    protected function list($operand = "&", $exclusive = false):string {
         $valid = $this->getValid();
         $value = $this->getValue();
         $list = "<ol class='binary-list'>";
@@ -104,27 +115,33 @@ class BinaryResult extends SchemaResult {
         return $list . "</ol>";
     }
 
-    public function and(int $test) {
+    #[Prototype]
+    protected function and(int $test) {
         return $this->getValue() & $test;
     }
 
-    public function or(int $test) {
+    #[Prototype]
+    protected function or(int $test) {
         return $this->getValue() | $test;
     }
 
-    public function xor(int $test) {
+    #[Prototype]
+    protected function xor(int $test) {
         return $this->getValue() ^ $test;
     }
 
-    public function not(int $test) {
+    #[Prototype]
+    protected function not(int $test) {
         return $this->getValue() & ~$test;
     }
 
-    public function left(int $places) {
+    #[Prototype]
+    protected function left(int $places) {
         return $this->getValue() << $places;
     }
 
-    public function right(int $places) {
+    #[Prototype]
+    protected function right(int $places) {
         return $this->getValue() >> $places;
     }
 }

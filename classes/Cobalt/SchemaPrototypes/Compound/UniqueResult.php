@@ -25,7 +25,7 @@ class UniqueResult extends StringResult {
     }
 
     function filter($value) {
-        if(!$this->isUnique($value)) throw new ValidationIssue("This value must be unique.");
+        if(!$this->isUnique($value)) throw new ValidationIssue("This value is already in use for another entry.");
         parent::filter($value);
         return $value;
     }

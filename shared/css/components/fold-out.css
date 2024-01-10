@@ -1,8 +1,11 @@
 :where(fold-out){
     display: block;
-    transition: height .8s;
+    transition: height .3s;
     height: var(--height);
     overflow: hidden;
+    width: 100%;
+    flex-grow: 1;
+    white-space: pre-wrap;
 }
 
 :where(fold-out.fold-out--closed ){

@@ -45,6 +45,10 @@ $flags = [
         'description' => 'Prevents extensions and their associated commands from being loaded',
         'exe' => '__safe_mode',
     ],
+    '--export' => [
+        'description' => 'Used with the database export function, a comma-delimited list of collections to export',
+        'exe' => '__export_flag'
+    ]
 ];
 
 
@@ -81,6 +85,10 @@ function __plain_output() {
 $GLOBALS['safe_mode'] = false;
 function __safe_mode() {
     $GLOBALS['safe_mode'] = true;
+}
+
+function __export_flag($value) {
+    $GLOBALS['export_collections'] = explode(",",$value);
 }
 
 __process_flags();

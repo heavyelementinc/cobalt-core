@@ -3,13 +3,15 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use MikeAlmond\Color\Color;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class HexColorResult extends SchemaResult {
-    function field($classes = [], $misc = []) {
+    use Fieldable;
 
-    }
+    protected $type = "color";
 
     function filter($val) {
         if($val[0] === "#") $val = substr($val, 1);
@@ -25,11 +27,21 @@ class HexColorResult extends SchemaResult {
         }
     }
 
-    public function getColor():Color {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    #[Prototype]
+    protected function field($classes = [], $misc = []) {
+        return $this->input($classes, $misc);
+    }
+
+    #[Prototype]
+    protected function getColor():Color {
         return Color::fromHex($this->value);
     }
 
-    public function cssRGB($alpha = false):string {
+    #[Prototype]
+    protected function cssRGB($alpha = false):string {
         $color = $this->getColor();
         $c = $color->getRgb();
         $a = "";
@@ -41,7 +53,8 @@ class HexColorResult extends SchemaResult {
         return "rgb$a($c[0], $c[1], $c[2]$v)";
     }
 
-    public function cssHSL($alpha = false) {
+    #[Prototype]
+    protected function cssHSL($alpha = false) {
         $color = $this->getColor();
         $c = $color->getHsl();
         $a = "";
@@ -53,7 +66,8 @@ class HexColorResult extends SchemaResult {
         return "hsl$a($c[0], $c[1], $c[2]$v)";
     }
 
-    public function getContrastColor($dark = "#000000", $light = "#FFFFFF") {
+    #[Prototype]
+    protected function getContrastColor($dark = "#000000", $light = "#FFFFFF") {
         $color = $this->getColor();
         $dark = Color::fromHex($dark);
         $darkContrast = $dark->luminosityContrast($color);

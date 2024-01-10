@@ -286,7 +286,7 @@ function cobalt_autoload($class) {
             try{
                 require_once $file;
             } catch (ParseError $e) {
-                die("Syntax error");
+                die("Syntax error in ".str_replace([__ENV_ROOT__, __APP_ROOT__], ["__ENV__", "__APP__"], $e->getFile()));
             }
             return;
         }
@@ -1826,3 +1826,11 @@ function normalize_file_array() {
 //         $flattened[$newkey] = 
 //     }
 // }
+
+function convertFractionToChar($string) {
+    return str_replace(" ", "", str_replace(
+        ["1/4",   "1/2",   "3/4",   "1/7",    "1/9",    "1/10",   "1/3",    "2/3",    "1/5",    "2/5",    "3/5",    "4/5",    "1/6",    "5/6",    "1/8",    "3/8",    "5/8",    "7/8"],
+        ["&#188;","&#189;","&#190;","&#8528;","&#8529;","&#8530;","&#8531;","&#8532;","&#8533;","&#8534;","&#8535;","&#8536;","&#8537;","&#8538;","&#8539;","&#8540;","&#8541;","&#8542;"],
+        $string
+    ));
+}

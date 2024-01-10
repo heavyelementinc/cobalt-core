@@ -52,6 +52,8 @@ abstract class Validation {
                 if($result->__isRequired()) throw new ValidationIssue("This field is required");
                 throw new ValidationContinue("This field is empty and it's not required. Continuing.");
             }
+            $pattern = $result->getDirective("pattern");
+            if($pattern) $this->testPattern($result, $value, $pattern);
             $validated = $result->filter($value);
             if(key_exists('set', $this->__schema[$field]) && is_callable($this->__schema[$field]['set'])) {
                 $validated = $result->set($value);
@@ -122,5 +124,14 @@ abstract class Validation {
         $this->__datasetValidated = $state;
     }
 
+    public function testPattern($result, $value, $pattern) {
+        $flags = $result->getDirective("pattern_flags");
+        $pattern = "/$pattern/$flags";
+        if(preg_match($pattern, $value)) return;
+        throw new ValidationIssue("Value does not match specified pattern");
+    }
+
     abstract function ingest(array $values):GenericMap;
+    
+    // abstract public function getDirective(string $field, string $directive);
 }

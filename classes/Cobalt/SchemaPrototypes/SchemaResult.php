@@ -21,6 +21,7 @@
 
 namespace Cobalt\SchemaPrototypes;
 
+use BadFunctionCallException;
 use Cobalt\Maps\Exceptions\DirectiveException;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Maps\PersistanceMap;
@@ -29,15 +30,21 @@ use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
 use stdClass;
 use TypeError;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+use JsonSerializable;
+use ReflectionException;
+use ReflectionObject;
 
 /** ## `SchemaResult` schema directives
  *  * `default` => [null], the default value of the an element
  *  * `valid`   => [array], an enumerated list of valid values
  *  * `md_preserve_tags` => `bool` determines if the markdown parser should preserve HTML tags
- *  * `private` => `bool` prevents a field from being serialized to JSON and prevents typecasting to string (returns "")
+ *  * `private` => `bool` prevents a field from being serialized to JSON and prevents typecasting to string (returns ""),
+ *  * `pattern` => `string` a regex-like pattern used to filter inputs BEFORE the native filter callback and included as an attribute in the field() callback
+ *  * `pattern_flags` => 'string' flags
  * @package Cobalt\SchemaPrototypes 
  * */
-class SchemaResult implements \Stringable
+class SchemaResult implements \Stringable, JsonSerializable
 {
     protected $value;
     protected $originalValue;
@@ -46,6 +53,10 @@ class SchemaResult implements \Stringable
     protected $schema;
     protected GenericMap $__reference;
     protected bool $asHTML = false;
+
+    public function jsonSerialize(): mixed {
+        return $this->originalValue;
+    }
 
     /**
      * Get the *processed* value of this method. This will return the
@@ -99,11 +110,13 @@ class SchemaResult implements \Stringable
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
 
-    public function raw() {
+    #[Prototype]
+    protected function raw() {
         return $this->getRaw();
     }
 
-    public function md() {
+    #[Prototype]
+    protected function md() {
         $val = $this->getValue();
         $asHtml = $this->asHTML;
         if ($this->schema['md_preserve_tags'] === true) $asHtml = true;
@@ -124,7 +137,8 @@ class SchemaResult implements \Stringable
      * 
      * @return array
      */
-    public function getValid(): array {
+    #[Prototype]
+    protected function getValid(): array {
         // if ($field === "pronoun_set") return $this->valid_pronouns();
         if (isset($this->schema['valid'])) {
             if (is_callable($this->schema['valid'])) {
@@ -147,7 +161,8 @@ class SchemaResult implements \Stringable
      * and the <input-autocomplete> component.
      * @return string
      */
-    public function options(): string {
+    #[Prototype]
+    protected function options(): string {
         $valid = $this->getValid();
         $val = $this->getValue() ?? $this->value;
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
@@ -199,7 +214,8 @@ class SchemaResult implements \Stringable
     }
 
 
-    public function list($delimiter = ", "): string {
+    #[Prototype]
+    protected function list($delimiter = ", "): string {
         return implode($delimiter, $this->getValid());
     }
 
@@ -208,12 +224,14 @@ class SchemaResult implements \Stringable
      * @param bool $pretty if set to pretty then JSON_PRETTY_PRING and JSON_UNESCAPED_SLASHES will be passed to `json_encode`
      * @return string
      */
-    public function json($pretty = false): string {
+    #[Prototype]
+     protected function json($pretty = false): string {
         if($this->__isPrivate()) return "";
         return json_encode($this->value, ($pretty) ? 0 : JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
-    public function json_pretty(): string {
+    #[Prototype]
+    protected function json_pretty(): string {
         return $this->json(true);
     }
 
@@ -226,7 +244,8 @@ class SchemaResult implements \Stringable
      *  * Any other value types return null
      * @return int|null the length the string or countable
      */
-    public function length(): int|null {
+    #[Prototype]
+    protected function length(): int|null {
         switch ($this->type) {
             case "string":
                 return strlen($this->getValue());
@@ -246,10 +265,17 @@ class SchemaResult implements \Stringable
      *  * For Enums, Numbers, and Strings, the enumerated public `valid` value will be returned *or* the actual value if the key doesn't exist 
      *  * For an ArrayResult the enumerated values for each array element, joined with a ", "
      */
-    public function display(): string {
+    #[Prototype]
+    protected function display(): string {
         $valid = $this->getValid();
         $type = $this->type;
         $val = $this->getValue();
+
+        // Since 'display' is already a method, we need to manually invoke the 
+        // `display` directive if it exists.
+        $directive = $this->getDirective("display");
+        if(is_callable($directive)) return $directive($val, $this->name, $valid);
+
         switch ($type) {
             case "upload":
                 return $this->embed();
@@ -290,6 +316,8 @@ class SchemaResult implements \Stringable
         'nullable' => false,
         'required' => false,
         'md_preserve_tags' => false,
+        'pattern' => '',
+        'pattern_flags' => '',
     ];
 
     /**
@@ -334,7 +362,8 @@ class SchemaResult implements \Stringable
         return $this->getValue() ?? "";
     }
 
-    function cast($type) {
+    #[Prototype]
+    protected function cast($type) {
         switch(strtolower($type)) {
             case "string":
                 return (string)$this->getValue();
@@ -351,14 +380,65 @@ class SchemaResult implements \Stringable
         }
     }
 
+    /**
+     * How prototypes are called:
+     *  - If a method is `public`, then that method gets called and bypasses the __call function
+     *  - If a Directive Protoype exists, then it's called and its value is returned
+     *  - If a built-in Prototype exists, then it's called and its value is returned
+     *  - A BadFunctionCallException is thrown if the above fails to return a value
+     * 
+     * ## DIRECTIVE PROTOTYPES
+     * Defining: you may define any arbitrary prototype method in a field's schema directives
+     * which will override any built-in prototypes of the same name.
+     * 
+     * Directive Prototypes are always passed ($this->getValue(), $this, ...$args)
+     * 
+     * ## BUILT-IN PROTOTYPES
+     * Defining: a prototype must be defined as `protected` and have the #[Prototype] attribute set,
+     * otherwise, this callback will throw a BadFunctionCallException.
+     * 
+     * Methods defined as protected will be overridable by Directive Prototypes, otherwise they will not.
+     * 
+     * Built-in prototypes are always passed (...$args) since they're already referencing $this
+     * 
+     * @param string $name - The name of the function being called
+     * @param mixed $arguments - The arguments
+     * @return mixed - The return value of the method
+     * @throws ReflectionException
+     * @throws BadFunctionCallException
+     */
     function __call($name, $arguments) {
         $schema = $this->schema;
+        $args = $arguments ?? [];
         if (key_exists($name, $schema) && is_callable($schema[$name])) {
-            if ($arguments) return $schema[$name]($this->getValue(), $this, ...$arguments);
-            return $schema[$name]($this->getValue(), $this);
+            return $schema[$name]($this->getValue(), $this, ...$args);
         }
-        if (method_exists($this, $name)) return $this->{$name}($this->getValue($this->getValue(), $this), $this, ...$arguments);
+        if (method_exists($this, $name)) {
+            if($this->__isPrototypeAttributeSet($this, $name) === false) throw new \BadFunctionCallException("Method lacks #[Prototype] attribute");
+            return $this->{$name}(...$args);
+        }
         throw new \BadFunctionCallException("Function `$name` does not exist on `$this->name`");
+    }
+
+    /**
+     * Uses the ReflectionObject class to check if a given method is defined as a prototype
+     * using the #[Prototype] attribute.
+     * 
+     * @param SchemaResult $class 
+     * @param string $methodName 
+     * @return ?bool Returns `true` if prototype attribute is found, `false` if not, `null` if the method does not exist
+     * @throws ReflectionException 
+     */
+    function __isPrototypeAttributeSet(SchemaResult $class, string $methodName):?bool {
+        $reflection = new ReflectionObject($class);
+        $method = $reflection->getMethod($methodName);
+        if(!$method) return null;//throw new \BadMethodCallException("Call for `$methodName` is invalid on `$this->name`");
+        $attributes = $method->getAttributes();
+        $validPrototypes = ["Prototype", "Cobalt\SchemaPrototypes\Traits\Prototype"];
+        foreach($attributes as $attr) {
+            if(in_array($attr->getName(), $validPrototypes)) return true;
+        }
+        return false;
     }
     
     /**

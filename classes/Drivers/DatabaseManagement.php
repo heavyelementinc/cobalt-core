@@ -2,6 +2,8 @@
 
 namespace Drivers;
 
+use Cobalt\Maps\GenericMap;
+
 class DatabaseManagement {
     private $db;
 
@@ -15,7 +17,7 @@ class DatabaseManagement {
         return $this->db->listCollections();
     }
     
-    public function export($file = null, $talk = false, $ignored = true, $extraIgnored = []) {
+    public function export($file = null, $talk = false, $ignored = true, $extraIgnored = [], $onlyExport = null) {
         if(!$file) $file = app("DB_export_directory");
         $file = __APP_ROOT__ . $file;
         if(!file_exists($file)) mkdir($file, 0777, true);
@@ -24,6 +26,16 @@ class DatabaseManagement {
         $extraIgnored = array_merge($extraIgnored ?? [], $this::IGNORED);
         $db_backup = [];
         $collections = $this->db->listCollections();
+
+        if(is_array($onlyExport)) {
+            $c = [];
+            foreach($collections as $col) {
+                if(in_array($col->getName(), $onlyExport)) $c[] = $col;
+            }
+            $collections = $c;
+            if(count($collections) === 0) return fmt("No collections to export. Aborting.", 'e');
+        }
+
         foreach($collections as $collection) {
             $whole_collection = [];
             $name = $collection->getName();
@@ -34,7 +46,11 @@ class DatabaseManagement {
 
             $entries = [];
             foreach($result as $row) {
-                $row_to_array = iterator_to_array($row);
+                if($row instanceof GenericMap) {
+                    $row_to_array = $row->jsonSerialize();
+                } else {
+                    $row_to_array = iterator_to_array($row);
+                }
                 array_push($entries, $row_to_array);
                 if($talk) printf(".");
             }
@@ -87,7 +103,12 @@ class DatabaseManagement {
                 $json_row = json_encode($row);
                 $bson = \MongoDB\BSON\fromJSON($json_row);
                 $row = \MongoDB\BSON\toPHP($bson);
+
+                if($row instanceof GenericMap) {
+                    // $row->__dataset['_id'] = $row->id;
+                }
                 $result = $collection->insertOne($row);
+
                 $documents_inserted += $result->getInsertedCount();
                 if($talk) printf(".");
             }

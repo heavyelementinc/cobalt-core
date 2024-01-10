@@ -2,10 +2,19 @@
 
 namespace Cobalt\SchemaPrototypes\Compound;
 
+use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
+use Validation\Exceptions\ValidationContinue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+use JsonSerializable;
 
 class UploadImageResult extends UploadResult {
-    public function embed($embedSize = "media", array $misc = []) {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    
+    #[Prototype]
+    protected function embed($embedSize = "media", array $misc = []) {
         $misc = array_merge(
             [
                 'class' => "",
@@ -16,10 +25,11 @@ class UploadImageResult extends UploadResult {
             $misc
         );
         $class = $misc['class'];
+
         $misc['data'] = array_merge([
-            "media-src" => $this->value["media"]['filename'],
-            "media-id" => $this->value["media"]['ref'],
-            "ref-id" => $this->value[$embedSize]['ref'] ?? $this->value['media']['ref']
+            "media-src" => $this->value->__dataset->media->filename,
+            "media-id" => $this->value->__dataset->media->ref,
+            "ref-id" => $this->value->__dataset[$embedSize]["ref"] ?? $this->value->__dataset["media"]["ref"]
         ], $misc['data'] ?? []);
 
         $lightbox = "";
@@ -43,12 +53,14 @@ class UploadImageResult extends UploadResult {
         return "<img class=\"result-embed $class\" src='$value[filename]'$lightbox width=\"$w\" height=\"$h\" ".$alt.$title.$data.">";
     }
 
-    public function embedEditor($embedSize, array $misc = []) {
+    #[Prototype]
+    protected function embedEditor($embedSize, array $misc = []) {
         return "<image-editor>".$this->embed($embedSize, $misc)."</image-editor>";
     }
 
     function filter($value) {
-        $result = parent::filter($value);
+        // Get the uploaded file(s) and store it in $result
+        $result = parent::filter(null);
         $targetName = "." . $this->queriableName($this->name) . "-upload-target";
         update("$targetName img.result-embed", ['src' => $result['media']['filename']]);
         update("$targetName .filename-target", ['value' => $result['media']['filename']]);
@@ -59,7 +71,8 @@ class UploadImageResult extends UploadResult {
         return $result;
     }
 
-    public function field() {
+    #[Prototype]
+    protected function field() {
         $val = $this->getValue();
         return view("CRUD/fields/UploadResult.html",[
             'field' => $this,
@@ -74,4 +87,19 @@ class UploadImageResult extends UploadResult {
             'hasThumbnail' => $this->name,
         ]);
     }
+
+    function setValue(mixed $value): void {
+        $this->originalValue = $value;
+        if(!is_array($value) && $value === $_POST[$this->name]) $value = [$this->name => $value];
+        $this->value = $value;
+    }
+
+    
+    public function jsonSerialize(): mixed {
+        return $this->originalValue->__dataset;
+    }
+    // function __isset($path) {
+    //     if($this->getValue()['isset'] === false) return false;
+    //     return true;
+    // }
 }

@@ -5,6 +5,7 @@ namespace Cobalt\SchemaPrototypes\Basic;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 /**
  * Custom schema entries:
@@ -15,12 +16,19 @@ use Validation\Exceptions\ValidationIssue;
 class EnumResult extends SchemaResult {
     use Fieldable;
 
-    function field($type = "select", $misc = []) {
+    protected $type = "string";
+
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    
+    #[Prototype]
+    protected function field($type = "select", $misc = []) {
         return $this->select($misc['class'] ?? "", $misc);
     }
 
-    protected $type = "string";
-    public function display():string {
+    #[Prototype]
+    protected function display():string {
         if(is_callable($this->schema['display'])) return $this->schema['display']($this->getValue(), $this, $this->getValid());
         $enum = $this->getValid();
         $val = $this->getValue();

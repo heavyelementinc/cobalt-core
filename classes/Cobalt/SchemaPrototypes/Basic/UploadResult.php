@@ -10,6 +10,7 @@ use Drivers\BinaryStorage;
 use Exceptions\HTTP\BadRequest;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 /**
  * ## `UploadResult` schema directives
@@ -33,11 +34,17 @@ class UploadResult extends MapResult {
      */
     protected string|bool $filename = "";
     
-    public function display():string {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    #[Prototype]
+    protected function display():string {
         return $this->embed();
     }
 
-    public function embed($embedSize = "media", array $misc = []) {
+    #[Prototype]
+    protected function embed($embedSize = "media", array $misc = []) {
         $misc = array_merge([
             'class' => "",
             'alt' => $this->name,

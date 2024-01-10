@@ -2,8 +2,14 @@
 
 namespace Cobalt\SchemaPrototypes\Traits;
 
+use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+
 trait Fieldable {
-    // abstract function field($class = "", $misc = []):string;
+    #[Prototype]
+    protected function field(string $class = "", array $misc = [], string $tag):string {
+        return $this->input($class, $misc, $tag);
+    }
 
     /**
      * The field method returns an editable field
@@ -13,8 +19,13 @@ trait Fieldable {
         $closingTag = "";
         if($tag !== "input") $closingTag = "</$tag>";
         
+        if($this->getDirective("private")) return "";
+        if($this->getDirecitve("immutable")) $misc['readonly'] = 'readonly';
+        
         $value = $this->getValue();
-        return "<$tag class=\"$classes\" $attrs value=\"" . htmlspecialchars($value) . "\">$closingTag";
+        $pattern = $this->getDirective("pattern", false);
+        if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+        return "<$tag class=\"$classes\" $attrs value=\"" . htmlspecialchars($value) . "\"$pattern>$closingTag";
     }
 
     protected function inputDate($classes = "", $misc = []) {
@@ -47,7 +58,10 @@ trait Fieldable {
 
         if($misc['from'] === "milliseconds") $formatted * 1000;
 
-        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"></input-date>";
+        $pattern = $this->getDirective("pattern", false);
+        if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+
+        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-date>";
     }
 
     protected function select($classes = "", $misc = [], $tag = "select") {
@@ -70,7 +84,9 @@ trait Fieldable {
 
     public function textarea($classes = "", $misc = [], $tag = "textarea") {
         [$misc, $attrs] = $this->defaultFieldData($misc);
-        return "<$tag class=\"$classes\" $attrs>".$this->getValue()."</$tag>";
+        $pattern = $this->getDirective("pattern", false);
+        if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+        return "<$tag class=\"$classes\" $attrs".$pattern.">".$this->getValue()."</$tag>";
     }
 
     protected function markdownarea($classes, $misc = []) {

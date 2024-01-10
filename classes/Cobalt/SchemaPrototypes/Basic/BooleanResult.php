@@ -5,30 +5,40 @@ namespace Cobalt\SchemaPrototypes\Basic;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class BooleanResult extends SchemaResult {
     use Fieldable;
     protected $type = "boolean";
-    public function field($class = "", $misc = []) {
+    
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    
+    #[Prototype] protected function field($class = "", $misc = []) {
         return $this->inputSwitch($class, $misc);
     }
 
-    public function equals($value) {
+    #[Prototype]
+    protected function equals($value) {
         $check = ($this->getValue() == $value);
         return ($this->asHTML) ? json_encode($check) : $check;
     }
 
-    public function strictEquals($value) {
+    #[Prototype]
+    protected function strictEquals($value) {
         $check = ($this->getValue() === $value);
         return ($this->asHTML) ? json_encode($check) : $check;
     }
 
-    public function notEquals($value) {
+    #[Prototype]
+    protected function notEquals($value) {
         $check = ($this->getValue() != $value);
         return ($this->asHTML) ? json_encode($check) : $check;
     }
 
-    public function display():string {
+    #[Prototype]
+    protected function display():string {
         $valid = $this->getValid();
         $val = $this->getValue();
         $str = ($val) ? "true" : "false";

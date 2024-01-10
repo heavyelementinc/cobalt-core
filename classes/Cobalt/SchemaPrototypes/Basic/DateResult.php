@@ -8,15 +8,12 @@ use DateTime;
 use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class DateResult extends SchemaResult {
     use Fieldable;
 
     protected $type = "date";
-    
-    public function field($class = "", $misc = []) {
-        return $this->inputDate($class, $misc);
-    }
     
     public function getValue():mixed {
         $value = $this->value;
@@ -37,11 +34,22 @@ class DateResult extends SchemaResult {
         else $this->value = $value;
     }
 
-    public function display():string {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    #[Prototype]
+    protected function field($class = "", $misc = []) {
+        return $this->inputDate($class, $misc);
+    }
+
+    #[Prototype]
+    protected function display():string {
         return $this->format("verbose");
     }
 
-    public function format(string $format = "input"):string {
+    #[Prototype]
+    protected function format(string $format = "input"):string {
         $value = $this->getValue();
         $shorthands = [
             'input' => "Y-m-d",
@@ -64,7 +72,8 @@ class DateResult extends SchemaResult {
         return date($format, $value->format("u") / 1000);
     }
 
-    public function relative($strtoparse) {
+    #[Prototype]
+    protected function relative($strtoparse) {
         
     }
 

@@ -12,10 +12,12 @@ use Countable;
 use Iterator;
 use JsonSerializable;
 use MongoDB\BSON\ObjectId;
+use stdClass;
+use Traversable;
 use TypeError;
 
-class GenericMap extends Validation implements Iterator, ArrayAccess, JsonSerializable, Countable {
-    use ResultTranslator;
+class GenericMap extends Validation implements Iterator, Traversable, ArrayAccess, JsonSerializable, Countable {
+    use ResultTranslator, NestedFind;
 
     protected $id;
     public array $__dataset = [];
@@ -66,68 +68,7 @@ class GenericMap extends Validation implements Iterator, ArrayAccess, JsonSerial
         $this->__schemaHasBeenInitialized = true;
     }
 
-    public function __isset($name):bool {
-        if(key_exists($name, $this->__hydrated)) return true;
-        if(key_exists($name, $this->__schema)) return true;
-        if(key_exists($name, $this->__dataset)) return true;
-        $nestedFindResult = false;
-        // if(strpos($name, ".")) $nestedFindResult = $this->__nestedFind($name);
-        // if($nestedFindResult) return true;
-        
-        // // // if($this->__setChecker($name, $this->__strictFind)) return true;
-        // if(strpos($name, ".")) return $this->__isset_deep($name);
-
-        return false;
-    }
-
-    // function __nestedFind($name) {
-    //     // Let's say $name = "media"
-    //     foreach($this->__schema as $field => $value) {
-    //         // Eventually, $field === "media.filename"
-    //         if(strpos($field, ".") === false) continue; // If this field is not a dot notation path, continue
-    //         if(strpos($field, $name) === 0) {
-    //             if(key_exists($name, $this->__dataset)) return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // function __isset_deep($name) {
-    //     $explodedName = explode(".", $name);
-    //     $found = "";
-    //     $candidate = [$this, null, ""];
-    //     while(count($explodedName) > 0) {
-    //         $currentPath = array_shift($explodedName);
-    //         $remainingPath = "$currentPath.". implode(".", $explodedName);
-    //         $candidate[1] = null;
-    //         $candidate[2] = "";
-
-    //         if($candidate[0] instanceof SchemaResult) {
-    //             $candidate = $this->__handleSchemaResult($candidate[0], $currentPath, $remainingPath);
-    //         }
-
-    //         if($candidate[0] instanceof GenericMap) {
-    //             $candidate = $this->__handleGenericMap($candidate[0], $currentPath, $remainingPath);
-    //         }
-            
-    //         if($candidate[1] === true) $found .= ($found) ? ".$candidate[2]" : "$candidate[2]";
-    //     }
-    //     if($name === $found) return true;
-    //     return false;
-    // }
-
-    // function __handleGenericMap($candidate, $name, $remaining) {
-    //     $isset = isset($candidate[$name]);
-    //     if($isset) return [$candidate[$name], true, $name];
-    //     $isset = isset($candidate[$remaining]);
-    //     if($isset) return [$candidate[$remaining], true, $remaining];
-    //     return [$candidate, false, null];
-    // }
-
-    // function __handleSchemaResult($candidate, $name, $remaining) {
-    //     if($candidate instanceof MapResult) return [$candidate->getRaw(), null, ""];
-    //     return [$candidate, null, ""];
-    // }
+    
 
     public function __get($name):GenericMap|SchemaResult|ObjectId {
         if(!$this->__schemaHasBeenInitialized) throw new TypeError("This Schema has not been initialized");
@@ -264,7 +205,13 @@ class GenericMap extends Validation implements Iterator, ArrayAccess, JsonSerial
     function ingest($data):GenericMap {
         if($data === null) $data = [];
         if(is_iterable($data) && !is_array($data)) $data = doc_to_array($data);
-        if(!is_array($data)) throw new TypeError('$data must be an array or convertable into an array');
+        if(!is_array($data)) {
+            if($data instanceof stdClass) {
+                $data = get_object_vars($data);
+            } else {
+                throw new TypeError('$data must be an array or convertable into an array');
+            }
+        }
         if(!isset($data['_id'])) $data['_id'] = new ObjectId();
 
         $this->__initialize_schema();
@@ -283,5 +230,15 @@ class GenericMap extends Validation implements Iterator, ArrayAccess, JsonSerial
 
     public function getId() {
         return $this->id;
+    }
+
+    public function getDirective(string $name, string $directive) {
+        if(!key_exists($name, $this->__schema)) return null;
+        if(!key_exists($directive, $this->__schema[$name])) {
+            return $this->__schema[$name][$directive];
+        } else if (key_exists('type', $this->__schema[$name])) {
+            return $this->__schema[$name]['type']->getDirective($name);
+        }
+        return null;
     }
 }

@@ -5,6 +5,7 @@ namespace Cobalt\SchemaPrototypes\Basic;
 use ArrayAccess;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 /**
  * Custom schema entries:
@@ -14,52 +15,72 @@ use Validation\Exceptions\ValidationIssue;
 class StringResult extends SchemaResult implements ArrayAccess{
     protected $type = "string";
 
-    public function length():int|null {
+
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    
+    #[Prototype]
+    protected function length():int|null {
         return strlen($this->value);
     }
 
-    public function capitalize(){
+    #[Prototype]
+    protected function capitalize(){
         return ucfirst($this->value);
     }
 
-    public function uppercase() {
+    #[Prototype]
+    protected function uppercase() {
         return strtoupper($this->value);
     }
 
-    public function toUppercase() {
+    #[Prototype]
+    protected function toUppercase() {
         return $this->uppercase();
     }
 
-    public function lowercase() {
+    #[Prototype]
+    protected function lowercase() {
         return strtolower($this->value);
     }
 
-    public function toLower() {
+    #[Prototype]
+    protected function toLower() {
         return $this->lowercase();
     }
 
-    public function last() {
+    #[Prototype]
+    protected function last() {
         return $this->value[count($this->value) - 1];
     }
 
-    public function field():string {
+    #[Prototype]
+    protected function field():string {
         return "<input type=\"Text\" name=\"$this->name\" value=\"".$this->getValue()."\">";
     }
 
-    public function substring(string $start, ?string $length = null, array $options = []) {
+    #[Prototype]
+    protected function substring(string $start, ?string $length = null, array $options = []) {
         return substr($this->getValue(), $start, $length);
     }
 
-    public function display():string {
+    #[Prototype]
+    protected function display():string {
         $val = $this->getValue();
         $valid = $this->getValid();
+        
+        // Since 'display' is already a method, we need to manually invoke the 
+        // `display` directive if it exists.
+        $directive = $this->getDirective("display");
+        if(is_callable($directive)) return $directive($val, $this->name, $valid);
+
         if(is_array($valid)) {
             if(key_exists($val, $valid)) return $valid[$val];
             if(key_exists($this->value, $valid)) return $valid[$this->value];
         }
         return (string)$val;
     }
-
 
     public function offsetExists(mixed $offset): bool {
         $length = count($this->getValue());

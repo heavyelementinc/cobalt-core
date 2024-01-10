@@ -6,16 +6,23 @@ use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class IdResult extends SchemaResult {
     use MongoId;
     protected $type = "_id";
     
-    public function display(): string {
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+    /**============= PROTOTYPE METHODS =============**/
+    /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    #[Prototype]
+    protected function display(): string {
         return (string)$this->value;
     }
 
-    public function format(): string {
+    #[Prototype]
+    protected function format(): string {
         return (string)$this->value;
     }
 
