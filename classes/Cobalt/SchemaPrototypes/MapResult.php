@@ -2,12 +2,23 @@
 
 namespace Cobalt\SchemaPrototypes;
 
+use ArrayAccess;
 use Cobalt\Maps\GenericMap;
+use Countable;
+use Iterator;
+use JsonSerializable;
+use Traversable;
 
-class MapResult extends SchemaResult {
+class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAccess, JsonSerializable, Countable {
+
+    /**
+     * @var GenericMap
+     */
+    protected $value;
+
     
     function filter($value) {
-    return $this->value->validate($value);
+        return $this->value->validate($value);
     }
 
     function __isset($path) {
@@ -15,7 +26,7 @@ class MapResult extends SchemaResult {
     }
 
     public function jsonSerialize(): mixed {
-        return $this->originalValue;
+        return $this->value->jsonSerialize();
     }
     // function setName(string $name) {
     //     // TODO: Set the appropriate name
@@ -39,4 +50,45 @@ class MapResult extends SchemaResult {
         return $this->value->__hydrated;
     }
 
+
+    
+    public function count(): int {
+        return $this->value->count();
+    }
+
+    public function offsetExists(mixed $offset): bool {
+        return $this->value->offsetExists($offset);
+    }
+
+    public function offsetGet(mixed $offset): mixed {
+        return $this->value->offsetGet($offset);
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void {
+        $this->value->offsetSet($offset, $value);
+    }
+
+    public function offsetUnset(mixed $offset): void {
+        $this->value->offsetUnset($offset);
+    }
+
+    public function current(): mixed {
+        return $this->value->current();
+    }
+
+    public function next(): void {
+        $this->value->next();
+    }
+
+    public function key(): mixed {
+        return $this->value->key();
+    }
+
+    public function valid(): bool {
+        return $this->value->valid();
+    }
+
+    public function rewind(): void {
+        return $this->value->rewind();
+    }
 }

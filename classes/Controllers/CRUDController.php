@@ -81,14 +81,14 @@ abstract class CRUDController extends Controller {
         $schema = new $schemaName();
         if($schema instanceof Normalize) {
             $mutant = $schema->__validate($_POST);
-            $operators = $schema->__operators($mutant);
+            // $operators = $schema->__operators($mutant);
         } else if ($schema instanceof GenericMap) {
             $mutant = $schema->validate($_POST);
-            $operators = $schema->operators($mutant);
+            // $operators = $schema->operators($mutant);
         }
         $id = new ObjectId();
-        $result = $this->manager->updateOne(['_id' => $id], $operators, ['upsert' => true]);
-        $insertedId = $result->getUpsertedId();
+        $result = $this->manager->insertOne($mutant);
+        $insertedId = $result->getInsertedId();
         $route = route("$this->name@edit", [(string)$insertedId]);
         header("X-Redirect: $route");// . (string)$insertedId);
         return $insertedId;
