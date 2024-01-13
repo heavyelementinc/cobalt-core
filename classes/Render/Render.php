@@ -319,7 +319,7 @@ class Render {
             // if (gettype($replace[$i]) === "object") $replace[$i] = "[object]";
         }
 
-        if(__APP_SETTINGS__['Renderer_debug_process']) {
+        if(__APP_SETTINGS__['Renderer_debug_process'] ?? false) {
             $result = "";
             foreach($search as $i => $var) {
                 $result .= str_replace($var, $replace[$i], $subject);

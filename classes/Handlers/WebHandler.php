@@ -226,7 +226,7 @@ class WebHandler implements RequestHandler {
     function getRouteBoundaries() {
         $boundaries = [];
         foreach(__APP_SETTINGS__['context_prefixes'] as $context => $data) {
-            $trailing_slash = ($data['prefix'][strlen($data['prefix']) - 1] === "/") ? "?" : "";
+            $trailing_slash = ($data['prefix'][strlen($data['prefix'] ?? "") - 1] === "/") ? "?" : "";
             $boundaries["^".preg_quote($data['prefix'])."$trailing_slash"] = $data['prefix'];
         }
         return "<script id='route-boundaries' type='application/json'>" . json_encode($boundaries) . "</script>";

@@ -963,7 +963,7 @@ function route_replacement($path, $args, $data = []) {
     $mutant = $rt;
     // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
     foreach($replacement[0] as $i => $replace) {
-        $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
+        $mutant = str_replace($replace, $args[$i] ?? $args[0] ?? "", $mutant);
     }
 
     return preg_replace("/\/{2,}/","/", $mutant);

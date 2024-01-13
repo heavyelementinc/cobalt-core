@@ -89,6 +89,6 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
     }
 
     public function rewind(): void {
-        return $this->value->rewind();
+        $this->value->rewind();
     }
 }

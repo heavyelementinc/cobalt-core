@@ -109,7 +109,7 @@ class Route {
 
         $path_prefix = app('context_prefixes')[$router_table_address]['prefix'];
 
-        $real_path = substr($path_prefix,0,-1) . $path;
+        $real_path = substr($path_prefix ?? "",0,-1) . $path;
         $real_regex = Route::convert_path_to_regex_pattern($real_path);
 
         if (isset($additional['anchor']) && !isset($additional['anchor']['href'])) {            if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
@@ -134,7 +134,7 @@ class Route {
             'real_path' => $real_path,    // The real path includes the root context (/admin, etc)
             'real_regex' => $real_regex,  // The regex for the path "%^\/admin\/project\/?"
             'context' => $router_table_address, // The context type
-            'context_root' => substr($path_prefix,0,-1), // The context root path
+            'context_root' => substr($path_prefix ?? "",0,-1), // The context root path
 
             // The PHP controller name
             'controller' => $controller,  // The controller "ProjectAdmin@newProject"
@@ -239,7 +239,7 @@ class Route {
 
         foreach ($endpoints as $context_name => $api) {
             // Check if our request is in the list of APIs
-            if (substr($request_uri, 0, strlen($api['prefix'])) === $api['prefix']) {
+            if (substr($request_uri, 0, strlen($api['prefix'] ?? "")) === $api['prefix']) {
                 $context = $context_name;
                 break;
             }
