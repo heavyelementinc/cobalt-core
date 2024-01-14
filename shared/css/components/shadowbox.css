@@ -9,6 +9,7 @@
 }
 
 .shadowbox-body {
+    display: flex;
     max-width: 80vw;
     max-height: 80vh;
 }
