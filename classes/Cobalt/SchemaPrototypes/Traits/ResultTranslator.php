@@ -39,6 +39,7 @@ trait ResultTranslator {
                 break;
             case "boolean":
                 $result = new BooleanResult();
+                break;
             case "object":
                 switch(get_class($value)) {
                     case "\\MongoDB\\BSON\\Array":

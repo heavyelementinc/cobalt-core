@@ -46,11 +46,15 @@ use Validation\Exceptions\ValidationIssue;
  */
 abstract class PersistanceMap extends GenericMap implements Persistable {
 
+    function __construct($doc = null) {
+        parent::__construct($doc);
+    }
+
     abstract function __get_schema():array;
 
     function __initialize_schema($schema = null): void
     {
-        $schema = array_merge($this->__get_schema(), $this->__initialized_schema ?? []);
+        $schema = array_merge($this->__get_schema(), $this->__schema ?? []);
         parent::__initialize_schema($schema);
     }
 

@@ -9,6 +9,9 @@ use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 
 class DefaultUploadSchema extends GenericMap {
+    function __construct($doc, $schema) {
+        parent::__construct($doc, $schema);
+    }
 
     public function __get_schema(): array {
         return [

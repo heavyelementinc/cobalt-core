@@ -78,6 +78,7 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 use TypeError;
 
 class Render {
@@ -334,6 +335,7 @@ class Render {
         // $custom = "custom.";
         // if($name === "custom") $this->custom->{str_replace("custom.","",$name)};
         $lookup = \lookup_js_notation($name, $this->vars);
+        // $lookup = \lookup($name, $this->vars, false);
         if ($process) return $this->process_vars($lookup);
         return $lookup;
     }
@@ -346,7 +348,8 @@ class Render {
                 $value = \json_encode($val); // Is this what we want?
                 break;
             case "object":
-                if(is_a($val, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) return $val;
+                if($val instanceof SchemaResult) return $val;
+                if($val instanceof ObjectId) return (string)$val;
                 if (method_exists($val, "__toString")) {
                     $value = (string)$val;
                     break;

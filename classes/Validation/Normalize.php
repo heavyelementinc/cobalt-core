@@ -874,7 +874,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $this->get_pronoun_table()["are"];
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize():mixed {
         if (!$this->__dataset) return []; // throw new \Exception("This normalizer has not been supplied with iterable data");
 
         $mutant = [];
@@ -947,7 +947,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $this->__position = 0;
     }
 
-    public function current() {
+    public function current():mixed {
         return $this->{$this->__index[$this->__position]};
     }
 
@@ -973,7 +973,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $this->__isset($offset);
     }
 
-    public function offsetGet($offset) {
+    public function offsetGet($offset):mixed {
         return $this->{$offset};
     }
 

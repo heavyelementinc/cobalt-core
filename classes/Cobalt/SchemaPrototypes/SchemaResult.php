@@ -462,7 +462,7 @@ class SchemaResult implements \Stringable, JsonSerializable
     }
 
     function __get($path) {
-        return lookup_js_notation($path, $this->value);
+        return lookup($path, $this->value);
     }
 
     /**

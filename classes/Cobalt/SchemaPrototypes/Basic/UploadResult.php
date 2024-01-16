@@ -115,7 +115,7 @@ class UploadResult extends MapResult {
     }
 
     function defaultSchemaValues(array $data = []): array {
-        $defaultValue = new DefaultUploadSchema([
+        $defaultValue = [
             'media' => [
                 'ref' => '',
                 'filename' => '/core-content/img/default.jpg',
@@ -125,7 +125,7 @@ class UploadResult extends MapResult {
                 ]
             ],
             'isset' => false
-        ]);
+        ];
         
         return [
             'filename'  => false, // Preserve filename? False will generate a new filename
@@ -173,7 +173,7 @@ class UploadResult extends MapResult {
         if(!$result) return;
         $filename = $this->getFilename($result);
 
-        $map = ['mapId' => $this->__reference->getId()];
+        $map = ['mapId' => $this->__reference->_id];
 
         $this->__cleanup($map);
         

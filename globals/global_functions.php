@@ -12,7 +12,9 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Renderer\Render;
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Controllers\CRUDController;
 use Demyanovs\PHPHighlight\Highlighter;
 use Drivers\UTCDateTime as DriversUTCDateTime;
@@ -554,6 +556,26 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
     else if ($throw_on_fail == "warn") throw new Exception("Could not find `$path_map`");
     else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
     else return; // Return undefined
+}
+
+function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed {
+    $type = is_array($subject) || $subject instanceof ArrayAccess;
+    if($type) {
+        if(isset($subject[$name])) return $subject[$name];
+    }
+    if ($subject instanceof SchemaResult) {
+        if(isset($subject->{$name})) return $subject->{$name};
+        $type = "SchemaResult";
+    }
+    if(strpos($name, ".") >= 0) {
+        $exploded = explode(".", $name);
+        $first = array_shift($exploded);
+        if($type === true && isset($subject[$first])) return lookup(implode(".", $exploded), $subject[$first]);
+        if($type === "SchemaResult" && isset($subject->{$first})) return lookup(implode(".", $exploded), $subject->{$first});
+        if($throwOnFail) throw new LookupFailure("Failed to find `$first` on " . gettype($subject));
+        return "";
+    }
+    if($throwOnFail) throw new LookupFailure("Failed to find `$name` on " . gettype($subject));
 }
 
 function get_temp_path($path, $key) {

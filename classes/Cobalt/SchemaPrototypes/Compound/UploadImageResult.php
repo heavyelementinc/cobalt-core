@@ -6,6 +6,7 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
 use Validation\Exceptions\ValidationContinue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use JsonSerializable;
 
 class UploadImageResult extends UploadResult {
@@ -58,6 +59,45 @@ class UploadImageResult extends UploadResult {
         return "<image-editor>".$this->embed($embedSize, $misc)."</image-editor>";
     }
 
+    #[Prototype]
+    protected function ref($type = "media") {
+        return $this->value->__dataset[$type]['ref'];
+    }
+
+    #[Prototype]
+    protected function filename($type = "media") {
+        return $this->value->{"$type.filename"};
+    }
+
+    #[Prototype]
+    protected function height($type = "media") {
+        return $this->value->{"$type.meta.height"};
+    }
+
+    #[Prototype]
+    protected function width($type = "media") {
+        return $this->value->{"$type.meta.width"};
+    }
+
+    #[Prototype]
+    protected function accent($type = "media") {
+        return $this->value->{"$type.meta.accent_color"};
+    }
+
+    #[Prototype]
+    protected function contrast($type = "media") {
+        // return $this->value->{"$type.meta.accent_color"}->getContrastColor();
+    }
+
+    #[Prototype]
+    protected function mimetype($type = "media") {
+        return $this->value->{"$type.meta.mimetype"};
+    }
+
+
+
+
+
     function filter($value) {
         // Get the uploaded file(s) and store it in $result
         $result = parent::filter(null);
@@ -90,8 +130,12 @@ class UploadImageResult extends UploadResult {
 
     function setValue(mixed $value): void {
         $this->originalValue = $value;
-        if(!is_array($value) && $value === $_POST[$this->name]) $value = [$this->name => $value];
-        $this->value = $value;
+        if(gettype($value) === 'string') {
+            $value = [];
+        }
+        $this->value = new DefaultUploadSchema($value, $this->schema);
+        // if(!is_array($value) && $value === $_POST[$this->name]) $value = [$this->name => $value];
+        // $this->value = $value;
     }
 
     
