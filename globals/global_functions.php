@@ -12,7 +12,9 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
+use Cobalt\Maps\GenericMap;
 use Cobalt\Renderer\Render;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Controllers\CRUDController;
@@ -526,9 +528,10 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
 
             if(is_a($mutant, "\\Cobalt\\Maps\\GenericMap")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
-                if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
-                if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\MapResult")) return lookup_js_notation($temp_path, $mutant);
-                if($looked_up . "$temp_path" === $path_map) return $mutant;
+                return lookup($temp_path, $mutant, $throw_on_fail);
+                // if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+                // if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\MapResult")) return lookup_js_notation($temp_path, $mutant);
+                // if($looked_up . "$temp_path" === $path_map) return $mutant;
             }
 
             if (is_a($mutant, "\Validation\Normalize")) {
@@ -558,6 +561,11 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
     else return; // Return undefined
 }
 
+function get_custom(string $name):?CustomSchema {
+    global $WEB_PROCESSOR_VARS;
+    return $WEB_PROCESSOR_VARS['custom']->getCustomizationByUniqueName($name);
+}
+
 function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed {
     $type = is_array($subject) || $subject instanceof ArrayAccess;
     if($type) {
@@ -573,9 +581,14 @@ function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed 
         if($type === true && isset($subject[$first])) return lookup(implode(".", $exploded), $subject[$first]);
         if($type === "SchemaResult" && isset($subject->{$first})) return lookup(implode(".", $exploded), $subject->{$first});
         if($throwOnFail) throw new LookupFailure("Failed to find `$first` on " . gettype($subject));
-        return "";
+        // return "";
+    }
+    if($subject instanceof GenericMap) {
+        $schema = $subject->readSchema();
+        if(key_exists($name, $schema)) return $subject->__toResult($name, null,  $schema[$name], $subject);
     }
     if($throwOnFail) throw new LookupFailure("Failed to find `$name` on " . gettype($subject));
+    return "";
 }
 
 function get_temp_path($path, $key) {
@@ -1514,6 +1527,7 @@ function relative_time($time = false, $now = null, $limit = 86400, $format = "M 
 
 function pretty_rounding($number):string{
     if($number === 0) return "zero";
+    if(is_null($number)) return "zero";
     
     $map = [
         [

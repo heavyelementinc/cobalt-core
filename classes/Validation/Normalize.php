@@ -951,7 +951,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $this->{$this->__index[$this->__position]};
     }
 
-    public function key() {
+    public function key():mixed {
         return $this->__index[$this->__position];
     }
 

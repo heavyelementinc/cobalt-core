@@ -8,8 +8,11 @@ use Validation\Exceptions\ValidationContinue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use JsonSerializable;
+use MongoDB\BSON\Document;
+use MongoDB\BSON\Persistable;
+use stdClass;
 
-class UploadImageResult extends UploadResult {
+class UploadImageResult extends UploadResult implements Persistable{
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -66,32 +69,32 @@ class UploadImageResult extends UploadResult {
 
     #[Prototype]
     protected function filename($type = "media") {
-        return $this->value->{"$type.filename"};
+        return $this->value->{$type}->meta->filename;
     }
 
     #[Prototype]
     protected function height($type = "media") {
-        return $this->value->{"$type.meta.height"};
+        return $this->value->{$type}->meta->height;
     }
 
     #[Prototype]
     protected function width($type = "media") {
-        return $this->value->{"$type.meta.width"};
+        return $this->value->{$type}->meta->width;
     }
 
     #[Prototype]
     protected function accent($type = "media") {
-        return $this->value->{"$type.meta.accent_color"};
+        return $this->value->{$type}->meta->accent_color;
     }
 
     #[Prototype]
     protected function contrast($type = "media") {
-        // return $this->value->{"$type.meta.accent_color"}->getContrastColor();
+        return $this->value->{$type}->meta->contrast_color;
     }
 
     #[Prototype]
     protected function mimetype($type = "media") {
-        return $this->value->{"$type.meta.mimetype"};
+        return $this->value->{$type}->meta->mimetype;
     }
 
 
@@ -114,6 +117,8 @@ class UploadImageResult extends UploadResult {
     #[Prototype]
     protected function field() {
         $val = $this->getValue();
+        $accept = $this->getDirective('accept');
+        $acceptAttr = $accept ? "accept=\"$accept\"" : "";
         return view("CRUD/fields/UploadResult.html",[
             'field' => $this,
             'qname' => $this->queriableName($this->name),
@@ -124,6 +129,7 @@ class UploadImageResult extends UploadResult {
             'height'   => $val->__dataset['media']['meta']['height'],
             'accent'   => $val->__dataset['media']['meta']['accent_color'],
             'color'    => $val->__dataset['media']['meta']['contrast_color'],
+            'accept'   => $acceptAttr,
             'hasThumbnail' => $this->name,
         ]);
     }
@@ -133,9 +139,11 @@ class UploadImageResult extends UploadResult {
         if(gettype($value) === 'string') {
             $value = [];
         }
-        $this->value = new DefaultUploadSchema($value, $this->schema);
-        // if(!is_array($value) && $value === $_POST[$this->name]) $value = [$this->name => $value];
-        // $this->value = $value;
+        if(gettype($value) === "string") {
+            $this->value = new DefaultUploadSchema($value, $this->schema);
+        } else {
+            $this->value = $value;
+        }
     }
 
     
@@ -146,4 +154,13 @@ class UploadImageResult extends UploadResult {
     //     if($this->getValue()['isset'] === false) return false;
     //     return true;
     // }
+
+    
+    public function bsonSerialize(): array|stdClass|Document {
+        return $this->value->__dataset;
+    }
+
+    public function bsonUnserialize(array $data): void {
+        $this->value = new DefaultUploadSchema($data);
+    }
 }

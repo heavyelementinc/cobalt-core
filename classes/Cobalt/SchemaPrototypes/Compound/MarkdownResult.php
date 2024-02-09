@@ -39,7 +39,9 @@ class MarkdownResult extends StringResult {
         return strip_tags(from_markdown($this->getValue(), false));
     }
 
-    public function field():string {
+    #[Prototype]
+    protected function field(string $class = "", array $misc = [], string $tag = ""):string {
+        // return $this->markdownarea($class, $misc);
         return "<markdown-area name=\"$this->name\">" . $this->getValue() . "</markdown-area>";
     }
 }

@@ -68,7 +68,7 @@ class ApiHandler implements RequestHandler {
 
         $return_value = $this->fulfillmentHandling($this->router_result);
         
-        $content_type = headers_list()['Content-Type'] ?? headers_list()['content-type'];
+        $content_type = headers_list()['Content-Type'] ?? headers_list()['content-type'] ?? "";
         if(preg_match("/json/", strtolower($content_type ?? ""))) {
             /** Prepare for API request loading progress bar */
             $json = json_encode($return_value);
@@ -77,6 +77,7 @@ class ApiHandler implements RequestHandler {
             // exit;
         } else if(gettype($return_value) !== "string") {
             $json = json_encode($return_value);
+            if($json === false) $json = json_last_error_msg();
             header("Content-Length: " . strlen($json));
         } else {
             $json = $return_value;

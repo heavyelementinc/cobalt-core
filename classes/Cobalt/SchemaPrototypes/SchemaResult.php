@@ -32,6 +32,7 @@ use stdClass;
 use TypeError;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use JsonSerializable;
+use MongoDB\Model\BSONArray;
 use ReflectionException;
 use ReflectionObject;
 
@@ -55,6 +56,11 @@ class SchemaResult implements \Stringable, JsonSerializable
     protected bool $asHTML = false;
 
     public function jsonSerialize(): mixed {
+        return $this->originalValue;
+    }
+
+    public function __getStorable(): mixed {
+        if($this instanceof Persistable) return $this;
         return $this->originalValue;
     }
 
@@ -106,6 +112,10 @@ class SchemaResult implements \Stringable, JsonSerializable
         return $this->value;
     }
 
+    public function readSchema():array {
+        return $this->schema;
+    }
+
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -144,6 +154,7 @@ class SchemaResult implements \Stringable, JsonSerializable
             if (is_callable($this->schema['valid'])) {
                 $val = $this->valid([], $this);
                 if (is_array($val)) return $val;
+                if ($val instanceof BSONArray) return $val->getArrayCopy();
                 if (is_iterable($val)) return iterator_to_array($val);
                 throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
             }
@@ -408,7 +419,7 @@ class SchemaResult implements \Stringable, JsonSerializable
      * @throws BadFunctionCallException
      */
     function __call($name, $arguments) {
-        $schema = $this->schema;
+        $schema = $this->schema ?? [];
         $args = $arguments ?? [];
         if (key_exists($name, $schema) && is_callable($schema[$name])) {
             return $schema[$name]($this->getValue(), $this, ...$args);

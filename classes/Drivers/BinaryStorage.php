@@ -34,24 +34,24 @@ trait BinaryStorage {
     }
 
     final public function __cleanup($query) {
-        $this->__initFS();
-        $count = $this->__collection->count($query);
-        $docs = $this->__collection->find($query);
+        // $this->__initFS();
+        // $count = $this->__collection->count($query);
+        // $docs = $this->__collection->find($query);
 
-        $newQuery = [$query];
-        $newQuery[1]['for'] = ['$in' => []];
+        // $newQuery = [$query];
+        // $newQuery[1]['for'] = ['$in' => []];
 
-        foreach($docs as $doc) {
-            $newQuery[1]['for']['$in'][] = $doc['_id'];
-        }
+        // foreach($docs as $doc) {
+        //     $newQuery[1]['for']['$in'][] = $doc['_id'];
+        // }
 
-        try {
-            $result = $this->__collection->deleteMany(['$or' => $newQuery]);
-            $deleted = $result->getDeletedCount();
-            header("X-Message: Cleaned up $deleted / $count orphaned uploads");
-        } catch (\Exception $e){ 
-            header("X-Message: Failed cleanup");
-        }
+        // try {
+        //     $result = $this->__collection->deleteMany(['$or' => $newQuery]);
+        //     $deleted = $result->getDeletedCount();
+        //     header("X-Message: Cleaned up $deleted / $count orphaned uploads");
+        // } catch (\Exception $e){ 
+        //     header("X-Message: Failed cleanup");
+        // }
     }
 
     final public function __updateFile(string $filename, array|GenericMap|SchemaResult|Document $data) {

@@ -3,6 +3,7 @@
 namespace Cobalt\Maps;
 
 use ArrayAccess;
+use ArrayObject;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Traits\Validatable;
 use Cobalt\SchemaPrototypes\SchemaResult;
@@ -59,6 +60,10 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         $this->__schemaHasBeenInitialized = true;
     }
 
+    public function readSchema():array {
+        return $this->__schema;
+    }
+
     /**
      * Do we need this??
      * @deprecated
@@ -77,6 +82,11 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     }
 
     public function ingest(array|BSONDocument|BSONArray $values): GenericMap {
+        if($values instanceof GenericMap) {
+            $this->__schema = array_merge($this->__schema, $values->readSchema());
+            // if($this->__schema) $this->__schemaHasBeenInitialized = true;
+            $values = $values->__dataset;
+        }
         if(!$this->__schemaHasBeenInitialized) $this->__initialize_schema();
         if($values instanceof BSONDocument || $values instanceof BSONArray) $values = doc_to_array($values);
         if($values instanceof BSONArray) $values = $values->getArrayCopy();
@@ -84,16 +94,37 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
             $this->id = $values['_id'];
             unset($values['_id']);
         }
+        $this->__dataset = $values; // Store our raw dataset because we have a ton of memory and we don't care.
+
         foreach($values as $field => $value) {
-            $this->__rehydrate($field, $value);
+            $this->__rehydrate($field, $value, $this->__hydrated);
         }
         $this->__hasBeenRehydrated = true;
         return $this;
     }
 
-    private function __rehydrate($field, $value) {
+    private function __rehydrate($field, $value, &$target) {
         if(!$this->__schemaHasBeenInitialized) throw new LookupFailure("Schema has not been initialized!");
-        $this->__hydrated[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
+        // $target[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
+        // return;
+        $schemaDirectives = null;
+        if(key_exists($field, $this->__schema)) {
+            $schemaDirectives = $this->__schema[$field];
+            if(key_exists('each', $schemaDirectives)) {
+                $mutant = $value;
+                foreach($mutant as $i => $v) {
+                    $mutant[$i] = $this->__toResult($field.".$i", $v, $schemaDirectives['each'], $this);
+                }
+                $value = $mutant;
+            }
+        } else if(is_array($value) || $value instanceof ArrayObject) {
+            foreach($value as $i => $v) {
+                if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
+            }
+        }
+        
+        $target[$field] = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
+        // $this->__hydrated[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
     }
 
     ##### GETTERS & SETTERS #####
@@ -116,7 +147,8 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
 
     public function __isset($name) {
         if($name === "_id") return isset($this->id);
-        if(strpos($name, ".") >= 0) return !!lookup($name, $this);
+        $lookup = lookup($name, $this);
+        if(strpos($name, ".") >= 0) return isset($lookup);
         return key_exists($name, $this->__hydrated);
     }
 
@@ -174,10 +206,12 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     }
 
     public function offsetExists(mixed $offset): bool {
+        if($offset === "_id") return isset($this->id);
         return isset($this->__hydrated[$offset]);
     }
 
     public function offsetGet(mixed $offset): mixed {
+        if($offset === "_id") return $this->id;
         return $this->__hydrated[$offset];
     }
 
@@ -190,7 +224,7 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     }
 
     public function jsonSerialize(): mixed {
-        return $this->__hydrated;
+        return $this->__dataset;
     }
 
     public function count(): int {

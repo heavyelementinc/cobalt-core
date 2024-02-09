@@ -18,6 +18,7 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
  *  * `filename`  => `false` generates unique filename, `true` preserves user-supplied filename, <string> specifies the desired filename
  *  * `required`  => `true` 
  *  * `limit`     => [int 1] the number of files to upload,
+ *  * `accept`    => List of mimetypes that fieldable accepts
  *  * `formats`   => UNIMPLEMENTED!
  * @package Cobalt\SchemaPrototypes
  */
@@ -144,6 +145,7 @@ class UploadResult extends MapResult {
         $uploadedFiles = $this->__get_uploaded_files();
         $errors = [];
         foreach($uploadedFiles as $file) {
+            if($file['input_name'] !== $this->name) continue;
             switch($file['error']) {
                 case UPLOAD_ERR_NO_FILE:
                     if($this->schema['required']) throw new ValidationContinue("No file uploaded");
@@ -255,7 +257,11 @@ class UploadResult extends MapResult {
     }
 
     function __toString():string {
-        return $this->value['media']['filename'] ?? $this->schema['default']['media']['filename'];
+        return $this->value->media->filename ?? $this->schema['default']['media']['filename'];
+    }
+
+    function jsonSerialize(): mixed {
+        return $this->value->__dataset;
     }
 
 }

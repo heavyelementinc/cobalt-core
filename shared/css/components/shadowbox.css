@@ -6,6 +6,7 @@
     backdrop-filter: blur(30px);
     justify-content: center;
     align-items: center;
+    z-index: calc(var(--project-modal-z-index) + 10);
 }
 
 .shadowbox-body {

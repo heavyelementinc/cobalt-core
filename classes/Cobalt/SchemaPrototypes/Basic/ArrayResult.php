@@ -18,6 +18,7 @@ use MongoDB\Model\BSONArray;
 use Traversable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use MongoDB\BSON\Persistable;
 
 class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Traversable{
     use ResultTranslator, Fieldable;
@@ -25,11 +26,11 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     protected $__index = 0;
 
     function setValue($value):void {
+        $this->originalValue = $value;
         $array = $value;
         if($value instanceof BSONArray) $array = $value->getArrayCopy();
         if(empty($value)) $array = $this->schema['default'];
         $array = $this->__each($array, $this->__reference);
-
         $this->value = $array;
     }
 
@@ -42,13 +43,18 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         }
         return $html;
     }
+
+    public function __getStorable(): mixed {
+        if($this instanceof Persistable) return $this;
+        return $this->value;
+    }
     
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
 
     #[Prototype]
-    private function field($classes = "", $misc = []) {
+    protected function field($classes = "", $misc = [], $tag = "") {
         return $this->inputArray($classes, $misc);
     }
 

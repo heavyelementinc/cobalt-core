@@ -83,7 +83,7 @@ abstract class CRUDController extends Controller {
             $mutant = $schema->__validate($_POST);
             // $operators = $schema->__operators($mutant);
         } else if ($schema instanceof GenericMap) {
-            $mutant = $schema->validate($_POST);
+            $mutant = $schema->__validate($_POST);
             // $operators = $schema->operators($mutant);
         }
         $id = new ObjectId();
@@ -104,17 +104,18 @@ abstract class CRUDController extends Controller {
     public function update($id): GenericMap|\Validation\Normalize {
         $schemaName = $this->manager->get_schema_name($_POST);
         $schema = new $schemaName();
-        if(is_a($schema, "\\Validation\\Normalize")) {
+        if($schema instanceof \Validation\Normalize) {
             $mutant = $schema->__validate($_POST);
             $update  = $schema->__operators($mutant);
-        } else if (is_a($schema, "\\Cobalt\\Maps\\GenericMap")) {
-            $mutant = $schema->validate($_POST);
-            $update = $schema->operators($mutant);
+        } else if ($schema instanceof \Cobalt\Maps\GenericMap) {
+            $mutant = $schema->__validate($_POST);
+            $update = $schema->__operators();
         }
         
         $query = ['_id' => new ObjectId($id)];
         $result = $this->manager->updateOne($query, $update, ['upsert' => false]);
         if($result->getMatchedCount() === 0) throw new NotFound("No document matched request", "No found");
+        // if($result->getModifiedCount() === 0) throw new 
         return $this->read($id);
     }
 

@@ -2,7 +2,7 @@ class Shadowbox {
     constructor(group, firstElement) {
         this.group = group;
         this.currentIndex = 0;
-        this.groupItems = document.querySelectorAll(`[data-group='${firstElement.dataset.group}']`);
+        this.groupItems = document.querySelectorAll(`[data-group='${firstElement.dataset?.group ?? ""}']`);
         if(this.groupItems.length === 0) this.groupItems = [firstElement];
         else {
             this.groupItems.forEach((e,i) => {

@@ -118,7 +118,7 @@ async function removeLoadingSpinner(spinner) {
  */
 async function lightbox(origin, animate = true) {
     let imageUrl = null;
-    if (typeof origin === "object") imageUrl = origin.getAttribute("full-resolution") ?? origin.src ?? null;
+    if (typeof origin === "object") imageUrl = origin?.getAttribute("full-resolution") ?? origin.src ?? null;
     else imageUrl = origin;
 
     let lightbox_content = `<img src='${imageUrl}'>`;
@@ -137,9 +137,10 @@ async function lightbox(origin, animate = true) {
     return modal;
 }
 
-async function shadowbox(element, group = false) {
+function shadowbox(element, group = false) {
     const box = new Shadowbox(group, element);
     box.initUI();
+    return box;
 }
 
 /**

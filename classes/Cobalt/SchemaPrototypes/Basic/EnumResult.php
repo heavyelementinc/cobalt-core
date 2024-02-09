@@ -29,7 +29,6 @@ class EnumResult extends SchemaResult {
 
     #[Prototype]
     protected function display():string {
-        if(is_callable($this->schema['display'])) return $this->schema['display']($this->getValue(), $this, $this->getValid());
         $enum = $this->getValid();
         $val = $this->getValue();
         if(key_exists($val, $enum)) return $enum[$val];

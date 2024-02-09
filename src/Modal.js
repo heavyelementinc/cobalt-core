@@ -358,7 +358,9 @@ class Modal {
         const next = document.createElement("button"),
             prev = document.createElement("button");
         next.tabIndex = 0;
+        next.classList.add("lightbox-button", "next")
         prev.tabIndex = 0;
+        prev.classList.add("lightbox-button", "previous")
 
         next.addEventListener('click', e => {
             this.container.parentNode.removeChild(this.container);

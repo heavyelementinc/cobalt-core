@@ -7,6 +7,7 @@ use Cobalt\Maps\SchemaExcludesUnregisteredKeys;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\Persistable;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
@@ -26,12 +27,12 @@ trait Validatable {
 
     public $__validatedFields = [];
 
-    public function validate(array $toValidate) {
+    public function __validate(array $toValidate) {
         if(!$this->__schema) $this->__initialize_schema();
 
         foreach($toValidate as $field => $value) {
             try {
-                $this->__validatedFields[$field] = $this->validate_field($field, $value);
+                $this->__validatedFields[$field] = $this->__validate_field($field, $value);
             } catch (ValidationContinue $e) {
                 continue;
             } catch (SchemaExcludesUnregisteredKeys $e) {
@@ -46,7 +47,7 @@ trait Validatable {
         return $this;
     }
 
-    private function validate_field($field, $value) {
+    private function __validate_field($field, $value) {
         if($this->__excludeUnregisteredKeys) {
             if(!key_exists($field, $this->__schema)) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
         }
@@ -77,6 +78,7 @@ trait Validatable {
         } catch (ValidationFailed $e) { // Handle subdoc failure
             $this->__issues[$field] = $e->data;
         }
+
         return $validated;
     }
 
@@ -91,10 +93,11 @@ trait Validatable {
      * @param mixed $validated 
      * @return array 
      */
-    function operators($allowUnvalidated = false):array {
+    function __operators($allowUnvalidated = false):array {
         $result = [];
         if(!$this->isValidated() && $allowUnvalidated === false) throw new ValidationFailed("Server configuration error");
-        foreach($this->__dataset as $field => $value) {
+        foreach($this->__hydrated as $field => $value) {
+            $value = $value->__getStorable();
             if(!key_exists($field, $this->__schema)) continue;
             if(!key_exists('operator', $this->__schema[$field])) {
                 if(!key_exists('$set', $result)) $result['$set'] = [];
@@ -115,7 +118,7 @@ trait Validatable {
                     $result[$operator] = array_merge($result[$operator], $r[$operator]);
             }
         }
-        
+
         return $result;
     }
 

@@ -7,9 +7,12 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 trait Fieldable {
     #[Prototype]
-    protected function field(string $class = "", array $misc = [], string $tag):string {
+    protected function field(string $class = "", array $misc = [], string $tag = "input"):string {
         return $this->input($class, $misc, $tag);
     }
+
+    // #[Prototype]
+    // abstract protected function field(string $class = "", array $misc = [], string $tag = ""):string;
 
     /**
      * The field method returns an editable field
@@ -20,7 +23,7 @@ trait Fieldable {
         if($tag !== "input") $closingTag = "</$tag>";
         
         if($this->getDirective("private")) return "";
-        if($this->getDirecitve("immutable")) $misc['readonly'] = 'readonly';
+        if($this->getDirective("immutable")) $misc['readonly'] = 'readonly';
         
         $value = $this->getValue();
         $pattern = $this->getDirective("pattern", false);
@@ -133,4 +136,6 @@ trait Fieldable {
         }
         return $d;
     }
+
+    // abstract public function getDirective($directiveName, $throwOnFail = false);
 }

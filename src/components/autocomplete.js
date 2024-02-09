@@ -22,7 +22,6 @@ class AutoComplete extends HTMLElement {
         /** Set up the default state */
         this.readonly = false;
         this.value = "";
-        this.allowCustomInputs = false;
 
         /** Other optional states */
         this.url = false;
@@ -127,7 +126,7 @@ class AutoComplete extends HTMLElement {
 
     /*** Handle attribute changes ***/
     static get observedAttributes() {
-        return ['value', 'allow-custom', 'url', 'min', 'readonly', 'placeholder', 'clear-button'];
+        return ['value', 'url', 'min', 'readonly', 'placeholder', 'clear-button'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -137,8 +136,12 @@ class AutoComplete extends HTMLElement {
         }
     }
 
-    change_handler_allow_custom(newValue) {
-        this.allowCustomInputs = string_to_bool(newValue);
+    get allowCustomInputs() {
+        return string_to_bool(this.getAttribute("allow-custom"));
+    }
+
+    set allowCustomInputs(value) {
+        this.setAttribute("allow-custom", JSON.stringify(value ? true : false));
     }
 
     change_handler_clear_button(newValue) {

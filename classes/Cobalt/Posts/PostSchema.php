@@ -77,11 +77,11 @@ class PostSchema extends \Validation\Normalize {
             ],
             'default_image' => [
                 'get' => function ($val) {
-                    if($val) return "$this->public_link/attachment/$val";
+                    if($val) return "/res/fs/$val";
                     $this->initFS();
                     $results = $this->fs->findOne(['for' => $this->_id],['sort' => ['order' => 1]]);
                     if(!$results) return "";
-                    return "$this->public_link/attachment/$results->filename";
+                    return "/res/fs/$results->filename";
                 },
                 'display' => function ($val) {
                     $val = $this->default_image;
@@ -94,7 +94,7 @@ class PostSchema extends \Validation\Normalize {
                     $this->initFS();
                     $results = $this->fs->findOne(['for' => $this->_id],['sort' => ['order' => 1]]);
                     if(!$results) return "";
-                    return "url=\"http://".app("domain_name")."$this->public_link/attachment/$results->filename\" length=\"".$results->length."\" type=\"".$results->meta->mimetype."\"";
+                    return "url=\"http://".app("domain_name")."/res/fs/$results->filename\" length=\"".$results->length."\" type=\"".$results->meta->mimetype."\"";
                 }
             ],
             'no_image' => [
@@ -124,16 +124,16 @@ class PostSchema extends \Validation\Normalize {
                 'set' => function ($val) {
                     if(empty($val)) throw new ValidationIssue("No files were attached");
                     if(!$this->_id) throw new BadRequest("There's no _id specified for storage");
-                    $mutant = ["attachments" => []];
+                    $mutant = ["attachments" => $val['attachments']];
                     
-                    foreach($val['attachments'] as $index => $file) {
-                        $mutant['attachments'][$index] = array_merge($file, ['name' => uniqid() . "." . pathinfo($file['name'],PATHINFO_EXTENSION)]);
+                    foreach($val['attachments']['name'] as $index => $file) {
+                        $mutant['attachments']['name'][$index] = uniqid() . "." . pathinfo($file,PATHINFO_EXTENSION);//array_merge($file, ['name' => uniqid() . "." . pathinfo($file['name'],PATHINFO_EXTENSION)]);
                     }
 
                     return $this->clientUploadImagesAndThumbnails("attachments", 200, null, ['for' => $this->_id], $mutant);
                 },
                 'display' => function ($val) {
-                    return view("/posts/parts/edit-gallery.html",['gallery' => $this->directoryListing("$this->public_link/attachment/", "gallery", ['filter' => ['for' => $this->_id]])]);
+                    return view("/posts/parts/edit-gallery.html",['gallery' => $this->directoryListing("/res/fs/", "gallery", ['filter' => ['for' => $this->_id]])]);
                     // '
                     // <cobalt-listing id="gallery" 
                     //     custom-label-1="Make Post Default" custom-action-1="/api/v1/posts/attachment/{id}/default" custom-method-1="PUT"

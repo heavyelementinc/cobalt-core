@@ -29,7 +29,7 @@ class CobaltSetting {
         $this->directives   = $definition['directives'];
         $this->meta         = $definition['meta'] ?? null;
         $this->validate     = $definition['validate'];
-        $this->defined      = $definition['defined'];
+        $this->defined      = $definition['defined'] ?? null;
         $this->user_modified_settings = $user_modified_settings;
         $this->allSettings  = $settings;
 

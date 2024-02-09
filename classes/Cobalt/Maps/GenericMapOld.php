@@ -157,7 +157,7 @@ class GenericMap extends Validation implements Iterator, Traversable, ArrayAcces
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {
-    $this->__dataset[$offset] = $value;
+        $this->__dataset[$offset] = $value;
         return;
     }
 

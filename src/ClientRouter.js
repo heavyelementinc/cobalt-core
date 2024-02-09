@@ -123,7 +123,7 @@ class ClientRouter extends EventTarget{
         }
         this.lastLocationChangeEvent = {};
         /**
-         * Here, we set the value of the last page request equal to window.__ in order to
+         * Here we set the value of the last page request equal to window.__ in order to
          * preserve the variables exported publicly by the Cobalt Engine for the first page load
          * @property Stores the last navigation event result
          */
@@ -171,7 +171,7 @@ class ClientRouter extends EventTarget{
         const forms = document.querySelectorAll("form-request");
         for(const f of forms) {
             if(f.unsavedChanges) {
-                const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this Page");
+                const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
                 if(!conf) return;
             }
         }
@@ -180,6 +180,18 @@ class ClientRouter extends EventTarget{
         const navStartEventResult = this.dispatchEvent(navStartEvent);
         document.dispatchEvent(navStartEvent);
         if(navStartEvent.defaultPrevented) return;
+
+        const current = history.state;
+        history.replaceState(
+            {
+                title: document.title,
+                url: current.url,
+                scrollY: window.scrollY,
+                scrollX: window.scrollX,
+            }, 
+            '',
+            current.url
+        );
 
         this.progressBar.classList.add("navigation-start");
 
@@ -215,6 +227,7 @@ class ClientRouter extends EventTarget{
         this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
 
         this.updateContent(result);
+        this.updateScroll();
         if(!this.allowStateChange) {
             this.setPushStateMode();
             return;
@@ -229,6 +242,16 @@ class ClientRouter extends EventTarget{
         );
 
         this.setPushStateMode();
+    }
+
+    updateScroll() {
+        let scrollX = 0;
+        let scrollY = 0;
+        if(this.lastLocationChangeEvent.type === "popstate") {
+            scrollX = this.lastLocationChangeEvent.state.scrollX;
+            scrollY = this.lastLocationChangeEvent.state.scrollY;
+        }
+        window.scrollTo(scrollX, scrollY);
     }
 
     replaceState(location, {
@@ -360,8 +383,8 @@ class ClientRouter extends EventTarget{
             if("url" in e.state === false) return;
             if("alwaysReloadOnForward" in e.state === false);
 
-            this.lastLocationChangeEvent = {type: e.type, detail: e.detail || {}, target: e.target || e.currentTarget || e.explicitTarget};
-            return this.location = e.state.url;
+            this.lastLocationChangeEvent = {type: e.type, state: e.state, detail: e.detail || {}, target: e.target || e.currentTarget || e.explicitTarget};
+            this.location = e.state.url;
         });
 
         this.applyLinkListeners();

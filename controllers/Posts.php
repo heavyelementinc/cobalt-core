@@ -22,7 +22,7 @@ class Posts extends PostController {
         $schemaName = $this->postMan->get_schema_name();
         $schema = new $schemaName(array_merge($query,['url_slug' => $post->{'url_slug'}]));
         $valid = $schema->validate(['attachments' => $_FILES]);
-        
+        // update("#gallery", ['style' => ['background-image' ]])
         return ['#gallery' => $schema->{'attachments.display'}];
     }
 

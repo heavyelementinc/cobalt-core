@@ -24,7 +24,9 @@ class DateResult extends SchemaResult {
 
     public function __toString(): string
     {
-        return $this->getValue()->format('c');
+        $val = $this->getValue();
+        if(!$val) return "";
+        return $val->format('c');
     }
 
     public function setValue($value):void {
@@ -69,7 +71,7 @@ class DateResult extends SchemaResult {
             $value = $dateTime->format("U");
             return date($format, $value);
         }
-        return date($format, $value->format("u") / 1000);
+        return $value->format($format);
     }
 
     #[Prototype]

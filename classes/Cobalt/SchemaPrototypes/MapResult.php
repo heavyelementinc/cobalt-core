@@ -7,6 +7,8 @@ use Cobalt\Maps\GenericMap;
 use Countable;
 use Iterator;
 use JsonSerializable;
+use MongoDB\BSON\Document;
+use stdClass;
 use Traversable;
 
 class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAccess, JsonSerializable, Countable {
@@ -16,13 +18,16 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
      */
     protected $value;
 
-    
     function filter($value) {
         return $this->value->validate($value);
     }
 
     function __isset($path) {
-        return $this->value->__isset($path);
+        return isset($this->value->{$path});
+    }
+
+    function __get($path) {
+        return $this->value->{$path};
     }
 
     public function jsonSerialize(): mixed {

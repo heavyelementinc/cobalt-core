@@ -4,6 +4,7 @@ namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
 use Cobalt\SchemaPrototypes\SchemaResult;
+// use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 
@@ -13,6 +14,7 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
  * @package Cobalt\SchemaPrototypes
  */
 class StringResult extends SchemaResult implements ArrayAccess{
+    // use Fieldable;
     protected $type = "string";
 
 

@@ -85,10 +85,11 @@ class BinaryResult extends SchemaResult {
     }
 
     #[Prototype]
-    protected function list($operand = "&", $exclusive = false):string {
+    protected function list($operand = "&", $exclusive = false, $none = ""):string {
         $valid = $this->getValid();
         $value = $this->getValue();
         $list = "<ol class='binary-list'>";
+        $count = 0;
         foreach($valid as $bit => $label) {
             $active = "";
             switch($operand) {
@@ -109,9 +110,11 @@ class BinaryResult extends SchemaResult {
                     if($value ^ ~$bit) $active = "class='not'";
                     break;
             }
+            if($active) $count++;
             if(!$active && $exclusive) continue;
             $list .= "<li $active data-bit=\"$bit\">$label</li>";
         }
+        if($count === 0 && $none) return $list . "<li class='active'>$none</li>";
         return $list . "</ol>";
     }
 

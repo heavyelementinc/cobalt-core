@@ -142,7 +142,16 @@ Route::get("/me/", "UserAccounts@me",
         ]);
     }
 
-
+    Route::get("/settings/fs-manager", "CoreSettingsPanel@fileManager",[
+        'permission' => 'Customizations_modify',
+        'anchor' => [
+            'name' => "FS Manager",
+            'icon' => 'palette-swatch-outline',
+            'icon_color' => 'linear-gradient(to bottom, #DA627D, #FF495C 80%)'
+        ],
+        'navigation' => ['application_settings'],
+        'handler' => 'admin/fs-manager.js'
+    ]);
 /** 
 *  ========================================================
 *  ================= ADVANCED SETTINGS ====================
