@@ -117,6 +117,11 @@ article.cobalt-post, a.cobalt-post:not(.cobalt-post--blurb) {
     text-align: center;
 }
 
+.cobalt-post figure.content-embed.content--instagram {
+    display: flex;
+    justify-content: center;
+}
+
 .cobalt-post--splash {
     display: none;
 }
