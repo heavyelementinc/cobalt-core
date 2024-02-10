@@ -39,9 +39,10 @@ class NewFormRequest extends HTMLElement {
 
     connectedCallback() {
         this.initSubmissionListeners();
+        this.initSubmitButton();
         let defaultValue = "field";
         if(this.getMethods.includes(this.method)) defaultValue = "none";
-        if(!this.submitButton && !this.autoSave) this.autoSave = defaultValue; // Default forms without a save button to autosave
+        if(!this.submitButton && !this.validAutoSaveValues.includes(this.autoSave)) this.autoSave = defaultValue; // Default forms without a save button to autosave
         this.addEventListener("submission", event => {
             const data = this.buildSubmission(event);
             this.submit(data, event);

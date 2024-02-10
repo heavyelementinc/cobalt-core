@@ -134,8 +134,8 @@ if(app("Mailchimp_api_signup_route")) {
 }
 
 
-Route::s_put("/api/key/{service}",  "APIManagement@update", ['permission' => 'API_manage_keys']);
-Route::s_post("/api/key/{service}", "APIManagement@parse",  ['permission' => 'API_manage_keys']);
+// Route::s_put("/api/key/{service}",  "APIManagement@update", ['permission' => 'API_manage_keys']);
+Route::s_post("/remote/{service}/update", "RemoteServices@update",  ['permission' => 'API_manage_keys']);
 
 if(app("Customizations_enabled")) {
     Route::s_post("/customizations/update/{id}?", "Customizations@update", ['permission' => 'Customizations_modify']);

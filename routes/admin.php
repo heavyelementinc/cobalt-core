@@ -193,7 +193,7 @@ Route::get("/me/", "UserAccounts@me",
     //     'navigation' => ['advanced_settings']
     // ]);
 
-    Route::get("/settings/api-keys/", "APIManagement@index",[
+    Route::get("/settings/api-keys/", "RemoteServices@index",[
         'permission' => 'API_manage_keys',
         'anchor' => [
             'name' => "API Keys",
@@ -203,7 +203,7 @@ Route::get("/me/", "UserAccounts@me",
         'navigation' => ['advanced_settings']
     ]);
 
-    Route::get('/settings/api-keys/{name}', "APIManagement@key",[
+    Route::get('/settings/api-keys/{name}', "RemoteServices@editor",[
         'permission' => 'API_manage_keys',
     ]);
 

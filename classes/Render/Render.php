@@ -418,9 +418,9 @@ class Render {
 
     function parse_funct_args($args, $funct_name, $originalName, $errorMessage = "was supplied malformed parameters", ):array {
         try{
-            $args = \json_decode("[" . $args . "]", true, 512, JSON_THROW_ON_ERROR);
+            $args = \json_decode("[" . ($args ?? "") . "]", true, 512, JSON_THROW_ON_ERROR);
         } catch (\Exception $e) {
-            // $this->debug_template($originalName, "$funct_name() $errorMessage");
+            $this->debug_template($originalName, "$funct_name() $errorMessage", $this->body);
         }
         return $this->functs_get_vars($args);
     }

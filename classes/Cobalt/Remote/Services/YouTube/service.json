@@ -1,0 +1,14 @@
+{
+    "name": "YouTube",
+    "icon": "youtube",
+    "identifier": "youtube",
+
+    "auth":    "Auth",
+    "schema":  "Schema",
+    "service": "Service",
+    
+    "base_url": "https://youtube.com/",
+    "endpoints": {
+
+    }
+}
