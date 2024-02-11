@@ -125,6 +125,7 @@ modal-button-row {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: var(--project-modal-z-index);
 }
 
 button.modal-dialog--close {
