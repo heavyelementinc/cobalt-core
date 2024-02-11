@@ -51,4 +51,18 @@ class Posts extends PostController {
 
         return $result;
     }
+
+    function RSS_feed() {
+        if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
+        $query = $this->getParams($this->postMan, ['published' => true], [], ['sort', 'page'], ['sort' => ['publicationDate' => -1], 'limit' => 10]);
+        $docs = $this->postMan->findAllAsSchema(...$query);
+
+        header('Content-Type: application/rss+xml; charset=utf-8');
+
+        $items = $this->docsToViews($docs, "/RSS/item.xml");
+        echo view("/RSS/feed.xml", [
+            'posts' => $items
+        ]);
+        exit;
+    }
 }

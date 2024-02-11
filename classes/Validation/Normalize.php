@@ -644,7 +644,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     private function __proto_gmt($val, $field) {
         if($val instanceof UTCDateTime) $val = $val->toDateTime()->getTimestamp();
-        return date('r', $val);
+        return date('r', strtotime($val));
     }
 
     private function __proto_immutable($val, $field) {
