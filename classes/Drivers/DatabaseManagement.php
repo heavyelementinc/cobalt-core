@@ -3,6 +3,10 @@
 namespace Drivers;
 
 use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\Basic\UploadResult;
+use Cobalt\SchemaPrototypes\MapResult;
+use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
+use Exception;
 
 class DatabaseManagement {
     private $db;
@@ -47,7 +51,7 @@ class DatabaseManagement {
             $entries = [];
             foreach($result as $row) {
                 if($row instanceof GenericMap) {
-                    $row_to_array = $row->jsonSerialize();
+                    $row_to_array = $this->preserveMap($row);
                 } else {
                     $row_to_array = iterator_to_array($row);
                 }
@@ -64,11 +68,46 @@ class DatabaseManagement {
         $filepath = $file . $this->get_backup_file_name();
         if($talk) printf("Writing file... ");
         if(!is_writable(pathinfo($filepath, PATHINFO_DIRNAME))) return say(" file path is not writeable!", "e");
-        if(file_put_contents($filepath, json_encode($db_backup)) === false) return say(" writing $filepath failed!", "e");
+        try {
+            if(file_put_contents($filepath, json_encode($db_backup, JSON_THROW_ON_ERROR, 1024)) === false) return say(" writing $filepath failed!", "e");
+        } catch (Exception $e) {
+            if($talk) {
+                printf(fmt("ERROR!\n"), 'e');
+                printf(fmt($e->getMessage()."\n",'e'));
+                exit;
+            }
+        }
         if(!file_exists($filepath)) return say(" an unknown error occurred. $filepath does not exist.");
-        if($talk) say(" done", "i");
-        if($talk) say("$filepath ". filesize($filepath) / 1024 . "Kb", 'i');
+        if($talk) {
+            say(" done", "i");
+            print(fmt("$filepath ", 'i'));
+            say(number_format(filesize($filepath) / 1024, 2,"",".") . "Kb");
+        }
         return;
+    }
+
+    function preserveMap(GenericMap $map) {
+        // Let's get the actual values from the database
+        $__dataset = $map->jsonSerialize();
+        foreach($map->readSchema() as $key => $value) {
+            // And then lets overwrite them with the <Type>Result value
+            $val = $map->{$key};
+            if($value['type'] instanceof MapResult) {
+                if($val->value === null) continue;
+                $__dataset[$key] = $this->preserveMap($val->value);
+                continue;
+            }
+            $__dataset[$key] = $val;
+        }
+
+        if($map instanceof DefaultUploadSchema) {
+            foreach($__dataset as $key => $val) {
+                $__dataset[$key] = iterator_to_array_recursive($val);
+                unset($__dataset[$key]['meta']["$key.meta"]);
+            }
+        }
+
+        return iterator_to_array_recursive($__dataset);
     }
 
     function get_backup_file_name() {

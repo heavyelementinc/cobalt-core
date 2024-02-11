@@ -67,12 +67,12 @@ class ContactForm extends Controller {
     function contact_submit() {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
         $persistance = new $className();
-        $mutant = $persistance->validate($_POST);
-        $mutant['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-        $mutant["token"] = $_SERVER["HTTP_X_CSRF_MITIGATION"];
-        $mutant["date"]  = new \MongoDB\BSON\UTCDateTime();
+        $mutant = $persistance->__validate($_POST);
+        $mutant->ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        $mutant->token = $_SERVER["HTTP_X_CSRF_MITIGATION"];
+        $mutant->date  = new \MongoDB\BSON\UTCDateTime();
 
-        $persistance->ingest($mutant);
+        // $persistance->ingest($mutant);
         switch(app("Contact_form_interface")) {
             case "SMTP":
                 $result = $this->contactSMTP($persistance);

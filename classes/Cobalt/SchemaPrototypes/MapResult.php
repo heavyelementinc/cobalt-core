@@ -90,10 +90,11 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
     }
 
     public function valid(): bool {
+        if(!$this->value) return false;
         return $this->value->valid();
     }
 
     public function rewind(): void {
-        $this->value->rewind();
+        if($this->value) $this->value->rewind();
     }
 }

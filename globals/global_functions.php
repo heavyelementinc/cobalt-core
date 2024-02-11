@@ -105,6 +105,16 @@ function doc_to_array($it): array {
     return $result;
 }
 
+function iterator_to_array_recursive($it):array {
+    $mutant = [];
+    foreach($it as $key => $value) {
+        if($value instanceof \Traversable) $value = iterator_to_array($value);
+        if(is_array($value)) $mutant[$key] = iterator_to_array_recursive($value);
+        else $mutant[$key] = $value;
+    }
+    return $mutant;
+}
+
 /**
  * Merges the elements of one or more arguments
  * @param array|Iterator $args,... Arguments

@@ -53,6 +53,7 @@ class DateResult extends SchemaResult {
     #[Prototype]
     protected function format(string $format = "input"):string {
         $value = $this->getValue();
+        if($value === null) return "";
         $shorthands = [
             'input' => "Y-m-d",
             'default' => 'm/d/Y',
