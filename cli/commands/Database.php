@@ -2,6 +2,10 @@
 
 use Drivers\DatabaseManagement;
 
+/**
+ * The `database` command offers a CLI interface for importing and exporting the database.
+ * @package cli_command
+ */
 class Database {
     public $help_documentation = [
         'export' => [

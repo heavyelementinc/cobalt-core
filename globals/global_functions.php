@@ -1542,39 +1542,51 @@ function relative_time($time = false, $now = null, $limit = 86400, $format = "M 
     return $relative;
 }
 
-function pretty_rounding($number):string{
+const FACTOR_MAP = [
+    [
+        'factor' => 1000,
+        'name' => 'thousand',
+        'precision' => 1,
+        'suffix' => 'k'
+    ], [
+        'factor' => 1000000,
+        'precision' => 1,
+        'name' => 'million',
+        'suffix' => 'm'
+    ], [
+        'factor' => 1000000000,
+        'precision' => 1,
+        'name' => 'billion',
+        'suffix' => 'b',
+    ], [
+        'factor' => 1000000000000,
+        'precision' => 1,
+        'name' => 'trillion',
+        'suffix' => 't',
+    ]
+];
+
+function pretty_rounding($number, $type = 'suffix', $join = ""):string{
     if($number === 0) return "zero";
     if(is_null($number)) return "zero";
     
-    $map = [
-        [
-            'factor' => 1000,
-            'precision' => 1,
-            'suffix' => 'k'
-        ], [
-            'factor' => 1000000,
-            'precision' => 1,
-            'suffix' => 'm'
-        ], [
-            'factor' => 1000000000,
-            'precision' => 1,
-            'suffix' => 'b',
-        ], [
-            'factor' => 1000000000000,
-            'precision' => 1,
-            'suffix' => 't',
-        ]
-    ];
+    $map = FACTOR_MAP;
     
     if($number < $map[0]['factor']) return $number;
 
     foreach($map as $data) {
         if($number < $data['factor']) continue;
-        $result = round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP) . $data['suffix'];
+        if(!key_exists($type, $data)) $type = "suffix";
+        $result = round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP) . $join . $data[$type];
     }
 
     return $result;
 }
+
+function pretty_numeral($number):string {
+    return pretty_rounding($number, 'name', " ");
+}
+
 
 function benchmark_start($name) {
     if(!__APP_SETTINGS__['debug']) return;

@@ -22,7 +22,7 @@ class UploadImageResult extends UploadResult implements Persistable{
         $misc = array_merge(
             [
                 'class' => "",
-                'alt' => $this->name,
+                'alt' => $this->getDirective('alt') ?? $this->name,
                 'lightbox' => false,
                 'data' => [],
             ],

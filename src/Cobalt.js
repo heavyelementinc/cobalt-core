@@ -11,6 +11,7 @@ class Cobalt {
                 this.resolvers.router = resolve;
             })
         }
+        this.screenReaderAnnounceArea = document.querySelector("#sr-announce");
     }
 
     get router() {
@@ -21,5 +22,5 @@ class Cobalt {
         this.state.router = rt;
     }
 
-    
+
 }

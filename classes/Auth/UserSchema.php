@@ -140,7 +140,7 @@ class UserSchema extends \Validation\Normalize {
      * 
      * @param $name - The name of the token to be generated
      * @param $expires - If INT, it's treated as seconds to wait before expiration. If DateTime, it's the expiration DateTime
-     * @return $token
+     * @return Token
      */
     public function generate_token($name, null|int|DateTime $expires = null) {
         if(!$this->_id) throw new \Exception("Tokens may only be generated for populated schemas.");

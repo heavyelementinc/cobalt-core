@@ -139,6 +139,7 @@ class ClientRouter extends EventTarget{
                 scrollX: window.scrollX
             }, '', window.location.toString()
         );
+        
     }
 
     get location() {
@@ -242,6 +243,7 @@ class ClientRouter extends EventTarget{
         );
 
         this.setPushStateMode();
+        
     }
 
     updateScroll() {
@@ -328,20 +330,24 @@ class ClientRouter extends EventTarget{
 
     updateContent(pageData, query = this.updateTarget) {
         document.title = pageData.title || app("app_name");
-
         let main;
         if(typeof query === "string") main = document.querySelector(query);
         else main = query;
         main.id = pageData.main_id || "main";
         main[this.updateProperty] = pageData.body || "";
 
-        const skipToContent = document.querySelector("#sr-skip-to-content");
-        skipToContent.href = `#${pageData.main_id}` || "#main";
-
         this.applyLinkListeners();
         this.applyFormListeners();
 
         this.navigationFinalize(this.route, pageData);
+        this.updateSrSkipToContent(`${document.title}. Skip to content`);
+    }
+
+    updateSrSkipToContent(mainTarget = null, setFocus = true) {
+        if(mainTarget === null) mainTarget = document.querySelector("main");
+        const skipToContent = document.querySelector("#sr-skip-to-content");
+        skipToContent.href = `#${mainTarget.id}`;
+        if(setFocus) skipToContent.focus({});
     }
 
     initListeners() {
