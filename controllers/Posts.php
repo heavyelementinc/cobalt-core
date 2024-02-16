@@ -22,13 +22,14 @@ class Posts extends PostController {
         $schemaName = $this->postMan->get_schema_name();
         $schema = new $schemaName(array_merge($query,['url_slug' => $post->{'url_slug'}]));
         $valid = $schema->validate(['attachments' => $_FILES]);
-        
+        // update("#gallery", ['style' => ['background-image' ]])
         return ['#gallery' => $schema->{'attachments.display'}];
     }
 
     function downloadFile($slug, $filename) {
         $this->download($filename);
     }
+
 
     function defaultImage($id) {
         $_id = new ObjectId($id);
@@ -44,6 +45,24 @@ class Posts extends PostController {
             ]
         ]);
 
+        $doc = $this->postMan->findOneAsSchema(['_id' => $result->for]);
+
+        update("#default_image", ['style' => ['background-image' => "url('$doc->default_image')"]]);
+
         return $result;
+    }
+
+    function RSS_feed() {
+        if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
+        $query = $this->getParams($this->postMan, ['published' => true], [], ['sort', 'page'], ['sort' => ['publicationDate' => -1], 'limit' => 10]);
+        $docs = $this->postMan->findAllAsSchema(...$query);
+
+        header('Content-Type: application/rss+xml; charset=utf-8');
+
+        $items = $this->docsToViews($docs, "/RSS/item.xml");
+        echo view("/RSS/feed.xml", [
+            'posts' => $items
+        ]);
+        exit;
     }
 }

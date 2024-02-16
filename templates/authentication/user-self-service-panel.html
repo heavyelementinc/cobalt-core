@@ -1,36 +1,80 @@
-<header-group>
+<hgroup>
     <h1><span id="fname">{{doc.fname}}</span> <span id="lname">{{doc.lname}}</span></h1>
     <action-menu title="Edit User">
-        <option method="DELETE" action="/api/v1/user/me/avatar">Reset Avatar to Default</option>
+        <option method="DELETE" action="/api/v1/user/me/avatar/">Reset Avatar to Default</option>
+        <option method="DELETE" action="/api/v1/user/me/">Delete My Account</option>
     </action-menu>
-</header-group>
-<form-request method="POST" action="/api/v1/user/me/" autosave="autosave">
+</hgroup>
 
-    <fieldset>
-        <legend>Your Profile</legend>
-        <ul class="list-panel">
-            <li>
-                <label>Avatar</label>
-                {{!doc.avatar.display}}
-                <input type="file" accept="image/svg+xml,image/*" name="avatar">
-            </li>
-            <li>
-                <label>Name</label>
-                <input type="text" name="fname" for="#fname" value="{{doc.fname}}" placeholder="First Name">
-                <input type="text" name="lname" for="#lname" value="{{doc.lname}}" placeholder="Last Name">
-            </li>
-            <li>
-                <label>Username</label>
-                <input type="text" name="uname" value="{{doc.uname}}" placeholder="Username">
-            </li>
-            <li>
-                <label>Email Address</label>
-                <input type="email" name="email" value="{{doc.email}}" placeholder="Email address">
-            </li>
-        </ul>
-    </fieldset>
+<tab-nav>
+    <nav>
+        <a href="#basic"><i name="card-account-details-outline"></i> Basic Info</a>
+        <a href="#password"><i name="shield-lock-open"></i> Password</a>
+        <a href="#preferences"><i name="tune"></i> Preferences</a>
+    </nav>
+    <form-request id="basic" method="POST" action="/api/v1/user/me/" autosave="autosave">
+        <hgroup><h2><i name="card-account-details-outline"></i> Your {{app.app_name}} Profile</h2></hgroup>
+        <div class="hbox" style="align-items:start">
+            <fieldset>
+                <legend>Avatar</legend>
+                <ul class="list-panel">
+                    <li>
+                        <label>Avatar</label>
+                        {{!doc.avatar.display}}
+                        <input type="file" accept="image/svg+xml,image/*" name="avatar">
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset>
+                <legend>Details</legend>
+                <ul class="list-panel">
+                    <li>
+                        <label>Name</label>
 
-</form-request>
+                        <div class="hbox" style="flex-wrap:nowrap; flex-grow: 1; gap: 1em;">
+                            <input type="text" name="fname" for="#fname" value="{{doc.fname}}" placeholder="First Name">
+                            <input type="text" name="lname" for="#lname" value="{{doc.lname}}" placeholder="Last Name">
+                        </div>
+                    </li>
+                    <li>
+                        <label>Username</label>
+                        <input type="text" name="uname" value="{{doc.uname}}" placeholder="Username">
+                    </li>
+                    <li>
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="{{doc.email}}" placeholder="Email address">
+                    </li>
+                </ul>
+            </fieldset>
+        </div>
+    </form-request>
+    <form-request id="password" method="POST" action="/api/v1/user/me/">
+        <hgroup><h2><i name="shield-lock-open"></i> Account Security</h2></hgroup>
+        {{!2fa}}
+        <fieldset>
+            <legend>Password Update</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Password</label>
+                    <input-password type="password" name="password"></input-password>
+                </li>
+            </ul>
+        </fieldset>
+    </form-request>
+    <form-request id="preferences" method="PUT" action="/api/v1/user/me/push" autosave="autosave">
+        <hgroup><h2><i name="tune"></i> Preferences</h2></hgroup>
+        <fieldset>
+            <legend>Notifications</legend>
+            <ul class="list-panel">
+                <li>
+                    <label>Enroll in Push Notifications</label>
+                    <push-enrollment-button><loading-spinner></loading-spinner> Loading...</push-enrollment-button>
+                </li>
+                {{!notifications}}
+            </ul>
+        </fieldset>
+    </form-request>
+</tab-nav>
 
 <style>
     form-request img.cobalt-user--avatar {

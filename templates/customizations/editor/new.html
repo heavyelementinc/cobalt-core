@@ -1,0 +1,36 @@
+<hgroup>
+    <h1>{{title}}</h1>
+    <action-menu>
+        <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
+    </action-menu>
+</hgroup>
+<form-request method="POST" action="/api/v1/customizations/update/{{doc._id}}" {{!doc.newDocAutosave}}>
+    <fieldset>
+        <ul class="list-panel">
+            <li>
+                <label>Type</label>
+                <select type='text' name="type" value="{{doc.type}}" {{doc.type.immutable}}>{{!doc.type.options}}</select>
+            </li>
+            <li>
+                <label>Group</label>
+                <input-autocomplete name="group" value="{{doc.group}}" allow-custom="true">{{!group_options}}</input-autocomplete>
+            </li>
+            <li>
+                <label>Name</label>
+                <input type='text' name="name" value="{{doc.name}}" {{doc.name.immutable}}>
+            </li>
+            <li>
+                <label>Unique Name</label>
+                <input type='text' name="unique_name" value="{{doc.unique_name}}" {{doc.unique_name.immutable}}>
+            </li>
+            <li>
+                <label>Description</label>
+                <textarea type='text' name="description">{{doc.description}}</textarea>
+            </li>
+        </ul>
+    </fieldset>
+    <!-- <input type='text' name="meta" value="{{doc.meta}}" {{doc.meta.immutable}}> -->
+    {{!doc.newDocSubmit}}
+</form-request>
+
+<footnote>Creating a new custom element will have NO EFFECT unless you insert the custom element's slug into the HTML template.</footnote>

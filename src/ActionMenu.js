@@ -8,7 +8,7 @@ class ActionMenu {
         event.preventDefault();
         this.event = event;
         this.title = title;
-        this.mode = mode || (window.matchMedia("only screen and (max-width: 900px)").matches) ? "modal" : "element";
+        this.mode = mode || (window.matchMedia("only screen and (max-width: 35em)").matches) ? "modal" : "element";
         this.withIcons = withIcons;
         this.toggle = false;
         this.attachTo = attachTo;
@@ -24,7 +24,8 @@ class ActionMenu {
             request: {
                 // Specify an endpoint and an action
                 // method: "POST",
-                // action: "/api/v1/some/endpoint"
+                // action: "/api/v1/some/endpoint",
+                // data: {}
             },
             callback: async (element, event, asyncRequest) => {
                 return true; // Return true to dismiss menu
@@ -48,6 +49,12 @@ class ActionMenu {
         const label = document.createElement("span");
         label.innerText = action.label;
         button.appendChild(label);
+
+        for(const i in action) {
+            if(i[0] === "o" && i[1] === "n") {
+                button[i] = action[i];
+            }
+        }
 
         if (action.dangerous) button.classList.add("action-menu-item--dangerous");
         if (action.disabled) button.disabled = action.disabled;
@@ -99,7 +106,9 @@ class ActionMenu {
     async handleAction(action, event) {
         let spinner = event.target.closest("button").querySelector("loading-spinner");
         if (spinner == null) spinner = document.createElement("loading-spinner");
-
+        
+        if("original" in action) action.original.dispatchEvent(new Event("loadstart", {detail: {action, event}}))
+        
         action.loading = {
             start: () => {
                 event.target.closest("button").appendChild(spinner);
@@ -116,20 +125,30 @@ class ActionMenu {
         action.loading.start()
         let result = null;
         let requestData = null;
-        const api = new ApiFetch(action.request.action, action.request.method,{});
+        const api = new AsyncFetch(action.request.action, action.request.method,{});
         if("method" in action.request && "action" in action.request) {
             try {
                 const toSubmit = this.toSubmit(action, event);
-                requestData = await api.send(toSubmit);
+                requestData = await api.submit(toSubmit);
+                // event.target.dispatchEvent(new Event("load", {detail: {requestData}}));
+                if("original" in action) action.original.dispatchEvent(new Event("load", {detail: {action, event, result: requestData}}))
             } catch (error) {
                 console.log(api);
                 action.loading.error(error);
-                if(api.result.code === 300) {
+                if(api.client.status === 300) {
                     this.closeMenu();
-                    return true;
+                    const promise = new Promise((resolve, reject) => {
+                        api.addEventListener("done", e => {
+                            resolve(e.detail);
+                        });
+                    });
+                    await promise;
+                    if(!promise) return;
+                    requestData = api.resolved.fulfillment;
+                } else {
+                    if("original" in action) action.original.dispatchEvent(new Event("error", {detail: {action, event, result: api.result}}))
+                    return;
                 }
-                new StatusError({message: api.result.message, icon: "ion-warning"});
-                return;
             }
         }
         try {
@@ -147,16 +166,22 @@ class ActionMenu {
     }
 
     toSubmit(action, event) {
-        let data = event.target.getAttribute("value") || event.target.closest("button").getAttribute("value");
-        if(data) data = JSON.parse(data);
+        let data = event.target.getAttribute("value") || action.request.value || event.target.closest("button").getAttribute("value");
+        try {
+            if(data) data = JSON.parse(data);
+        } catch (error) {
+            // Do nothing.
+        }
         return action.value || data || {};
     }
 
     /** Close this menu */
     closeMenu() {
         document.body.classList.remove("scroll-locked");
-        if ("parentNode" in this.wrapper && this.wrapper.parentNode)
-            this.wrapper.parentNode.removeChild(this.wrapper);
+        this.wrapper.style.display = "none";
+        setTimeout(() => {
+            if ("parentNode" in this.wrapper && this.wrapper.parentNode) this.wrapper.parentNode.removeChild(this.wrapper);
+        }, 1000);
         this.clearEvent();
         this.closeCallback();
     }
@@ -232,7 +257,7 @@ class ActionMenu {
         if(target.parentNode.tagName === "BUTTON") target = target.parentNode
         if(this.attachTo) target = this.attachTo;
         else {
-            target = this.event.target.closest("button, input[type='button'], input[type='submit'], async-button, split-button");
+            target = this.event.target.closest("button, input[type='button'], input[type='submit'], async-button, split-button") ?? target;
         }
 
         switch(type) {

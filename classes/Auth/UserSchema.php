@@ -22,6 +22,7 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\UTCDateTime;
 use PhpToken;
+use SessionHandler;
 
 class UserSchema extends \Validation\Normalize {
     use ClientFSManager;
@@ -89,6 +90,12 @@ class UserSchema extends \Validation\Normalize {
                 'attributes' => [],
                 'label' => 'Require password reset on next login'
             ],
+            'flags.locked' => [
+                'set' => function ($val) {
+                    $val = $this->boolean_helper($val);
+                    return $val;
+                }
+            ],
             'token' => [
                 'get' => fn($val) => $val,
                 'set' => null,
@@ -133,7 +140,7 @@ class UserSchema extends \Validation\Normalize {
      * 
      * @param $name - The name of the token to be generated
      * @param $expires - If INT, it's treated as seconds to wait before expiration. If DateTime, it's the expiration DateTime
-     * @return $token
+     * @return Token
      */
     public function generate_token($name, null|int|DateTime $expires = null) {
         if(!$this->_id) throw new \Exception("Tokens may only be generated for populated schemas.");
@@ -337,7 +344,7 @@ class UserSchema extends \Validation\Normalize {
 
     function displayAvatar($val) {
         $link = $this->avatar;
-        $meta = $val['thumb']['meta'];
+        $meta = $val['thumb']['meta'] ?? ['width' => 0, 'height' => 0];
         $img = "<img src='$link' class='cobalt-user--avatar' width='$meta[width]' height='$meta[height]'>";
         return $img;
     }

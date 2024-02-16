@@ -1,5 +1,5 @@
 {
-    navigation_callback: () => {
+    onload: () => {
         window.router_entities.userpanel = new UserPanel();
     }
 }

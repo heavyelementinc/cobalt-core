@@ -1,5 +1,20 @@
+window.Cobalt = {
+    announce: (announcement) => {
+        const div = document.createElement("div");
+        div.innerText = announcement;
+        const screenReaderAnnounceArea = document.querySelector("#sr-announce");
+        screenReaderAnnounceArea.appendChild(div);
+        setTimeout(() => {
+            div.parentNode.removeChild(div);
+        }, 1000);
+    }
+};
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], input-text[name], input-switch[name], input-array[name], input-object-array[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], markdown-area[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
+
+function isRegisteredWebComponent(tag) {
+    return !!customElements.get(tag.toLowerCase());
+}
 
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
@@ -74,6 +89,8 @@ async function logOutConfirm() {
     if (result.result) window.location.reload();
 }
 
+
+
 async function confirmModal(message, yes = "Okay", no = "Cancel") {
     const modal = new Modal({
         event: event
@@ -111,7 +128,7 @@ async function removeLoadingSpinner(spinner) {
  */
 async function lightbox(origin, animate = true) {
     let imageUrl = null;
-    if (typeof origin === "object") imageUrl = origin.getAttribute("full-resolution") ?? origin.src ?? null;
+    if (typeof origin === "object") imageUrl = origin?.getAttribute("full-resolution") ?? origin.src ?? null;
     else imageUrl = origin;
 
     let lightbox_content = `<img src='${imageUrl}'>`;
@@ -128,6 +145,12 @@ async function lightbox(origin, animate = true) {
     modal.draw();
 
     return modal;
+}
+
+function shadowbox(element, group = false) {
+    const box = new Shadowbox(group, element);
+    box.initUI();
+    return box;
 }
 
 /**
@@ -169,12 +192,12 @@ async function modalConfirm(message, okay = "Okay", cancel = "Cancel", dangerous
     });
 }
 
-async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "", event = null }) {
+async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern = "", value = "", type = "text", event = null }) {
     if (pattern) pattern = ` pattern="${pattern}" required`;
     if (value) value = ` value="${value.replace("\"", "&quot;")}"`;
     return new Promise((resolve, reject) => {
         const modal = new Modal({
-            body: `<p>${message}</p><input type="text" name="modalInputField"${pattern}${value}>`,
+            body: `<p>${message}</p><input type="${type}" name="modalInputField"${pattern}${value}>`,
             classes: "modal-window--input",
             event: event,
             chrome: {
@@ -255,6 +278,60 @@ function modalView(url, close = "Close") {
             }
         })
         modal.draw();
+    });
+}
+
+async function dialogViewReplace(url) {
+    const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
+    dialog.draw();
+    const previous = Cobalt.router.location.currentRoute;
+    dialog.addEventListener("modalclose", evt => {
+        Cobalt.router.replaceState(previous);
+    });
+    const result = await Cobalt.router.replaceState(url, {target: dialog, updateProperty: "body"});
+    return result;
+}
+
+async function dialogView(url) {
+    const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
+    dialog.draw();
+    const result = await Cobalt.router.popState(url, {target: dialog, updateProperty: "body"});
+    return result;
+}
+
+/**
+ * @param string string to test
+ * @param pattern  pattern to test
+ * @returns bool
+ */
+function matches(string, pattern) {
+    let regex = pattern;
+    if(typeof regex === "string") regex = new RegExp(pattern);
+    const match = string.match(regex);
+    if (match === null) return false;
+    if (match.length <= 0) return false;
+    return true;
+}
+
+// async function dialogView(url, close = "Close") {
+//     const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
+//     dialog.draw();
+//     const previous = Cobalt.router.location.currentRoute;
+//     dialog.addEventListener("modalclose", evt => {
+//         Cobalt.router.replaceState(previous);
+//     });
+//     const result = await Cobalt.router.replaceState(url, {target: dialog, updateProperty: "body"});
+//     return result;
+// }
+
+function dialogConfirm(message, confirmLabel = "Okay", cancelLabel = "Cancel") {
+    return new Promise(resolve => {
+        const dialog = new Dialog({close_btn: false});
+        dialog.addCloseButton(cancelLabel);
+        dialog.addConfirmButton(confirmLabel);
+        dialog.addEventListener("modalconfirm", e => resolve(true));
+        dialog.addEventListener("modalcancel", e => resolve(false));
+        dialog.draw(message)
     });
 }
 
@@ -383,6 +460,25 @@ async function wait_for_animation(element, animationClass, removeClass = true, m
     if (!element) return;
     return new Promise((resolve, reject) => {
         element.addEventListener("animationend", e => {
+            resolve();
+            callback(element);
+            if (removeClass) element.classList.remove(animationClass);
+            clearTimeout(timeout);
+        }, { once: true });
+        if (typeof animationClass === "string") animationClass = [animationClass];
+        element.classList.add(...animationClass);
+        if (element.style.animationPlayState !== "running") element.style.animationPlayState = "running";
+        let timeout = setTimeout(() => {
+            resolve();
+            if (removeClass) element.classList.remove(animationClass);
+        }, maxDuration);
+    });
+}
+
+async function wait_for_transition(element, animationClass, removeClass = true, maxDuration = 2000, callback = (element) => { }) {
+    if (!element) return;
+    return new Promise((resolve, reject) => {
+        element.addEventListener("transitionend", e => {
             resolve();
             callback(element);
             if (removeClass) element.classList.remove(animationClass);
@@ -671,6 +767,7 @@ function reflow() {
 }
 
 function iOS() {
+    if("platform" in navigator === false) return (navigator.userAgent.includes("Mac") && "ontouchend" in document);
     return [
       'iPad Simulator',
       'iPhone Simulator',
@@ -678,7 +775,7 @@ function iOS() {
       'iPad',
       'iPhone',
       'iPod'
-    ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    ].includes(navigator.platform);
 }
 
 function imagePromise(url) {
@@ -746,3 +843,75 @@ function getBlobWithLoadingBar(url, throbber, progressBar) {
         client.send();
     })
 }
+
+function copyToClipboard(valueToCopy) {
+    const element = document.createElement("input");
+    document.body.appendChild(element);
+    element.value = valueToCopy;
+    element.select();
+    element.setSelectionRange(0, valueToCopy.length + 1);
+
+    navigator.clipboard.writeText(element.value);
+    
+    document.body.removeChild(element);
+
+    const message = new StatusMessage({
+        message: "Copied text to clipboard",
+        duration: 4000
+    })
+
+    // setTimeout(() => message.close(), 4000);
+}
+
+function removeNearest(element, ancestorSelector) {
+    let ancestor = element.closest(ancestorSelector);
+    ancestor.parentNode.removeChild(ancestor);
+}
+
+function promiseTimeout(callback, value) {
+    return Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(callback());
+        }, value);
+    })
+}
+
+function getTabId() {
+    if (window.sessionStorage.tabId) {
+        return window.sessionStorage.tabId;
+    }
+    const tabId = Math.floor(Math.random() * 1000000) + Math.floor(Math.random() * 1000000);
+    window.sessionStorage.tabId = tabId;
+    return tabId;
+}
+
+getTabId();
+
+class Rt {
+    get location() {
+        this.warn();
+        return Cobalt.router.location.URL.pathname;
+    }
+
+    set location(loc) {
+        this.warn();
+        Cobalt.router.location = loc;
+    }
+
+    warn() {
+        console.warn("Your app is using a deprecated Cobalt API! Please change any reference to `router.location` to utilize `Cobalt.router.location`");
+    }
+}
+
+window.router = new Rt();
+
+function upload_field_update(element) {
+    const name = element.name;
+    const container = element.closest(`.upload-field`);
+    const previewTarget = container.querySelector("img");
+    // previewTarget.src = 
+}
+
+function dateFromObjectId(objectId) {
+	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+};

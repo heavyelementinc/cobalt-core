@@ -22,7 +22,6 @@ class AutoComplete extends HTMLElement {
         /** Set up the default state */
         this.readonly = false;
         this.value = "";
-        this.allowCustomInputs = false;
 
         /** Other optional states */
         this.url = false;
@@ -40,6 +39,7 @@ class AutoComplete extends HTMLElement {
         this.placeholder = "Start typing...";
         this.customElementClass = "input-array--list-custom";
         this.arrowKeySelectionIndex = -1;
+        this.setAttribute("__custom-input", "true");
     }
 
     get value() {
@@ -126,7 +126,7 @@ class AutoComplete extends HTMLElement {
 
     /*** Handle attribute changes ***/
     static get observedAttributes() {
-        return ['value', 'allow-custom', 'url', 'min', 'readonly', 'placeholder', 'clear-button'];
+        return ['value', 'url', 'min', 'readonly', 'placeholder', 'clear-button'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -136,8 +136,12 @@ class AutoComplete extends HTMLElement {
         }
     }
 
-    change_handler_allow_custom(newValue) {
-        this.allowCustomInputs = string_to_bool(newValue);
+    get allowCustomInputs() {
+        return string_to_bool(this.getAttribute("allow-custom"));
+    }
+
+    set allowCustomInputs(value) {
+        this.setAttribute("allow-custom", JSON.stringify(value ? true : false));
     }
 
     change_handler_clear_button(newValue) {
@@ -281,10 +285,27 @@ class AutoComplete extends HTMLElement {
         this.clearButton.style.display = "none";
     }
 
-    handleSearchKeyUp(e) {
+    async handleSearchKeyUp(e) {
         e.preventDefault();
         let toSearch = e.target.value;
         let tempOpts = { ...this.options };
+
+        if(this.url) {
+            const api = new ApiFetch(this.url, this.getAttribute("method") || "GET", {});
+            const opts = await api.send({search: toSearch});
+            tempOpts = {};
+            for(const el in opts) {
+                if(typeof opts === "object" && "search" in opts && "label" in opts) {
+                    tempOpts[el] = opts[el];
+                } else {
+                    tempOpts[el] = {
+                        search: opts[el],
+                        label: opts[el]
+                    };
+                }
+            }
+        }
+
         if (this.allowCustomInputs === true && toSearch !== "") tempOpts[toSearch] = {
             "search": toSearch,
             "label": toSearch,

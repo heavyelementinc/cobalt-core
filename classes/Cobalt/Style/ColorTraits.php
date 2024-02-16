@@ -22,6 +22,18 @@ trait ColorTraits {
         return strtoupper($val);
     }
 
+    final protected function rgb_array_to_hex($arr) {
+        $R = dechex($arr[0]);
+        if(strlen($R)<2) $R = "0$R";
+
+        $G = dechex($arr[1]);
+        if(strlen($G)<2) $G = "0$G";
+
+        $B = dechex($arr[2]);
+        if(strlen($B)<2) $B = "0$B";
+        return "#" . $R . $G . $B;
+    }
+
     /**
      * Returns the input $value if, and only if, the comparison of the two hex
      * value's luminosity meets the $threshold. Default is 5.

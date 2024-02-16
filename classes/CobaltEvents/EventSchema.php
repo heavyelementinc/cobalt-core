@@ -107,19 +107,19 @@ class EventSchema extends \Validation\Normalize {
                 }
             ],
             "bgColor" => [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-background"),
+                'get' => fn ($val) => ($val) ? $val : __APP_SETTINGS__["vars-web.events-banner-background"],
                 'set' => 'hex_color',
-                'display' => fn ($val) => $this->hex_color($val, app("vars-web.events-banner-background")),
+                'display' => fn ($val) => $this->hex_color($val, __APP_SETTINGS__["vars-web.events-banner-background"]),
             ],
             "txtColor" =>  [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-banner-text"),
+                'get' => fn ($val) => ($val) ? $val : __APP_SETTINGS__["vars-web.events-banner-text"],
                 'set' => function ($val) {
                     return $this->contrast_color($val, $this->__dataset['bgColor']);
                 },
-                'display' => fn ($val) => $this->hex_color($val ?? app("vars-web.events-banner-text"), app("vars-web.events-banner-text")),
+                'display' => fn ($val) => $this->hex_color($val ?? __APP_SETTINGS__["vars-web.events-banner-text"], __APP_SETTINGS__["vars-web.events-banner-text"]),
             ],
             "txtJustification" => [
-                'get' => fn ($val) => $val ?? app("CobaltEvents_default_h1_alignment"),
+                'get' => fn ($val) => $val ?? __APP_SETTINGS__["CobaltEvents_default_h1_alignment"],
                 'valid' => [
                     "space-between" => "<i name='format-align-left'></i>",
                     "center" => "<i name='format-align-center'></i>",
@@ -127,13 +127,14 @@ class EventSchema extends \Validation\Normalize {
                 ]
             ],
             'btnColor' =>  [
-                'get' => fn ($val) => ($val) ? $val : app("vars-web.events-button-color"),
+                'get' => function ($val) {
+                    return $this->get_color($val, "vars-web.events-button-color", "#000000");
+                },
                 'set' => function ($val) {
                     return $val;
                 },
                 'display' => function ($val) {
-                    return $this->hex_color($val ?? app("vars-web.events-button-color"),app("vars-web.events-button-color"));
-                    // ($val) ? $this->hex_color($val ?? app("vars-web.events-button-color"), app("vars-web.events-button-color")) : ""
+                    return $this->hex_color($this->get_color($val, "vars-web.events-button-color", "#000000"),$this->get_color($val, "vars-web.events-button-color", "#000000"));
                 },
             ],
             'btnTextColor' => [
@@ -142,7 +143,7 @@ class EventSchema extends \Validation\Normalize {
                     $color = $this->get_best_contrast($this->btnColor);
                     return $color;
                 },
-                'display' => fn ($val) => ($val) ? $this->hex_color($val ?? app("vars-web.events-button-text"), app("vars-web.events-button-text")) : "",
+                'display' => fn ($val) => ($val) ? $this->hex_color($this->get_color($val, "vars-web.events-button-text","#000000"), $this->get_color($val, "vars-web.events-button-text", "#000000")) : "",
             ],
             'valid_paths' => [
                 'get' => fn ($val) => $val ?? ["/"],
@@ -164,7 +165,8 @@ class EventSchema extends \Validation\Normalize {
             ],
             'start_time' => [
                 'get' => 'get_time',
-                'set' => fn ($val) => $this->set_time($val, 'start')
+                'set' => fn ($val) => $this->set_time($val, 'start'),
+                'display' => fn () => relative_time($this->__dataset['start_time'])
             ],
             'end_date' => [
                 'get' => fn () => $this->get_date($this->__dataset['end_time'],'input'),
@@ -172,7 +174,21 @@ class EventSchema extends \Validation\Normalize {
             ],
             'end_time' => [
                 'get' => 'get_time',
-                'set' => fn ($val) => $this->set_time($val, 'end')
+                'set' => fn ($val) => $this->set_time($val, 'end'),
+                'display' => fn () => relative_time($this->__dataset['end_time'])
+            ],
+            'happening_now' => [
+                'get' => function () {
+                    $now = new \DateTime();
+                    $start = $this->__dataset['start_time']->toDateTime();
+                    $greater_than_start = ($now > $start);
+
+                    $end = $this->__dataset['end_time']->toDateTime();
+                    $less_than_end = ($now < $end);
+                    return $greater_than_start && $less_than_end;
+                },
+                'set' => false,
+                'display' => fn () => ($this->happening_now) ? "<span class='events--happening-now events--active-event'></span>" : "<span class='events--happening-now'></span>"
             ],
             'advanced.included_paths' => [
                 'set' => 'relative_pathnames',
@@ -194,6 +210,14 @@ class EventSchema extends \Validation\Normalize {
             "changes_override" => [
                 'get' => fn ($val) => $val,
                 'set' => fn ($val) => $this->boolean_helper($val)
+            ],
+            "advanced.public_index" => [
+                'get' => fn ($val) => $val,
+                'valid' => [
+                    'false'  => 'Unlisted (default)',
+                    'true'   => 'Displayed, if also marked as "Public"',
+                    'always' => 'Displayed, regardless of "Public" status',
+                ]
             ]
         ];
     }
@@ -249,5 +273,9 @@ class EventSchema extends \Validation\Normalize {
             $options[$v] = $v;
         }
         return $options;
+    }
+
+    function get_color($val, $setting, $fallback = "#000000") {
+        return $val ?? __APP_SETTINGS__[$setting] ?? $fallback;
     }
 }

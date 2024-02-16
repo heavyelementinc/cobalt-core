@@ -1,21 +1,28 @@
-<div>
+<div style="background-color: {{app.vars.web.body-background}}">
     <div style="text-align:center">
-        <img src="{{current_domain}}{{app.login-hero-sidebar}}"></section>
+        <img src="{{current_domain}}{{app.logo.media.filename}}" height="400" width="400" style="object-fit: contain;">
     </div>
     
     <h1 style="text-align:center">Hi {{user.display_name}}</h1>
-    <p>We received a login request for your user account ({{user.uname}}) over on
+    <p>We received a login request for your user account ({{user.uname}}) at
         {{current_host}}.</p>
     
     <p>Please use the link below to sign in!</p>
     
     <div style="text-align:center">
         <a href="{{current_domain}}/webhooks/token/{{token}}?{{query}}"
-            style="text-align:center;
-            padding: 5px;
-            background-color: black;
-            color: white;
+            style="display: inline-block;
+            text-align: center;
+            padding: 8px 5px;
+            font-size: 14pt;
+            background-color: {{app.vars.web.color-button-init}};
+            color: {{app.vars.web.color-button-text}};
             "
         >Login</a>
+    </div>
+
+    <div style="font-size: 10pt;">
+        This message is not a solicitation. It was sent at the request of a
+        at {{current_domain}}.
     </div>
 </div>

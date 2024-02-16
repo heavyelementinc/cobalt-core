@@ -1,0 +1,42 @@
+<hgroup>
+    <h1>{{title}}</h1>
+    <action-menu>
+        <option onclick='copyToClipboard("&#123;&#123;!custom.{{doc.unique_name}}.embed&#125;&#125;")'>Copy slug to clipboard</option>
+        <option onclick='modalForm("/admin/customizations/update/{{doc._id}}",{})'>Update parameters</option>
+        <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
+    </action-menu>
+</hgroup>
+<div>
+    {{!doc.description.md}}
+</div>
+<form-request method="POST" action="/api/v1/customizations/upload/{{doc._id}}" {{!doc.newDocAutosave}}>
+    <fieldset>
+        <ul class="list-panel">
+            <li>
+                <label>Group</label>
+                <input-autocomplete name="group" value="{{doc.group}}" allow-custom="true">{{!group_options}}</input-autocomplete>
+            </li>
+            <li>
+                <div class="hbox" style="flex-wrap: nowrap; width:100%;">
+                    <div style="flex-grow: 1">
+                        <label>File</label>
+                        <input type='file' name="value" accept="audio/*" for="#preview">
+                    </div>
+                    {{!doc.value.embed}}
+                </div>
+            </li>
+            <li>
+                <label>Show controls</label>
+                <input-switch name="meta.controls" checked="{{doc.meta.controls}}"></input-switch>
+            </li>
+            <li>
+                <label>Loop by default</label>
+                <input-switch name="meta.loop" checked="{{doc.meta.loop}}"></input-switch>
+            </li>
+            <li>
+                <label>Mute by default</label>
+                <input-switch name="meta.mute" checked="{{doc.meta.mute}}"></input-switch>
+            </li>
+        </ul>
+    </fieldset>
+</form-request>

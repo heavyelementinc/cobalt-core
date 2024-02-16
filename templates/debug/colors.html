@@ -1,0 +1,86 @@
+<tab-nav >
+    <nav>
+        <a href="#cobalt">Cobalt Generator</a>
+        <a href="#third">3rd Party</a>
+    </nav>
+    <div id="cobalt">
+        <form-request>
+            <fieldset>
+                <div style="
+                    height:200px;
+                    width:200px;
+                    background:#{{accent}}
+                    "></div>
+                <legend>Test Legend</legend>
+                <ul class="list-panel">
+                    <li>
+                        <label>Demonstration <strong>test</strong></label>
+                        <input name="test" value="content">
+                    </li>
+                    <li>
+                        <label><strong>Demonstration</strong> test</label>
+                        <input name="test" value="content" disabled="disabled">
+                    </li>
+                </ul>
+                <button>Button</button><button native>Native</button>
+                <div class="hbox">
+                    {{!swatch}}
+                </div>
+            </fieldset>
+        </form-request>
+    </div>
+    <div id="third">{{!palettegenerator}}</div>
+</tab-nav>
+
+
+<style>
+    :root {
+        {{cobalt}}
+        /* --font-color-normal: #000000;
+        --font-color-bold: #000000; */
+        /* --body-background: rgb(254 247 251); */
+        /* --content-border: rgb(244 214 230); */
+        /* --content-background-even: rgb(249 247 248); */
+        /* --content-background-odd: rgb(252 245 248); */
+        /* --element-border-enabled: rgb(254 212 234); */
+        /* --element-border-disabled: rgb(241 224 233); */
+        /* --element-border-focused: rgb(254 186 221); */
+        /* --element-border-accent-error: rgb(254 196 185); */
+        /* --element-background-enabled: rgb(254 240 247); */
+        /* --element-background-disabled: rgb(252 250 251); */
+        /* --element-background-focused: rgb(254 230 243); */
+        /* --element-background-accent-error: rgb(254 235 230); */
+
+        --project-color-inactive: var(--content-border);
+
+        --project-color-table-border: 1px solid var(--content-border);
+        --project-color-input-disabled: var(--element-background-disabled);
+        --project-color-input-border-nofocus: var(--element-border-enabled);
+        --project-color-input-background: var(--element-background-enabled);
+        --project-color-input-disabled: var(--element-background-disabled);
+    }
+    ul.list-panel {
+        border: 1px solid var(--content-border);
+    }
+
+    ul.list-panel li {
+        background: var(--content-background-even);
+    }
+    ul.list-panel li:nth-of-type(odd) {
+        background: var(--content-background-odd);
+    }
+
+    :is(tab-nav,chip-nav),
+    :is(tab-nav,chip-nav) nav a  {
+        background: var(--container-background);
+    }
+
+    :is(tab-nav):not([type='row']) nav{
+        background: var(--content-background-odd);
+    }
+
+    input:hover{ 
+        border: 1px solid var(--element-border-hover);
+        background: var(--element-background-hover);
+    }
+</style>

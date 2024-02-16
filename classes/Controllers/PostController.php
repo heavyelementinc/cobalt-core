@@ -23,6 +23,7 @@ abstract class PostController extends Controller {
     protected $permission = "Post_manage_posts";
     protected $publishPermission = "Post_publish_posts";
     protected $permissionGroup = "Post";
+    protected $customTitle = "";
 
     public function initialize($collection, $schemaName = null, $permission_suffix = "") {
         if($schemaName === null) $schemaName =  "\\Cobalt\\Posts\\PostSchema";
@@ -36,7 +37,9 @@ abstract class PostController extends Controller {
 
     public function admin_index() {
         if(!$this->postMan) throw new Exception("You must manually initialize the PostController");
-        $result = $this->postMan->findAllAsSchema(...$this->getParams($this->postMan, []));
+        $result = $this->postMan->findAllAsSchema(...$this->params($this->postMan, [], [
+            'defaultOptions' => ['sort' => ['publicationDate' => -1]]
+        ]));
         $posts = "";
         foreach($result as $post) {
             $posts .= view($post->getTemplate("table"),[
@@ -117,17 +120,23 @@ abstract class PostController extends Controller {
 
     public function index() {
         if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
-        $query = $this->getParams($this->postMan, ['published' => true]);
+        $query = $this->params($this->postMan, ['published' => true], [
+            'defaultOptions' => ['sort' => ['publicationDate' => -1]]
+        ]);
         $docs = $this->postMan->findAllAsSchema(...$query);
 
         $og_image = "";
         $og_title = __APP_SETTINGS__ . "";
-        $og_body = __APP_SETTINGS__['app_name'] . " news and updates feature the kinds of";
+        $og_body = "Find " . count($docs) ."+ articles at ". __APP_SETTINGS__['app_name'] . ".";
 
         $posts = "";
+        $first_item = null;
 
         foreach($docs as $index => $doc) {
-            if($index === 0) $doc->prominent = true;
+            if($index === 0) {
+                $doc->prominent = true;
+                $first_item = $doc;
+            }
             if(isset($_SESSION['Posts_display_type'])) $doc->prominent = $_SESSION['Posts_display_type'];
             $posts .= view($doc->getTemplate('blurb'), [
                 'post' => $doc,
@@ -140,6 +149,8 @@ abstract class PostController extends Controller {
             'title' => $this->postMan->get_public_name(),
             'posts' => $posts,
             'controls' => $this->getPaginationLinks(true),
+            'first' => $first_item,
+            'og_template' => '/posts/parts/og_landing.html',
         ]);
 
         set_template((new PostManager())->getTemplate('public'));
@@ -177,7 +188,8 @@ abstract class PostController extends Controller {
             'title' => htmlspecialchars($post->title),
             'unpublished' => $unpublished,
             'post' => $post,
-            'edit' => $edit
+            'edit' => $edit,
+            'og_template' => '/posts/parts/og_individual.html'
         ]);
 
         set_template((new PostManager())->getTemplate('post'));
@@ -226,7 +238,7 @@ abstract class PostController extends Controller {
 
     function RSS_feed() {
         if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
-        $query = $this->getParams($this->postMan, ['published' => true]);
+        $query = $this->getParams($this->postMan, ['published' => true], [], ['sort', 'page'], ['sort' => ['publicationDate' => -1], 'limit' => 10]);
         $docs = $this->postMan->findAllAsSchema(...$query);
 
         header('Content-Type: application/rss+xml; charset=utf-8');

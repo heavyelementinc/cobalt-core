@@ -1,0 +1,27 @@
+<hgroup>
+    <h1>{{title}}</h1>
+    <action-menu>
+        <option onclick='copyToClipboard("&#123;&#123;custom.{{doc.unique_name}}&#125;&#125;")'>Copy slug to clipboard</option>
+        <option onclick='modalForm("/admin/customizations/update/{{doc._id}}",{})'>Update parameters</option>
+        <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
+    </action-menu>
+</hgroup>
+<div>
+    {{!doc.description.md}}
+</div>
+<form-request method="POST" action="/api/v1/customizations/update/{{doc._id}}" {{!doc.newDocAutosave}}>
+    <fieldset>
+        <ul class="list-panel">
+            <li>
+                <label>Group</label>
+                <input-autocomplete name="group" value="{{doc.group}}" allow-custom="true">{{!group_options}}</input-autocomplete>
+            </li>
+            <li>
+                <label>Value</label>
+                <textarea type='text' name="value">{{value}}</textarea>
+            </li>
+        </ul>
+    </fieldset>
+</form-request>
+
+@view("/parts/markdown-explainer.html");

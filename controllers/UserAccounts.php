@@ -1,8 +1,12 @@
 <?php
 
+use Auth\MultiFactorManager;
+use Auth\SessionManager;
 use \Auth\UserCRUD;
 use Auth\UserSchema;
 use \Auth\UserValidate;
+use Cobalt\Notifications\PushNotifications;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
@@ -18,6 +22,76 @@ class UserAccounts extends \Controllers\Pages {
         return $validated;
     }
 
+    function update_push($id) {
+        $_id = new ObjectId($id);
+        $ua = new UserCRUD();
+        $user = $ua->findOneAsSchema(['_id' => $_id]);
+        if(!$user) throw new NotFound("Resource does not exist");
+        $push = new PushNotifications();
+        $updateable = [];
+        foreach($_POST as $type => $value) {
+            if(!key_exists($type, $push->valid)) throw new BadRequest("Bad request data");
+            if(!is_bool($value)) throw new BadRequest("Value is invalid");
+            if(!$push->is_elligible($user, $type)) throw new Unauthorized("This resource is inelligible for the requested update");
+            
+            $updateable["$push->ua_push_types.$type"] = $value;
+        }
+        
+        $result = $ua->updateOne(['_id' => $_id],[
+            '$set' => $updateable
+        ]);
+        return $updateable;
+    }
+
+    function update_my_push() {
+        return $this->update_push((string)session('_id'));
+    }
+
+    function update_my_push_enrollment($status) {
+        $_id = session('_id');
+        if(!$_id) throw new Unauthorized("You must be logged in.");
+        $push = new PushNotifications();
+        switch($status) {
+            case "subscribed":
+            case "subscribe":
+                $result = $push->enrollPushKeys($_id, $_POST);
+                break;
+            case "unsubscribed":
+            case "unsubscribe":
+            default:
+                $result = $push->revokePushKeys($_id, $_POST);
+                break;
+        }
+        return $result;
+    }
+
+    function totp_enroll() {
+        reauthorize("You must re-authenticate to add TOTP to your account.", $_POST);
+        $user = session();
+        $totp = new MultiFactorManager($user);
+        $backups = $totp->enroll_user($user, $_POST['verification']);
+        $body = "<p>Back up these recovery codes somewhere safe! If you lose access to your TOTP app, you can use these codes as a way to recover access to your account. <strong>You will <u>not</u> see these backup codes again!<strong></p><ul>";
+        foreach($backups as $b) {
+            $body .= "<li>$b</li>";
+        }
+        $body .= "</ul>";
+
+        update("#enrollment-pane", ['innerHTML' => $body]);
+
+        return $body;
+    }
+
+    function totp_unenroll() {
+        // confirm("Are you sure you want to remove TOTP Authentication from your account?", $_POST);
+        reauthorize("You must re-authenticate to remove TOTP from your account.", $_POST);
+        $user = session();
+        $totp = new MultiFactorManager($user);
+
+        $result = $totp->unenroll_user($user);
+        update("#enrollment-pane",['innerHTML' => "<legend>Two-Factor Authentication</legend></p>You've opted out of TOTP 2FA</p>"]);
+        return $result->getModifiedCount();
+    }
+
     /* Working Jun 10 2021 */
     function update_basics($id) {
         $update = $_POST;
@@ -31,7 +105,19 @@ class UserAccounts extends \Controllers\Pages {
                 // Do nothing
             }
         }
+        if(key_exists("flags.locked", $update)) {
+            $schema = $ua->findOneAsSchema(['_id' => new ObjectId($id)]);
+            if(confirm("Are you sure you want to lock $schema->name's account? Doing so will log $schema->them out from all devices and $this->they will not be able to log back in until $schema->their account is unlocked!", $_POST)) {
+                $session = new SessionManager();
+                $result = $session->destroy_session_by_user_id($id);
+            }
+        }
         $validated = $ua->updateUser($id, $update);
+        
+        if(key_exists('avatar', $update)) {
+            update("#profile-picture .cobalt-user--avatar", ['attributes' => ['src' => "/res/fs/".$validated['avatar']['thumb']['filename']]]);
+        }
+
         return $validated;
     }
 
@@ -109,9 +195,13 @@ class UserAccounts extends \Controllers\Pages {
 
     function me() {
         $session = session();
+        $push = new PushNotifications();
+        $multifactor = new \Auth\MultiFactorManager($session);
         add_vars([
             'title' => "$session->fname $session->lname",
-            'doc' => $session
+            'doc' => $session,
+            'notifications' => $push->render_push_opt_in_form_values($session),
+            '2fa' => $multifactor->get_multifactor_enrollment($session),
         ]);
 
         set_template("/authentication/user-self-service-panel.html");
@@ -139,6 +229,9 @@ class UserAccounts extends \Controllers\Pages {
                 // Ignore it if we can't delete the avatar.
                 header("HTTP/1.1 200 OK");
             }
+            update(".cobalt-user--avatar", ['attributes' => ['src' => "/res/fs/".$validated['avatar']['thumb']['filename']]]);
+        } else {
+            unset($validated['avatar']);
         }
 
         $user = new UserCRUD();
@@ -161,5 +254,11 @@ class UserAccounts extends \Controllers\Pages {
         confirm("This action will <strong>permanently delete</strong> $message avatar. Are you sure you want to continue?", $_POST);
 
         return $user->deleteAvatar();
+    }
+
+    function log_out_session_by_id($id) {
+        $sess = new SessionManager();
+        $result = $sess->destroy_session_by_session_id(new ObjectId($id));
+        return $result;
     }
 }

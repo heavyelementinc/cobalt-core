@@ -1,27 +1,28 @@
-class LoginForm extends HTMLElement {
-    connectedCallback() {
-        // super.connectedCallback();
-        this.button = this.querySelector("button[type='submit']");
-        this.getRequest();
-        this.button.addEventListener('click', e => this.request.send(e));
-        this.addEventListener('keyup', e => {
-            if (e.key === "Enter") this.request.send(e)
-        })
-        this.addEventListener("requestSuccess", e => {
-            window.location.reload();
-        })
-        this.addEventListener("requestFailure", async e => {
-            await wait_for_animation(this, "status-message--no")
-        })
-    }
+// class LoginForm extends HTMLElement {
+//     connectedCallback() {
+//         // super.connectedCallback();
+//         this.button = this.querySelector("button[type='submit']");
+//         this.getRequest();
+//         this.button.addEventListener('click', e => this.request.send(e));
+//         this.addEventListener('keyup', e => {
+//             if (e.key === "Enter") this.request.send(e)
+//         })
+//         this.addEventListener("requestSuccess", e => {
+//             window.location.reload();
+//         })
+//         this.addEventListener("requestFailure", async e => {
+//             await wait_for_animation(this, "status-message--no")
+//         })
+//         this.dispatchEvent(new CustomEvent("componentready"));
+//     }
 
-    getRequest() {
-        this.request = new LoginFormRequest(this, {});
-    }
+//     getRequest() {
+//         this.request = new LoginFormRequest(this, {});
+//     }
 
-}
+// }
 
-customElements.define("login-form-request", LoginForm);
+// customElements.define("login-form-request", LoginForm);
 
 
 class InputSwitch extends HTMLElement {
@@ -38,7 +39,7 @@ class InputSwitch extends HTMLElement {
         this.checkbox.checked = this.checked;
 
         this.thumb = document.createElement("span");
-
+        // this.setAttribute("__custom-input", "true");
     }
 
     get value() {
@@ -48,6 +49,7 @@ class InputSwitch extends HTMLElement {
     set value(val) {
         this.checkbox.checked = val;
         this.checked = val;
+        this.setAttribute("checked", JSON.stringify(val));
     }
 
     // get checked() {
@@ -73,7 +75,7 @@ class InputSwitch extends HTMLElement {
         if (['indeterminate', 'unknown', 'null', 'maybe'].includes(this.checked)) this.checkbox.indeterminate = true;
         // Init our listeners for this element
         this.initListeners();
-        
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     /** Initialize the listeners on this element */
@@ -96,6 +98,7 @@ class InputSwitch extends HTMLElement {
         this.clearIntermediateState({ target: this.checkbox });
         this.checkbox.checked = !this.checkbox.checked;
         this.checked = this.checkbox.checked;
+        this.setAttribute("checked", JSON.stringify(this.checked));
         const change = new Event("change");
         this.checkbox.dispatchEvent(change);
         this.dispatchEvent(change);
@@ -124,20 +127,20 @@ class InputSwitch extends HTMLElement {
 
 customElements.define("input-switch", InputSwitch);
 
-class SwitchContainer extends HTMLElement {
-    connectedCallback() {
-        this.switch = this.querySelector("input-switch");
+// class SwitchContainer extends HTMLElement {
+//     connectedCallback() {
+//         this.switch = this.querySelector("input-switch");
 
-        this.addEventListener("click", (e) => {
-            for(const i of e.path) {
-                if(i.tagName === "INPUT-SWITCH") return;
-            }
-            this.switch.value = !this.switch.value;
-        });
-    }
-}
+//         this.addEventListener("click", (e) => {
+//             for(const i of e.path) {
+//                 if(i.tagName === "INPUT-SWITCH") return;
+//             }
+//             this.switch.value = !this.switch.value;
+//         });
+//     }
+// }
 
-customElements.define("switch-container", SwitchContainer);
+// customElements.define("switch-container", SwitchContainer);
 
 /**
  * radio-groups support the following attributes:
@@ -157,17 +160,36 @@ class RadioGroup extends HTMLElement {
         if (first) this.name = first.getAttribute("name");
         if (this.selected) this.updateSelected(this.selected);
         else if (this.default) this.updateSelected(this.default);
+        this.setAttribute("__custom-input", "true");
     }
 
     get value() {
+        this.ariaInvalid = false;
         const node = this.querySelector("[type='radio']:checked");
+        if(!node) {
+            if(this.props.required || this.getAttribute("required") !== "false") {
+                this.ariaInvalid = true;
+                throw new Error("This field is required");
+            }
+            return "";
+        }
         return node.value;
     }
 
     set value(val) {
+        this.ariaInvalid = false;
         const node = this.querySelector(`[type='radio'][value='${val}']`);
+        if(!node && !val) return;
         if(!node) throw new Error("No button with specified value");
         node.checked = true;
+    }
+
+    get name() {
+        return this.getAttribute("name") || this.querySelector(`[type='radio']`).name || this.querySelector(`[type='radio'][name]`).name;
+    }
+
+    connectedCallback() {
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     updateSelected(selected) {
@@ -194,8 +216,9 @@ class LoadingSpinner extends HTMLElement {
     }
 
     dashes() {
-        const height = this.getAttribute("height") ?? "calc(2em * 4)",
-        width = this.getAttribute("width") ?? "calc(2em * 4)"
+        const size = this.getAttribute("scale") ?? "1em";
+        const height =  size,
+        width = size;
         return `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 100 100" version="1.1" id="svg1091"><circle class="spinner-dashes" style="fill:none;stroke:${getComputedStyle(this).color};stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1" id="path1964" cx="50" cy="50" r="43.098995" /></svg>`
     }
 
@@ -237,6 +260,7 @@ class DisplayDate extends HTMLElement {
         this.relative = this.getAttribute("relative") || "false";
 
         if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     getValue() {
@@ -313,6 +337,7 @@ class InputObjectArray extends HTMLElement {
 
         this.fieldItems = [];
         // this.initInterface();
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
@@ -321,14 +346,21 @@ class InputObjectArray extends HTMLElement {
             try {
                 this.value = JSON.parse(this.getAttribute("value")) || [];
             } catch (e) {
-                console.warn("Field has invalid parse data", this);
+                throw new Error("Failed to parse JSON from 'value' attribute");
             }
         } else if (json && "innerText" in json) {
-            try { this.value = JSON.parse(json.innerText) || [] } catch (error) { }
+            let js = [];
+            try {
+                js = JSON.parse(json.innerText) || [];
+            } catch (error) {
+                throw new Error("Failed to parse JSON from <var> tag");
+            }
+            this.value = js;
         } else {
             this.value = [];
         }
         this.dispatchEvent(new CustomEvent("ObjectArrayReady"));
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     initInterface() {
@@ -495,7 +527,9 @@ class HelpSpan extends HTMLElement {
 
         this.addEventListener("mouseout", e => {
             this.detatch();
-        })
+        });
+
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     attach() {
@@ -591,10 +625,12 @@ class CopySpan extends HTMLElement {
             this.copy();
         })
         this.appendChild(this.button);
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
         this.button.innerHTML = this.clipboard(window.getComputedStyle(this, null).getPropertyValue('font-size'));
+        this.dispatchEvent(new CustomEvent("componentready"));
     }
 
     get value() {
@@ -764,3 +800,71 @@ class ProgressBar extends HTMLElement {
 }
 
 customElements.define("progress-bar", ProgressBar);
+
+class InputNumber extends HTMLElement {
+    constructor() {
+        super();
+        this.setAttribute("__custom-input", "true");
+    }
+
+    connectedCallback() {
+        this.realField = document.createElement("input");
+        this.realField.type = "number";
+        this.realField.min = this.getAttribute("min");
+        this.realField.max = this.getAttribute("max");
+        this.realField.pattern = this.getAttribute("pattern");
+        this.realField.addEventListener("change", e => {
+            e.stopPropagation();
+            this.dispatchEvent(new Event("change"));
+        })
+        // this.realField.disabled = this.getAttribute("disabled");
+        this.value = this.getAttribute("value");
+        this.appendChild(this.realField);
+        this.dispatchEvent(new CustomEvent("componentready"));
+    }
+
+    get value() {
+        const val = this.realField.value;
+        if(val === "") return Number(this.getAttribute('default')) || 0;
+        return Number(this.realField.value);
+    }
+
+    set value(number) {
+        this.realField.value = number;
+    }
+
+    get name() {
+        return this.getAttribute("name");
+    }
+    
+    set name(name) {
+        this.setAttribute("name", name);
+    }
+
+    get disabled() {
+        return this.realField.getAttribute("aria-disabled");
+    }
+
+    set disabled(value) {
+        this.realField.ariaDisabled = value;
+        this.realField.disabled = value;
+    }
+
+    get min() {
+        return this.realField.min;
+    }
+
+    set min(value) {
+        this.realField.min = value;
+    }
+
+    get max() {
+        return this.realField.max;
+    }
+
+    set max(value) {
+        this.realField.max = value;
+    }
+}
+
+customElements.define("input-number", InputNumber);

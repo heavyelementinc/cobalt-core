@@ -14,11 +14,12 @@ class CobaltSetting {
     public $name;
     public $defaultValue;
     public $directives;
+    public $defined;
     public $meta;
     public $validate;
     public $user_modified_settings;
     public $allSettings;
-    public $reference;
+    public \Cobalt\Settings\Settings $reference;
     public $toCache;
     public $aliasedValue;
     
@@ -28,6 +29,7 @@ class CobaltSetting {
         $this->directives   = $definition['directives'];
         $this->meta         = $definition['meta'] ?? null;
         $this->validate     = $definition['validate'];
+        $this->defined      = $definition['defined'] ?? null;
         $this->user_modified_settings = $user_modified_settings;
         $this->allSettings  = $settings;
 
@@ -52,7 +54,8 @@ class CobaltSetting {
     }
 
     function directive_public($value) {
-        $GLOBALS['PUBLIC_SETTINGS'][$this->name] = $value;
+        define_public_js_setting($this->name, $value);
+        // $GLOBALS['PUBLIC_SETTINGS'][$this->name] = $value;
         return $value;
     }
 
@@ -110,11 +113,12 @@ class CobaltSetting {
                 $this->toCache['vars-web']["$type-family"] = $v['family'];
             }
         }
-        if($this->name === "css-vars") {
-            foreach ($value as $type => $v) {
-                $this->toCache['root-style'] .= "--project-$type: $v;\n";
-            }
-        }
+        // if($this->name === "css-vars") {
+        //     if(!$value) $value = $this->allSettings['css-vars'];
+        //     foreach ($value as $type => $v) {
+        //         $this->toCache['root-style'] .= "--project-$type: $v;\n";
+        //     }
+        // }
         return $value;
     }
 
@@ -129,5 +133,13 @@ class CobaltSetting {
         ];
 
         return $value;
+    }
+
+    /**
+     * Config values will override values in settings.json
+     */
+    function directive_config($value, $data) {
+        if (!isset($GLOBALS['CONFIG'][$data])) return $value;
+        return $GLOBALS['CONFIG'][$data];
     }
 }

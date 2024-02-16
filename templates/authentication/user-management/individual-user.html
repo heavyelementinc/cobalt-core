@@ -1,19 +1,24 @@
-<div class='hbox'>
-    <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+<hgroup>
+    <div class="vbox">
+        <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
+        <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
+    </div>
     <action-menu title="Manage User">
-        <option method="DELETE" action="/api/v1/user/{{user_account._id}}/avatar" dangerous>Reset Avatar to Default</option>
+        <option method="DELETE" action="/api/v1/user/{{user_account._id}}/avatar">Reset Avatar to Default</option>
         <option method="DELETE" action="/api/v1/user/{{user_account._id}}/delete" dangerous>Delete {{user_account.fname}}</option>
+        <option method="PUT" action="/api/v1/user/{{user_account._id}}/update" value="{&quot;flags.locked&quot;: true}">Lock user account</option>
     </action-menu>
-</div>
-    <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
+</hgroup>
 
     <tab-nav id="tab-list--parent">
         <nav>
-            <a href="#basics" class="tab-nav--current-content">Basic Info</a>
-            <a href="#permissions">Permissions</a>
+            <a href="#basics" class="tab-nav--current-content"><i name="card-account-details"></i> Basic Info</a>
+            <a href="#push"><i name="bell-cog"></i> Notifications</a>
+            <a href="#permissions"><i name="key-chain"></i> Permissions</a>
             <!-- <a href="#statistics">Stats</a> -->
             {{!additional_button}}
-            <a href="#manage">Manage</a>
+            <a href="#manage"><i name="form-textbox-password"></i> Manage</a>
+            <a href="#sessions"><i name="list-status"></i> Sessions</a>
         </nav>
         <section id="basics" class="">
             <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{user_account._id}}/update"
@@ -52,6 +57,7 @@
                     </fieldset>
                 </form-request>
         </section>
+        {{!notifications}}
         <section id="permissions" class="drawer-list--item">
             <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{user_account._id}}/permissions"
                 autosave="autosave">
@@ -94,6 +100,9 @@
                     </ul>
                 </fieldset>
             </form-request>
+        </section>
+        <section id="sessions">
+            {{!sessions}}
         </section>
     </tab-nav>
 

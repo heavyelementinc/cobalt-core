@@ -6,8 +6,10 @@ class ActionMenuElement extends HTMLElement {
         this.type = this.getAttribute("type");
         this.menuId = random_string();
         this.menu = null;
-        this.setAttribute("arai-pressed", "false");
+        this.stopPropagation = this.hasAttribute("stop-propagation");
+        this.setAttribute("aria-pressed", "false");
         this.setAttribute("aria-role", "button");
+        this.setAttribute("__custom-input", "true");
         this.initListeners();
     }
 
@@ -17,6 +19,11 @@ class ActionMenuElement extends HTMLElement {
     }
 
     toggleButton(event) {
+        if(this.stopPropagation) {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            event.preventDefault();
+        }
         if(this.getAttribute("aria-pressed") === "true") {
             this.menu.closeMenu();
             this.menu = null;
@@ -52,19 +59,42 @@ class ActionMenuElement extends HTMLElement {
         let action = {
             label: opt.innerHTML || "Default",
             icon: (icon) ? `<i name="${icon}"></i>` : "",
+            onloadstart: event => 
+                this.triggerEvent(opt, "loadstart", event), // <- loadstart has worked a few times...
+            onload:  event => 
+                this.triggerEvent(opt, "load", event),
+            onerror: event => 
+                this.triggerEvent(opt, "error", event), // <- error has worked 
+            onclick: event => 
+                this.triggerEvent(opt, "click", event), // <- Triggers correctly
             dangerous: opt.hasAttribute("dangerous"),
-            disabled: opt.hasAttribute("disabled")
+            disabled: opt.hasAttribute("disabled"),
+            original: opt
         }
 
-        if(opt.onclick) action.callback = opt.onclick;
+        // if(opt.onclick) action.callback = opt.onclick;
         if(opt.hasAttribute("action")) {
+            let json = opt.getAttribute("value") ?? {};
+            // try {
+            //     json = JSON.parse(opt.getAttribute("value"));
+            // } catch (error) {
+            //     json = opt.getAttribute("value");
+            // }
             action.request = {
                 action: opt.getAttribute("action"),
-                method: opt.getAttribute("method") ?? "POST"
+                method: opt.getAttribute("method") ?? "POST",
+                value: json,
             }
         }
         
         return action;
+    }
+
+    triggerEvent(option, type, event, custom = false) {
+        let event_object = null;
+        if(custom) event_object = new CustomEvent(event.type, {detail: {option, event}});
+        else event_object = new Event(event.type, {detail: {option, event}});
+        option.dispatchEvent(event_object);
     }
 
     toggleButtonWithKeypress(event) {
@@ -80,6 +110,9 @@ class ActionMenuElement extends HTMLElement {
 
 customElements.define("action-menu", ActionMenuElement);
 
+/** The InlineMenu hides/shows its children when the inline-menu button is active.
+ *  This is useful if you want to have visually hidden form elements, such as advanced filters for a GET request
+ */
 class InlineMenu extends HTMLElement {
     constructor() {
         super();

@@ -1,5 +1,7 @@
 <?php
 
+use Cobalt\Extensions\Extensions;
+use Cobalt\Notifications\PushNotifications;
 use Controllers\ClientFSManager;
 
 class FileController extends \Controllers\FileController {
@@ -7,7 +9,7 @@ class FileController extends \Controllers\FileController {
     function __construct() {
         if (!app("enable_core_content")) throw new Exceptions\HTTP\NotFound("Shared files are not enabled.");
         $cacheControl = 'Cache-Control: private, ';
-        if (!app("debug")) $cacheControl .= "immutable, ";
+        $cacheControl .= "immutable, ";
         $cacheControl .= "max-age=31536000";
         header($cacheControl);
         header('Pragma: private');
@@ -17,13 +19,23 @@ class FileController extends \Controllers\FileController {
     }
 
     function core_content_shared() {
-        $path = $GLOBALS['router']->uri;
+        global $ROUTER;
+        global $SHARED_CONTENT;
+        $path = $ROUTER->uri;
+        $extensions = [];
+        Extensions::invoke("register_shared_dir", $extensions);
         // $file = __ENV_ROOT__ . "/shared/$path";
-        $file = find_one_file([__ENV_ROOT__ . "/shared/", ...$GLOBALS['SHARED_CONTENT']], sanitize_path_name($path));
+        $file = find_one_file([
+            __APP_ROOT__ . "/shared/",
+            ...$extensions ?? [],
+            __ENV_ROOT__ . "/shared/",
+            ...$SHARED_CONTENT
+        ], sanitize_path_name($path));
         if (!file_exists($file)) throw new Exceptions\HTTP\NotFound("The resource could not be located");
         // header('Content-Description: File Transfer');
         // header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+        // header('Content-Disposition: inline');
         // header('Expires: 0');
         $mime = mime_content_type($file);
         if (pathinfo($file, PATHINFO_EXTENSION) === "css") $mime = "text/css";
@@ -40,17 +52,37 @@ class FileController extends \Controllers\FileController {
         if ($cache->exists) {
             $file = $cache->file_path;
         } else {
-            $files = files_exist([
-                __APP_ROOT__ . "/src/$match",
-                __ENV_ROOT__ . "/src/$match"
-            ], false);
-            if (!count($files))  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
-            $file = $files[0];
+            $extensions = [];
+            Extensions::invoke("register_js_dirs", $extensions);
+            $file = find_one_file([
+                __APP_ROOT__ . "/src/",
+                ...$extensions,
+                __ENV_ROOT__ . "/src/",
+            ], $match);
+            if (!$file)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
         }
 
         header("Content-Type: application/javascript;charset=UTF-8");
         $this->get_etag($file);
         readfile($file);
+        exit;
+    }
+
+    function service_worker() {
+        $file = find_one_file([
+            __APP_ROOT__ . "/src/",
+            __ENV_ROOT__ . "/src/"
+        ], "ServiceWorker.js");
+
+        header("Content-Type: application/javascript;charset=UTF-8");
+        $this->get_etag($file);
+        readfile($file);
+        exit;
+    }
+
+    function vapid_pub_key(){
+        header("Content-Type: application/json;charset=UTF-8");
+        echo json_encode((new PushNotifications())->vapid_keys->keyset->publicKey);
         exit;
     }
 
@@ -70,13 +102,13 @@ class FileController extends \Controllers\FileController {
         exit;
     }
 
-
     function plugin_resources($plugin, $match) {
+        global $ACTIVE_PLUGINS;
         $content_dirs = [];
 
-        if (!isset($GLOBALS['ACTIVE_PLUGINS'][$plugin])) throw new \Exceptions\HTTP\NotFound("The resource could not be located");
-        $plugin = $GLOBALS['ACTIVE_PLUGINS'][$plugin];
-        // foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
+        if (!isset($ACTIVE_PLUGINS[$plugin])) throw new \Exceptions\HTTP\NotFound("The resource could not be located");
+        $plugin = $ACTIVE_PLUGINS[$plugin];
+        // foreach ($ACTIVE_PLUGINS as $i => $plugin) {
         //     array_push($content_dirs, $plugin->register_public_content_dir());
         // }
 
@@ -103,7 +135,7 @@ class FileController extends \Controllers\FileController {
     }
 
     function manifest() {
-        $content = with("/parts/manifest.site");
+        $content = view("/parts/site.webmanifest");
         header('Content-Type: text/json');
         header('Content-Length: ' . strlen($content) * 8);
         echo $content;

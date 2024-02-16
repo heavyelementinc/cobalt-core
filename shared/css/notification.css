@@ -1,4 +1,174 @@
-a.cobalt-notification {
-    display: grid;
+notify-button[role='button'] {
+    font-family: "Material Design Icons";
+    border: unset;
+    font-size: inherit;
+    padding: unset;
+    margin: unset;
+    background: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+notify-button:before {
+    content: "\F009C";
+}
+
+notify-button.notification-indicator--unread:before {
+    content: "\F009A";
+}
+
+notify-button.notification-indicator--muted:before {
+    content: "\F009B";
+}
+
+notify-button .unseen-indicator {
+    border-radius: 50%;
+    height: 2ch;
+    width:  2ch;
+    background: var(--project-color-problem);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .5em;
+    font-family: sans-serif;
+    position: absolute;
+    top: 0;
+    right: -0.3em;
+}
+
+notify-button .unseen-indicator:empty {
+    display: none;
+}
+
+.notifications--notifications-panel {
+    position:fixed;
+    right: 0;
+    top:0;
+    background: var(--project-body-background);
+    box-shadow: 0 0 10px rgb(0 0 0 / .4);
+    padding:1em;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 40ch;
+    z-index: calc(var(--project-modal-z-index) + 1);
+}
+
+.notifications--notifications-panel[aria-hidden="true"] {
+    right: -150%;
+}
+
+.notifications--notifications-panel hgroup {
+    display:flex;
+    align-items: center;
+}
+
+.notifications--notifications-panel h1 {
+    font-size: 1.2rem;
+}
+
+.notifications--notifications-panel button {
+    border: none;
+    background: none;
+    color: inherit;
+    padding: 0;
+    margin: 0 0 0 auto;
+}
+
+
+.notifications--notifications-panel ul.notifications--list {
+    list-style: none;
+    margin:0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    flex-grow: 1;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+
+
+
+a.notifications--notification-container {
+    display: flex;
     text-decoration: none;
+    flex-direction: column;
+    border: 1px solid var(--project-color-input-border-nofocus);
+    background: var(--project-color-input-background);
+    padding: .4rem;
+    color: inherit;
+}
+
+a.notifications--notification-container:visited {
+    color: inherit;
+}
+
+/* a.notifications--notification-container:hover {
+
+} */
+
+.notification--from {
+    display: flex;
+    align-items: center;
+}
+
+.notification--from .cobalt-user--avatar{
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.notification--from span {
+    font-size: .8rem;
+}
+
+.notification--from action-menu {
+    margin-left: auto;
+}
+
+.notification--body {
+    margin: 0 1rem;
+    /* width: 40ch; */
+}
+
+.notification--foot {
+    font-size: .8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+form-request.notifications--send {
+    margin-top: auto;
+    /* flex-grow: 1; */
+}
+
+split-field {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    overflow: hidden;
+}
+
+split-field > *:first-child {
+    border: unset;
+    margin: 0;
+    flex-grow: 1;
+    border-radius: 0;
+    height: 100%;
+}
+
+split-field > *:last-child {
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 0;
+    border-left: 1px solid var(--project-color-input-border-nofocus);
+    margin: 0;
+    border-radius: 0;
+    height: 100%;
 }

@@ -1,0 +1,49 @@
+@set("title", "Binary Test");
+<h1>{{title}}</h1>
+
+<table>
+    <tr>
+        <td>Value:</td>
+        <td>{{type.binary}}</td>
+    </tr>
+    <tr>
+        <td>Or:</td>
+        <td>{{$type.binary.or(45)}}</td>
+    </tr>
+    <tr>
+        <td>And:</td>
+        <td>{{$type.binary.and(45)}}</td>
+    </tr>
+    <tr>
+        <td>Xor:</td>
+        <td>{{$type.binary.xor(45)}}</td>
+    </tr>
+    <tr>
+        <td>And:</td>
+        <td>{{$type.binary.not(45)}}</td>
+    </tr>
+    <tr>
+        <td>Left:</td>
+        <td>{{$type.binary.left(2)}}</td>
+    </tr>
+    <tr>
+        <td>Right:</td>
+        <td>{{$type.binary.right(2)}}</td>
+    </tr>
+    <tr>
+        <td>List:</td>
+        <td>{{type.binary.list()}}</td>
+    </tr>
+</table>
+
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Filter Result</label>
+            {{type.binary.field()}}
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

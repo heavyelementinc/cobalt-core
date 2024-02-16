@@ -21,6 +21,20 @@
         "default": false,
         "ring": 1
     },
+    "Contact_form_submissions_access": {
+        "group": "Admin",
+        "label": "Allows the user to access submissions to the contact form",
+        "dangerous": false,
+        "default": false,
+        "ring": 3
+    },
+    "Contact_form_submissions_modify": {
+        "group": "Admin",
+        "label": "Allows the user to delete submissions to the contact form",
+        "dangerous": true,
+        "default": false,
+        "ring": 3
+    },
     "Debug_access": {
         "group": "Admin",
         "label": "Access to debug tools for web developers.<help-span value='Most people do NOT need this.'></help-span>",
@@ -70,19 +84,41 @@
         "default": false,
         "ring": 2
     },
+    "Addressee_query": {
+        "group": "Notifications",
+        "label": "Able to query for username and first/last name.<help-span value='This is used as part of the notification system.'></help-span>",
+        "dangerous": false,
+        "default": true,
+        "ring": 9
+    },
+    "Notifications_can_send_notification": {
+        "group": "Notifications",
+        "label": "Able to send a notification",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Notifications_can_access_any_notification": {
+        "group": "Notifications",
+        "label": "Able to access any notification<help-span value='Typically, a user can only access a notification if they wrote it or it is addressed to them.'></help-span>",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
     "CobaltEvents_crud_events": {
         "group": "Admin",
         "label": "Create, delete, or modify Cobalt Events.",
         "dangerous": true,
         "default": false
     },
-    "Plugins_allow_management": {
-        "group": "Plugins",
+    "Extensions_allow_management": {
+        "group": "Extensions",
         "label": "Allows the user to manage plugins. This is VERY dangerous.",
         "dangerous": true,
         "default": false,
         "ring": 1
     },
+
     "API_manage_keys": {
         "group": "API",
         "label": "Allow the user to manage API keys",
@@ -93,6 +129,48 @@
     "CRUDControllerPermission": {
         "group": "Users",
         "label": "Allow the user to access default CRUD endpoints",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_create": {
+        "group": "Customization",
+        "label": "Allow the user to create arbitrary customized content (requires the modify privilege as well).",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_modify": {
+        "group": "Customization",
+        "label": "Allow the user to modify the values of customized content",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_delete": {
+        "group": "Customization",
+        "label": "Allow the user to delete existing customized content",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Customizations_update_parameters": {
+        "group": "Customization",
+        "label": "Allow the user to modify customized content",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Database_database_export": {
+        "group": "Admin",
+        "label:": "Allow the user to export database files",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Database_database_import": {
+        "group": "Admin",
+        "label:": "Allow the user to import database files",
         "dangerous": true,
         "default": false,
         "ring": 1

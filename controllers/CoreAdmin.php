@@ -1,11 +1,14 @@
 <?php
 
+use Auth\SessionManager;
 use \Auth\UserSchema;
 use MongoDB\BSON\ObjectId;
 use Cobalt\Payments\PaymentGateway;
 use Cobalt\Payments\PaymentGatewaySchema;
 use CobaltEvents\EventManager;
 use Contact\ContactManager;
+use Cobalt\Extensions\Extensions;
+use Cobalt\Notifications\PushNotifications;
 
 class CoreAdmin {
     function index() {
@@ -14,7 +17,7 @@ class CoreAdmin {
             'contact_manager' => (new ContactManager())->get_unread_count_for_user(session()),
             'user_accounts' => (new \Auth\UserCRUD())->count([]),
             'events' => (new EventManager())->getAdminWidget(),
-            'plugin_count' => count($GLOBALS['ACTIVE_PLUGINS']),
+            'plugin_count' => Extensions::get_active_count(),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
         ]);
         set_template("/authentication/admin-dashboard/index.html");
@@ -28,6 +31,7 @@ class CoreAdmin {
             <flex-header>Email</flex-header>
             <flex-header>Groups</flex-header>
             <flex-header>Verified</flex-header>
+            <flex-header style='width:20px'></flex-header>
         </flex-row>";
         foreach ($collection->find([]) as $user) {
             $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
@@ -55,19 +59,28 @@ class CoreAdmin {
         if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", ['template' => 'errors/404_invalid_user.html']);
 
         $table = $GLOBALS['auth']->permissions->get_permission_table($user);
-
+        $push = new PushNotifications();
         add_vars([
             'title' => "$user->fname $user->lname",
             'user_account' => $user,
             'user_id' => (string)$user->_id,
             'permission_table' => $table,
             'account_flags' => $ua->getUserFlags($user),
+            'notifications' => view("/authentication/user-management/push-notifications.html", [
+                'doc' => $user,
+                'endpoint' => '/api/v1/user/{{user_account._id}}/push',
+                'push_options' => $push->render_push_opt_in_form_values($user),
+            ]),
+            'sessions' => (new SessionManager())->session_manager_ui_by_user_id($user->_id)
         ]);
 
         try {
             $auth = new \Auth\AdditionalUserFields();
             $additional = $auth->__get_additional_user_tabs();
-        } catch (\Exception $e) {
+            foreach($additional as $user => $value) {
+                if($value['name'][0].$value['name'][1] !== "<i") $additional[$user]['name'] = "<i name='card-bulleted-outline'></i> " . $value['name'];
+            }
+        } catch (\Error $e) {
             $additional = "";
         }
 
@@ -117,10 +130,11 @@ class CoreAdmin {
     function settings_index() {
         add_vars([
             'title' => "Settings Panel",
-            'basic_settings' => get_route_group('admin_basic_panel', ['with_icon' => true]),
-            'settings_panel' => get_route_group("settings_panel",['with_icon' => true]),
-            'advanced_panel' => get_route_group("access_panel",['with_icon' => true]),
-            'public_settings_panel' => get_route_group("public_settings_panel",['with_icon' => true]),
+            'presentation_settings' => get_route_group('presentation_settings', ['with_icon' => true]),
+            'application_settings'  => get_route_group("application_settings",['with_icon' => true]),
+            'advanced_settings'     => get_route_group('advanced_settings', ['with_icon' => true]),
+            // 'access_panel'         => get_route_group("access_panel",['with_icon' => true]),
+            // 'public_settings_panel'   => get_route_group("public_settings_panel",['with_icon' => true]),
         ]);
 
         set_template("/admin/settings/control-panel.html");

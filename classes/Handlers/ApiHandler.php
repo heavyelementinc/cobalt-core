@@ -20,6 +20,8 @@
 
 namespace Handlers;
 
+use Cobalt\Notifications\NotificationManager;
+
 class ApiHandler implements RequestHandler {
     private $methods_from_stdin = ['POST', 'PUT', 'PATCH', 'DELETE'];
     private $content_type = "application/json; charset=utf-8";
@@ -31,6 +33,8 @@ class ApiHandler implements RequestHandler {
     public $allowed_origins = null;
     public $router_result = null;
     public $_stage_bootstrap = [];
+    public $update_instructions = [];
+    public $events = [];
 
     function __construct() {
         $this->http_mode = (is_secure()) ? "https" : "http";
@@ -61,31 +65,74 @@ class ApiHandler implements RequestHandler {
 
     public function _stage_output($context_output = "") {
         $return_value = [];
-        // $result = getHeader('X-Update-Client-State');
-        /** TODO: Finish X-Update-Client-State */
-        if (key_exists('X-Update-Client-State', $this->headers) || key_exists('x-update-client-state', $this->headers)) $return_value = [
-            'response' => $this->router_result,
-            'settings' => $GLOBALS['app']->public_settings,
-            // 'user' => [
-            //     'uname' => session('uname')
-            // ]
-        ];
-        else $return_value = $this->router_result;
-        
-        /** Prepare for API request loading progress bar */
-        $json = json_encode($return_value);
-        header("Content-Length: " . strlen($json));
 
+        $return_value = $this->fulfillmentHandling($this->router_result);
+        
+        $content_type = headers_list()['Content-Type'] ?? headers_list()['content-type'] ?? "";
+        if(preg_match("/json/", strtolower($content_type ?? ""))) {
+            /** Prepare for API request loading progress bar */
+            $json = json_encode($return_value);
+            header("Content-Length: " . strlen($json));
+        } else if (preg_match('/image/', strtolower($content_type ?? ""))) {
+            // exit;
+        } else if(gettype($return_value) !== "string") {
+            $json = json_encode($return_value);
+            if($json === false) $json = json_last_error_msg();
+            header("Content-Length: " . strlen($json));
+        } else {
+            $json = $return_value;
+            // header("Content-Length: " . strlen($json));
+        }
+        
         /** Echo the result to the output buffer */
         return $json;
     }
 
-    public function _public_exception_handler($e) {
-        $this->router_result = [
-            'code' => $e->status_code, // Why is this $this->status_code
-            'error' => $e->getMessage(),
-            'data' => $e->data
+    private function fulfillmentHandling($router_result) {
+        $header = getHeader('X-Include', null, true, false);
+        if($header === null) return $router_result;
+        
+        $include = explode(",",$header);
+
+        $supported_types = ['update', 'events', 'notification', 'settings'];
+        $result = [
+            'fulfillment' => $router_result,
         ];
+        foreach($include as $method) {
+            if(!in_array($method, $supported_types)) continue;
+            $result[$method] = $this->{$method}();
+        }
+        return $result;
+    }
+
+    private function update() {
+        return $this->update_instructions;
+    }
+
+    private function events() {
+        return [];
+    }
+
+    private function settings() {
+        return $GLOBALS['app']->public_settings;
+    }
+
+    private function notification() {
+        $ntfy = new NotificationManager();
+        return $ntfy->getUnreadNotificationCountForUser();
+    }
+
+    public function _public_exception_handler($e) {
+        // $errorMessage = $e->clientMessage;
+        $errorMessage = "Unknown Error";
+        if(method_exists($e, "publicMessage")) $errorMessage = $e->publicMessage();
+        $this->router_result = [
+            'code' => $e->status_code ?? 500, // Why is this $this->status_code
+            'error' => $errorMessage,
+            'data' => $e->data,
+        ];
+        if(__APP_SETTINGS__['debug_exceptions_publicly']) $this->router_result['exception'] = $e->getMessage();
+        if($this->router_result['error'] === "Unknown Error") $this->router_result['error'] = $this->router_result['exception'];
         if (!$this->_stage_bootstrap['_stage_output']) return $this->_stage_output();
     }
 
@@ -108,10 +155,17 @@ class ApiHandler implements RequestHandler {
 
         $incoming_content_type = isset($_SERVER['CONTENT_TYPE']) ? trim($_SERVER['CONTENT_TYPE']) : '';
 
-        /** Check if our content is in JSON format and get it if it is. */
-        if ($incoming_content_type === $this->content_type) {
-            $incoming_stream = trim(file_get_contents("php://input"));
+        $is_json = false;
+
+        switch($incoming_content_type) {
+            case ($incoming_content_type === $this->content_type):
+            case preg_match("/json/", strtolower($incoming_content_type)) === 1:
+                $is_json = true;
+                break;
         }
+
+        /** Check if our content is in JSON format and get it if it is. */
+        if ($is_json) $incoming_stream = trim(file_get_contents("php://input"));
 
         $multipart_form_data = "multipart/form-data;";
         // $form_data = "Content-Disposition: form-data;";
@@ -163,7 +217,9 @@ class ApiHandler implements RequestHandler {
         header("Access-Control-Allow-Origin: $allowed_origin");
         header("Access-Control-Allow-Credentials: true");
         header("Access-Control-Allow-Methods: $allowed_methods");
-        header("Content-Type: " . $this->content_type);
+        $current_headers = headers_list();
+        if(key_exists('Content-Type',$current_headers) || key_exists('content-type', $current_headers)) $this->content_type = $current_headers['Content-Type'] ?? $current_headers['content-type'];
+        else header("Content-Type: " . $this->content_type);
     }
 
     function cors_error() {

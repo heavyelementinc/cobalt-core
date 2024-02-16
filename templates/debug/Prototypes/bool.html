@@ -1,0 +1,38 @@
+@set("title", "Boolean Test");
+<h1>{{title}}</h1>
+
+<table>
+    <tr>
+        <td>Value:</td>
+        <td>{{type.bool}}</td>
+    </tr>
+    <tr>
+        <td>Equals:</td>
+        <td>{{$type.bool.equals(1)}}</td>
+    </tr>
+    <tr>
+        <td>Strict Equals:</td>
+        <td>{{$type.bool.strictEquals(false)}}</td>
+    </tr>
+    <tr>
+        <td>Not Equals:</td>
+        <td>{{$type.bool.notEquals(1)}}</td>
+    </tr>
+    <tr>
+        <td>Display:</td>
+        <td>{{$type.bool.display()}}</td>
+    </tr>
+</table>
+
+
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Boolean Test</label>
+            {{type.bool.field()}}
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

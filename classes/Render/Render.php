@@ -73,13 +73,24 @@
 
 namespace Render;
 
+use BadFunctionCallException;
+use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\SchemaResult;
+use Exception;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
+use TypeError;
 
 class Render {
     public $body = "";
+    public $name = "";
+    public $stock_vars = [];
     public $vars = [];
-    const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    // const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)?"; //\|?([\w\s]*) -- If we want to add null coalescence
+    const VAR_STRING = "([!@#$]*[\w.\?\-\[\]$]+)(\(.*\))?";
+    public $custom;
     public $variable = "/[%\{]{2}" . self::VAR_STRING . "[\}%]{2}/i"; // Define the regex we're using to search for variables
+
     public $variable_alt = "/\{\{" . self::VAR_STRING . "\}\}/i"; // Stict-mode {{mustache}}-style parsing
     public $function = "/@(\w+)\((.*?)\);?/";
     public $multiline_function = "/@(\w+)\((.*[\w\[\]\"',\r\n]*)\);/mU";
@@ -106,8 +117,12 @@ class Render {
                 'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
             ],
             'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
-            'og_template' => "/parts/opengraph/default.html"
+            'og_template' => "/parts/opengraph/default.html",
+            // 'extensions' => extensions(),
+            // 'custom' => new CustomizationManager(),
         ];
+
+        // $this->custom = new CustomizationManager();
     }
 
     /**
@@ -162,7 +177,7 @@ class Render {
         } else if (!key_exists($template_path, $GLOBALS['TEMPLATE_CACHE'])) { // We do not have the file saved to the template cache
             // Load our template from the specified paths
             $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
-            if($contenders === false) throw new NotFound("The template ($template_path) was not found ");
+            if($contenders === false) throw new NotFound("The template \"$template_path\" was not found ");
             // Load the template
             $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($contenders);
         }
@@ -229,6 +244,9 @@ class Render {
             $operator = $name[0];
             $options = ENT_QUOTES;
             $process_vars = true;
+            $ex = null;
+            $function = null;
+            $arguments = null;
 
             /** Check if this variable is supposed to be inline HTML (as denoted by the "!")
              * if it is, we need to remove the exclamation point from the name */
@@ -262,17 +280,62 @@ class Render {
                     $process_vars = false;
                     break;
             }
+            $arguments = [];
+            // Let's decide if we have a function call and strip that call from the lookup name
+            if($args = $replacements[2][$i]) {
+                $ex = explode(".",$name);
+                $function = array_pop($ex);
+                $arguments = $this->parse_funct_args(substr($args, 1,-1), $function, $replacements[2][$i]);//json_decode("[".substr($args, 1, -1)."]");
+                $name = implode(".",$ex);
+            }
 
             $replace[$i] = $this->lookup_value($name, $process_vars);
+
+            if($replace[$i] instanceof \Cobalt\SchemaPrototypes\SchemaResult) {
+                $replace[$i]->htmlSafe($is_inline_html);
+                $is_inline_html = true;
+                if($function) {
+                    // if(!$args) $args = [];
+                    try {
+                        // if(__APP_SETTINGS__['Renderer_debug_process']) $replace[$i]->setDebugTarget();
+                        $replace[$i] = $replace[$i]->{$function}(...$arguments);
+                    } catch(BadFunctionCallException $e) {
+                        $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
+                    } catch(TypeError $e) {
+                        $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
+                    }
+                } else {
+                    $replace[$i] = $replace[$i];//->getValue();
+                }
+            }
+
+            if($replace[$i] instanceof GenericMap) {
+                $this->debug_template($replacements[0][1], "", $subject);
+                throw new Exception("PersistanceMap shouldn't get to this point");
+                // user_error("Schemas shouldn't make it to this point!", E_USER_WARNING);
+            }
+
             if ($is_inline_json) $replace[$i] = json_encode($replace[$i], $is_pretty_print); // Convert to JSON
-            if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i], $options); // < = &lt;
+            if (!$is_inline_html) $replace[$i] = htmlspecialchars($replace[$i] ?? '', $options); // < = &lt;
             // if (gettype($replace[$i]) === "object") $replace[$i] = "[object]";
         }
+
+        if(__APP_SETTINGS__['Renderer_debug_process'] ?? false) {
+            $result = "";
+            foreach($search as $i => $var) {
+                $result .= str_replace($var, $replace[$i], $subject);
+            }
+            return $result;
+        }
+
         return str_replace($search, $replace, $subject);
     }
 
     function lookup_value($name, $process = true) {
+        // $custom = "custom.";
+        // if($name === "custom") $this->custom->{str_replace("custom.","",$name)};
         $lookup = \lookup_js_notation($name, $this->vars);
+        // $lookup = \lookup($name, $this->vars, false);
         if ($process) return $this->process_vars($lookup);
         return $lookup;
     }
@@ -285,6 +348,8 @@ class Render {
                 $value = \json_encode($val); // Is this what we want?
                 break;
             case "object":
+                if($val instanceof SchemaResult) return $val;
+                if($val instanceof ObjectId) return (string)$val;
                 if (method_exists($val, "__toString")) {
                     $value = (string)$val;
                     break;
@@ -325,12 +390,13 @@ class Render {
         $mutant = $subject;
         foreach ($functions[1] as $i => $funct) {
             if (!is_callable($funct)) $this->debug_template($funct, $functions[2][$i], $functions[0][$i], "@$funct() is not callable", $i, $subject);
-            try{
-                $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
-            } catch (\Exception $e) {
-                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], "@$funct() was supplied malformed parameters", $i, $subject);
-            }
-            $mutant_vars = $this->functs_get_vars($args);
+            // try{
+            //     $args = \json_decode("[" . $functions[2][$i] . "]", true, 512, JSON_THROW_ON_ERROR);
+            // } catch (\Exception $e) {
+            //     $this->debug_template($functions[0][$i], "@$funct() was supplied malformed parameters", $subject);
+            // }
+            // $mutant_vars = $this->functs_get_vars($args);
+            $mutant_vars = $this->parse_funct_args($functions[2][$i], $funct, $functions[0][$i]);
             
             // We want to include the current context's variables when @view is called
             // from inside a template, so we add a special case. Fun.
@@ -338,9 +404,9 @@ class Render {
             try{
                 $result = $funct(...$mutant_vars);
             } catch (\Exception $e) {
-                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], $e->getMessage(), $i, $subject);
+                $this->debug_template($functions[0][$i], $e->getMessage(), $subject);
             } catch (\Error $e) {
-                $this->debug_template($funct, $functions[2][$i], $functions[0][$i], $e->getMessage(), $i, $subject);
+                $this->debug_template($functions[0][$i], $e->getMessage(), $subject);
             }
             // If we run the 'set' callable, then we want to update our current vars with 
             // the values set just set.
@@ -350,7 +416,16 @@ class Render {
         return $mutant;
     }
 
-    function functs_get_vars($vars) {
+    function parse_funct_args($args, $funct_name, $originalName, $errorMessage = "was supplied malformed parameters", ):array {
+        try{
+            $args = \json_decode("[" . ($args ?? "") . "]", true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Exception $e) {
+            $this->debug_template($originalName, "$funct_name() $errorMessage", $this->body);
+        }
+        return $this->functs_get_vars($args);
+    }
+
+    function functs_get_vars($vars):array {
         $mutant = [];
         foreach ($vars as $value) {
             if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
@@ -359,10 +434,10 @@ class Render {
         return $mutant;
     }
 
-    function debug_template($funct, $args, $errorToHighlight, $message, $index, $body) {
+    function debug_template($errorToHighlight, $message, $body) {
         // $strpos = \strpos($GLOBALS['TEMPLATE_CACHE'][$this->name], $funct);
         // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
-        $errorToHighlight = preg_quote($errorToHighlight);
+        // $errorToHighlight = preg_quote($errorToHighlight);
         $strpos = \strpos($body, $errorToHighlight);
         $template = $body;
         $substr = substr($template, 0, $strpos);
@@ -371,7 +446,7 @@ class Render {
         $linePos = strlen($explosion[$lineNum - 1]);
         // $substr = substr();
         // $message = "";
-        if(app("debug")) $this->render_template_error($errorToHighlight, $message, $lineNum, $linePos, $template);
+        if(app("debug_exceptions_publicly")) $this->render_template_error($errorToHighlight, $message, $lineNum, $linePos, $template);
         $errorMessage = "$message in \"$this->name\" on line $lineNum, column $linePos";
         try{
             throw new \Exception($errorMessage);
@@ -381,10 +456,12 @@ class Render {
 
     function render_template_error($funct, $message, $lineNum, $strpos, $template) {
         header("HTTP/1.1 500 Internal Server Error");
+        header("Content-Type: text/html");
         // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
         $safe = htmlspecialchars($template);
         $safe = str_replace($funct,"<code class='error'>$funct</code>",$safe);
         echo "<h1>Cobalt Template Debugger</h1>";
+        echo "<h2 style='font-family: monospace;'>Filename: " . $this->name . "</h2>";
         echo "<code>".$message . " in \"$this->name\" on line $lineNum, column " . $strpos."</code>";
         echo "<pre>";
         foreach(explode("\n",$safe) as $number => $line) {

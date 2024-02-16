@@ -7,6 +7,7 @@
     constructor() {
         super();
         this.passwordVisible = false;
+        this.setAttribute("__custom-input", "true");
     }
 
     observedAttributes() {

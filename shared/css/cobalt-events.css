@@ -138,7 +138,7 @@ button.cobalt-events--banner-close, button.cobalt-events--banner-close:hover, bu
     }
 }
 
-@media only screen and (max-width: 900px) {
+@media only screen and (max-width: 35em) {
     .cobalt-events--banner {
         padding: 1rem;
         flex-direction: column;

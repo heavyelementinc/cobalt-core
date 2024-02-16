@@ -1,4 +1,6 @@
-
+header img.cobalt-masthead {
+    max-height: 52px;
+}
 nav ul {
     list-style: none;
     margin: 0;
@@ -9,6 +11,7 @@ body > header {
     display: flex;
     background: var(--project-color-header-branding);
     align-items: center;
+    z-index: calc(var(--project-modal-z-index) - 2);
 }
 
 header nav ul {
@@ -23,9 +26,46 @@ header nav ul li {
     position: relative;
 }
 
-.directory--group .directory--submenu {
+.directory--group a.navigation--current {
+    box-shadow: 0px 2px 0px currentColor
+}
+
+.directory--group:not(.subgroup--display) .directory--submenu {
     display: none;
     z-index: calc(var(--project-modal-z-index) - 1);
+}
+
+.directory--group.directory--icon-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1em;
+    list-style: none;
+    margin: 1em;
+    padding: unset;
+}
+
+.directory--group.directory--icon-panel li a{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-weight: normal;
+    text-decoration: none;
+    height: 5.5rem;
+    width: 5.5rem;
+    padding: 1em;
+    border-radius: .5rem;
+    background-color: white;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.directory--group.directory--icon-panel a i {
+    font-size: 5rem;
 }
 
 .directory--group .unread {
@@ -194,6 +234,19 @@ header nav a.navigation--current {
   font-size: 2.25rem;
   background: var(--project-color-button-init);
   color: var(--project-color-button-text);
+}
+
+:is(hgroup, header-group, headline-group) {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--project-color-inactive);
+}
+
+:is(hgroup, header-group, headline-group) action-menu {
+    margin-left: auto;
+    margin-bottom: auto;
 }
 
 @media only screen and (max-width:35em) {

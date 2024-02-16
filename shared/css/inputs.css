@@ -20,13 +20,18 @@ input-wrapper {
   display: inline-flex;
 }
 
-input-wrapper, input-text, input, textarea, input-password, button[native], action-menu {
+/* input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field  */
+input, textarea, button[native], [role='button'], [__custom-input] {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
   border-radius: 4px;
   font-size: 1.1rem;
   color: var(--project-color-input-text-color);
+}
+
+input[type='color'] {
+  padding: .1rem;
 }
 
   :is(input-wrapper, input-password) :is(input, button) {
@@ -40,10 +45,11 @@ input-wrapper, input-text, input, textarea, input-password, button[native], acti
     border: unset;
   }
 
-  input[invalid],
+  /* input[invalid],
   textarea[invalid],
-  :is(input-wrapper, input-password, input-text) input[invalid],
-  input-array[invalid] {
+  :is(input-wrapper, input-password, input-text) input[invalid]
+  input-array[invalid]  */
+  :is(input, textarea, button[native], [role='button'], [__custom-input])[aria-invalid="true"]{
     border: 1px solid var(--project-color-input-invalid-border);
     background: var(--project-color-input-invalid-bg);
   }
@@ -115,13 +121,58 @@ input:focus, textarea:focus {
   box-shadow: none;
 }
 
-input:disabled, textarea:disabled {
+input:disabled, textarea:disabled, markdown-area[aria-disabled="true"], markdown-area[aria-disabled="true"] .CodeMirror {
   background: var(--project-color-input-disabled);
 }
 
+
+div.upload-field img{
+  width: 210px;
+  height: 210px;
+  object-fit: contain;
+}
+
+
+input-user {
+  display: flex;
+  padding: 0;
+  align-items: center;
+  overflow: hidden;
+}
+
+input-user fieldset.autocomplete--search-container{
+  padding:0;
+  margin: 0;
+  border: none;
+  flex-grow: 1;
+}
+
+input-user button {
+  background: inherit;
+}
+
+input-user.value fieldset.autocomplete--search-container {
+  display: none;
+}
+
+input-user [type='search'] {
+  border: none;
+}
+
+input-user .cobalt-user--profile-display {
+  margin-left: .5em;
+  font-size: .95rem;
+}
+
+input-user .cobalt-user--profile-display .username {
+  font-size: .8rem;
+  color: var(--project-color-input-border-nofocus)
+}
+
+
 /** BUTTON LINKS **/
 
-.button, button {
+.button, button, [role='button'] {
   --btn-normal: var(--project-color-button-init);
   --btn-text: var(--project-color-button-text);
   --btn-hover: var(--project-color-button-hover);
@@ -137,9 +188,20 @@ input:disabled, textarea:disabled {
   box-sizing: border-box;
 }
 
-button {
+.button,[role='button'] {
   border-radius: 0;
-  border: 1px solid var(--project-color-input-border-nofocus)
+  border: 1px solid var(--project-color-input-border-nofocus);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: normal;
+  user-select: none;
+}
+
+:is(.button, button, [role='button']) loading-spinner{
+  font-size: 1em;
+  height: 1em;
+  width: 1em;
 }
 
 a.button {
@@ -162,7 +224,7 @@ a.button {
   border: 1px solid;
 }
 
-.button:hover,button:hover, action-menu:hover {
+.button:hover,button:hover, action-menu:hover, [role='button'] {
   background-color: var(--btn-hover);
   color: var(--btn-hover-text);
 }
@@ -177,7 +239,37 @@ a.button {
   cursor: zoom-in;
 }
 
-input-array {
+input-binary {
+  display: inline-flex;
+  
+}
+
+input-binary option {
+  display: none;
+}
+
+input-binary tag-container button {
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: var(--project-color-input-background-focus);
+}
+
+input-binary[readonly] {
+  background: var(--project-color-input-disabled);
+}
+
+input-binary[readonly] button {
+  pointer-events: none;
+}
+
+input-binary tag-container :is(button)[aria-pressed='true'] {
+  border: 1px solid var(--project-color-input-border-focus);
+  background: var(--project-color-input-background);
+}
+
+:is(input-array, input-user-array){
   display: inline-flex;
   flex-direction: column;
   border: 1px solid var(--project-color-input-border-nofocus);
@@ -189,16 +281,17 @@ input-array {
   box-sizing: border-box;
 }
 
-  fieldset > input-array{
+  fieldset > :is(input-array, input-user-array){
     width: 100%;
   }
 
-  :is(form-request) input-array fieldset, input-array fieldset{
+  :is(form-request) :is(input-array, input-user-array) fieldset,
+  :is(input-array, input-user-array) fieldset{
     display: flex;
     flex-wrap: wrap;
     flex-grow:1;
     min-height: 2rem;
-    border: 0;
+    /* border: 0; */
     border-bottom: 1px solid var(--project-color-input-border-nofocus);
     background: var(--project-color-input-disabled);
     margin: 0;
@@ -207,27 +300,27 @@ input-array {
     max-width: 100%;
   }
 
-  :is(input-array:disabled,input-array[disabled]) :is(.autocomplete--search-container, input-array-tag) {
+  :is(input-array:disabled,input-array[disabled], input-user-array[disabled]) :is(.autocomplete--search-container, input-array-tag) {
     background-color: var(--project-color-input-disabled);
     pointer-events: none;
   }
 
-  :is(input-array:disabled, input-array[disabled]) :is(input-array-tag input[type="button"]) {
+  :is(input-array:disabled, input-array[disabled], input-user-array[disabled]) :is(input-array-tag input[type="button"]) {
     display: none;
   }
 
-  input-array fieldset:empty{
+  :is(input-array, input-user-array) fieldset:empty{
     text-align: center;
   }
 
-  input-array fieldset:empty:before{
+  :is(input-array, input-user-array) fieldset:empty:before{
     content:"Use the field below to add items to this list";
     font-style:italic;
     opacity: .6;
     font-size: .6em;
   }
 
-  input-array input[type="search"]{
+  :is(input-array, input-user-array) input[type="search"]{
     border: none;
     border-radius: unset;
     font-size: .9rem;
@@ -235,7 +328,7 @@ input-array {
     margin:0;
   }
 
-  input-array input[type="search"]:focus{
+  :is(input-array, input-user-array) input[type="search"]:focus{
     background: var(--project-color-input-background);
   }
 
@@ -255,7 +348,7 @@ input-array {
     width:100%;
   }
 
-  input-array optgroup, input-array option{
+  :is(input-array, input-user-array) optgroup, :is(input-array, input-user-array) option{
     display: none;
   }
 
@@ -272,7 +365,7 @@ input-array {
     width: calc(100% - .2rem);
     top:100%;
     left:.1rem;
-    z-index: var(--project-modal-z-index);
+    z-index: calc(var(--project-modal-z-index) + 100);
     box-sizing: border-box;
   }
 
@@ -346,7 +439,8 @@ input-array-tag{
   }
 
   input-array-item input[type='button'],
-  input-array-tag input[type='button']{
+  input-array-tag input[type='button'],
+  input-user > button{
     font-size: .8rem;
     color: var(--project-color-input-border-nofocus);
     border: none;
@@ -356,7 +450,8 @@ input-array-tag{
     height: 100%;
   }
 
-  input-array-tag input[type='button']:hover {
+  input-array-tag input[type='button']:hover,
+  input-user > input[type='button'] {
     background-color:var(--project-color-problem);
     color:white;
   }
@@ -685,4 +780,53 @@ progress.spa-loading-indicator.navigation-start {
   z-index: calc(var(--project-modal-z-index) * 100);
   top: -4px;
   opacity: 1;
+}
+
+input-binary {
+  display: inline-flex;
+}
+
+input-binary option {
+  display: none;
+}
+
+input-binary tag-container button {
+  all: revert;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  background: var(--project-color-input-disabled);
+  color: var(--project-color-input-border-nofocus);
+  border-radius: .2rem;
+  margin: .1rem;
+  font-size: .8em;
+}
+
+input-binary tag-container button:before {
+  content: "";
+  display: inline-block;
+  height: .6em;
+  width: .6em;
+  margin-right: .3em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+input-binary tag-container button[aria-pressed='true'] {
+  border: 1px solid var(--project-color-input-border-focus);
+  background: #FFF;
+    color: black;
+}
+
+input-binary tag-container button[aria-pressed='true']:before {
+  background-color: currentcolor;
+}
+
+ol.binary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ol.binary-list li:not(.active){
+  opacity: .2;
 }

@@ -2,9 +2,11 @@
 
 use Cobalt\Requests\Remote\Twitter;
 use Cobalt\Requests\Remote\YouTube;
+use Cobalt\Style\SchemeGenerator;
 use Exceptions\HTTP\BadRequest;
 use Render\Render;
 use MikeAlmond\Color;
+use Routes\RouteGroup;
 
 class Debug extends \Controllers\Pages {
 
@@ -78,7 +80,14 @@ class Debug extends \Controllers\Pages {
                     'stored' => json_encode($stored[$setting] ?? "",JSON_PRETTY_PRINT),
                     'aliased' => $alias_value,
                     'default' => json_encode($GLOBALS['app']->default_values[$setting] ?? $data['default'] ?? $data['meta']['merge'] ?? $data['meta']['mergeAll'],JSON_PRETTY_PRINT),
-                    'definition' => "<span>".substr(implode("</span>\n<span>",explode("\n",json_encode($definitions[$setting],JSON_PRETTY_PRINT))),0) . "</span>",
+                    'definition' => "<span>".substr(
+                        implode(
+                            "</span>\n<span>",explode(
+                                "\n",
+                                htmlspecialchars(json_encode($definitions[$setting],JSON_PRETTY_PRINT))
+                            )
+                        ),0
+                    ) . "</span>",
                     'defined_in' => $filename,
                     'shorthand' => json_encode($shorthand),
                 ]
@@ -92,6 +101,14 @@ class Debug extends \Controllers\Pages {
         ]);
         
         set_template("/debug/settings/container.html");
+    }
+
+    function new_form_request() {
+        add_vars([
+            'title' => 'New Form Request Test'
+        ]);
+
+        return set_template('/debug/new-form-request.html');
     }
 
     function debug_router() {
@@ -191,6 +208,7 @@ class Debug extends \Controllers\Pages {
                 ['bar' => 'Baz test',]
             ]
         ]);
+        
         add_vars([
             'title' => 'Form Validation Test',
             'document' => $document
@@ -200,9 +218,10 @@ class Debug extends \Controllers\Pages {
 
     function validate_test_form() {
         $validator = new \Validation\ExampleSchema();
-
         $result = $validator->__validate($_POST);
-
+        header("X-Status: @key $_POST[name] was validated");
+        update("#result", ['innerHTML' => $_POST['name']." was validated"]);
+        // update('input[name="name"]:closest(new-form-request)', ['remove' => true]);
         return $result;
     }
 
@@ -219,6 +238,13 @@ class Debug extends \Controllers\Pages {
         ]);
 
         set_template("/debug/modal-template.html");
+    }
+
+    function x_modal() {
+        $body = json_encode([
+            "body" => "This is a <strong>body test</strong>"
+        ]);
+        header("X-Modal: $body");
     }
 
     function slow_response($delay = 10) {
@@ -306,21 +332,29 @@ class Debug extends \Controllers\Pages {
     }
 
     function colors($color = "fe329e") {
+        $cobalt = new SchemeGenerator($color);
+
+        $style_values = $cobalt->derive_style_colors_from_accent();
+
+
         $color = \MikeAlmond\Color\Color::fromHex($color);
         $generator = new \MikeAlmond\Color\PaletteGenerator($color);
         $luminance = $generator->monochromatic(10);
-        $adjacent = $generator->adjacent();
-        $palette = $generator->tetrad();
+        $adjacent  = $generator->adjacent();
+        $palette   = $generator->tetrad();
 
-        $html = $this->color_sample($luminance, 'l');
-        $html .= $this->color_sample($adjacent, 'a');
-        $html .= $this->color_sample($palette, 'p');
+        $html  = $this->color_sample($luminance, 'l');
+        $html .= $this->color_sample($adjacent,  'a');
+        $html .= $this->color_sample($palette,   'p');
 
 
         add_vars([
-            'main' => $html
+            'accent' => $color,
+            'swatch' => $cobalt->get_swatch_divs(),
+            'palettegenerator' => $html,
+            'cobalt' => $style_values,
         ]);
-        set_template("/parts/main.html");
+        set_template("/debug/colors.html");
     }
 
     private function color_sample($colors, $label) {
@@ -519,7 +553,15 @@ class Debug extends \Controllers\Pages {
         return set_template("/debug/server-control-headers.html");
     }
 
-    function control_headers() {
+    function control_headers($method = null) {
+
+        switch($method) {
+            case "confirm":
+                return $this->confirm_test();
+            case "revalidate":
+                return $this->revalidate_test();
+        }
+
         switch($_POST['method']) {
             case "modal":
                 $method = "X-Modal:";
@@ -557,5 +599,55 @@ class Debug extends \Controllers\Pages {
         header("$method @$_POST[type] $message");
 
         return ['message' => $message];
+    }
+
+    private function confirm_test(){
+        update("#confirm-confirmation", ['innerHTML' => 'Confirmation pending...']);
+        confirm("Are you sure you want to complete this test?", $_POST);
+
+        update('#confirm-confirmation', ['innerHTML' => 'You took the action']);
+        return 1;
+    }
+
+    private function revalidate_test(){
+        update("#revalidate-confirmation", ['innerHTML' => 'Revalidation pending...']);
+        reauthorize("Are you sure you want to complete this test?", $_POST);
+
+        update('#revalidate-confirmation', ['innerHTML' => 'You validated yourself']);
+        return 1;
+    }
+
+    function new_route_group() {
+        $route_group = [
+            "<h2>Basic</h2>",
+            (new RouteGroup("main_navigation", ""))->render(),
+            "<h2>ID test <code>test-id</code></h2>",
+            (new RouteGroup("admin_panel", ""))->setID("test-id")->render(),
+            "<h2>Classes <code>class-test</code></h2>",
+            (new RouteGroup("advanced_settings", "", true))->setClasses(['class-test'])->render(),
+            "<h2>Icon Panel</h2>",
+            (new RouteGroup("advanced_settings", "", true))->setIconPanel(true)->render(),
+            "<h2>Classes from string</h2>",
+            (new RouteGroup("application_settings", ""))->setClassesFromString("class-test other-class")->render(),
+            "<h2>Render Depth: 2</h2>",
+            (new RouteGroup("debug_demo", "", false))->setSubmenuDepth(2)->setSubmenuVisibilty(true)->render(),
+            "<h2>External Link Test</h2>",
+        ];
+
+        $route_group[] = (new RouteGroup("presentation_settings", ""))->setExternalLinks([
+            [
+                'href'  => 'https://heavyelement.io/',
+                'label' => 'Heavy Element',
+                'order' => 1
+            ]
+        ])->render();
+
+        $route_group[] = "<h2>Excluded Wrappers</h2>";
+        $route_group[] = (new RouteGroup("presentation_settings", ""))->setExcludeWrappers(true)->render();
+        add_vars([
+            'title' => 'Route Group Test',
+            'main' => implode("",$route_group),
+        ]);
+        return set_template("/debug/route-group-test.html");
     }
 }

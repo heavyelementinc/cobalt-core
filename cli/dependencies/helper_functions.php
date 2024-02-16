@@ -38,7 +38,7 @@ function dbg($var) {
 function cli_to_bool($input, $defaultToYes = false) {
     $allowed = ['y', 'yes', 'true', 'on', 'enable', 'enabled'];
     if ($defaultToYes) array_push($allowed, "");
-    return in_array(strtolower($input), $allowed);
+    return in_array(trim(strtolower($input)), $allowed);
 }
 
 function confirm_message($message, $default = false, $additional = "") {
@@ -74,6 +74,11 @@ function say($str, $type = "normal", $formatted = false) {
     print($fmt . " \n");
 }
 
+function say_quietly($str, $type = "normal", $formatted = false) {
+    if(!$GLOBALS['fmt_allowed']) return "";
+    say($str, $type, $formatted);
+}
+
 /**
  * Available types:
  *   * `b` - Bold
@@ -90,6 +95,7 @@ function say($str, $type = "normal", $formatted = false) {
  * @return string 
  */
 function fmt($str, $type = "normal", $back = "normal") {
+    if(!$GLOBALS['fmt_allowed']) return $str;
     $fmt = "";
     $arr = [
         'b' => '1m'
@@ -144,7 +150,110 @@ function fmt($str, $type = "normal", $back = "normal") {
 
 function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
     if ($lvl > $GLOBALS['cli_verbosity']) return;
+    $date = date('Y-m-d');
+    $logpath = __APP_ROOT__ . "/ignored/logs/cobalt-$date.log";
+    $resource = fopen($logpath, "a");
+    fwrite($resource, "[".date(DATE_RFC2822)."] {$message}\n");
+    fclose($resource);
+    if(!function_exists("say")) return;
     $m = fmt("[LOG $lvl]", 'i');
     $m .= " " . fmt($message, $type, $back);
     print($m . "\n");
+}
+
+function get_image_function($image_data) {
+    $valid_types = [
+        IMG_GIF => ['imagecreatefromgif', 'imagegif'],
+        IMG_JPG => ['imagecreatefromjpeg', 'imagejpeg'],
+        3       => ['imagecreatefrompng', 'imagepng'],
+        IMG_PNG => ['imagecreatefrompng', 'imagepng'],
+        IMG_WBMP => ['imagecreatefromwbmp', 'imagewbmp'],
+        IMG_XPM => ['imagecreatefromxpm', 'imagexpm'],
+        IMG_WEBP => ['imagecreatefromwebp', 'imagewebp'],
+        IMG_BMP => ['imagecreatefrombmp', 'imagebmp'],
+    ];
+    $valid_types = [
+        "image/bmp" => ['imagecreatefrombmp', 'imagebmp'],
+        "image/gif" => ['imagecreatefromgif', 'imagegif'],
+        "image/jpeg" => ['imagecreatefromjpeg', 'imagejpeg'],
+        "image/png" => ['imagecreatefrompng', 'imagepng'],
+        "image/wbmp" => ['imagecreatefromwbmp', 'imagewbmp'],
+        "image/xpm" => ['imagecreatefromxpm', 'imagexpm'],
+        "image/webp" => ['imagecreatefromwebp', 'imagewebp'],
+    ];
+    if (key_exists($image_data["mime"], $valid_types)) return $valid_types[$image_data["mime"]];
+    return null;
+}
+
+function image_average_color($path_to_image_file, $null_on_failure = true) { 
+    $size = @getimagesize($path_to_image_file);
+    if($size === false) {
+        if($null_on_failure) return null;    
+        else throw new Exception("Not a valid image");
+    } 
+    $fn = @get_image_function($size);
+    if(!$fn) {
+        if($null_on_failure) return null;
+        else throw new Exception("Invalid image processing function or mimetype");
+    }
+    $img = $fn($path_to_image_file);
+    // $img = @imagecreatefromstring(file_get_contents($imageFile)); 
+
+    if(!$img) {
+        if($null_on_failure) return null;
+        else throw new Exception("Cannot open image file");
+    }
+
+    $scaled = imagescale($img, 1, 1, IMG_BICUBIC);
+    $index = imagecolorat($scaled, 0, 0);
+    $rgb = imagecolorsforindex($scaled, $index);
+
+    return sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+
+    // for($x = 0; $x < $size[0]; $x += $granularity) {
+    //     for($y = 0; $y < $size[1]; $y += $granularity) {
+    //         $thisColor = imagecolorat($img, $x, $y);
+    //         $rgb = imagecolorsforindex($img, $thisColor);
+    //         $red = round(round(($rgb['red'] / 0x33)) * 0x33);
+    //         $green = round(round(($rgb['green'] / 0x33)) * 0x33);
+    //         $blue = round(round(($rgb['blue'] / 0x33)) * 0x33);
+    //         $thisRGB = sprintf('%02X%02X%02X', $red, $green, $blue);
+    //         if(array_key_exists($thisRGB, $colors)) {
+    //             $colors[$thisRGB]++;
+    //         } else {
+    //             $colors[$thisRGB] = 1;
+    //         }
+    //     }
+    // }
+    // arsort($colors);
+    // return array_slice(array_keys($colors), 0, $number_of_colors);
+}
+
+function enumerate_valid_commands():array {
+    $extMan = null;
+    $commands = hydrate_command_paths(__CLI_ROOT__ . "/commands/");
+
+    if(defined("__APP_ROOT__")) {
+        $commands = array_merge($commands, hydrate_command_paths(__APP_ROOT__ . "/cli/commands/"));
+        $extMan = extensions();
+    }
+
+    if($extMan) $extMan::invoke("register_cli_commands",$commands);
+
+    return $commands;
+}
+
+function hydrate_command_paths($scandir):array {
+    $scanResult = scandir($scandir);
+    if($scanResult === false) return [];
+    $cmd = [];
+    foreach($scanResult as $file) {
+        if($file === "." || $file === "..") continue;
+        if(pathinfo($file, PATHINFO_EXTENSION) !== "php") continue;
+        $name = pathinfo($file, PATHINFO_FILENAME);
+        $cmd[$name] = [
+            'path' => "$scandir/$file"
+        ];
+    }
+    return $cmd;
 }

@@ -1,0 +1,54 @@
+<hgroup>
+    <h1>Filesystem Manager</h1>
+</hgroup>
+
+<div class="filemanager-container">
+    {{!html}}
+</div>
+
+<div class="hbox" style="font-size: 2em">
+    <a href="/admin/settings/fs-manager?page={{lastPage}}"><i name='chevron-left'></i></a>
+    <a href="/admin/settings/fs-manager?page={{nextPage}}"><i name='chevron-right'></i></a>
+</div>
+
+<style>
+    .filemanager-container{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .fs-filemanager {
+        width: 200px;
+        height: 200px;
+        display: flex;
+        color: var(--contrast-color);
+        position: relative;
+    }
+    .fs-filemanager img {
+        width: 200px;
+        height: 200px;
+    }
+    .fs-filemanager.thumbnail:before{ 
+        content: \F0C8F;
+        font-family: "Material Design Icons";
+    }
+    .fs-filemanager .badges {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        font-size: 20pt;
+        background: linear-gradient(0deg, var(--accent-color), transparent);
+        width:100%;
+    }
+
+    .fs-filemanager .badges:after {
+        content: "";
+        height: calc(1em - 2px);
+        width:  calc(1em - 2px);
+        display: block;
+        background: var(--accent-color);
+        border: 2px solid var(--contrast-color);
+    }
+</style>

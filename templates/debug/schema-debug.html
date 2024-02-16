@@ -1,0 +1,58 @@
+<ul class="list-panel">
+    <li>
+        <label>Escape HTML <help-span value="Should be escaped HTML"></help-span></label>
+        {{doc.html}}
+    </li>
+    <li>
+        <label>Headline <help-span value="Should be an H1 tag and a paragraph"></help-span></label>
+        {{!doc.html}}
+    </li>
+    <li>
+        <label>Markdown <help-span value="Should be escaped HTML processed as markdown"></help-span></label>
+        {{!doc.html.md()}}
+    </li>
+    <li>
+        
+    </li>
+</ul>
+
+
+<div>
+    <h2>Number Prototypes</h2>
+    <label>Number</label>
+    <table>
+        <tbody>
+            <th>number</th>
+            <th>percent</th>
+            <th>add</th>
+            <th>subtract</th>
+            <th>multiply</th>
+            <th>divide</th>
+            <th>modulo</th>
+            <th>min</th>
+            <th>max</th>
+        </tbody>
+        <tr>
+            <td>{{doc.number}}</th>
+            <td>{{doc.number.percent(1.75, 100, 2)}} <help-span value="Expected: 171.42"></help-span></td>
+            <td>{{doc.number.add(5)}} <help-span value="Expected: 8"></help-span></th>
+            <td>{{doc.number.subtract(2)}} <help-span value="Expected: 1"></help-span></th>
+            <td>{{doc.number.multiply(-1)}} <help-span value="Expected: -3"></help-span></th>
+            <td>{{doc.number.divide(2)}} <help-span value="Expected: 1.5"></help-span></th>
+            <td>{{doc.number.modulo(2)}} <help-span value="Expected: 1"></help-span></th>
+            <td>{{doc.number.min(5,18,21)}}</td>
+            <td>{{doc.number.max(11, 20, 5,10,9)}}</td>
+        </tr>
+        <tr>
+            <td>{{doc.number}}</th>
+            <td>{{doc.number.percent(10)}} <help-span value="Expected: 30"></help-span></td>
+            <td>{{doc.number.add(8)}} <help-span value="Expected: 4"></help-span></th>
+            <td>{{doc.number.subtract(4)}} <help-span value="Expected: 1"></help-span></th>
+            <td>{{doc.number.multiply(18.2)}} <help-span value="Expected: -3"></help-span></th>
+            <td>{{doc.number.divide(1.1)}} <help-span value="Expected: 1.5"></help-span></th>
+            <td>{{doc.number.modulo(4)}} <help-span value="Expected: 1"></help-span></th>
+            <td>{{doc.number.min(19,5,2,-1)}}</td>
+            <td>{{doc.number.max(12, -3, 4, 18)}}</td>
+        </tr>
+    </table>
+</div>

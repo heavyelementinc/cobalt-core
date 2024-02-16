@@ -21,6 +21,7 @@
 
 namespace Routes;
 
+use Cobalt\Extensions\Extensions;
 use Exception;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
@@ -54,26 +55,26 @@ class Router {
         $contexts = app('context_prefixes');
         //  = array_fill_keys(array_keys($contexts), []);
 
+        global $ROUTE_TABLE;
+        
         foreach($contexts as $context => $data) {
-            $GLOBALS['ROUTE_TABLE'][$context] = [
+            $ROUTE_TABLE[$context] = [
                 'get'    => [],
                 'post'   => [],
                 'put'    => [],
                 'delete' => [],
             ];
 
+            $results = [];
+            Extensions::invoke("register_routes", $context, $results);
             // Make a list of all the routes we need to load
             $this->router_table_list[$context] = [
+                ...$results,
                 __ENV_ROOT__ . "/routes/$context.php",
                 __APP_ROOT__ . "/routes/$context.php",
                 // __APP_ROOT__ . "/private/routes/$context.php",
             ];
-            
-            foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
-                $result = $plugin->register_routes($context);
-                if ($result) array_push($this->router_table_list[$context], $result);
-                $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
-            }
+
         }
 
         $this->router_table_initialized = true;
@@ -81,62 +82,22 @@ class Router {
 
     }
 
-    // function init_route_table() {
-    //     /** Export our route table to the global space, we use this to specify where
-    //      * we should look for our routes.
-    //      */
-    //     $GLOBALS['ROUTE_TABLE_ADDRESS'] = $this->route_context . "_routes";
-    //     if (!isset($GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']])) $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']] = [];
-    //     $this->router_table_list = [
-    //         __ENV_ROOT__ . "/routes/" . $this->route_context . ".php"
-    //     ];
-
-    //     foreach ($GLOBALS['ACTIVE_PLUGINS'] as $i => $plugin) {
-    //         $result = $plugin->register_routes($this->route_context);
-    //         if ($result) array_push($this->router_table_list, $result);
-    //         $this->registered_plugin_controllers[$i] = $plugin->register_controllers() ?? [];
-    //     }
-
-    //     array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");
-    // }
-
     function get_routes() {
+        global $ROUTE_TABLE, $ROUTE_TABLE_ADDRESS;
         if($this->router_table_loaded) {
-            $this->routes = $GLOBALS['ROUTE_TABLE'];
+            $this->routes = $ROUTE_TABLE;
             return;
         }
         foreach($this->router_table_list as $context => $value) {
             foreach($value as $table){
-                $GLOBALS['ROUTE_TABLE_ADDRESS'] = $context;
+                $ROUTE_TABLE_ADDRESS = $context;
                 if(file_exists($table)) require_once $table;
             }
         }
-        $this->routes = $GLOBALS['ROUTE_TABLE'];
+        $this->routes = $ROUTE_TABLE;
         $this->router_table_loaded = true;
     }
 
-    // function get_routes() {
-    //     /** Check if we're supposed to cache our routes
-    //      *  @todo Complete the table_from_cache functionality */
-    //     if (app('route_cache_enabled') && $this->table_from_cache()) {
-    //         return;
-    //     }
-
-    //     try {
-    //         /** Get a list of route tables that exist */
-    //         $route_tables = files_exist($this->router_table_list);
-    //     } catch (\Exception $e) {
-    //         /** If there are no routes available, die with a nice message */
-    //         die("Could not load route for context $GLOBALS[route_context]");
-    //     }
-
-    //     /** Execute each router table we found */
-    //     foreach ($route_tables as $table) {
-    //         require_once $table;
-    //     }
-
-    //     $this->routes = $GLOBALS[$GLOBALS['ROUTE_TABLE_ADDRESS']];
-    // }
 
     /** @todo complete this */
     function table_from_cache() {
@@ -174,7 +135,6 @@ class Router {
                 return [$preg_pattern, $directives];
             }
         }
-
         if ($this->current_route === null) throw new NotFound("No route discovered.");
     }
 
@@ -242,14 +202,17 @@ class Router {
         $controller_search = [
             __APP_ROOT__ . "/controllers",
             __APP_ROOT__ . "/private/controllers",
-            ...array_values($this->registered_plugin_controllers),
+            // ...array_values($this->registered_plugin_controllers),
             __ENV_ROOT__ . "/controllers"
         ];
+
+        extensions()::invoke("register_controller_dir", $controller_search);
 
         try {
             // We are doing these in reverse order because we want our app's 
             // controllers to override the core's controllers.
             $controller_file = find_one_file($controller_search, "$controller_name.php");
+            if(!$controller_file) die("Controller not found");
         } catch (\Exception $e) {
             // throw new NotImplemented("Controller $controller_name not found.");
             // header("HTTP/")
@@ -280,12 +243,21 @@ class Router {
         
     }
 
+    public $router_js_table = [
+        __APP_ROOT__ . "/controllers/client/",
+        __APP_ROOT__ . "/private/controllers/client/",
+        __ENV_ROOT__ . "/controllers/client/",
+    ];
+
     /** @todo Fix terrible nested loops/logic */
     function get_js_route_table() {
         $table = [];
         $prefix = "";
         if ($GLOBALS['route_context']) $prefix = "^" . app("context_prefixes")[$GLOBALS['route_context']]['prefix'];
         $prefix = substr($prefix, 0, -1);
+
+        extensions()::invoke("register_client_controllers",$this->router_js_table);
+
         foreach($this->routes as $context => $methods) {
             foreach ($methods as $method => $routes) {
                 foreach ($routes as $path => $route) {
@@ -299,23 +271,20 @@ class Router {
                     }
                     if($hasHandler === false) continue;
 
-                    $files = \files_exist([
-                        __APP_ROOT__ . "/controllers/client/$handler",
-                        __APP_ROOT__ . "/private/controllers/client/$handler",
-                        __ENV_ROOT__ . "/controllers/client/$handler",
-                    ], false);
-                    if(empty($files)){
-                        if(isset($route['handler'])) throw new Exception("The router table specfied a client controller but the file was not found");
-                        else continue;
+                    if(isset($route['handler'])) {
+                        $file = find_one_file($this->router_js_table, $route['handler']);
+                        if(!$file) throw new Exception("The router table specfied a client controller but the file was not found");
+
+                        $real_regex = $route['real_regex'];
+                        // if ($prefix !== "" && $path[0] == "^") $real_regex = substr($real_regex, 2);
+                        $index1 = 0;
+                        $index2 = 0;
+                        if ($real_regex[0] === "%") $index1 = 1;
+                        if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
+                        $real_regex = substr($real_regex, $index1, $index2);
+                        array_push($table, "\n'$real_regex': " . file_get_contents($file));
+                        continue;
                     }
-                    $real_regex = $route['real_regex'];
-                    // if ($prefix !== "" && $path[0] == "^") $real_regex = substr($real_regex, 2);
-                    $index1 = 0;
-                    $index2 = 0;
-                    if ($real_regex[0] === "%") $index1 = 1;
-                    if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
-                    $real_regex = substr($real_regex, $index1, $index2);
-                    array_push($table, "\n'$real_regex': " . file_get_contents($files[0]));
                 }
             }
         }

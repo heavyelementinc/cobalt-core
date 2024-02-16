@@ -1,0 +1,96 @@
+<fold-out class="markdown-explainer" label="Markdown Explainer">
+    <ul class="list-panel">
+        <li class="hbox">
+            <label>Headlines <help-span value="An easy way to remember is that the number of # is equivalent to its heirarchy"></help-span></label>
+            <pre># Headline 1
+## Headline 2
+### Headline 3
+#### Headline 4
+##### Headline 5</pre>
+        </li>
+        <li class="hbox">
+            <label>Headline with custom ID <help-span value="Use the same headline syntax as above. Now, when you visit the page this markdown lives on, you can add the text inside the brackets to the end of the URL (including the hash mark) and your browser will automatically scroll to this headline!"></help-span></label>
+            <pre># Headline 1 {#custom-id}</pre>
+        </li>
+        <li class="hbox">
+            <label>Paragraphs <help-span value="Ensure there's an empty line between paragraphs"></help-span></label>
+            <pre>Lorem ipsum dolor imset ati
+
+Consectetur adipisicing elit. Quia, blanditiis.</pre>
+        </li>
+        <li class="hbox">
+            <label>Bold Text <help-span value="Two sets of asterisks surrounding the text you want bold. This cannot span multiple line breaks."></help-span></label>
+            <pre>Lorem ipsum **dolor imset** ati</pre>
+        </li>
+        <li class="hbox">
+            <label>Italic Text <help-span value="A single set of asterisks surrounding the text you want italic. This cannot span multiple line breaks."></help-span></label></label>
+            <pre>Lorem ipsum *dolor imset* ati</pre>
+        </li>
+        <li class="hbox">
+            <label>Strikethrough <help-span value=""></help-span></label>
+            <pre>Lorem ipsum ~~dolor imset~~ ati</pre>
+        </li>
+        <li class="hbox">
+            <label>Hyperlink <help-span value="Remember: alphabetically brackets come before parenthesis, and the label comes before the link."></help-span></label>
+            <pre>[Example](https://example.com)</pre>
+        </li>
+        <li class="hbox">
+            <label>Image <help-span value="It's exactly the same as the hyperlink, except you start it with an exclamation point"></help-span></label>
+            <pre>![Alt Text]({{app.logo.thumb.filename}})</pre>
+        </li>
+        <li class="hbox">
+            <label>Blockquote <help-span value="If you want to have a multi-paragraph blockquote, you must start every line with a &gt;, even the 'empty' ones"></help-span></label>
+            <pre>&gt; Lorem ipsum dolor</pre>
+        </li>
+        <li class="hbox">
+            <label>Unordered List (Bullet list)</label>
+            <pre>* List Item 1
+* List Item 2</pre>
+        </li>
+        <li class="hbox">
+            <label>Ordered List <help-span value="Numbers can be all ones or they can be sequential"></help-span></label>
+<pre>1. List Item 1
+1. List Item 2</pre>
+        </li>
+        <li class="hbox">
+            <label>Inline Code <help-span value="Note that the this is the backtick (it's next to the 1 key on your keyboard, it's the unshifted ~ tilde key) and not a single or double quote"></help-span></label>
+            <pre>Lorem `ipsum dolor` dolor set ati</pre>
+        </li>
+        <li class="hbox">
+            <label>Code Block <help-span value="Note that block quotes require three backticks (```) at the beginning and three at the end of your code block."></help-span></label>
+            <pre>```
+var lorem = "ipsum"
+if(lorem && !dolor) {
+    exit 1;
+}
+```</pre>
+        </li>
+        <li>
+            <label>Footnote</label>
+            <pre>
+Lorem ipsum dolor imset ati. [^1]
+
+[^1]: This is the footnote.</pre>
+        </li>
+        <li class="hbox">
+            <label>Superscript</label>
+            <pre>Text^2</pre>
+        </li>
+        <li class="hbox">
+            <label>Horizontal Rule</label>
+            <pre>---</pre>
+        </li>
+        
+    </ul>
+</fold-out>
+<style>
+    .markdown-explainer pre {
+        border: 1px solid var(--project-color-input-border-nofocus);
+        background: white;
+        border-radius: 4px;
+        padding: 8px;
+        width: 100%;
+        margin: 1em;
+        box-sizing: border-box;
+    }
+</style>

@@ -170,8 +170,7 @@ help-span{
   text-align: center;
   height: 1em;
   width:  1em;
-  /* color:white; */
-  color:var(--project-color-input-border-nofocus);
+  color: var(--project-color-input-border-nofocus, currentColor);
   border-radius: 50%;
   margin:0 .5ch;
   font-family: sans-serif;
@@ -187,14 +186,21 @@ help-span[warning]{
     justify-self: center;
     align-self:center;
   }
+  help-span[warning]:hover:before {
+    content: "\F05D6";
+  }
 
   help-span:before{
-    content: "\F02D7";
+    content: "\F02FC";
     font-family: "Material Design Icons";
     /* font-weight: bold; */
     font-size: 1em;
     /* margin-top: .05em; */
     align-self: flex-start;
+  }
+
+  help-span:hover:before {
+    content: "\F02FD"
   }
 
   .help-span-article {

@@ -6,12 +6,24 @@
     background: var(--project-color-table-bg-odd);
 }
 
+:is(tab-nav):not([type='row']) {
+    flex-direction: row;
+}
+
 :is(tab-nav,chip-nav) nav {
     display:flex !important;
     justify-content: center;
     gap: .5em;
     background: var(--project-color-table-bg-even);
     border-bottom: var(--project-color-table-border);
+}
+
+:is(tab-nav):not([type='row']) nav {
+    flex-direction: column;
+    justify-content: flex-start;
+    border-bottom: unset;
+    border-right: var(--project-color-table-border);
+    gap: 0;
 }
 
 :is(tab-nav,chip-nav) nav a {
@@ -24,6 +36,17 @@
     border-left: var(--project-color-table-border);
     border-right: var(--project-color-table-border);
     box-sizing: border-box;
+}
+
+:is(tab-nav):not([type='row']) nav a {
+    border-left: unset;
+    border-right: 1px solid transparent;
+    /* border-top: var(--project-color-table-border); */
+    border-top: none;
+    border-bottom: var(--project-color-table-border);
+    font-size: 1.05em;
+    padding: 0.68em;
+    min-width: 18ch;
 }
 
 :is(tab-nav,chip-nav) a[disabled="disabled"] {
@@ -39,12 +62,28 @@
     box-shadow: 0 2px 0 var(--project-color-table-bg-odd), 0 -2px;
     text-decoration: none;
     font-style: normal;
+    translate: 1px;
+}
+
+:is(tab-nav):not([type='row']) nav a.tab-nav--current-tab {
+    box-shadow: 2px 0 0 var(--project-color-table-bg-odd), -3px 0;
 }
 
 :is(tab-nav,chip-nav) > *:not(nav) {
     display: none !important;
     /* visibility: none; */
     padding: .5rem .5rem .6rem;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+:is(tab-nav) > *:not(nav) hgroup {
+    width: 100%;
+    padding-bottom: 0.4em;
+}
+
+:is(tab-nav) hgroup :is(h1, h2, h3, h4, h5) {
+    margin: 0;
 }
 
 :is(tab-nav,chip-nav):not(.tab-nav--hydrated) > :target,

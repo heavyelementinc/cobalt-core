@@ -30,7 +30,7 @@ class ContactFormSchema extends Normalize {
             ],
             "date" => [
                 "set" => fn() => new UTCDateTime(),
-                "display" => fn($val) => $this->get_date($val, "verbose")
+                "display" => fn($val) => $this->convert_date($val, "verbose")
             ],
             "ip" => [
                 "set" => fn() => ""
@@ -38,8 +38,9 @@ class ContactFormSchema extends Normalize {
             "read_status" => [
                 "get" => function () {
                     $id = session("_id");
-                    if(!property_exists($this->__dataset,"read")) return "unread";
-                    $array = $this->__dataset['read']->getArrayCopy();
+                    if(!key_exists("read", $this->__dataset)) return "unread";
+                    // if(!key_exists("read",$this->__dataset)) return "unread";
+                    $array = $this->__dataset['read'];
                     return in_array($id, $array);
                 },
                 "display" => fn () => ($this->read_status) ? "read" : "unread"

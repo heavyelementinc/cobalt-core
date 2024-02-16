@@ -7,6 +7,7 @@ class InputText extends HTMLElement {
         this.max = this.getAttribute("max");
         this.pattern = this.getAttribute("pattern");
         this.name = this.getAttribute("name");
+        this.setAttribute("__custom-input", "true");
     }
     
     connectedCallback() {

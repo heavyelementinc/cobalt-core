@@ -46,8 +46,12 @@ class AutoCompleteInterface extends HTMLElement {
         this.searchResults = null;
         this.displayResultsUntilSelection = string_to_bool(this.getAttribute("static-results")) ?? false;
         this.excludeCurrentValues = string_to_bool(this.getAttribute("exclude-current")) ?? false;
+        this.action = this.getAttribute("action") ?? null;
+        this.minimumRemoteQueryLength = this.getAttribute("min") ?? 3;
         this.hasFocus = false;
         this.timeout = null;
+        this.actionAbort = null;
+        this.setAttribute("__custom-input", "true");
     }
 
     getAutocompleteSearchField() {
@@ -90,8 +94,9 @@ class AutoCompleteInterface extends HTMLElement {
             this.keyUpListener(e);
         });
 
-        this.AutocompleteSearchField.addEventListener("focusin", (e) => {
+        this.AutocompleteSearchField.addEventListener("focusin", async (e) => {
             this.hasFocus = true;
+            await this.createSearchResults("", {}, true);
             this.appendSearchResults();
             clearTimeout(this.timeout);
         });
@@ -104,7 +109,7 @@ class AutoCompleteInterface extends HTMLElement {
         });
     }
 
-    keyUpListener(e) {
+    async keyUpListener(e) {
         this.updatePosition();
         if("key" in e && Object.keys(this.specialKeys).includes(e.key)) {
             const result = this[this.specialKeys[e.key].callback](e.key, e);
@@ -121,7 +126,8 @@ class AutoCompleteInterface extends HTMLElement {
         const filter = new RegExp(`(${toSearch})`,'i');
         
         let custom = {};
-        if(this.allowCustom === true) {
+        let allowCustom = string_to_bool(this.getAttribute("allow-custom")) ?? false;
+        if(allowCustom) {
             custom = {
                 value: toSearch,
                 label: toSearch,
@@ -129,7 +135,23 @@ class AutoCompleteInterface extends HTMLElement {
             };
         }
 
-        let workingOptions = this.filterOptions(filter, custom);
+        await this.createSearchResults(filter, custom);
+    }
+
+    async createSearchResults(filter, custom = {}, all = false) {
+        let workingOptions;
+        if(this.action) {
+            clearTimeout(this.actionAbort);
+            this.actionAbort = setTimeout(async () => {
+                workingOptions = await this.filterOptions(filter, custom, false) ?? [];
+                for(const i of workingOptions) {
+                    this.addSearchResult(i,filter);
+                }
+            }, 400);
+            return;
+        }
+
+        workingOptions = await this.filterOptions(filter, custom, false) ?? [];
 
         for(const i of workingOptions) {
             this.addSearchResult(i,filter);
@@ -171,7 +193,7 @@ class AutoCompleteInterface extends HTMLElement {
     selectSearchResult(target) {
         let val = target.getAttribute("value"),
             label = target.getAttribute("label");
-        this.dispatchEvent(new CustomEvent("autocompleteselect",{detail: {value: val,label}}));
+        this.dispatchEvent(new CustomEvent("autocompleteselect",{detail: {value: val, label}}));
         this.clearResults();
         clearTimeout(this.timeout);
     }
@@ -183,12 +205,22 @@ class AutoCompleteInterface extends HTMLElement {
         this.searchResults.innerHTML = "";
     }
 
-    filterOptions(filter, custom = {}) {
+    async filterOptions(filter, custom = {}, all = false) {
         const val = this.value;
-        const opts = this.options;
+        let opts = this.options ?? [];
         let finalOptions = [];
+
+        if(this.action) {
+            let remoteQueryValue = this.AutocompleteSearchField.value;
+            if(remoteQueryValue.length >= this.minimumRemoteQueryLength) {
+                const api = new ApiFetch(`${this.action}?search=${remoteQueryValue}`, this.getAttribute("method") || "GET", {});
+                opts = await api.send();
+                finalOptions = this.renderOptions(opts);
+            }
+        }
+
         for(const i of opts) {
-            const attr = i.getAttribute("value");
+            const attr = i.value || i._id?.$oid || i.getAttribute("value");
             // Let's exclude current values
             switch(typeof val) {
                 case "object":
@@ -198,7 +230,7 @@ class AutoCompleteInterface extends HTMLElement {
                     if(val === attr) continue;
                     break;
             }
-            if(filter.test(i.innerText)) finalOptions.push({
+            if(filter.test(i.innerText) || all) finalOptions.push({
                 value: attr,
                 label: i.innerText,
                 custom: false
@@ -208,7 +240,25 @@ class AutoCompleteInterface extends HTMLElement {
         return finalOptions;
     }
 
+    renderOptions(opts) {
+        let finalOptions = [];
+        for(const el in opts) {
+            if(typeof opts === "object" && "search" in opts && "label" in opts) {
+                finalOptions[el] = opts[el];
+            } else {
+                finalOptions[el] = {
+                    search: opts[el],
+                    label: opts[el]
+                };
+            }
+        }
+        return finalOptions;
+    }
+
     addSearchResult(option, filter){
+        if("label" in option === false) {
+            return;
+        }
         const result = document.createElement("li");
         result.setAttribute("value",option.value);
         result.setAttribute("label",option.label);
@@ -218,7 +268,6 @@ class AutoCompleteInterface extends HTMLElement {
         result.addEventListener("click", e => {
             this.selectSearchResult(e.target);
         });
-
         result.innerHTML = option.label.replace(filter, "<strong>$1</strong>");
         this.searchResults.appendChild(result);
     }
@@ -232,6 +281,7 @@ class AutoCompleteInterface extends HTMLElement {
     }
 
     updatePosition() {
+        if(!this.searchResults) this.appendSearchResults();
         const offset = get_offset(this);
         this.searchResults.style.top = (offset.bottom - 1) + "px";
         this.searchResults.style.left = (offset.x + 4) + "px";

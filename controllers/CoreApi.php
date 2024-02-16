@@ -14,7 +14,8 @@ class CoreApi extends \Controllers\Pages {
 
     function page() {
         // Housekeeping
-        $GLOBALS['write_to_buffer_handled'] = true;
+        global $WRITE_TO_BUFFER_HANDLED, $ROUTER, $EXPORTED_PUBLIC_VARS;
+        $WRITE_TO_BUFFER_HANDLED = true;
         $route = $_GET['route'];
         unset($_GET['route']);
         $method = "get";
@@ -26,30 +27,31 @@ class CoreApi extends \Controllers\Pages {
         // Set up context processor
         $contextProcessor = app("context_prefixes")[$route_context]['processor'];
         $processor = new $contextProcessor();
-        $processor->no_write_on_destruct();
+        if(method_exists($processor, "no_write_on_destruct")) $processor->no_write_on_destruct();
 
         // Initialize the processor
         $processor->_stage_init(app("context_prefixes")[$route_context]);
         $processor->_stage_bootstrap['_stage_init'] = true;
 
         // Get the current route
-        $current_route_meta = $GLOBALS['router']->discover_route($route, null, $method, $route_context);
+        $current_route_meta = $ROUTER->discover_route($route, null, $method, $route_context);
         if($current_route_meta === null) throw new NotFound("Route not found");
 
         // Set up route meta in the processor
         $processor->_stage_route_discovered(...$current_route_meta);
         $processor->_stage_bootstrap['_stage_route_discovered'] = true;
 
-        // Allow
-        $router_result = $GLOBALS['router']->execute_route($current_route_meta[0], $method, $route_context);
-        $processor->_stage_execute($router_result);
+        // 
+        $router_result = $ROUTER->execute_route($current_route_meta[0], $method, $route_context);
+        $body = $processor->_stage_execute($router_result);
         $processor->_stage_bootstrap['_stage_execute'] = true;
         $processor->_stage_bootstrap['_stage_output'] = true;
-        $body = $processor->process();
+        if(method_exists($processor, 'process')) $body = $processor->process();
+
         if($current_route_meta[1]['cache_control'] === false) {
             header("Cache-Control: ");
         }
-        return array_merge($GLOBALS['EXPORTED_PUBLIC_VARS'], [
+        return array_merge($EXPORTED_PUBLIC_VARS, [
             "title" => $processor->template_vars['title'],
             "body" => $body
         ]);

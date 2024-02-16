@@ -68,6 +68,7 @@
 namespace Validation;
 
 use ArrayAccess;
+use Countable;
 use Exception;
 use Iterator;
 use JsonSerializable;
@@ -77,12 +78,13 @@ use \Validation\Exceptions\NoValue;
 use \Validation\Exceptions\ValidationIssue;
 use \Validation\Exceptions\ValidationFailed;
 
-abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator, ArrayAccess {
+abstract class Normalize extends NormalizationHelpers implements JsonSerializable, Iterator, ArrayAccess, Countable {
     protected $__schema = [];
-    protected $__dataset = [];
+    public $__dataset = [];
     protected $__index = [];
     protected $__to_validate = [];
     protected $__normalize_out = true;
+    protected $__isEmptyDoc = true;
     protected $__prototypes = [
         'raw',        // Returns the un-normalized value for the field
         'valid',      // Returns the valid options for selectable data
@@ -91,12 +93,18 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         'json',       // Converts the data to JSON
         'json_pretty',// Pretty prints JSON
         'display',    // Display lets us pretty-fy output in our schema
+        'class',      // A definable prototype function that is meant for use in attributes
+        'attrs',      // Returns HTML attributes
         'length',     // The length of a string, the number of elements in an array
         'md',         // Parses markdown into HTML
         'capitalize', // Capitalizes the first letter of a string
         'uppercase',  // Upper cases the entire string
         'lowercase',  // Lower cases the entire string
+        'embed',      // Convert value into an HTML tag based on metadata or file extension
+        'last',       // Select the last element of an array
+        'strip',      // Converts text to markdown and then strips the tags. Should give plain text.
         'gmt',
+        'immutable',
     ];
 
     protected $__global_fields = [];
@@ -110,29 +118,40 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     function __construct($data = null, $normalize_get = true) {
         $this->__dataset = $data ?? [];
         
+        if(empty($data) || is_null($data)) {
+            $this->__isEmptyDoc = true;
+        } else {
+            $this->__isEmptyDoc = false;
+        }
+        
         $this->__normalize($normalize_get);
 
         $this->__global_fields = [
             'isEmptyDoc' => [
-                'callback' => fn () => (count($this->__dataset) < 1)
+                'callback' => fn () => $this->__isEmptyDoc
             ],
             'newDocDisabled' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? " disabled=disabled" : "",   // Check if there are any files
+                'callback' => fn () => ($this->__isEmptyDoc) ? " disabled=disabled" : "",   // Check if there are any files
             ],
             'newDocSubmit' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "<button type=submit>Submit</button>" : "",
+                'callback' => fn () => ($this->__isEmptyDoc) ? "<button type=submit>Submit</button>" : "",
             ],
             'newDocAutosave' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=autosave",
+                'callback' => fn () => ($this->__isEmptyDoc) ? "" : " autosave=autosave",
             ],
             'newDocAutosaveFieldset' => [
-                'callback' => fn () => ($this->isEmptyDoc) ? "" : " autosave=fieldset",
+                'callback' => fn () => ($this->__isEmptyDoc) ? "" : " autosave=fieldset",
+            ],
+            'newDocMethod' => [
+                'callback' => fn () => ($this->__isEmptyDoc) ? "POST" : "PUT"
             ]
         ];
         
         $this->init_schema();
 
         $this->__dataset = array_merge($this->default_values(), doc_to_array($this->__dataset));
+
+        $this->__normalize_data();
         // Only enable pronoun prototypes if the 'pronoun_set' key is in the schema.
         // Do we actually want this?
         if (key_exists('pronoun_set', $this->__schema)) {
@@ -201,6 +220,43 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     /**
+     * Pass validated values and this will return an array of operators
+     * Any key that exists in the schema will use the $set operator unless
+     * the field's schema entry has an `operator` key set.
+     * 
+     * The `operator` key must match a MongoDB Top Level Operator!
+     * 
+     * @param mixed $validated 
+     * @return array 
+     */
+    function __operators($validated) {
+        $result = [];
+        foreach($validated as $field => $value) {
+            if(!key_exists($field, $this->__schema)) continue;
+            if(!key_exists('operator', $this->__schema[$field])) {
+                if(!key_exists('$set', $result)) $result['$set'] = [];
+                $result['$set'][$field] = $value;
+                continue;
+            }
+            $operator = $this->__schema[$field]['operator'];
+            
+            switch(gettype($operator)) {
+                case "string":
+                    if(!key_exists($operator, $result)) $result[$operator] = [];
+                    $result[$operator][$field] = $value;
+                    break;
+                case is_callable($operator):
+                    $r = $operator($field, $value);
+                    $operator = key($r);
+                    if(!key_exists($operator, $result)) $result[$operator] = [];
+                    $result[$operator] = array_merge($result[$operator], $r[$operator]);
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
      * Validation routine.
      * 
      * @alias __validate
@@ -223,7 +279,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      * @throws ValidationFailed 
      */
     public function __validate($data, $createSubset = true) {
-        $this->__to_validate = $data;
+        $this->__to_validate = &$data;
         if ($createSubset) $schema = $this->get_schema_subset(array_keys($data));
         else $schema = $this->init_schema();
         $this->issues = [];
@@ -233,8 +289,13 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
                 // Run the setter function by assigning value which can throw issues
                 $this->{$name} = (isset($this->__to_validate[$name])) ? $this->__to_validate[$name] : null;
             } catch (ValidationIssue $e) { // Handle issues
-                if (!isset($this->issues[$name])) $this->issues[$name] = $e->getMessage();
-                else $this->issues[$name] .= "\n" . $e->getMessage();
+                if (!isset($this->issues[$name])) {
+                    $this->issues[$name] = $e->getMessage();
+                    update("[name='$name']", ['message' => $e->getMessage(), 'invalid' => true]);
+                }
+                else {
+                    $this->issues[$name] .= "\n" . $e->getMessage();
+                }
             } catch (ValidationFailed $e) { // Handle subdoc failure
                 $this->issues[$name] = $e->data;
             }
@@ -247,6 +308,12 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     public function __normalize($value) {
         $this->__normalize_out = $value;
+    }
+
+    public function __normalize_data() {
+        foreach($this->__schema as $field => $methods) {
+            if(key_exists('each', $methods)) $this->__dataset[$field] = $this->subdocument($this->__dataset[$field], $methods['each']);
+        }
     }
 
     /**
@@ -372,10 +439,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         // WTF is this doing?!?
         if ($this->__normalize_out === false) return $value;
 
-        if (isset($this->__schema[$name]['each']) && !isset($this->__schema[$name]['get'])) {
-            $subdoc = new Subdocument($value, $this->__schema[$name]['each'], $this);
-            return iterator_to_array($subdoc);
-        }
+        // if (isset($this->__schema[$name]['each']) && !isset($this->__schema[$name]['get'])) {
+        //     $subdoc = new Subdocument($value, $this->__schema[$name]['each'], $this);
+        //     return iterator_to_array($subdoc);
+        // }
 
         if($pos) return $value;
         return $this->__callable($value, $name); // Return the value
@@ -386,9 +453,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
         if (is_callable($method_name)) {
             // Run the value through the getter function
-            $value = $method_name($value, $name);
+            $value = $method_name($value, $name, $this);
         } else if (method_exists($this, $method_name)) {
-            $value = $this->{$method_name}($value, $name);
+            $value = $this->{$method_name}($value, $name, $this);
         }
         return $value;
     }
@@ -475,8 +542,13 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
 
     protected function subdocument($value, $schema) {
-        $doc = new Subdocument($value, $schema, $context);
-        return $doc->__validate($value);
+        $doc = new Subdocument($value, $schema, $this);
+        // $subdoc = [];
+        // foreach($doc->__schema as $field => $f) {
+        //     $subdoc[$field] = $doc->{$field};
+        // }
+        // return $subdoc;
+        return $doc;//$doc->__validate($value);
     }
 
     protected function each($schema, $data) {
@@ -496,9 +568,10 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     private function initialize_schema() {
-        foreach ($this->__schema as $fieldname => $methods) {
+        foreach ($this->__schema as $fieldname => $directives) {
             $this->find_method($fieldname, "get");
             $this->find_method($fieldname, "set");
+            if(key_exists("default", $directives)) $this->__dataset[$fieldname] = $directives['default'];
             // if(key_exists('serialize', $methods)) {
             //     array_push($this->__index);
             // }
@@ -532,14 +605,23 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         // If $pos is false we know there's no prototype
         if ($pos === false) return false;
         $proto = substr($name, $pos += 1); // $proto = "options"
-        if (!in_array($proto, $this->__prototypes)) return false;
-        return [substr($name, 0, $pos - 1), $proto]; // ['value', 'options']
+        $field = substr($name, 0, $pos - 1);
+        if (in_array($proto, $this->__prototypes)) return [$field, $proto]; // ['value', 'options']
+        if (key_exists($field, $this->__schema) && key_exists($proto, $this->__schema[$field])) return [$field, $proto];
+        return false;
     }
 
 
     private function __execute_prototype($value, $fieldname, $prototype) {
         $method_name = "__proto_$prototype";
-        if (method_exists($this, $method_name)) return $this->{$method_name}($value, $fieldname);
+        $got = $value;
+        try{ 
+            if(isset($this->__schema[$fieldname]['get'])) $got = $this->__schema[$fieldname]['get']($value, $fieldname, $this) ?? $value;
+        } catch (\Error $e) {
+            
+        }
+        if (method_exists($this, $method_name)) return $this->{$method_name}($got, $fieldname, $value);
+        if (key_exists($fieldname, $this->__schema) && key_exists($prototype, $this->__schema[$fieldname])) return $this->__schema[$fieldname][$prototype]($got, $fieldname, $value);
         return "";
         // if (isset($this->__schema[$fieldname][$prototype])) {
         //     return $this->__schema[$fieldname][$prototype]($value, $fieldname);
@@ -556,9 +638,18 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return '';
     }
 
+    private function __proto_strip($val, $field) {
+        return markdown_to_plaintext($val);
+    }
+
     private function __proto_gmt($val, $field) {
         if($val instanceof UTCDateTime) $val = $val->toDateTime()->getTimestamp();
-        return date('r', $val);
+        return date('r', strtotime($val));
+    }
+
+    private function __proto_immutable($val, $field) {
+        if(in_array($field, $this->__dataset) && $this->__dataset[$field]) return " readonly=\"readonly\"";
+        return "";
     }
 
     /** Allows us to specify in the schema an alternate display method
@@ -569,16 +660,23 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     private function __proto_display($val, $field) {
         if (isset($this->__schema[$field]['display'])) {
-            return $this->__schema[$field]['display']($val, $field);
+            $fn = $this->__schema[$field]['display'];
+            if(is_callable($fn)) return $fn($val, $field, $this);
+            return $fn;
         } else if (isset($this->__schema[$field]['valid'])) {
             $valid = $this->__schema[$field]['valid'];
-            if (is_callable($valid)) $valid = $valid($val, $field);
+            if (is_callable($valid)) $valid = $valid($val, $field, $this);
             $type = gettype($val);
-            if ($type === "object" || $type === "array") return $this->__proto_display_array_items($val, $valid);
+            if ($type === "object" || $type === "array") return $this->__proto_display_array_items($val, $valid, $this);
             if (key_exists($val, $valid)) return $valid[$val];
         }
         if($val instanceof \MongoDB\BSON\UTCDateTime) return $this->get_date($val, 'verbose');
         return $val;
+    }
+
+    private function __proto_class($val, $field) {
+        if(!isset($this->__schema[$field]['class'])) return "";
+        return $this->__schema[$field]['class']($this->{$field}, $field);
     }
     
     private function __proto_display_array_items($values, $valid) {
@@ -600,6 +698,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return [];
     }
 
+    private function __proto_attrs($val, $field) {
+        if(!isset($this->__schema[$field]['attrs'])) return $val;
+        return $this->__schema[$field]['attrs']($val);
+    }
+
     /** Returns a list of HTML options */
     private function __proto_options($val, $field) {
         $valid = $this->__proto_valid($val, $field);
@@ -614,7 +717,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
             case "array":
                 $v = [];
                 foreach($val as $o) {
-                    $v[$o] = $o;
+                    $v[(string)$o] = $o;
                 }
                 $valid = array_merge($v ?? [], $valid ?? []);
                 $type = gettype($val);
@@ -662,11 +765,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
     }
 
     private function __proto_json_pretty($val, $field) {
-        return json_encode($val, JSON_PRETTY_PRINT);
+        return json_encode($val, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
     }
 
     private function __proto_md($val, $field) {
-        if (!$val) $val = $this->{$field};
+        $val = $this->{$field};
         if (!$val) return "";
         return from_markdown($val);
     }
@@ -687,6 +790,56 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     private function __proto_lowercase($val, $field) {
         return strtolower($val);
+    }
+
+    private function __proto_last($val, $field) {
+        if(!is_array($val)) return $val;
+        return $val[count($val) - 1];
+    }
+
+    private function __proto_embed($val, $field) {
+        if(isset($this->__dataset['meta'])) {
+            return $this->embed_from_meta($val, $field);
+        }
+        return $this->embed_from_value($val, $field);
+    }
+
+    private function embed_from_meta($val, $field) {
+        $type = $this->__dataset['type'];
+        // if(!$type) return $this->embed_from_value($val, $field);
+        $mimetype = $this->__dataset['meta']['meta']['mimetype'] ?? $this->__dataset['meta']['mimetype'];
+        $pos = explode("/",$mimetype);
+        $sub = $pos[0];
+        $enc = $pos[1];
+        $rt = $this->{'value'};
+        if(is_array($rt)) {
+            $rt = $rt[count($rt) - 1];
+        }
+        $w = $this->__dataset['meta']['display_width'] ?? $this->__dataset['meta']['width'] ?? $this->__dataset['meta']['meta']['width'];
+        $h = $this->__dataset['meta']['display_height'] ?? $this->__dataset['meta']['height'] ?? $this->__dataset['meta']['meta']['height'];
+        switch(strtolower($type)) {
+            case "image":
+                $rt = "<img src='$rt' width=\"$w\" height=\"$h\">";
+                break;
+            case "video":
+                $rt = "<video width=\"$w\" height=\"$h\" ".$this->{'meta.controls.display'}.$this->{'meta.loop.display'}.$this->{'meta.autoplay.display'}.$this->{'meta.mute.display'}."><source src='$rt' type='$mimetype'></video>";
+                break;
+            case "audio":
+                $rt = "<audio ".$this->{'meta.mute.display'}.$this->{'meta.loop.display'}.$this->{'meta.controls.display'}."><source src='$rt' type='$mimetype'></audio>";
+                break;
+            case "href":
+                $fs = $this->{'meta.allowfullscreen'};
+                $allow = $this->{'meta.allow'};
+                $title = $this->{'meta.title'};
+                $rt = "<iframe src=\"$rt\" name=\"$enc\" scrolling=\"no\" frameborder=\"0\" width=\"$w\" height=\"$h\" $fs $allow $title></iframe>";
+                break;
+        }
+
+        return $rt;
+    }
+
+    private function embed_from_value($val, $field) {
+        return $val;
     }
 
     function get_pronoun_table() {
@@ -721,11 +874,15 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $this->get_pronoun_table()["are"];
     }
 
-    public function jsonSerialize() {
-        if (!$this->__dataset) throw new \Exception("This normalizer has not been supplied with iterable data");
+    public function jsonSerialize():mixed {
+        if (!$this->__dataset) return []; // throw new \Exception("This normalizer has not been supplied with iterable data");
 
         $mutant = [];
         foreach ($this->__dataset as $name => $value) {
+            // if($value instanceof Subdocument) {
+            //     $mutant[$name] = $value->__all_fields();
+            //     continue;
+            // }
             $mutant[$name] = $this->__get($name);
         }
         foreach($this->__schema as $name => $data) {
@@ -777,7 +934,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     public function add_to_schema($to_add) {
         $this->__schema = array_merge($to_add, $this->__schema);
-        $this->__index = array_keys($this->__schema);
+        $this->__index  = array_keys($this->__schema);
     }
 
 
@@ -790,11 +947,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         $this->__position = 0;
     }
 
-    public function current() {
+    public function current():mixed {
         return $this->{$this->__index[$this->__position]};
     }
 
-    public function key() {
+    public function key():mixed {
         return $this->__index[$this->__position];
     }
 
@@ -816,7 +973,7 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         return $this->__isset($offset);
     }
 
-    public function offsetGet($offset) {
+    public function offsetGet($offset):mixed {
         return $this->{$offset};
     }
 
@@ -837,5 +994,11 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
         }
 
         return $mutant;
+    }
+
+    /** COUNTABLE */
+
+    public function count():int {
+        return count($this->__dataset);
     }
 }

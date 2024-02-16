@@ -7,6 +7,8 @@
         this.currentNavClass = "tab-nav--current-tab";
         this.currentContentClass = "tab-nav--current-content";
         this.nav = this.querySelector("nav");
+        this.mode = (this.tagName === "TAB-NAV") ? 1 : 2;
+        if(this.mode === 1 && this.getAttribute('type') === null) this.mode = 10;
         if(!this.nav) console.warn("`tab-nav` is missing a `nav` element",this);
     }
     
@@ -31,6 +33,8 @@
             }
             const content = this.querySelector(url);
             if(!content) e.setAttribute("disabled","disabled");
+            const hgroupselector = content.querySelector("hgroup:first-child");
+            if(!hgroupselector) this.generateHgroup(e,content);
             e.addEventListener("click", evt => {
                 // evt.preventDefault();
                 // evt.stopPropagation();
@@ -42,8 +46,13 @@
         this.hashUpdate({});
     }
 
+    generateHgroup(anchor, target) {
+        const hgroup = document.createElement("hgroup");
+        hgroup.innerHTML = `<h2>${anchor.innerHTML}</h2>`;
+        target.insertBefore(hgroup, target.firstElementChild);
+    }
+
     hashUpdate(event = {}) {
-        console.log("Hash update")
         let newHash = location.hash || window.location.hash;
         if(!newHash || newHash === "#") newHash = new URL(this.nav.querySelector("a[href]").href).hash;
         newHash = newHash;

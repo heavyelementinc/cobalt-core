@@ -1,0 +1,55 @@
+<hgroup>
+    <vbox>
+        <h1>{{doc.meta.name}}</h1>
+        <span>{{path}}</span>
+    </vbox>
+</hgroup>
+<tab-nav>
+    <nav>
+        <a href="#info"><i name="information-outline"></i> Basic Info</a>
+        <a href="#options"><i name="tune-vertical"></i> Options</a>
+        <a href="#security"><i name="security"></i> Security</a>
+    </nav>
+    <form-request id="info" method="POST" action="/api/v1/extensions/{{doc._id}}/info" autosave="true">
+        <ul class="list-panel">
+            <li>
+                <label><strong>Author</strong></label>
+                <data>{{!doc.meta.author}}</data>
+            </li>
+            <li>
+                <label><strong>Description</strong></label>
+                <data>@from_markdown("$doc.meta.description");</data>
+            </li>
+            <li>
+                <label><strong>Version</strong></label>
+                <table>
+                    <tr>
+                        <th>Version Number</th>
+                        <td>{{doc.version}}</td>
+                    </tr>
+                    <tr>
+                        <th>Last Updated</th>
+                        <td><date-span value="{{doc.last_updated}}"></date-span></td>
+                    </tr>
+                    <tr>
+                        <th>Cobalt Extension Engine</th>
+                        <td>{{doc.extension_api}}</td>
+                    </tr>
+                </table>
+            </li>
+            <li>
+                <label><strong>Status</strong></label>
+                <switch-container>
+                    <input-switch name="active" checked="{{$doc.active}}"></input-switch>
+                    <label>Enabled</label>
+                </switch-container>
+            </li>
+        </ul>
+    </form-request>
+    <form-request id="options" method="POST" action="/api/v1/extensions/{{doc._id}}/options" autosave="form">
+        {{!options_view}}
+    </form-request>
+    <div id="security">
+        {{!grants}}
+    </div>
+</tab-nav>

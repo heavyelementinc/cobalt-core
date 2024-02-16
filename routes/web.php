@@ -6,14 +6,11 @@ if(app("UGC_enable_user_generated_content")) {
     Route::get(trim_trailing_slash(app("UGC_retrieval_endpoint")) . "/{file_id}", "UGC@retrieve");
 }
 
-Route::get("/", "Pages@index", [
-    'anchor' => ['name' => 'Home'],
-    'navigation' => ['main_navigation']
-]);
+Route::get("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']);
 
 Route::get("/res/fs/...","FileController@download");
 
-
+Route::get("/ServiceWorker.js", "FileController@service_worker");
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
     if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
@@ -22,6 +19,13 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@index", __APP_SETTINGS__['Posts']['public_index_options']);
     Route::get(__APP_SETTINGS__['Posts']['public_post'],  "Posts@post",  __APP_SETTINGS__['Posts']['public_post_options']);
     Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
+}
+
+if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {
+    Route::get('/events', "EventsController@public_index",[
+        'anchor' => ['name' => 'Events'],
+        'navigation' => ['main_navigation']
+    ]);
 }
 
 /** If authentications are enabled, these routes should be added to the table */
@@ -46,3 +50,5 @@ if (app("Auth_account_creation_enabled")) {
 if (app("Database_fs_enabled")) {
     Route::get(trim_trailing_slash(app("Database_fs_public_endpoint")) . "/...", "FileController@download");
 }
+
+Route::get("/resource/vapid-key.json", "FileController@vapid_pub_key");

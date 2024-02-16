@@ -12,13 +12,25 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Cobalt\Customization\CustomSchema;
+use Cobalt\Maps\Exceptions\LookupFailure;
+use Cobalt\Maps\GenericMap;
+use Cobalt\Renderer\Render;
+use Cobalt\SchemaPrototypes\SchemaResult;
+use Controllers\CRUDController;
 use Demyanovs\PHPHighlight\Highlighter;
+use Drivers\UTCDateTime as DriversUTCDateTime;
 use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Reauthorize;
+use Exceptions\HTTP\Unauthorized;
+use Handlers\ApiHandler;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use Validation\Exceptions\NoValue;
+use Validation\Exceptions\ValidationIssue;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -93,6 +105,16 @@ function doc_to_array($it): array {
     return $result;
 }
 
+function iterator_to_array_recursive($it):array {
+    $mutant = [];
+    foreach($it as $key => $value) {
+        if($value instanceof \Traversable) $value = iterator_to_array($value);
+        if(is_array($value)) $mutant[$key] = iterator_to_array_recursive($value);
+        else $mutant[$key] = $value;
+    }
+    return $mutant;
+}
+
 /**
  * Merges the elements of one or more arguments
  * @param array|Iterator $args,... Arguments
@@ -118,6 +140,10 @@ function merge() {
         $list[$i] = $arg;
     }
     return array_merge(...$list);
+}
+
+function array_append(&$array) {
+    
 }
 
 /**
@@ -162,11 +188,26 @@ function get_all_where_available($paths, $merged = true, $throwOnFail = false) {
         } catch (Exception $e) {
             throw new Exception("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""], $path) . '`');
         }
+        if(!isset($available[$key])) continue;
         if($available[$key] === null || $available[$key] === []) unset($available[$key]);
     }
     if ($merged) return array_merge(...$available);
     return $available;
 }
+
+// function scan_dir_all(array $paths, $contexts = [__ENV_ROOT__, __APP_ROOT__]):array {
+//     $results = [];
+//     foreach($paths as $path) {
+        
+//         $dir = scandir($path);
+//         $r = [];
+//         foreach($dir as $d) {
+            
+//         }
+
+//     }
+//     return array_unique(array_merge(...$results));
+// }
 
 /** Hand this function an array of files that might exist and this function will
  *  return an array of file paths that exist */
@@ -249,13 +290,18 @@ function str_to_id($str) {
  * @param string $class the class name
  */
 function cobalt_autoload($class) {
+    global $CLASSES_DIR;
     $namespace_to_path = str_replace("\\", "/", $class) . ".php";
-
-    $file = find_one_file($GLOBALS['CLASSES_DIR'], $namespace_to_path) ?? "";
+    
+    $file = find_one_file($CLASSES_DIR, $namespace_to_path) ?? "";
 
     try {
         if ($file !== false) {
-            require_once $file;
+            try{
+                require_once $file;
+            } catch (ParseError $e) {
+                die("Syntax error in ".str_replace([__ENV_ROOT__, __APP_ROOT__], ["__ENV__", "__APP__"], $e->getFile()));
+            }
             return;
         }
         $controllers_special_case = '/Controllers/';
@@ -327,30 +373,42 @@ function cobalt_autoload($class) {
     }
 }
 
+function get_controller($controllerName, $instanced = false) {
+    $locations = [
+        __APP_ROOT__ . "/controllers",
+        __ENV_ROOT__ . "/controllers",
+    ];
+
+    $found = find_one_file($locations,"$controllerName.php");
+    if($found === false) throw new HTTPException("Could not locate requested controller");
+    require_once $found;
+    if(!$instanced) return $controllerName;
+    return new $found();
+}
+
 /** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
  * @deprecated use new *set_template("/path/to/template.html")*
  * @param string $path The path name relative to TEMPLATE_PATHS
  * @return void
  */
 function add_template($path) {
-    set_template($path);
+    return set_template($path);
 }
 
 /** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
  * @param string $path The path name relative to TEMPLATE_PATHS
+ * @deprecated Setting a global template is deprecated behavior! Return a view() from your controller instead!
  * @return void
  */
-function set_template($path) {
+function set_template($path, $vars = []) {
     try {
-        $templates = files_exist([
-            __APP_ROOT__ . "/templates/$path",
-            __ENV_ROOT__ . "/templates/$path",
-        ]);
+        global $TEMPLATE_PATHS;
+        $templates = files_exist($TEMPLATE_PATHS);
     } catch (\Exception $e) {
         throw new NotFound("Template not found");
     }
     $GLOBALS['WEB_PROCESSOR_TEMPLATE'] = $path;
-    return $templates[0];
+    return view($path, $vars);
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
@@ -366,6 +424,7 @@ function set_template($path) {
  * @return void
  */
 function add_vars($vars) {
+    if(key_exists('custom', $vars)) throw new Exception("You may not override the `custom` var.");
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
         $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
         return;
@@ -391,8 +450,9 @@ function get_exportable_vars() {
     return $GLOBALS['EXPORTED_PUBLIC_VARS'];
 }
 
-function get_exportables_as_json() {
-    return json_encode($GLOBALS['EXPORTED_PUBLIC_VARS']);
+function get_exportables_as_json($encode = 0) {
+    if($encode === true) $encode = JSON_HEX_APOS;
+    return base64_encode(json_encode($GLOBALS['EXPORTED_PUBLIC_VARS'], $encode | JSON_PRETTY_PRINT));
 }
 
 $GLOBALS['TEMPLATE_BINDINGS'] = [
@@ -465,11 +525,31 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
         /** If it's an object, we'll check if the key exists and set the value
          * of $mutant to the found property */
         if ($type === "object") {
+            $mutated_path = null;
+
+            if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\SchemaResult")) {
+                return $mutant;
+            }
+
+            if (is_a($mutant, "\\Cobalt\\Customization\\CustomizationManager")) {
+                $mutant = $mutant->getCustomizationValue($key);
+                $mutated_path = str_replace("custom.$key", "value", $path_map);
+            }
+
+            if(is_a($mutant, "\\Cobalt\\Maps\\GenericMap")) {
+                $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
+                return lookup($temp_path, $mutant, $throw_on_fail);
+                // if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
+                // if (is_a($mutant, "\\Cobalt\\SchemaPrototypes\\MapResult")) return lookup_js_notation($temp_path, $mutant);
+                // if($looked_up . "$temp_path" === $path_map) return $mutant;
+            }
+
             if (is_a($mutant, "\Validation\Normalize")) {
-                $temp_path = get_temp_path($path_map, $key);
+                $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 if (isset($mutant->{$temp_path})) $mutant = $mutant->{$temp_path};
                 return $mutant;
             }
+            
             if (!isset($mutant->{$key})) break; // Break if we can't find the property
             $mutant = $mutant->{$key};
             $break = false;
@@ -489,6 +569,36 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
     else if ($throw_on_fail == "warn") throw new Exception("Could not find `$path_map`");
     else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
     else return; // Return undefined
+}
+
+function get_custom(string $name):?CustomSchema {
+    global $WEB_PROCESSOR_VARS;
+    return $WEB_PROCESSOR_VARS['custom']->getCustomizationByUniqueName($name);
+}
+
+function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed {
+    $type = is_array($subject) || $subject instanceof ArrayAccess;
+    if($type) {
+        if(isset($subject[$name])) return $subject[$name];
+    }
+    if ($subject instanceof SchemaResult) {
+        if(isset($subject->{$name})) return $subject->{$name};
+        $type = "SchemaResult";
+    }
+    if(strpos($name, ".") >= 0) {
+        $exploded = explode(".", $name);
+        $first = array_shift($exploded);
+        if($type === true && isset($subject[$first])) return lookup(implode(".", $exploded), $subject[$first]);
+        if($type === "SchemaResult" && isset($subject->{$first})) return lookup(implode(".", $exploded), $subject->{$first});
+        if($throwOnFail) throw new LookupFailure("Failed to find `$first` on " . gettype($subject));
+        // return "";
+    }
+    if($subject instanceof GenericMap) {
+        $schema = $subject->readSchema();
+        if(key_exists($name, $schema)) return $subject->__toResult($name, null,  $schema[$name], $subject);
+    }
+    if($throwOnFail) throw new LookupFailure("Failed to find `$name` on " . gettype($subject));
+    return "";
 }
 
 function get_temp_path($path, $key) {
@@ -512,23 +622,58 @@ function get_temp_path($path, $key) {
  */
 function from_markdown(?string $string, bool $untrusted = true) {
     if(!$string) return "";
+
+    // [$string, $placeholders, $replacements] = parse_embeds($string);
+
     $md = new ParsedownExtra();
     $md->setSafeMode($untrusted);
+    $parsed = $md->text($string);
+
+    $parsed = youtube_embedder($parsed);
+    $parsed = instagram_embedder($parsed);
+    // $ytMatch = ["/&lt;img.*src=['\"].*(youtube).*v=[a-zA-Z0-9.*['\"].*&gt;/", "/<img.*src=['\"].*(youtube).*['\"].*>/"];
+
+    // foreach($ytMatch as $url) {
+    //     $matches = [];
+    //     preg_replace($url, $parsed, $matches);
+
+    //     $parsed = str_replace($match[0], , $parsed);
+    // }
+
     // Implmentented reddit's ^ for superscript. Only works one word at a time.
     return preg_replace(
         [
             "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
             "/\^(\w)/",
+            
             // "/<img src=['\"]()['\"])/"
             // "/&lt;a(\s*[='\(\)]*.*)&gt;(.*)&lt;\/a&gt;/",
         ],
         [
             "<sup>$1</sup>",
             "<sup>$1</sup>",
+
             // "<a$1>$2</a>",
         ],
-        $md->text($string)
+        $parsed
     );
+}
+
+function youtube_embedder($html){
+    $regExp = "/!youtube:([^#&?<>]*)/";
+    $match = preg_replace($regExp, '<figure class="content-embed content--youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/$1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></figure>', $html);
+    return $match;
+}
+
+function instagram_embedder($html) {
+    $regExp = "/!instagram:([^#&?<>]*)/";
+    $match = preg_replace($regExp, '<figure class="content-embed content--instagram"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/$1/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/p/$1/?utm_source=ig_embed&amp;utm_campaign=loading" style=" background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style=" display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div> <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style=" color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style=" background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style=" width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style=" width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style=" background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style=" width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/p/$1/?utm_source=ig_embed&amp;utm_campaign=loading" style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank"></a></p></div></blockquote> <script async src="//www.instagram.com/embed.js"></script></figure>', $html);
+    return $match;
+}
+
+function markdown_to_plaintext(?string $string) {
+    $md = from_markdown($string);
+    return strip_tags($md);
 }
 
 /**
@@ -597,7 +742,8 @@ function build_object_from_paths($object) {
 }
 
 function is_secure() {
-    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'])) return true;
+    
+    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'] ?? "")) return true;
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || $_SERVER['SERVER_PORT'] == 443;
 }
@@ -683,10 +829,24 @@ function maybe_with($template, $vars = []) {
  * @return string Processed template
  */
 function view(string $template, array $vars = []):string {
+    if(__APP_SETTINGS__['Render_use_v2_engine']) {
+        $render = new Render();
+        $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
+        $render->getBodyFromTemplate($template);
+    } else {
+        $render = new \Render\Render();
+        $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
+        $render->set_vars($vars);
+        $render->from_template($template);
+    }
+    return $render->execute();
+}
+
+function view_from_string(string $view, array $vars = []):string {
     $render = new \Render\Render();
     if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
     $render->set_vars($vars);
-    $render->from_template($template);
+    $render->set_body($view, 'string');
     return $render->execute();
 }
 
@@ -728,8 +888,17 @@ function view_each(string $template, Iterator|array $docs, string $var_name = 'd
 
 function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
     $array = [];
-    foreach($docs as $index => $doc){
-        $array[$index] = view($template, [$var_name => $doc]);
+    $d = $docs;
+    if(gettype($docs) === "array") {
+        if(key_exists($var_name, $docs)) $d = $docs[$var_name];
+    } else {
+        $d = iterator_to_array($d);
+    }
+    foreach($d as $index => $doc){
+        $array[$index] = view($template, array_merge(
+            $d,
+            [$var_name => $doc]
+        ));
     }
     return $array;
 }
@@ -747,6 +916,18 @@ function credit_card_form(array|object $data = [],$shipping = false):string {
         'months' => $months,
         'shipping' => ($shipping) ? view('/parts/credit-card-shipping.html',['cc' => $data]) : "",
     ]);
+}
+
+function url_fragment_sanitize(string $value):string {
+    $mutant = strtolower($value);
+    // Remove any character that isn't alphanumerical and replace it with a dash
+    $mutant = preg_replace("/([^a-z0-9])/", "-", $mutant);
+    // Remove any consecutive dash
+    $mutant = preg_replace("/(-){2,}/", "", $mutant);
+
+    if (!$mutant || $mutant === "-") throw new ValidationIssue("\"$value\" is not suitable to transform into a URL fragment");
+
+    return $mutant;
 }
 
 /** Compare two pathnames
@@ -772,9 +953,10 @@ function is_child_dir($base_dir, $path) {
 }
 
 // function get_route_data(string $class, string $method, ?string $routeMethod = "get", string $context = null) {
+    // global $ROUTER;
 //     if($context === null) $context = "web";
 //     $controllerAlias = "$class@$method";
-//     $router = $GLOBALS['router'];
+//     $router = $ROUTER;
 //     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
 //     // if($context !== $router->route_context) {
 //     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
@@ -801,9 +983,9 @@ function is_child_dir($base_dir, $path) {
  * @return string 
  */
 function get_path_from_route(string $class, string $method, array $args = [], ?string $routeMethod = "get", string $context = null) {
+    global $ROUTER;
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
-    $router = $GLOBALS['router'];
     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
     // if($context !== $router->route_context) {
     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
@@ -811,7 +993,7 @@ function get_path_from_route(string $class, string $method, array $args = [], ?s
     // }
     // $routes = $router->routes[$context][$routeMethod];
     $route = null;
-    foreach($router->routes as $routes) {
+    foreach($ROUTER->routes as $routes) {
         foreach($routes[$routeMethod] as $r => $data) {
             if($data['controller'] !== $controllerAlias) continue;
             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
@@ -833,7 +1015,7 @@ function route_replacement($path, $args, $data = []) {
     $mutant = $rt;
     // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
     foreach($replacement[0] as $i => $replace) {
-        $mutant = str_replace($replace, $args[$i] ?? $args[0], $mutant);
+        $mutant = str_replace($replace, $args[$i] ?? $args[0] ?? "", $mutant);
     }
 
     return preg_replace("/\/{2,}/","/", $mutant);
@@ -858,11 +1040,11 @@ function route(string $directiveName, array $args = [], array $context = []):str
 }
 
 function validate_route($directiveName, $context) {
+    global $ROUTER;
     $routeMethod = $context['method'] ?? "get";
     $ctx = $context['context'] ?? "web";
     
-    $router = $GLOBALS['router'];
-    $routes = $router->routes[$ctx][$routeMethod];
+    $routes = $ROUTER->routes[$ctx][$routeMethod];
 
     foreach($routes as $r => $data) {
         if($data['controller'] !== $directiveName) continue;
@@ -879,7 +1061,8 @@ function validate_route($directiveName, $context) {
  * 
  * @param string $directory_group the name of the key
  */
-function get_route_group($directory_group, $misc = []) {
+function get_route_group_old($directory_group, $misc = []) {
+    global $ROUTER;
     $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
     if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
     if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
@@ -889,33 +1072,55 @@ function get_route_group($directory_group, $misc = []) {
     
     $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
     if($misc['excludeWrapper'] === true) $ul = "";
-    $current_route = $GLOBALS['router']->current_route;
-    $list = $GLOBALS['router']->routes;
+    $current_route = $ROUTER->current_route;
+    $list = $ROUTER->routes;
 
     // handleAuxiliaryRoutes($list, $misc, $directory_group);
 
+    $group_to_process = [];
+
     foreach($list as $context => $methods) {
         foreach($methods as $method => $routes) {
+            $nat_order = -1;
             foreach ($routes as $r => $route) {
                 $groups = $route['navigation'] ?? false;
                 if (!$groups) continue;
-                // If we get here, we know we [probably] have an array
-        
                 // Now we check if the directory group is in $groups or the key exists
                 // If both are FALSE, then we skip list assembly.
                 if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
                 if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-                $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
-                if(key_exists('unread',$route)) $info['unread'] = $route['unread'];
-                if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
-                if ($r === $current_route) $info['attributes'] = 'class="current--route"';
-                $ul .= build_directory_item($info, $misc['with_icon'], $context);
-        
+                $nat_order++;
+                $group_to_process[] = [...$route, ...['r' => $r, 'context' => $context, 'current_nav_group' => $directory_group, 'nat_order' => $nat_order]];
             }
         }
     }
+
+    uasort($group_to_process, function ($a, $b) {
+        $order_a = $a['anchor']['order'] ?? $a['navigation'][$a['current_nav_group']]['order'] ?? $a['nat_order'];
+        $order_b = $b['anchor']['order'] ?? $b['navigation'][$b['current_nav_group']]['order'] ?? $b['nat_order'];
+        return $order_a - $order_b;
+    });
+
+    foreach($group_to_process as $key => $route) {
+        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
+        if(key_exists('unread',$route)) $info['unread'] = $route['unread'];
+        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
+        if ($route['r'] === $current_route) $info['attributes'] = 'class="current--route"';
+        $ul .= build_directory_item($info, $misc['with_icon'], $route['context']);
+    }
+
     $wrapper = ($misc['excludeWrapper']) ? "" : "</ul>";
     return $ul . $wrapper;
+}
+
+function get_route_group($directory_group, $misc = []) {
+    global $ROUTER;
+    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
+    $rtGrp = new \Routes\RouteGroup($directory_group, $ROUTER->current_route ?? "",$misc['with_icon']);
+    $rtGrp->setID($misc['id']);
+    $rtGrp->setClassesFromString($misc['classes']);
+    $rtGrp->setExcludeWrappers($misc['excludeWrapper']);
+    return $rtGrp->render();
 }
 
 // TODO: Fix this
@@ -967,8 +1172,8 @@ function auxRouteHandler($route, $group) {
 
 function build_directory_item($item, $icon = false, $context = "") {
     $prefix = "";
+    $icon = "";
     if ($icon) $icon = "<i name='$item[icon]'></i>";
-    else $icon = "";
     $attributes = $item["attributes"] ?? '';
     if ($context !== "web") {
         $prefix = app('context_prefixes')[$context]['prefix'];
@@ -1011,6 +1216,14 @@ function schema_group_element($tag, $attributes, $label = "") {
         $attrs = " $key=\"" . htmlspecialchars($value) . "\"";
     }
     return "<$tag$attributes>";
+}
+
+/** Convert seconds to pretty string */
+function prettify_seconds(?int $seconds) {
+    if(!$seconds) return "";
+    $date = new DateTime("00:00:00");
+    $date->modify("+ $seconds seconds");
+    return $date->format("g\h i\m");// . "h " . $date->format("i") . "m";
 }
 
 /** Convert cents to dollars with decimal fomatting (not prepended by a "$" dollar sign)
@@ -1098,9 +1311,45 @@ function confirm($message, $data, $okay = "Continue", $dangerous = true) {
     try {
         $header = getHeader("X-Confirm-Dangerous");
         if($header) return true;
-    } catch (Exception $e) {       
+    } catch (Exception $e) {
         throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
     }
+}
+
+/**
+ * 
+ * @param string $message - Prompt the client will display with the reauth request
+ * @param mixed $resubmit - Data the client must return to complete the reauth request
+ * @return true         - This function will only ever return true, it will throw an exception in any failure case
+ * @throws Unauthorized - If the user is not logged in
+ * @throws Reauthorize  - If the user must reauthorize or fails a password verification
+ */
+function reauthorize($message = "You must re-authroize your account", $resubmit) {
+    // Check if session doesn't exist
+    if(!session()) throw new Unauthorized("You must be logged in");
+    $reauth_session_name = 'last_reauthorized';
+    
+    try {
+        // Check if the X-Reauthorization header is set
+        $reauth = getHeader("X-Reauthorization");
+    } catch(Exception $e) {
+        $reauth = false;
+    }
+
+    if($reauth) {
+        $password_plain_text = base64_decode($reauth);
+        $session_pword = session('pword');
+        if(!password_verify($password_plain_text, $session_pword)) throw new Reauthorize($message, $resubmit);
+        $_SESSION[$reauth_session_name] = time();
+        return true;
+    }
+    // Check if the session meets the minimum reauth timeline
+    if(!isset($_SESSION[$reauth_session_name]) || time() - $_SESSION[$reauth_session_name] >= app("Auth_reauth_timeout")) {
+        throw new Reauthorize($message, $resubmit);
+    }
+
+    // If everything checks out, return true;
+    return true;
 }
 
 
@@ -1154,6 +1403,47 @@ function fetch_and_save($url) {
 }
 
 /**
+ * 
+ * @param mixed $remote_url 
+ * @param mixed $path 
+ * @return bool true on success, false on failure
+ */
+function fetch_remote_file($remote_url, $path):bool {
+    $result = copy($remote_url, $path);
+    return $result;
+    // return file_put_contents($path, $result);
+
+    // $dir            =   $path;
+    // $fileName       =   basename($remote_url);
+    // $saveFilePath   =   $dir . $fileName;
+    // $ch = curl_init($remote_url);
+    // $fp = fopen($path, 'wb');
+    // curl_setopt($ch, CURLOPT_FILE, $fp);
+    // curl_setopt($ch, CURLOPT_HEADER, 0);
+    // $result = curl_exec($ch);
+    // curl_close($ch);
+    // fclose($fp);
+    // return $result;
+
+    // //This is the file where we save the information
+    // $fp = fopen($path, 'w+');
+    // //Here is the file we are downloading, replace spaces with %20
+    // $ch = curl_init(str_replace(" ","%20",$remote_url));
+    // // make sure to set timeout to a high enough value
+    // // if this is too low the download will be interrupted
+    // curl_setopt($ch, CURLOPT_TIMEOUT, 600);
+    // // write curl response to file
+    // curl_setopt($ch, CURLOPT_FILE, $fp); 
+    // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    // // get curl response
+    // $result = curl_exec($ch); 
+    // curl_close($ch);
+    // fclose($fp);
+
+    // return $result;
+}
+
+/**
  * This function returns the maximum files size that can be uploaded 
  * in PHP
  * @return int File size in bytes
@@ -1202,6 +1492,14 @@ function async_cobalt_command($command, $context = true, $log = "/dev/null") {
     return $pid;
 }
 
+function cobalt_command($command, $context = true, $stripControlCharacters = false) {
+    $shell = __ENV_ROOT__ . "/core.sh";
+    if ($context) $shell = __APP_ROOT__ . "/cobalt.sh";
+    if($stripControlCharacters) $shell .= " --plain-output";
+    $result = shell_exec("sh $shell $command");
+    return $result;
+}
+
 function plural($number, string $suffix = "s") {
     if ($number == 1) return "";
     return $suffix;
@@ -1216,52 +1514,91 @@ function sanitize_path_name($path) {
     return str_replace(["../"], "", $path);
 }
 
-function relative_time($date, $now = null) {
-    if (!$now) $now = time();
+function relative_time($time = false, $now = null, $limit = 86400, $format = "M jS g:i A") {
+    if($time instanceof UTCDateTime || $time instanceof DriversUTCDateTime) $time = $time->toDateTime();
+    if($time instanceof DateTime) $time = $time->getTimestamp();
+    if (empty($time) || (!is_string($time) && !is_numeric($time))) $time = time();
+    else if (is_string($time)) $time = strtotime($time);
+
+    if(is_null($now)) $now = time();
+    $relative = '';
+
+    if ($time === $now) $relative = 'now';
+    elseif ($time > $now) $relative = 'in the future';
+    else {
+        $diff = $now - $time;
+
+        if ($diff >= $limit) $relative = date($format, $time);
+        elseif ($diff < 60) {
+            $relative = 'less than one minute ago';
+        } elseif (($minutes = ceil($diff/60)) < 60) {
+            $relative = $minutes.' minute'.(((int)$minutes === 1) ? '' : 's').' ago';
+        } else {
+            $hours = ceil($diff/3600);
+            $relative = 'about '.$hours.' hour'.(((int)$hours === 1) ? '' : 's').' ago';
+        }
+    }
+
+    return $relative;
 }
 
-function pretty_rounding($number):string{
+const FACTOR_MAP = [
+    [
+        'factor' => 1000,
+        'name' => 'thousand',
+        'precision' => 1,
+        'suffix' => 'k'
+    ], [
+        'factor' => 1000000,
+        'precision' => 1,
+        'name' => 'million',
+        'suffix' => 'm'
+    ], [
+        'factor' => 1000000000,
+        'precision' => 1,
+        'name' => 'billion',
+        'suffix' => 'b',
+    ], [
+        'factor' => 1000000000000,
+        'precision' => 1,
+        'name' => 'trillion',
+        'suffix' => 't',
+    ]
+];
+
+function pretty_rounding($number, $type = 'suffix', $join = ""):string{
     if($number === 0) return "zero";
+    if(is_null($number)) return "zero";
     
-    $map = [
-        [
-            'factor' => 1000,
-            'precision' => 1,
-            'suffix' => 'k'
-        ], [
-            'factor' => 1000000,
-            'precision' => 1,
-            'suffix' => 'm'
-        ], [
-            'factor' => 1000000000,
-            'precision' => 1,
-            'suffix' => 'b',
-        ], [
-            'factor' => 1000000000000,
-            'precision' => 1,
-            'suffix' => 't',
-        ]
-    ];
+    $map = FACTOR_MAP;
     
     if($number < $map[0]['factor']) return $number;
 
     foreach($map as $data) {
         if($number < $data['factor']) continue;
-        $result = round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP) . $data['suffix'];
+        if(!key_exists($type, $data)) $type = "suffix";
+        $result = round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP) . $join . $data[$type];
     }
 
     return $result;
 }
 
+function pretty_numeral($number):string {
+    return pretty_rounding($number, 'name', " ");
+}
+
+
 function benchmark_start($name) {
     if(!__APP_SETTINGS__['debug']) return;
-    $GLOBALS['BENCHMARK_RESULTS'][$name] = ['start' => microtime(true) * 1000];
+    global $BENCHMARK_RESULTS;
+    $BENCHMARK_RESULTS[$name] = ['start' => microtime(true) * 1000];
 }
 
 function benchmark_end($name) {
     if(!__APP_SETTINGS__['debug']) return;
-    $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] = microtime(true) * 1000;
-    $GLOBALS['BENCHMARK_RESULTS'][$name]['delta'] = $GLOBALS['BENCHMARK_RESULTS'][$name]['end'] - $GLOBALS['BENCHMARK_RESULTS'][$name]['start'];
+    global $BENCHMARK_RESULTS;
+    $BENCHMARK_RESULTS[$name]['end'] = microtime(true) * 1000;
+    $BENCHMARK_RESULTS[$name]['delta'] = $BENCHMARK_RESULTS[$name]['end'] - $BENCHMARK_RESULTS[$name]['start'];
 }
 
 function obscure_email(string $email, int $threshold = 3, string $character = "â€¢"): string {
@@ -1289,8 +1626,7 @@ function obscure_email(string $email, int $threshold = 3, string $character = "â
 
 function set_up_db_config_file(string $database, string $user, string $password, string $addr = "localhost", string $port = "27017", string $ssl = "false", string $sslFile = "", string $invalidCerts = "false", ?string $path = null) {
     $path = $path ?? $GLOBALS['db_config'];
-    file_put_contents($path,"
-<?php
+    return file_put_contents($path,"<?php
 /**
  * This is the bootstrap config file. We use this to
  * Set up our database access. This file is read every
@@ -1352,7 +1688,8 @@ function clamp(int|float $current, int|float $min, int|float $max):int|float {
     return max($min, min($max, $current));
 }
 
-function country2flag(string $countryCode, ?string $countryName = null): string {
+function country2flag(?string $countryCode, ?string $countryName = null): string {
+    if(!$countryCode) return "";
     $unicode = (string) preg_replace_callback(
         '/./',
         static fn (array $letter) => mb_chr(ord($letter[0]) % 32 + 0x1F1E5),
@@ -1361,14 +1698,20 @@ function country2flag(string $countryCode, ?string $countryName = null): string 
     return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
 }
 
-function getHeader($header) {
+function getHeader($header, $headerList = null, $latest = true, $exception = true) {
+    if($headerList === null) $headerList = getallheaders();
     $toMatch = strtolower($header);
     $headers = [];
-    foreach(getallheaders() as $key => $value){
+    foreach($headerList as $key => $value){
         $headers[strtolower($key)] = $value;
     }
-    if(key_exists($toMatch, $headers)) return $headers[$toMatch];
-    throw new NoValue("The specified header was not found among the request headers");
+    $match = null;
+    if(key_exists($toMatch, $headers)) $match = $headers[$toMatch];
+
+    if(gettype($match) === "array" && $latest) return $match[count($match) - 1];
+    if($match) return $match;
+    if($exception) throw new NoValue("The specified header was not found among the request headers");
+    return null;
 }
 
 function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
@@ -1406,4 +1749,153 @@ function createJWT(array $header, array $payload, $secret) {
     $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
 
     return $jwt;
+}
+
+if(!function_exists("log_item")) {
+    function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
+        if ($lvl > $GLOBALS['cli_verbosity']) return;
+        $date = date('Y-m-d');
+        $logpath = __APP_ROOT__ . "/ignored/logs/";
+        if(!is_dir($logpath)) mkdir($logpath, 0777, true);
+        $resource = fopen($logpath . "cobalt-$date.log", "a");
+        fwrite($resource, "[".date(DATE_RFC2822)."] {$message}\n");
+        fclose($resource);
+        if(!function_exists("say")) return;
+        $m = fmt("[LOG $lvl]", 'i');
+        $m .= " " . fmt($message, $type, $back);
+        print($m . "\n");
+    }
+}
+
+/**
+ * Implemented values
+ *   value
+ *   innerHTML
+ *   outerHTML
+ *   invalid
+ *   remove - will remove any single element that matches query OR a node list
+ *   message - will provide a message to the end user. It will look like a ValidationIssue
+ *   src - update the src attribute for an img tag
+ *   attribute - update arbitrary attribute
+ *   attributes - update a list of attributes
+ *   style - update a list of styles
+ *   
+ * 
+ * @param string $query 
+ * @param array $value 
+ * @return void 
+ */
+function update(string $query, array $value) {
+    global $context_processor;
+    if($context_processor instanceof ApiHandler === false) return;
+    $context_processor->update_instructions[] = ['target' => $query, ...$value];
+}
+
+/**
+ * Supply a custom content group name and this function will return a hyperlink
+ * for authorized user accounts where they can edit content.
+ * 
+ * Use this to manually place an edit link for groups of like content.
+ * @param string $group 
+ * @return string 
+ * @throws Exception 
+ */
+function edit_link($group) {
+    try {
+        if(!has_permission("Customizations_modify", null, null, false)) return "";
+    } catch (\Exceptions\HTTP\Unauthorized $e) {
+        return "";
+    }
+    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i></a>";
+}
+
+/**
+ * Will return the $_FILES superglobal to a more sane format:
+ * [
+ *    [0] => Array
+ *        (
+ *             [input_name] => 'example',
+ *             [name]       => 'example.jpg',
+ *             [type]       => 'image/jpeg',
+ *             [tmp_name]   => 'tmp/php8830t4',
+ *             [error]      => 0,
+ *             [size]       => 21509
+ *        )
+ * ]
+ * @return array 
+ */
+function normalize_file_array() {
+    $fileUploadArray = $_FILES;
+    $resultingDataStructure = [];
+    foreach ($fileUploadArray as $input => $infoArr) {
+        $filesByInput = [];
+        $nextIndex = count($filesByInput);
+        foreach ($infoArr as $key => $valueArr) {
+            if (is_array($valueArr)) { // file input "multiple"
+                foreach($valueArr as $i=>$value) {
+                    $filesByInput[$i][$key] = $value;
+                }
+                
+            }
+            else { // -> string, normal file input
+                $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
+                break;
+            }
+        }
+        $filesByInput[$nextIndex]['input_name'] = $input;
+        $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
+    }
+    $filteredFileArray = [];
+    foreach($resultingDataStructure as $file) { // let's filter empty & errors
+        if (!$file['error']) $filteredFileArray[] = $file;
+    }
+    return $filteredFileArray;
+}
+
+
+/**
+ * Given this structure:
+ * [
+ *    "key" => [
+ *       "value" => [
+ *           "nested" => true
+ *       ],
+ *       "other" => false
+ *    ],
+ *    ...
+ * ]
+ * 
+ * This function will return:
+ * [
+ *    "key.value.nested" => true,
+ *    "key.other" => false,
+ *    ...
+ * ]
+ * @param mixed $array 
+ * @param string $toplevel 
+ * @return void 
+ */
+// function flatten_array_to_js_notation($array, $toplevel = null) {
+//     $flattened = [];
+//     // if($toplevel) $toplevel = "$toplevel.";
+//     foreach($array as $key => $val) {
+//         $mutant = [];
+//         if(is_object($val) && $val instanceof jsonSerializable) {
+//             $val = $val->__jsonSerialize();
+//         }
+//         if(is_array($val)) {
+//             $val = flatten_array_to_js_notation($array, $key);
+//             continue;
+//         }
+//         // $newkey = $toplevel.$key;
+//         $flattened[$newkey] = 
+//     }
+// }
+
+function convertFractionToChar($string) {
+    return str_replace(" ", "", str_replace(
+        ["1/4",   "1/2",   "3/4",   "1/7",    "1/9",    "1/10",   "1/3",    "2/3",    "1/5",    "2/5",    "3/5",    "4/5",    "1/6",    "5/6",    "1/8",    "3/8",    "5/8",    "7/8"],
+        ["&#188;","&#189;","&#190;","&#8528;","&#8529;","&#8530;","&#8531;","&#8532;","&#8533;","&#8534;","&#8535;","&#8536;","&#8537;","&#8538;","&#8539;","&#8540;","&#8541;","&#8542;"],
+        $string
+    ));
 }

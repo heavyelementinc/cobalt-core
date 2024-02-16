@@ -1,16 +1,27 @@
-<fieldset>
+<hgroup>
+    <h1>{{title}}</h1>
+</hgroup>
+
+<fieldset class="control-panel">
+    <legend>Presentation Settings</legend>
+    {{!presentation_settings}}
+</fieldset>
+<fieldset class="control-panel">
     <legend>Application Settings</legend>
-    {{!basic_settings}}
+    {{!application_settings}}
 </fieldset>
-<fieldset>
-    <legend>Basic Settings</legend>
-    {{!settings_panel}}
-</fieldset>
-<fieldset>
+<!-- <fieldset class="control-panel">
     <legend>Public Settings</legend>
     {{!public_settings_panel}}
+</fieldset> -->
+<fieldset class="control-panel">
+    <legend>Advanced Settings</legend>
+    {{!advanced_settings}}
 </fieldset>
 <style>
+    .control-panel:has(.directory--group:empty) {
+        display: none;
+    }
     .directory--icon-group {
         display: flex;
         list-style: none;
@@ -38,5 +49,9 @@
 
     .directory--icon-group i {
         font-size: 5rem;
+    }
+
+    .directory--group:has(ul:empty) {
+        display: none;
     }
 </style>

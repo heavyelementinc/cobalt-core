@@ -1,0 +1,9 @@
+<hgroup>
+    <h1>{{title}}</h1>
+</hgroup>
+<form-request method="POST" action="/api/v1/remote/{{identifier}}/update" autosave="none">
+    <ul class='list-panel'>
+        {{!fields}}
+    </ul>
+    <button class="submit">Save</button>
+</form-request>

@@ -13,7 +13,10 @@
 
 namespace Auth;
 
+use Cobalt\Extensions\Extensions;
 use Exception;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\Error;
 
 class CurrentSession extends \Drivers\Database {
 
@@ -48,7 +51,7 @@ class CurrentSession extends \Drivers\Database {
         $this->default_token_expiration = $this->now + $this->month;
         $this->default_token_refresh = $this->now + $this->day;
 
-        $headers = apache_request_headers();
+        $headers = \apache_request_headers();
         $this->cookie_options = [
             'expires' => $this->default_cookie_expiration,
             'path' => '/',
@@ -131,7 +134,7 @@ class CurrentSession extends \Drivers\Database {
         return $token;
     }
 
-    function login_session($user_id, $stay_logged_in) {
+    function login_session($user_id, $stay_logged_in, $state = null) {
         // $query = [
         //     $this->cookie_name => $this->token_value,
         //     'user_id' => null // We want to make sure we're only updating tokens that aren't logged in
@@ -139,23 +142,31 @@ class CurrentSession extends \Drivers\Database {
         // $count = $this->count($query);
         // if ($count === 0) return true;
         // app("require_https_login_and_cookie") &&
-        if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("No token");
+        if (empty($this->token_value)) throw new \Exceptions\HTTP\BadRequest("There was no token specified");
         try {
+
+            $session = [
+                $this->cookie_name => $this->token_value,
+                'user_id' => $this->__id($user_id),
+                'refresh' => $this->default_token_refresh,
+                'expires' => $this->default_token_expiration,
+                'persist' => filter_var($stay_logged_in, FILTER_VALIDATE_BOOLEAN),
+                'address' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'],
+                'details' => $this->get_browser_details(),
+                'state'   => $state,
+            ];
+
+            Extensions::invoke("session_creation", $session);
+
             $result = $this->updateOne(
                 [$this->cookie_name => $this->token_value],
-                ['$set' => [
-                    $this->cookie_name => $this->token_value,
-                    'user_id' => $this->__id($user_id),
-                    'refresh' => $this->default_token_refresh,
-                    'expires' => $this->default_token_expiration,
-                    'persist' => filter_var($stay_logged_in, FILTER_VALIDATE_BOOLEAN)
-                ]],
+                ['$set' => $session],
                 ['upsert' => true]
             );
         } catch (\Exception $e) {
             throw new \Exceptions\HTTP\Error("Failed to create session");
         }
-        if ($result->getUpsertedCount() === 0 && $result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("You're already logged in.");
+        if ($result->getUpsertedCount() === 0 && $result->getModifiedCount() === 0) throw new \Exceptions\HTTP\BadRequest("No session document was created or modified","You're already logged in.");
         return true;
     }
 
@@ -195,5 +206,42 @@ class CurrentSession extends \Drivers\Database {
         /** Unset the cookie's value */
         unset($_COOKIE[$this->cookie_name]);
         return ['result' => (bool)$result->getModifiedCount()];
+    }
+
+    function get_browser_details() {
+        $ua = $_SERVER['HTTP_USER_AGENT'];
+        return [
+            'client'  => $this->get_browser($ua),
+            'platform' => $this->get_platform($ua),
+        ];
+    }
+
+    function get_browser($agent) {
+        $browser = "Unknown";
+        if (preg_match('/Chrome[\/\s](\d+\.\d+)/', $agent, $match) ) $browser = "Chrome";
+        else if (preg_match('/Edge\/\d+/', $agent, $match) ) $browser = "Edge";
+        else if (preg_match('/Firefox[\/\s](\d+\.\d+)/', $agent, $match) ) $browser = "Firefox";
+        else if (preg_match('/OPR[\/\s](\d+\.\d+)/', $agent, $match) ) $browser = "Opera";
+        else if (preg_match('/Safari[\/\s](\d+\.\d+)/', $agent, $match) ) $browser = "Safari";
+
+        return [
+            'build'   => $browser,
+            'version' => $match[1]
+        ];
+    }
+
+    function get_platform($agent) {
+        $os = "Unknown";
+        if(preg_match('/Android[\/\s](\d{1,2})/',$agent,$match)) $os = 'Android';
+        elseif(preg_match('/Windows NT[\/\s](\d{1,2})/',$agent,$match)) $os = 'Windows';
+        elseif(preg_match('/iPhone[\/\s]OS[\/\s](\d{1,2})|iPad[\/\s]OS[\/\s](\d{1,2})/',$agent,$match)) $os = 'iOS';
+        elseif(preg_match('/CrOS[\/\s]\w*[\/\s](\d*.\d*.\d*)/',$agent,$match)) $os = 'ChromeOS';
+        elseif(preg_match('/Mac[\/\s]OS[\/\s]X?[\/\s](\d{1,2})/',$agent,$match)) $os = 'Mac OS';
+        elseif(preg_match('/Linux[\/\s](\w*)/',$agent,$match)) $os = 'Linux';
+
+        return [
+            'build' => $os,
+            'version' => $match[1]
+        ];
     }
 }

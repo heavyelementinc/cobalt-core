@@ -2,9 +2,14 @@
     --admin-panel-width: 200px;
 }
 
+nav#admin-panel a[is="real"][href="/"] {
+    display: flex;
+    justify-content: center;
+}
 nav#admin-panel .cobalt-masthead {
-    width: var(--admin-panel-width);
+    width: calc(var(--admin-panel-width) - 10%);
     height: 150px;
+    max-height: unset;
     object-fit: contain;
 }
 
@@ -16,9 +21,11 @@ nav#admin-panel {
     width: var(--admin-panel-width);
     height: 100%;
     background: var(--project-color-admin-panel-background);
+    z-index: calc(var(--project-modal-z-index) - 1);
+    color:  var(--project-color-admin-panel-font);
 }
 
-#admin-panel > ul {
+#admin-panel > ul.admin-panel--nav-group {
     flex-grow: 1;
     height: 100%;
     /* overflow-y: scroll; */
@@ -67,6 +74,53 @@ nav#admin-panel {
     width: var(--admin-panel-width);
 }
 
+#admin-panel .settings-panel--footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: inherit;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 5px;
+    background: var(--project-color-user-panel-button);
+    width: var(--admin-panel-width);
+    padding: 5px 5px 2px;
+    box-sizing: border-box;
+}
+
+#admin-panel .settings-panel--footer:empty {
+    display: none;
+}
+
+#admin-panel .settings-panel--footer :is(a, notify-button) {
+    color: inherit;
+    text-decoration: none;
+    background-color: inherit;
+    opacity: .5;
+    transition: opacity .5s;
+}
+
+#admin-panel .settings-panel--footer :is(a, notify-button):hover {
+    opacity: 1;
+}
+
+#admin-panel .settings-panel--footer notify-button[aria-pressed="true"] {
+    opacity: 1;
+}
+
+#admin-panel .settings-panel--footer :is(i, notify-button) {
+    font-size: 2em;
+}
+
+.contextual {
+    display: none;
+}
+
+.contextual:focus {
+    display: block;
+}
+
 #admin-panel + main {
     display: block;
     min-height: 80vh;
@@ -100,4 +154,31 @@ main {
 
 #user-panel-header a {
     color:white;
+}
+
+@media only screen and (max-width: 35em) {
+    :root {
+        --admin-panel-width: 0;
+    }
+    
+    nav#admin-panel{
+        z-index: calc(var(--project-modal-z-index) - 10);
+        translate: -100vw;
+/*         left: -100vw; */
+        width: 100vw;
+        transition: translate .4s;
+    }
+    
+    #admin-panel .settings-panel--footer {
+        width: 100vw;
+    }
+    
+    
+    .js-nav-spawned nav#admin-panel {
+        translate: 0;
+    }
+    
+    #app-header {
+        display: none
+    }
 }

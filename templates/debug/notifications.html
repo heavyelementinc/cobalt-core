@@ -1,3 +1,21 @@
-<h1>Notification Debug</h1>
+<hgroup>{{title}}</hgroup>
+<tab-nav>
+    <nav>
+        <a href="#ui">UI</a>
+        <a href="#test">Test</a>
+    </nav>
+    <div id="ui">
 
-{{!notifications}}
+        {{!notifications}}
+    </div>
+    <div id="test">
+        <ul class="list-panel">
+            <li>
+                <async-button method="POST" action="/debug/push-test/root">Send Test Push Notification to Admin</async-button>
+            </li>
+            <li>
+                <async-button method="POST" action="/debug/push-test/{{session._id}}">Send Test Push Notification to Yourself</async-button>
+            </li>
+        </ul>
+    </div>
+</tab-nav>

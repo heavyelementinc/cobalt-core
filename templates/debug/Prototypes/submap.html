@@ -1,0 +1,34 @@
+@set("title", "SubMap Prototype");
+<h1>{{title}}</h1>
+
+<table>
+    <tr>
+        <td>JSON-ified: </td><td><textarea>{{$type.submap}}</textarea></td>
+    </tr>
+    <tr>
+        <td>Headline: </td><td>{{type.submap.headline}}</td>
+    </tr>
+    <tr>
+        <td>Subheadline: </td><td>{{type.submap.subheadline}}</td>
+    </tr>
+    <tr>
+        <td>Map: </td><td>{{type.submap.map.list()}}</td>
+    </tr>
+    <tr>
+        <td>Nested Value 1: </td><td>{{type.submap.nested.data1}}</td>
+    </tr>
+    <tr>
+        <td>Nested Value 2: </td><td>{{type.submapt.nested.data2}}</td>
+    </tr>
+</table>
+
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Filter Result</label>
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

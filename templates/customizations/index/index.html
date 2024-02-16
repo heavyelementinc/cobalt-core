@@ -1,0 +1,31 @@
+<hgroup>
+    <h1>{{title}}</h1>
+</hgroup>
+<div class="hbox">
+    <label>
+        <input type="checkbox" oninput="document.querySelectorAll('.value-container').forEach(e => e.classList.toggle('display-all'))">
+        Display full text content
+    </label>
+    {{!pagination}}
+</div>
+<flex-table>{{!headers}}{{!table}}</flex-table>
+
+{{!create_button}}
+
+<footnote>
+    <p>Customizations allow you to modify mutable content built into your application.</p>
+    <p>The search above will search the value of any field as well as the name and slug of the content.</p>
+</footnote>
+
+<style>
+    flex-table:empty:before {
+        content: "There's nothing here."
+    }
+    .value-container {
+        height: 1em;
+        overflow: hidden;
+    }
+    .value-container.display-all {
+        height: unset;
+    }
+</style>

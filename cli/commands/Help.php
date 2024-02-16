@@ -59,19 +59,20 @@ class Help {
         log_item("Building help table for \"$class\"");
         $command = strtolower($class);
         $capitalized = ucfirst($class);
-        $className = __CLI_ROOT__ . "/commands/$capitalized.php";
-        if (!file_exists($className)) {
-            if (!defined("__APP_ROOT__")) {
-                say("Unrecognized command", "e");
-                exit;
-            }
-            $className = __APP_ROOT__ . "/cli/commands/$capitalized.php";
-            if (!file_exists($className)) {
-                say("Unrecognized command", "e");
-                exit;
-            }
-        }
-        require_once $className;
+        // $className = __CLI_ROOT__ . "/commands/$capitalized.php";
+        $pathToClass = VALID_COMMANDS[$class]['path'];
+        // if (!file_exists($className)) {
+        //     if (!defined("__APP_ROOT__")) {
+        //         say("Unrecognized command", "e");
+        //         exit;
+        //     }
+        //     $className = __APP_ROOT__ . "/cli/commands/$capitalized.php";
+        //     if (!file_exists($className)) {
+        //         say("Unrecognized command", "e");
+        //         exit;
+        //     }
+        // }
+        require_once $pathToClass;
         $c = new $capitalized("help");
         $this->help_items[$command] = $c->help_documentation;
         foreach ($this->help_items[$command] as $subcmd => $items) {
@@ -89,14 +90,11 @@ class Help {
     }
 
     private function class_table_all() {
-        $command_files = scandir(__CLI_ROOT__ . "/commands/");
-        $app_commands = false;
-        if(defined("__APP_ROOT__")) $app_commands = scandir(__APP_ROOT__ . "/cli/commands/");
-        if ($app_commands !== false) $command_files = [...$command_files, ...$app_commands];
-        foreach ($command_files as $file) {
+        foreach (VALID_COMMANDS as $commandName => $file) {
+            $file = $file['path'];
             if ($file === "." || $file === "..") continue;
             $cmd = pathinfo($file, PATHINFO_FILENAME);
-            $this->build_class_table($cmd);
+            $this->build_class_table($cmd, $file);
         }
     }
 

@@ -112,9 +112,18 @@
     "display_masthead": {
         "default": true
     },
+    "Landing_page_home_route_options": {
+        "default": {
+            "anchor": {"name": "Home"},
+            "navigation": ["main_navigation"]
+        }
+    },
     /* Debug routes include things like the WebComponent input tests */
     "enable_debug_routes": {
         "default": false,
+        "directives": {
+            "config": "enable_debug_routes"
+        },
         "meta": {
             "group": "Cache &amp; Debug",
             "name": "Enable debug routes",
@@ -261,7 +270,46 @@
     "API_CORS_enable_other_origins": {
         "default": true
     },
+    "Validation_exclude_unregistered_keys_by_default": {
+        "default": true
+    },
+    "Validation_strict_data_submission_policy_by_default": {
+        "default": false
+    },
+    "UploadResult_default_thumbnail": {
+        "default": [450, null]
+    },
+    "Mailchimp_api_signup_route": {
+        "default": false
+    },
 
+    "Customizations_enabled": {
+        "default": true,
+        "directives": {},
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Enable Customization Framework <help-span value='Enables customization'></help-span>",
+            "subgroup": "Customization"
+        },
+        "validate": {
+            "type": "bool"
+        }
+    },
+    "error_on_missing_customization": {
+        "default": true,
+        "directives": {},
+        "meta": {
+            "group": "Look &amp; Feel",
+            "name": "Error on missing Customzations <help-span value='When enabled, the CustomizationManager will throw an Exception if a value is missing.'></help-span>",
+            "subgroup": "Customization"
+        },
+        "validate": {
+            "type": "bool"
+        }
+    },
+    "Enable_database_import_export": {
+        "default": true
+    },
     "CobaltEvents_enabled": {
         "default": true,
         "directives": {
@@ -285,6 +333,23 @@
         // },
         "default": "CobaltEvents"
     },
+
+    "CobaltEvents_enable_public_index": {
+        "default": false,
+        "directives": {
+            "public": true
+        },
+        "meta": {
+            "group": "Look &amp; Feel",
+            "subgroup":"Events",
+            "name": "Enable web-side index of specially-marked events <help-span value='To be elligible for display on the Events page, an event must have its `Display on web-side index` flag set to true.'></help-span>",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+
     "CobaltEvents_default_h1_alignment": {
         "default": "space-between",
         "directives": {
@@ -306,18 +371,12 @@
             }
         }
     },
-    /* The id attribute of the body tag when errors happen in a web context. */
-    "HTTP_error_body_id": {
-        "default": "cobalt_http_error"
-    },
-
-    /** Mail **/
 
     "API_contact_form_enabled": {
         "default": false,
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Enable Contact Form",
             "type": "input-switch"
         },
@@ -325,13 +384,12 @@
             "type": "boolean"
         }
     },
-
     
     "Contact_form_interface": {
         "default": "panel",
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Contact Form Backend",
             "type": "select"
         },
@@ -343,12 +401,14 @@
             }
         }
     },
-
+    "Contact_form_validation_classname": {
+        "default": "\\Contact\\Persistance"
+    },
     "Contact_form_submission_throttle": {
         "default": 500,
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Minumum number of seconds between contact form submissions (based on IP address)",
             "type": "input"
         },
@@ -360,8 +420,8 @@
     "Contact_form_success_message": {
         "default": "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Contact Form Success Message",
             "type": "input"
         },
@@ -373,8 +433,8 @@
     "Contact_form_notify_on_new_submission": {
         "default": false,
         "meta": {
-            "group": "Features",
-            "subgroup":"Contact Form",
+            "group": "Contact Form",
+            "subgroup":"General",
             "name": "Send admins a notification when new notifications are received",
             "type": "input-switch"
         },
@@ -383,12 +443,140 @@
         }
     },
 
+    "PublicContact_name": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Name</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_phone": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Phone Number</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_fax": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Fax Number</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_email": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Email Address</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_street_address1": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Street Address 1</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_street_address2": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Street Address 2</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_state": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>State</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_zip": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Zip Code</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+    "PublicContact_country": {
+        "default": "",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup": "Public Contact Info",
+            "name": "Publicly displayed contact <b>Country</b>",
+            "type": "input"
+        },
+        "validate": {
+            
+        }
+    },
+
+    /* The id attribute of the body tag when errors happen in a web context. */
+    "HTTP_error_body_id": {
+        "default": "cobalt_http_error"
+    },
+
+    /** Mail **/
+
     "Notifications_system_enabled": {
         "default": true,
         "meta": {
             "group": "Features",
             "subgroup": "Notifications",
             "name": "Enable the notification system",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Notifications_enable_push_notifications": {
+        "default": true,
+        "meta": {
+            "group": "Features",
+            "subgroup": "Notifications",
+            "name": "Enable push notifications to be dispatched",
             "type": "input-switch"
         },
         "validate": {
@@ -425,6 +613,7 @@
     "Mail_username": {
         "default": "",
         "directives": {
+            "config": "smtp_username",
             "env": "MAIL_USERNAME"
         },
         "meta": {
@@ -437,7 +626,10 @@
 
     "Mail_password": {
         "default": "",
-        "directives": {"env": "MAIL_PASSWORD"},
+        "directives": {
+            "config": "smtp_password",
+            "env": "MAIL_PASSWORD"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup": "Mail",
@@ -452,6 +644,7 @@
     "Mail_smtp_host": {
         "default": "",
         "directives":{
+            "config": "smtp_host",
             "env": "MAIL_SMTP_HOST"
         },
         "meta": {
@@ -464,7 +657,10 @@
 
     "Mail_port": {
         "default": 587,
-        "directives":{"env": "MAIL_PORT"},
+        "directives":{
+            "config": "smtp_port",
+            "env": "MAIL_PORT"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -478,7 +674,10 @@
     
     "Mail_smtp_auth": {
         "default": true,
-        "directives": {"env": "MAIL_AUTH"},
+        "directives": {
+            "config": "smtp_auth",
+            "env": "MAIL_AUTH"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -492,7 +691,9 @@
 
     "Mail_reply_to_address": {
         "default": "",
-        "directives":{"alias": "Mail_from_address"},
+        "directives":{
+            "alias": "Mail_from_address"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -507,7 +708,9 @@
     },
     "Mail_reply_to_name": {
         "default": "",
-        "directives":{"alias": "app_short_name"},
+        "directives":{
+            "alias": "app_short_name"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -522,7 +725,10 @@
     
     "Mail_from_address": {
         "default": "",
-        "directives":{"alias": "Mail_username"},
+        "directives":{
+            "config": "smtp_from_address",
+            "alias": "Mail_username"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -532,7 +738,10 @@
     },
     "Mail_from_name": {
         "default": "",
-        "directives":{"alias": "app_short_name"},
+        "directives":{
+            "config": "smtp_from_name",
+            "alias": "app_short_name"
+        },
         "meta": {
             "group": "Configuration",
             "subgroup":"Mail",
@@ -610,6 +819,9 @@
     "version": {
         "default": "0.0"
     },
+    "Schema_hydration_on_unserialize": {
+        "default": true
+    },
     /* API Routes consist of prefixes for URI path names. These prefixes are 
     used to load the appropriate routing table and tell the engine which 
     processor to use to handle the request. */
@@ -685,6 +897,13 @@
                     "session_refresh": false,
                     "api_access": false,
                     "prefix": "/streams/"
+                },
+                "websocket": {
+                    "processor": "Handlers\\WebsSocketHandler",
+                    "mode": "application/json",
+                    "session_refresh": false,
+                    "api_access": false,
+                    "prefix": "/websocket"
                 },
                 "web": {
                     "processor": "Handlers\\WebHandler",
@@ -796,6 +1015,12 @@
     "Render_strict_variable_parsing": {
         "default": false
     },
+    "Render_use_v2_engine": {
+        "default": false
+    },
+    "RenderV2_throw_template_exception_on_no_value": {
+        "default": true
+    },
     /* A meta setting which will disable ALL user account settings. Anything
     that requires privileges, has to do with user accounts, or sessions should
     "$required": {"Auth_user_accounts_enabled": true} */
@@ -881,6 +1106,12 @@
     },
     "Auth_session_days_until_expiration": {
         "default": 90
+    },
+    "Auth_reauth_timeout": {
+        "default": 600 // 10 minutes in seconds
+    },
+    "TwoFactorAuthentication_enabled": {
+        "default": true
     },
     "Renderer_parse_for_multiline_functions": {
         // When true, the trailing semicolon is REQUIRED.
@@ -986,9 +1217,6 @@
         "default": "default"
     },
     /* 
-    If debugging is TRUE, then a bunch of things happen. 
-        - core/apiv1.php will add a HelloWorld route
-        - HTTPExceptions used to display an B64 value of the exception message
     If debugging is FALSE, then:
         - The WebHandler will cache a concat of all JS files in `packages`
         - The WebHandler will cache a concat of all CSS files in `css-packages`
@@ -997,7 +1225,8 @@
         "default": true,
         "definition": "Debug",
         "meta": {
-            "group": "Cache &amp; Debug",
+            "group": "Developer",
+            "subgroup": "Debug",
             "name": "Debug status",
             "type": "input-switch"
         },
@@ -1005,7 +1234,22 @@
             "type": "boolean"
         }
     },
-
+    "debug_exceptions_publicly": {
+        "default": false,
+        "directives": {
+            "config": "debug_exceptions_publicly"
+        },
+        "meta": {
+            "group": "Developer",
+            "subgroup": "Debug",
+            "name": "Output detailed exception data publicly via route context handlers. DANGEROUS!",
+            "dangerous": true,
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
     "Database_fs_enabled": {
         "default": true
     },

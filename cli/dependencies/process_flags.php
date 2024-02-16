@@ -36,6 +36,18 @@ $flags = [
     '--verbose' => [
         'description' => 'Sets the verbosity level of the CLI. Use digits 0 through 2',
         'exe' => '__verbosity',
+    ],
+    '--plain-output' => [
+        'description' => 'Prevents the fmt() function from modifying output',
+        'exe' => '__plain_output',
+    ],
+    '--safe-mode' => [
+        'description' => 'Prevents extensions and their associated commands from being loaded',
+        'exe' => '__safe_mode',
+    ],
+    '--export' => [
+        'description' => 'Used with the database export function, a comma-delimited list of collections to export',
+        'exe' => '__export_flag'
     ]
 ];
 
@@ -55,7 +67,7 @@ function __app_context($app = ""){
         log_item("App context found as directory name.");
         $context_found = $file.$app;
     }
-    if(!$context_found) throw new Exception("Could not establish context for $app","e");
+    if(!$context_found) throw new Exception("Could not establish context for $app");
 
     $GLOBALS['cli_app_root'] = $context_found;
     require __CLI_ROOT__ . "/../env.php";
@@ -65,6 +77,18 @@ $GLOBALS['cli_verbosity'] = 0;
 function __verbosity($number){
     $GLOBALS['cli_verbosity'] = (int)$number;
     log_item("Verbosity set to $number");
+}
+$GLOBALS['fmt_allowed'] = true;
+function __plain_output() {
+    $GLOBALS['fmt_allowed'] = false;
+}
+$GLOBALS['safe_mode'] = false;
+function __safe_mode() {
+    $GLOBALS['safe_mode'] = true;
+}
+
+function __export_flag($value) {
+    $GLOBALS['export_collections'] = explode(",",$value);
 }
 
 __process_flags();

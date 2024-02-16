@@ -174,7 +174,11 @@ abstract class NormalizationHelpers {
         return $date->timestamp;
     }
 
-    final protected function get_date($value, $format = "input") {
+    final function get_date($value, $format = "input") {
+        return $this->convert_date($value, $format);
+    }
+
+    final function convert_date($value, $format = "input") {
         if(!$value) return "";
         $shorthands = [
             'input' => "Y-m-d",
@@ -183,8 +187,11 @@ abstract class NormalizationHelpers {
             "long" => "l, F jS Y",
             "12-hour" => "g:i a",
             "24-hour" => "H:i",
-            "seconds" => "g:i:s A"
+            "seconds" => "g:i:s A",
         ];
+        if($format === "relative") {
+            return "<date-span relative='true' value=\"$value\"></date-span>";
+        }
         if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
             $dateTime = $value->toDateTime();
@@ -449,8 +456,21 @@ abstract class NormalizationHelpers {
     function user($id):?UserSchema {
         $crud = new UserCRUD();
         $_id = $crud->__id($id);
-        $user = $crud->findOne(['_id' => $_id]);
-        if($user) return new UserSchema($user);
-        return null;
+        $user = $crud->findOneAsSchema(['_id' => $_id]);
+        // if($user) return new UserSchema($user);
+        return $user;
+    }
+
+    /**
+     * Pass an array of ObjectIds to get the string values instead
+     * @param mixed $ids 
+     * @return void 
+     */
+    function filter_ids($_ids){
+        $ids = [];
+        foreach($_ids as $_id) {
+            array_push($ids, (string)$_id);
+        }
+        return $ids;
     }
 }

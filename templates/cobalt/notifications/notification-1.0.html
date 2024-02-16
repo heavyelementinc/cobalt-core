@@ -1,11 +1,20 @@
-<a class="cobalt-notification cobalt-notification-{{ntfy.version}}" href="{{ntfy.action}}">
-    <div class="cobalt-notification--from">{{!ntfy.from?name}} says:</div>
-    <div class="cobalt-notification--body">
-        {{!ntfy.body.display}}
-    </div>
-    <div class="cobalt-notification--foot">
-        <date-span value="{{ntfy.sent.raw}}" format="relative"></date-span>
-        &bull;
-        <async-button method="GET" action="/api/notifications/{{ntfy._id}}/recipients/">Sent to {{ntfy.for.display}}</async-button>
-    </div>
-</a>
+<li>
+    <a data-id="{{ntfy._id}}" class="notifications--notification-container notifications--notification-container-{{ntfy.version}}" href="{{ntfy.action}}">
+        <div class="notification--from">
+            {{!ntfy.from.uname}}
+            <action-menu stop-propagation="true" type="options">
+                <option method="PUT" action="/api/notifications/{{ntfy._id}}/status/{{ntfy.for.readInverse.display}}" onload="window.Cobalt.NotificationsPanel.updateById('{{ntfy._id}}', event)">Mark as "{{ntfy.myReadState}}"</option>
+                <option onclick="modalView('/api/notifications/{{ntfy._id}}/update')">Edit</option>
+                <option method="DELETE" action="/api/notifications/{{ntfy._id}}/delete" onload="removeNearest(this, '.notifications--notification-container')">Delete</option>
+            </action-menu>
+        </div>
+        <div class="notification--body">
+            {{!ntfy.body.display()}}
+        </div>
+        <div class="notification--foot">
+            {{!ntfy.for.join(", ")}}
+            <date-span value="{{ntfy.sent}}" format="relative"></date-span>
+            <!-- <async-button method="GET" action="/api/notifications/{{ntfy._id}}/recipients/">Sent to {{ntfy.for.display}}</async-button> -->
+        </div>
+    </a>
+</li>

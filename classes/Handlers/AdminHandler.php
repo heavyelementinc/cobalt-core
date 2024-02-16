@@ -26,13 +26,16 @@ class AdminHandler extends WebHandler {
         
         // $session = session();
         $settings = route("CoreAdmin@settings_index");
-        $userPanel = view('/admin/users/session-panel.html', [
-            'settings' => ($settings) ? "<option icon='cog' onclick=\"router.location = '$settings'; return true;\">Settings</option>" : ""
-        ]);
+        $customize = route("Customizations@index");
+        $userPanel = view('/admin/users/session-panel.html',[]);
+        // [
+        //     'settings' => ($settings) ? "<option icon='cog' onclick=\"Cobalt.router.location = ''; return true;\">Settings</option>" : ""
+        // ]
 
         $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";
 
-        $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='directory--group'>";
+        $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='admin-panel--nav-group directory--group'>";
+    
     
         $panel .= get_route_group("admin_panel", [
             'prefix' => app("context_prefixes")['admin']['prefix'],
@@ -41,6 +44,11 @@ class AdminHandler extends WebHandler {
         ]);
         // $settings = route("CoreAdmin@settings_index");
         // $panel .= ;
+        $panel .= "</ul>";
+        $panel .= "<ul class='settings-panel--footer'>";
+        $panel .= (__APP_SETTINGS__['Notifications_system_enabled']) ? "<notify-button></notify-button>" : "";
+        $panel .= ($customize) ? "<a class='admin-panel--customize-link' href='$customize' rel='Customize Panel' title='Customize Panel'><i name='application-edit-outline'></i><span class='contextual contextual--hover'>Customize</span></a>" : "";
+        $panel .= ($settings) ? "<a class='admin-panel--settings-link' href='$settings' rel='Settings Panel' title='Settings Panel'><i name='cog'></i><span class='contextual contextual--hover'>Settings</span></a>" : "";
         $panel .= "</ul>";
         $panel .= "</nav>";
         return $panel;
@@ -53,7 +61,6 @@ class AdminHandler extends WebHandler {
     // function generate_style_meta() {
     //     $link_tags = "";
     //     $compiled = "";
-    //     $debug = app("debug");
     //     foreach (array_merge(app('common-css-packages'), app('admin-css-packages')) as $package) {
     //         $files = files_exist([
     //             __APP_ROOT__ . "/shared/css/$package",

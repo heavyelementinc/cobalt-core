@@ -2,15 +2,15 @@
 
 namespace Cobalt\CLI;
 
-interface Command {
+abstract class Command {
     
 
-    function main(): void;
+    abstract function main():int;
 
     /**
      * The return value must have a list of commands like so:
      * [
-     *    'subcommand' => [
+     *    'subcommand_name' => [
      *       'description' => 'Some help text that describes the subcommand',
      *       'arguments' => [
      *           'arg1' => 'Description',
@@ -20,5 +20,5 @@ interface Command {
      * ]
      * @return array 
      */
-    function reference(): array;
+    abstract static function reference():array;
 }

@@ -5,5 +5,7 @@
 namespace MongoDB\BSON;
 
 class ObjectId {
-
+    function getTimestamp():int {
+        return 1;
+    }
 }

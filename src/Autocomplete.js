@@ -12,6 +12,7 @@ class AutoComplete extends HTMLElement {
     constructor() {
         super();
         this.defineAttributes();
+        this.setAttribute("__custom-input", "true");
     }
 
     defineAttributes() {

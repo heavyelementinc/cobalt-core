@@ -22,6 +22,7 @@ body {
     margin: 0;
     font-family: var(--project-body-family);
     background: var(--project-body-background);
+    color: var(--project-body-color);
 }
 
 main {
@@ -229,7 +230,7 @@ table, tr, td {
 }
 
 .visually-hidden:not(:focus):not(:active),
-.sr-only:not(:focus):not(:active) {
+.sr-only:not(:active) {
     clip: rect(0 0 0 0); 
     clip-path: inset(50%);
     height: 1px;
@@ -390,6 +391,7 @@ ul.list-panel {
     margin-top: .5rem;
     border: 1px solid var(--project-color-input-border-nofocus);
     border-radius: 4px;
+    /* background: var(--project-calendar-cell-other-bg) */
 }
 
 #permissions h2 {
@@ -408,7 +410,7 @@ ul.list-panel {
 }
 
 .list-panel li:nth-of-type(odd) {
-    background: var(--project-calendar-cell-other-bg);
+    background: var(--project-color-table-bg-even);
 }
 
 .list-panel li:first-of-type{
@@ -425,6 +427,9 @@ ul.list-panel {
 
 .list-panel li label {
     width:100%;
+    /* font-weight: bold;
+    text-transform: uppercase;
+    font-size: .8em; */
 }
 
 .list-panel li > * {
@@ -435,7 +440,14 @@ ul.list-panel {
     margin: 0 1rem 0 0;
 }
 
-@media only screen and (max-width: 900px) {
+.list-panel li small {
+    display: block;
+    width: 100%;
+    color: var(--project-color-user-panel-button);
+    font-size: 0.9rem;
+}
+
+@media only screen and (max-width: 35em) {
     html, body {
         font-size: 3.5vw;
     }

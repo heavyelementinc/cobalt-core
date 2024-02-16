@@ -21,14 +21,23 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Cobalt\Notifications\PushNotifications;
+use Cobalt\Renderer\Debugger;
+use Cobalt\Renderer\Exceptions\TemplateException;
 use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
+use Render\Render;
 
 class WebHandler implements RequestHandler {
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
+    var $encoding_mode;
+    var $renderer;
+    var $_stage_bootstrap;
+    protected string $mainTemplateFilename;
+
 
     /** The `body.html` is scanned for these specific tags and then the 
      * corresponding methods are called and their results are stored with the 
@@ -49,6 +58,7 @@ class WebHandler implements RequestHandler {
         "@footer_credits@" => "",
         "@script_content@" => "",
         "@session_panel@"  => "",
+        "@notify_panel@"   => "",
     ];
 
     private $main_content_replacement = "@main_content@";
@@ -59,14 +69,15 @@ class WebHandler implements RequestHandler {
     private $template_main_content = "";
 
     private $context_mode = null;
+    private $push_handler = null;
 
     function __construct() {
-        $this->web_manifest = get_all_where_available([
-            __ENV_ROOT__ . "/manifest.jsonc",
-            __ENV_ROOT__ . "/manifest.json",
-            __APP_ROOT__ . "/manifest.jsonc",
-            __APP_ROOT__ . "/manifest.json"
-        ]);
+        // $this->web_manifest = get_all_where_available([
+        //     __ENV_ROOT__ . "/manifest.jsonc",
+        //     __ENV_ROOT__ . "/manifest.json",
+        //     __APP_ROOT__ . "/manifest.jsonc",
+        //     __APP_ROOT__ . "/manifest.json"
+        // ]);
         /** If we're in a web context, load the HTML body. This is so that we can
          * request just the main-content of a page via API later.
          */
@@ -77,7 +88,8 @@ class WebHandler implements RequestHandler {
         } else {
             $this->template_body = $this->main_content_replacement;
         }
-        $this->renderer = new \Render\Render();
+        if(__APP_SETTINGS__['Render_use_v2_engine']) $this->renderer = new \Cobalt\Renderer\Render();
+        else $this->renderer = new Render();
     }
 
     /** INTERFACE REQUIREMENTS */
@@ -93,8 +105,10 @@ class WebHandler implements RequestHandler {
     }
 
     public function _stage_execute($router_result = "") {
-        if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
-        if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
+        $this->template_main_content = $router_result;
+        // if($router_result)
+        // if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
+        // if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
     }
 
     public function _stage_output($context_result) {
@@ -113,7 +127,10 @@ class WebHandler implements RequestHandler {
         unset($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
 
         // Get the message string and data
-        $message = $e->getMessage();
+        $message = $e->name ?? "Unknown Error";
+
+        if(method_exists($e, "publicMessage")) $message = $e->publicMessage();
+
         $data = $e->data;
 
         // Get the default template for this error type:
@@ -127,8 +144,9 @@ class WebHandler implements RequestHandler {
         }
 
         // If we're in debug mode, let's embed the actual error message
-        $embed = "";
-        if (app('debug')) $embed = "<pre class=\"error--message\">Status code:\n\n$message\n\n" . \json_encode($data) . "</pre>";
+        $embed = "$message";
+        if(__APP_SETTINGS__['debug_exceptions_publicly']) $embed .= "<pre class=\"error--message\">" . base64_encode($e->getMessage()) . "</pre>";
+
         $this->add_vars([
             'title' => $e->status_code,
             'message' => $message,
@@ -190,10 +208,11 @@ class WebHandler implements RequestHandler {
 
 
     function app_settings() {
+        $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
-
+        $settings .= $this->getRouteBoundaries();
         $vars = "";
-        foreach(__APP_SETTINGS__["vars-" . $this->meta_selector] as $var => $value) {
+        foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
             $vars .= "--project-$var: $value;\n";
         }
         foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
@@ -204,6 +223,15 @@ class WebHandler implements RequestHandler {
         return $settings;
     }
 
+    function getRouteBoundaries() {
+        $boundaries = [];
+        foreach(__APP_SETTINGS__['context_prefixes'] as $context => $data) {
+            $trailing_slash = ($data['prefix'][strlen($data['prefix'] ?? "") - 1] === "/") ? "?" : "";
+            $boundaries["^".preg_quote($data['prefix'] ?? "")."$trailing_slash"] = $data['prefix'];
+        }
+        return "<script id='route-boundaries' type='application/json'>" . json_encode($boundaries) . "</script>";
+    }
+
     var $header_template = "parts/header.html";
 
     var $header_nav_cache_name = "template-precomp/header_nav.html";
@@ -211,7 +239,7 @@ class WebHandler implements RequestHandler {
         $masthead = "";
         
         $logo = app("logo.thumb");
-        $meta = $logo->meta;
+        $meta = $logo['meta'];
         $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
         
         $header = $this->load_template($this->header_template);
@@ -227,7 +255,8 @@ class WebHandler implements RequestHandler {
     function header_nav() {
         return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
         // $links = "";
-        // foreach ($GLOBALS['router']->routes['get'] as $regex => $route) {
+        // global $ROUTER:
+        // foreach ($router->routes['get'] as $regex => $route) {
         //     if (!isset($route['header_nav'])) continue;
         //     $href  = $route['header_nav']['href'] ?? $route['original_path'];
         //     $label = $route['header_nav']['label'];
@@ -289,6 +318,11 @@ class WebHandler implements RequestHandler {
         return $this->cache_handler($this->script_cache_name, "generate_script_content");
     }
 
+    function notify_panel() {
+        if(!__APP_SETTINGS__['Notifications_system_enabled']) return "";
+        return view('/cobalt/notifications/panel.html');
+    }
+
     var $style_cache_name = "template-precomp/style.html";
     function style_meta() {
         return $this->cache_handler($this->style_cache_name, "generate_style_meta");
@@ -318,11 +352,12 @@ class WebHandler implements RequestHandler {
 
     var $route_table_cache = "js-precomp/router-table.js";
     function router_table() {
+        global $ROUTER;
         $table_name = str_replace(".js", ".$this->context_mode.js", $this->route_table_cache);
         $cache = new CacheManager($table_name);
         $table_content = "";
         if (app('route_cache_disabled') === false || $GLOBALS['TIME_TO_UPDATE'] || !$cache->cache_exists()) {
-            $table_content = $GLOBALS['router']->get_js_route_table();
+            $table_content = $ROUTER->get_js_route_table();
             $cache->set($table_content, false);
         } else $table_content = $cache->get();
 
@@ -336,7 +371,7 @@ class WebHandler implements RequestHandler {
         $debug = app("debug");
 
         // Load packages from manifest
-        foreach (app("js-$this->meta_selector") as $package) {
+        foreach (app("js.$this->meta_selector") as $package) {
             if ($debug) {
                 $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
             } else {
@@ -380,10 +415,17 @@ class WebHandler implements RequestHandler {
         throw new NotFound("Unable to handle resource $type");
     }
 
+    function get_css_pathname_from_manifest_entry($entry) {
+        $type = gettype($entry);
+        if($type === "string") return "/core-content/css/$entry";
+        if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
+        if(key_exists('url', $entry)) return $entry['url'];
+        throw new NotFound("Unable to handle resource $type");
+    }
+
     // function generate_script_content($script_name) {
     //     $script_tags = "";
     //     $compiled = "";
-    //     $debug = app("debug");
     //     foreach (app('packages') as $package) {
     //         if ($debug) {
     //             $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
@@ -422,7 +464,7 @@ class WebHandler implements RequestHandler {
         $link_tags = "";
         $compiled = "";
         $debug = app("debug");
-        foreach (app("css-$this->meta_selector") as $package) {
+        foreach (__APP_SETTINGS__["css"][$this->meta_selector] as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
@@ -469,6 +511,7 @@ class WebHandler implements RequestHandler {
     }
 
     function main_content_from_template($template) {
+
         /** Load the template in question */
         $this->template_main_content = $this->load_template($template);
 
@@ -485,7 +528,8 @@ class WebHandler implements RequestHandler {
     function load_template($template_name) {
         $ext = pathinfo($template_name, PATHINFO_EXTENSION);
         $session_template_name = str_replace($ext, "session.$ext", $template_name);
-        $templates = $GLOBALS['TEMPLATE_PATHS'];
+        global $TEMPLATE_PATHS;
+        $templates = $TEMPLATE_PATHS;
         // [__APP_ROOT__ . "/private/$this->template_cache_dir/$session_template_name",
         // __ENV_ROOT__ . "/$this->template_cache_dir/$session_template_name",]
 
@@ -498,6 +542,8 @@ class WebHandler implements RequestHandler {
         if (!$candidates) $candidates = \find_one_file($templates, $template_name);
 
         if (!$candidates) throw new NotFound("Cannot find that file");
+
+        $this->mainTemplateFilename = $candidates;
 
         return file_get_contents($candidates);
     }
@@ -528,11 +574,21 @@ class WebHandler implements RequestHandler {
     }
 
     function process() {
-        if (isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) $this->main_content_from_template($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
-        if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
-        if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
-        $this->renderer->set_body($this->template_body);
-        $this->renderer->set_vars($this->template_vars);
-        return $this->renderer->execute();
+        if($this->template_main_content) {
+            $this->template_body = str_replace($this->main_content_replacement, $this->template_main_content, $this->template_body);
+        } else {
+            if (isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) $this->main_content_from_template($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
+        }
+        try{ 
+            if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
+            if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
+            $this->renderer->set_body($this->template_body);
+            if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
+            $this->renderer->set_vars($this->template_vars);
+            return $this->renderer->execute();
+        } catch (TemplateException $e) {
+            $debug = new Debugger($e);
+            return $debug->render();
+        }
     }
 }

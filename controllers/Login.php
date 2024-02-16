@@ -20,7 +20,14 @@ class Login {
     function handle_login() {
         $result = Authentication::handle_login();
 
-        // If we're here, we've been logged in successfully. Now it's time to
+        // If we're here, we've been logged in successfully, but we may need to
+        // perform an additional level of authentcation.
+        if($result['login'] === 0) {
+            header("X-Modal: /login/2fa");
+            return $result;
+        }
+        
+        // Now it's time to
         // determine what we should be doing. If we're on the login page, 
         // redirect the user to "/admin" otherwise refresh the page
         $redirect = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
@@ -35,7 +42,7 @@ class Login {
     }
 
     function handle_email_login_stage_1() {
-        $email = Authentication::handle_email_login();
+        $email = Authentication::handle_email_login($_POST['username']);
         header("X-Redirect: /login/email");
     }
 

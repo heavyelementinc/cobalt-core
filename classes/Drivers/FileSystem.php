@@ -8,11 +8,15 @@ use Exceptions\HTTP\RangeNotSatisfiable;
 
 class FileSystem {
     // public $db = __APP_SETTINGS__['database'];
-    public $bucket;
+    // public $bucket;
     protected $db = null;
-    protected $client = null;
-    protected $database = null;
-    protected $collection = null;
+    // protected $client = null;
+    // protected $database = null;
+    // protected $collection = null;
+    protected \MongoDB\Client $client;
+    protected \MongoDB\Database $database;
+    protected \MongoDB\GridFS\Bucket $bucket;
+    protected \MongoDB\Collection $collection;
 
     function __construct($database = null) {
         if ($database !== null) $this->db = $database;
@@ -33,7 +37,7 @@ class FileSystem {
      * @param array $options 
      * @return never Creating a download for the client will exit this application!
      */
-    final public function download(string $filename, $options = ['revision' => 0]): never {
+    final public function download(string $filename, $options = ['revision' => -1]): never {
         ob_clean();
         try{
             $stream = $this->getStream("/".$filename, $options);
@@ -54,7 +58,7 @@ class FileSystem {
         $mime = mime_content_type($stream);
         header("Content-Type: $mime");
         header("Content-Length: $metadata->length");
-        if(isset($_GET['nocache'])) header("Cache-Control: no-cache");
+        // if(isset($_GET['nocache'])) header("Cache-Control: no-cache");
 
         fpassthru($stream);
 
@@ -115,7 +119,7 @@ class FileSystem {
     /** Will return a stream. To send the file to the client
      * @return resource File stream
      */
-    final public function getStream(string $filename, $options = ['revision' => 0]) {
+    final public function getStream(string $filename, $options = ['revision' => -1]) {
         return $this->bucket->openDownloadStreamByName($filename, $options);
     }
 

@@ -17,7 +17,7 @@ abstract class Request {
     abstract function settings():array;
     
     public function __initialize($context):void {
-        if($this->permission && !has_permission($this->permission)) throw new Unauthorized("You don't have permission to be here.");
+        if($this->permission && !has_permission($this->permission)) throw new Unauthorized("User is missing '$this->permission' permission","You don't have permission to be here.");
         add_vars($this->globals);
         $this->initialize($context);
     }

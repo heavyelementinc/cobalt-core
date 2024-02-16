@@ -4,5 +4,17 @@
     "start_url": "/",
     "display": "{{app.pwa.display}}",
     "background_color": "{{app.pwa.background_color}}",
-    "description": "{{app.opengraph.description}}"
+    "description": "{{app.opengraph.description}}",
+    "icons": [
+        {
+            "src": "{{app.logo.thumb.filename}}",
+            "sizes": "{{app.logo.thumb.meta.height}}x{{app.logo.thumb.meta.width}}",
+            "type": "{{app.logo.thumb.meta.mimetype}}"
+        },
+        {
+            "src": "{{app.logo.media.filename}}",
+            "sizes": "{{app.logo.media.meta.height}}x{{app.logo.media.meta.width}}",
+            "type": "{{app.logo.media.meta.mimetype}}"
+        }
+    ]
 }

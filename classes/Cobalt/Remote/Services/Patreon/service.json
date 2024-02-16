@@ -1,0 +1,14 @@
+{
+    "name": "Patreon",
+    "icon": "patreon",
+    "identifier": "patreon",
+
+    "auth":    "Auth",
+    "schema":  "Schema",
+    "service": "Service",
+    
+    "base_url": "https://patreon.com/",
+    "endpoints": {
+
+    }
+}

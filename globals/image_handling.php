@@ -41,6 +41,7 @@ const IMAGE_HANDLERS = [
  * @param $dest - a valid file target
  * @param $targetWidth - desired output width
  * @param $targetHeight - desired output height or null
+ * @return 
  */
 function createThumbnail($src, $dest, $targetWidth, $targetHeight = null) {
 

@@ -1,8 +1,10 @@
 <?php
 
+use Cobalt\Notifications\PushNotifications;
 use Contact\ContactManager;
 use Controllers\Controller;
 use Exceptions\HTTP\HTTPException;
+use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\ServiceUnavailable;
 use Exceptions\HTTP\TooManyRequests;
 use Mail\SendMail;
@@ -12,14 +14,18 @@ class ContactForm extends Controller {
 
     function index() {
         $conMan = new ContactManager();
-        $results = $conMan->findAllAsSchema(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
-        $lines = $this->docsToViews($results, "/admin/contact-form/index-item.html");
+        $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
+        $lines = "";
+        foreach($results as $doc) {
+            $lines .= view("/admin/contact-form/index-item.html", ['doc' => $doc]);
+        }
+        // $lines = $this->docsToViews($results, );
         add_vars([
             'title' => 'Contact Form Submissions',
             'lines' => $lines
         ]);
 
-        return set_template("/admin/contact-form/index.html");
+        return view("/admin/contact-form/index.html");
     }
 
     function read_status($id) {
@@ -33,13 +39,20 @@ class ContactForm extends Controller {
     function read($id) {
         $conMan = new ContactManager();
         $_id = $conMan->__id($id);
-        
+        $found = $conMan->findOne(['_id' => $_id]);
+        if(!$found) throw new NotFound("Not found", "That resource does not exist");
         add_vars([
             'title' => "Contact",
-            'doc' => $conMan->findOneAsSchema(['_id' => $_id])
+            'doc' => $found,
         ]);
 
         $conMan->read_for_user($_id, session());
+
+        $unread = (new ContactManager())->get_unread_count_for_user(session());
+        $update = "innerHTML";
+        $query = "[href=\"/admin/contact-form/\"] .unread";
+        if($unread === 0) $unread = "";
+        update($query, [$update => $unread]);
 
         return set_template("/admin/contact-form/read.html");
     }
@@ -52,21 +65,22 @@ class ContactForm extends Controller {
     }
 
     function contact_submit() {
-        $validator = new \Contact\ContactFormValidator();
-        $mutant = $validator->validate($_POST);
-        $mutant = array_merge($mutant, [
-            "ip" => $_SERVER['REMOTE_ADDR'],
-            "token" => $_SERVER["HTTP_X_CSRF_MITIGATION"],
-            "date"  => new \MongoDB\BSON\UTCDateTime()
-        ]);
+        $className = __APP_SETTINGS__['Contact_form_validation_classname'];
+        $persistance = new $className();
+        $mutant = $persistance->__validate($_POST);
+        $mutant->ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        $mutant->token = $_SERVER["HTTP_X_CSRF_MITIGATION"];
+        $mutant->date  = new \MongoDB\BSON\UTCDateTime();
+
+        // $persistance->ingest($mutant);
         switch(app("Contact_form_interface")) {
             case "SMTP":
-                $result = $this->contactSMTP($mutant);
+                $result = $this->contactSMTP($persistance);
                 header("X-Status: @info " . app("Contact_form_success_message"));
                 break;
             case "panel":
             default:
-                $id = $this->contactPanel($mutant);
+                $id = $this->contactPanel($persistance);
                 header("X-Status: @info " . app("Contact_form_success_message"));
                 return $id;
                 break;
@@ -94,21 +108,32 @@ class ContactForm extends Controller {
         $backend = new ContactManager();
 
         $throttle = iterator_to_array($backend->find(['ip' => $mutant['ip']], ['sort' => ['date' => -1]]));
-        if(count($throttle) > 3) {
-            $now = (new \MongoDB\BSON\UTCDateTime())->toDateTime()->getTimestamp();
-            $then = $throttle[0]->date->toDateTime()->getTimestamp();
-            if($now - $then <= app("Contact_form_submission_throttle")) {
-                sleep(5);
-                throw new TooManyRequests("Looks like you've already submitted a few.");
-            }
-        }
+        // if(count($throttle) > 3) {
+        //     $now = (new \MongoDB\BSON\UTCDateTime())->toDateTime()->getTimestamp();
+        //     $then = $throttle[0]->date->toDateTime()->getTimestamp();
+        //     if($now - $then <= app("Contact_form_submission_throttle")) {
+        //         sleep(5);
+        //         throw new TooManyRequests("Looks like you've already submitted a few.");
+        //     }
+        // }
 
         try {
             $result = $backend->insertOne($mutant);
         } catch (\Exception $e) {
             throw new ServiceUnavailable("An unknown error occurred");
         }
-        assert(app("Contact_form_notify_on_new_submission") === false);
+        try{
+            $push = new PushNotifications();
+            $push->push(
+                'Contact Submission',
+                "Someone has filled out the {{app.app_name}} contact form!",
+                ['contact_form_new'],
+                ['path' => "/admin/contact-form/".(string)$result->getInsertedId()]
+            );
+        } catch (\Exception $e) {
+            
+        }
+        
         if(app("Contact_form_notify_on_new_submission")) {
             // $notify = new Notification1_0Schema([
             //     'subject' => 'New contact form submission',

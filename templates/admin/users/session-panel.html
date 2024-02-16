@@ -2,7 +2,6 @@
     {{!session.nametag}}
     <action-menu title="User">
         <option icon="account" onclick="router.location = '/admin/me'; return true">Edit Profile</option>
-        {{!settings}}
         <option icon="logout" method="GET" action="/api/v1/logout">Logout</option>
     </action-menu>
 </div>

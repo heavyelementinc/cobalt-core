@@ -16,8 +16,12 @@ use Auth\UserValidate;
 use Auth\UserSchema;
 use Cobalt\Token;
 use DateTime;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\HTTPException;
+use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use PhpParser\Node\Expr\Cast\Object_;
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {
@@ -50,6 +54,7 @@ class UserCRUD extends \Drivers\Database {
         ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
         $perms = array_fill_keys($permissions, $status);
+        
         return $this->findAllAsSchema(
             [
                 '$or' => [
@@ -69,6 +74,10 @@ class UserCRUD extends \Drivers\Database {
         return $this->findAllAsSchema([
             'group' => $groups
         ], $options);
+    }
+
+    final function getRootUsers() {
+        return iterator_to_array($this->find(['groups' => 'root']));
     }
 
     final function findUserByToken(string $name, string $token):?UserSchema {
@@ -94,7 +103,7 @@ class UserCRUD extends \Drivers\Database {
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
-        if ($result->getModifiedCount() !== 1) throw new \Exception("Failed to update fields");
+        if ($result->getModifiedCount() !== 1) throw new HTTPException("Failed to update fields", true);
         return new UserSchema($mutant);
     }
 

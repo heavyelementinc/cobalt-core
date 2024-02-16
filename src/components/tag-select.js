@@ -4,6 +4,7 @@
 class TagSelect extends HTMLElement {
     constructor() {
         super();
+        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {

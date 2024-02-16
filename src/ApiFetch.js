@@ -16,10 +16,12 @@ class ApiFetch {
         this.result = null;
         this.abortController = null;
         this.reject = null;
+        console.warn("WARNING! The 'ApiFetch' class has been deprecated and is being phased out in a future version of Cobalt Engine! Use 'AsyncFetch' instead!");
     }
 
     // fetch requests are now abortable!
     async send(data = "") {
+        console.warn("WARNING! This app is using ApiFetch to fetch data! This class has been deprecated! Use AsyncFetch instead!");
         return new Promise(async (resolve, reject) => {
             this.reject = reject;
             this.abortController = new AbortController();
@@ -37,17 +39,16 @@ class ApiFetch {
             if (this.method !== "GET") send["body"] = (this.asJSON) ? JSON.stringify(data) : data
             let result = null;
             result = await fetch(this.uri, send);
-            this.result = await result.json();
-
-            if (result.headers.get("X-Redirect")) router.location = result.headers.get('X-Redirect');
-            if (result.headers.get("X-Refresh")) this.pageRefresh(result.headers.get("X-Refresh"));
-            if (result.headers.get("X-Status")) this.statusMessage(result.headers.get("X-Status"));
-            if (result.headers.get("X-Modal")) this.modal(result.headers.get('X-Modal'));
+            this.fetchResult = result;
+            if(result.headers.get('Content-Type').match(/json/i)) this.result = await result.json();
+            else this.result = result.text();
 
             if (result.ok === false) {
                 reject(this.result);
                 await this.handleErrors(result,this.result);
+                return new AsyncMessageHandler(this, "ApiFetch", "error");
             }
+            new AsyncMessageHandler(this, "ApiFetch", "status");
             // this.result = result;
     
             if("headers" in result) {
@@ -122,20 +123,14 @@ class ApiFetch {
         return await this.send("", "GET", {});
     }
 
+    // For now, we're just going to let this object handle FetchConfirms.
     async handleErrors(result, json) {
-        // const json = await result.json();
-        // this.result = json;
-        
         switch (result.status) {
             case 300:
                 let confirm = new FetchConfirm(json, this);
                 result = await confirm.draw();
                 if (json.error !== "Aborted") break;
-            case 301:
-                router.location = json.message;
                 break;
-            default:
-                throw new FetchError("HTTP Error", result, json, this.uri);
         }
         return json;
     }
@@ -158,7 +153,7 @@ class ApiFile extends ApiFetch {
         headers = {},
         progressBar = null,
     }) {
-        super(uri, method, { format, cache, asJSON, credentials, headers });
+    super(uri, method, { format, cache, asJSON, credentials, headers });
         this.progressBar = progressBar;
     }
 
@@ -240,21 +235,5 @@ class FetchError extends Error {
     statusMessage() {
         if("error" in this.result && this.result.error) new StatusError({message: this.result.error, id: this.url, type: this.result.code});
         else new StatusError({message:"An unknown error occurred", id: this.url});
-    }
-}
-
-class FetchConfirm {
-    constructor(data, original_fetch) {
-        this.returnValues = data;
-        this.fetch = original_fetch;
-    }
-
-    async draw() {
-        let confirm = await modalConfirm(this.returnValues.error, this.returnValues.okay, "Cancel", this.returnValues.dangerous);
-        if (confirm === false) return { json: () => { return { status: 400, error: "Aborted", data: false } } };
-        console.log(this.returnValues.data)
-        this.fetch.headers = { ...this.fetch.headers, ...this.returnValues.data.headers };
-        const result = await this.fetch.send(this.returnValues.data.return);
-        return { json: () => result };
     }
 }

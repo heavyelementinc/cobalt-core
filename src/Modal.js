@@ -103,21 +103,21 @@ class Modal {
 
         // Append our modal container and its children to the DOM
         document.querySelector("body").appendChild(this.container);
-        if (!this.zIndex && event) {
-            const spawnIndex = spawn_priority(event);
-            if (spawnIndex) this.container.style.zIndex = spawnIndex + document.querySelectorAll("modal-container").length;
+        if (!this.zIndex) {
+            // const spawnIndex = spawn_priority(event);
+            // if (spawnIndex) this.container.style.zIndex = spawnIndex + document.querySelectorAll("modal-container").length;
         }
         this.close_button(); // Add our close button
 
-        // Set a window 
-        window.router.modalState();
-        history.pushState({ page: 1, isModalState: true }, this.modalTitle || document.title, "");
-        window.addEventListener("popstate", e => {
-            if (this.container.parentNode !== null) this.close(e)
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-        }, { once: true })
+        // TODO: Allow modal windows to listen for popStates
+        // window.router.modalState();
+        // history.pushState({ page: 1, isModalState: true }, this.modalTitle || document.title, "");
+        // window.addEventListener("popstate", e => {
+        //     if (this.container.parentNode !== null) this.close(e)
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        //     e.stopImmediatePropagation();
+        // }, { once: true })
 
 
         // Handle animation stuff
@@ -225,7 +225,7 @@ class Modal {
             // UNIMPLEMENTED What color should the button be?
             let color = c.color | "var(--project-gray)";
             let classes = "modal-button";
-            if (c.dangerous) classes = " modal--button-dangerous";
+            if (c.dangerous) classes = "modal--button-dangerous";
             // Create our button element
             // We use actual HTML button elements for accessibility and tab indexing
             const element = document.createElement("button");
@@ -358,7 +358,9 @@ class Modal {
         const next = document.createElement("button"),
             prev = document.createElement("button");
         next.tabIndex = 0;
+        next.classList.add("lightbox-button", "next")
         prev.tabIndex = 0;
+        prev.classList.add("lightbox-button", "previous")
 
         next.addEventListener('click', e => {
             this.container.parentNode.removeChild(this.container);

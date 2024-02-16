@@ -1,0 +1,30 @@
+{
+    "uuid": "3156dc59-a6c0-4dac-807f-8229da14692a",
+    "version": "1.0",
+    "extension_api": "1.0",
+    "class": "Posts",
+    "entrypoint": "extension.php",
+    "name": "Posts",
+    "repository": "https://heavyelement.io/heavyelementinc/contact",
+    "meta": {
+        "description": "A blogging system for Cobalt applications"
+    },
+    "settings": {
+    },
+    "permissions": {
+
+    },
+    "public": {
+        "js": {
+            "web": []
+        },
+        "css": {
+            "web": []
+        },
+        "vars": {
+            "web": {}
+        }
+    },
+    "grants": {
+    }
+}

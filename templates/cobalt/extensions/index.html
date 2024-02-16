@@ -1,0 +1,23 @@
+<hgroup>
+    <div class="vbox">
+        <h1>{{title}}</h1>
+        <cite>Last rebuild: <date-span value="{{extman.options.last_rebuild}}"></date-span></cite>
+    </div>
+    <action-menu>
+        <option method="POST" action="/api/v1/extensions/rebuild">Rebuild Database</option>
+    </action-menu>
+</hgroup>
+<flex-table>
+    <flex-row>
+        <flex-header>Extension Name</flex-header>
+        <flex-header>Repository</flex-header>
+        <flex-header>Settings Count</flex-header>
+        <flex-header>Permission Count</flex-header>
+        <flex-header>Installation Path</flex-header>
+        <flex-header>Activation Status</flex-header>
+    </flex-row>
+    {{!extensions}}
+</flex-table>
+
+
+<script type="application/json">{{$extman}}</script>

@@ -1,10 +1,30 @@
-<h1>{{title}}</h1>
+<hgroup>
+    <h1>{{title}}</h1>
+</hgroup>
 
 <form-request method="PUT" action="/api/v1/api/key/{{id}}">
     <fieldset>
         <legend>Key Data</legend>
-        <label>JSON <help-span value="Copy and paste the API data here."></help-span></label>
-        <textarea name="key">{{token.key}}</textarea>
+        <label>Client ID <help-span value="Your app's client_id"></help-span></label>
+        <input type="string" name="key" value="{{token.key}}">
+        
+        <label>Project ID</label>
+        <input type="text" name="project_id" value="{{token.project_id}}">
+
+        <label>Auth URI</label>
+        <input type="url" name="auth_uri" value="{{token.auth_uri}}">
+
+        <label>Token URI</label>
+        <input type="url" name="token_uri" value="{{token.token_uri}}">
+
+        <label>Auth Provider</label>
+        <input type="url" name="auth_provider_x509_cert_url" value="{{token.auth_provider_x509_cert_url}}">
+
+        <label>Client Secret</label>
+        <input-password name="secret" value="{{token.secret}}"></input-password>
+    
+        <label>Redirect URIs</label>
+        <input-array name="redirect_uris" allow-custom="true">{{!token.redirect_uris.options}}</input-array>
     </fieldset>
     <button type="submit">Submit</button>
 </form-request>

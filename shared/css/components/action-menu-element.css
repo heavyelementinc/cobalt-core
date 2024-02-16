@@ -20,11 +20,13 @@ action-menu[aria-pressed="true"] {
     background: var(--project-color-input-background);
 }
 action-menu[type="options"] {
+    display: inline-block;
     border: none;
     background: transparent;
     margin: 0;
     padding: 0;
     justify-self: center;
+    min-width: 20px;
 }
 
 action-menu[type="options"]:before {
@@ -55,3 +57,7 @@ inline-menu radio-group {
     flex-direction: column;
 }
 
+inline-menu label {
+    display: inline-block;
+    word-wrap: nowrap;
+}

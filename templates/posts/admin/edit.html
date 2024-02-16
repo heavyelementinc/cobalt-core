@@ -1,5 +1,6 @@
-<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-<h1>Edit Post <span id="title"></span></h1>
+<hgroup>
+    <h1>Edit Post <span id="title"></span></h1>
+</hgroup>
 <div class="vbox" id="container">
     <form-request method="PUT" action="{{update_action}}" id="post-manager">
         <fieldset id="primary-content">
@@ -11,9 +12,9 @@
                 <a href="{{post.public_link}}" is>http://{{app.domain_name}}{{href}}</a>
                 <input name="url_slug" value="{{post.url_slug}}">
             </div>
-            <textarea name='body' placeholder="Share your thoughts...">{{post.body}}</textarea>
-            @view("/parts/markdown-guide.html");
-
+            <markdown-area name='body' placeholder="Share your thoughts...">{{post.body}}</markdown-area>
+            <!-- @view("/parts/markdown-guide.html"); -->
+            <small>Supported embed references: <code>!youtube:0wx7_31bse</code>, <code>!instagram:302b38oxy</code></small>
         </fieldset>
 
         <fieldset id="post-meta">
@@ -34,23 +35,24 @@
                 <textarea name='excerpt'>{{post.excerpt}}</textarea>
             </div>
             <div id="default_image" {{!post.default_image.display}}>
-                <radio-group name="alignment.position" value="{{post.alignment.position}}">
+                <select name="alignment.position">{{!post.alignment.position.options}}</select>
+                <!-- <radio-group name="alignment.position" value="{{post.alignment.position}}">
+                    <div>
+                    </div>
                     <div>
                         <input type="radio" name="alignemnt.position" value="top left">
                         <input type="radio" name="alignemnt.position" value="top center">
                         <input type="radio" name="alignemnt.position" value="top right">
-                    </div>
-                    <div>
                         <input type="radio" name="alignemnt.position" value="center left">
                         <input type="radio" name="alignemnt.position" value="center center">
                         <input type="radio" name="alignemnt.position" value="center right">
-                    </div>
-                    <div>
                         <input type="radio" name="alignemnt.position" value="bottom left">
                         <input type="radio" name="alignemnt.position" value="bottom center">
                         <input type="radio" name="alignemnt.position" value="bottom right">
                     </div>
-                </radio-group>
+                    <div>
+                    </div>
+                </radio-group> -->
             </div>
             <ul class="list-panel">
                 <li>
@@ -179,6 +181,7 @@
         width: 100%;
         height: 100%;
         overflow:hidden;
+        background: rgba(255,255,255,.8);
     }
     
     #default_image input {

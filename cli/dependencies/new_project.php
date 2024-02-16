@@ -24,11 +24,18 @@ class NewProject{
             'value' => null,
             'key' => 'settings.json',
         ],
-        'database' => [
-            'prompt' => "Provide a unique name for your database:",
-            'confirm' => 'Database name ',
-            'validate' => "__np_validate_cannot_be_blank",
-            'value' => null,
+        'addr' => [
+            'prompt' => "Database address (default: 'localhost')",
+            'confirm' => 'DB Address    ',
+            'validate' => "__np_validate_may_be_blank",
+            'value' => 'localhost',
+            'key' => 'config.php',
+        ],
+        'port' => [
+            'prompt' => "Database port (default: '27017')",
+            'confirm' => 'DB Port       ',
+            'validate' => "__np_validate_may_be_blank",
+            'value' => '27017',
             'key' => 'config.php',
         ],
         'username' => [
@@ -44,7 +51,15 @@ class NewProject{
             'validate' => "__np_validate_may_be_blank",
             'value' => null,
             'key' => 'config.php',
-        ]
+        ],
+        'database' => [
+            'prompt_base' => "Provide a unique name for your database",
+            'prompt' => "",
+            'confirm' => 'DB Name       ',
+            'validate' => "__np_validate_database_name",
+            'value' => null,
+            'key' => 'config.php',
+        ],
         // 'Auth_enable_logins' => [
         //     'prompt' => "Enable user accounts? (Y/n)",
         //     'validate' => '__np_validate_enable_logins'
@@ -79,6 +94,10 @@ class NewProject{
     var $complete = "Your new project has been created!\n";
 
     var $new_app = [];
+    var $app_root =  __CLI_ROOT__ . "/../../";
+    var $new_project_dir = "";
+    var $app_root_directory = "";
+
 
     function __construct(){
         $this->app_root = __CLI_ROOT__ . "/../../";
@@ -111,7 +130,7 @@ class NewProject{
         }
 
         // Wait for the user to confirm the new application settings.
-        if(!$this->__np_confirm_creation()) return "You chose to not create this project. Aborting!";
+        if($this->__np_confirm_creation() === false) return "Aborting!";
 
         // Loop through the exe array and execute the methods
         foreach($this->exe as $name => $exe){
@@ -136,8 +155,46 @@ class NewProject{
         return cli_to_bool($validate,true);
     }
     
-    function __np_validate_cannot_be_blank($validate){
+    function __np_validate_cannot_be_blank($validate, $key){
         if(!$validate) throw new Exception("Entry must not be blank");
+        return $validate;
+    }
+
+    function __np_validate_database_name($db_name) {
+        $validate = $db_name;
+        if(!$validate) {
+            $validate = $this->app_root_directory;
+        }
+        $this->new_app['config.php']['database'] = $validate;
+
+        $config = [
+            'username' => $this->new_app['config.php']['username'],
+            'password' => $this->new_app['config.php']['password'],
+            'ssl'       => false,
+            'sslCAFile' => "",
+            'sslAllowInvalidCertificates' => false,
+        ];
+
+        foreach($config as $key => $val) {
+            if(!$val) unset($config[$key]);
+        }
+
+        try{
+            require_once __CLI_ROOT__ . "/../vendor/autoload.php";
+            $client = new MongoDB\Client("mongodb://".$this->new_app['config.php']['addr'].":".$this->new_app['config.php']['port'],$config);
+            $db_names = iterator_to_array($client->listDatabaseNames());
+        } catch (Exception $e) {
+            $continue = confirm_message("   WARNING: Could not connect to database. Continue anyway?", true);
+            if(!$continue) die(fmt("Aborting. No changes were made.\n", "e"));
+            say("   Continuing app initialization with no validation.", "i");
+            say("   If your DB requires SSL, you must configure this manually in config.php", "i");
+            return $validate;
+        }
+
+        if(in_array($validate, $db_names)) {
+            say("   ". fmt("WARNING: ","e"). "The database name is not unique!");
+            if(!confirm_message("   If you continue, no changes will be made. Continue?", false)) return false;
+        }
         return $validate;
     }
     
@@ -148,10 +205,13 @@ class NewProject{
         $dir_exists = file_exists($dir_name);
         if($dir_exists) throw new Exception("A file or directory with the name '$validate' already exists.\nPlease choose another.");
         $this->new_project_dir = $dir_name;
+        $this->app_root_directory = $validate;
+        $this->app['database']['prompt'] = $this->app['database']['prompt_base'] . " (default: '$validate')";
         return $dir_name;
     }
     
-    function __np_validate_may_be_blank($validate) {
+    function __np_validate_may_be_blank($validate, $key) {
+        if(!$validate) $validate = $this->app[$key]['value'] ?? "";
         return $validate;
     }
 
@@ -176,10 +236,12 @@ class NewProject{
     function __np_confirm_creation(){
         say("\nNew app summary:","b");
         foreach($this->app as $name => $values){
-            print("  - $values[confirm] " . $this->new_app[$values['key']][$name] . "\n");
+            $value = $this->new_app[$values['key']][$name];
+            if(!$value) $value = fmt("<none>", "grey");
+            print("  - $values[confirm] " . $value . "\n");
         }
         print("\n\n");
-        $correct = confirm_message("Does this look correct?","Y");
+        $correct = confirm_message("Does this look correct?", false);
         return $correct;
     }
 
@@ -192,7 +254,7 @@ class NewProject{
 
     function __np_create_ignored(){
         print(" -> Creating ignored files... ");
-        file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/");
+        file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/\nvendor/");
         @mkdir($this->new_project_dir . "/ignored");
         touch($this->new_project_dir . "/ignored/settings.json");
         return true;
@@ -203,7 +265,7 @@ class NewProject{
         $settings = $this->new_app['settings.json'];
         unset($settings['root']);
         $conf = $this->new_project_dir . "/config/settings.json";
-        if(file_put_contents($conf,json_encode($settings))) return true;
+        if(file_put_contents($conf,json_encode($settings, JSON_PRETTY_PRINT))) return true;
         else return false;
     }
 
@@ -216,7 +278,11 @@ class NewProject{
         print(" -> Writing config.php... ");
         $conf = $this->new_app['config.php'];
         require_once __CLI_ROOT__ . "/../globals/global_functions.php";
-        set_up_db_config_file($conf['database'],$conf['username'],$conf['password'], "localhost", "27017", "false", "", "false", $this->new_project_dir . "/config/config.php");
+        $config_file = set_up_db_config_file($conf['database'],$conf['username'],$conf['password'], $conf['addr'] ?? "localhost", $conf['port'] ?? "27017", "false", "", "false", $this->new_project_dir . "/config/config.php");
+        if($config_file) say("ok!", "s");
+        print("Creating development env config file... ");
+        $config_file = set_up_db_config_file($conf['database'],$conf['username'],$conf['password'], $conf['addr'] ?? "localhost", $conf['port'] ?? "27017", "false", "", "false", $this->new_project_dir . "/config/config.php");
+        return ($config_file !== false);
     }
 }
 

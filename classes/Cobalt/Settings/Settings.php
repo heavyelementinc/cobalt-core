@@ -27,8 +27,11 @@
 
 namespace Cobalt\Settings;
 
+use Cobalt\Extensions\Extensions;
 use Exception;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
@@ -59,8 +62,10 @@ class Settings extends \Drivers\Database {
     public $definitions;
     public $instances;
     public $raw_decode;
+    public $manifest_raw_decode = [];
     public $default_values;
     public $update_settings;
+    public $manifest_build_cache;
 
     // const __SETTINGS__ = [
     //     __ENV_ROOT__ . "/config/flags.jsonc",
@@ -68,7 +73,7 @@ class Settings extends \Drivers\Database {
     //     __APP_ROOT__ . "/ignored/config/custom_settings.jsonc",
     // ];
 
-    function __construct($bootstrap = true) {
+    function __construct($bootstrap = false) {
         // Instance our parent class
         parent::__construct();
 
@@ -77,6 +82,7 @@ class Settings extends \Drivers\Database {
         $this->__settings = $this->fetchCachedSettings();
         $bootstrap_required = $this->isBootstrapRequired($bootstrap);
         if ($bootstrap_required) $this->bootstrap();
+        else $this->fetchPublicSettings();
     }
 
     function get_settings() {
@@ -87,7 +93,8 @@ class Settings extends \Drivers\Database {
         return "CobaltSettings";
     }
 
-    final public function isBootstrapRequired($bootstrap = false) {
+    final public function isBootstrapRequired($mode = false) {
+        $bootstrap = $this->bootstrap_mode($mode);
         // If we're forced to do a bootstrap, do it.
         if($bootstrap) return true;
         // If there are no settings, do a bootstrap
@@ -99,6 +106,11 @@ class Settings extends \Drivers\Database {
         // If the cachedk max_m_time is less than the current max_m_time, do a bootstrap
         if($this->__settings->Meta->max_m_time < $this->max_m_time) return true;
         // Otherwise, we don't need to bootstrap.
+        return false;
+    }
+
+    final public function bootstrap_mode($mode) {
+        if($mode === COBALT_BOOSTRAP_ALWAYS) return true;
         return false;
     }
 
@@ -143,7 +155,9 @@ class Settings extends \Drivers\Database {
             }
         }
 
-        $toCache = array_merge($toCache, $this->bootstrapManifestData());
+        $details = $this->bootstrapManifestData();
+
+        $toCache = array_merge($toCache, $details);
         
         // Get the ID of the cached settings
         $id = $this->__settings->_id;
@@ -161,6 +175,9 @@ class Settings extends \Drivers\Database {
         ],
         ['upsert' => true]);
         $this->__settings = $this->fetchCachedSettings();
+
+        global $PUBLIC_SETTINGS;
+        $this->updatePublicSettings($PUBLIC_SETTINGS);
 
         return;
     }
@@ -181,6 +198,7 @@ class Settings extends \Drivers\Database {
         $max_m_time = 0;
         // $this->mtime_candidates = scandir(__ENV_ROOT__ . "/routes/");
         foreach ($this::__DEFINITIONS__ as $file) {
+            if(!file_exists($file)) continue;
             $mtime = filemtime($file);
             if ($mtime === false) continue;
             if ($mtime > $max_m_time) $max_m_time = $mtime;
@@ -195,6 +213,8 @@ class Settings extends \Drivers\Database {
                 if(!file_exists($file)) continue;
                 $this->raw_decode[$file] = jsonc_decode(file_get_contents($file), true, 512, JSON_ERROR_SYNTAX);
             }
+
+            Extensions::invoke("register_settings_definitions", $this->raw_decode, $this->manifest_raw_decode);
 
             $values = [];
             $definitions = [];
@@ -211,6 +231,7 @@ class Settings extends \Drivers\Database {
 
     private function parseSetting(&$values, &$def, $settings, $filename) {
         $detect_definition = ['default','directives','meta'];
+        if(!is_iterable($settings)) return;
         foreach($settings as $name => $data) {
             $isDefinition = $this->isDefinition($data);
             if(gettype($data) == "array") {
@@ -276,15 +297,65 @@ class Settings extends \Drivers\Database {
         return iterator_to_array($array[0]);
     }
 
+    public function fetchPublicSettings() {
+        $cache = $this->findOne([
+            'Meta.type' => 'public_js_cache'
+        ]);
+        unset($cache['Meta']);
+        foreach($cache as $field => $value) {
+            define_public_js_setting($field, $value);
+        }
+    }
+
+    public function updatePublicSettings($settings) {
+        $this->updateOne([
+            'Meta.type' => 'public_js_cache'
+        ],
+        [
+            '$set' => $settings
+        ],
+        [
+            'upsert' => true
+        ]);
+    }
+
     public function bootstrapManifestData() {
+        $GLOBALS['TIME_TO_UPDATE'] = true;
+        
+        // Load our manifests
+        foreach($this::__MANIFESTS__ as $file) {
+            // $index = count($this->manifest_raw_decode);
+            $this->manifest_raw_decode[] = get_json($file);
+        }
+
+        // This isn't necessary because we're already getting the manifest_raw_decode during the settings invocation!
+        // extensions()::invoke("register_public_manifest", $this->manifest_raw_decode);
+
+        $final = new ManifestEntry();
+        foreach($this->manifest_raw_decode as $data) {
+            $final->addManifest(($data instanceof BSONDocument) ? doc_to_array($data) : $data);
+        }
+        $data = $final->getFinalizedData();
+        // $data['css-vars'] = $data['vars']['web'];
+        // unset($data['vars']['web']);
+        // foreach($final as $type => $data) {
+        //     (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
+        // }
+        return $data;
+    }
+    
+    public function oldbootstrapManifestData() {
         // TODO: remove TIME_TO_UPDATE global
         $GLOBALS['TIME_TO_UPDATE'] = true;
         $final = [];
+
         foreach($this::__MANIFESTS__ as $file) {
-            foreach(get_json($file) as $type => $data) {
+            $this->manifest_raw_decode[] = get_json($file);
+            foreach($this->manifest_raw_decode[count($this->manifest_raw_decode) - 1] as $type => $data) {
                 $this->manifest_combine($type, $data, $final);
             }
         }
+
         foreach($final as $type => $data) {
             (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
         }

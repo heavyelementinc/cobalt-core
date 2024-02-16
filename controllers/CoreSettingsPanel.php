@@ -2,6 +2,7 @@
 
 use Controllers\ClientFSManager;
 use Controllers\Controller;
+use Drivers\FSManager;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
 
@@ -10,10 +11,11 @@ class CoreSettingsPanel extends Controller {
     private $requiresRoot = ['Cache &amp; Debug'];
     private $settings = null;
 
-    function settings_index() {
+    function settings_index($subset = null) {
         // $this->settings = jsonc_decode(file_get_contents(__ENV_ROOT__ . "/config/setting_definitions.jsonc"));
-        $GLOBALS['app']->bootstrap();
-        $this->settings = $GLOBALS['app']->instances;
+        global $app;
+        $app->bootstrap();
+        $this->settings = $app->instances;
 
         $setting_groups = [];
         $setting_tables = [];
@@ -74,7 +76,7 @@ class CoreSettingsPanel extends Controller {
                 $type = "text";
                 break;
             case "number": 
-                $template = "/admin/settings/inputs/input.html";
+                $template = "/admin/settings/inputs/number.html";
                 $type = "number";
                 break;
             case "textarea":
@@ -197,6 +199,28 @@ class CoreSettingsPanel extends Controller {
         return set_template("/admin/settings/presentation.html");
     }
 
+    public function fileManager() {
+        $man = new FSManager();
+        $page = $_GET['page'] ?? "1";
+        if(!ctype_digit($page)) throw new BadRequest("'page' parameter must be a digit");
+        $page -= 1;
+        $limit = 50;
+
+        $result = $man->find([], ['sort' => ['_id' => 1], 'skip' => $limit * $page, 'limit' => $limit]);
+
+        $html = "";
+        foreach($result as $data) {
+            $html .= $man->fromData($data);
+        }
+
+        $lastPage = $page - 1;
+        if($lastPage < 0) $lastPage = 0;
+        $nextPage = $page + 1;
+
+        add_vars(['html' => $html, 'lastPage' => $lastPage, 'nextPage' => $nextPage]);
+
+        return view("/admin/fs-manager.html");
+    }
     // private function get_object($settings, $index, $url) {
     //     $object = "";
     //     foreach(__APP_SETTINGS__[$index][0] as $name => $value) {

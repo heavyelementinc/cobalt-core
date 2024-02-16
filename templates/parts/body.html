@@ -26,14 +26,15 @@
     @style_meta@
     {{!html_head_binding}}
     @router_table@
-    <link rel="apple-touch-icon" href="/icon.png?{{app.version}}">
+    <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{app.version}}">
     <script>
-        window.__ = JSON.parse('@get_exportables_as_json()');
+        window.__ = JSON.parse(atob('@get_exportables_as_json(true);'));
     </script>
 </head>
 
 <body id="{{body_id}}" class="{{body_class}}">
-    <a id="sr-skip-to-content" href="{{main_id}}" class="sr-only">Skip to content</a>
+    <a id="sr-skip-to-content" href="#{{main_id}}" class="sr-only">Skip to content</a>
+    <div id="sr-announce" class="sr-only" aria-live="assertive"></div>
     <noscript>
         {{app.name}} <strong>REQUIRES</strong> JavaScript. Basic functionality <strong>will not work</strong>
         without JavaScript enabled. Please enable JavaScript or upgrade your
@@ -67,6 +68,7 @@
         {{!footer_binding_after}}
         @footer_credits@
     </footer>
+    @notify_panel@
     @cookie_consent@
     @script_content@
 </body>

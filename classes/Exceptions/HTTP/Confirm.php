@@ -9,8 +9,10 @@ namespace Exceptions\HTTP;
 class Confirm extends HTTPException {
     public $status_code = 300;
     public $name = "Multiple Choices";
+
     function __construct($message, $data, $okay = "Continue", $dangerous = true, $required_header = ['X-Confirm-Dangerous' => "true"]) {
-        parent::__construct($message);
+        header("X-Confirm: Multiple choices");
+        parent::__construct("Confirm", $message);
         $this->data = [
             'return' => $data,
             'headers' => $required_header,

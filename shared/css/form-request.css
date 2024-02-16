@@ -33,8 +33,41 @@ form-header :is(h1, h2, h3, h4, h5) {
   margin-top: .5rem;
 }
 
-fieldset:has(legend:first-child + ul.list-panel:last-child) {
-  border: none;
+fieldset:has(ul.directory--group) {
+  padding-bottom: .5em;
+  margin-bottom: 1em;
+  border-bottom: 1px solid var(--project-color-inactive);
+}
+
+fieldset ul.directory--group {
+  padding-left: 1em;
+}
+
+.form-request--feedback {
+  opacity: 0;
+  transition: opacity .5s;
+}
+
+.form-request--feedback.feedback-add {
+  opacity: 1;
+}
+
+.form-request--feedback.feedback-remove {
+  opacity: 0;
+}
+
+form-request[aria-disabled="true"], 
+fieldset[aria-disabled="true"] {
+  position: relative;
+}
+
+form-request[aria-disabled="true"]:after, 
+fieldset[aria-disabled="true"]:after {
+  content: "";
+  inset: 0;
+  position: absolute;
+  background-color: rgb(255 255 255 / .6);
+  backdrop-filter: blur(1px);
 }
 
 /* 

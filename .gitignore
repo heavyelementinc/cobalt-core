@@ -1,3 +1,4 @@
 .vscode/
 /ignored/
 vendor/
+classes/ReadyTicket/config.json
