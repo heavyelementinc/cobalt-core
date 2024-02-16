@@ -1,10 +1,12 @@
 <?php
 
-namespace Cobalt\SchemaPrototypes\Compound;
+namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\Maps\Exceptions\DirectiveException;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\MapResult;
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Traversable;
 use TypeError;
 
@@ -12,19 +14,18 @@ use TypeError;
  * @property array 'each'
  * @package Cobalt\SchemaPrototypes\Compound
  */
-class ArrayOfSubmaps extends ArrayResult {
+class ArrayOfMaps extends SchemaResult {
     function setValue($value): void
     {
         if(!is_array($value) && $value instanceof Traversable === false) throw new TypeError("Value is not iterable");
         $each = $this->getDirective("each");
-        $instance = $this->getDirective('instance');
-        if($each === null && $instance === null) throw new DirectiveException("ArrayOfSubmaps must define 'each' directive when no 'instance' directive is defined");
-        if(!$instance) $instance = '\\Cobalt\\Maps\\GenericMap';
+        if($each === null) throw new DirectiveException("ArrayOfMaps must define 'each' directive");
 
         $this->originalValue = $value;
         $this->value = [];
         foreach($value as $obj) {
-            $this->value[] = new $instance($obj, $each);
+            $map = new MapResult;
+            $this->value[] = $map;
         }
 
         return;
@@ -33,7 +34,6 @@ class ArrayOfSubmaps extends ArrayResult {
     function defaultSchemaValues(array $data = []): array
     {
         return [
-            'instance' => null,
             'each' => null
         ];
     }

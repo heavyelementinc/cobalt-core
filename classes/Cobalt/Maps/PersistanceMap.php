@@ -31,10 +31,15 @@ use Validation\Exceptions\ValidationIssue;
  * predictable way, and an easy syntax for setting and getting data with 
  * prototypal inheritance for classes.
  * 
- * The following are definitions for valid schema fields
- * |:- field    -:|:- type -:|:- definition -:|
- * -------------------------------
- * | `get`        | callable | The `get` field |
+ * The following are definitions for valid schema directives
+ * |:- directive -:|:- type -:|:- return type         -:|:- definition -:|
+ * --------------------------------------------------
+ * | `get`           | callable | mixed                                          | The `get` field |
+ * | `filter`        | callable | mixed (return is validated and stored)         | Called within `try` block, catches ValidationContinue, ValidationIssue, ValidationFailed |
+ * | `set`           | callable | mixed (return is stored)                       | A function that's called when a field is set (AFTER validation) |
+ * | `pattern`       | mixed    | string | A RegEx pattern to match against input |
+ * | `pattern_flags` | mixed    | string | A string of RegEx flags |
+ * | 
  * 
  * Schemas will return field data as Schema<Type>Result objects. These
  * provide a convenient way to access and mutate data through prototypical
@@ -46,10 +51,14 @@ use Validation\Exceptions\ValidationIssue;
  */
 abstract class PersistanceMap extends GenericMap implements Persistable {
 
-    function __construct($doc = null) {
-        parent::__construct($doc);
+    function __construct($doc = null, $schema = [], $__namePrefix = "") {
+        parent::__construct($doc, $schema, $__namePrefix);
     }
 
+    /**
+     * 
+     * @return array 
+     */
     abstract function __get_schema():array;
 
     function __initialize_schema($schema = null): void

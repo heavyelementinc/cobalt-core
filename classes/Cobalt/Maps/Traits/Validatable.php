@@ -2,8 +2,11 @@
 
 namespace Cobalt\Maps\Traits;
 
+use Cobalt\Maps\Exceptions\DirectiveException;
 use Cobalt\Maps\GenericMap;
-use Cobalt\Maps\SchemaExcludesUnregisteredKeys;
+use Cobalt\Maps\Exceptions\SchemaExcludesUnregisteredKeys;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
@@ -32,7 +35,10 @@ trait Validatable {
 
         foreach($toValidate as $field => $value) {
             try {
-                $this->__validatedFields[$field] = $this->__validate_field($field, $value);
+                // The __validatedFields name NEEDS dot notation for nested elements
+                // we want to update, so we use whatever fieldname is submitted as
+                // the `name` attribute will include dot notation here.
+                $this->__validate_field($field, $value);
             } catch (ValidationContinue $e) {
                 continue;
             } catch (SchemaExcludesUnregisteredKeys $e) {
@@ -47,7 +53,25 @@ trait Validatable {
         return $this;
     }
 
+    /**
+     * Use this in a filter, set, or other CRUD context to modify another field
+     * @param string $name - The name of the field to update
+     * @param mixed $value - The value of that field
+     * @param bool $validateBeforeModification - [true] Validate before updating
+     * @return void 
+     * @throws SchemaExcludesUnregisteredKeys 
+     * @throws DirectiveException 
+     * @throws ValidationIssue
+     */
+    public function __modify(string $name, mixed $value, bool $validateBeforeModification = true):void {
+        if($validateBeforeModification) $value = $this->__validate_field($name, $value);
+        $this->__validatedFields[$name] = $value;
+    }
+
     private function __validate_field($field, $value) {
+        if(strpos($field, ".") !== false) {
+            return $this->__validate_dot_notation($field, $value);
+        }
         if($this->__excludeUnregisteredKeys) {
             if(!key_exists($field, $this->__schema)) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
         }
@@ -57,6 +81,11 @@ trait Validatable {
                 if($result->__isRequired()) throw new ValidationIssue("This field is required");
                 throw new ValidationContinue("This field is empty and it's not required. Continuing.");
             }
+
+            if(key_exists('filter', $this->__schema[$field])) {
+                $value = $this->__schema[$field]['filter']($value);
+            }
+
             $pattern = $result->getDirective("pattern");
             if($pattern) $this->testPattern($result, $value, $pattern);
             $validated = $result->filter($value);
@@ -79,7 +108,33 @@ trait Validatable {
             $this->__issues[$field] = $e->data;
         }
 
-        return $validated;
+        $this->__modify($field, $validated, false);
+    }
+
+    function __validate_dot_notation($field, $value) {
+        $exploded = explode(".", $field);
+        
+        $mapFieldName = array_shift($exploded);
+        // Hydrate our MapResult
+        $map = $this->__toResult($mapFieldName, [], $this->__schema[$mapFieldName]);
+        if($map instanceof MapResult) {
+            // Explode our key
+            $key = implode(".", $exploded);
+            // Recursively run our validation pipeline
+            $result = $map->getValue();
+            $result->__validate([$key => $value]);
+            // Run through `__validatedFields` and bring them into this context.
+            foreach($result->__validatedFields as $fieldName => $validatedValue) {
+                // If the key we submitted matches the fieldName, we want to update that
+                // to the field we're trying to update.
+                $fname = $fieldName;
+                if($fname === $key) $fname = $field;
+                $this->__modify($fname, $validatedValue, false);
+            }
+            return;
+        };
+        // if($map instanceof ArrayResult) return $map->getValue()
+        throw new ValidationIssue("Updates with dot notation are only valid on `MapResult`s or `ArrayResult`s");
     }
 
     /**
@@ -96,23 +151,28 @@ trait Validatable {
     function __operators($allowUnvalidated = false):array {
         $result = [];
         if(!$this->isValidated() && $allowUnvalidated === false) throw new ValidationFailed("Server configuration error");
-        foreach($this->__hydrated as $field => $value) {
-            $value = $value->__getStorable();
-            if(!key_exists($field, $this->__schema)) continue;
-            if(!key_exists('operator', $this->__schema[$field])) {
+        foreach($this->__validatedFields as $field => $value) {
+            $v = $this->__hydrated[$field];
+            $schema = $v->getSchema();
+            $storable = $v->__getStorable();
+            // if(!key_exists($field, $this->__schema)) {
+            //     continue;
+            // }
+            
+            if(!key_exists('operator', $schema)) {
                 if(!key_exists('$set', $result)) $result['$set'] = [];
-                $result['$set'][$field] = $value;
+                $result['$set'][$field] = $storable;
                 continue;
             }
-            $operator = $this->__schema[$field]['operator'];
+            $operator = $schema['operator'];
             
             switch(gettype($operator)) {
                 case "string":
                     if(!key_exists($operator, $result)) $result[$operator] = [];
-                    $result[$operator][$field] = $value;
+                    $result[$operator][$field] = $storable;
                     break;
                 case is_callable($operator):
-                    $r = $operator($field, $value);
+                    $r = $operator($field, $storable);
                     $operator = key($r);
                     if(!key_exists($operator, $result)) $result[$operator] = [];
                     $result[$operator] = array_merge($result[$operator], $r[$operator]);
@@ -121,6 +181,10 @@ trait Validatable {
 
         return $result;
     }
+
+    // function __operators_from_dot_notation($allowUnvalidated = false):array {
+    //     $result = [];
+    // }
 
 
     public function isValidated() {

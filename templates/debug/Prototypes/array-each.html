@@ -1,0 +1,26 @@
+@set("title", "Array Prototype");
+<h1>{{title}}</h1>
+
+<table>
+    <tr>
+        <td>Value: </td><td>{{type.array_each.json()}}</td>
+    </tr>
+    <tr>
+        <td>Index 0 name</td><td>{{type.array_each.0.name.first}} {{type.array_each.0.name.last}}</td>
+    </tr>
+    <tr>
+        <td>Index 1</td><td>{{type.array_each.1.name.position.display()}}</td>
+    </tr>
+</table>
+
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Filter Result</label>
+            {{type.array_each.field()}}
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

@@ -3,7 +3,6 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\SchemaPrototypes\MapResult;
-use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Traits\ImageManipulation;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Drivers\BinaryStorage;

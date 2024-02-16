@@ -1,4 +1,4 @@
-@set("title", "SubMap Prototype");
+@set("title", "MapResult Prototype");
 <h1>{{title}}</h1>
 
 <table>
@@ -12,13 +12,16 @@
         <td>Subheadline: </td><td>{{type.submap.subheadline}}</td>
     </tr>
     <tr>
-        <td>Map: </td><td>{{type.submap.map.list()}}</td>
-    </tr>
-    <tr>
         <td>Nested Value 1: </td><td>{{type.submap.nested.data1}}</td>
     </tr>
     <tr>
-        <td>Nested Value 2: </td><td>{{type.submapt.nested.data2}}</td>
+        <td>Nested Value 2: </td><td>{{type.submap.nested.data2.list()}}</td>
+    </tr>
+    <tr>
+        <td>Nested2 Value 3:</td><td>{{type.submap.nested.nested2.markdown.md()}}</td>
+    </tr>
+    <tr>
+        <td>Nested2 Value 4:</td><td>{{type.submap.nested.nested2.bool}}</td>
     </tr>
 </table>
 
@@ -26,6 +29,10 @@
     <ul class="list-panel">
         <li>
             <label>Filter Result</label>
+        </li>
+        <li>
+            <label>Nested2 Value</label>
+            {{type.submap.nested.nested2.markdown.field("textarea")}}
         </li>
         <li>
             <button type="submit">Filter</button>

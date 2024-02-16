@@ -15,8 +15,11 @@ use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use MongoDB\BSON\ObjectId;
 
 trait ResultTranslator {
+    public string $__namePrefix = "";
+
     function __toResult(string $name, mixed $value, ?array $schema, ?GenericMap $ref = null):SchemaResult|ObjectId {
         $type = gettype($value);
+        // if($schema === null) $schema = $this->__schema[$name];
 
         switch($type) {
             case $value instanceof GenericMap:
@@ -59,7 +62,7 @@ trait ResultTranslator {
                 break;
         }
 
-        $result->setName($name);
+        $result->setName($this->__namePrefix.$name);
         $result->setSchema($schema);
         
         if(!$ref) $ref = $this;
@@ -73,7 +76,7 @@ trait ResultTranslator {
     private function __each(?Iterable $elements, GenericMap $ref, $startingIndex = 0) {
         if(!$elements) return [];
         if(!isset($this->schema['each'])) return $elements;
-        if($this->schema['each'] instanceof SchemaResult) {
+        if($this->schema['each'] instanceof GenericMap) {
             $schema = $this->schema;
             $schema['type'] = $schema['each'];
             unset($schema['each']);
@@ -82,6 +85,14 @@ trait ResultTranslator {
                 $mutant[$i] = $this->__toResult($this->name.'['.$startingIndex + $i."]", $v, $schema, $ref);
             }
             return $mutant;
+        }
+        if(isset($this->schema['each'])) {
+            $e = [];
+            foreach($elements as $key => $value) {
+                // $map = new GenericMap($value->getValue(), $this->schema['each'], $this->name);
+                $e[$key] = $this->__toResult($key, $value->getValue(), ['type' => new MapResult, 'schema' => $this->schema['each']], $ref);
+            }
+            return $e;
         }
         return $elements;
     }

@@ -226,6 +226,13 @@ if (app("enable_debug_routes")) {
         ],
         'anchor' => ['name' => 'Array Prototype']
     ]);
+
+    Route::get("/proto/array_each", "SchemaDebug@arrayeach",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Array Each']
+    ]);
     
     Route::get("/proto/binary", "SchemaDebug@binaryresult",[
         'navigation' => [

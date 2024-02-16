@@ -10,6 +10,8 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
+use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
@@ -55,6 +57,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     #[Prototype]
     protected function field($classes = "", $misc = [], $tag = "") {
+        if($this->getDirective("view") || $this->getDirective("template")) return $this->inputObjectArray($classes, $misc);
         return $this->inputArray($classes, $misc);
     }
 
@@ -124,7 +127,8 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     #[Prototype]
     protected function join($delimiter) {
-        return implode($delimiter, $this->getValue());
+        $val = implode($delimiter, $this->getValue());
+        return $val;
     }
 
     #[Prototype]
@@ -143,7 +147,10 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     }
 
     public function __toString():string {
-        return $this->join(", ");
+        if($this->__isPrivate()) return "";
+        $string = $this->join(", ");
+        if(gettype($string) !== "string") return json_encode($string);
+        return $string;
     }
 
     public function offsetExists(mixed $offset): bool {

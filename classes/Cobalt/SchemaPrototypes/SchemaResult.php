@@ -490,6 +490,11 @@ class SchemaResult implements \Stringable, JsonSerializable
         return true;
     }
 
+    // function __set($name, $value) {
+    //     if($name !== "name") return;
+    //     $this->name = $value;
+    // }
+
     function __isRequired(): bool {
         return $this->coalece_directive('required');
     }

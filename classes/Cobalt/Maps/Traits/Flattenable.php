@@ -1,10 +1,10 @@
 <?php
 
-namespace Cobalt\Maps;
+namespace Cobalt\Maps\Traits;
 
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 
-class Flatten {
+trait Flattenable {
     use ResultTranslator;
     /**
      * Flatten a multi-dimensional associative array with dots.

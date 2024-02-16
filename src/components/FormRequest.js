@@ -138,7 +138,7 @@ class NewFormRequest extends HTMLElement {
     }    
 
     initSubmissionListeners() {
-        this.initSubmitButton();
+        // this.initSubmitButton();
         this.initAutoSaveListeners();
     }
 

@@ -4,6 +4,7 @@ namespace Cobalt\SchemaPrototypes\Traits;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Exception;
 
 trait Fieldable {
     #[Prototype]
@@ -83,6 +84,17 @@ trait Fieldable {
 
     protected function inputArray($classes = "", $misc = []) {
         return $this->select($classes, $misc, "input-array");
+    }
+
+    protected function inputObjectArray($classes = "", $misc = []) {
+        $template = $this->getDirective("view");
+        if($template) $final = view($template, ['doc' => $this, 'field' => $this->value[0]]);
+        else {
+            $template = $this->getDirective("template");
+            $final = view_from_string($template, ['doc' => $this, 'field' => $this->value[0]]);
+        }
+        if(!$template) throw new Exception("Cannot create a field for $this->name, must set a 'view' or 'template' directive");
+        return "<input-object-array name='$this->name'><template>$final</template><var>".json_encode($this->value)."</var></input-object-array>";
     }
 
     public function textarea($classes = "", $misc = [], $tag = "textarea") {

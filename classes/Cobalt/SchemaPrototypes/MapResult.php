@@ -12,7 +12,6 @@ use stdClass;
 use Traversable;
 
 class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAccess, JsonSerializable, Countable {
-
     /**
      * @var GenericMap
      */
@@ -48,7 +47,7 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
 
     function setValue(mixed $value): void {
         $this->originalValue = $value;
-        $this->value = new GenericMap($value, $this->schema ?? []);
+        $this->value = new GenericMap($value, $this->schema['schema'] ?? [], "$this->name.");
     }
 
     function __getHydrated():array {

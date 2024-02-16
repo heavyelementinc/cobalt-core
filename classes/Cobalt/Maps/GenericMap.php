@@ -28,6 +28,7 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     public array $__dataset = [];
     protected int $__current_index = 0;
 
+    public string $namePrefix = "";
     protected array $__schema = [];
     protected bool $__schemaHasBeenInitialized = false;
     protected array $__schemaFromConstructorArg = [];
@@ -37,7 +38,8 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
 
     protected ?ObjectId $id = null;
 
-    function __construct($document = null, array $schema = []) {
+    function __construct($document = null, array $schema = [], string $namePrefix = "") {
+        $this->__namePrefix = $namePrefix;
         $this->__schemaFromConstructorArg = $schema ?? [];
         $this->__initialize_schema();
         if($document) $this->ingest($document);
