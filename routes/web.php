@@ -14,10 +14,19 @@ Route::get("/ServiceWorker.js", "FileController@service_worker");
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
     if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
-        Route::get(__APP_SETTINGS__['Posts_rss_feed_path'], "Posts@RSS_feed");
+        Route::get(__APP_SETTINGS__['Posts']['public_index'].".xml", "Posts@RSS_feed");
     }
     Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@index", __APP_SETTINGS__['Posts']['public_index_options']);
-    Route::get(__APP_SETTINGS__['Posts']['public_post'],  "Posts@post",  __APP_SETTINGS__['Posts']['public_post_options']);
+    
+    $posts = array_merge(
+        __APP_SETTINGS__['Posts']['public_post_options'] ?? [], [
+            'sitemap' => [
+                'children' => fn () => register_individual_post_routes(),
+                'ignore' => true
+            ]
+    ]);
+    
+    Route::get(__APP_SETTINGS__['Posts']['public_post'],  "Posts@post", $posts);
     Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
 }
 
@@ -32,15 +41,17 @@ if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {
 if (app("Auth_logins_enabled")) {
     /** Basic login page */
     Route::get(app("Auth_login_page"), "Login@login_form");
+    Route::get("/login/email", "Login@email_sent", ['sitemap' => ['ignore' => true]]);
     // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
     // /** Admin panel (TODO: Implement admin panel) */
     // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
 
-    Route::get("/user/menu", "UserAccounts@get_user_menu");
+    // Route::get("/user/menu", "UserAccounts@get_user_menu");
     Route::get("/admin", "CoreController@admin_redirect");
-    Route::get("/password-reset", "Login@password_reset_initial_form");
+    Route::get("/password-reset", "Login@password_reset_initial_form", [
+        'sitemap' => ['ignore' => true]
+    ]);
     Route::get("/password-reset/{token}", "Login@password_reset_token_form");
-    Route::get("/login/email", "Login@email_sent");
 }
 
 if (app("Auth_account_creation_enabled")) {
@@ -52,3 +63,6 @@ if (app("Database_fs_enabled")) {
 }
 
 Route::get("/resource/vapid-key.json", "FileController@vapid_pub_key");
+
+Route::get("/robots.txt", "FileController@robots");
+Route::get("/sitemap.xml", "FileController@sitemap");

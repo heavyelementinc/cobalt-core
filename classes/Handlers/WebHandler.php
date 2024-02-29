@@ -368,11 +368,11 @@ class WebHandler implements RequestHandler {
     function generate_script_content($script_name) {
         $script_tags = "";
         $compiled = "";
-        $debug = app("debug");
+        $debug = app("Package_JS_script_content");
 
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
-            if ($debug) {
+            if ($debug === false) {
                 $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
             } else {
                 $files = files_exist([
@@ -463,14 +463,14 @@ class WebHandler implements RequestHandler {
     function generate_style_meta() {
         $link_tags = "";
         $compiled = "";
-        $debug = app("debug");
+        $debug = app("Package_style_content");
         foreach (__APP_SETTINGS__["css"][$this->meta_selector] as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
             ], false);
-            if ($debug === true) {
+            if ($debug === false) {
                 $path = "/res/css/";
                 if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
                 else if(empty($files)) throw new NotFound("That file does not exist");

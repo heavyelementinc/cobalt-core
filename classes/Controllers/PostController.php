@@ -26,9 +26,9 @@ abstract class PostController extends Controller {
     protected $customTitle = "";
 
     public function initialize($collection, $schemaName = null, $permission_suffix = "") {
+        if($collection === null) __APP_SETTINGS__['Posts']['collection_name'];
         if($schemaName === null) $schemaName =  "\\Cobalt\\Posts\\PostSchema";
         $this->init_permission($permission_suffix);
-        
         // Initialize our Post controller
         $this->postMan = new PostManager(null, $collection);
         $this->postMan->set_schema($schemaName);

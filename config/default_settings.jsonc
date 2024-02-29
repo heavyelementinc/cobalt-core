@@ -1234,6 +1234,32 @@
             "type": "boolean"
         }
     },
+    "Package_JS_script_content": {
+        "default": false,
+        "definition": "Debug",
+        "meta": {
+            "group": "Developer",
+            "subgroup": "Packaging",
+            "name": "Bundle JavaScript Content <help-span value='Compiles all client-side JavaScript into one file. May moderately decrease load times.'></help-span>",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Package_style_content": {
+        "default": false,
+        "definition": "Debug",
+        "meta": {
+            "group": "Developer",
+            "subgroup": "Packaging",
+            "name": "Bundle CSS Content <help-span value='Compiles all CSS files into one. May significantly decrease load times.'></help-span>",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
     "debug_exceptions_publicly": {
         "default": false,
         "directives": {

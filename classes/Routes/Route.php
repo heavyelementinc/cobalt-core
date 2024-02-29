@@ -147,6 +147,13 @@ class Route {
             'handler'    => $additional['handler'],
             'handler_data'  => $handler_data, // Handler script data
 
+            // The sitemap directives
+            'sitemap'    => $additional['sitemap'], // array_merge([
+            //     'ignore' => false, // Whether the sitemap should ignore this route
+            //     'children' => fn () => '', // A delta function that returns a string of valid <url> entries
+            //     'lastmod' => fn () => null, // A delta function which returns `Y-m-d` formatted string to indicate the last modification date, otherwise it uses the date the controller file was modified
+            // ],  ?? []),
+
             // Permission for a page or API 
             'permission' => $additional['permission'] ?? $context_permission ?? null,
             'groups'     => $additional['group'] ?? null,

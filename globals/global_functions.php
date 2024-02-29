@@ -15,6 +15,7 @@
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Posts\PostManager;
 use Cobalt\Renderer\Render;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Controllers\CRUDController;
@@ -373,7 +374,7 @@ function cobalt_autoload($class) {
     }
 }
 
-function get_controller($controllerName, $instanced = false) {
+function get_controller($controllerName, $instanced = false, $path = false) {
     $locations = [
         __APP_ROOT__ . "/controllers",
         __ENV_ROOT__ . "/controllers",
@@ -381,6 +382,7 @@ function get_controller($controllerName, $instanced = false) {
 
     $found = find_one_file($locations,"$controllerName.php");
     if($found === false) throw new HTTPException("Could not locate requested controller");
+    if($path) return $found;
     require_once $found;
     if(!$instanced) return $controllerName;
     return new $found();
@@ -1400,6 +1402,23 @@ function post_fetch($url, $data, $headers = [], $return_headers = false) {
 }
 
 function fetch_and_save($url) {
+}
+
+
+function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name'], $schema = "\\Cobalt\\Posts\\PostSchema") {
+    $html = "";
+    $posts = new PostManager(null, $collection);
+    $posts->set_schema($schema);
+    $count = $posts->count(['published' => true]);
+    foreach($posts->findAllAsSchema(['published' => true], ['limit' => $count + 1]) as $post) {
+        $html .= view("sitemap/url.xml", [
+            'location' => $post->{'public_link'},
+            'lastModified' => $post->publicationDate,
+            'priority' => 999,
+            // 'additional' => "<changefreq>true</changefreq>"
+        ]);
+    }
+    return $html;
 }
 
 /**

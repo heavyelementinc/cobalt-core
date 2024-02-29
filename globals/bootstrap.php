@@ -5,6 +5,8 @@
 define("COBALT_BOOSTRAP_AS_NEEDED", 0);
 // define("COBALT_BOOTSTRAP_");
 define("COBALT_BOOSTRAP_ALWAYS",  999);
+define("COBALT_MODE_DEVELOPMENT", 0);
+define("COBALT_MODE_PRODUCTION",  1);
 
 $db_config = __APP_ROOT__ . "/config/config.php";
 if(file_exists(__APP_ROOT__ . "/ignored/DEVELOPMENT") || file_exists(__APP_ROOT__ . "/ignored/DEV")) {

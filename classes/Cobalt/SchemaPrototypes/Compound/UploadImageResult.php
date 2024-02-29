@@ -31,9 +31,9 @@ class UploadImageResult extends UploadResult implements Persistable{
         $class = $misc['class'];
 
         $misc['data'] = array_merge([
-            "media-src" => $this->value->__dataset->media->filename,
-            "media-id" => $this->value->__dataset->media->ref,
-            "ref-id" => $this->value->__dataset[$embedSize]["ref"] ?? $this->value->__dataset["media"]["ref"]
+            "media-src" => $this->value->media->filename,
+            "media-id" => $this->value->media->ref,
+            "ref-id" => $this->value->{$embedSize}->ref ?? $this->value->media->ref
         ], $misc['data'] ?? []);
 
         $lightbox = "";
@@ -47,14 +47,14 @@ class UploadImageResult extends UploadResult implements Persistable{
         $title = $misc['title'] ? " title=\"".htmlspecialchars($misc['title'])."\"" : "";
         $alt = $misc['alt'] ? " alt=\"$misc[alt]\"" : "";
         
-        $value = (isset($this->value->__dataset)) ? $this->value->__dataset[$embedSize] : $this->value[$embedSize] ?? $this->value['media'] ?? $this->schema['default'][$embedSize] ?? $this->schema['default']['media'];
+        $value = (isset($this->value)) ? $this->value[$embedSize] : $this->value[$embedSize] ?? $this->value['media'] ?? $this->schema['default'][$embedSize] ?? $this->schema['default']['media'];
         
-        $type = $value['type'];
+        $type = $value->type;
         
-        $w = $value['meta']['width']  ?? $value['meta']['meta']['width'];
-        $h = $value['meta']['height'] ?? $value['meta']['meta']['height'];
+        $w = $value->meta->width  ?? $value->meta->meta->width;
+        $h = $value->meta->height ?? $value->meta->meta->height;
         
-        return "<img class=\"result-embed $class\" src='$value[filename]'$lightbox width=\"$w\" height=\"$h\" ".$alt.$title.$data.">";
+        return "<img class=\"result-embed $class\" src='$value->filename'$lightbox width=\"$w\" height=\"$h\" ".$alt.$title.$data.">";
     }
 
     #[Prototype]
@@ -124,11 +124,11 @@ class UploadImageResult extends UploadResult implements Persistable{
             'qname' => $this->queriableName($this->name),
             'name'  => $this->name,
             'val'   => $val,
-            'filename' => $val->__dataset['media']['filename'],
-            'width'    => $val->__dataset['media']['meta']['width'],
-            'height'   => $val->__dataset['media']['meta']['height'],
-            'accent'   => $val->__dataset['media']['meta']['accent_color'],
-            'color'    => $val->__dataset['media']['meta']['contrast_color'],
+            'filename' => $val->media->filename,
+            'width'    => $val->media->meta['width'],
+            'height'   => $val->media->meta['height'],
+            'accent'   => $val->media->meta['accent_color'],
+            'color'    => $val->media->meta['contrast_color'],
             'accept'   => $acceptAttr,
             'hasThumbnail' => $this->name,
         ]);

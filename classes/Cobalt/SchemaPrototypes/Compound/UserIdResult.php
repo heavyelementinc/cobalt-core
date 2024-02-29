@@ -5,6 +5,7 @@ namespace Cobalt\SchemaPrototypes\Compound;
 use Auth\UserCRUD;
 use Cobalt\SchemaPrototypes\PersistableResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
+use Exception;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
 
@@ -50,6 +51,42 @@ class UserIdResult extends PersistableResult {
 
         }
         $this->initialized = true;
+    }
+
+    static function get_valid_users($groupOrPermission = null, $type = null, $storage = null, $valueCallback = null) {
+        if(!$type) $type = "all";
+        if(!$storage) $storage = "_id";
+        $value = function ($doc) {
+            $name = "$doc->fname $doc->lname";
+            if($name === " ") $name = $doc->uname;
+            return $name;
+        };
+        
+        if(is_callable($valueCallback)) $value = $valueCallback;
+        $options = [
+            'permission' => [
+                'method' => 'getUsersByPermission',
+                'query' => [$groupOrPermission]
+            ],
+            'group'      => [
+                'method' => 'getUsersByGroup',
+                'query' => [$groupOrPermission]
+            ],
+            'all'        => [
+                'method' => 'find',
+                'query' => []
+            ],
+        ];
+        if(!key_exists($type, $options)) throw new Exception("$type is an invalid way to look up users");
+
+        $crud = new UserCRUD();
+        
+        $valid = [];
+        foreach($crud->{$options[$type]['method']}(...$options[$type]['query']) as $doc) {
+            $valid[(string)$doc->_id] = $value($doc);
+        }
+
+        return $valid;
     }
 
 }
