@@ -181,7 +181,7 @@ class FileController extends \Controllers\FileController {
         foreach($ROUTER->routes['web']['get'] as $route => $data) {
             $includeRawRoute = true;
             $registered = null;
-            if(isset($data['sitemap'])) {
+        if(isset($data['sitemap'])) {
                 if($data['sitemap']['children']) $registered = $data['sitemap']['children'];
                 if($data['sitemap']['ignore']) $includeRawRoute = !$data['sitemap']['ignore'];
             }

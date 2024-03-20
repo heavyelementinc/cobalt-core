@@ -673,9 +673,11 @@ function instagram_embedder($html) {
     return $match;
 }
 
-function markdown_to_plaintext(?string $string) {
+function markdown_to_plaintext(?string $string, $stripWhitespace = false) {
     $md = from_markdown($string);
-    return strip_tags($md);
+    $md = strip_tags($md);
+    if($stripWhitespace) $md = preg_replace("/[\s]/", " ", $md);
+    return $md;
 }
 
 /**

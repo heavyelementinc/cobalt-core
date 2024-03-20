@@ -20,7 +20,7 @@ class CoreAdmin {
             'plugin_count' => Extensions::get_active_count(),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
         ]);
-        set_template("/authentication/admin-dashboard/index.html");
+        return view("/authentication/admin-dashboard/index.html");
     }
 
     function list_all_users($page = 0) {
@@ -45,7 +45,7 @@ class CoreAdmin {
             'title' => "Manage users",
             "users" => $list
         ]);
-        set_template("/authentication/user-management/list-users.html");
+        return view("/authentication/user-management/list-users.html");
     }
 
     private function user_link($id, $target = "#basics") {
@@ -77,8 +77,8 @@ class CoreAdmin {
         try {
             $auth = new \Auth\AdditionalUserFields();
             $additional = $auth->__get_additional_user_tabs();
-            foreach($additional as $user => $value) {
-                if($value['name'][0].$value['name'][1] !== "<i") $additional[$user]['name'] = "<i name='card-bulleted-outline'></i> " . $value['name'];
+            foreach($additional as $usr => $value) {
+                if($value['name'][0].$value['name'][1] !== "<i") $additional[$usr]['name'] = "<i name='card-bulleted-outline'></i> " . $value['name'];
             }
         } catch (\Error $e) {
             $additional = "";
@@ -97,14 +97,14 @@ class CoreAdmin {
             ]);
         }
 
-        set_template("/authentication/user-management/individual-user.html");
+        return view("/authentication/user-management/individual-user.html",[]);
     }
 
     function create_user() {
         add_vars([
             'title' => "Create user"
         ]);
-        set_template("/authentication/user-management/create_new_user_basic.html");
+        return view("/authentication/user-management/create_new_user_basic.html");
     }
 
     function plugin_manager() {
@@ -114,7 +114,7 @@ class CoreAdmin {
             'title' => "Plugin Manager",
             'main' => $content
         ]);
-        set_template("plugins/index.html");
+        return view("plugins/index.html");
     }
 
     function plugin_individual_manager($plugin_id) {
@@ -124,7 +124,7 @@ class CoreAdmin {
             'title' => $plugin['name'],
             'plugin' => $plugin
         ]);
-        set_template("plugins/individual.html");
+        return view("plugins/individual.html");
     }
 
     function settings_index() {
@@ -137,11 +137,11 @@ class CoreAdmin {
             // 'public_settings_panel'   => get_route_group("public_settings_panel",['with_icon' => true]),
         ]);
 
-        set_template("/admin/settings/control-panel.html");
+        return view("/admin/settings/control-panel.html");
     }
 
     function app_settings() {
-        set_template("/admin/settings/basic-settings.html");
+        return view("/admin/settings/basic-settings.html");
     }
 
     function cron_panel() {
@@ -155,7 +155,7 @@ class CoreAdmin {
             // 'widgets ' => $widgets,
             'tasks' => $tasks
         ]);
-        set_template("/admin/cron/cron-task-index.html");
+        return view("/admin/cron/cron-task-index.html");
     }
 
 
@@ -174,6 +174,6 @@ class CoreAdmin {
             'paypal' => $paypal,
         ]);
 
-        set_template("/admin/settings/payment-gateways.html");
+        return view("/admin/settings/payment-gateways.html");
     }
 }

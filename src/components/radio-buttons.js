@@ -55,7 +55,7 @@ class RadioButtons extends HTMLElement {
     buttonControls(value, controller, btn) {
         switch(controller) {
             case "hash":
-                window.router.replaceLocation(`${location.pathname}#${value}`, document.title);
+                window.Cobalt.router.location = `${location.pathname}#${value}`;
                 window.dispatchEvent(new Event("hashchange"));
                 break;
         }
@@ -67,7 +67,7 @@ class RadioButtons extends HTMLElement {
         this.clearButton.addEventListener("click", () => {
             switch(this.getAttribute("controls")) {
                 case "hash":
-                    window.router.replaceLocation(location.pathname, document.title);
+                    window.Cobalt.router = location.pathname;
                     window.dispatchEvent(new Event("hashchange"));
                     break;
             }

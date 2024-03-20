@@ -36,9 +36,13 @@
     <a id="sr-skip-to-content" href="#{{main_id}}" class="sr-only">Skip to content</a>
     <div id="sr-announce" class="sr-only" aria-live="assertive"></div>
     <noscript>
-        {{app.name}} <strong>REQUIRES</strong> JavaScript. Basic functionality <strong>will not work</strong>
-        without JavaScript enabled. Please enable JavaScript or upgrade your
-        browser.{{!noscript_binding_after}}
+        <div>
+            &quot;{{app.app_name}}&quot; <strong>requires</strong> JavaScript. Basic functionality <strong>will not work</strong>
+            without JavaScript enabled. Please enable JavaScript or upgrade your browser.
+        </div>
+        <div>JavaScript allows us to deliver a better, more performant user experience. Don't believe us? Check out
+        our <a href="https://heavyelement.io/news/cobalt-performance">blog post on Cobalt application performance.</a></div>
+        {{!noscript_binding_after}}
     </noscript>
     <button id="nav-menu-spawn" aria-pressed="false"
         aria-controls="app-header" aria-expanded="false" 

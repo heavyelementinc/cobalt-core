@@ -13,9 +13,9 @@ class Route {
     /** Register a GET route for the site. Valid tokens are {some_name}, ..., and ?
      * optional parameters.
      * 
-     * $path = "/some/path/{token}/..." which would match "/some/path/variable/other/path"
+     * $pattern = "/some/path/{token}/..." which would match "/some/path/variable/other/path"
      * 
-     * $additional options include: 
+     * $options options include: 
      *  
      *  * handler - A JavaScript controller file in controllers/js
      *  * permission - The name of a permission required to access route
@@ -24,40 +24,40 @@ class Route {
      *  * navigation - Either an indexed array of group names or an associative array with unique anchor values (header navigation group = "main_navigation") (web only)
      *  * csrf_required => bool determines if CSRV tokens are required for the request (API only)
      * 
-     * @param string $path A REQUEST_URI to be matched against using Cobalt's route syntax
+     * @param string $pattern A REQUEST_URI to be matched against using Cobalt's route syntax
      * @param string $controller A controller/method pair in the "Controller@method" format
-     * @param array $additional An array of optional metadata ['handler','anchor','lists',]
+     * @param array $options An array of optional metadata ['handler','anchor','lists',]
      */
-    static function get(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, $additional, 'get');
+    static function get(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, $options, 'get');
     }
 
-    static function post(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, $additional, 'post');
+    static function post(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, $options, 'post');
     }
 
-    static function put(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, $additional, 'put');
+    static function put(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, $options, 'put');
     }
 
-    static function delete(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, $additional, 'delete');
+    static function delete(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, $options, 'delete');
     }
 
-    static function s_get(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'get');
+    static function s_get(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'get');
     }
 
-    static function s_post(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'post');
+    static function s_post(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'post');
     }
 
-    static function s_put(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'put');
+    static function s_put(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'put');
     }
 
-    static function s_delete(String $path, $controller, array|BSONArray|BSONDocument $additional = []) {
-        Route::add_route($path, $controller, array_merge($additional, ['require_session' => true]), 'delete');
+    static function s_delete(String $pattern, $controller, array|BSONArray|BSONDocument $options = []) {
+        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'delete');
     }
 
     static function throw_without_session($access = "modify") {
@@ -71,9 +71,9 @@ class Route {
      * we'd like to add a ROUTE TABLE CACHE to speed things up a bit and here seems
      * like the best place to find and store the variable names.
      */
-    static function add_route(String $path, $controller, array|BSONArray|BSONDocument $additional = [], $type = "get") {
-        if($additional instanceof BSONArray || $additional instanceof BSONDocument) {
-            $additional = $additional->getArrayCopy();
+    static function add_route(String $path, $controller, array|BSONArray|BSONDocument $options = [], $type = "get") {
+        if($options instanceof BSONArray || $options instanceof BSONDocument) {
+            $options = $options->getArrayCopy();
         }
 
         /** Okay, let's first suss out our variable names */
@@ -94,8 +94,8 @@ class Route {
 
         // If the client handler is set, we should get that handler
         $handler_data = null;
-        if (!key_exists('handler', $additional)) $additional['handler'] = null;
-        else $handler_data = Route::get_js_handler($additional['handler'], $regex, $controller);
+        if (!key_exists('handler', $options)) $options['handler'] = null;
+        else $handler_data = Route::get_js_handler($options['handler'], $regex, $controller);
         $router_table_address = $GLOBALS['ROUTE_TABLE_ADDRESS'];
         $context_permission = __APP_SETTINGS__['context_prefixes'][$router_table_address]['permission'] ?? null;
         // $context_permission = ($GLOBALS['permission_needed'] !== false) ? $GLOBALS['permission_needed'] : null;
@@ -112,8 +112,8 @@ class Route {
         $real_path = substr($path_prefix ?? "",0,-1) . $path;
         $real_regex = Route::convert_path_to_regex_pattern($real_path);
 
-        if (isset($additional['anchor']) && !isset($additional['anchor']['href'])) {            if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
-            $additional['anchor']['href'] = $path;
+        if (isset($options['anchor']) && !isset($options['anchor']['href'])) {            if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
+            $options['anchor']['href'] = $path;
         }
 
         $cache_control = [
@@ -144,38 +144,38 @@ class Route {
             'uri_var_types' => [], // Unused? 
 
             // The client-side controller (in JavaScript)
-            'handler'    => $additional['handler'],
+            'handler'    => $options['handler'],
             'handler_data'  => $handler_data, // Handler script data
 
             // The sitemap directives
-            'sitemap'    => $additional['sitemap'], // array_merge([
+            'sitemap'    => $options['sitemap'], // array_merge([
             //     'ignore' => false, // Whether the sitemap should ignore this route
             //     'children' => fn () => '', // A delta function that returns a string of valid <url> entries
             //     'lastmod' => fn () => null, // A delta function which returns `Y-m-d` formatted string to indicate the last modification date, otherwise it uses the date the controller file was modified
             // ],  ?? []),
 
             // Permission for a page or API 
-            'permission' => $additional['permission'] ?? $context_permission ?? null,
-            'groups'     => $additional['group'] ?? null,
+            'permission' => $options['permission'] ?? $context_permission ?? null,
+            'groups'     => $options['group'] ?? null,
 
             // Directory stuff
-            'anchor' => $additional['anchor'] ?? [], // Keys: 'label', 'href', 'attributes'
-            'navigation' => $additional['navigation'] ?? [], // INDEXED array
+            'anchor' => $options['anchor'] ?? [], // Keys: 'label', 'href', 'attributes'
+            'navigation' => $options['navigation'] ?? [], // INDEXED array
 
             // Header stuff -- May contain keys: 'label', 'href', 'attributes'
-            'header_nav' => $additional['header_nav'] ?? null,
+            'header_nav' => $options['header_nav'] ?? null,
 
             // Admin panel name
-            'panel_name' => $additional['name'] ?? null,
+            'panel_name' => $options['name'] ?? null,
             'route_file' => $file,   // The route.php file and the line number it was defined on!
             
             // API authentication stuff
-            'csrf_required' => $additional['requires_csrf'] ?? app("Router_csrf_required_default"),
+            'csrf_required' => $options['requires_csrf'] ?? app("Router_csrf_required_default"),
             
             // Cache Control stuff is only honored by API page requests
-            'cache_control' => array_merge($additional['cache_control'] ?? [], $cache_control),
-            'unread' => $additional['unread'] ?? false,
-            'require_session' => $additional['require_session'] ?? !app("Web_normally_open_pages"),
+            'cache_control' => array_merge($options['cache_control'] ?? [], $cache_control),
+            'unread' => $options['unread'] ?? false,
+            'require_session' => $options['require_session'] ?? !app("Web_normally_open_pages"),
 
             // Info that route groups need
             'nat_order' => $nat_order,

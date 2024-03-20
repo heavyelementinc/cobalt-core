@@ -76,6 +76,9 @@
             "alias": "app_name"
         }
     },
+    "Timezone": {
+        "default": "America/New_York"
+    },
     "DB_export_directory": {
         "default": "/ignored/db_backups/"
     },
@@ -1254,6 +1257,19 @@
             "group": "Developer",
             "subgroup": "Packaging",
             "name": "Bundle CSS Content <help-span value='Compiles all CSS files into one. May significantly decrease load times.'></help-span>",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "Package_style_minify": {
+        "default": true,
+        "definition": "Debug",
+        "meta": {
+            "group": "Developer",
+            "subgroup": "Packaging",
+            "name": "Minify Bundled CSS Content <help-span value='When `Package_style_content` is enabled, package.css is minified. May significantly decrease load times.'></help-span>",
             "type": "input-switch"
         },
         "validate": {

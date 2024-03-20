@@ -464,7 +464,8 @@ class WebHandler implements RequestHandler {
         $link_tags = "";
         $compiled = "";
         $debug = app("Package_style_content");
-        foreach (__APP_SETTINGS__["css"][$this->meta_selector] as $package) {
+        $toPackage = __APP_SETTINGS__["css"][$this->meta_selector];
+        foreach ($toPackage as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
@@ -476,7 +477,8 @@ class WebHandler implements RequestHandler {
                 else if(empty($files)) throw new NotFound("That file does not exist");
                 $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
             } else {
-                $compiled .= "\n\n" . file_get_contents($files[0]);
+                $compiled .= "\n\n/* $package */";
+                $compiled .= file_get_contents($files[0]);
             }
         }
 
@@ -492,9 +494,11 @@ class WebHandler implements RequestHandler {
         if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
 
         if ($compiled !== "") {
-            $minifier = new \MatthiasMullie\Minify\CSS();
-            $minifier->add($compiled);
-            $compiled = $minifier->minify();
+            if(__APP_SETTINGS__['Package_style_minify']) {
+                $minifier = new \MatthiasMullie\Minify\CSS();
+                $minifier->add($compiled);
+                $compiled = $minifier->minify();
+            }
 
             $cache = new CacheManager("css-precomp/package.css");
             $cache->set($compiled, false);
