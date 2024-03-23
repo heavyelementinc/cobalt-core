@@ -164,6 +164,50 @@ class ClientRouter extends EventTarget{
         const result = this.navigate(route);
     }
 
+    get hash() {
+        return window.location.hash;
+    }
+
+    set hash(newHash) {
+        window.location.hash = newHash;
+    }
+
+    // set hashObject(hash) {
+    //     let decoded = this.hashObject;
+    //     let object = hash;
+    //     switch(typeof hash){
+    //         case "string":
+    //             object = hash.split("/");
+    //             break;
+    //     }
+    //     decoded = {
+    //         ...decoded,
+    //         ...hash
+    //     };
+    //     window.location.hash = this.serializeHashObject(decoded);
+    // }
+
+    // get hashObject() {
+    //     return this.deserializeHashObject(window.location.hash);
+    // }
+
+    // deserializeHashObject(hash) {
+    //     const encoded = hash;
+    //     let arr = encoded.split("/");
+    //     const decoded = {};
+    //     for(let i = 0; i >= arr.length; i += 2) {
+    //         decoded[arr[i]] = arr[i + 1];
+    //     }
+    //     return decoded;
+    // }
+
+    // serializeHashObject(object) {
+    //     let string = "";
+    //     for(let i = 0; i >= Object.keys(object).length; i += 2) {
+            
+    //     }
+    // }
+
     get routeBoundaries() {
         return this.properties.routeBoundaries;
     }
