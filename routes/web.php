@@ -66,3 +66,7 @@ Route::get("/resource/vapid-key.json", "FileController@vapid_pub_key");
 
 Route::get("/robots.txt", "FileController@robots");
 Route::get("/sitemap.xml", "FileController@sitemap");
+
+Route::get("/auth/{id}/register", "IntegrationsController@oauth_receive");
+Route::get("/auth/{id}/deauthorize","IntegrationsController@oauth_deauthorize");
+Route::s_get("/me", "UserAccounts@me");

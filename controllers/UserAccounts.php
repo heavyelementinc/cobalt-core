@@ -1,5 +1,6 @@
 <?php
 
+use Auth\AdditionalUserFields;
 use Auth\MultiFactorManager;
 use Auth\SessionManager;
 use \Auth\UserCRUD;
@@ -10,6 +11,7 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Exception\BadMethodCallException;
 use Validation\Exceptions\ValidationFailed;
 
 class UserAccounts extends \Controllers\Pages {
@@ -153,10 +155,14 @@ class UserAccounts extends \Controllers\Pages {
     }
 
     function change_my_password() {
+        // if (!password_verify($_POST['current'], session("pword"))) throw new Unauthorized("You must enter your current password", true); 
+        if (!reauthorize("You must confirm your password", $_POST)) return;
         if (!isset($_POST['password']) || !isset($_POST['pword'])) throw new  ValidationFailed("Failed to update your password", ['pword' => "You need to specify both password fields."]);
         if ($_POST['password'] !== $_POST['pword']) throw new ValidationFailed("Failed to update your password", ['pword' => "Both password fields must match."]);
+        $_POST = ['pword' => $_POST['pword']];
         $value = $this->update_basics(session("_id"));
-
+        header("X-Status: @info Your password was updated successfully");
+        // update("");
         return "Success";
     }
 
@@ -182,7 +188,7 @@ class UserAccounts extends \Controllers\Pages {
             'main' => str_replace("</ul>", "", $html) . "</ul>"
         ]);
 
-        set_template("parts/main.html");
+        return view("parts/main.html");
     }
 
     function onboarding() {
@@ -190,21 +196,43 @@ class UserAccounts extends \Controllers\Pages {
             'title' => "Make an account"
         ]);
 
-        set_template("authentication/account-creation/onboarding.html");
+        return view("authentication/account-creation/onboarding.html");
     }
 
     function me() {
         $session = session();
         $push = new PushNotifications();
         $multifactor = new \Auth\MultiFactorManager($session);
+
+        $addtl = new AdditionalUserFields();
+        $fields = $addtl->__get_additional_user_tabs();
+        $links = "";
+        $extensions = "";
+        foreach($fields as $field => $data) {
+            if(!$data['self_service']) continue;
+            $view = $data['self_service'];
+            if($view === true) $view = $data['view'];
+            $icon = $data['icon'] ?? 'card-bulleted-outline';
+            $data['name'] = "<i name='$icon'></i> $data[name]";
+            $links .= "<a href='#$field'>$data[name]</a>";
+            $extensions .= "<div id='$field'>".view($view, ['user_account' => $session])."</div>";
+        }
+
+        $sessionMan = new SessionManager();
+        $sessions = $sessionMan->session_manager_ui_by_user_id(session('_id'));
+
         add_vars([
             'title' => "$session->fname $session->lname",
             'doc' => $session,
             'notifications' => $push->render_push_opt_in_form_values($session),
             '2fa' => $multifactor->get_multifactor_enrollment($session),
+            'integrate' => (new IntegrationsController())->getOauthIntegrations(),
+            'links' => $links,
+            'extensions' => $extensions,
+            'sessions' => "<div id='sessions'>$sessions</div>",
         ]);
 
-        set_template("/authentication/user-self-service-panel.html");
+        return view("/authentication/user-self-service-panel.html");
     }
 
     function update_me() {

@@ -1,0 +1,46 @@
+<hgroup>
+    <h1>{{title}}</h1>
+    <action-menu>
+        <option method="DELETE" action="/api/v1/integrations/{{name}}/reset">Reset</option>
+    </action-menu>
+</hgroup>
+<form-request method="POST" action="/api/v1/integrations/{{name}}/update">
+    <ul class="list-panel">
+        <li>
+            <label>Client ID</label>
+            <input-password name="client_id" value="{{config.client_id}}"></input-password>
+        </li>
+        <li>
+            <label>Project ID</label>
+            <input name="project_id" value="{{config.project_id}}">
+        </li>
+        <li>
+            <label>Auth URI</label>
+            <input name="auth_uri" value="{{config.auth_uri}}">
+        </li>
+        <li>
+            <label>Token URI</label>
+            <input name="token_uri" value="{{config.token_uri}}">
+        </li>
+        <li>
+            <label>Auth Provider</label>
+            <input name="auth_provider_x509_cert_url" value="{{config.auth_provider_x509_cert_url}}">
+        </li>
+        <li>
+            <label>Client Secret</label>
+            <input-password name="client_secret" value="{{config.client_secret}}"></input-password>
+        </li>
+        <li>
+            <label>Redirect URIs</label>
+            <input-array name="redirect_uris" allow-custom="true">{{config.redirect_uris.options()}}</input-array>
+        </li>
+        <li>
+            <label>Scopes</label>
+            <input-array name="scope" allow-custom="true">{{config.scope.options()}}</input-array>
+        </li>
+        <li>
+            <label>Access Type</label>
+            {{config.access_type.field()}}
+        </li>
+    </ul>
+</form-request>

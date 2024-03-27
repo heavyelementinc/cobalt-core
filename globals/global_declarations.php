@@ -61,3 +61,10 @@ function getRouteGroups() {
     global $ROUTE_GROUPS;
     return $ROUTE_GROUPS;
 }
+
+const REQUEST_ENCODE_JSON = 1;
+const REQUEST_ENCODE_FORM = 2;
+const REQUEST_ENCODE_XML = 4;
+const REQUEST_ENCODE_MULTIPART_FORM = 8;
+const REQUEST_ENCODE_OCTET = 16;
+const REQUEST_ENCODE_PLAINTEXT = 32;

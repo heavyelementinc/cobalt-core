@@ -291,13 +291,19 @@ class ClientRouter extends EventTarget{
     }
 
     updateScroll() {
+        // Prevent smooth scrolling when transitioning pages
+        document.body.parentNode.style.scrollBehavior = "auto";
+
         let scrollX = 0;
         let scrollY = 0;
         if(this.lastLocationChangeEvent.type === "popstate") {
             scrollX = this.lastLocationChangeEvent.state.scrollX;
             scrollY = this.lastLocationChangeEvent.state.scrollY;
         }
+        
         window.scrollTo(scrollX, scrollY);
+        // Restore initial scrolling behavior now that we've scrolled
+        document.body.parentNode.style.scrollBehavior = '';
     }
 
     replaceState(location, {

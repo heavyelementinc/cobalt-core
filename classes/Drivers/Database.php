@@ -23,7 +23,7 @@ use Validation\Normalize;
 
 abstract class Database {
     public $db = null;
-    public $collection;
+    public Collection $collection;
     public string $__schema;
     public $collectionSpecifiedAtConstruction;
 

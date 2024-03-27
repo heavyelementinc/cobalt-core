@@ -32,7 +32,8 @@
     }
 
     connectedCallback() {
-        this.innerHTML = "<input type='password'><button></button>";
+        let placeholder = this.getAttribute("placeholder");
+        this.innerHTML = `<input type='password'${(placeholder) ? ` placeholder="${placeholder}"`:""}><button></button>`;
         this.input = this.querySelector("input");
         this.input.addEventListener("change", (e) => {
             e.stopPropagation();

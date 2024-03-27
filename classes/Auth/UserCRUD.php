@@ -210,6 +210,21 @@ class UserCRUD extends \Drivers\Database {
         return $result;
     }
 
+    final function store_integration_credentials(ObjectId $user, $type, $details, $expiration) {
+        $result = $this->updateOne(
+            ['_id' => $user],
+            [
+                '$push' => [
+                    "integrations.$type" => [
+                        'details' => $details,
+                        'expiration' => $expiration
+                    ]
+                ]
+            ]
+        );
+        return $result->getModifiedCount();
+    }
+
 
     /* ============================
             HELPER FUNCTIONS

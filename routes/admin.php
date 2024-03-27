@@ -219,6 +219,15 @@ Route::get("/me/", "UserAccounts@me",
         ]);
     }
 
+Route::get("/integrations/", "IntegrationsController@index", [
+    'anchor' => [
+        'name' => 'Integrations',
+        'icon' => 'api'
+    ],
+    'navigation' => ['advanced_settings']
+]);
+Route::get("/integrations/{class}", "IntegrationsController@token_editor");
+
 /** 
 *  ========================================================
 *  ================ MISCELLANEOUS ROUTES ==================

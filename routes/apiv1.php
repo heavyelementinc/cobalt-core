@@ -82,6 +82,9 @@ Route::s_post("/extensions/{uuid}/info",    "ExtensionsController@modify_extensi
 Route::s_post("/extensions/{uuid}/options", "ExtensionsController@modify_extension_options", ['permission' => 'Extensions_allow_management']);
 Route::s_post("/extensions/rebuild", "ExtensionsController@rebuild_database", ['permission' => 'Extensions_allow_management']);
 
+Route::s_post("/integrations/{id}/update", "IntegrationsController@update");
+Route::s_delete("/integrations/{id}/reset", "IntegrationsController@delete");
+
 if (app('debug')) {
     Route::get("/hello_world/{something}/{machina}?", "HelloWorld@do_it", [ // Hello World test route
         'requires_csrf' => false,

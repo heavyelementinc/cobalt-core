@@ -78,7 +78,8 @@ class CoreAdmin {
             $auth = new \Auth\AdditionalUserFields();
             $additional = $auth->__get_additional_user_tabs();
             foreach($additional as $usr => $value) {
-                if($value['name'][0].$value['name'][1] !== "<i") $additional[$usr]['name'] = "<i name='card-bulleted-outline'></i> " . $value['name'];
+                $icon = $i['icon'] ?? "card-bulleted-outline";
+                $additional[$usr]['name'] = "<i name='$icon'></i> " . $value['name'];
             }
         } catch (\Error $e) {
             $additional = "";

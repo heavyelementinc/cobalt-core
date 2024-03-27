@@ -2,6 +2,8 @@
 /** Stubs to appease the IDE gods */
 namespace MongoDB\Driver;
 
-class Cursor {
+use Traversable;
+
+class Cursor implements Traversable {
     
 }
