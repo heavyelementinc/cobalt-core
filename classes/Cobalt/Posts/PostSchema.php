@@ -70,11 +70,11 @@ class PostSchema extends \Validation\Normalize {
                 },
                 // 'soft_char_cap' => 200,
                 'display' => function ($val) {
-                    return from_markdown(strip_tags($this->excerpt));
-                    // return str_replace(['<a',"</a"], ['<strong','</strong'], from_markdown($this->{"excerpt"}));
+                    // return markdown_to_plaintext($this->excerpt);
+                    return from_markdown($this->{"excerpt"});
                 },
                 'attrs' => function ($val) {
-                    return markdown_to_plaintext($val ?? $this->__dataset['body.strip']);
+                    return markdown_to_plaintext($this->{"excerpt"} ?? $this->__dataset['body.strip']);
                 }
             ],
             'postType' => [

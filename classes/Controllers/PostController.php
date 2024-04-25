@@ -20,7 +20,7 @@ use Validation\Exceptions\ValidationFailed;
 
 abstract class PostController extends Controller {
 
-    public $postMan = null;
+    public PostManager $postMan;
     protected $permission = "Post_manage_posts";
     protected $publishPermission = "Post_publish_posts";
     protected $permissionGroup = "Post";
