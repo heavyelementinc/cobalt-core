@@ -154,6 +154,7 @@ class Router {
 
         for(const i of links) {
             i.addEventListener("click", (event) => {
+                if(event.defaultPrevented) return;
                 this.handleClick(i, event);
             });
         }

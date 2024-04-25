@@ -923,8 +923,17 @@
             }
         }
     },
-    "default-color-scheme": {
-        "default": "light"
+    "default_color_scheme": {
+        "default": true
+    },
+    "color_primary": {
+        "default": "#004BA8"
+    },
+    "color_background": {
+        "default": "#efefef"
+    },
+    "color_mixed_percentage": {
+        "default": 75
     },
     "opengraph": {
         "directives": {

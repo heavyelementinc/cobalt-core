@@ -24,9 +24,12 @@ use \Cache\Manager as CacheManager;
 use Cobalt\Notifications\PushNotifications;
 use Cobalt\Renderer\Debugger;
 use Cobalt\Renderer\Exceptions\TemplateException;
+use Cobalt\SchemaPrototypes\Basic\HexColorResult;
+use Cobalt\ThemeManager;
 use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
+use MikeAlmond\Color\Color;
 use Render\Render;
 
 class WebHandler implements RequestHandler {
@@ -211,7 +214,8 @@ class WebHandler implements RequestHandler {
         $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
         $settings .= $this->getRouteBoundaries();
-        $vars = "";
+        $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
+        $vars = $theme->getPrimaryColor() . $theme->getBackgroundColor() . $theme->getMixedColor();
         foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
             $vars .= "--project-$var: $value;\n";
         }
@@ -222,6 +226,7 @@ class WebHandler implements RequestHandler {
         $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;
     }
+
 
     function getRouteBoundaries() {
         $boundaries = [];

@@ -56,6 +56,13 @@
         "default": false,
         "ring": 3
     },
+    "Posts_allow_unsafe_post_content": {
+        "group": "Posts",
+        "label": "Allows the user to modify the 'unsafe content' setting in posts (HTML tags).",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
     "Auth_allow_creating_users": {
         "group": "Users",
         "label": "Able to create new user accounts.",

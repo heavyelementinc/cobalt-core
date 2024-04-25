@@ -1,8 +1,8 @@
-{{!unpublished}}
-<article class="cobalt-post">
-    <div class="cobalt-post--splash" {{!post.default_image.display}}></div>
-    <div class="cobalt-post--header">
-        <h1 class="cobalt-post--title">{{!post.title.md}}</h1>
+            {{!unpublished}}
+            <article class="cobalt-post">
+                <div class="cobalt-post--splash" {{!post.default_image.display}}></div>
+                <div class="cobalt-post--header">
+                    <h1 class="cobalt-post--title">{{!post.title.md}}</h1>
         <ul>
             <li><strong>{{!post.author.display}}</strong></li>
             <li><a href="{{href}}" class="cobalt-post--article-link">{{!post.publicationDate.display}}</a></li>
@@ -10,6 +10,6 @@
         </ul>
     </div>
     <content>
-        {{!post.body.md}}
+        {{!post.body.display}}
     </content>
 </article>

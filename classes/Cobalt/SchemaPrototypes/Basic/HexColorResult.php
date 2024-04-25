@@ -36,6 +36,29 @@ class HexColorResult extends SchemaResult {
     }
 
     #[Prototype]
+    protected function lighten($percentage) {
+        $color = Color::fromHex($this->value); 
+        return $color->lighten($percentage);
+    }
+
+    #[Prototype]
+    protected function darken($percentage) {
+        $color = Color::fromHex($this->value); 
+        return $color->lighten(-1 * $percentage);
+    }
+
+    #[Prototype]
+    protected function mix(Color $color, float $percentage = 50) {
+        $thisColor = Color::fromHex($this->value); 
+        return $color->mix($thisColor, $percentage);
+    }
+
+    #[Prototype]
+    protected function adjustHue() {
+
+    }
+
+    #[Prototype]
     protected function getColor():Color {
         return Color::fromHex($this->value);
     }

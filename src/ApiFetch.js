@@ -31,7 +31,9 @@ class ApiFetch {
                 cache: this.cache,
                 headers: {
                     "Content-Type": this.format,
+                    // "X-Include": "fulfillment,update,events",
                     // "X-Mitigation": document.querySelector("meta[name='token']").getAttribute("content"),
+                    "X-Request-Source": "ApiFetch",
                     ...this.headers
                 },
                 signal: this.abortController.signal

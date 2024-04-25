@@ -18,6 +18,8 @@
  * @copyright 2023 - Heavy Element, Inc.
  */
 
+use Cobalt\UTMTracker\UTMHandler;
+
 ob_start();
 $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
 
@@ -127,7 +129,6 @@ $cobalt_session_started = session_start([
 ]);
 
 if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
-
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
 if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");

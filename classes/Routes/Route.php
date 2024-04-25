@@ -148,7 +148,7 @@ class Route {
             'handler_data'  => $handler_data, // Handler script data
 
             // The sitemap directives
-            'sitemap'    => $options['sitemap'], // array_merge([
+            'sitemap'    => $options['sitemap'] ?? [], // array_merge([
             //     'ignore' => false, // Whether the sitemap should ignore this route
             //     'children' => fn () => '', // A delta function that returns a string of valid <url> entries
             //     'lastmod' => fn () => null, // A delta function which returns `Y-m-d` formatted string to indicate the last modification date, otherwise it uses the date the controller file was modified

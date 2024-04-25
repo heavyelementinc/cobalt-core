@@ -53,7 +53,11 @@ class PostSchema extends \Validation\Normalize {
                 'get' => fn () => $this->get_date($this->__dataset['publicationDate'], "24-hour"),
                 'set' => false,
             ],
-            'body' => [],
+            'body' => [
+                'display' => function ($val) {
+                    return from_markdown($val, !$this->allow_html_content);
+                }
+            ],
             'excerpt' => [
                 'get' => function ($val) {
                     if(!$val) return $this->markdown_word_limit($this->__dataset['body'], $this->soft_char_cap);
@@ -66,7 +70,8 @@ class PostSchema extends \Validation\Normalize {
                 },
                 // 'soft_char_cap' => 200,
                 'display' => function ($val) {
-                    return str_replace(['<a',"</a"], ['<strong','</strong'], from_markdown($this->{"excerpt"}));
+                    return from_markdown(strip_tags($this->excerpt));
+                    // return str_replace(['<a',"</a"], ['<strong','</strong'], from_markdown($this->{"excerpt"}));
                 },
                 'attrs' => function ($val) {
                     return markdown_to_plaintext($val ?? $this->__dataset['body.strip']);
@@ -155,6 +160,16 @@ class PostSchema extends \Validation\Normalize {
                 'display' => function ($val) {
                     if(app("Posts_default_index_display") === "prominent") return " cobalt-post--prominent";
                     return ($val) ? " cobalt-post--prominent" : "";
+                }
+            ],
+            'allow_html_content' => [
+                'set' => function ($val) {
+                    $session = session();
+                    if(!$session) throw new ValidationIssue("You're not logged in. I don't know how you managed to get this far.");
+                    if(!has_permission('Posts_allow_unsafe_post_content', null, $session, false)) {
+                        if($val === true) throw new ValidationIssue("You do not have permission to pass through HTML content");
+                    }
+                    return $val;
                 }
             ]
         ];

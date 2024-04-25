@@ -25,6 +25,18 @@ body {
     color: var(--project-body-color);
 }
 
+a {
+    color: var(--project-href-color-normal);
+}
+
+a:visited {
+    color: var(--project-href-color-normal);
+}
+
+a:hover {
+    color: var(--project-href-color-hover);
+}
+
 main {
     display: block;
 }

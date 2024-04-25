@@ -16,6 +16,7 @@ use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\PostNotFound;
 use Exceptions\HTTP\Unauthorized;
 use Exceptions\HTTP\UnknownError;
+use Validation\Exceptions\ValidationFailed;
 
 abstract class PostController extends Controller {
 
@@ -59,7 +60,7 @@ abstract class PostController extends Controller {
             $post = new $schema();
         }
 
-        set_template($post->getTemplate('admin'));
+        return view($post->getTemplate('admin'));
     }
 
     public function edit($id = null) {
@@ -73,13 +74,14 @@ abstract class PostController extends Controller {
             'title' => "Edit",
             'post' => $post,
             'href' => $this->path('post',[]),
+            'allow_html_content' => (has_permission("Posts_allow_unsafe_post_content", null, null, false)) ? view("/posts/admin/allow-unsafe-html.html", ['doc' => $post]) : "",
             'update_action' => $this->path('update',[$id],'put',   'apiv1'),
             'upload_action' => $this->path('upload',[$id],'post',  'apiv1'),
             'delete_action' => $this->path('delete',[$id],'delete','apiv1'),
             'pretty' => "<fold-out title=\"Raw Database Entry\"><pre>".json_encode($post, JSON_PRETTY_PRINT)."</pre></fold-out>",
         ]);
 
-        set_template($post->getTemplate("edit"));
+        return view($post->getTemplate("edit"));
     }
 
     public function update($id = null) {
@@ -153,7 +155,7 @@ abstract class PostController extends Controller {
             'og_template' => '/posts/parts/og_landing.html',
         ]);
 
-        set_template((new PostManager())->getTemplate('public'));
+        return view((new PostManager())->getTemplate('public'));
     }
 
     public function post($slug) {
@@ -192,7 +194,7 @@ abstract class PostController extends Controller {
             'og_template' => '/posts/parts/og_individual.html'
         ]);
 
-        set_template((new PostManager())->getTemplate('post'));
+        return view((new PostManager())->getTemplate('post'));
     }
 
     public function init_permission($suffix) {

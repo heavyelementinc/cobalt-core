@@ -13,7 +13,7 @@ class AsyncFetch extends EventTarget {
         cache = "default",
         headers = {},
         form = null,
-    }) {
+    } = {}) {
         super();
         this.action = action;
         this.method = method;
@@ -31,9 +31,10 @@ class AsyncFetch extends EventTarget {
         this.response = null; // The raw response from the fetch request
         this.resolved = null; // The resolved data from the request
         this.headerDirectiveMap = {
+            'location': XRedirect,
+            'x-redirect': XRedirect,
             'x-status': XStatus,
             'x-modal': XModal,
-            'x-redirect': XRedirect,
             'x-refresh': XRefresh,
             'x-confirm': XConfirm,
             'x-reauthorization': XReauth,
@@ -71,6 +72,7 @@ class AsyncFetch extends EventTarget {
             }
 
             client.setRequestHeader('X-Include', "fulfillment,update,events");
+            client.setRequestHeader('X-Request-Source', "AsyncFetch");
             const submission = this.encodeFormData(this.data)
             if(this.format) client.setRequestHeader('Content-Type', this.format);
             try{
