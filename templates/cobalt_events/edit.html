@@ -2,7 +2,7 @@
     <h1 id="internal_name">{{title}}</h1>
 
     <action-menu id="more-menu">
-        <!-- <option>Preview</option> -->
+        <option method="DELETE" action="/api/v1/cobalt-events/{{!event._id}}" dangerous="true">Delete</option>
     </action-menu>
     <!-- <div id="options">
         <button ><i name="menu"></i></button>
