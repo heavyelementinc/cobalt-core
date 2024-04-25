@@ -1,5 +1,8 @@
 <hgroup>
     <h1>Edit Post <span id="title"></span></h1>
+    <action-menu>
+        <option method="DELETE" action="/api/v1/posts/{{!post._id}}/delete" dangerous="true">Delete</option>
+    </action-menu>
 </hgroup>
 <div class="vbox" id="container">
     <form-request method="PUT" action="{{update_action}}" id="post-manager">
