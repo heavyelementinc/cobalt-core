@@ -62,7 +62,6 @@
             "main.js",
             "app.js",
             "Cobalt/MobileNavMenu.js",
-            "Router.js",
             "ClientRouter.js"
         ]
     },

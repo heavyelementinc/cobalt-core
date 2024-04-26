@@ -465,6 +465,7 @@ class ClientRouter extends EventTarget{
         if(target.getAttribute("href")[0] === "#") return true;
         if(e.ctrlKey) return true;
         if(e.button !== 0) return true;
+        if(target.hasAttribute("target")) return true;
         this.lastLocationChangeEvent = {type: e.type, detail: e.detail || {}, target: e.target || e.currentTarget || e.explicitTarget};
         e.preventDefault();
         window.Cobalt.router.location = target.href;
