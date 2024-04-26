@@ -12,7 +12,7 @@
             <div class="hbox"><input name='title' value="{{post.title}}" for="title"></div>
             <div id="slug">
                 <!-- <span>Link: </span> -->
-                <a href="{{post.public_link}}" is>http://{{app.domain_name}}{{href}}</a>
+                <a href="{{post.public_link}}">http://{{app.domain_name}}{{href}}</a>
                 <input name="url_slug" value="{{post.url_slug}}">
             </div>
             <markdown-area name='body' placeholder="Share your thoughts...">{{post.body}}</markdown-area>
