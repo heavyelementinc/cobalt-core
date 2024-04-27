@@ -17,8 +17,11 @@ class DateResult extends SchemaResult {
     
     public function getValue():mixed {
         $value = $this->value;
-        if($this->value instanceof UTCDateTime) $value = $this->value->toDateTime();
-        if(key_exists("get", $this->schema) && is_callable($this->schema['get'])) $value = $this->schema['get'];
+        if(is_callable($value)) {
+            $value = $value();
+        }
+        if($value instanceof UTCDateTime) $value = $value->toDateTime();
+        if(key_exists("get", $this->schema ?? []) && is_callable($this->schema['get'])) $value = $this->schema['get'];
         return $value;
     }
 

@@ -81,6 +81,8 @@ class UploadResult extends MapResult {
                 $allow = $value['meta']['allow'];
                 $title = $value['meta']['title'];
                 return "<iframe class=\"$class\" src=\"$rt\" name=\"$enc\" scrolling=\"no\" frameborder=\"0\" width=\"$w\" height=\"$h\" $fs $allow $title></iframe>";
+            case "zip":
+                return "<a href=''></a>";
             case "image":
             default:
                 return "<img class=\"$class\" src=\"$value[filename]\" width=\"$w\" height=\"$h\" style=\"background-color: ".$value['meta']['accent']."\">";

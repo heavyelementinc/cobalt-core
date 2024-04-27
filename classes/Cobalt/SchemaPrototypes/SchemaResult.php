@@ -73,7 +73,10 @@ class SchemaResult implements \Stringable, JsonSerializable
      */
     public function getValue(): mixed {
         $result = $this->value;
-        if ($result === null && $this->schema['default']) $result = $this->schema['default'];
+        if ($result === null && $this->schema['default']) {
+            $result = $this->schema['default'];
+            if(is_callable($result)) $result = $result();
+        }
         if (key_exists('get', $this->schema ?? []) && is_callable($this->schema['get'])) $result = $this->schema['get']($result, $this);
         else $result = $this->getRaw();
         if ($this->asHTML === false && gettype($this->value) === "string") $result = htmlspecialchars($result);
