@@ -68,7 +68,10 @@ if(file_exists($db_config)) {
         // if($CONFIG[$key] == false) unset($CONFIG[$key]);
     }
 
-    date_default_timezone_set($CONFIG['timezone']);
+    $tz_set_result = date_default_timezone_set($CONFIG['timezone']);
+    if(!$tz_set_result) {
+        throw new Exception("Failed to set timezone");
+    }
 }
 
 /**

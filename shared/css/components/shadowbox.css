@@ -28,10 +28,16 @@
     background: none;
     border: none;
     font-size: 2em;
+    color: white;
 }
 
 .shadowbox-container .close {
     position: absolute;
     top: 1ch;
     right: 1ch;
+    color: white;
+}
+
+.shadowbox-container button:hover, .shadowbox-container .close:hover {
+    color: black;
 }

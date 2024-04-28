@@ -21,20 +21,17 @@
 
 namespace Cobalt\SchemaPrototypes;
 
-use BadFunctionCallException;
-use Cobalt\Maps\Exceptions\DirectiveException;
-use Cobalt\Maps\GenericMap;
-use Cobalt\Maps\PersistanceMap;
 use Exception;
-use MongoDB\BSON\Document;
-use MongoDB\BSON\Persistable;
-use stdClass;
 use TypeError;
-use Cobalt\SchemaPrototypes\Traits\Prototype;
 use JsonSerializable;
-use MongoDB\Model\BSONArray;
-use ReflectionException;
+use BadFunctionCallException;
 use ReflectionObject;
+use ReflectionException;
+use MongoDB\Model\BSONArray;
+use MongoDB\BSON\Persistable;
+use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Cobalt\Maps\Exceptions\DirectiveException;
 
 /** ## `SchemaResult` schema directives
  *  * `default` => [null], the default value of the an element
@@ -45,8 +42,7 @@ use ReflectionObject;
  *  * `pattern_flags` => 'string' flags
  * @package Cobalt\SchemaPrototypes 
  * */
-class SchemaResult implements \Stringable, JsonSerializable
-{
+class SchemaResult implements \Stringable, JsonSerializable {
     protected $value;
     protected $originalValue;
     protected $type = "mixed";

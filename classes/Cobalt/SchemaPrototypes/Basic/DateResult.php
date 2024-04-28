@@ -9,6 +9,7 @@ use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use DateTimeZone;
 
 class DateResult extends SchemaResult {
     use Fieldable;
@@ -25,8 +26,7 @@ class DateResult extends SchemaResult {
         return $value;
     }
 
-    public function __toString(): string
-    {
+    public function __toString(): string {
         $val = $this->getValue();
         if(!$val) return "";
         return $val->format('c');
@@ -72,6 +72,7 @@ class DateResult extends SchemaResult {
         if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
             $dateTime = $value->toDateTime();
+            $dateTime->setTimezone(new DateTimeZone(config()['timezone']));
             $value = $dateTime->format("U");
             return date($format, $value);
         }

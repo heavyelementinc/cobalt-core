@@ -109,24 +109,33 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         if(!$this->__schemaHasBeenInitialized) throw new LookupFailure("Schema has not been initialized!");
         // $target[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
         // return;
+        
+        // Set no schemaDirectives as default behavior
         $schemaDirectives = null;
+        // Check if the field we're working on is explicity defined in our schema
         if(key_exists($field, $this->__schema)) {
+            // If it is, we need to read our schemaDirectives
             $schemaDirectives = $this->__schema[$field];
+            // Check if our schema includes an 'each' field
             if(key_exists('each', $schemaDirectives)) {
-                $mutant = $value;
-                foreach($mutant as $i => $v) {
-                    $mutant[$i] = $this->__toResult($field.".$i", $v, $schemaDirectives['each'], $this);
+                // If it does, let's check if it's a BSONArray and convert it
+                if($value instanceof BSONArray) $value = $value->getArrayCopy();
+                // Loop through through the array
+                foreach($value as $index => $arrayItem) {
+                    // Upconvert it to a result
+                    $value[$index] = $this->__toResult($field.".$index", $arrayItem, $schemaDirectives['each'], $this);
                 }
-                $value = $mutant;
             }
         } else if(is_array($value) || $value instanceof ArrayObject) {
+            // If it's an array or array object
             foreach($value as $i => $v) {
+                // Loop through them and rehydrate them
                 if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
             }
         }
         
+        // Reference our target so we can recursively set values
         $target[$field] = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
-        // $this->__hydrated[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
     }
 
     ##### GETTERS & SETTERS #####

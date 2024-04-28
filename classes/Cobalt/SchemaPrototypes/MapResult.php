@@ -76,24 +76,35 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
         $this->value->offsetUnset($offset);
     }
 
+    /********* ITERATOR METHODS ***********/
+
+    private $iteratorCurrentOffset = 0;
+
     public function current(): mixed {
-        return $this->value->current();
+        if(method_exists($this->value, "current")) return $this->value->current();
+        return $this->value[$this->key()];
     }
 
     public function next(): void {
-        $this->value->next();
+        if(method_exists($this->value, "next")) $this->value->next();
+        else $this->iteratorCurrentOffset++;
     }
 
     public function key(): mixed {
-        return $this->value->key();
+        if(method_exists($this->value, "key")) return $this->value->key();
+        $schema = $this->getSchema();
+        $keys = array_keys($schema);
+        return $keys[$this->iteratorCurrentOffset];
     }
 
     public function valid(): bool {
-        if(!$this->value) return false;
-        return $this->value->valid();
+        if(method_exists($this->value, "valid")) return $this->value->valid();
+        if(isset($this->value[$this->key()])) return true;
+        return false;
     }
 
     public function rewind(): void {
-        if($this->value) $this->value->rewind();
+        if(method_exists($this->value, "rewind")) $this->value->rewind();
+        else $this->iteratorCurrentOffset = 0;
     }
 }

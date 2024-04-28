@@ -17,7 +17,6 @@ class StringResult extends SchemaResult implements ArrayAccess{
     // use Fieldable;
     protected $type = "string";
 
-
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/

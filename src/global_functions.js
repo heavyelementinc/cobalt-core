@@ -148,6 +148,11 @@ async function lightbox(origin, animate = true) {
 }
 
 function shadowbox(element, group = false) {
+    if(group === false) {
+        if(element.hasAttribute("data-group")) {
+            group = element.hasAttribute("data-group");
+        }
+    }
     const box = new Shadowbox(group, element);
     box.initUI();
     return box;

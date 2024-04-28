@@ -261,7 +261,7 @@ class WebHandler implements RequestHandler {
         return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
         // $links = "";
         // global $ROUTER:
-        // foreach ($router->routes['get'] as $regex => $route) {
+        // foreach ($router->routes['get'] a Saturday, April 27th 2024 9:29 PM s $regex => $route) {
         //     if (!isset($route['header_nav'])) continue;
         //     $href  = $route['header_nav']['href'] ?? $route['original_path'];
         //     $label = $route['header_nav']['label'];
