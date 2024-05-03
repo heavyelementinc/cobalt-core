@@ -335,7 +335,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
      * @param null|array $schema 
      * @return void 
      */
-    function setSchema(?array $schema): void {
+    function setSchema(null|array $schema): void {
         $this->schema = array_merge(
             self::universalSchemaDirectives,
             $this->defaultSchemaValues(),

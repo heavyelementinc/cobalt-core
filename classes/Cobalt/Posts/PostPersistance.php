@@ -3,6 +3,7 @@
 namespace Cobalt\Posts;
 
 use Cobalt\Maps\PersistanceMap;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\Basic\FakeResult;
@@ -71,6 +72,15 @@ class PostPersistance extends PersistanceMap {
                 new FakeResult,
                 'attrs' => function ($val) {
                     
+                }
+            ],
+            'tags' => [
+                new ArrayResult,
+                'allow_custom' => true,
+                'valid' => function () {
+                    $posts = new PostManager();
+                    $tags = $posts->distinct('tags');
+                    return $tags;
                 }
             ]
         ];

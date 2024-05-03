@@ -32,6 +32,10 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
     public function jsonSerialize(): mixed {
         return $this->value->jsonSerialize();
     }
+
+    public function __toString(): string {
+        return "[MapResultObject]";
+    }
     // function setName(string $name) {
     //     // TODO: Set the appropriate name
     // }

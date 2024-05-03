@@ -171,6 +171,9 @@ class PostSchema extends \Validation\Normalize {
                     }
                     return $val;
                 }
+            ],
+            'tags' => [
+                
             ]
         ];
     }

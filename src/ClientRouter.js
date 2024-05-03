@@ -133,13 +133,19 @@ class ClientRouter extends EventTarget{
         this.setPushStateMode();
         this.initListeners();
         history.replaceState({ // Let's set up initial pages so async popstates work well
-                title: document.title,
+                title: this.getTitle(document.title),
                 url: window.location.toString(),
                 scrollY: window.scrollY,
                 scrollX: window.scrollX
             }, '', window.location.toString()
         );
         
+    }
+
+    getTitle(title) {
+        const titleElement = document.querySelector("title");
+        const suffix = titleElement.dataset.suffix ?? "";
+        return `${title}${suffix}`;
     }
 
     get location() {
@@ -229,7 +235,7 @@ class ClientRouter extends EventTarget{
         const current = history.state;
         history.replaceState(
             {
-                title: document.title,
+                title: this.getTitle(document.title),
                 url: current.url,
                 scrollY: window.scrollY,
                 scrollX: window.scrollX,
@@ -279,7 +285,7 @@ class ClientRouter extends EventTarget{
         }
         
         history[this.historyMode]({
-                title: document.title,
+                title: this.getTitle(document.title),
                 url: route.originalRoute,
                 scrollY: window.scrollY,
                 scrollX: window.scrollX,
@@ -379,7 +385,7 @@ class ClientRouter extends EventTarget{
     }
 
     updateContent(pageData, query = this.updateTarget) {
-        document.title = pageData.title || app("app_name");
+        document.title = this.getTitle(pageData.title || app("app_name"));
         let main;
         if(typeof query === "string") main = document.querySelector(query);
         else main = query;

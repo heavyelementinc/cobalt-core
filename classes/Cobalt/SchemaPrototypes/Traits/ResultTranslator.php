@@ -17,7 +17,8 @@ use MongoDB\BSON\ObjectId;
 trait ResultTranslator {
     public string $__namePrefix = "";
 
-    function __toResult(string $name, mixed $value, ?array $schema, ?GenericMap $ref = null):SchemaResult|ObjectId {
+    function __toResult(string $name, mixed $value, null|array $schema, ?GenericMap $ref = null):SchemaResult|ObjectId {
+        
         $type = gettype($value);
         // if($schema === null) $schema = $this->__schema[$name];
 
