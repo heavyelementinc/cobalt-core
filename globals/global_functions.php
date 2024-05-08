@@ -385,7 +385,7 @@ function get_controller($controllerName, $instanced = false, $path = false) {
     if($path) return $found;
     require_once $found;
     if(!$instanced) return $controllerName;
-    return new $found();
+    return new $controllerName();
 }
 
 /** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
@@ -1417,6 +1417,23 @@ function reauthorize($message = "You must re-authroize your account", $resubmit)
 function plugin($name) {
     if (isset($GLOBALS['ACTIVE_PLUGINS'][$name])) return $GLOBALS['ACTIVE_PLUGINS'][$name];
     throw new Exception('Plugin is not active!');
+}
+
+function get_posts_from_tags(array $tags, string $controller = "Posts"):string {
+    $html = "";
+    $postController = get_controller($controller, true);
+    $posts = $postController->postMan;
+    $view = $posts->getTemplate("blurb");
+    $result = $posts->getPostsFromTags($tags);
+
+    foreach($result as $post) {
+        $html .= view($view, [
+            'post' => $post,
+            'href' => $postController->path('post',[(string)$post['url_slug']])
+        ]);
+    }
+
+    return $html;
 }
 
 /**

@@ -27,7 +27,7 @@ abstract class PostController extends Controller {
     protected $customTitle = "";
 
     public function initialize($collection, $schemaName = null, $permission_suffix = "") {
-        if($collection === null) __APP_SETTINGS__['Posts']['collection_name'];
+        if($collection === null) $collection = __APP_SETTINGS__['Posts']['collection_name'];
         if($schemaName === null) $schemaName =  "\\Cobalt\\Posts\\PostSchema";
         $this->init_permission($permission_suffix);
         // Initialize our Post controller
@@ -209,7 +209,7 @@ abstract class PostController extends Controller {
         $GLOBALS['POST_PERMISSIONS'] = $this->permission;
     }
 
-    private function path(string $methodName, array $args = [], string $method = "get", $context = "web") {
+    public function path(string $methodName, array $args = [], string $method = "get", $context = "web") {
         $className = $this::class;
         $path = get_path_from_route($className, $methodName, $args, $method, $context);
         if(!$path) {

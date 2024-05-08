@@ -33,6 +33,7 @@
                     <input type="time" name='publicationTime' value="{{post.publicationTime}}">
                 </div>
             </div>
+            <input-array name="tags" allow-custom="true">{{!post.tags.options}}</input-array>
             <div id="excerpt">
                 <label>Excerpt</label>
                 <textarea name='excerpt'>{{post.excerpt}}</textarea>

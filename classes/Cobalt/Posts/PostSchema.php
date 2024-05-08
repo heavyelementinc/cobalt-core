@@ -47,7 +47,23 @@ class PostSchema extends \Validation\Normalize {
             'publicationDate' => [
                 'get' => fn ($val) => $this->get_date($val),
                 'set' => fn ($val) => $this->make_date($val . " " . $this->__to_validate['publicationTime']),
-                'display' => fn ($val) => $this->get_date($val, 'relative'),
+                'display' => function ($val) {
+                    $date = null;
+                    switch(gettype($val)) {
+                        case "string":
+                        case "int":
+                        case "float":
+                        case "double":
+                            $date = new \DateTime($val . " " . $this->{'publicationTime'});
+                            break;
+                        case "object":
+                            $date = $val->toDateTime();
+                            break;
+                    }
+                    // $date = $this->{'publicationDate'}->toDateTime();
+                    // return "<date-span value=\"".$date->format('U')."\"</date-span>";//$this->get_date($val, 'relative');
+                    return $date->format(__APP_SETTINGS__['Posts_date_format']) . " at " . $date->format(__APP_SETTINGS__['Posts_date_time']);
+                },
             ],
             'publicationTime' => [
                 'get' => fn () => $this->get_date($this->__dataset['publicationDate'], "24-hour"),
@@ -173,7 +189,12 @@ class PostSchema extends \Validation\Normalize {
                 }
             ],
             'tags' => [
-                
+                'operator' => '$addToSet',
+                'valid' => function ($val) {
+                    // $tags = $this->{"tags"};
+                    $post = new PostManager();
+                    return $post->distinct("tags");
+                }
             ]
         ];
     }
