@@ -37,6 +37,10 @@
             font-size: .8em;
         }
 
+        .cobalt-post--blurb content  {
+            white-space: pre-wrap;
+        }
+
             .cobalt-posts--public-index .cobalt-post--blurb content p {
                 margin-top:0;
             }

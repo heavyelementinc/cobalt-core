@@ -734,7 +734,8 @@ function markdown_to_plaintext(?string $string, $stripWhitespace = false) {
     $md = from_markdown($string);
     $md = strip_tags($md);
     if($stripWhitespace) $md = preg_replace("/[\s]/", " ", $md);
-    return $md;
+    $md = str_replace("\n", "\n\n", $md);
+    return trim($md);
 }
 
 /**

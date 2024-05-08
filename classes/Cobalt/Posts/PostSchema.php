@@ -90,7 +90,7 @@ class PostSchema extends \Validation\Normalize {
                     return from_markdown($this->{"excerpt"});
                 },
                 'attrs' => function ($val) {
-                    return markdown_to_plaintext($this->{"excerpt"} ?? $this->__dataset['body.strip']);
+                    return markdown_to_plaintext($val ?? $this->__dataset['body.strip']);
                 }
             ],
             'postType' => [
