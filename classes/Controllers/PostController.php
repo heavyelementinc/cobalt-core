@@ -78,7 +78,7 @@ abstract class PostController extends Controller {
             'update_action' => $this->path('update',[$id],'put',   'apiv1'),
             'upload_action' => $this->path('upload',[$id],'post',  'apiv1'),
             'delete_action' => $this->path('delete',[$id],'delete','apiv1'),
-            'pretty' => "<fold-out title=\"Raw Database Entry\"><pre>".json_encode($post, JSON_PRETTY_PRINT)."</pre></fold-out>",
+            'pretty' => "<fold-out title=\"Raw Database Entry\"><pre>".htmlspecialchars(json_encode($post, JSON_PRETTY_PRINT))."</pre></fold-out>",
         ]);
 
         return view($post->getTemplate("edit"));

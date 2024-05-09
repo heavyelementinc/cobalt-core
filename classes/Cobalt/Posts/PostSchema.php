@@ -72,6 +72,12 @@ class PostSchema extends \Validation\Normalize {
             'body' => [
                 'display' => function ($val) {
                     return from_markdown($val, !$this->allow_html_content);
+                },
+                'set' => function ($val) {
+                    $candidates   = ["‘",     "’",     "“",      "”",      "…",        "—",       "–"];
+                    $replacements = ["&#39;", "&#39;", "&quot;", "&quot;", "&hellip;", "&mdash;", "&mdash;"];
+
+                    return str_replace($candidates, $replacements, $val);
                 }
             ],
             'excerpt' => [
