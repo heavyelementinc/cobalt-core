@@ -68,6 +68,7 @@ class DatePicker extends HTMLElement {
         this.setButton.addEventListener("click", e => {
             if(!this.dateValue) new StatusMessage({message:"Select a date", id: "invaliddate"});
             if(!this.timeValue) new StatusMessage({message:"Select a time", id: "invalidtime"});
+            console.log(this.value);
             if(this.dateValue && this.timeValue) this.dispatchEvent(new CustomEvent("dateselect", {detail: this.value}))
         })
 
@@ -210,7 +211,7 @@ class DatePicker extends HTMLElement {
     }
 
     makeTimeString(date) {
-        return `${this.formatNumber(date.getHours())}:${this.formatNumber(date.getMinutes)}`;
+        return `${this.formatNumber(date.getHours())}:${this.formatNumber(date.getMinutes())}`;
     }
 
     formatNumber(num) {

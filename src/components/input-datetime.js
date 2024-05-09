@@ -26,14 +26,6 @@ class InputDateTime extends HTMLElement {
             this.datePicker.hide();
             this.dispatchEvent(new Event("change"));
         });
-
-        // this.addEventListener("focus", () => {
-        //     this.datePicker.show();
-            
-        // });
-        // this.addEventListener("blur", () => {
-        //     this.datePicker.hide();
-        // });
     }
 
     disconnectedCallback() {
@@ -51,7 +43,6 @@ class InputDateTime extends HTMLElement {
                 break;
         }
     }
-
 
     get value() {
         if(!this.props.value) return null;

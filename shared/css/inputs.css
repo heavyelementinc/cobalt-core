@@ -30,6 +30,12 @@ input, textarea, button[native], [role='button'], [__custom-input] {
   color: var(--project-color-input-text-color);
 }
 
+input-datetime {
+  display: inline-flex;
+  justify-content: space-between;
+  width: 21ch;
+}
+
 input[type='color'] {
   padding: .1rem;
 }
