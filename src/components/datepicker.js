@@ -24,11 +24,16 @@ class DatePicker extends HTMLElement {
         ];
         this.daysTag = document.createElement("div")
         this.daysTag.classList.add("days");
+
+        this.timeContainer = document.createElement("div");
+        this.timeContainer.classList.add("hbox");
+
         this.timeInput = document.createElement("input");
         this.timeInput.type = "time";
         this.timeInput.addEventListener('input', () => {
             this.timeValue = this.timeInput.value;
-        })
+        });
+        this.timeContainer.appendChild(this.timeInput);
 
         this.hgroup = document.createElement("hgroup");
         this.monthContainer = document.createElement("select");
@@ -72,6 +77,7 @@ class DatePicker extends HTMLElement {
             if(this.dateValue && this.timeValue) this.dispatchEvent(new CustomEvent("dateselect", {detail: this.value}))
         })
 
+        this.timeContainer.appendChild(this.setButton);
     }
 
     get value() {
@@ -138,8 +144,8 @@ class DatePicker extends HTMLElement {
         this.prevButton.addEventListener("click", nextPrevCallback);
         this.appendChild(this.daysTag);
         this.appendChild(document.createElement("hr"));        
-        this.appendChild(this.timeInput);
-        this.appendChild(this.setButton);
+        this.appendChild(this.timeContainer);
+        // this.appendChild(this.setButton);
 
         this.render();
         this.hide()
