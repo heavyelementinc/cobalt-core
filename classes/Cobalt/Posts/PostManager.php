@@ -39,6 +39,7 @@ class PostManager extends \Drivers\Database {
             'published' => $publicOnly,
         ],[
             'limit' => $limit,
+            'sort' => ['publicationDate' => -1]
         ]);
         return $posts;
     }
