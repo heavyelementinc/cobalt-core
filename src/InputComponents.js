@@ -507,12 +507,23 @@ class HelpSpan extends HTMLElement {
 
     constructor() {
         super();
+        this.setId();
+        this.setAttribute("popovertarget", this.targetId);
         this.message = document.createElement("article");
+        this.id = this.targetId;
         this.message.classList.add("help-span-article");
+        this.message.setAttribute("popover", "auto");
+        this.message.setAttribute("anchor", this.targetId);
         this.trunkatingContainer = document.body;
         this.justifyRightClass = "help-span-article--right-justified";
         this.warning = this.hasAttribute("warning");
         if (this.warning) this.message.setAttribute("warning", "");
+    }
+
+    setId() {
+        this.targetId = random_string(10,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        // Recurse if this ID already exists.
+        if(document.querySelector(`#${this.targetId}`)) return this.setId();
     }
 
     connectedCallback() {
@@ -520,16 +531,21 @@ class HelpSpan extends HTMLElement {
 
         this.message.innerText = this.value || this.getAttribute("value");
 
+        this.attach();
         this.message.classList.remove(this.articleShown);
-        this.addEventListener("mouseover", e => {
-            this.attach();
+        this.addEventListener("click", e => {
+            this.message.showPopover();
         })
 
-        this.addEventListener("mouseout", e => {
-            this.detatch();
-        });
+        // this.addEventListener("mouseout", e => {
+        //     this.detatch();
+        // });
 
         this.dispatchEvent(new CustomEvent("componentready"));
+    }
+
+    disconnectedCallback() {
+        this.detatch();
     }
 
     attach() {

@@ -203,8 +203,9 @@ help-span[warning]{
     content: "\F02FD"
   }
 
-  .help-span-article {
-    visibility: hidden;
+  :is(.help-span-article, .help-span-article[popover]) {
+    /* visibility: hidden; */
+    inset: unset;
     width: max-content;
     max-width: 270px;
     font-size: 1rem;
@@ -215,6 +216,7 @@ help-span[warning]{
     color:black;
     /* top: 50%; */
     left: 100%;
+    left: anchor(middle);
     position: absolute;
     padding: .2rem .4rem;
     border-radius: 4px;
@@ -228,7 +230,7 @@ help-span[warning]{
   }
 
   .help-span-article--shown {
-    visibility: visible;
+    /* visibility: visible; */
   }
 
   .help-span-article.help-span-article--right-justified {

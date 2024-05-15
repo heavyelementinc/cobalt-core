@@ -181,6 +181,8 @@ abstract class NormalizationHelpers {
     final function convert_date($value, $format = "input") {
         if(!$value) return "";
         $shorthands = [
+            'iso' => 'c',
+            'input-datetime' => 'c',
             'input' => "Y-m-d",
             'default' => 'm/d/Y',
             "verbose" => "l, F jS Y g:i A",

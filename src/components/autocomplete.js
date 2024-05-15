@@ -103,7 +103,7 @@ class AutoComplete extends HTMLElement {
         this.initClearButton();
         this.searchElements();
         this.initSearchField();
-        this.value = this.getAttribute("value");
+        this.value = this.initValue();
     }
 
     disconnectedCallback() {
@@ -123,6 +123,11 @@ class AutoComplete extends HTMLElement {
         if (!opts) this.options = {};
     }
 
+    initValue() {
+        let val = this.querySelector("option[selected='selected']");
+        if(val) return val.getAttribute("value");
+        return this.getAttribute("value")
+    }
 
     /*** Handle attribute changes ***/
     static get observedAttributes() {
@@ -267,8 +272,9 @@ class AutoComplete extends HTMLElement {
         if (!this.withClearButton) return;
         const btn = document.createElement("button");
         btn.innerHTML = window.closeGlyph;
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", e => {
             this.value = "";
+            this.searchField.dispatchEvent(new Event("input", e))
         });
         this.clearButton = btn;
         this.addEventListener('input', () => {

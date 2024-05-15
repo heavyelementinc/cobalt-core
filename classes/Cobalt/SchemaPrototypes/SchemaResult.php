@@ -176,6 +176,14 @@ class SchemaResult implements \Stringable, JsonSerializable {
         $valid = $this->getValid();
         $val = $this->getValue() ?? $this->value;
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
+        
+        // If custom is allowed
+        $allow_custom = $this->getDirective("strict") === false;
+        if(!$allow_custom) $allow_custom = $this->getDirective("allow_custom");
+
+        // If the current value is not a key in the current valid options AND
+        // we're allowed to have custom options, add the current val to the options
+        if($allow_custom && $val && !key_exists($val, $valid)) $valid += [$val => $val];
 
         $type = gettype($val);
 

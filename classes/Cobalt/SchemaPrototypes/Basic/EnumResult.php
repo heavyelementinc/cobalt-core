@@ -47,7 +47,7 @@ class EnumResult extends SchemaResult {
         $val = $value;
         if(key_exists($val, $enum)) return $val;
         $message = "Invalid selection";
-        $strict = $this->schema['strict'] || true;
+        $strict = $this->schema['strict'] ?? true;
         if($strict) throw new ValidationIssue($message);
         return $value;
     }
