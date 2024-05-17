@@ -4,6 +4,7 @@ namespace Cobalt\Integrations;
 
 use Drivers\Database;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use ReflectionClass;
@@ -14,6 +15,9 @@ use RuntimeException;
  * @package Cobalt\Integrations
  */
 abstract class Base extends Database {
+    
+    const STATUS_CHECK_OK   = 0;
+    const STATUS_CHECK_FAIL = 1;
 
     public Config $config;
     public bool $configured = false;
@@ -61,6 +65,8 @@ abstract class Base extends Database {
      */
     abstract function configuration(): Config;
 
+    abstract function status(): int;
+
     /**
      * This should return the contents of the button that takes you to
      * the integration management page
@@ -92,15 +98,22 @@ abstract class Base extends Database {
      * @throws RuntimeException 
      */
     public function fetch($method, $action, $data = [], $headers = [], $authenticate = true) {
-        $headers = $this->requestHeaders($headers);
-        $body = $this->requestBody($data);
-        $rq = ['headers' => $headers];
-
-        if($body) $rq['form_params'] = $body;
-
         $client = new Client();
+        $method_type = strtoupper($method);
+        $headers = $this->requestHeaders($headers);
+        $rq = ['headers' => $headers];
+        $body = $this->requestBody($data);
+
+        if($body && in_array($method_type, ['POST','PUT', 'PATCH'])) {
+            $rq += $body;
+        }
+
         if($authenticate) $this->config->authenticate($rq, $client);
-        $request = $client->request($method, $action, $rq);
+        try {
+            $request = $client->request($method_type, $action, $rq);
+        } catch(ClientException $error) {
+            throw new IntegrationRemoteException($error->getMessage(), $error);
+        }
         $response = $request->getBody()->getContents();
         $responseHeaders = $request->getHeaders();
         $result = "";
@@ -115,20 +128,23 @@ abstract class Base extends Database {
     }
 
     public function requestBody(mixed $data) {
-        return $data;
-        switch($this->config->__requestEncoding) {
+        // return $data;
+        switch((int)$this->config->__requestEncoding) {
             case REQUEST_ENCODE_JSON:
-                return [RequestOptions::JSON => $data];
+                return ['body' => json_encode($data)];
                 break;
             case REQUEST_ENCODE_FORM:
-                return $data;
+                return [RequestOptions::FORM_PARAMS => $data];
                 break;
             case REQUEST_ENCODE_XML:
-                return xmlrpc_encode($data);
+                return ['body' => xmlrpc_encode($data)];
+                break;
+            case REQUEST_ENCODE_MULTIPART_FORM:
+                return [RequestOptions::MULTIPART => $data];
                 break;
             case REQUEST_ENCODE_PLAINTEXT:
             default:
-                return (string)$data; // TODO: Fix this
+                return ['body' => (string)$data];
                 break;
         }
     }

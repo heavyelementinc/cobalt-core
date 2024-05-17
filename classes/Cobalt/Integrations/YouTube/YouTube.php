@@ -13,6 +13,10 @@ use Exceptions\HTTP\Unauthorized;
 
 class YouTube extends OauthBase {
 
+    public function status(): int {
+        return self::STATUS_CHECK_OK;
+    }
+    
 
     public function publicName(): string {
         return "YouTube OAuth";

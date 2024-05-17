@@ -11,7 +11,7 @@ input-datetime:hover {
 input-datetime {
     display: inline-flex;
     justify-content: space-between;
-    width: 21ch;
+    width: 23ch;
 }
 
 input-datetime > button {

@@ -7,6 +7,10 @@ use Cobalt\Integrations\OauthBase;
 
 class Facebook extends OauthBase {
 
+    public function status(): int {
+        return self::STATUS_CHECK_OK;
+    }
+
     public function oauth_errors(): array {
         return [
             'user_denied' => [
