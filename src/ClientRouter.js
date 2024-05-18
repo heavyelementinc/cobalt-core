@@ -236,12 +236,12 @@ class ClientRouter extends EventTarget{
         history.replaceState(
             {
                 title: this.getTitle(document.title),
-                url: current.url,
+                url: current?.url ?? this.location.toString(),
                 scrollY: window.scrollY,
                 scrollX: window.scrollX,
             }, 
             '',
-            current.url
+            current?.url ?? this.location.toString()
         );
 
         this.progressBar.classList.add("navigation-start");

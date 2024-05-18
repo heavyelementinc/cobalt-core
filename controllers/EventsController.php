@@ -31,7 +31,7 @@ class EventsController {
             'title' => 'Events',
             'events' => $views
         ]);
-        set_template("/cobalt_events/public-index.html");
+        return view("/cobalt_events/public-index.html");
     }
 
     function list_events() {
@@ -74,7 +74,7 @@ class EventsController {
             'main' => implode("", $result)
         ]);
 
-        set_template("/cobalt_events/index.html");
+        return view("/cobalt_events/index.html");
     }
 
     function edit_event($id = null) {
@@ -87,7 +87,7 @@ class EventsController {
             'event' => $event
         ]);
 
-        set_template("/cobalt_events/edit.html");
+        return view("/cobalt_events/edit.html");
     }
 
     function update_event($ident = null) {
@@ -100,7 +100,7 @@ class EventsController {
             ['upsert' => true]
         );
         // if($result->getModifiedCount() !== 1 && $result->getUpsertedCount() !== 1)
-        if (!$ident) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
+        if ($ident === null) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
         return $this->events->findOneAsSchema(['_id' => $id]);
     }
 
