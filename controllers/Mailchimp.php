@@ -64,14 +64,17 @@ class Mailchimp extends Controller {
 
         $status = $mc->contact_exists($id, $_POST['email']);
         if(!$status) {
-            $result = $mc->contact_add($id, [
+            $merge = ['merge_fields' => [
+
+            ]];
+            if($_POST['fname']) $merge['merge_fields']['FNAME'] = $_POST['fname'];
+            if($_POST['lname']) $merge['merge_fields']['LNAME'] = $_POST['lname'];
+            $data = [
                 'email_address' => $_POST['email'],
                 'status' => 'subscribed',
-                'merge_fields' => [
-                    'FNAME' => $_POST['fname'],
-                    'LNAME' => $_POST['lname'],
-                ]
-            ]);
+            ];
+            if(!empty($merge['merge_fields'])) $data += $merge;
+            $result = $mc->contact_add($id, $data);
         } else {
             $result = $mc->contact_update($id, $_POST['email'], "subscribed");
         }
