@@ -77,6 +77,7 @@ use BadFunctionCallException;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
+use Exceptions\HTTP\Error;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use TypeError;
@@ -177,7 +178,7 @@ class Render {
         } else if (!key_exists($template_path, $GLOBALS['TEMPLATE_CACHE'])) { // We do not have the file saved to the template cache
             // Load our template from the specified paths
             $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
-            if($contenders === false) throw new NotFound("The template \"$template_path\" was not found ");
+            if($contenders === false) throw new Error("The template \"$template_path\" was not found", "Internal server error");
             // Load the template
             $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($contenders);
         }

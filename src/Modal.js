@@ -29,7 +29,7 @@
  * data you can listen for the 'modalButtonPress' event on the `modal` property
  */
 
-class Modal {
+class Modal extends EventTarget {
     /** First up, let's build our class. The constructor requires a object literal
      * as its sole argument. The object literal provided is merged with the default
      * values assigned as you can see below.
@@ -52,6 +52,7 @@ class Modal {
         zIndex = null,
         pageTitle = null,
     }) {
+        super();
         this.id = id;
         this.classes = classes;
         this.parentClass = parentClass;
@@ -154,8 +155,8 @@ class Modal {
 
         this.handleLightboxGallery()
 
-        if (this.url) window.router.navigation_event(null, this.url);
-
+        // if (this.url) window.router.navigation_event(null, this.url);
+        this.dispatchEvent(new CustomEvent("modalready", {detail: {dialog: this.dialog}}));
         return this.dialog;
     }
 
@@ -181,6 +182,7 @@ class Modal {
             this.loading_spinner.style.left = `${offset_left}px`;
             this.loading_spinner.style.color = "white";
         }, 200);
+
         this.loading_spinner_timeout_error = setTimeout(() => {
             if ("parentNode" in this.loading_spinner && this.loading_spinner.parentNode) this.loading_spinner.parentNode.removeChild(this.loading_spinner)
             this.container.append("Something went wrong.");
@@ -197,7 +199,7 @@ class Modal {
         // If we haven't been explicitly given a URL, return body even if it's blank
         if (!this.url) return this.body;
         try {
-            const page = new ApiFetch(`/api/v1/page/?route=${this.url}`, 'GET', {});
+            const page = new AsyncFetch(`/api/v1/page/?route=${this.url}`, 'GET', {});
             let body = await page.get();
             this.pageTitle = document.title
             document.title = body.title
@@ -251,7 +253,8 @@ class Modal {
         let result = await this.chrome[btn].callback(this.container, event, btn); // Await a promise resolution
 
         const modalButton = new CustomEvent("modalButtonPress", { detail: { type: btn, result: result } })
-        this.dialog.dispatchEvent(modalButton);
+        this.dispatchEvent(modalButton);
+        // this.dialog.dispatchEvent(modalButton);
         if (result === false) return result; // If the return value is false, we do not close the modal
         this.close(); // Otherwise we close the modal
         return result;
@@ -297,6 +300,7 @@ class Modal {
         this.container.style.opacity = this.container_opacity_start;
         this.dialog.style.transform = this.window_transform_start;
         if (this.pageTitle) document.title = this.pageTitle;
+        this.dispatchEvent(new CustomEvent("modalclose", {detail: {modal: this}}));
     }
 
     /** Generates the close '✖️' button */

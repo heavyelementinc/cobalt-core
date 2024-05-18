@@ -1,0 +1,18 @@
+<h1>{{title}}</h1>
+<form-request method="POST" action='@route("Mailchimp@onboard_landing");'>
+    <ul class="list-panel">
+        <li>
+            <label>First Name</label>
+            <input name="fname" placeholder="First Name">
+        </li>
+        <li>
+            <label>Last Name</label>
+            <input name="lname" placeholder="Last Name">
+        </li>
+        <li>
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="Email Address">
+        </li>
+    </ul>
+    <button type="submit">Sign Up</button>
+</form-request>

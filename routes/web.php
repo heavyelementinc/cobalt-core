@@ -54,6 +54,10 @@ if (app("Auth_logins_enabled")) {
     Route::get("/password-reset/{token}", "Login@password_reset_token_form");
 }
 
+if(__APP_SETTINGS__['Mailchimp_default_list_id']) {
+    Route::get("/newsletter/", "Mailchimp@onboard_landing");
+}
+
 if (app("Auth_account_creation_enabled")) {
     Route::get(app("Auth_onboading_url"), "UserAccounts@onboarding");
 }

@@ -132,8 +132,8 @@ if(__APP_SETTINGS__['PaymentGateways_enabled']) {
     Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);
 }
 
-if(app("Mailchimp_api_signup_route")) {
-    Route::post("/mailchimp/onboard", "Mailchimp@onboard");
+if(app("Mailchimp_default_list_id")) {
+    Route::post("/newsletter/onboard", "Mailchimp@onboarding");
 }
 
 

@@ -37,6 +37,10 @@ function random_number(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function indirectEval(str) {
+    return eval?.(`"use strict";(${str})`);
+}
+
 function flyoutHandler(button, menu, callback = null) {
     // Hide the menu
     menu.classList.add("hidden");

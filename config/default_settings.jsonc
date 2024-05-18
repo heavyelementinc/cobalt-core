@@ -282,10 +282,9 @@
     "UploadResult_default_thumbnail": {
         "default": [450, null]
     },
-    "Mailchimp_api_signup_route": {
-        "default": false
+    "Mailchimp_default_list_id": {
+        "default": ""
     },
-
     "Customizations_enabled": {
         "default": true,
         "directives": {},

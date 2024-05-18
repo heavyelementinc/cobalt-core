@@ -287,7 +287,15 @@ class AsyncUpdate {
     exec() {
         const list = this.request.resolved.update;
         for(const instruction of list) {
-            this.updateElement(this.getElement(instruction.target), instruction);
+            switch(instruction.target) {
+                case "sessionStorage":
+                case "localStorage":
+                    this.updateStorage(instruction);
+                    break;
+                default:
+                    this.updateElement(this.getElement(instruction.target), instruction);
+                    break;
+            }
         }
     }
 
@@ -305,6 +313,32 @@ class AsyncUpdate {
             return closest;
         }
         return document.querySelectorAll(query);
+    }
+
+    updateStorage(instructions) {
+        const target = instructions.target;
+        for(const i in instructions) {
+            const directive = `storage_${i}`;
+            if(directive === "storage_target") continue;
+            if(directive in this === false) {
+                console.warn(`Unsupported storage directive: ${directive}`)
+                continue;
+            }
+            
+            this[directive](window[target], instructions[i]);
+        }
+    }
+
+    storage_set(target, values) {
+        for(const i in values) {
+            target.setItem(i, values[i]);
+        }
+    }
+
+    storage_remove(target, values) {
+        for(const i of values) {
+            target.removeItem(i);
+        }
     }
 
     updateElement(elements, instructions) {
@@ -398,6 +432,7 @@ class AsyncUpdate {
             el.style[v] = value[v];
         }
     }
+
 }
 
 function appendElementInformation(element, value, instructions) {

@@ -1,8 +1,10 @@
 <?php
 
+use Cobalt\Integrations\MailChimp\MailChimp as MailChimpIntegration;
 use Cobalt\Requests\Remote\Mailchimp as RemoteMailchimp;
 use Controllers\Controller;
 use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\Error;
 use Exceptions\HTTP\ServiceUnavailable;
 
 class Mailchimp extends Controller {
@@ -46,5 +48,46 @@ class Mailchimp extends Controller {
         // $_SESSION['mailchimp-onboarded'] = true;
         header("X-Status: $success");
         return $subscribe;
+    }
+
+    function onboard_landing() {
+        add_vars([
+            'title' => 'Email Newsletter',
+        ]);
+        return view("/parts/mailchimp-onboarding.html");
+    }
+
+    function onboarding() {
+        $id = __APP_SETTINGS__['Mailchimp_default_list_id'];
+        if(!$id) throw new Error("Default list ID is not specified!","Application misconfiguration");
+        $mc = new MailChimpIntegration();
+
+        $status = $mc->contact_exists($id, $_POST['email']);
+        if(!$status) {
+            $result = $mc->contact_add($id, [
+                'email_address' => $_POST['email'],
+                'status' => 'subscribed',
+                'merge_fields' => [
+                    'FNAME' => $_POST['fname'],
+                    'LNAME' => $_POST['lname'],
+                ]
+            ]);
+        } else {
+            $result = $mc->contact_update($id, $_POST['email'], "subscribed");
+        }
+        
+        header("X-Status: @success You've been added to our newsletter!");
+
+        $mc->contact_tags($id, $_POST['email'], [
+            [
+                'name' => 'Newsletter',
+                'status' => 'active'
+            ]
+        ]);
+
+        update("localStorage", ['set' => [
+            'newsletterSignUp' => 0,
+            'newsletterDate' => date("c"),
+        ]]);
     }
 }

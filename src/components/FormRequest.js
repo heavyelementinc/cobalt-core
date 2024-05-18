@@ -220,12 +220,12 @@ class NewFormRequest extends HTMLElement {
 
     handleAsyncErrorEvent(e, submission = {}) {
         this.removeFeedback(e);
-        this.dispatchEvent(new Event("error", e));
+        this.dispatchEvent(new Event("error", {detail: e.detail}));
     }
 
     handleAsyncDoneEvent(e, submission = {}) {
         this.removeFeedback(e);
-        this.dispatchEvent(new CustomEvent("done", e));
+        this.dispatchEvent(new CustomEvent("done", {detail: e.detail}));
     }
 
     applyFeedback(event) {
