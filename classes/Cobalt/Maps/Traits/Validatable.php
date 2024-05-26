@@ -122,7 +122,9 @@ trait Validatable {
             $key = implode(".", $exploded);
             // Recursively run our validation pipeline
             $result = $map->getValue();
-            $result->__validate([$key => $value]);
+            if($result instanceof Validatable) {
+                $result->__validate([$key => $value]);
+            }
             // Run through `__validatedFields` and bring them into this context.
             foreach($result->__validatedFields as $fieldName => $validatedValue) {
                 // If the key we submitted matches the fieldName, we want to update that
