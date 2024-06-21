@@ -33,6 +33,25 @@ function random_string(length = 8, validChars = null) {
     return string;
 }
 
+window.viewport_lock_level = 0;
+
+function lock_viewport() {
+    window.viewport_lock_level += 1;
+    let width = get_offset(document.body).w;
+    document.body.style.overflow = "hidden";
+    document.body.style.width = `${width}px`;
+}
+
+function unlock_viewport(ignore_lock_level = false) {
+    if(ignore_lock_level == false) {
+        window.viewport_lock_level -= 1;
+        if(window.viewport_lock_level > 0) return;
+    }
+    window.viewport_lock_level = 0; // Just in case we've somehow unlocked more times than locked
+    document.body.style.overflow = "unset";
+    document.body.style.width = "unset";
+}
+
 function random_number(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }

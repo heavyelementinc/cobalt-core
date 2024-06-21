@@ -361,7 +361,7 @@ trait ClientFSManager {
         // Loop through available docs
         foreach($docs as $doc) {
             // Execute the tag_start callback:
-            $string .= "<" . $container["tag_start"]($doc, $href, $options['lazy']) . " data-id='".(string)$doc->_id."'";
+            $string .= "<div><" . $container["tag_start"]($doc, $href, $options['lazy']) . " data-id='".(string)$doc->_id."'";
             foreach($options['child'] as $property => $value) {
                 $string .= " $property='".htmlspecialchars($value)."'"; // Add properties
             }
@@ -372,6 +372,8 @@ trait ClientFSManager {
 
             // If we have 
             $string .= ($container['tag_end']) ? "</$container[tag_end]>" : "";
+            if($container['container'] !== "carousel") $string .= "<button><i name=\"dots-vertical\"></i></button>";
+            $string .= "</div>";
         }
         return $string . "</$container[container]>";
     }

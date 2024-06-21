@@ -42,6 +42,13 @@
         "default": false,
         "ring": 1
     },
+    "Posts_allowed_author": {
+        "group": "Posts",
+        "label": "Allows user to appear as an author (but not publish them).",
+        "dangerous": false,
+        "default": false,
+        "ring": 3
+    },
     "Posts_manage_posts": {
         "group": "Posts",
         "label": "Allows the user to manage posts (but not publish them).",

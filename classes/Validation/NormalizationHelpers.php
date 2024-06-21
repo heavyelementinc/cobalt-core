@@ -407,7 +407,8 @@ abstract class NormalizationHelpers {
         $crud = new UserCRUD();
         
         $valid = [];
-        foreach($crud->{$options[$type]['method']}(...$options[$type]['query']) as $doc) {
+        $results = $crud->{$options[$type]['method']}(...$options[$type]['query']);
+        foreach($results as $doc) {
             $valid[(string)$doc->_id] = $value($doc);
         }
 

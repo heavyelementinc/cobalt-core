@@ -47,7 +47,7 @@ class InputDateTime extends HTMLElement {
     get value() {
         if(!this.props.value) return null;
         if(this.props.value.toString() === 'Invalid Date') return null;
-        switch(this.to) {
+        switch(this.to.toLowerCase()) {
             case "string":
                 return this.props.value.toString();
             case "seconds":
@@ -59,7 +59,7 @@ class InputDateTime extends HTMLElement {
                 return this.props.value.getTime();
             case "u":
                 return this.props.value.getTime() * 1000;
-            case "ISO 8601":
+            case "iso 8601":
             default:
                 return this.props.value.toISOString();
             // default:

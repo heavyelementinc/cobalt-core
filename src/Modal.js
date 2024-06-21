@@ -161,14 +161,11 @@ class Modal extends EventTarget {
     }
 
     lockViewport() {
-        let width = get_offset(document.body).w;
-        document.body.style.overflow = "hidden";
-        document.body.style.width = `${width}px`;
+        lock_viewport();
     }
 
     unlockViewport() {
-        document.body.style.overflow = "unset";
-        document.body.style.width = "unset";
+        unlock_viewport();
     }
 
     loading_spinner_start() {

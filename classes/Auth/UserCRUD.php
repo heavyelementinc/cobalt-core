@@ -53,15 +53,17 @@ class UserCRUD extends \Drivers\Database {
             'limit' => 50
         ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        $perms = array_fill_keys($permissions, $status);
+        $perms = [
+            '$or' => [
+                ['groups' => 'root']
+            ]
+        ];
+        foreach($permissions as $permission) {
+            $perms['$or'][count($perms['$or'])] = ["permissions.$permission" => $status];
+        }
         
         return $this->findAllAsSchema(
-            [
-                '$or' => [
-                    ['permissions' => $perms],
-                    ['groups' => 'root']
-                ]
-            ],
+            $perms,
             $options
         );
     }

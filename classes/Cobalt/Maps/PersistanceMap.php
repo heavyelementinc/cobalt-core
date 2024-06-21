@@ -50,7 +50,7 @@ use Validation\Exceptions\ValidationIssue;
  * @package Cobalt
  */
 abstract class PersistanceMap extends GenericMap implements Persistable {
-
+     
     function __construct($doc = null, $schema = [], $__namePrefix = "") {
         parent::__construct($doc, $schema, $__namePrefix);
     }

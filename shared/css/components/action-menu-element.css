@@ -1,10 +1,13 @@
-action-menu {
+action-menu[role="button"] {
     display: flex;
     aspect-ratio: 1 / 1;
     width: 2ch;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--project-color-input-border-nofocus);
+    background: var(--project-color-input-background);
 }
+
 action-menu:before {
     content: "\F035C";
     font-family: "Material Design Icons";
@@ -13,12 +16,19 @@ action-menu:before {
 action-menu option{
     display: none;
 }
+
 action-menu[aria-pressed="true"] {
     background: var(--project-action-menu-background);
 }
+
+action-menu:hover:not([aria-pressed="true"]) {
+    background: var(--project-color-button-hover);
+}
+
 .action-menu-element-toggled .action-menu {
     background: var(--project-color-input-background);
 }
+
 action-menu[type="options"] {
     display: inline-block;
     border: none;

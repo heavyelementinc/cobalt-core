@@ -50,7 +50,7 @@
             <flex-cell>Here's another cell</flex-cell>
             <flex-cell>
                 <action-menu>
-                    <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+                    <option method="GET" action="/debug/slow-response/10">Slow Response</option>
                 </action-menu>
             </flex-cell>
         </flex-row>
@@ -59,7 +59,7 @@
             <flex-cell>We've got yet another row</flex-cell>
             <flex-cell>
                 <action-menu>
-                    <option method="GET" action="/api/v1/debug/slow-response/10">Slow Response</option>
+                    <option method="GET" action="/debug/slow-response/10">Slow Response</option>
                 </action-menu>
             </flex-cell>
         </flex-row>
@@ -71,26 +71,49 @@
 </div>
 
 <script>
-    const fixed = document.querySelectorAll(".fixed");
-    const context = document.querySelectorAll(".context");
-    fixed.forEach(i => {
-        i.addEventListener("click", e => {
-            e.preventDefault();
-            const menu = new ActionMenu({ event: e, title: "Test", mode: "modal" });
-            menu.registerAction({ label: "Edit" });
-            menu.registerAction({ label: "Delete", dangerous: true });
-            menu.draw();
+    window.addEventListener("DOMContentLoaded", () => {
+
+        const fixed = document.querySelectorAll(".fixed");
+        const context = document.querySelectorAll(".context");
+        fixed.forEach(i => {
+            const menu = new ActionMenu(i);
+            menu.title = "Test Menu";
+            menu.mode = 1;
+            let editAction = menu.registerAction();
+            editAction.label = "Edit";
+            editAction.callback = async () => {
+                let val = await modalInput("modal", {});
+                if(!val) return;
+                i.innerText = val;
+            }
+            let deleteAction = menu.registerAction();
+            deleteAction.label = "Delete";
+            deleteAction.dangerous = true;
+            deleteAction.requestMethod = "GET";
+            deleteAction.requestAction = "/debug/slow-response/3";
+        })
+
+
+        context.forEach(i => {
+            const menu = new ActionMenu(i);
+            menu.title = "Test Menu";
+            menu.mode = 0;
+            let editAction = menu.registerAction();
+            editAction.label = "Edit";
+            editAction.callback = async () => {
+                let val = await modalInput("modal", {});
+                if(!val) return;
+                i.innerText = val;
+            }
+            let deleteAction = menu.registerAction();
+            deleteAction.label = "Delete";
+            deleteAction.dangerous = true;
+            deleteAction.requestMethod = "GET";
+            deleteAction.requestAction = "/debug/slow-response/10";
+            i.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                menu.open()
+            })
         })
     })
-
-    context.forEach(i => {
-        i.addEventListener("contextmenu", e => {
-            e.preventDefault();
-            const menu = new ActionMenu({ event: e, title: "A different test" });
-            menu.registerAction({ label: "Won't close on click", callback: (e) => false })
-            menu.registerAction({ label: "Will close on click" })
-            menu.draw();
-        })
-    })
-
 </script>

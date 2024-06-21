@@ -104,7 +104,7 @@ class AsyncMessageHandler {
         this.responseType = data.getHeader('Content-Type');
         this.uri = data.action;
         this.headers = data.responseHeaders;
-        return data.resolved.fulfillment || data.resolved;
+        return data.resolved?.fulfillment || data.resolved;
     }
 
     _getAsyncHeaders(request) {

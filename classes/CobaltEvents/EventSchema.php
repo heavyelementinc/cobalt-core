@@ -52,6 +52,9 @@ class EventSchema extends \Validation\Normalize {
                 'set' => function ($val) {
                     // $val = $this->sanitize($val);
                     $val = $this->required_field($val);
+                    update("#internal_name", [
+                        'innerText' => $val,
+                    ]);
                     return $val;
                 }
             ],

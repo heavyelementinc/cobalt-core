@@ -1,0 +1,174 @@
+action-menu {
+    
+}
+
+.action-menu--work-complete, .action-menu--work-error {
+    position: relative;
+}
+.action-menu--work-complete:before, .action-menu--work-error:before {
+    content: "";
+    position: absolute;
+    top: -0.2em;
+    right: -0.2em;
+    height: 0.7em;
+    width: 0.7em;
+    background-color: var(--project-color-acknowledge);
+    box-shadow: 0 0 5px var(--project-color-acknowledge);
+    border-radius: 50%;
+}
+
+.action-menu--work-error:before {
+    background-color: var(--project-color-problem);
+    box-shadow: 0 0 5px var(--project-color-problem);
+}
+
+.action-menu-wrapper {
+    /* box-shadow: 1px 1px 20px rgba(0,0,0,.3); */
+    background: var(--project-action-menu-background);
+    border: var(--project-action-menu-border);
+}
+
+/* @position-try --action-menu-position-fallbacks {
+    bottom: anchor(top);
+    right: anchor(left);
+} */
+
+.action-menu-wrapper[mode="popover"] {
+    position: absolute;
+    inset: unset;
+    top: anchor(bottom);
+    left: anchor(left);
+    position-try-options: flip-block, flip-inline, flip-block flip-inline;
+}
+
+.action-menu-wrapper[mode="modal"]::backdrop {
+    background-color: rgba(0,0,0,.2);
+}
+
+.action-menu-wrapper[mode="modal"] {
+    width: 35vw;
+    min-width: 350px;
+    border-radius: 1em 1em 0 0;
+    /* bottom: 0; */
+    position: fixed;
+    inset: unset;
+    bottom: 0;
+    left: 50%;
+    translate: -50% -100vh;
+    opacity: 0;
+    transition: translate .2s, opacity .2s;
+}
+
+.action-menu-wrapper[mode="modal"]:popover-open {
+    translate: -50%;
+    opacity: 1;
+}
+
+.action-menu-wrapper:not([mode="modal"]) .action-menu-header {
+    display: none;
+}
+
+.action-menu-wrapper .action-menu-header {
+    text-align: center;
+    position: relative;
+    padding: .8em;
+}
+
+    .action-menu-wrapper .action-menu-header button {
+        position: absolute;
+        top: .5em;
+        right: .5em;
+        background: transparent;
+        padding: unset;
+    }
+
+    .action-menu-wrapper .action-menu-header button:hover {
+        background: transparent;
+        color: black;
+    }
+
+.action-menu-wrapper menu {
+    display: block;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.action-menu-wrapper[mode="modal"] menu {
+    scrollbar-width: thin;
+    min-height: 250px;
+    overflow-y: scroll;
+}
+
+    .action-menu-wrapper .action-menu--request-working {
+        animation: actionMenuWorking .5s forwards infinite;
+        animation-timing-function: ease-in-out;
+    }
+
+    .action-menu-wrapper menu button i:not([name]) {
+        display: none;
+    }
+
+    .action-menu-wrapper menu li {
+        padding: 0;
+        margin: 0;
+    }
+
+    .action-menu-wrapper menu button[disabled] {
+        pointer-events: none;
+    }
+
+    .action-menu-wrapper menu button[disabled] label {
+        color: rgba(0, 0, 0, .6);
+    }
+
+    .action-menu-wrapper menu button {
+        display: flex;
+        background-color: transparent;
+        width: 100%;
+        text-align: left;
+        border-radius: unset;
+        font-family: var(--project-body-family);
+        text-transform: unset;
+        font-size: 1rem;
+        padding: 0.5em;
+        box-sizing: border-box;
+        justify-content: space-between;
+        align-items: center;
+        min-width: 13ch;
+    }
+
+    .action-menu-wrapper menu button:hover {
+        background-color: var(--project-action-menu-hover);
+    }
+    
+    .action-menu-wrapper menu button[dangerous="dangerous"]:hover {
+        background-color: var(--project-color-problem);
+        color:white;
+    }
+
+    .action-menu-wrapper menu button[disabled="disabled"] {
+        opacity: .3;
+        pointer-events: none;
+    }
+
+    .action-menu-wrapper menu label {
+        flex-grow: 1;
+    }
+
+    .action-menu-wrapper menu .throbber {
+        transition: opacity .3s, color .1s;
+    }
+
+@keyframes actionMenuWorking {
+    0% {
+        background-color: rgba(0,0,0,0);
+    }
+    50% {
+        background-color: rgba(0,0,0,.05);
+    }
+    100% {
+        background-color: rgba(0,0,0,0);
+    }
+}
+

@@ -124,7 +124,7 @@ class AsyncFetch extends EventTarget {
         if(this.getHeader('Content-Type')?.match(/json/i)) this.resolved = JSON.parse(client.response);
         else {
             try {
-                JSON.parse(client.response);
+                this.resolved = JSON.parse(client.response);
             } catch (e) {
                 this.resolved = client.response;
             }
@@ -285,7 +285,7 @@ class AsyncUpdate {
     }
     
     exec() {
-        const list = this.request.resolved.update;
+        const list = this.request.resolved.update ?? [];
         for(const instruction of list) {
             switch(instruction.target) {
                 case "sessionStorage":
@@ -315,6 +315,10 @@ class AsyncUpdate {
         return document.querySelectorAll(query);
     }
 
+    /**
+     * 
+     * @param  instructions 
+     */
     updateStorage(instructions) {
         const target = instructions.target;
         for(const i in instructions) {
@@ -354,6 +358,23 @@ class AsyncUpdate {
                 this[directive](el, instructions[i], instructions);
             }
         }
+    }
+
+    fn_dispatchEvent(el, value, instructions) {
+        let event
+        switch(value) {
+            case "click":
+            case "mousedown":
+            case "keydown":
+            case "load":
+            case "change":
+                event = new Event(value, {detail: instructions});
+                break;
+            default:
+                event = new CustomEvent(value, {detail: instructions});
+                break;
+        }
+        el.dispatchEvent(event);
     }
 
     fn_value(el, value, instructions) {

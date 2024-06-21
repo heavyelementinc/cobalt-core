@@ -675,6 +675,7 @@ function youtube_embedder(DOMElement $img, DOMDocument $doc){
             case "www.youtu.be":
             case "youtu.be":
                 $id = parse_url($url, PHP_URL_PATH);
+                if($id[0] == "/") $id = substr($id, 1);
                 break;
         }
     }
@@ -687,7 +688,7 @@ function youtube_embedder(DOMElement $img, DOMDocument $doc){
 
     $iframe->setAttribute('width', '560');
     $iframe->setAttribute('height', '315');
-    $iframe->setAttribute('src', 'https://www.youtube.com/embed'.$id);
+    $iframe->setAttribute('src', 'https://www.youtube.com/embed/'.$id);
     $iframe->setAttribute('title', 'YouTube video player');
     $iframe->setAttribute('frameborder', "0");
     $iframe->setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
@@ -1695,6 +1696,7 @@ function benchmark_end($name) {
     global $BENCHMARK_RESULTS;
     $BENCHMARK_RESULTS[$name]['end'] = microtime(true) * 1000;
     $BENCHMARK_RESULTS[$name]['delta'] = $BENCHMARK_RESULTS[$name]['end'] - $BENCHMARK_RESULTS[$name]['start'];
+    return $BENCHMARK_RESULTS[$name]['delta'];
 }
 
 function obscure_email(string $email, int $threshold = 3, string $character = "•"): string {

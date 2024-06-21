@@ -20,7 +20,7 @@ class PostSchema extends \Validation\Normalize {
             'author' => [
                 // 'get' => [],
                 'valid' => function ($val) {
-                    return $this->valid_users_by_permission('Posts_manage_posts','permission');
+                    return $this->valid_users_by_permission('Posts_allowed_author','permission');
                 },
                 'display' => function ($val) {
                     $man = new UserCRUD();
