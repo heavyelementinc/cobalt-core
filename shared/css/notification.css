@@ -95,7 +95,7 @@ notify-button .unseen-indicator:empty {
 
 
 
-a.notifications--notification-container {
+notification-item.notifications--notification-container {
     display: flex;
     text-decoration: none;
     flex-direction: column;
@@ -105,11 +105,11 @@ a.notifications--notification-container {
     color: inherit;
 }
 
-a.notifications--notification-container:visited {
+notification-item.notifications--notification-container:visited {
     color: inherit;
 }
 
-/* a.notifications--notification-container:hover {
+/* notification-item.notifications--notification-container:hover {
 
 } */
 

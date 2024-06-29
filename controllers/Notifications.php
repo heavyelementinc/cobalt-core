@@ -2,11 +2,13 @@
 
 use Auth\UserCRUD;
 use Cobalt\Notifications\Notification;
+use Cobalt\Notifications\NotificationAddresseeSchema;
 use Cobalt\Notifications\NotificationManager;
 use Cobalt\Notifications\PushNotifications;
 use Controllers\Controller;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 
 class Notifications extends Controller {
     private $ntfy;
@@ -65,14 +67,22 @@ class Notifications extends Controller {
     }
 
     function sendNotification() {
-        $mutant = $_POST;
-        if(key_exists('for.user[]', $mutant)) {
-            $mutant['for.user'] = explode(",",$mutant['for.user[]']);
-            unset($mutant['for.user[]']);
+        $note = new Notification();
+        $submission = $_POST;        
+        $users = $submission['users'];
+        $submission['users'] = [];
+
+        foreach($submission as $users => $id) {
+            $schema = new NotificationAddresseeSchema();
+            array_push($submission['users'], $schema->__validate(['user' => $id]));
         }
-        if(!key_exists('action', $mutant)) $mutant['action'] = [
-            'path' => parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)
-        ];
+        
+        
+        $mutant = $note->__validate($submission);
+        
+        if(!key_exists('action', $submission)) {
+            $mutant->action->path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+        }
         return $this->ntfy->sendNotification($mutant);
     }
 
@@ -120,6 +130,7 @@ class Notifications extends Controller {
                 session()['_id']
             ]
         ];
+        $note->sent = new UTCDateTime();
 
         
         // [

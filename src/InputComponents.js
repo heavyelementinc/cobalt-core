@@ -248,7 +248,6 @@ class DisplayDate extends HTMLElement {
             "12-hour": "g:i a",
             "24-hour": "H:i",
             "seconds": "g:i:s A"
-
         };
     }
 

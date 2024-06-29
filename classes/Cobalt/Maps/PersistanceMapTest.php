@@ -12,6 +12,7 @@ use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
+use Validation\Exceptions\ValidationIssue;
 
 class PersistanceMapTest extends PersistanceMap {
     function __get_schema():array {
@@ -30,25 +31,32 @@ class PersistanceMapTest extends PersistanceMap {
                     'value1' => 'Value 1',
                     'super2' => 'Super 2',
                 ],
+                "custom" => true,
             ],
             'array_each' => [
                 new ArrayResult,
                 'template' => "<fieldset><label>First Name</label><input name='name.first'></fieldset>
-                <fieldset><label>Last Name</label><input name='name.last'></fieldset>
-                <fieldset><label>Position</label><select name='position'>{{field.position.options()}}</select></fieldset>",
+                        <fieldset><label>Last Name</label><input name='name.last'></fieldset>
+                        <fieldset><label>Position</label><select name='position'>{{field.position.options()}}</select>
+                    </fieldset>",
                 'each' => [
                     'name' => [
                         new MapResult,
                         'schema' => [
                             'first' => new StringResult,
                             'last' => new StringResult
-                        ]
+                        ],
+                        'full_name' => function ($ref) {
+                            return $ref->first . " " . $ref->last;
+                        }
                     ],
                     'position' => [
                         new EnumResult,
                         'valid' => [
                             'cap' => 'Captain',
-                            'xo' => 'First Officer'
+                            'xo' => 'First Officer',
+                            'comm' => 'Communications',
+                            'helm' => 'Helmsman'
                         ]
                     ]
                 ]
@@ -71,12 +79,10 @@ class PersistanceMapTest extends PersistanceMap {
             ],
             'bool' => [
                 new BooleanResult,
-                'default' => true,
+                'default' => true
             ],
             'date' => [
                 new DateResult,
-                'from' => 'milliseconds',
-                'to' => 'milliseconds'
             ],
             'submap' => [
                 new MapResult,

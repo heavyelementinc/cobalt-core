@@ -4,16 +4,10 @@
         {{doc.html}}
     </li>
     <li>
-        <label>Headline <help-span value="Should be an H1 tag and a paragraph"></help-span></label>
-        {{!doc.html}}
-    </li>
-    <li>
-        <label>Markdown <help-span value="Should be escaped HTML processed as markdown"></help-span></label>
+        <label>Markdown <help-span value="Should not be escaped HTML processed as markdown"></help-span></label>
         {{!doc.html.md()}}
     </li>
-    <li>
-        
-    </li>
+
 </ul>
 
 

@@ -463,7 +463,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
      * Directive methods will always be called with the following arguments:
      *  [$this->getValue(), $this, ...[other_args]]
      * @param mixed $directiveName - The name of the directive to fetch
-     * @param bool $throwOnFail - If the directive does not exist, return `null` if `false` or throw a `DirectiveException` if `true`
+     * @param bool $throwOnFail - If the directive does not exist, return `null` if throwOnFail is `false`, otherwise will throw a `DirectiveException`
      * @return mixed returns the value of the directive callable *or* the directive literal value
      * @throws DirectiveException 
      */
@@ -490,7 +490,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
      */
     function __isset($path) {
         try {
-            $result = lookup_js_notation($path, $this->value, true);
+            $result = lookup_js_notation($path, $this->getValue(), true);
         } catch (Exception $e) {
             return false;
         }

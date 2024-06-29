@@ -2,12 +2,11 @@
 
 namespace Cobalt\Notifications;
 
-use Cobalt\SchemaPrototypes\ArrayResult;
-use Cobalt\SchemaPrototypes\IpResult;
-use Cobalt\SchemaPrototypes\PersistableResult;
-use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\Maps\PersistanceMap;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
 
-class NotificationActionSchema extends PersistableResult {
+class NotificationActionSchema extends PersistanceMap {
 
     public function __get_schema(): array {
         return [

@@ -6,6 +6,7 @@ use ArrayAccess;
 use ArrayObject;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Traits\Validatable;
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Countable;
@@ -105,27 +106,17 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         return $this;
     }
 
-    private function __rehydrate($field, $value, &$target) {
+    private function __rehydrate(string $field, mixed $value, array|BSONDocument|BSONArray &$target, ?array &$schema = null): void {
         if(!$this->__schemaHasBeenInitialized) throw new LookupFailure("Schema has not been initialized!");
-        // $target[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
-        // return;
+        
+        if(is_null($schema)) $schema = $this->__schema;
         
         // Set no schemaDirectives as default behavior
         $schemaDirectives = null;
         // Check if the field we're working on is explicity defined in our schema
-        if(key_exists($field, $this->__schema)) {
+        if(key_exists($field, $schema)) {
             // If it is, we need to read our schemaDirectives
-            $schemaDirectives = $this->__schema[$field];
-            // Check if our schema includes an 'each' field
-            if(key_exists('each', $schemaDirectives)) {
-                // If it does, let's check if it's a BSONArray and convert it
-                if($value instanceof BSONArray) $value = $value->getArrayCopy();
-                // Loop through through the array
-                foreach($value as $index => $arrayItem) {
-                    // Upconvert it to a result
-                    $value[$index] = $this->__toResult($field.".$index", $arrayItem, $schemaDirectives['each'], $this);
-                }
-            }
+            $schemaDirectives = $schema[$field];
         } else if(is_array($value) || $value instanceof ArrayObject) {
             // If it's an array or array object
             foreach($value as $i => $v) {
@@ -136,6 +127,7 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         
         // Reference our target so we can recursively set values
         $target[$field] = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
+        return;
     }
 
     ##### GETTERS & SETTERS #####

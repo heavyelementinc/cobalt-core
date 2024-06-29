@@ -6,10 +6,18 @@
         <td>Value: </td><td>{{type.array_each.json()}}</td>
     </tr>
     <tr>
-        <td>Index 0 name</td><td>{{type.array_each.0.name.first}} {{type.array_each.0.name.last}}</td>
+        <td>Index 0 name</td><td>{{type.array_each.0.name.first}}
+            {{type.array_each.0.name.last.toLowercase()}}
+        </td>
     </tr>
     <tr>
-        <td>Index 1</td><td>{{type.array_each.1.name.position.display()}}</td>
+        <td>Index 0 position (display)</td><td>{{type.array_each.0.position.display()}}</td>
+    </tr>
+    <tr>
+        <td>Index 1 name</td><td>{{type.array_each.1.name.join(" ")}}</td>
+    </tr>
+    <tr>
+        <td>Index 1 position (display)</td><td>{{type.array_each.1.position.display()}}</td>
     </tr>
 </table>
 

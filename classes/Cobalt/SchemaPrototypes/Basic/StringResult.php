@@ -9,8 +9,10 @@ use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 /**
- * Custom schema entries:
- * 'max' - @int The max length of the value. If it's not specified, the string can be any length.
+ * ## Schema directives
+ * 'max'           - <int> The max length of the value. If it's not specified, the string can be any length.
+ * 'min'           - <int> The minumum length of the value
+ * `illegal_chars` - <string> A string of characters that must not be included in the subject
  * @package Cobalt\SchemaPrototypes
  */
 class StringResult extends SchemaResult implements ArrayAccess{
@@ -42,8 +44,18 @@ class StringResult extends SchemaResult implements ArrayAccess{
     }
 
     #[Prototype]
+    protected function toUpper() {
+        return $this->uppercase();
+    }
+
+    #[Prototype]
     protected function lowercase() {
         return strtolower($this->value);
+    }
+
+    #[Prototype]
+    protected function toLowercase() {
+        return $this->lowercase();
     }
 
     #[Prototype]
@@ -54,6 +66,11 @@ class StringResult extends SchemaResult implements ArrayAccess{
     #[Prototype]
     protected function last() {
         return $this->value[count($this->value) - 1];
+    }
+
+    #[Prototype]
+    protected function resverse() {
+        return strrev($this->value);
     }
 
     #[Prototype]
@@ -103,24 +120,33 @@ class StringResult extends SchemaResult implements ArrayAccess{
     }
 
     function character_limit($value) {
-        if(!key_exists('max', $this->schema)) return $value;
+        // Get our subject's length
         $length = strlen($value);
-        $max = $this->schema['max'];
+        $min = $this->getDirective("min");
+        if(is_null($min)) $min = 0;
+        if($length < $min) throw new ValidationIssue("This value must be at least $min characters");
+        
+        $max = $this->getDirective("max");
+        if(is_null($max)) return $value;
         if($length <= $max) return $value;
-        throw new ValidationIssue("This may not be greater than $max characters long");
+        throw new ValidationIssue("This value may not be greater than $max characters");
     }
     
-    function restricted_chars($value) {
+    function illegal_chars($value) {
         if(!key_exists('illegal_chars', $this->schema)) return $value;
-        $illegal = str_split($this->schema['illegal_chars']);
+        // Split our string of illegal characters into an array
+        $illegal = str_split($this->getDirective('illegal_chars'));
+        // Remove any illegal characters from the subject
         $mutant = str_replace($illegal, "", $value);
+        // Compare the subject and the mutated value. If they don't match then
+        // the subject must have contained illegal characters
         if($mutant !== $value) throw new ValidationIssue("This entry contains illegal characters.");
         return $value;
     }
     
     function filter($value) {
         $this->character_limit($value);
-        $this->restricted_chars($value);
+        $this->illegal_chars($value);
         return $value;
     }
 }

@@ -897,7 +897,7 @@ function removeNearest(element, ancestorSelector) {
 }
 
 function promiseTimeout(callback, value) {
-    return Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         setTimeout(() => {
             resolve(callback());
         }, value);

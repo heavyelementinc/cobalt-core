@@ -58,6 +58,7 @@ class DateResult extends SchemaResult {
         $value = $this->getValue();
         if($value === null) return "";
         $shorthands = [
+            'iso' => 'c',
             'input' => "Y-m-d",
             'default' => 'm/d/Y',
             "verbose" => "l, F jS Y g:i A",
@@ -66,9 +67,6 @@ class DateResult extends SchemaResult {
             "24-hour" => "H:i",
             "seconds" => "g:i:s A",
         ];
-        if($format === "relative") {
-            return "<date-span relative='true' value=\"$value\"></date-span>";
-        }
         if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
             $dateTime = $value->toDateTime();
@@ -80,8 +78,8 @@ class DateResult extends SchemaResult {
     }
 
     #[Prototype]
-    protected function relative($strtoparse) {
-        
+    protected function relative() {
+        return "<date-span format='verbose' relative='true' value='" .($this->format("U") * 1000). "'></date-span>";
     }
 
     public function filter($value) {

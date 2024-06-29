@@ -3,23 +3,24 @@
 namespace Cobalt\Notifications;
 
 use Cobalt\Maps\PersistanceMap;
-use Cobalt\SchemaPrototypes\BooleanResult;
-use Cobalt\SchemaPrototypes\DateResult;
-use Cobalt\SchemaPrototypes\EnumResult;
-use Cobalt\SchemaPrototypes\UserIdResult;
+use Cobalt\SchemaPrototypes\Basic\BinaryResult;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 
 class NotificationAddresseeSchema extends PersistanceMap {
     public function __get_schema(): array {
         return [
-            'id' => new UserIdResult,
+            'user' => new UserIdResult,
             'state' => [
-                new EnumResult,
+                new BinaryResult,
+                'default' => 0,
                 'valid' => [
-                    'seen' => 'Seen',
-                    'read' => 'Read',
-                ]
+                    0b0001 => 'Seen', // User has seen this notification in the panel
+                    0b0010 => 'Read', // User has visited the actionable location
+                    0b0100 => 'Muted', // User has muted further notifications
+                ],
             ],
-            'modified' => new DateResult,
+            'modified' => new DateResult
         ];
     }
 }

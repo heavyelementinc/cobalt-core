@@ -1,8 +1,8 @@
 <?php
 
 use Cobalt\Maps\PersistanceMap;
-use Cobalt\SchemaPrototypes\NumberResult;
-use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
 
 class DebugRenderer {
     function render($userInput = "Test") {
@@ -27,7 +27,7 @@ class TestSchema extends PersistanceMap {
                 'type' => new StringResult,
             ],
             'number' => [
-                'type' => new NumberResult
+                'type' => new NumberResult,
             ],
             'selectArr' => [
                 'type' => new StringResult,

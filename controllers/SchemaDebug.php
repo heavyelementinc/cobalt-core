@@ -26,13 +26,13 @@ class SchemaDebug {
                     'position' => "cap",
                 ],
                 [
-                    'name' => ['first' => 'Spock', 'last' => ''],
+                    'name' => ['first' => 'Mr.', 'last' => 'Spock'],
                     'position' => "xo",
                 ]
             ],
             'binary' => 0b1010101010,
             'bool' => true,
-            'date' => (new UTCDateTime())->toDateTime()->format('u'),
+            'date' => new UTCDateTime(),
             'submap' => [
                 'headline' => 'Some headline',
                 'subheadline' => 'Sub headline',
@@ -88,10 +88,10 @@ class SchemaDebug {
     }
 
     function submapresult() {
-        $result = $this->test['submap']['nested']['nested2']['markdown']->md();
+        // $result = $this->test->submap['nested']['nested2']['markdown']->md();
         return view('/debug/Prototypes/submap.html', [
             'type' => $this->test,
-            'result' => $result
+            'result' => $result ?? ""
         ]);
     }
 

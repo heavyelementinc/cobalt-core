@@ -10,8 +10,6 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
-use Cobalt\Maps\GenericMap;
-use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
@@ -32,7 +30,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         $array = $value;
         if($value instanceof BSONArray) $array = $value->getArrayCopy();
         if(empty($value)) $array = $this->schema['default'];
-        $array = $this->__each($array, $this->__reference);
+        $array = $this->__each($array, $this->schema['each'] ?? []);
         $this->value = $array;
     }
 
@@ -58,6 +56,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     #[Prototype]
     protected function field($classes = "", $misc = [], $tag = "") {
         if($this->getDirective("view") || $this->getDirective("template")) return $this->inputObjectArray($classes, $misc);
+        if($this->getDirective("allow-custom") || $this->getDirective("custom")) $misc['allow-custom'] = "true";
         return $this->inputArray($classes, $misc);
     }
 
@@ -67,6 +66,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         $valid = $this->getValid();
         $result = [];
         foreach($value as $key) {
+            if($key instanceof SchemaResult) $key = (string)$key;
             switch(gettype($valid)) {
                 case "array":
                     if(key_exists($key, $valid)) $result[] = "<li>$valid[$key]</li>";

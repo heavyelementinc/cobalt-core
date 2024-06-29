@@ -20,6 +20,10 @@ class ActionMenuElement extends CustomButton {
         this.getOptions();
 
         this.addEventListener("click", event => {
+            if(this.stopPropagation) {
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }
             const currentState = this.menu.isOpen;
             if(currentState) return;
             this.menu.toggle();
@@ -49,6 +53,14 @@ class ActionMenuElement extends CustomButton {
         this.setAttribute("mode", value);
     }
 
+    get stopPropagation() {
+        return JSON.parse(this.getAttribute("stop-propagation"))
+    }
+
+    set stopPropagation(value) {
+        if(typeof value !== "boolean") throw new TypeError("Must be a boolean value");
+        this.setAttribute("stop-propagation", JSON.parse(value));
+    }
     // toggleButton(event) {
 
     // }
@@ -68,7 +80,8 @@ class ActionMenuElement extends CustomButton {
         action.icon = icon;
         if(opt.hasAttribute("href")) action.href = opt.getAttribute("href")
         
-        action.button.addEventListener("mousedown", event => {
+        action.button.addEventListener("click", event => {
+            if(this.stopPropagation) event.stopPropagation();
             this.triggerEvent(opt, "click", event)
         });
         action.button.addEventListener("load", event => {
@@ -85,29 +98,6 @@ class ActionMenuElement extends CustomButton {
         action.disabled = (opt.hasAttribute("disabled")) ? opt.disabled : false
         action.original = opt
         
-        // let action1 = {
-        //     label: opt.innerHTML || "Default",
-        //     icon: (icon) ? `<i name="${icon}"></i>` : "",
-        //     onloadstart: event => 
-        //         this.triggerEvent(opt, "loadstart", event), // <- loadstart has worked a few times...
-        //     onload:  event => 
-        //         this.triggerEvent(opt, "load", event),
-        //     onerror: event => 
-        //         this.triggerEvent(opt, "error", event), // <- error has worked 
-        //     onclick: event => {
-        //         const href = opt.getAttribute("href")
-        //         if(href) {
-        //             Cobalt.router.location = href;
-        //             return true;
-        //         }
-        //         this.triggerEvent(opt, "click", event)
-        //     }, // <- Not working
-        //     dangerous: opt.hasAttribute("dangerous"),
-        //     disabled: opt.hasAttribute("disabled"),
-        //     original: opt
-        // }
-
-        // if(opt.onclick) action.callback = opt.onclick;
         if(opt.hasAttribute("action")) {
             let json = opt.getAttribute("value") ?? {};
             action.requestAction = opt.getAttribute("action");

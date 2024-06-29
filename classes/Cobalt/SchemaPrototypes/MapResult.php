@@ -36,18 +36,20 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
     public function __toString(): string {
         return "[MapResultObject]";
     }
+    
     // function setName(string $name) {
+    //     return;
     //     // TODO: Set the appropriate name
     // }
 
-    // function setSchema(?array $schema): void {
-    //     $this->schema = array_merge(
-    //         self::universalSchemaDirectives,
-    //         $this->defaultSchemaValues(),
-    //         $schema ?? []
-    //     );
-    //     // $this->value->schema;
-    // }
+    function setSchema(?array $schema): void {
+        $this->schema = array_merge(
+            self::universalSchemaDirectives,
+            $this->defaultSchemaValues(),
+            $schema ?? []
+        );
+        // $this->value->schema;
+    }
 
     function setValue(mixed $value): void {
         $this->originalValue = $value;
@@ -58,8 +60,6 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
         return $this->value->__hydrated;
     }
 
-
-    
     public function count(): int {
         return $this->value->count();
     }
