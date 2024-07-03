@@ -126,8 +126,8 @@ ob_clean();
 // Let's finally output the result:
 if($context_result !== null) {
     echo $context_result;
-    $BENCHMARK_RESULTS['env_invoke']['end'] = microtime(true) * 1000;
-    $BENCHMARK_RESULTS['env_invoke']['delta'] = $BENCHMARK_RESULTS['env_invoke']['end'] - $BENCHMARK_RESULTS['env_invoke']['start'];
+    $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_END] = microtime(true) * 1000;
+    $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_DELTA] = $BENCHMARK_RESULTS['env_invoke']['end'] - $BENCHMARK_RESULTS['env_invoke']['start'];
 
     $global_benchmarks = "";
     if(app('debug') && isset($context_processor->encoding_mode) && $context_processor->encoding_mode === "text/html") {

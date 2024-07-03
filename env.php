@@ -21,7 +21,14 @@
 use Cobalt\UTMTracker\UTMHandler;
 
 ob_start();
-$GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = ['start' => microtime(true) * 1000];
+const DB_BENCHMARK = 'db_requests';
+const DB_BENCH_READ = 'reads';
+const DB_BENCH_WRITE = 'writes';
+const DB_BENCH_START = 'start';
+const DB_BENCH_END = 'end';
+const DB_BENCH_DELTA = 'delta(ms)';
+$GLOBALS['BENCHMARK_RESULTS'][DB_BENCHMARK] = [DB_BENCH_READ => 0, DB_BENCH_WRITE => 0];
+$GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = [DB_BENCH_START => microtime(true) * 1000];
 
 require_once __DIR__ . "/globals/logs.php";
 // Let's make sure our environment is configured properly.

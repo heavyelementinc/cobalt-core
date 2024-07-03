@@ -174,6 +174,9 @@
             "type": "boolean"
         }
     },
+    "enable_benchmark_profiling": {
+        "default": true
+    },
     /* Enabled the core-content/ route */
     "enable_core_content": {
         "default": true,

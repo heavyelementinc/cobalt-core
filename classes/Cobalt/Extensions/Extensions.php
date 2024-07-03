@@ -116,6 +116,7 @@ class Extensions extends \Drivers\Database {
         return str_replace([__APP_ROOT__, __ENV_ROOT__, "//"], [$app, $core, "/"], $path);
     }
 
+    // TODO: Write to the DB in a deferred way
     private function register_extension($manifest) {
         return $this->updateOne(
             ['uuid' => $manifest['uuid']],

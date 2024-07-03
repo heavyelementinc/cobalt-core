@@ -15,9 +15,12 @@
 
 namespace Drivers;
 
+use Cobalt\Maps\GenericMap;
 use MongoDB\BSON\ObjectId;
 use Drivers\UTCDateTime;
 use MongoDB\Collection;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Normalize;
 
@@ -67,32 +70,41 @@ abstract class Database {
 
     /* CREATE */
     final function insertOne($document, array $options = []) {
-        return $this->collection->insertOne($document, $options);
+        $cursor = $this->collection->insertOne($document, $options);
+        benchmark_writes($cursor->getInsertedCount());
+        return $cursor;
     }
 
     final function insertMany($documents, array $options = []) {
-        return $this->collection->insertMany($documents, $options);
+        $cursor = $this->collection->insertMany($documents, $options);
+        benchmark_writes($cursor->getInsertedCount());
+        return $cursor;
     }
 
 
     /* READ */
     final function findOne($filter, array $options = []) {
+        benchmark_reads();
         return $this->collection->findOne($filter, $options);
     }
 
     final function findOneAndUpdate($filter, $update, array $options = []) {
+        benchmark_reads();
         return $this->collection->findOneAndUpdate($filter, $update, $options);
     }
 
     final function find($filter = [], array $options = []) {
+        benchmark_reads();
         return $this->collection->find($filter, $options);
     }
 
     final function count($filter, $options = []) {
+        benchmark_reads();
         return $this->collection->count($filter, $options);
     }
 
     final function distinct($field,$filter = []) {
+        benchmark_reads();
         return $this->collection->distinct($field, $filter);
     }
 
@@ -134,24 +146,34 @@ abstract class Database {
 
     /* UPDATE */
     final function updateOne($filter, $fields, array $options = []) {
-        return $this->collection->updateOne($filter, $fields, $options);
+        $cursor = $this->collection->updateOne($filter, $fields, $options);
+        benchmark_writes($cursor->getModifiedCount() + $cursor->getUpsertedCount());
+        return $cursor;
     }
 
     final function updateMany($filter, $fields, array $options = []) {
-        return $this->collection->updateMany($filter, $fields, $options);
+        $cursor = $this->collection->updateMany($filter, $fields, $options);
+        benchmark_writes($cursor->getModifiedCount() + $cursor->getUpsertedCount());
+        return $cursor;
     }
 
 
     /* DESTROY */
     final function deleteOne($filter, array $options = []) {
-        return $this->collection->deleteOne($filter, $options);
+        $cursor = $this->collection->deleteOne($filter, $options);
+        benchmark_writes($cursor->getDeletedCount());
+        return $cursor;
     }
 
     final function deleteMany($filter, array $options = []) {
-        return $this->collection->deleteMany($filter, $options);
+        $cursor = $this->collection->deleteMany($filter, $options);
+        benchmark_writes($cursor->getDeletedCount());
+        return $cursor;
     }
 
     final function aggregate($pipeline, $options = []) {
-        return $this->collection->aggregate($pipeline, $options);
+        $cursor = $this->collection->aggregate($pipeline, $options);
+        benchmark_reads();
+        return $cursor;
     }
 }

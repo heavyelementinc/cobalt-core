@@ -1686,17 +1686,28 @@ function pretty_numeral($number):string {
 
 
 function benchmark_start($name) {
-    if(!__APP_SETTINGS__['debug']) return;
+    if(!__APP_SETTINGS__['enable_benchmark_profiling']) return;
     global $BENCHMARK_RESULTS;
-    $BENCHMARK_RESULTS[$name] = ['start' => microtime(true) * 1000];
+    $BENCHMARK_RESULTS[$name] = [DB_BENCH_START => microtime(true) * 1000];
 }
 
 function benchmark_end($name) {
-    if(!__APP_SETTINGS__['debug']) return;
+    if(!__APP_SETTINGS__['enable_benchmark_profiling']) return;
     global $BENCHMARK_RESULTS;
-    $BENCHMARK_RESULTS[$name]['end'] = microtime(true) * 1000;
-    $BENCHMARK_RESULTS[$name]['delta'] = $BENCHMARK_RESULTS[$name]['end'] - $BENCHMARK_RESULTS[$name]['start'];
-    return $BENCHMARK_RESULTS[$name]['delta'];
+    $BENCHMARK_RESULTS[$name][DB_BENCH_END] = microtime(true) * 1000;
+    $BENCHMARK_RESULTS[$name][DB_BENCH_DELTA] = $BENCHMARK_RESULTS[$name][DB_BENCH_END] - $BENCHMARK_RESULTS[$name][DB_BENCH_START];
+    return $BENCHMARK_RESULTS[$name][DB_BENCH_DELTA];
+}
+
+function benchmark_reads() {
+    global $BENCHMARK_RESULTS;
+    $BENCHMARK_RESULTS[DB_BENCHMARK][DB_BENCH_READ] += 1;
+}
+
+function benchmark_writes($modified) {
+    if($modified <= 0) return;
+    global $BENCHMARK_RESULTS;
+    $BENCHMARK_RESULTS[DB_BENCHMARK][DB_BENCH_WRITE] += 1;
 }
 
 function obscure_email(string $email, int $threshold = 3, string $character = "•"): string {
