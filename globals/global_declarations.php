@@ -68,3 +68,8 @@ const REQUEST_ENCODE_XML = 4;
 const REQUEST_ENCODE_MULTIPART_FORM = 8;
 const REQUEST_ENCODE_OCTET = 16;
 const REQUEST_ENCODE_PLAINTEXT = 32;
+
+const QUERY_PARAM_SORT_NAME = 'sort-name';
+const QUERY_PARAM_SORT_DIR = 'sort-direction';
+const QUERY_PARAM_LIMIT = 'limit';
+const QUERY_PARAM_PAGE_NUM = 'page';

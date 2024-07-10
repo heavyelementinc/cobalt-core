@@ -57,6 +57,15 @@ flex-table{
         flex-header + flex-header{
             border-left: var(--project-color-table-border);
         }
+
+        flex-header.sort-asc:after, flex-header.sort-desc:after {
+            content: "\F035D";
+            font-family: "Material Design Icons";
+        }
+
+        flex-header.sort-desc:after {
+            content: "\F0360";
+        }
     
         flex-cell,flex-header,flex-sticky{
             display: flex;

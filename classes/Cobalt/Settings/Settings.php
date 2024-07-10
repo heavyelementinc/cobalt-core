@@ -133,7 +133,7 @@ class Settings extends \Drivers\Database {
                 try{
                     $setting = new $def($name, $this->normalizeSetting($name, $definition), $this->__user_modified_settings, $this->__settings, $this, $toCache);
                 } catch (\Exception $e) {
-                    die("Setting `$name` specifies a bad definition");
+                    kill("Setting `$name` specifies a bad definition");
                 }
                 if($setting instanceof CobaltSetting === false) $setting = false;
             }
@@ -151,7 +151,7 @@ class Settings extends \Drivers\Database {
             try{
                 $toCache[$name] = $setting->get_value();
             } catch (AliasMissingDependency $e) {
-                die($e);
+                kill($e);
             }
         }
 
@@ -223,7 +223,7 @@ class Settings extends \Drivers\Database {
             }
             // $json = get_all_where_available($this::__DEFINITIONS__, true, true);
         } catch (\Exception $e) {
-            die($e->getMessage());
+            kill($e->getMessage());
         } 
         $this->default_values = $values;
         $this->definitions    = $definitions;
@@ -529,7 +529,7 @@ class Settings extends \Drivers\Database {
     //         try {
     //             $definitions[$file] = jsonc_decode($file,true, JSON_ERROR_SYNTAX);
     //         } catch (\Exception $e) {
-    //             die("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""],$file) . '`');
+    //             kill("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""],$file) . '`');
     //         }
     //         foreach($definitions[$file] as $name => $setting) {
     //             if(gettype($setting) === "array") 

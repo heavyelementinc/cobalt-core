@@ -27,6 +27,6 @@ function trim_trailing_slash(string $path, string $char = "/") {
 // register_shutdown_function(function () {
 //     $error = error_get_last();
 //     if ($error !== null) {
-//         die("Error");
+//         kill("Error");
 //     }
 // });

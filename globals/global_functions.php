@@ -301,7 +301,7 @@ function cobalt_autoload($class) {
             try{
                 require_once $file;
             } catch (ParseError $e) {
-                die("Syntax error in ".str_replace([__ENV_ROOT__, __APP_ROOT__], ["__ENV__", "__APP__"], $e->getFile()));
+                kill("Syntax error in ".str_replace([__ENV_ROOT__, __APP_ROOT__], ["__ENV__", "__APP__"], $e->getFile()));
             }
             return;
         }

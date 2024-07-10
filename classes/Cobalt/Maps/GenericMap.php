@@ -146,6 +146,7 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     public function __set($name, $value) {
         $this->__dataset[$name] = $value;
         $this->__rehydrate($name, $value, $this->__hydrated);
+        $this->__validatedFields[$name] = $value;
     }
 
     public function __isset($name) {

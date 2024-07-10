@@ -22,7 +22,7 @@ try {
     /** @global $auth Access the Authentication class */
     $auth = new Auth\Authentication();
 } catch (Exception $e) {
-    die($e->getMessage());
+    kill($e->getMessage());
 }
 $WEB_PROCESSOR_VARS['custom'] = new Cobalt\Customization\CustomizationManager();
 
@@ -43,8 +43,8 @@ if ($route_context !== "web") {
 $context_processor = new $processor();
 
 if (!is_a($context_processor, "Handlers\RequestHandler")) {
-    if (app("debug_exceptions_publicly")) die("Context processor must be an instance of Handlers\RequestHandler");
-    else die("Error");
+    if (app("debug_exceptions_publicly")) kill("Context processor must be an instance of Handlers\RequestHandler");
+    else kill("Error");
 }
 
 define("__APP_CONTEXT__", __APP_ROOT__ . "/app_context.php");
@@ -138,5 +138,5 @@ if($context_result !== null) {
     ob_flush();
     exit;
 } else {
-    die("No content in buffer");
+    kill("No content in buffer");
 }

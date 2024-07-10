@@ -76,7 +76,7 @@ function __cobalt_initialize($values) {
         // Otherwise, prompt the user to create the account.
         else $result = __cobalt_initialize_routes($ask_for);
     } catch (Exception $e) {
-        die($e->getMessage());
+        kill($e->getMessage());
     }
     return $result;
 }
@@ -104,7 +104,7 @@ function __cobalt_initialize_create_user($root_user) {
     try {
         $crud->updateOne(['_id' => $result['_id']], ['$set' => ['groups' => ['root']]]);
     } catch (Exception $e) {
-        die($e->getMessage());
+        kill($e->getMessage());
     }
 
     // Redact the password field
@@ -115,7 +115,7 @@ function __cobalt_initialize_create_user($root_user) {
 
     // If we fail to overwrite the contents of the init file, die with an error.
     if (!file_put_contents($GLOBALS['init_file'], json_encode([]))) {
-        die($err);
+        kill($err);
     }
 
     __cobalt_initialize_set_init_complete();
@@ -137,7 +137,7 @@ function __cobalt_initialize_set_init_complete() {
     if (!file_exists($file)) touch($file);
     // If we fail to rename the init_file, die with an error.
     if (!rename($file, $file . ".set")) {
-        die("Failed to initialize");
+        kill("Failed to initialize");
     }
 }
 

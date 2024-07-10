@@ -32,6 +32,12 @@ class DateResult extends SchemaResult {
         return $val->format('c');
     }
 
+    public function __defaultIndexPresentation(): string {
+        $val = $this->getValue();
+        if(!$val) return "No date set";
+        return $this->format('no-dow');
+    }
+
     public function setValue($value):void {
         $this->originalValue = $value;
         if ($value === null) $this->value = $this->schema['default'];
@@ -62,6 +68,7 @@ class DateResult extends SchemaResult {
             'input' => "Y-m-d",
             'default' => 'm/d/Y',
             "verbose" => "l, F jS Y g:i A",
+            "no-dow"  => "F jS Y g:i A",
             "long" => "l, F jS Y",
             "12-hour" => "g:i a",
             "24-hour" => "H:i",

@@ -25,7 +25,7 @@ try {
     /** @global $auth Access the Authentication class */
     $auth = new Auth\Authentication();
 } catch (Exception $e) {
-    die($e->getMessage());
+    kill($e->getMessage());
 }
 
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
@@ -55,8 +55,8 @@ try {
     $kernel = new $kernel_name();
 
     if (!is_a($kernel, "Cobalt\Kernel\Request")) {
-        if (app("debug_exceptions_publicly")) die("Context processor must be an instance of Cobalt\Kernel\Request");
-        else die("Error");
+        if (app("debug_exceptions_publicly")) kill("Context processor must be an instance of Cobalt\Kernel\Request");
+        else kill("Error");
     }
 
     // Now we're ready to execute our route
@@ -85,5 +85,5 @@ if($context_result !== null) {
     ob_flush();
     exit;
 } else {
-    // die("No content in buffer");
+    // kill("No content in buffer");
 }

@@ -22,8 +22,8 @@ if(file_exists($db_config)) {
     // Load the settings file
     require_once $db_config;
     global $CONFIG;
-    if(!$CONFIG) die("Cobalt requires your config.php file to declare \$CONFIG");
-    if(config() !== $CONFIG) die("Something went wrong with the bootstrap process");
+    if(!$CONFIG) kill("Cobalt requires your config.php file to declare \$CONFIG");
+    if(config() !== $CONFIG) kill("Something went wrong with the bootstrap process");
 
     // Sanity check functions must return TRUE if valid and FALSE if invalid
     $sanity_check = [
@@ -61,10 +61,10 @@ if(file_exists($db_config)) {
         // If the sanity check key is not in config
         if(!key_exists($key, $CONFIG)) {
             // Check if 
-            if(!key_exists($key, $default_values)) die("Your config.php file is missing a required key.");
+            if(!key_exists($key, $default_values)) kill("Your config.php file is missing a required key.");
             $CONFIG[$key] = $default_values[$key];
         }
-        if($value !== false && is_callable($value) && !$value($CONFIG[$key])) die("config.php validation failed. Key `$key` contains invalid data.");
+        if($value !== false && is_callable($value) && !$value($CONFIG[$key])) kill("config.php validation failed. Key `$key` contains invalid data.");
         // if($CONFIG[$key] == false) unset($CONFIG[$key]);
     }
 
@@ -103,7 +103,7 @@ function db_cursor($collection, $database = null, $returnClient = false, $return
         if($returnDatabase) return $client->{$database};
         if($returnClient) return $client;
     } catch (Exception $e) {
-        die("Cannot connect to database");
+        kill("Cannot connect to database");
     }
     $database = $client->{$database};
     return $database->{$collection};

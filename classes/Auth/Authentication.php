@@ -14,6 +14,7 @@ use Exceptions\HTTP\BadRequest;
 use Mail\SendMail;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use SensitiveParameter;
 
 class Authentication {
     public $permissions = null;
@@ -38,7 +39,7 @@ class Authentication {
     }
 
     /** Our user login routine. */
-    function login_user($username, $password, $stay_logged_in = false, $skip_password_check = false) {
+    function login_user($username, #[SensitiveParameter] $password, $stay_logged_in = false, $skip_password_check = false) {
         $stock_message = "Invalid credentials.";
         /** Get our user by their username or email address */
         $ua = new UserCRUD();

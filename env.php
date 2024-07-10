@@ -27,8 +27,27 @@ const DB_BENCH_WRITE = 'writes';
 const DB_BENCH_START = 'start';
 const DB_BENCH_END = 'end';
 const DB_BENCH_DELTA = 'delta(ms)';
+const INTERNAL_SERVER_ERROR = "HTTP/1.0 500 Internal Server Error";
 $GLOBALS['BENCHMARK_RESULTS'][DB_BENCHMARK] = [DB_BENCH_READ => 0, DB_BENCH_WRITE => 0];
 $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = [DB_BENCH_START => microtime(true) * 1000];
+
+function kill(string $message = "", string $error_type = INTERNAL_SERVER_ERROR) {
+    header($error_type);
+    $msg = "The server encountered an error and had to stop.";
+    if($message) $msg = $message;
+    $html = "<html>
+    <head>
+        <title>Internal Server Error</title>
+    </head>
+    <body style='background: gray; display: flex; justify-content: center; align-items: center;'>
+        <main style='background: white; color: black; height: 80ch; width: 80ch;'>
+            <h1>Internal Server Error</h1>
+            <p>$msg</p>
+        </main>
+    </body>
+    </html>";
+    die($html);
+}
 
 require_once __DIR__ . "/globals/logs.php";
 // Let's make sure our environment is configured properly.
@@ -44,7 +63,10 @@ if (!empty($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "
 // Rely on the Cobalt CLI to mandate the path to our app
 else if (key_exists("cli_app_root", $GLOBALS)) $app_root = $GLOBALS['cli_app_root'];
 else if (key_exists("unit_test", $GLOBALS)) $app_root = $GLOBALS['unit_test'];
-else die("Cannot establish absolute path to app root"); // Die.
+else {
+    header(INTERNAL_SERVER_ERROR);
+    kill("Cannot establish absolute path to app root"); // Die.
+}
 
 define("__APP_ROOT__", realpath($app_root));
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
@@ -91,7 +113,9 @@ if (!file_exists($composer) && !file_exists(__APP_ROOT__ . "/composer.json")) {
     $composer = __ENV_ROOT__ . "/vendor/autoload.php";
     $__dependency_dir = "cobalt-core";
 }
-if (!file_exists($composer)) die("Dependencies have not been installed. Run `composer install` in the $__dependency_dir directory as your webserver user");
+if (!file_exists($composer)) {
+    kill("Dependencies have not been installed. Run `composer install` in the $__dependency_dir directory as your webserver user");
+}
 require_once $composer;
 
 // And then define our own autoload function (specified in global_functions.php)
@@ -101,7 +125,7 @@ spl_autoload_register("cobalt_autoload", true);
 //     // Load our ACTIVE plugins.
 //     require_once __ENV_ROOT__ . "/globals/plugins.php";
 // } catch (Exception $e) {
-//     die($e->getMessage());
+//     kill($e->getMessage());
 // }
 
 require_once __ENV_ROOT__ . "/globals/extensions.php";
@@ -112,9 +136,9 @@ try {
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
-    die($e->getMessage());
+    kill($e->getMessage());
 } catch (Error $e) {
-    die($e->getMessage());
+    kill($e->getMessage());
 }
 
 // Let's find our trusted cobalt domain
@@ -135,10 +159,10 @@ $cobalt_session_started = session_start([
     // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
 
-if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) die("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
+if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) kill("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;
-if (!version_compare($depends, __COBALT_VERSION, ">=")) die("This app depends on version $depends of Cobalt Engine. Please upgrade.");
+if (!version_compare($depends, __COBALT_VERSION, ">=")) kill("This app depends on version $depends of Cobalt Engine. Please upgrade.");
 
 ob_end_clean(); // Prevent any dependencies from polluting our output
 

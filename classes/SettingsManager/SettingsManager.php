@@ -172,7 +172,7 @@ class SettingsManager {
             }
             $this->setting_definitions = array_merge($this->setting_definitions, ...$plugin_settings);
         } catch (Exception $e) {
-            die("Syntactic error in setting definitions file");
+            kill("Syntactic error in setting definitions file");
         }
 
         // Check if we need to import our settings from the cache
@@ -258,7 +258,7 @@ class SettingsManager {
                 $this->process_directives($setting_name, $directives);
             }
         } catch (SettingsManagerException $e) {
-            die($e->getMessage());
+            kill($e->getMessage());
         }
 
         $this->settings->set_index(array_keys($this->setting_definitions));

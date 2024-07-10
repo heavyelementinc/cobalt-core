@@ -70,8 +70,9 @@ class SchemaResult implements \Stringable, JsonSerializable {
     public function getValue(): mixed {
         $result = $this->value;
         if ($result === null && $this->schema['default']) {
-            $result = $this->schema['default'];
-            if(is_callable($result)) $result = $result();
+            $result = $this->getDirective('default');
+            // $result = $this->schema['default'];
+            // if(is_callable($result)) $result = $result();
         }
         if (key_exists('get', $this->schema ?? []) && is_callable($this->schema['get'])) $result = $this->schema['get']($result, $this);
         else $result = $this->getRaw();
@@ -113,6 +114,12 @@ class SchemaResult implements \Stringable, JsonSerializable {
 
     public function readSchema():array {
         return $this->schema;
+    }
+
+    public function getLabel() {
+        $this->name;
+        $name = preg_replace("[-_]", " ", $this->name);
+        return ucwords($name);
     }
 
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -375,6 +382,10 @@ class SchemaResult implements \Stringable, JsonSerializable {
         $this->__reference = $schema;
     }
 
+    function __defaultIndexPresentation(): string {
+        return $this->__toString();
+    }
+
     function __toString(): string {
         if($this->__isPrivate()) return "";
         return $this->getValue() ?? "";
@@ -472,7 +483,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
             if($throwOnFail) throw new DirectiveException("Undefined value");
             return null;
         }
-        if(is_callable($this->schema[$directiveName])) {
+        if(is_callable($this->schema[$directiveName]) && gettype($this->schema[$directiveName]) !== "string") {
             $args = func_get_args();
             return $this->schema[$directiveName]($this->getValue(), $this, ...array_slice($args, 2));
         }

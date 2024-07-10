@@ -500,7 +500,7 @@ class Debug extends \Controllers\Pages {
 
 
     function phpinfo() {
-        if(!is_root()) die("You don't have permisison.");
+        if(!is_root()) kill("You don't have permisison.");
         phpinfo();
         exit;
     }

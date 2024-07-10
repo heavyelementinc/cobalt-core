@@ -6,6 +6,7 @@ use chillerlan\QRCode\QRCode;
 use Exception;
 use Exceptions\HTTP\Unauthorized;
 use RobThree\Auth\TwoFactorAuth;
+use SensitiveParameter;
 
 class MultiFactorManager {
 
@@ -48,7 +49,7 @@ class MultiFactorManager {
         return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>This Cobalt app has Two-Factor Authentication disabled. Please contact your system administrator to enable TOTP support</p></fieldset>";
     }
 
-    function enroll_user(UserSchema $user, string $passwd) {
+    function enroll_user(UserSchema $user, #[SensitiveParameter] string $passwd) {
         if(!$this->verify_otp($user, $passwd)) throw new Unauthorized("OTP verification failed","There was an error validating the provided one-time password");
         $crud = new UserCRUD();
         $backups = $this->generate_backup_codes();

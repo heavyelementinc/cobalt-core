@@ -86,8 +86,8 @@ class User {
     function password($username = null) {
         if (!app("Auth_user_accounts_enabled")) throw new Exception("User accounts are not enabled");
         if ($username === null) throw new Exception("Missing operand. You must specify a username and password to be changed");
-        $pword = readline("Provide a new password > ");
-        $confirm = readline("Confirm the new password > ");
+        $pword = readline_private("Provide a new password > ");
+        $confirm = readline_private("Confirm the new password > ");
 
         if ($pword !== $confirm) throw new Exception("Passwords did not match. Aborting.");
         $accounts = new Auth\UserCRUD();

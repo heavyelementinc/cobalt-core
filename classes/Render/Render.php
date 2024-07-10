@@ -452,7 +452,7 @@ class Render {
         try{
             throw new \Exception($errorMessage);
         } catch (\Exception $e){}
-        die("A template error occurred. Please contact your IT team.");
+        kill("A template error occurred. Please contact your IT team.");
     }
 
     function render_template_error($funct, $message, $lineNum, $strpos, $template) {
@@ -498,7 +498,7 @@ class Render {
             color:red;
             font-weight:bold;
         }</style>";
-        die();
+        kill();
     }
 
     function strposall($needle, $haystack, $up_to) {
