@@ -95,6 +95,10 @@ class NewFormRequest extends HTMLElement {
     }
 
     async submit(data = null, event = {}) {
+        if(data == null) {
+            console.warn("`data` must not be null. Aborting.")
+            return
+        }
         const method  = this.getAttribute('method');
         const action  = this.getAttribute('action');
         const enctype = this.getAttribute('enctype') ?? "application/json; charset=utf-8";

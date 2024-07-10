@@ -1,3 +1,7 @@
+markdown-area {
+    display: block;
+}
+
 markdown-area[aria-disabled="true"], markdown-area[aria-disabled="true"] .CodeMirror {
     pointer-events: none;
 }

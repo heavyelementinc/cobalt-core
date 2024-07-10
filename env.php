@@ -27,29 +27,11 @@ const DB_BENCH_WRITE = 'writes';
 const DB_BENCH_START = 'start';
 const DB_BENCH_END = 'end';
 const DB_BENCH_DELTA = 'delta(ms)';
-const INTERNAL_SERVER_ERROR = "HTTP/1.0 500 Internal Server Error";
 $GLOBALS['BENCHMARK_RESULTS'][DB_BENCHMARK] = [DB_BENCH_READ => 0, DB_BENCH_WRITE => 0];
 $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = [DB_BENCH_START => microtime(true) * 1000];
 
-function kill(string $message = "", string $error_type = INTERNAL_SERVER_ERROR) {
-    header($error_type);
-    $msg = "The server encountered an error and had to stop.";
-    if($message) $msg = $message;
-    $html = "<html>
-    <head>
-        <title>Internal Server Error</title>
-    </head>
-    <body style='background: gray; display: flex; justify-content: center; align-items: center;'>
-        <main style='background: white; color: black; height: 80ch; width: 80ch;'>
-            <h1>Internal Server Error</h1>
-            <p>$msg</p>
-        </main>
-    </body>
-    </html>";
-    die($html);
-}
-
 require_once __DIR__ . "/globals/logs.php";
+require_once __DIR__ . "/globals/global_exceptions.php";
 // Let's make sure our environment is configured properly.
 require_once __DIR__ . "/globals/env_probe.php";
 
@@ -99,7 +81,6 @@ $WRITE_TO_BUFFER_HANDLED = false;
 require_once __DIR__ . "/globals/global_declarations.php";
 require_once __DIR__ . "/globals/bootstrap.php";
 // Let's import our exceptions and our helper functions:
-require_once __DIR__ . "/globals/global_exceptions.php";
 require_once __DIR__ . "/globals/global_functions.php";
 require_once __DIR__ . "/globals/global_csrf.php";
 
