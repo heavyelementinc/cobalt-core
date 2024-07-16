@@ -14,7 +14,10 @@ Route::get("/ServiceWorker.js", "FileController@service_worker");
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
     if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
-        Route::get(__APP_SETTINGS__['Posts']['public_index'].".xml", "Posts@RSS_feed");
+        $address = __APP_SETTINGS__['Posts']['public_index'];
+        $length = strlen($address) - 1;
+        if($address[$length] === "/") $address = substr($address, 0, -1);
+        Route::get("$address.xml", "Posts@RSS_feed");
     }
     Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@index", __APP_SETTINGS__['Posts']['public_index_options']);
     
