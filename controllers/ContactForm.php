@@ -59,6 +59,13 @@ class ContactForm extends Crudable {
     }
 
     function read($document): GenericMap|BSONDocument|null {
+        $this->manager->read_for_user($document->_id, session());
+
+        $unread = (new ContactManager())->get_unread_count_for_user(session());
+        $update = "innerHTML";
+        $query = "[href=\"/admin/contact-form/\"] .unread";
+        if($unread === 0) $unread = "";
+        update($query, [$update => $unread]);
         return $document;
     }
 
@@ -71,14 +78,6 @@ class ContactForm extends Crudable {
             'title' => "Contact",
             'doc' => $found,
         ]);
-
-        $conMan->read_for_user($_id, session());
-
-        $unread = (new ContactManager())->get_unread_count_for_user(session());
-        $update = "innerHTML";
-        $query = "[href=\"/admin/contact-form/\"] .unread";
-        if($unread === 0) $unread = "";
-        update($query, [$update => $unread]);
 
         return view("/admin/contact-form/read.html");
     }

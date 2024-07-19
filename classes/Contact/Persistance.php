@@ -25,7 +25,7 @@ class Persistance extends PersistanceMap {
                 'index' => [
                     'title' => 'Name',
                     'order' => 0,
-                    'sort' => 1,
+                    'sort' => -1,
                     'view' => fn ($val) => $val->getRaw()
                 ]
             ],

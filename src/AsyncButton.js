@@ -1,6 +1,7 @@
 class AsyncButton extends CustomButton{
     constructor() {
         super();
+        this.checkmarkQuery = ".doc_id_mark input[name='_id'][type='checkbox']";
         this.setAttribute("__custom-input", "true");
     }
 
@@ -8,6 +9,14 @@ class AsyncButton extends CustomButton{
         this.addEventListener("click", e => {
             this.submit();
         })
+        if(this.type !== "multidelete") return;
+        this.setDisabledState();
+        const checkboxes = document.querySelectorAll(this.checkmarkQuery);
+        for(const check of checkboxes) {
+            check.addEventListener("change", () => {
+                this.setDisabledState(checkboxes);
+            });
+        }
     }
 
     submit() {
@@ -28,7 +37,7 @@ class AsyncButton extends CustomButton{
         let val = {};
         switch(this.type) {
             case "multidelete":
-                const id_boxes = document.querySelectorAll(".doc_id_mark input[name='_id'][type='checkbox']");
+                const id_boxes = document.querySelectorAll(this.checkmarkQuery);
                 val._ids = [];
                 for(const box of id_boxes) {
                     if(!box.checked) continue;
@@ -80,6 +89,16 @@ class AsyncButton extends CustomButton{
     done(event) {
         this.ariaInvalid = false;
         this.dispatchEvent(new CustomEvent("done", event));
+    }
+
+    setDisabledState() {
+        let val = this.value._ids
+        if(val.length === 0) {
+            this.disabled = true;
+            return;
+        }
+        
+        this.disabled = false;
     }
 }
 
