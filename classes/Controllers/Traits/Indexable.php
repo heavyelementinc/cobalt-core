@@ -21,11 +21,13 @@ use MongoDB\Database;
  * 
  */
 trait Indexable {
+    protected GenericMap $schema;
     protected array $indexableSchema;
     protected array $sortedTable;
     protected array $queryParameters = [];
 
     public function init(GenericMap $schema, array $params) {
+        $this->schema = $schema;
         $this->indexableSchema = $schema->readSchema();
         $table = [];
 
@@ -59,6 +61,9 @@ trait Indexable {
         }
         // Establish our table header
         $html = "<flex-row>";
+        if($this->schema->__get_index_checkbox_state()) {
+            $html .= "<flex-header class=\"doc_id_mark\"><input type=\"checkbox\"></flex-header>";
+        }
         foreach($this->sortedTable as $field) {
             // Merge the newly-safe params with the params for this field
             $sort_direction  = 1;
@@ -104,6 +109,9 @@ trait Indexable {
 
     private function get_table_row($doc, &$html) {
         $html .= "<flex-row>";
+        if($this->schema->__get_index_checkbox_state()) {
+            $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\" value=\"$doc->_id\"></flex-cell>";
+        }
         $route = route("$this->name@__edit", [$doc->_id]);
         // Get each cell's contents
         foreach($this->sortedTable as $cell) {
@@ -140,6 +148,7 @@ trait Indexable {
         $total_pages = 0;
         if($count && $limit) $total_pages = ceil($count / $limit);
 
+        // Check if we've got our current page set
         $get_page = $_GET[QUERY_PARAM_PAGE_NUM] ?? 1;
         if(!is_numeric($get_page)) {
             unset($_GET['uri']);
@@ -168,7 +177,12 @@ trait Indexable {
         $prev->setHref("?" . http_build_query(array_merge($_GET, [QUERY_PARAM_PAGE_NUM => $prev_page])));
         $prev->setText("<i name=\"chevron-left\"></i>");
 
-        return ['previous' => $prev, 'next' => $next, 'page' => $current_page];
+        $multidelete_button = "";
+        if($this->schema->__get_index_checkbox_state()) {
+            $multidelete_button = "<async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\"><i name=\"delete\"></i></async-button>";
+        }
+
+        return ['previous' => $prev, 'next' => $next, 'page' => $current_page, 'search' => '', 'multidelete_button' => $multidelete_button];
     }
 
     /** All you need in order to have a field be included in the index is to include
@@ -188,7 +202,7 @@ trait Indexable {
     final protected function get_title(string $field, array $directives) {
         $index = $directives['index'] ?? [];
         $title = $index['title'] ?? $field;
-        if(is_callable($title)) return $title($field, $directives);
+        if(gettype($title) !== "string" && is_callable($title)) return $title($field, $directives);
         return $title;
     }
 

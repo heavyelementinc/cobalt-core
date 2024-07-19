@@ -25,7 +25,11 @@ flex-table{
     flex-wrap: wrap;
     border: var(--project-color-table-border);
 }
-  
+    flex-table .doc_id_mark {
+        padding: 0 1ch;
+        justify-content: center;
+    }
+
     flex-table[scroll-x]{
         display:table;
         overflow-x: scroll;

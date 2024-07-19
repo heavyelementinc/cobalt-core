@@ -43,6 +43,8 @@ $CLASSES_DIR = [
     $env_class_root,
 ];
 
+$CRUDABLE_CONFIG_TRACKER = [];
+
 /** @global ?UserSchema */
 global $session;
 $session = null;
@@ -69,7 +71,16 @@ const REQUEST_ENCODE_MULTIPART_FORM = 8;
 const REQUEST_ENCODE_OCTET = 16;
 const REQUEST_ENCODE_PLAINTEXT = 32;
 
-const QUERY_PARAM_SORT_NAME = 'sort-name';
-const QUERY_PARAM_SORT_DIR = 'sort-direction';
+const QUERY_PARAM_SORT_NAME = 'sort_field';
+const QUERY_PARAM_SORT_DIR  = 'direction';
 const QUERY_PARAM_LIMIT = 'limit';
 const QUERY_PARAM_PAGE_NUM = 'page';
+const QUERY_PARAM_SEARCH = 'query';
+
+const CRUDABLE_CONFIG_APIV1 = 0b0001;
+const CRUDABLE_CONFIG_ADMIN = 0b0010;
+
+const CRUDABLE_DELETEABLE = 0b00001;
+
+const CRUDABLE_MULTIDESTROY_FIELD = "_ids";
+// const CRUDABLE_

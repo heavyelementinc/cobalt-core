@@ -1098,7 +1098,12 @@ function route(string $directiveName, array $args = [], array $context = []):str
     $split = explode("@", $directiveName);
     
     $route = get_path_from_route($split[0], $split[1], $args, $routeMethod, $ctx);
-    if(!$route) throw new Exception("Could not find route based on directive name.");
+    if(!$route) {
+        $flag = get_crudable_flag($split[0]);
+        if($flag === null) throw new Exception("Could not find route based on directive name.");
+        if($flag !== CRUDABLE_CONFIG_ADMIN + CRUDABLE_CONFIG_APIV1) throw new Exception("Crudable has not been configured");
+        throw new Exception("Could not find route based on directive name.");
+    }
     return $route;
 }
 
@@ -2034,4 +2039,16 @@ function convertFractionToChar($string) {
         ["&#188;","&#189;","&#190;","&#8528;","&#8529;","&#8530;","&#8531;","&#8532;","&#8533;","&#8534;","&#8535;","&#8536;","&#8537;","&#8538;","&#8539;","&#8540;","&#8541;","&#8542;"],
         $string
     ));
+}
+
+function set_crudable_flag(string $name, int $flag): int {
+    global $CRUDABLE_CONFIG_TRACKER;
+    if(!key_exists($name, $CRUDABLE_CONFIG_TRACKER)) $CRUDABLE_CONFIG_TRACKER[$name] = 0;
+    $CRUDABLE_CONFIG_TRACKER[$name] += $flag;
+    return $CRUDABLE_CONFIG_TRACKER[$name];
+}
+
+function get_crudable_flag(string $name): ?int {
+    global $CRUDABLE_CONFIG_TRACKER;
+    return $CRUDABLE_CONFIG_TRACKER[$name] ?? null;
 }

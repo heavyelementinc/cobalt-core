@@ -5,6 +5,7 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Controllers\Traits\Indexable;
 use Drivers\Database;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
@@ -17,6 +18,8 @@ abstract class Crudable {
     public string $friendly_name;
     public Database $manager;
     public int $index_limit = 50;
+
+    protected int $index_display_action_menu = 0;
 
     function __construct(?string $name = null) {
         $this->name = self::className();
@@ -144,9 +147,14 @@ abstract class Crudable {
                 'next_page'    => $hypermedia['next'],
                 'previous_page'=> $hypermedia['previous'],
                 'page_number'  => $hypermedia['page'],
+                'search'       => $hypermedia['search'],
+                'multidelete_button' => $hypermedia['multidelete_button'],
+                'page_param'   => QUERY_PARAM_PAGE_NUM,
+                'search_param' => QUERY_PARAM_SEARCH,
                 'href'         => $new_doc_href,
             ]);
-            return $this->index();
+            $index = $this->index();
+            return $index;
         }
         
         static public function readable_permissions(array $defaultValue = [], array $userSuppliedValue = []):array {
@@ -255,6 +263,20 @@ abstract class Crudable {
             return $result->getDeletedCount();
         }
 
+        final public function __multidestroy() {
+            $upgraded = [];
+            foreach($_POST[CRUDABLE_MULTIDESTROY_FIELD] as $id) {
+                if(!$id) throw new BadRequest("Invalid ID found", "Invalid ID supplied");
+                $upgraded[] = new ObjectId($id);
+            }
+            $query = ['_id' => ['$in' => $upgraded]];
+            $results = $this->manager->count($query);
+            confirm("This will delete $results document".plural($results).". Do you want to continue?", $_POST);
+
+            $deleted = $this->manager->deleteMany($query);
+            header("X-Redirect: " . route("$this->name@__index"));
+        }
+
         static public function destroyable_permissions(array $defaultValue = [], array $userSuppliedValue = []):array {
             return array_merge(['permission' => "CRUDControllerPermission",], $defaultValue, $userSuppliedValue);
         }
@@ -277,6 +299,8 @@ abstract class Crudable {
             Route::post("$mutant/create", "$class@__create", self::creatable_permissions($options['create'] ?? []));
             Route::post("$mutant/update/{id}", "$class@__update", self::updateable_permissions($options['update'] ?? []));
             Route::delete("$mutant/delete/{id}", "$class@__destroy", self::destroyable_permissions($options['destroy'] ?? []));
+            Route::delete("$mutant/multi-delete/", "$class@__multidestroy", self::destroyable_permissions($options['destroy'] ?? []));
+            set_crudable_flag($class, CRUDABLE_CONFIG_APIV1);
         }
 
         /**
@@ -298,6 +322,7 @@ abstract class Crudable {
             );
             Route::get("$mutant/new", "$class@__new_document", self::creatable_permissions($options['new'] ?? []));
             Route::get("$mutant/edit/{id}", "$class@__edit", self::updateable_permissions($options['edit'] ?? []));
+            set_crudable_flag($class, CRUDABLE_CONFIG_ADMIN);
         }
 
 
@@ -327,5 +352,26 @@ abstract class Crudable {
         $prefix = preg_replace('/([A-Z])/', ' $1',self::className());
         if($prefix[0] == "-") $prefix = substr($prefix, 1);
         return trim($prefix);
+    }
+
+
+    
+    function __set_action_menu(int $state) {
+        $this->index_display_action_menu = $state;
+    }
+
+    function __get_action_menu_state(): bool {
+        return $this->index_display_action_menu;
+    }
+
+    /** $type - can be blank or "options" */
+    function __get_action_menu(string $type = "", GenericMap|BSONDocument|null $document):string {
+        $class = self::className();
+        $html = "";
+        if($this->index_display_action_menu | CRUDABLE_DELETEABLE) {
+            $html .= "<option method=\"DELETE\" action=\"".route("$class@__destroy", [(string)$document->_id])."\">Delete</option>";
+        }
+
+        return "<action-menu type=\"$type\">$html</action-menu>";
     }
 }

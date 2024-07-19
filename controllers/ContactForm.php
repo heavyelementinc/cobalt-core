@@ -1,30 +1,52 @@
 <?php
 
+use Cobalt\Maps\GenericMap;
 use Cobalt\Notifications\PushNotifications;
 use Contact\ContactManager;
+use Contact\Persistance;
 use Controllers\Controller;
+use Controllers\Crudable;
+use Drivers\Database;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\ServiceUnavailable;
 use Exceptions\HTTP\TooManyRequests;
 use Mail\SendMail;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
+use MongoDB\Model\BSONDocument;
 
-class ContactForm extends Controller {
+class ContactForm extends Crudable {
+    function get_manager(): Database {
+        return new ContactManager();
+    }
 
-    function index() {
-        $conMan = new ContactManager();
-        $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
-        $lines = "";
-        foreach($results as $doc) {
-            $lines .= view("/admin/contact-form/index-item.html", ['doc' => $doc]);
-        }
-        // $lines = $this->docsToViews($results, );
-        add_vars([
-            'title' => 'Contact Form Submissions',
-            'lines' => $lines
-        ]);
+    function get_schema($data):GenericMap {
+        return new Persistance();
+    }
 
+    function edit($document):string {
+        return view("/admin/contact-form/read.html");
+    }
+
+    function destroy(GenericMap|BSONDocument $document):array {
+        return [
+            "message" => "Message from $document->name"
+        ];
+    }
+
+    function index():string {
+        // $conMan = new ContactManager();
+        // $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
+        // $lines = "";
+        // foreach($results as $doc) {
+        //     $lines .= view("/admin/contact-form/index-item.html", ['doc' => $doc]);
+        // }
+        // // $lines = $this->docsToViews($results, );
+        // add_vars([
+        //     'title' => 'Contact Form Submissions',
+        //     'lines' => $lines
+        // ]);
         return view("/admin/contact-form/index.html");
     }
 
@@ -36,7 +58,11 @@ class ContactForm extends Controller {
         return $conMan->read_for_user($_id, session());
     }
 
-    function read($id) {
+    function read($document): GenericMap|BSONDocument|null {
+        return $document;
+    }
+
+    function read_old($id) {
         $conMan = new ContactManager();
         $_id = $conMan->__id($id);
         $found = $conMan->findOne(['_id' => $_id]);
@@ -54,15 +80,15 @@ class ContactForm extends Controller {
         if($unread === 0) $unread = "";
         update($query, [$update => $unread]);
 
-        return set_template("/admin/contact-form/read.html");
+        return view("/admin/contact-form/read.html");
     }
     
-    function delete($id) {
-        confirm("Are you sure you want to delete this item? (There is no undoing this!)",$_POST);
-        $result = (new ContactManager())->delete_submission($id);
-        header("X-Location: /admin/contact-form/");
-        return $result;
-    }
+    // function delete($id) {
+    //     confirm("Are you sure you want to delete this item? (There is no undoing this!)",$_POST);
+    //     $result = (new ContactManager())->delete_submission($id);
+    //     header("X-Location: /admin/contact-form/");
+    //     return $result;
+    // }
 
     function contact_submit() {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
@@ -106,16 +132,12 @@ class ContactForm extends Controller {
 
     private function contactPanel($mutant) {
         $backend = new ContactManager();
-
-        $throttle = iterator_to_array($backend->find(['ip' => $mutant['ip']], ['sort' => ['date' => -1]]));
-        // if(count($throttle) > 3) {
-        //     $now = (new \MongoDB\BSON\UTCDateTime())->toDateTime()->getTimestamp();
-        //     $then = $throttle[0]->date->toDateTime()->getTimestamp();
-        //     if($now - $then <= app("Contact_form_submission_throttle")) {
-        //         sleep(5);
-        //         throw new TooManyRequests("Looks like you've already submitted a few.");
-        //     }
-        // }
+        $two_min_ago = strtotime("-".__APP_SETTINGS__['Contact_form_submission_throttle_period'], time()) * 1000;
+        $now = new UTCDateTime($two_min_ago);
+        $throttle = $backend->count(['ip' => (string)$mutant->ip, 'date' => ['$gte' => $now]]);
+        if($throttle >= __APP_SETTINGS__['Contact_form_submission_throttle_after_max_submissions']) {
+            throw new TooManyRequests("Too many requests", __APP_SETTINGS__['Contact_form_fail_message']);
+        }
 
         try {
             $result = $backend->insertOne($mutant);

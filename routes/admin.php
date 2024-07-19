@@ -235,18 +235,19 @@ Route::get("/integrations/{class}", "IntegrationsController@token_editor");
 */
 
 if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
-    Route::get("/contact-form/", "ContactForm@index", [
-        'permission' => 'Contact_form_submissions_access',
-        'anchor' => [
-            'name' => "Contact Form",
-            'icon' => 'chat-alert-outline',
-        ],
-        'navigation' => ['admin_panel'],
-        'unread' => function () {
-            return (new ContactManager())->get_unread_count_for_user(session());
-        },
-        'handler' => '/core/contact-form.js'
-    ]);
+    get_controller("ContactForm")::admin();
+    // Route::get("/contact-form/", "ContactForm@__index", [
+    //     'permission' => 'Contact_form_submissions_access',
+    //     'anchor' => [
+    //         'name' => "Contact Form",
+    //         'icon' => 'chat-alert-outline',
+    //     ],
+    //     'navigation' => ['admin_panel'],
+    //     'unread' => function () {
+    //         return (new ContactManager())->get_unread_count_for_user(session());
+    //     },
+    //     'handler' => '/core/contact-form.js'
+    // ]);
     Route::get("/contact-form/{id}", "ContactForm@read", ['permission' => 'Contact_form_submissions_access']);
 }
 

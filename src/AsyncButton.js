@@ -17,25 +17,42 @@ class AsyncButton extends CustomButton{
         }
         this.ariaInvalid = false;
         const api = new AsyncFetch(this.getAttribute("action") || this.getAttribute("href"), this.getAttribute("method") ?? "POST", {});
-        api.addEventListener("submit", e => this.startSpinner.bind(this));
-        api.addEventListener("aborted",  e => this.endSpinner.bind(this));
-        api.addEventListener("error",  e => this.error.bind(this));
-        api.addEventListener("done",   e => this.done.bind(this));
+        api.addEventListener("submit",  e => this.startSpinner.bind(this));
+        api.addEventListener("aborted", e => this.endSpinner.bind(this));
+        api.addEventListener("error",   e => this.error.bind(this));
+        api.addEventListener("done",    e => this.done.bind(this));
         api.submit(this.value, {});
     }
 
     get value() {
-        let val = this.getAttribute("value");
-        if(val) {
-            try {
-                val = JSON.parse(val);
-            } catch (error) {}
+        let val = {};
+        switch(this.type) {
+            case "multidelete":
+                const id_boxes = document.querySelectorAll(".doc_id_mark input[name='_id'][type='checkbox']");
+                val._ids = [];
+                for(const box of id_boxes) {
+                    if(!box.checked) continue;
+                    val._ids.push(box.value);
+                }
+                break;
+            default:
+                val = this.getAttribute("value");
+                if(val) {
+                    try {
+                        val = JSON.parse(val);
+                    } catch (error) {}
+                }
+                break
         }
         return val;
     }
 
     set value(val) {
         this.setAttribute("value", JSON.stringify(val));
+    }
+
+    get type() {
+        return this.getAttribute("type");
     }
 
     spinner() {

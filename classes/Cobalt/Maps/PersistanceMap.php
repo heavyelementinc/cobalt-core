@@ -50,9 +50,19 @@ use Validation\Exceptions\ValidationIssue;
  * @package Cobalt
  */
 abstract class PersistanceMap extends GenericMap implements Persistable {
-     
+    
+    protected bool $index_add_id_checkbox = false;
+
     function __construct($doc = null, $schema = [], $__namePrefix = "") {
         parent::__construct($doc, $schema, $__namePrefix);
+    }
+
+    function __set_index_checkbox_state(bool $state) {
+        $this->index_add_id_checkbox = $state;
+    }
+
+    function __get_index_checkbox_state(): bool {
+        return $this->index_add_id_checkbox;
     }
 
     /**

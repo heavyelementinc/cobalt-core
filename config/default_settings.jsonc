@@ -409,25 +409,48 @@
     "Contact_form_validation_classname": {
         "default": "\\Contact\\Persistance"
     },
-    "Contact_form_submission_throttle": {
-        "default": 500,
+    "Contact_form_submission_throttle_period": {
+        "default": "2 minutes",
         "meta": {
             "group": "Contact Form",
             "subgroup":"General",
-            "name": "Minumum number of seconds between contact form submissions (based on IP address)",
+            "name": "Contact form submission grace period <help-span value=\"How long should the grace period last. Will be converted to a negative number and subtracted from the current time of a given submission.\"></help-span>",
             "type": "input"
         },
         "validate": {
-            "type": "int"
+            "type": "string"
         }
     },
-
+    "Contact_form_submission_throttle_after_max_submissions": {
+        "default": 2,
+        "meta": {
+            "group": "Contact Form",
+            "subgroup":"General",
+            "name": "Maximum number of submissions during the grace permission",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
     "Contact_form_success_message": {
         "default": "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
         "meta": {
             "group": "Contact Form",
             "subgroup":"General",
             "name": "Contact Form Success Message",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
+    "Contact_form_fail_message": {
+        "default": "It looks like you'll need to try again later.",
+        "meta": {
+            "group": "Contact Form",
+            "subgroup":"General",
+            "name": "Contact Form Failure Message",
             "type": "input"
         },
         "validate": {

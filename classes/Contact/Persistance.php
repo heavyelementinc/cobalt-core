@@ -16,18 +16,35 @@ class Persistance extends PersistanceMap {
 
     public function __get_schema(): array {
         $addtl = new AdditionalContactFields();
+        $this->__set_index_checkbox_state(true);
         $fields = $addtl->__get_schema();
         $schema = [
             "name" => [
                 new StringResult,
                 'char_limit' => 150,
+                'index' => [
+                    'title' => 'Name',
+                    'order' => 0,
+                    'sort' => 1,
+                    'view' => fn ($val) => $val->getRaw()
+                ]
             ],
             "organization" => [
                 new StringResult,
                 'char_limit' => 150,
-                'illegal_chars' => '<>'
+                'illegal_chars' => '<>',
+                'index' => [
+                    'title' => 'Org',
+                    'order' => 1
+                ]
             ],
-            "email" => new EmailAddressResult,
+            "email" => [
+                new EmailAddressResult,
+                'index' => [
+                    'title' => 'Email',
+                    'order' => 2,
+                ]
+            ],
             "phone" => new PhoneNumberResult,
             "preferred" => [
                 new EnumResult,
@@ -49,9 +66,25 @@ class Persistance extends PersistanceMap {
                 'status' => function ($val, $ref) {
                     if($val) return "read";
                     return "unread";
-                }
+                },
+                'index' => [
+                    'title' => 'Read Status',
+                    'order' => 3,
+                    'sortable' => false,
+                    'view' => function ($val) {
+                        if(in_array(session("_id"), $val)) return "Read";
+                        return "Unread";
+                    }
+                ]
             ],
-            "date" => new DateResult,
+            "date" => [
+                new DateResult,
+                'index' => [
+                    'title' => 'Date',
+                    'order' => 1,
+                    'view' => fn ($val) => $val->format("c")
+                ]
+            ],
             "ip" => new IpResult,
         ];
         $schema += $fields;

@@ -65,6 +65,7 @@ if (app('API_contact_form_enabled')) {
     Route::post("/contact", "ContactForm@contact_submit");
     Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
     Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
+    get_controller("ContactForm")::apiv1();
 }
 
 if (app("CobaltEvents_enabled")) {

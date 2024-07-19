@@ -1,7 +1,17 @@
 <hgroup>
-    <h1>{{title}}</h1>
+    <h1>{{!title}}</h1>
 </hgroup>
-<flex-table>{{!lines}}</flex-table>
+<form>
+    {{!multidelete_button}}
+    {{!previous_page}}
+    <input type="number" name="{{page_param}}" value="{{page_number}}" style="width:3ch;text-align: right;">
+    {{!next_page}}
+    <input type="search" name="{{search_param}}" value="{{search_value}}" placeholder="Search"><button type="submit"><i name="magnify"></i></button>
+</form>
+<flex-table>
+    {{!table_header}}
+    {{!documents}}
+</flex-table>
 <style>
     .read-status--unread {
         font-weight: bold;
