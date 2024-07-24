@@ -87,6 +87,8 @@ class CoreSettingsPanel extends Controller {
                 $template = "/admin/settings/inputs/password.html";
                 break;
             case "input-switch":
+            case "boolean":
+            case "bool":
                 $template = "/admin/settings/inputs/bool.html";
                 break;
             case "input-array":
