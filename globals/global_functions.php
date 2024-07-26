@@ -1602,8 +1602,8 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
     return $result;
 }
 
-function plural($number, string $suffix = "s") {
-    if ($number == 1) return "";
+function plural($number, string $suffix = "s", string $singular = "") {
+    if ($number == 1) return $singular;
     return $suffix;
 }
 
@@ -1915,7 +1915,7 @@ function redirect(string $path) {
     $headers = apache_request_headers();
     // If the request was sent via AsyncFetch, return `X-Location` header
     if(key_exists("X-Request-Source",$headers)) {
-        header("X-Location: $path");
+        header("X-Redirect: $path");
         return;
     }
     // Otherwise, return `Location` header
