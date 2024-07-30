@@ -6,8 +6,7 @@
     <flex-cell>{{doc.type.display}}</flex-cell>
     <flex-cell style="width: 20px">
         <action-menu type="options">
-            <option onclick='copyToClipboard("&#123;&#123;{{exclaim}}custom.{{doc.unique_name}}{{embed}}&#125;&#125;")'>Copy slug to clipboard</option>
-            <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
+            {{!doc.action_menu_options}}
         </action-menu>
     </flex-cell>
 </flex-row>

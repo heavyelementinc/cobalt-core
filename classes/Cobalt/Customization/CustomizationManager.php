@@ -3,8 +3,14 @@
 namespace Cobalt\Customization;
 
 use ArrayAccess;
+use Cobalt\Extensions\Extensions;
+use MongoDB\BSON\ObjectId;
 
 class CustomizationManager extends \Drivers\Database {
+    const CUSTOMIZATION_FILE = [
+        __ENV_ROOT__ . "/config/customizations.php",
+        __APP_ROOT__ . "/config/customizations.php",
+    ];
 
     private $cache = [];
 
@@ -53,5 +59,40 @@ class CustomizationManager extends \Drivers\Database {
         }
 
         return $value;
+    }
+
+    function load() {
+        global $DECLARED_CUSTOMIZATIONS;
+        $DECLARED_CUSTOMIZATIONS = [];
+        $customization_files = self::CUSTOMIZATION_FILE;
+        Extensions::invoke("register_customizations", $customization_files);
+        foreach($customization_files as $file) {
+            if(!file_exists($file)) continue;
+            if(is_callable("say")) say("Importing " . obfuscate_path_name($file));
+            require($file);
+        }
+        return $DECLARED_CUSTOMIZATIONS;
+    }
+
+    function import(bool $reset = false) {
+        // Load our default definitions
+        $this->load();
+        
+        // Reference our customizations and loop through them
+        global $DECLARED_CUSTOMIZATIONS;
+        foreach($DECLARED_CUSTOMIZATIONS as $definition) {
+            // 
+            if(is_callable("say")) print(fmt("$definition[unique_name] ", "b"));
+            $results = $this->getCustomizationByUniqueName($definition['unique_name']);
+            if($reset === false) {
+                if($results) {
+                    if(is_callable("say")) print("exists... skipping\n");
+                    continue;
+                }
+            }
+            if(is_callable("say")) print("creating... ");
+            $upsert = $this->updateOne(['_id' => $results['_id'] ?? new ObjectId()], ['$set' => $definition], ['upsert' => true]);
+            if(is_callable("say")) print("OK!\n");
+        }
     }
 }

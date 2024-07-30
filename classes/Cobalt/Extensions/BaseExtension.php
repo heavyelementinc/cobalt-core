@@ -90,6 +90,12 @@ abstract class BaseExtension {
         $manifest[] = $m;
     }
 
+    function register_customizations(&$files) {
+        $path = $this->path . "/config/customizations.php";
+        if(!file_exists($path)) return;
+        $files[] = $path;
+    }
+
     // function register_settings(&$settings) {
     //     $set = $this->manifest->settings;
     //     if($set instanceof \MongoDB\Model\BSONArray) $set->getArrayCopy();

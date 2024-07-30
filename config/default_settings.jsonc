@@ -584,7 +584,6 @@
     "HTTP_error_body_id": {
         "default": "cobalt_http_error"
     },
-
     "opengraph": {
         "directives": {
             "merge": {
@@ -1041,6 +1040,18 @@
         "default": false,
         "directives": {
             "public": true
+        }
+    },
+    "Web_include_app_branding": {
+        "default": true,
+        "meta": {
+            "group": "Look &amp; Feel",
+            "subgroup": "General",
+            "name": "Include logo in Web masthead?",
+            "type": "input-switch"
+        },
+        "validation": {
+            "type": "bool"
         }
     },
     "Web_privacy_policy": {

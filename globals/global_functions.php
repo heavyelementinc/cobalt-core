@@ -301,7 +301,7 @@ function cobalt_autoload($class) {
             try{
                 require_once $file;
             } catch (ParseError $e) {
-                kill("Syntax error in ".str_replace([__ENV_ROOT__, __APP_ROOT__], ["__ENV__", "__APP__"], $e->getFile()));
+                kill("Syntax error in ".obfuscate_path_name($e->getFile()));
             }
             return;
         }
@@ -372,6 +372,10 @@ function cobalt_autoload($class) {
         }
         exit;
     }
+}
+
+function obfuscate_path_name(string $path_name):string {
+    return str_replace([__ENV_ROOT__, __APP_ROOT__], ['__ENV_ROOT__', '__APP_ROOT__'], $path_name);
 }
 
 function get_controller($controllerName, $instanced = false, $path = false) {

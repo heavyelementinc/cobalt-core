@@ -144,6 +144,8 @@ Route::s_post("/remote/{service}/update", "RemoteServices@update",  ['permission
 if(app("Customizations_enabled")) {
     Route::s_post("/customizations/update/{id}?", "Customizations@update", ['permission' => 'Customizations_modify']);
     Route::s_post("/customizations/upload/{id}?", "Customizations@uploadFile", ['permission' => 'Customizations_modify']);
+    Route::s_put("/customizations/reset/all", "Customizations@resetAll", ['permission' => 'Customizations_modify']);
+    Route::s_put("/customizations/reset/{id}", "Customizations@resetItem", ['permission' => 'Customizations_modify']);
     Route::s_delete("/customizations/{id}", "Customizations@deleteItem", ['permission' => 'Customizations_delete']);
     Route::s_delete("/customizations/attachment/{id}", "Customizations@delete", ['permission' => 'Customizations_delete']);
 }

@@ -212,4 +212,26 @@ class Customizations extends \Controllers\Controller {
 
         return set_template('/customizations/index/list.html');
     }
+
+    function resetItem($id) {
+        $query = ['_id' => new ObjectId($id)];
+        $result = $this->man->findOneAsSchema($query);
+        if(!$result) throw new NotFound("That resource does not exist");
+        
+        $items = $this->man->load();
+        foreach($items as $item) {
+            if($item['unique_name'] == $result->unique_name) {
+                $update = $this->man->updateOne($query, ['$set' => $item], ['upsert' => false]);
+                header("X-Refresh: now");
+                // header("X-Redirect: " . route("Customizations@editor", [(string)$id]));
+                return;
+            }
+        }
+        throw new BadRequest("This customization does not exist in the definition file! (Was the unique name changed?)", true);
+    }
+
+    function resetAll() {
+        confirm("This will reset ALL customizations to their default state. Are you sure you want to continue?\n\n<strong>THIS WILL RESULT IN DATA LOSS.</strong>", $_POST, 'Continue', true);
+        $this->man->import(true);
+    }
 }

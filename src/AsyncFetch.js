@@ -673,18 +673,19 @@ class XReplace extends XRedirect {
 class XRefresh extends HeaderDirective {
     execute() {
         switch(this.tag) {
-            case "now":
-            case this.content === "now":
-                Cobalt.router.location = location.pathname;
-                break;
             case "wait":
                 new StatusMessage({message: `Refreshing in ${wait} seconds`});
-            case "silent": 
-            default:
+            case "silent":
                 let wait = this.tagArgs[0] || Number(this.content);
                 setTimeout( () => {
                     Cobalt.router.location = location.pathname;
                 }, wait * 1000);
+            case "now":
+            case "true":
+            default:
+                Cobalt.router.location = location.pathname;
+                break; 
+                
         }
     }
 }

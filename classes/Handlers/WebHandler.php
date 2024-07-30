@@ -243,9 +243,11 @@ class WebHandler implements RequestHandler {
     function header_content() {
         $masthead = "";
         
-        $logo = app("logo.thumb");
-        $meta = $logo['meta'];
-        $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+        if(__APP_SETTINGS__['Web_include_app_branding']) {
+            $logo = app("logo.thumb");
+            $meta = $logo['meta'];
+            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+        }
         
         $header = $this->load_template($this->header_template);
         $this->add_vars([
