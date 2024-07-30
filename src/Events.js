@@ -313,7 +313,16 @@ class CobaltEvent_modal extends CobaltEvent_default {
     }
 }
 
-
+class ExternalPromise {
+    constructor() {
+        this.resolve = null
+        this.reject = null
+        this.promise = new Promise((resolve, reject) => {
+            this.resolve = resolve
+            this.reject = reject
+        })
+    }
+}
 
 
 

@@ -25,7 +25,7 @@ class AsyncFetch extends EventTarget {
         this.abortController = null;
         this.reject = null;
         this.totalUploadSize = 0;
-        this.form = null;
+        this.form = form;
         
         this.data = "";
         this.response = null; // The raw response from the fetch request
@@ -72,6 +72,7 @@ class AsyncFetch extends EventTarget {
             }
 
             client.setRequestHeader('X-Include', "fulfillment,update,events");
+            client.setRequestHeader('X-Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
             client.setRequestHeader('X-Request-Source', "AsyncFetch");
             const submission = this.encodeFormData(this.data)
             if(this.format) client.setRequestHeader('Content-Type', this.format);
@@ -292,6 +293,12 @@ class AsyncUpdate {
                 case "localStorage":
                     this.updateStorage(instruction);
                     break;
+                case "@form":
+                    this.updateForm(instruction);
+                    break;
+                case "@cookie":
+                    this.updateCookie(instruction);
+                    break;
                 default:
                     this.updateElement(this.getElement(instruction.target), instruction);
                     break;
@@ -313,6 +320,21 @@ class AsyncUpdate {
             return closest;
         }
         return document.querySelectorAll(query);
+    }
+
+    updateCookie(instructions) {
+        for(const i in instructions) {
+            switch(i) {
+                case "set":
+                    for(const c in instructions[i]) set_cookie(c, instructions[i][c]);
+                    break;
+                case "remove":
+                    for(const c in instructions[i]) delete_cookie(c, instructions[i][c]);
+                    break;
+                default:
+                    console.warn(`"${i}" is not a recognized updateCookie instruction`);
+            }
+        }
     }
 
     /**
@@ -343,6 +365,20 @@ class AsyncUpdate {
         for(const i of values) {
             target.removeItem(i);
         }
+    }
+
+    updateForm(instructions) {
+        if(!this.request.form) {
+            console.warn("The form is not specified for this request type");
+            return;
+        }
+        if("clear" in instructions) {
+            if(instructions.clear === true) {
+                this.request.form.dispatchEvent(new CustomEvent("clearall"))
+            }
+            delete instructions.clear
+        }
+        this.updateElement(this.request.form, instructions)
     }
 
     updateElement(elements, instructions) {
@@ -411,10 +447,17 @@ class AsyncUpdate {
         return el.disabled = true;
     }
 
+    fn_delete(el, value, instructions) {
+        if(value !== true) return;
+        el.parentNode.removeChild(el)
+    }
+
     fn_remove(el, value, instructions) {
-        if(typeof value === "string") el = this.getElement(value);
-
-
+        try {
+            if(typeof value === "string") el = el.querySelectorAll(value);
+        } catch (Error) {
+            console.warn("Malformed selector")
+        }
 
         if(el instanceof NodeList || Array.isArray(el)) el.forEach(e => e.parentNode.removeChild(e));
         

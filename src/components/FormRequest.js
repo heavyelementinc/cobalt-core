@@ -24,6 +24,9 @@ class NewFormRequest extends HTMLElement {
         this.originalState = {};
         this.childrenReady = false;
         this.childWebComponentPromises = [];
+        this.addEventListener("clearall", () => {
+            this.clearAll()
+        });
     }
 
     get unsavedChanges() {
@@ -92,6 +95,31 @@ class NewFormRequest extends HTMLElement {
             else value[name] = this.getFieldValue(input)//.value;
         }
         return value;
+    }
+
+    clearAll() {
+        const elements = this.querySelectorAll(universal_input_element_query)
+        for(const input of elements) {
+            switch(input.tagName) {
+                case "SELECT":
+                    break;
+                case "INPUT-AUTOCOMPLETE":
+                    input.dispatchEvent(new CustomEvent("clear"));
+                    break;
+                case "TEXTAREA":
+                case "INPUT":
+                default:
+                    switch(input.type) { 
+                        case "RADIO":
+                        case "CHECKBOX":
+                            input.checked = false
+                            break;
+                        default:
+                            input.value = ""
+                    }
+                    break;
+            }
+        }
     }
 
     async submit(data = null, event = {}) {

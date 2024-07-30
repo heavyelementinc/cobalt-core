@@ -140,6 +140,11 @@ $cobalt_session_started = session_start([
     // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
 
+// $_SESSION['timezone'] = apache_request_headers()['X-Timezone'];
+
+@$tz=timezone_open($_SESSION['timezone']);
+if($tz) $tz_set_result = date_default_timezone_set($_SESSION['timezone']);
+
 if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) kill("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
 
 $depends = __APP_SETTINGS__['cobalt_version'] ?? __COBALT_VERSION;

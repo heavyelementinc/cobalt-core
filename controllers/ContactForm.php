@@ -102,14 +102,17 @@ class ContactForm extends Crudable {
             case "SMTP":
                 $result = $this->contactSMTP($persistance);
                 header("X-Status: @info " . app("Contact_form_success_message"));
+                update("@form", ['clear' => true]);
                 break;
             case "panel":
             default:
                 $id = $this->contactPanel($persistance);
                 header("X-Status: @info " . app("Contact_form_success_message"));
+                update("@form", ['clear' => true]);
                 return $id;
                 break;
         }
+
         return "error";
     }
 
@@ -134,9 +137,9 @@ class ContactForm extends Crudable {
         $two_min_ago = strtotime("-".__APP_SETTINGS__['Contact_form_submission_throttle_period'], time()) * 1000;
         $now = new UTCDateTime($two_min_ago);
         $throttle = $backend->count(['ip' => (string)$mutant->ip, 'date' => ['$gte' => $now]]);
-        if($throttle >= __APP_SETTINGS__['Contact_form_submission_throttle_after_max_submissions']) {
-            throw new TooManyRequests("Too many requests", __APP_SETTINGS__['Contact_form_fail_message']);
-        }
+        // if($throttle >= __APP_SETTINGS__['Contact_form_submission_throttle_after_max_submissions']) {
+        //     throw new TooManyRequests("Too many requests", __APP_SETTINGS__['Contact_form_fail_message']);
+        // }
 
         try {
             $result = $backend->insertOne($mutant);

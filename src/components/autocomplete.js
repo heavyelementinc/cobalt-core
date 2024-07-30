@@ -10,6 +10,8 @@
  * @attribute min 
  * @attribute clear-button
  * 
+ * @emits clear when the clearButton is pressed
+ * 
  */
 
 class AutoComplete extends HTMLElement {
@@ -40,6 +42,7 @@ class AutoComplete extends HTMLElement {
         this.customElementClass = "input-array--list-custom";
         this.arrowKeySelectionIndex = -1;
         this.setAttribute("__custom-input", "true");
+        this.addEventListener("clear", e => this.reset(e));
     }
 
     get value() {
@@ -186,6 +189,7 @@ class AutoComplete extends HTMLElement {
         if (this.readonly === true) return "";
         let placeholder = this.placeholder;
         let pattern = "";
+
         if (this.allowCustomInputs && this.pattern) pattern = " " + this.pattern;
         this.searchResults = document.createElement("ul");
         this.searchResults.classList.add("input-array--search-results");
@@ -228,6 +232,15 @@ class AutoComplete extends HTMLElement {
             if (this.searchField.value == "") this.searchElements();
         });
 
+        // this.searchField.addEventListener("keydown", e => {
+        //     console.log(e)
+        //     switch(e.key) {
+        //         case "ArrowUp":
+        //         case "ArrowDown":
+        //             e.preventDefault();
+        //             break;
+        //     }
+        // });
         this.searchField.addEventListener("keyup", e => this.handleSearchKeyUp(e));
 
         this.addEventListener("focusin", e => {
@@ -268,13 +281,17 @@ class AutoComplete extends HTMLElement {
         });
     }
 
+    reset(e) {
+        this.searchField.value = "";
+        this.searchField.dispatchEvent(new Event("input"))
+    }
+
     initClearButton() {
         if (!this.withClearButton) return;
         const btn = document.createElement("button");
         btn.innerHTML = window.closeGlyph;
         btn.addEventListener("click", e => {
-            this.value = "";
-            this.searchField.dispatchEvent(new Event("input", e))
+            this.dispatchEvent(new CustomEvent("clear"));
         });
         this.clearButton = btn;
         this.addEventListener('input', () => {
@@ -328,6 +345,7 @@ class AutoComplete extends HTMLElement {
                 }
             case "ArrowUp":
                 e.preventDefault();
+                e.stopPropagation();
                 this.selectFromArrows(e.key);
                 return;
         }

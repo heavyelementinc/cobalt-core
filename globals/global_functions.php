@@ -1882,18 +1882,26 @@ if(!function_exists("log_item")) {
 }
 
 /**
- * Implemented values
- *   value
- *   innerHTML
- *   outerHTML
- *   invalid
- *   remove - will remove any single element that matches query OR a node list
- *   message - will provide a message to the end user. It will look like a ValidationIssue
- *   src - update the src attribute for an img tag
- *   attribute - update arbitrary attribute
- *   attributes - update a list of attributes
- *   style - update a list of styles
- *   
+ * Special Query Keywords
+ *   @form - References the form-request element that submitted the request (if any)
+ *   @cookie - [set, remove] Updates a cookie value through an async reques
+ *   sessionStorage - [set, remove] Stores or removes sessionStorage data
+ *   localStorage - [set, remove] Stores or removes localStorage data
+ * 
+ * Implemented Update Parameters
+ *   value - <mixed> Modify the value property of the target
+ *   dispatchEvent - [event => [detail => [...]]] Dispatches an event on the target
+ *   innerHTML - <string> Updates the innerHTML of the element
+ *   outerHTML - <string> Updates the outerHTML of the element
+ *   invalid - [true|false] Sets the `invalid` property
+ *   delete - [true] Deletes the target element
+ *   remove - [true] Removes the target element | <string> Queries the target for the given string and removes matching element(s)
+ *   message - <string> will provide a message to the end user. It will look like a ValidationIssue
+ *   src - <string> update the src attribute for an img tag
+ *   attribute - <string> update arbitrary attribute
+ *   attributes - <array> update a list of attributes
+ *   style - <array> update a list of styles
+ *   clear - [true] (@form only) - Clears the form that initiated this request
  * 
  * @param string $query 
  * @param array $value 

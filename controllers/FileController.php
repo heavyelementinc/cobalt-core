@@ -165,10 +165,7 @@ class FileController extends \Controllers\FileController {
 
         if(!$file) throw new NotFound("Not found");
 
-        $view = view("robots.txt", [
-            'allow'    => __APP_SETTINGS__['Robots_allow'],
-            'disallow' => __APP_SETTINGS__['Robots_disallow'],
-        ]);
+        $view = view("robots.txt");
         header('Content-Length: ' . strlen($view));
         header('Content-Type: text');
         echo $view;

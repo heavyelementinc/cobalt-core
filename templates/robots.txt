@@ -1,5 +1,3 @@
-User-agent: *
-Allow: /
-Disallow: /admin
+{{!app.Robots_txt_config}}
 
 Sitemap: http://{{app.domain_name}}/sitemap.xml
