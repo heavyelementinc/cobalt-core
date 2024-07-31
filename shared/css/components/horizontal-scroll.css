@@ -1,0 +1,17 @@
+horizontal-scroll {
+    display: block;
+    white-space: nowrap;
+    overflow-x: scroll;
+    user-select: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    cursor: grab;
+}
+
+horizontal-scroll.active {
+    cursor: grabbing
+}
+
+horizontal-scroll.active > * {
+    pointer-events: none;
+}

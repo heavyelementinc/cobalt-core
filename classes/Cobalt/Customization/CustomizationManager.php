@@ -75,6 +75,7 @@ class CustomizationManager extends \Drivers\Database {
     }
 
     function import(bool $reset = false) {
+        if(is_callable("say")) say("", "i");
         // Load our default definitions
         $this->load();
         
@@ -82,17 +83,18 @@ class CustomizationManager extends \Drivers\Database {
         global $DECLARED_CUSTOMIZATIONS;
         foreach($DECLARED_CUSTOMIZATIONS as $definition) {
             // 
-            if(is_callable("say")) print(fmt("$definition[unique_name] ", "b"));
             $results = $this->getCustomizationByUniqueName($definition['unique_name']);
             if($reset === false) {
                 if($results) {
-                    if(is_callable("say")) print("exists... skipping\n");
+                    if(is_callable("say")) say("[".fmt("SKIP", "i")."] " . fmt("$definition[unique_name] ", "b"));
                     continue;
                 }
             }
-            if(is_callable("say")) print("creating... ");
             $upsert = $this->updateOne(['_id' => $results['_id'] ?? new ObjectId()], ['$set' => $definition], ['upsert' => true]);
-            if(is_callable("say")) print("OK!\n");
+            if(is_callable("say")) {
+                if($upsert->getModifiedCount()) print("[".fmt("OKAY","s")."] " . fmt("$definition[unique_name] ", "b") . "\n");
+                else print("[".fmt("PASS","w")."] " . fmt("$definition[unique_name] ", "b") . "\n");
+            }
         }
     }
 }
