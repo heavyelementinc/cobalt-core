@@ -32,6 +32,8 @@ use MongoDB\BSON\Persistable;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Cobalt\Maps\Exceptions\DirectiveException;
+use Cobalt\Renderer\Exceptions\TemplateException;
+use MongoDB\Model\BSONDocument;
 
 /** ## `SchemaResult` schema directives
  *  * `default` => [null], the default value of the an element
@@ -69,8 +71,9 @@ class SchemaResult implements \Stringable, JsonSerializable {
      */
     public function getValue(): mixed {
         $result = $this->value;
-        if ($result === null && $this->schema['default']) {
-            $result = $this->getDirective('default');
+        if ($result === null) {
+            if($this->schema['default']) $result = $this->getDirective('default');
+            // if($this->schema['fallback']) $result = $this->getDirective('fallback');
             // $result = $this->schema['default'];
             // if(is_callable($result)) $result = $result();
         }
@@ -118,7 +121,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
 
     public function getLabel() {
         $this->name;
-        $name = preg_replace("[-_]", " ", $this->name);
+        $name = preg_replace("/[-_]/", " ", $this->name);
         return ucwords($name);
     }
 
@@ -158,9 +161,10 @@ class SchemaResult implements \Stringable, JsonSerializable {
         // if ($field === "pronoun_set") return $this->valid_pronouns();
         if (isset($this->schema['valid'])) {
             if (is_callable($this->schema['valid'])) {
-                $val = $this->valid([], $this);
+                $val = $this->getDirective('valid');
                 if (is_array($val)) return $val;
                 if ($val instanceof BSONArray) return $val->getArrayCopy();
+                if ($val instanceof BSONDocument) return (array)$val;
                 if (is_iterable($val)) return iterator_to_array($val);
                 throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
             }
@@ -182,6 +186,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
     protected function options(): string {
         $valid = $this->getValid();
         $val = $this->getValue() ?? $this->value;
+        if(!is_string($val) && is_numeric($val)) $val = (string)$val;
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
         
         // If custom is allowed
@@ -388,7 +393,9 @@ class SchemaResult implements \Stringable, JsonSerializable {
 
     function __toString(): string {
         if($this->__isPrivate()) return "";
-        return $this->getValue() ?? "";
+        $read = $this->getValue();
+        $type = gettype($read);
+        return $read ?? "";
     }
 
     #[Prototype]
@@ -479,7 +486,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
      * @throws DirectiveException 
      */
     public function getDirective($directiveName, $throwOnFail = false) {
-        if(!key_exists($directiveName, $this->schema)) {
+        if(!key_exists($directiveName, $this->schema ?? [])) {
             if($throwOnFail) throw new DirectiveException("Undefined value");
             return null;
         }
@@ -540,5 +547,25 @@ class SchemaResult implements \Stringable, JsonSerializable {
 
     protected function queriableName($name) {
         return str_replace(".", "__", $name);
+    }
+
+    protected function isStrict(): bool {
+        $valid_key_exists = key_exists('valid', $this->schema);
+        if($valid_key_exists === false) return false;
+
+        $strict_directive = $this->getDirective('strict');
+        $allow_custom = $this->getDirective('allow_custom');
+        // If `strict_directive` is false
+        if(!$strict_directive) {
+            // And `allow_custom` is false
+            if(!$allow_custom) return false;
+            
+        }
+
+        // If we're here, that means that strict_directive is true
+        // So let's check if allow_custom is `true`.
+        if($allow_custom === true) return false;
+
+        return true;
     }
 }

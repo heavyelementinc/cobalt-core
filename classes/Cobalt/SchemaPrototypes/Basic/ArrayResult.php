@@ -46,7 +46,99 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     public function __getStorable(): mixed {
         if($this instanceof Persistable) return $this;
-        return $this->value;
+        $storable = [];
+        foreach($this->value as $index => $value) {
+            $storable[$index] = $value->getRaw();
+        }
+        return $storable;
+    }
+    
+    function filter($value) {
+        if(!is_array($value)) {
+            throw new ValidationIssue("Value must be an array");
+        }
+
+        $strict = $this->isStrict();
+        if($strict) {
+            // $valid = $this->getDirective('valid');
+            // if($valid) {
+            //     $intersection = array_intersect($value, $valid);
+            // }
+        }
+        return $value;
+    }
+
+    function defaultSchemaValues(array $data = []): array {
+        return [
+            'strict' => false,
+            'allow_custom' => false
+        ];
+    }
+
+    #[Prototype]
+    protected function options(): string {
+        $valid = $this->getValid();
+        $val = $this->getRaw();// ?? $this->value;
+        if(!is_string($val) && is_numeric($val)) $val = (string)$val;
+        // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
+        
+        // If custom is allowed
+        $allow_custom = $this->getDirective("strict") === false;
+        if(!$allow_custom) $allow_custom = $this->getDirective("allow_custom");
+
+        // If the current value is not a key in the current valid options AND
+        // we're allowed to have custom options, add the current val to the options
+        if($allow_custom && $val) $valid += array_diff($valid, $val);
+
+        $type = gettype($val);
+
+        switch ($type) {
+                // case $val instanceof \MongoDB\Model\BSONArray:
+                //     $val = $val->getArrayCopy();
+            case "array":
+                $validValue = [];
+                foreach ($val as $o) {
+                    $validValue[(string)$o] = $o;
+                }
+                $valid = array_merge($validValue ?? [], $valid ?? []);
+                $type = gettype($val);
+        }
+
+        $options = "";
+        foreach ($valid as $validKey => $validValue) {
+            $value = $validValue;
+            $data = "";
+            if (gettype($validValue) === "array") {
+                $validValue = $validValue['value'];
+                unset($value['value']);
+                foreach ($value as $attr => $val) {
+                    $data .= " data-$attr=\"$val\"";
+                }
+            }
+            $selected = "";
+            switch ($type) {
+                case "string":
+                case "integer":
+                case "double":
+                    $selected = ($val == $validKey) ? "selected='selected'" : "";
+                    break;
+                case "object":
+                    if ($val instanceof \MongoDB\BSON\ObjectId && (string)$val === $validKey) {
+                        $selected = "selected='selected'";
+                    }
+                    break;
+                case "array":
+                    $selected = (in_array($validKey, $val)) ? "selected='selected'" : "";
+                    break;
+            }
+            $options .= "<option value='$validKey'$data $selected>$validValue</option>";
+        }
+        return $options;
+    }
+
+    function getRaw(): mixed {
+        if($this->originalValue instanceof BSONArray) return $this->originalValue->getArrayCopy();
+        return $this->originalValue;
     }
     
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -56,7 +148,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     #[Prototype]
     protected function field($classes = "", $misc = [], $tag = "") {
         if($this->getDirective("view") || $this->getDirective("template")) return $this->inputObjectArray($classes, $misc);
-        if($this->getDirective("allow-custom") || $this->getDirective("custom")) $misc['allow-custom'] = "true";
+        if($this->getDirective("allow_custom")) $misc['allow-custom'] = "true";
         return $this->inputArray($classes, $misc);
     }
 
@@ -188,11 +280,4 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         $this->__index = 0;
     }
 
-    function filter($value) {
-        if(!is_array($value)) {
-            // if(is_a())
-            throw new ValidationIssue("Value must be an array");
-        }
-        return $value;
-    }
 }

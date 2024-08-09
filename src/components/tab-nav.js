@@ -6,6 +6,7 @@
         super();
         this.currentNavClass = "tab-nav--current-tab";
         this.currentContentClass = "tab-nav--current-content";
+        this.TABNAV_ERROR = "tab-nav--validation-issue";
         this.nav = this.querySelector("nav");
         this.mode = (this.tagName === "TAB-NAV") ? 1 : 2;
         if(this.mode === 1 && this.getAttribute('type') === null) this.mode = 10;
@@ -32,7 +33,15 @@
                 return;
             }
             const content = this.querySelector(url);
-            if(!content) e.setAttribute("disabled","disabled");
+            if(!content) {
+                e.setAttribute("disabled","disabled");
+                return;
+            }
+
+            content.addEventListener("validationissue", event => {
+                e.classList.add(this.TABNAV_ERROR);
+            });
+
             const hgroupselector = content.querySelector("hgroup:first-child");
             if(!hgroupselector) this.generateHgroup(e,content);
             e.addEventListener("click", evt => {
@@ -40,10 +49,19 @@
                 // evt.stopPropagation();
                 // history.replaceState({},'',e.href);
                 // this.hashUpdate();
+                e.classList.remove(this.TABNAV_ERROR);
             });
         })
 
         this.hashUpdate({});
+    }
+
+    checkIfError(navLink) {
+        const content = this.querySelector(new URL(navLink.href).hash);
+        if(!content) return;
+        const error = content.querySelectorAll(`[aria-invalid="true"]`);
+        if(error.length !== 0) navLink.classList.add(this.TABNAV_ERROR);
+        else navLink.classList.remove(this.TABNAV_ERROR);
     }
 
     generateHgroup(anchor, target) {
@@ -60,6 +78,7 @@
         const anchors = this.nav.querySelectorAll("a");
         anchors.forEach(e => {
             e.classList.remove(this.currentNavClass);
+            this.checkIfError(e);
         });
 
         const anchor = this.nav.querySelector(`[href='${newHash}']`);

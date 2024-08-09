@@ -3,16 +3,60 @@
 namespace Cobalt\SchemaPrototypes\Compound;
 
 use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\Basic\HexColorResult;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
+use Cobalt\SchemaPrototypes\MapResult;
 use Validation\Exceptions\ValidationContinue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
+use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use JsonSerializable;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
 use stdClass;
 
 class UploadImageResult extends UploadResult implements Persistable{
+
+    function defaultSchemaValues(array $data = []): array
+    {
+        $schema = [
+            'ref' => [
+                new IdResult,
+                'nullable' => true,
+            ],
+            'filename' => [
+                new StringResult,
+                'default' => '/core-content/img/default.jpg'
+            ],
+            'height' => [
+                new NumberResult,
+                'default' => 150,
+            ],
+            'width' => [
+                new NumberResult,
+                'default' => 150
+            ],
+        ];
+        return [
+            'schema' => [
+                'media' => [
+                    new MapResult,
+                    'schema' => $schema,
+                ],
+                'thumb' => [
+                    new MapResult,
+                    'schema' => $schema,
+                ],
+                'alt' => new StringResult,
+                'accent_color' => new HexColorResult,
+                'contrast_color' => new HexColorResult,
+            ],
+            'isset' => false
+        ];
+    }
+
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -69,7 +113,7 @@ class UploadImageResult extends UploadResult implements Persistable{
 
     #[Prototype]
     protected function filename($type = "media") {
-        return $this->value->{$type}->meta->filename;
+        return $this->value->{$type}->filename;
     }
 
     #[Prototype]

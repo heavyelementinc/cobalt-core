@@ -3,11 +3,16 @@
 namespace Cobalt\SchemaPrototypes\Compound;
 
 use Auth\UserCRUD;
+use Cobalt\Maps\Exceptions\LookupFailure;
+use Cobalt\Maps\Exceptions\SchemaExcludesUnregisteredKeys;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\MongoId;
 use Exception;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Validation\Exceptions\ValidationFailed;
 
 /**
  * Valid directives
@@ -15,13 +20,19 @@ use Validation\Exceptions\ValidationIssue;
  * `group` - <string> The name of a group that a user must belong to
  */
 class UserIdResult extends SchemaResult {
-    use MongoId;
+    use MongoId, Fieldable;
     protected UserCRUD $userCrud;
     protected $userData = false;
     protected $initialized = false;
 
     function __construct() {
         $this->userCrud = new UserCRUD();
+    }
+    
+    #[Prototype]
+    public function field(string $class = "", array $misc = [], string $tag = "input"):string {
+        // return $this->input($class, $misc, "input-user");
+        return "<input-user class=\"$class\" name=\"$this->name\" value=\"".$this->getRaw()."\">".$this->options()."</input-user>";
     }
 
     public function getValue():mixed {
@@ -34,12 +45,16 @@ class UserIdResult extends SchemaResult {
     }
 
     public function getValid():array {
-        return [];
+        if(key_exists('permission', $this->schema)) $permission = $this->getDirective("permission");
+        if(!$permission && key_exists('group', $this->schema)) $permission = $this->getDirective("group");
+        if(!$permission) throw new LookupFailure("UserIdResult must have a 'permission' or 'group' set on field $this->name");
+        return $this->get_valid_users($permission, 'permission');
     }
 
     function filter($value) {
         // Check if this userId is nullable
         if($this->getDirective('nullable') && !$value) return null;
+        // if(!$value) return "";
         // Check if this is a validly-formatted MongoID
         if(!$this->isValidIdFormat($value)) throw new ValidationIssue("Does not appear to be a valid MongoId");
         
@@ -112,4 +127,32 @@ class UserIdResult extends SchemaResult {
         return $valid;
     }
 
+    public function defaultSchemaValues(array $data = []): array{
+        return [
+            'nullable' => true
+        ];
+    }
+
+    #[Prototype]
+    public function get_name($name) {
+        $user = $this->getValue();
+        switch($name) {
+            case "full":
+                return "$user->fname $user->lname";
+            case "first":
+            case "fname":
+                return $user->fname;
+            case "last":
+            case "lname":
+                return $user->lname;
+            default:
+                return $user->uname;
+        }
+    }
+
+    #[Prototype]
+    public function get_avatar($size = "thumb") {
+        $user = $this->getValue();
+        return $user->avatar;
+    }
 }

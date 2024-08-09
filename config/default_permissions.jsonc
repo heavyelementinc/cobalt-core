@@ -42,6 +42,13 @@
         "default": false,
         "ring": 1
     },
+    "Pages_allowed_author": {
+        "group": "Pages",
+        "label": "Allows user to appear as an author of pages.",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
     "Posts_allowed_author": {
         "group": "Posts",
         "label": "Allows user to appear as an author (but not publish them).",

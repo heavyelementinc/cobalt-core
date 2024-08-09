@@ -157,6 +157,7 @@ class WebHandler implements RequestHandler {
             'status_code' => $e->status_code,
             'data' => $data,
             'body_id' => app("HTTP_error_body_id"),
+            'keywords' => __APP_SETTINGS__['keywords'],
         ]);
 
         // Check if the template exists
@@ -375,11 +376,12 @@ class WebHandler implements RequestHandler {
     function generate_script_content($script_name) {
         $script_tags = "";
         $compiled = "";
-        $debug = app("Package_JS_script_content");
+        $generate_script_content = app("Package_JS_script_content");
 
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
-            if ($debug === false) {
+            if ($generate_script_content === false) {
                 $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
             } else {
                 $files = files_exist([
@@ -393,7 +395,7 @@ class WebHandler implements RequestHandler {
         // Load JS packages from plugins.
         foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
             if (!file_exists($private)) continue;
-            if ($debug) {
+            if ($generate_script_content) {
                 $script_tags .= "<script src='$public?{{app.version}}'></script>";
             } else {
                 $compiled .= "\n\n" . file_get_contents($private);
@@ -470,7 +472,8 @@ class WebHandler implements RequestHandler {
     function generate_style_meta() {
         $link_tags = "";
         $compiled = "";
-        $debug = app("Package_style_content");
+        $package_style_content = app("Package_style_content");
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $package_style_content = false;
         $toPackage = __APP_SETTINGS__["css"][$this->meta_selector];
         foreach ($toPackage as $package) {
             $files = files_exist([
@@ -478,7 +481,7 @@ class WebHandler implements RequestHandler {
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
             ], false);
-            if ($debug === false) {
+            if ($package_style_content === false) {
                 $path = "/res/css/";
                 if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
                 else if(empty($files)) throw new NotFound("That file does not exist");
@@ -492,7 +495,7 @@ class WebHandler implements RequestHandler {
         foreach ($GLOBALS['PACKAGES']['css'] as $public => $private) {
             $file = file_exists($private);
             if (!$file) continue;
-            if ($debug === true) {
+            if ($package_style_content === true) {
                 $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
             } else {
                 $compiled .= "\n\n" . file_get_contents($file);
@@ -500,8 +503,10 @@ class WebHandler implements RequestHandler {
         }
         if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
 
+        $minify = __APP_SETTINGS__['Package_style_minify'];
+        if(config()['bootstrap_mode'] === COBALT_BOOSTRAP_ALWAYS) $minify = false;
         if ($compiled !== "") {
-            if(__APP_SETTINGS__['Package_style_minify']) {
+            if($minify) {
                 $minifier = new \MatthiasMullie\Minify\CSS();
                 $minifier->add($compiled);
                 $compiled = $minifier->minify();
@@ -572,7 +577,8 @@ class WebHandler implements RequestHandler {
     function add_vars($vars) {
         $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
 
-        $exportable = [];
+        // Let's reset these every time vars are added
+        $exportable = ['body_id' => '','body_class' => '','main_id' => '','main_class' => ''];
 
         foreach(array_merge($vars) as $var => $val) {
             if(in_array($var, $always_export_these_keys)) $exportable += correct_exported_values($vars, $var, $val);

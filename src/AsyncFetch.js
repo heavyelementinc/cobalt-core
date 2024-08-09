@@ -439,7 +439,7 @@ class AsyncUpdate {
     }
 
     fn_disabled(el, value, instructions) {
-        if(value) {
+        if(!value) {
             el.ariaDisabled = false;
             return el.disabled = false;
         }
@@ -468,17 +468,22 @@ class AsyncUpdate {
 
     fn_message(el, value, instructions) {
         const messageElement = appendElementInformation(el, value, instructions);
+        el.dispatchEvent(new CustomEvent("validationissue", {bubbles: true}));
         el.addEventListener("focusin", e => messageElement.dispatchEvent(new Event("click", e)), {once: true});
     }
 
     fn_img(el, value, instructions){
-        this.fn_src(el, value.filename)
+        this.fn_src(el, value.filename, instructions);
         el.height = value.meta.height;
         el.width = value.meta.width;
     }
 
     fn_src(el, value, instructions) {
-        el.src = value;
+        el.setAttribute("src", value);
+    }
+
+    fn_href(el, value, instructions) {
+        el.setAttribute("href", value);
     }
 
     fn_attribute(el, value, instructions) {
@@ -503,6 +508,7 @@ function appendElementInformation(element, value, instructions) {
     let el = document.createElement("validation-issue");
     const spawnIndex = spawn_priority(element);
     if (spawnIndex) el.style.zIndex = spawnIndex + 1;
+
     el.addEventListener('click', () => {
         if (el) {
             el.parentNode.removeChild(el);

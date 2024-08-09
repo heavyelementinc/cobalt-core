@@ -155,3 +155,11 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
         'permission' => 'Database_database_export',
     ]);
 }
+
+LandingPages::apiv1();
+
+if(__APP_SETTINGS__['Block_Editor_endpoints']) {
+    Route::s_post('/block-editor/upload/url/', "BlockEditor@fileByURL");
+    Route::s_post('/block-editor/upload/', "BlockEditor@fileUpload");
+    Route::s_get('/block-editor/link-fetch/', "BlockEditor@linkFetcher");
+}

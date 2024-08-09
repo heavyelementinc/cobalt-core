@@ -100,7 +100,10 @@ class UserSchema extends \Validation\Normalize {
                 'get' => fn($val) => $val,
                 'set' => null,
                 // 'each' => '\\Cobalt\\Token'
-            ]
+            ],
+            // 'biography' => [
+            //     'set' => fn ($val) => $val
+            // ]
             // "prefs" => [],
             // "since" => [],
             // "verified" => [],

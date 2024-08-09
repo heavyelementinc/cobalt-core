@@ -507,12 +507,14 @@ class Settings extends \Drivers\Database {
 
         $v = $this->instances[$name]->validate;
 
-        if(isset($v['confirm'])) confirm($v['confirm'], [$name => $value]);
-        if(isset($v['type'])) $this->check_type($v, $name, $value);
-        if(isset($v['ctype'])) $this->check_ctype($v, $name, $value);
-        
-        
-        if(isset(($v['filter']))) $value = $this->filter($v['filter'], $name, $value);
+        if(method_exists($this->instances[$name], "filter")) {
+            $value = $this->instances[$name]->filter($value);
+        } else {
+            if(isset($v['confirm'])) confirm($v['confirm'], [$name => $value]);
+            if(isset($v['type'])) $this->check_type($v, $name, $value);
+            if(isset($v['ctype'])) $this->check_ctype($v, $name, $value);
+            if(isset(($v['filter']))) $value = $this->filter($v['filter'], $name, $value);
+        }
 
         return $value;
     }

@@ -103,7 +103,7 @@ abstract class Database {
         return $this->collection->count($filter, $options);
     }
 
-    final function distinct($field,$filter = []) {
+    final function distinct($field,$filter = []):array {
         benchmark_reads();
         return $this->collection->distinct($field, $filter);
     }

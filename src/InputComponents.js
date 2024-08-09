@@ -534,6 +534,11 @@ class HelpSpan extends HTMLElement {
         this.message.classList.remove(this.articleShown);
         this.addEventListener("click", e => {
             this.message.showPopover();
+            const offsets = this.getOffsets(this);
+            this.message.style.top = `${offsets.y + offsets.h + 2}px`;
+            this.message.style.left = `${offsets.x + (offsets.w / 2) - (this.getOffsets(this.message).w / 2)}px`
+            // this.message.style.zIndex = `${offsets.zIndex + 100}`;
+            this.justify(offsets);
         })
 
         // this.addEventListener("mouseout", e => {
@@ -550,12 +555,7 @@ class HelpSpan extends HTMLElement {
     attach() {
         document.body.appendChild(this.message);
         this.message.classList.add(this.articleShown);
-        const offsets = this.getOffsets(this);
-        this.message.style.top = `${offsets.y + offsets.h + 2}px`;
-        this.message.style.left = `${offsets.x + (offsets.w / 2) - (this.getOffsets(this.message).w / 2)}px`
-        this.message.style.zIndex = offsets.zIndex + 100;
         // this.message.style.top = this.top();
-        this.justify(offsets);
     }
 
     justify(offsets) {

@@ -21,6 +21,8 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     ]);
 }
 
+LandingPages::admin();
+
 Route::get("/me/", "UserAccounts@me",
     [
         

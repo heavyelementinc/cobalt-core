@@ -459,26 +459,39 @@ class Render {
         header("HTTP/1.1 500 Internal Server Error");
         header("Content-Type: text/html");
         // $template = $GLOBALS['TEMPLATE_CACHE'][$this->name];
-        $safe = htmlspecialchars($template);
-        $safe = str_replace($funct,"<code class='error'>$funct</code>",$safe);
+        // $safe = htmlspecialchars($template);
+        $safe = str_replace($funct,"<code class='error'>$funct</code>",$template);
         echo "<h1>Cobalt Template Debugger</h1>";
         echo "<h2 style='font-family: monospace;'>Filename: " . $this->name . "</h2>";
         echo "<code>".$message . " in \"$this->name\" on line $lineNum, column " . $strpos."</code>";
-        echo "<pre>";
-        foreach(explode("\n",$safe) as $number => $line) {
-            echo "<span>" . $line . "</span>\n";
-        }
-        echo "</pre>";
+        // echo "<pre class='template-debugger' language='html'>";
+        $code = "";
+        // foreach(explode("\n",$safe) as $number => $line) {
+        //     $code .= "" . $line . "\n";
+        // }
+        $highlighted = syntax_highlighter($template, "error", "html", false);
+        $error_highlighted = str_replace($funct,"<code class='error'>$funct</code>",$highlighted);
+        echo $error_highlighted;
+        // echo "</pre>";
         echo "<style>
+        body {
+            display: flex;
+            flex-direction: column !important;
+        }
         h1 {
             display:pre;
             font-family: monospace;
+        }
+        code.error {
+            // color: red;
+            text-decoration-line: spelling-error;
         }
         pre{
             background:#212124;
             color:white;
             white-space:pre-wrap
-            counter-reset: line;
+            
+            width: 110ch;
         }
         pre span {
             counter-increment: line;

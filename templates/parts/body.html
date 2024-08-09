@@ -19,7 +19,7 @@
         href="https://fonts.googleapis.com/css?family={{app.fonts.head.import}}|{{app.fonts.body.import}}&display=swap"
         rel="stylesheet">
     <link href="/core-content/css/material-design/css/material.min.css?{{app.verion}}" rel="stylesheet">
-    <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+    <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
     @app_settings@
 
     @app_meta@
@@ -74,7 +74,22 @@
     </footer>
     @notify_panel@
     @cookie_consent@
-    <script src="/core-content/js/components/editorjs.mjs?v={{app.version}}" type="module"></script>
+    <script>
+        window.asyncScripts = [];
+    </script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.2/dist/editorjs.umd.min.js"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
     @script_content@
+    <!-- <script src="/core-content/js/moduleshim.js?v={{app.version}}" type="module"></script> -->
 </body>
 </html>

@@ -195,7 +195,7 @@
     email templates and more. */
     "fonts": {
         "default": [],
-        // "definiiton": "Fonts",
+        // "definititon": "Fonts",
         "directives": {
             "merge":  {
                 "head": {
@@ -1316,7 +1316,6 @@
     },
     "Package_style_content": {
         "default": false,
-        "definition": "Debug",
         "meta": {
             "group": "Developer",
             "subgroup": "Packaging",
@@ -1329,7 +1328,6 @@
     },
     "Package_style_minify": {
         "default": true,
-        "definition": "Debug",
         "meta": {
             "group": "Developer",
             "subgroup": "Packaging",
@@ -1401,6 +1399,50 @@
         },
         "validate": {
             "type": "string"
+        }
+    },
+    "Block_Editor_endpoints": {
+        "default": true
+    },
+    "LandingPages_enabled": {
+        "default": true
+    },
+    "LandingPage_route_prefix": {
+        "default": "/",
+        "definititon": "LandingPage_route_prefix",
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "General",
+            "name": "Route Prefix <help-span value=\"Your pages will live at this location. It MUST start with a slash and may contain more.&#10;&#10;Changing this setting WILL break existing links to pages.\"></help-span>",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
+    "LandingPage_allow_custom_css_injection": {
+        "default": true,
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "Presentation",
+            "name": "Allow Custom CSS Injection",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "LandingPage_related_content_title": {
+        "default": "Related Pages",
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "Related Content",
+            "name": "Related Content Default Headline <help-span value=\"The default headline for the 'Other Content' section.\"></help-span>",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string",
+            "confirm": "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
         }
     }
 }

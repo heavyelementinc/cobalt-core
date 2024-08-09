@@ -221,7 +221,7 @@ class ClientRouter extends EventTarget{
     async navigate(route) {
         const forms = document.querySelectorAll("form-request");
         for(const f of forms) {
-            if(f.unsavedChanges) {
+            if(await f.unsavedChanges()) {
                 const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
                 if(!conf) return;
             }
@@ -389,8 +389,8 @@ class ClientRouter extends EventTarget{
         let main;
         if(typeof query === "string") main = document.querySelector(query);
         else main = query;
-        main.id = pageData.main_id || "main";
-        main[this.updateProperty] = pageData.body || "";
+        main.id = pageData?.main_id || "main";
+        main[this.updateProperty] = pageData?.body || "";
 
         this.applyLinkListeners();
         this.applyFormListeners();

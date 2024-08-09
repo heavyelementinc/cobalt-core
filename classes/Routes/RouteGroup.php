@@ -98,7 +98,8 @@ class RouteGroup {
             [
                 'real_path' => $link['href'] ?? "Unknown",
                 'anchor'    => [
-                    'label' => $link['label'] ?? "Unknown"
+                    'label' => $link['label'] ?? "Unknown",
+                    'order' => $link['order'] ?? 999,
                 ]
             ],[
                 'externalLink' => true
@@ -153,8 +154,8 @@ class RouteGroup {
         $submenu = $this->getSubmenu($entry);
         $classes = $this->getClasses($entry);
         $unread = $this->getUnread($entry);
-        if($link === $this->currentRt) $classes[] = "navigation--current";
-        if(isset($entry['externalLink'])) $classes[] = "external-link";
+        if($link === $this->currentRt) $classes .= "navigation--current";
+        if(isset($entry['externalLink'])) $classes .= "external-link";
         return "{$this->listItemTags[0]}<a href=\"$link\" class=\"$classes\">{$icon}{$label}{$unread}</a>{$submenu}{$this->listItemTags[1]}\n";
     }
 

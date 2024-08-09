@@ -15,6 +15,7 @@
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Pages\PageManager;
 use Cobalt\Posts\PostManager;
 use Cobalt\Renderer\Render;
 use Cobalt\SchemaPrototypes\SchemaResult;
@@ -419,6 +420,7 @@ function set_template($path, $vars = []) {
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
  * 
+ * 
  * A few template vars for quick reference:
  *  * title       - The title of the page
  *  * main_id     - the main element's id
@@ -426,20 +428,30 @@ function set_template($path, $vars = []) {
  *  * body_class  - the body element's class list
  *  * og_template - relative path of an open graph template
  * 
+ * Prefix var names with `__` to export them to the client (the `__` is removed
+ * so you don't have to reference them with the dunderscore)
+ * 
  * @param array $vars MUST BE ASSOCIATIVE ARRAY
  * @return void
  */
 function add_vars($vars) {
     if(key_exists('custom', $vars)) throw new Exception("You may not override the `custom` var.");
-    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) {
-        $GLOBALS['WEB_PROCESSOR_VARS'] = $vars;
-        return;
+    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) $GLOBALS['WEB_PROCESSOR_VARS'] = [];
+    $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
+
+    $exportable = ['body_id' => '','body_class' => '','main_id' => '','main_class' => ''];
+    foreach($vars as $var => $val) {
+        if(in_array($var, $always_export_these_keys)) $exportable += correct_exported_values($vars, $var, $val);
+        if($var[0] . $var[1] == "__") $exportable += correct_exported_values($vars, $var, $val);
     }
+
+    export_vars($exportable);
 
     $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
 }
 
 function correct_exported_values(&$vars, $var, $val) {
+    if($var[0].$var[1] !== "__") return [$var => $val];
     $correctedName = substr($var,2);
     $vars[$correctedName] = $val;
     unset($vars[$var]);
@@ -1192,6 +1204,16 @@ function get_route_group($directory_group, $misc = []) {
     $rtGrp->setID($misc['id']);
     $rtGrp->setClassesFromString($misc['classes']);
     $rtGrp->setExcludeWrappers($misc['excludeWrapper']);
+    $landingPages = new PageManager();
+    $pageData = [];
+    foreach($landingPages->find($landingPages->public_query(['include_in_route_group' => true, 'route_group' => $directory_group])) as $page) {
+        $pageData[] = [
+            'href' => "/$page->url_slug",
+            'label' => $page->route_link_label->getValue() ?? $page->title->getValue(),
+            'order' => $page->route_order->getValue(),
+        ];
+    }
+    if(!empty($pageData)) $rtGrp->setExternalLinks($pageData);
     return $rtGrp->render();
 }
 
@@ -1959,7 +1981,7 @@ function edit_link($group) {
     } catch (\Exceptions\HTTP\Unauthorized $e) {
         return "";
     }
-    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i></a>";
+    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span style='display: none'>Edit This Customization</span></a>";
 }
 
 /**

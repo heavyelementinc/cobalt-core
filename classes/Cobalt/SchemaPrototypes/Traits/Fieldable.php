@@ -19,7 +19,6 @@ trait Fieldable {
      * The field method returns an editable field
      */
     protected function input($classes = "", $misc = [], $tag = "input"):string {
-        [$misc, $attrs] = $this->defaultFieldData($misc);
         $closingTag = "";
         if($tag !== "input") $closingTag = "</$tag>";
         
@@ -29,6 +28,8 @@ trait Fieldable {
         $value = $this->getValue();
         $pattern = $this->getDirective("pattern", false);
         if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+
+        [$misc, $attrs] = $this->defaultFieldData($misc);
         return "<$tag class=\"$classes\" $attrs value=\"" . htmlspecialchars($value) . "\"$pattern>$closingTag";
     }
 

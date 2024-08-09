@@ -158,7 +158,7 @@ class ActionMenu extends EventTarget {
         const action = new RegisteredAction(this, index);
         this.props.registeredActions.push(action);
         this.actionMenuItems.appendChild(action.actionContainer);
-        action.actionContainer.addEventListener("mousedown", async event => {
+        action.actionContainer.addEventListener("click", async event => {
             const type = action.getType();
             let value = true;
             switch(type) {
@@ -173,9 +173,9 @@ class ActionMenu extends EventTarget {
                     value = await action.callback(action.actionContainer, event, {})
                     break;
             }
-            
+
             // Handle closure of this menu
-            const actionmenuselect = new CustomEvent("actionmenuselect", {detail: {result: value}})
+            const actionmenuselect = new CustomEvent("actionmenuselect", {detail: {result: value, action: action}})
             this.dispatchEvent(actionmenuselect);
             if(actionmenuselect.defaultPrevented) return; // If the default is prevented, do nothing!
             
@@ -352,6 +352,14 @@ class RegisteredAction {
         return "request";
     }
 
+    get option() {
+        return this.props.option;
+    }
+
+    set option(reference) {
+        this.props.option = reference;
+    }
+
     get button() {
         return this.buttonContainer;
     }
@@ -431,6 +439,18 @@ class RegisteredAction {
 
     set callback(value) {
         return this.props.callback = value;
+    }
+
+    actionActivated(originalEvent) {
+        let detail = {}
+        if(this.hasAttribute())
+        if(this.hasAttribute("event")) {
+            this.dispatchEvent(new Event(this.getAttribute("event")))
+        }
+    }
+
+    dispatchEvent(event) {
+        this.props.menu.dispatchEvent(event);
     }
 
     setRequestFeedback(state) {

@@ -76,22 +76,24 @@ class ActionMenuElement extends CustomButton {
     actionFromOption(opt) {
         const icon = opt.getAttribute("icon");
         const action = this.menu.registerAction();
+        action.option = opt;
+
         action.label = opt.innerHTML ?? "Default";
         action.icon = icon;
         if(opt.hasAttribute("href")) action.href = opt.getAttribute("href")
         
         action.button.addEventListener("click", event => {
             if(this.stopPropagation) event.stopPropagation();
-            this.triggerEvent(opt, "click", event)
+            this.triggerEvent(opt, "click", event, true, action)
         });
         action.button.addEventListener("load", event => {
-            this.triggerEvent(opt, "load", event, false)
+            this.triggerEvent(opt, "load", event, false, action)
         });
         action.button.addEventListener("loadstart", event => {
-            this.triggerEvent(opt, "loadstart", event, true)
+            this.triggerEvent(opt, "loadstart", event, true, action)
         });
         action.button.addEventListener("error", event => {
-            this.triggerEvent(opt, "error", event, false)
+            this.triggerEvent(opt, "error", event, false, action)
         });
         
         action.dangerous = opt.hasAttribute("dangerous");
@@ -113,6 +115,10 @@ class ActionMenuElement extends CustomButton {
         if(custom) event_object = new CustomEvent(event.type, {detail: {option, event}});
         else event_object = new Event(event.type, {detail: {option, event}});
         option.dispatchEvent(event_object);
+        const details = {};
+        if(option.hasAttribute("details")) details = option.getAttribute("details");
+        if(option.hasAttribute("event")) this.dispatchEvent(option.getAttribute("event"), {detail: details});
+        if(option.hasAttribute("custom-event")) this.dispatchEvent(option.getAttribute("custom-event"), {detail: details});
     }
 
     toggleButtonWithKeypress(event) {

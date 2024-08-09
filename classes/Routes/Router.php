@@ -22,11 +22,14 @@
 namespace Routes;
 
 use Cobalt\Extensions\Extensions;
+use Cobalt\Pages\PageManager;
+use Cobalt\Pages\PageMap;
 use Exception;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\NotImplemented;
 use Exceptions\HTTP\Unauthorized;
+use MongoDB\BSON\UTCDateTime;
 
 class Router {
 
@@ -94,6 +97,31 @@ class Router {
                 if(file_exists($table)) require_once $table;
             }
         }
+
+        // Specify any follow-up router table options here
+        if(__APP_SETTINGS__['LandingPages_enabled']) {
+            $ROUTE_TABLE_ADDRESS = "web";
+            Route::get(__APP_SETTINGS__['LandingPage_route_prefix']."...", "LandingPages@page", [
+                'sitemap' => [
+                    'ignore' => true,
+                    'children' => function () {
+                        $manager = new PageManager();
+                        $pages = $manager->find($manager->public_query());
+                        $html = "";
+                        foreach($pages as $page) {
+                            if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
+                            $html .= view("sitemap/url.xml", [
+                                'location' => "/$page->url_slug",
+                                'lastModified' => $page->live_date->format("Y-m-d")
+                            ]);
+                        }
+                        return $html;
+                    },
+                    'lastmod' => fn()=> null
+                ]
+            ]);
+        }
+
         $this->routes = $ROUTE_TABLE;
         $this->router_table_loaded = true;
     }

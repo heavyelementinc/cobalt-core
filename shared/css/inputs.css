@@ -138,6 +138,12 @@ input-user {
   padding: 0;
   align-items: center;
   overflow: hidden;
+  justify-content: space-between;
+  width: 20ch;
+}
+
+input-user option {
+  display: none;
 }
 
 input-user fieldset.autocomplete--search-container{
@@ -147,8 +153,10 @@ input-user fieldset.autocomplete--search-container{
   flex-grow: 1;
 }
 
-input-user button {
+input-user > button {
   background: inherit;
+  width: 3.5ch;
+  padding: .5ch;
 }
 
 input-user.value fieldset.autocomplete--search-container {
@@ -157,6 +165,11 @@ input-user.value fieldset.autocomplete--search-container {
 
 input-user [type='search'] {
   border: none;
+}
+
+input-user > div[value] {
+  flex-grow: 1;
+  width: 100%;
 }
 
 input-user .cobalt-user--profile-display {

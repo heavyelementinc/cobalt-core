@@ -147,4 +147,17 @@ class BinaryResult extends SchemaResult {
     protected function right(int $places) {
         return $this->getValue() >> $places;
     }
+
+    #[Prototype]
+    protected function most_significant_set(?int $limit = null) {
+        $valid = $this->getValid();
+        $value = $this->getValue();
+
+
+    }
+    
+    #[Prototype]
+    protected function lowest(?int $limit = null) {
+
+    }
 }

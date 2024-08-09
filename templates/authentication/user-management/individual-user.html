@@ -39,6 +39,10 @@
                         <label>Email</label>
                         <input type="email" name="email" value="{{user_account.email}}">
                     </li>
+                    <!-- <li>
+                        <label>Biography</label>
+                        <block-editor name="biography"><script type="application/json">{{!user_account.biography}}</script></block-editor>
+                    </li> -->
                 </ul>
                 </fieldset>
             </form-request>
@@ -94,7 +98,7 @@
                     <legend>Change Password</legend>
                     <ul class='list-panel'>
                         <li>
-                            <input type="password" name="pword" placeholder="Password" required="required">
+                            <input type="password" name="pword" placeholder="Password" required="required" autocomplete="new-password">
                             <input type='submit' value="Save">
                         </li>
                     </ul>
