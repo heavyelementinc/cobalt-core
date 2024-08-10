@@ -35,7 +35,7 @@ h6.blockeditor--header {
 
 }
 
-    .blockeditor--image-stretched {
+    .blockeditor--content.blockeditor--image-stretched {
         margin: 0 0 var(--block-editor-margins);
     }
 
@@ -70,6 +70,8 @@ h6.blockeditor--header {
     width: 100%;
     text-align: center;
     font-style: italic;
+    margin-top: .3em;
+    font-size: 0.8em;
 }
 
     .blockeditor--content figcaption:empty {
@@ -126,9 +128,11 @@ a.blockeditor--link-preview {
 }
 
 .blockeditor--quote-block {
-    width: 70ch;
-    margin: 0 auto var(--block-editor-margins);
+    width: 100%;
+    margin: 0;
     font-size: .9em;
+    padding: 2em var(--block-editor-margins);
+    background: var(--project-body-background);
 }
     .blockeditor--quote-block.blockeditor--quote-alignment-center {
         text-align: center;
@@ -174,10 +178,6 @@ ol.blockeditor--index ol {
         --aspect-ratio: calc(var(--width) / var(--height));
         width: 100%;
         height: calc(100% * var(--aspect-ratio));
-    }
-
-    .blockeditor--quote-block {
-        width: calc(100% - 10%);
     }
 
     a.blockeditor--link-preview {

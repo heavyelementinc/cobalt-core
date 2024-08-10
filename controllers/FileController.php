@@ -163,7 +163,7 @@ class FileController extends \Controllers\FileController {
             // ...$SHARED_CONTENT
         ], "robots.txt");
 
-        if(!$file) throw new NotFound("Not found");
+        if(!$file) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
         $view = view("robots.txt");
         header('Content-Length: ' . strlen($view));

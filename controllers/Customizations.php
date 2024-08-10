@@ -216,7 +216,7 @@ class Customizations extends \Controllers\Controller {
     function resetItem($id) {
         $query = ['_id' => new ObjectId($id)];
         $result = $this->man->findOneAsSchema($query);
-        if(!$result) throw new NotFound("That resource does not exist");
+        if(!$result) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         
         $items = $this->man->load();
         foreach($items as $item) {

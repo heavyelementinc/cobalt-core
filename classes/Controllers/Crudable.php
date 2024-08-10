@@ -250,7 +250,7 @@ abstract class Crudable {
 
         final public function __destroy($id) {
             $read = $this->__read($id);
-            if(!$read) throw new NotFound("Resource not found");
+            if(!$read) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
             $default_confirm_message = "Are you sure you want to delete this record?";
             
             $confirm_message = $this->destroy($read);

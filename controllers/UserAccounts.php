@@ -28,7 +28,7 @@ class UserAccounts extends \Controllers\Pages {
         $_id = new ObjectId($id);
         $ua = new UserCRUD();
         $user = $ua->findOneAsSchema(['_id' => $_id]);
-        if(!$user) throw new NotFound("Resource does not exist");
+        if(!$user) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         $push = new PushNotifications();
         $updateable = [];
         foreach($_POST as $type => $value) {

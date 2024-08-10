@@ -114,7 +114,7 @@ class Render {
             // '$main_id' => 'main-content',
             'session' => session(),
             'request' => [
-                'url' => "$http://$_SERVER[SERVER_NAME]" . "$_SERVER[REQUEST_URI]$query_string",
+                'url' => server_name() . "$_SERVER[REQUEST_URI]$query_string",
                 'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
             ],
             'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],

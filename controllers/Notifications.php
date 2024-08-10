@@ -100,7 +100,7 @@ class Notifications extends Controller {
         $_id = new ObjectId($id);
         $query = ['_id' => $_id];
         $note = $this->ntfy->findOne($query);
-        if(!$note) throw new NotFound("Resource does not exist");
+        if(!$note) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         // confirm("Are you sure you want to delete this notification?", $_POST);
         $result = $this->ntfy->deleteOne($query);
         return $result->getDeletedCount();
@@ -109,7 +109,7 @@ class Notifications extends Controller {
     function status($id, $status) {
         $_id = new ObjectId($id);
         $note = $this->ntfy->findOne(['_id' => $_id]);
-        if(!$note) throw new NotFound("Resource does not exist");
+        if(!$note) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
         $this->ntfy->setReadState($_id, session('_id'), $status);
         header("Content-Type: text\html");

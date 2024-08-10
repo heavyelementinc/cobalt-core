@@ -8,6 +8,8 @@ const ERROR_ARRAY = [
     ]
 ];
 
+const ERROR_RESOURCE_NOT_FOUND = "Requested resource does not exist.";
+
 function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_ERROR) {
     if(!key_exists($error_type, ERROR_ARRAY)) $error_type = 0;
     [$header, $title, $message] = ERROR_ARRAY[$error_type];

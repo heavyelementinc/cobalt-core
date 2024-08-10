@@ -74,7 +74,7 @@ class PushNotifications {
     function dispatch($subject, $message, $recipients, $data = []) {
         $auth = [
             "VAPID" => [
-                'subject'    => $_SERVER['SERVER_NAME'],// ?? app("domain_name"),
+                'subject'    => server_name(),// ?? app("domain_name"),
                 'publicKey'  => $this->vapid_keys->keyset->publicKey,
                 'privateKey' => $this->vapid_keys->keyset->privateKey
             ]

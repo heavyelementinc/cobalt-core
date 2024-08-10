@@ -34,7 +34,7 @@ class LandingPages extends Controllers\Landing\Page {
 
         /** @var PageMap */
         $page = $this->manager->findOne(['_id' => $_id]);
-        if(!$page) throw new NotFound("Resource does not exist");
+        if(!$page) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
         confirm("Are you sure you want to provision a new preview key? The previous key will become unusable!",$_POST,"Continue");
         $string = uniqid();

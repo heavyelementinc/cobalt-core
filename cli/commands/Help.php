@@ -60,7 +60,7 @@ class Help {
         $command = strtolower($class);
         $capitalized = ucfirst($class);
         // $className = __CLI_ROOT__ . "/commands/$capitalized.php";
-        $pathToClass = VALID_COMMANDS[$class]['path'];
+        $pathToClass = VALID_COMMANDS[$capitalized]['path'];
         // if (!file_exists($className)) {
         //     if (!defined("__APP_ROOT__")) {
         //         say("Unrecognized command", "e");
@@ -72,6 +72,7 @@ class Help {
         //         exit;
         //     }
         // }
+        if(!$pathToClass) return;
         require_once $pathToClass;
         $c = new $capitalized("help");
         $this->help_items[$command] = $c->help_documentation;

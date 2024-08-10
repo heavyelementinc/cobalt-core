@@ -49,6 +49,7 @@ class PageMap extends PersistanceMap {
     const BIO_AVATAR_RADIUS_CIRCULAR = 0b0010;
 
     public function __get_schema(): array {
+        $this->__set_index_checkbox_state(true);
         return [
             "url_slug" => [
                 new StringResult,
@@ -97,12 +98,8 @@ class PageMap extends PersistanceMap {
                 'index' => [
                     'title' => 'Visibility',
                     'order' => 2,
-                    'view' => function ($val) {
-                        return match($val) {
-                            self::VISIBILITY_PUBLIC => 'Public',
-                            self::VISIBILITY_PRIVATE => 'Private',
-                            self::VISIBILITY_DRAFT => 'Draft',
-                        };
+                    'view' => function () {
+                        return $this->visibility->display();
                     }
                 ],
             ],
@@ -289,7 +286,8 @@ class PageMap extends PersistanceMap {
             'preview_key' => [
                 new StringResult,
                 'display' => function ($val) {
-                    return "https://".$_SERVER['SERVER_NAME'].__APP_SETTINGS__['LandingPage_route_prefix'].$this->url_slug."?pkey=".$val;
+                    $name = server_name();
+                    return $name.__APP_SETTINGS__['LandingPage_route_prefix'].$this->url_slug."?pkey=".$val;
                 }
             ],
 

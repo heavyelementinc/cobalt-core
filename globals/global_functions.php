@@ -821,8 +821,12 @@ function build_object_from_paths($object) {
     return $mutant;
 }
 
-function is_secure() {
-    
+/**
+ * Checks if the HTTPS protocol is being used.
+ * 
+ * @return bool 
+ */
+function is_secure():bool {
     if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'] ?? "")) return true;
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || $_SERVER['SERVER_PORT'] == 443;
@@ -2086,4 +2090,26 @@ function set_crudable_flag(string $name, int $flag): int {
 function get_crudable_flag(string $name): ?int {
     global $CRUDABLE_CONFIG_TRACKER;
     return $CRUDABLE_CONFIG_TRACKER[$name] ?? null;
+}
+
+/**
+ * Get the current app's domain name (based on request headers and app settings).
+ * If $defaultToAppSetting is true, then this function will always return a value.
+ * 
+ * @throws Exception if $defatulToAppSetting is true and the incoming server name doesn't exist as the apps domain_name or in the allowed_origins list
+ * @return string the domain name of this app (with protocol and NO TRAILING SLASH)
+ */
+function server_name(bool $defaultToAppSetting = true) {
+    $request_from = $_SERVER['SERVER_NAME'];
+    $name = "https://$request_from";
+    $isSecure = is_secure();
+    if(!$isSecure) $name = "http://$request_from";
+    if($request_from === __APP_SETTINGS__['domain_name']) {
+        return $name;
+    }
+    if(in_array($request_from, __APP_SETTINGS__['API_CORS_allowed_origins'])) {
+        return $name;
+    }
+    if($defaultToAppSetting == false) throw new Exception("Request has no valid server name. Aborting.");
+    return ($isSecure) ? "https://".__APP_SETTINGS__['domain_name'] : "http://".__APP_SETTINGS__['domain_name'];
 }

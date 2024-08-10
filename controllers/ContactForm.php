@@ -73,7 +73,7 @@ class ContactForm extends Crudable {
         $conMan = new ContactManager();
         $_id = $conMan->__id($id);
         $found = $conMan->findOne(['_id' => $_id]);
-        if(!$found) throw new NotFound("Not found", "That resource does not exist");
+        if(!$found) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         add_vars([
             'title' => "Contact",
             'doc' => $found,

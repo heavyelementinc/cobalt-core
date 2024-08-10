@@ -191,10 +191,11 @@ trait Indexable {
     final protected function get_field(string $field, array $directives):?array {
         if(!key_exists('index', $directives)) return null;
         $array = [
+            'name' => $field,
             'title' => $this->get_title($field, $directives),
             'order' => $this->get_order($field, $directives),
             'sort' => $this->get_sort($field, $directives),
-            'name' => $field
+            'view' => $this->get_view($field, $directives),
         ];
         return $array;
     }
@@ -218,6 +219,13 @@ trait Indexable {
     final protected function get_sort(string $field, array $directives) {
         $index = $directives['index'] ?? [];
         $sort = $index['sort'] ?? 0;
+        if(is_callable($sort)) return $sort($field, $directives);
+        return $sort;
+    }
+
+    final protected function get_view(string $field, array $directives) {
+        $index = $directives['index'] ?? [];
+        $sort = $index['view'] ?? null;
         if(is_callable($sort)) return $sort($field, $directives);
         return $sort;
     }

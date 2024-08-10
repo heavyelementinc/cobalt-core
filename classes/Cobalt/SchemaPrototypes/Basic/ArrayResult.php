@@ -19,6 +19,7 @@ use Traversable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use MongoDB\BSON\Persistable;
+use MongoDB\Model\BSONDocument;
 
 class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Traversable{
     use ResultTranslator, Fieldable;
@@ -234,7 +235,12 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     function valid():bool {
         $val = $this->getValue();
-        if(key_exists(array_keys($val)[$this->__index], $val)) return true; 
+        if(is_null($val)) return false;
+        if($val instanceof Iterator) $val = iterator_to_array($val);
+        if($val instanceof BSONDocument) $val = iterator_to_array($val);
+        $key = array_keys($val ?? [])[$this->__index];
+        if(is_null($key)) return false;
+        if(key_exists($key, $val)) return true; 
         return false;
     }
 
@@ -272,6 +278,9 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     public function key(): mixed {
         $val = $this->getValue();
+        if($val instanceof BSONDocument) {
+            $val = iterator_to_array($val);
+        }
         $keys = array_keys($val);
         return $keys[$this->__index];
     }

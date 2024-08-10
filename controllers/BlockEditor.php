@@ -24,7 +24,7 @@ class BlockEditor {
         return [
             'success' => 1,
             'file' => [
-                'url' => "/res/fs/$result[filename]",
+                'url' => server_name()."/res/fs/$result[filename]",
                 'mime' => $result['meta']['mimetype'],
                 'width' => $result['meta']['width'],
                 'height' => $result['meta']['height'],
