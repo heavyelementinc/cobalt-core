@@ -79,8 +79,10 @@
             <aside class="sidebar">
                 <ul class="list-panel">
                     <li>
-                        <label>{{doc.include_aside.getLabel()}} Content <help-span value="Should this page show an sidebar?"></help-span></label>
-                        {{doc.include_aside.field()}}
+                        <switch-container>
+                            <label>Include Sidebar <help-span value="Should this page show a sidebar?"></help-span></label>
+                            {{doc.include_aside.field()}}
+                        </switch-container>
                     </li>
                     <li>
                         <label>{{doc.aside_positioning.getLabel()}}</label>
@@ -106,8 +108,14 @@
                         {{doc.author.field()}}
                     </li>
                     <li>
-                        <label>{{doc.include_bio.getLabel()}} <help-span value="Should this page show a biography of the author?"></help-span></label>
-                        {{doc.include_bio.field()}}
+                        <switch-container>
+                            <label>{{doc.include_bio.getLabel()}} <help-span value="Should this page show a biography of the author?"></help-span></label>
+                            {{doc.include_bio.field()}}
+                        </switch-container>
+                    </li>
+                    <li>
+                        <label>Biography CTA Button Label</label>
+                        {{doc.bio_cta.field()}}
                     </li>
                     <li>
                         <label>Misc Author Settings</label>
@@ -149,8 +157,10 @@
                 <label>Route Groups</label>
                 <ul class="list-panel">
                     <li>
-                        <label>{{doc.include_in_route_group.getLabel()}} <help-span value="If this is off, this page will not be included in the route group."></help-span></label>
-                        {{doc.include_in_route_group.field()}}
+                        <switch-container>
+                            <label>{{doc.include_in_route_group.getLabel()}} <help-span value="If this is off, this page will not be included in the route group."></help-span></label>
+                            {{doc.include_in_route_group.field()}}
+                        </switch>
                     </li>
                     <li>
                         <label>{{doc.route_group.getLabel()}} <help-span value="Pages may only be added to `web context` route groups. Listed above are all web context route groups in your application."></help-span></label>
@@ -176,9 +186,16 @@
                         </details>
                     </li>
                 </ul>
-                <label>Flags</label>
+                <label>Misc. Settings</label>
                 <ul class="list-panel">
                     <li>
+                        <switch-container>
+                            <label>Main Navigation <help-span value="Display the main navigation in the header of your app on this page."></help-span></label>
+                            {{doc.show_main_nav.field()}}
+                        </switch-container>
+                    </li>
+                    <li>
+                        <label>Flags</label>
                         {{doc.flags.field()}}
                     </li>
                     <li>
@@ -265,5 +282,8 @@
         display: flex;
         width: 100%;
         min-height: 13ch;
+    }
+    switch-container {
+        width: 100%;
     }
 </style>
