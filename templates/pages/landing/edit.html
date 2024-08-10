@@ -136,6 +136,11 @@
                     {{doc.tags.field()}}
                 </li>
                 <li>
+                    <label>{{doc.preview_key.getLabel()}} <async-button method="POST" action="/api/v1/landing-pages/{{doc._id}}/preview-key/">New Key</async-button></label>
+                    <!-- {{doc.preview_key.field()}} -->
+                    <copy-span class="preview-key" value="{{doc.preview_key.display()}}"></copy-span>
+                </li>
+                <li>
                     <label>{{doc.style.getLabel()}} <help-span value="Add valid CSS in this box. It will be injected into the page."></help-span></label>
                     {{doc.style.field()}}
                 </li>
@@ -143,11 +148,6 @@
             <aside class="sidebar">
                 <label>Route Groups</label>
                 <ul class="list-panel">
-                    <li>
-                        <small>"Route Groups" are used to generate navigation links. This section lets you dynamically 
-                            add your page to any predefined Route Group (thus showing your page as a navigation link).
-                        </small>
-                    </li>
                     <li>
                         <label>{{doc.include_in_route_group.getLabel()}} <help-span value="If this is off, this page will not be included in the route group."></help-span></label>
                         {{doc.include_in_route_group.field()}}
@@ -166,12 +166,31 @@
                         <label>{{doc.route_order.getLabel()}} <help-span value="This is the order that your link should fall in within the group. Note that it's possible to use negative numbers but we recommend against using them since it quickly becomes confusing."></help-span></label>
                         {{doc.route_order.field()}}
                     </li>
+                    <li>
+                        <details>
+                            <summary>About Route Groups</summary>
+                            <small>
+                                "Route Groups" are used to generate navigation links. This section lets you dynamically 
+                                add your page to any predefined Route Group (thus showing your page as a navigation link).
+                            </small>
+                        </details>
+                    </li>
                 </ul>
                 <label>Flags</label>
                 <ul class="list-panel">
                     <li>
                         {{doc.flags.field()}}
-                        <small style="margin-top: .5em">Flags are miscellaneous settings relative to this page.<br><br>These control access and visibilty for the page among other things.</small>
+                    </li>
+                    <li>
+                        <details>
+                            <summary>About Flags</summary>
+                            <small>Flags are miscellaneous settings relative to this page.<br><br>They control access and
+                                visibilty for the page among other things.<br><br>
+                                <strong>Access Exclusive To Users</strong> means that a user must be logged in to access this page<br><br>
+                                <strong>Exclude Page From Sitemap</strong> will prevent this page from appearing on the <a href="/sitemap.xml">sitemap</a><br><br>
+                                <strong>Do Not Show Related Pages</strong> will hide the "Related Pages" section that normally appears just above the footer
+                            </small>
+                        </details>
                     </li>
                 </ul>
             </aside>
@@ -184,6 +203,11 @@
 </form-request>
 <style>
     input[name="title"]{
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    input, textarea, [__custom-input] {
         width: 100%;
         box-sizing: border-box;
     }

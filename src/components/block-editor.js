@@ -59,20 +59,24 @@ class BlockEditor extends HTMLElement {
             },
             onChange: (api, event) => {
                 this.hasChangeOccurred = true;
-                clearTimeout(this.saveTimeout)
-                this.saveTimeout = setTimeout(() => {
-                    this.hasChangeOccurred = false;
-                    console.log(api, event);
-                    this.dispatchEvent(new Event("change", {detail: {api, event}}));
-                }, this.autosaveTimeout);
+                // clearTimeout(this.saveTimeout)
+                // this.saveTimeout = setTimeout(() => {
+                //     this.hasChangeOccurred = false;
+                //     console.log(api, event);
+                //     this.dispatchEvent(new Event("change", {detail: {api, event}}));
+                // }, this.autosaveTimeout);
             }
         });
-        // this.addEventListener("blur", event => {
-        //     if(!this.hasChangeOccurred) return;
-        //     console.log("Clearing save timeout and dispatching change event on blur")
-        //     clearTimeout(this.saveTimeout);
-        //     this.dispatchEvent(new Event("change", {detail: {api: {}, event}}))
-        // });
+        this.addEventListener("focusout", event => {
+            if(this.hasChangeOccurred === false) return;
+            this.dispatchEvent(new Event("change", {detail: {api: {}, event}}))
+            this.hasChangeOccurred = false;
+        });
+        this.addEventListener("focusin", event => {
+            if(this.hasChangeOccurred === false) return;
+            this.dispatchEvent(new Event("change", {detail: {api: {}, event}}));
+            this.hasChangeOccurred = false;
+        });
     }
 
     get name() {

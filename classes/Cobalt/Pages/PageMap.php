@@ -38,10 +38,12 @@ class PageMap extends PersistanceMap {
     const FLAGS_EXCLUDE_FROM_SITEMAP  = 0b00000010;
     const FLAGS_EXCLUDE_RELATED_PAGES = 0b00000100;
 
-    const ASIDE_SIDEBAR_NATURAL = 0b00001;
-    const ASIDE_SIDEBAR_REVERSE = 0b00010;
-    const ASIDE_SIDEBAR_FOOTER  = 0b00100;
-    const ASIDE_STICKY          = 0b01000;
+    const ASIDE_SIDEBAR_NATURAL      = 0b000001;
+    const ASIDE_SIDEBAR_REVERSE      = 0b000010;
+    const ASIDE_SIDEBAR_FOOTER       = 0b000100;
+    const ASIDE_STICKY               = 0b001000;
+    const ASIDE_INCLUDE_TOC_INDEX    = 0b010000;
+    const ASIDE_INDEX_BEFORE_CONTENT = 0b100000;
 
     const BIO_AVATAR_RADIUS_ROUNDED  = 0b0001;
     const BIO_AVATAR_RADIUS_CIRCULAR = 0b0010;
@@ -217,12 +219,14 @@ class PageMap extends PersistanceMap {
             ],
             'aside_positioning' => [
                 new BinaryResult,
-                'default' => self::ASIDE_SIDEBAR_NATURAL + self::ASIDE_STICKY,
+                'default' => self::ASIDE_SIDEBAR_NATURAL + (__APP_SETTINGS__['LandingPage_table_of_contents_by_default']) ? self::ASIDE_INCLUDE_TOC_INDEX : 0,
                 'valid' => [
-                    self::ASIDE_SIDEBAR_NATURAL => 'Sidebar Right',
-                    self::ASIDE_SIDEBAR_REVERSE => 'Sidebar Left',
+                    self::ASIDE_SIDEBAR_NATURAL => 'Sidebar Left',
+                    self::ASIDE_SIDEBAR_REVERSE => 'Sidebar Right',
                     self::ASIDE_SIDEBAR_FOOTER => 'Aside as Footer',
-                    self::ASIDE_STICKY => 'Sticky'
+                    self::ASIDE_STICKY => 'Sticky',
+                    self::ASIDE_INCLUDE_TOC_INDEX => 'Include Table of Contents',
+                    self::ASIDE_INDEX_BEFORE_CONTENT => 'TOC Before Content',
                 ]
             ],
             'aside' => [
@@ -282,6 +286,12 @@ class PageMap extends PersistanceMap {
                     self::FLAGS_EXCLUDE_RELATED_PAGES => "Do Not Show Related Pages",
                 ]
             ],
+            'preview_key' => [
+                new StringResult,
+                'display' => function ($val) {
+                    return "https://".$_SERVER['SERVER_NAME'].__APP_SETTINGS__['LandingPage_route_prefix'].$this->url_slug."?pkey=".$val;
+                }
+            ],
 
             /** BIOGRAPHY FIELDS */
             'author' => [
@@ -293,10 +303,10 @@ class PageMap extends PersistanceMap {
             ],
             "include_bio" => [
                 new BooleanResult,
+                'default' => __APP_SETTINGS__['LandingPage_bio_by_default']
             ],
             'bio_headline' => [
                 new StringResult,
-                'default' => "About the Author"
             ],
             "bio" => [
                 new BlockResult,

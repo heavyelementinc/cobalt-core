@@ -157,6 +157,7 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
 }
 
 LandingPages::apiv1();
+Route::s_post('/landing-pages/{id}/preview-key/', 'LandingPages@preview_key');
 
 if(__APP_SETTINGS__['Block_Editor_endpoints']) {
     Route::s_post('/block-editor/upload/url/', "BlockEditor@fileByURL");

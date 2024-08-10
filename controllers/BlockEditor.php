@@ -73,23 +73,29 @@ class BlockEditor {
             throw new BadRequest("Response was malformed");
         }
 
+        /** @var DOMNodeList */
         $domList = $dom->getElementsByTagName("meta");
+        $pageTitle = trim(iterator_to_array($dom->getElementsByTagName('title'))[0]->textContent);
+        $description = "";
+        $listOfParagraphs = iterator_to_array($dom->getElementsByTagName("p"));
+        if(!empty($listOfParagraphs)) $description = trim($listOfParagraphs[0]->textContent);
         $metaTags = [];
-
+        
+        /** @var DOMElement */
         foreach($domList as $element) {
             $property = $element->getAttribute("property");
-            if($property && substr($property, 0, 2) == "og") {
-                $metaTags[$property] = $element->getAttribute("content");
-            }
+            // if($property && substr($property, 0, 2) == "og") {
+            $metaTags[$property] = $element->getAttribute("content");
+            // }
         }
 
         return [
             'success' => 1,
             'link' => $metaTags['og:url'] ?? $_GET['url'],
             'meta' => [
-                'title' => $metaTags['og:title'],
+                'title' => $metaTags['og:title'] ?? $pageTitle,
                 'site_name' => $metaName['og:site_name'] ?? $metaTags['og:url'] ?? $metaTags['og:title'],
-                'description' => $metaTags['og:description'],
+                'description' => $metaTags['og:description'] ?? $metaTags['description'] ?? $description,
                 'image' => [
                     'url' => $metaTags['og:image'],
                     'height' => $metaTags['og:image:height'],

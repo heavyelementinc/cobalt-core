@@ -147,6 +147,28 @@ a.blockeditor--link-preview {
     width: 100%;
 }
 
+.aside--table-of-contents {
+    font-size: 1.2rem;
+    margin: 0 0.5rem;
+}
+
+.blockeditor--index {
+    list-style: none;
+    padding-left: 1em;
+}
+
+ol.blockeditor--index ol {
+    margin: .3em;
+}
+
+.cdx-notifies {
+    z-index: calc(var(--project-modal-z-index) + 1000);
+}
+
+.cdx-notify {
+    z-index: calc(var(--project-modal-z-index) + 1000);
+}
+
 @media only screen and (max-width: 35em) {
     .blockeditor--embed iframe {
         --aspect-ratio: calc(var(--width) / var(--height));

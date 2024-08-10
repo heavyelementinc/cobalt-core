@@ -5,8 +5,11 @@ namespace Cobalt\SchemaPrototypes\Basic;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use DOMDocument;
+use Exception;
+use Validation\Exceptions\ValidationIssue;
 
-
+/** @package Cobalt\SchemaPrototypes\Basic */
 class BlockResult extends SchemaResult {
     use Fieldable;
     protected $type = "block-editor";
@@ -14,7 +17,6 @@ class BlockResult extends SchemaResult {
 
     #[Prototype]
     protected function field(string $class = "", array $misc = [], string $tag = "block-editor"):string {
-        // return $this->input($class, $misc, "block-editor");
         if($this->getDirective("private")) return "";
         if($this->getDirective("immutable")) $misc['readonly'] = 'readonly';
         [$misc, $attrs] = $this->defaultFieldData($misc);
@@ -26,14 +28,95 @@ class BlockResult extends SchemaResult {
 
     #[Prototype]
     protected function firstParagraph():string {
+        // Loop through our block content until we find the first instance of a paragraph
         foreach($this->value->blocks as $val => $details) {
             if($details->type === "paragraph") return $details->data->text;
         }
+        // If there's no paragraph data, just return an empty string
         return "";
     }
 
+    #[Prototype]
+    protected function tableOfContents():string {
+        $body = $this->getRaw();
+        // Since headline levels only go up to six, we'll start at 10
+        $header = 10;
+        $subheader = 11;
+        $headlines = [];
+        // Loop through our blocks and build a list of headlines
+        // We'll also take this list to determine our baseline header values
+        foreach($body->blocks as $block) {
+            if($block->type !== "header") continue;
+            if($block->data->level < $header) $header = $block->data->level;
+            $headlines[] = $block;
+        }
+
+        // Now that have a baseline header, we'll set our other header
+        $subheader = $header + 1;
+
+        $ol = "<nav><ol class=\"blockeditor--index level--$header\" rel=\"Table of Contents\">";
+
+        // $tagOpen = false;
+        $previousHeadlineLevel = $header;
+
+        foreach($headlines as $block) {
+            $currentBlockLevel = $block->data->level;
+            // If our subheader is 2 and our current block is 3, skip.
+            if($currentBlockLevel > $subheader) continue;
+
+            // If our current block is a $header
+            if($currentBlockLevel === $header && $currentBlockLevel !== $previousHeadlineLevel) {
+                // Check if our tag is 
+                $ol .= "</ol>";
+                // $tagOpen = false;
+            }
+            
+            if($currentBlockLevel === $subheader && $currentBlockLevel !== $previousHeadlineLevel) {
+                // $tagOpen = true;
+                $ol .= "<ol class=\"blockeditor--index level--$currentBlockLevel\">";
+            }
+            $id = $block->data->id ?? $block->id;
+            $ol .= "<li><a href=\"#$id\">".$block->data->text."</a></li>";
+            $previousHeadlineLevel = $currentBlockLevel;
+        }
+
+        return $ol . "</ol></nav>";
+    }
+
     function filter($value) {
+        foreach($value['blocks'] as $block) {
+            switch($block['type']) {
+                case "rawtool":
+                    $this->filter_htmltool($block);
+                    break;
+                case "header":
+                    $this->filter_header($block);
+                    break;
+            }
+        }
         return $value;
+    }
+
+    private function filter_htmltool(&$block):void {
+        if(!$block['data']['html']) return;
+        $dom = new DOMDocument();
+        try {
+            $parsed = $dom->loadHTML($block['data']['html']);
+        } catch (Exception $e) {
+            throw new ValidationIssue("Raw HTML must evaluate to valid HTML");
+        }
+        
+        if($parsed === false) throw new ValidationIssue("The Raw HTML tool must evaluate");
+        // $scripts = $dom->getElementsByTagName("script");
+        // /** @var DOMElement */
+        // foreach($scripts as $script) {
+        //     if($script->textContent) throw new ValidationIssue("script tags may only load scripts, they cannot contain JavaScript!");
+        // }
+    }
+
+    private function filter_header(&$block):void {
+        if(!$block['data']['text']) return;
+        $block['data']['id'] = url_fragment_sanitize($block['data']['text']);
     }
 
     function __toString(): string {
@@ -85,7 +168,8 @@ class BlockResult extends SchemaResult {
 
     private function __from_header($block) {
         $tag = "h". $block->data->level;
-        return "<$tag id=\"$block->id\" class=\"blockeditor--content blockeditor--header\">" . $block->data->text . "</$tag>";
+        $id = $block->data->id ?? $block->id;
+        return "<$tag id=\"$id\" class=\"blockeditor--content blockeditor--header\">" . $block->data->text . "</$tag>";
     }
 
     private function __from_imagetool($block) {

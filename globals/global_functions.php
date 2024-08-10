@@ -728,6 +728,7 @@ function embed_from_img_tags($html) {
     $dom = new DOMDocument();
     $dom->loadHTML($html);
     $imgTags = $dom->getElementsByTagName("img");
+    /** @var DOMElement */
     foreach($imgTags as $img) {
         $src = $img->getAttribute('src');
         $host = parse_url($src, PHP_URL_HOST);
@@ -1005,7 +1006,6 @@ function url_fragment_sanitize(string $value):string {
     $mutant = preg_replace("/(-){2,}/", "", $mutant);
 
     if (!$mutant || $mutant === "-") throw new ValidationIssue("\"$value\" is not suitable to transform into a URL fragment");
-
     return $mutant;
 }
 
@@ -1206,9 +1206,10 @@ function get_route_group($directory_group, $misc = []) {
     $rtGrp->setExcludeWrappers($misc['excludeWrapper']);
     $landingPages = new PageManager();
     $pageData = [];
+    $prefix = __APP_SETTINGS__['LandingPage_route_prefix'];
     foreach($landingPages->find($landingPages->public_query(['include_in_route_group' => true, 'route_group' => $directory_group])) as $page) {
         $pageData[] = [
-            'href' => "/$page->url_slug",
+            'href' => $prefix."$page->url_slug",
             'label' => $page->route_link_label->getValue() ?? $page->title->getValue(),
             'order' => $page->route_order->getValue(),
         ];

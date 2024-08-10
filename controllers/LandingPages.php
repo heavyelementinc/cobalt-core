@@ -4,6 +4,8 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\PageManager;
 use Cobalt\Pages\PageMap;
 use Drivers\Database;
+use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
 
 /** @package  */
@@ -25,6 +27,46 @@ class LandingPages extends Controllers\Landing\Page {
 
     public function destroy(GenericMap|BSONDocument $document): array {
         return ['message' => "Are you sure you want to delete this page?"];
+    }
+
+    public function preview_key($id) {
+        $_id = new ObjectId($id);
+
+        /** @var PageMap */
+        $page = $this->manager->findOne(['_id' => $_id]);
+        if(!$page) throw new NotFound("Resource does not exist");
+
+        confirm("Are you sure you want to provision a new preview key? The previous key will become unusable!",$_POST,"Continue");
+        $string = uniqid();
+        $string = (double)bin2hex($string);
+        $p = strtolower(str_replace("=", "", base64_encode(sprintf("%d",($string * 1.27) << 1))));
+        // $p = hex2bin(str_replace("-","",$str));
+        $pkey = "px-";
+        $skip = false;
+        // $indexes = [7, 4, 5, 7, 8, 12];
+        // $index = 0;
+        for($i = strlen($p); $i >= 0; $i--) {
+            if($i % 7 === 1) {
+                if($skip === false) {
+                    $i += 1;
+                    $pkey .= '-';
+                    $skip = true;
+                    continue;
+                } else {
+                    $skip = false;
+                    // $index += 1;
+                }
+            }
+            $pkey .= $p[$i];
+        }
+        $result = $this->manager->updateOne(['_id' => $_id], [
+            '$set' => ['preview_key' => $pkey]
+        ]);
+        $schema = $page->__get_schema();
+        update("copy-span.preview-key", [
+            'value' => $schema['preview_key']['display']($pkey)
+        ]);
+        return $result;
     }
 
     // public function get_page_data($query): ?PageMap {

@@ -1420,6 +1420,54 @@
             "type": "string"
         }
     },
+    "LandingPage_table_of_contents_label": {
+        "default": "Contents",
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "Presentation",
+            "name": "Contents Label Headline <help-span value=\"The headline displayed over the Landing Page's Table of Contents\"></help-span>",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
+    "LandingPage_table_of_contents_by_default": {
+        "default": true,
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "Presentation",
+            "name": "Generate a Table Of Contents by default",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "LandingPage_bio_by_default": {
+        "default": true,
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "Biography",
+            "name": "Show a biography of the author by default",
+            "type": "input-switch"
+        },
+        "validate": {
+            "type": "boolean"
+        }
+    },
+    "LandingPage_bio_default_headline": {
+        "default": "About the Author",
+        "meta": {
+            "group": "Landing Pages",
+            "subgroup": "Biography",
+            "name": "Default headline for author biography",
+            "type": "input"
+        },
+        "validate": {
+            "type": "string"
+        }
+    },
     "LandingPage_allow_custom_css_injection": {
         "default": true,
         "meta": {
