@@ -10,7 +10,7 @@ block-editor {
 }
 
 .blockeditor--content {
-    margin: calc(var(--block-editor-margins) * 1.5) calc(var(--block-editor-margins) * 1.5);
+    margin: var(--block-editor-margins);
     box-sizing: border-box;
 }
 
