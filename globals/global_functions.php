@@ -599,18 +599,19 @@ function plugin($name) {
     throw new Exception('Plugin is not active!');
 }
 
-function get_posts_from_tags(array $tags, string $controller = "Posts"):string {
+function get_posts_from_tags(array $tags, string $controller = "Posts", int $limit = 3):string {
     $html = "";
     $postController = get_controller($controller, true);
-    $posts = $postController->postMan;
-    $view = $posts->getTemplate("blurb");
-    $result = $posts->getPostsFromTags($tags);
+    $posts = $postController->manager;
+    
+    $result = $posts->getPagesFromTags($tags, $limit);
 
     foreach($result as $post) {
-        $html .= view($view, [
-            'post' => $post,
-            'href' => $postController->path('post',[(string)$post['url_slug']])
-        ]);
+        $html .= $postController->renderPreview($post);
+        // view($view, [
+        //     'post' => $post,
+        //     'href' => $postController->path('post',[(string)$post['url_slug']])
+        // ]);
     }
 
     return $html;

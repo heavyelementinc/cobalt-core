@@ -83,4 +83,15 @@ class PageManager extends Database {
         
         return $array;
     }
+
+    function getPagesFromTags(array $tags, int $limit = 3) {
+        return $this->find($this->public_query([
+            'tags' => ['$in' => $tags]]
+        ), [
+            'sort' => [
+                'live_date' => -1
+            ],
+            'limit' => $limit
+        ]);
+    }
 }
