@@ -368,6 +368,6 @@ function time_to_read(string $string, int $output = TIME_TO_READ_FORMAT_ROUND) {
         default:
             if($seconds > 30) $minutes += 1;
             if($minutes < 1) $minutes = "~1";
-            return "$minutes min" . plural($minutes);
+            return "$minutes min";
     }
 }

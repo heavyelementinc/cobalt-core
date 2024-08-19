@@ -109,7 +109,7 @@ abstract class Page extends Crudable {
         }
 
         $follow_link = "";
-        if(__APP_SETTINGS__['Posts_enable_rss_feed']) $follow_link = " &middot; <a href='".server_name().route("Posts@rss_feed")."' class=\"rss-feed-link\" target=\"_blank\"><i name=\"rss\"></i> Follow</a>";
+        if(__APP_SETTINGS__['Posts_enable_rss_feed']) $follow_link = " &middot; <a href='".server_name().route("Posts@rss_feed")."' class=\"rss-feed-link button\" target=\"_blank\"><i name=\"rss\"></i> Follow</a>";
 
         // And render it
         return view($view, ['page' => $page, 'class' => $classes, 'follow_link' => $follow_link]);
