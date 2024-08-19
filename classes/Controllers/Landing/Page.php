@@ -29,12 +29,11 @@ abstract class Page extends Crudable {
         $does_not_exist = "That page does not exist.";
         // If there's no result, then we know it's not found.
         if($page === null) throw new NotFound($does_not_exist, true);
-        $this->manager->updateOne(['_id' => $page->_id], ['$inc' => ['views' => 1]]);
 
         // Check the page's visibility criteria
-        $visibility = (int)$page->visibility->getRaw();
+        $visibility = $page->visibility->getValue();
         
-        if($visibility >= $page::VISIBILITY_UNLISTED) {
+        if($visibility < $page::VISIBILITY_UNLISTED) {
             $pkey = (string)$page->preview_key;
             switch($visibility) {
                 case(isset($_GET['pkey']) && $pkey && $_GET['pkey'] === $pkey):
@@ -49,6 +48,8 @@ abstract class Page extends Crudable {
                     break;
             }
         }
+
+        $this->manager->updateOne(['_id' => $page->_id], ['$inc' => ['views' => 1]]);
 
         /** @var DateTime */
         $live_date = (int)$page->live_date->getValue()->format("U");
