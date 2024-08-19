@@ -16,9 +16,13 @@
 namespace Drivers;
 
 use Cobalt\Maps\GenericMap;
+use Cobalt\Maps\PersistanceMap;
+use Contact\Persistance;
 use MongoDB\BSON\ObjectId;
 use Drivers\UTCDateTime;
+use MongoDB\BSON\Persistable;
 use MongoDB\Collection;
+use MongoDB\Driver\Cursor;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationFailed;
@@ -98,7 +102,7 @@ abstract class Database {
         return $this->collection->find($filter, $options);
     }
 
-    final function count($filter, $options = []) {
+    final function count($filter, $options = []):int {
         benchmark_reads();
         return $this->collection->count($filter, $options);
     }

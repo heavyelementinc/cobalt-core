@@ -109,7 +109,9 @@ class InputArray extends AutoCompleteInterface {
         this.was = [ ...this.values ?? []];
     }
 
-    
+    get name() {
+        return this.getAttribute("name");
+    }
 
     updateTags(val = null) {
         // Get the value of the element
@@ -318,6 +320,10 @@ class InputBinary extends HTMLElement {
 
         this.setAttribute("readonly", JSON.stringify(bool));
     }
+
+    get name() {
+        return this.getAttribute("name");
+    }
 }
 
 customElements.define("input-binary", InputBinary);
@@ -403,6 +409,9 @@ class InputUserArray extends InputArray {
         this.tags.appendChild(tag);
     }
 
+    get name() {
+        return this.getAttribute("name");
+    }
 }
 
 customElements.define("input-user-array", InputUserArray);
@@ -439,6 +448,10 @@ class InputUser extends AutoCompleteInterface {
     get options() {
         const opts = this.querySelectorAll("option");
         return opts;
+    }
+
+    get name() {
+        return this.getAttribute("name");
     }
 
     // renderOptions(opts) {

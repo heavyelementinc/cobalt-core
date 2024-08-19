@@ -286,7 +286,7 @@ class AsyncUpdate {
     }
     
     exec() {
-        const list = this.request.resolved.update ?? [];
+        const list = this.request.resolved?.update ?? [];
         for(const instruction of list) {
             switch(instruction.target) {
                 case "sessionStorage":

@@ -15,7 +15,7 @@
                 <a href="{{post.public_link}}">http://{{app.domain_name}}{{href}}</a>
                 <input name="url_slug" value="{{post.url_slug}}">
             </div>
-            <markdown-area name="body">{{post.body.raw}}</markdown-area>
+            <block-editor name="body"><script type="application/json">{{!post.body.json}}</script></block-editor>
             <!-- @view("/parts/markdown-guide.html"); -->
             <small>Supported embed references: <code>!youtube:0wx7_31bse</code>, <code>!instagram:302b38oxy</code></small>
         </fieldset>
@@ -29,8 +29,9 @@
             <div>
                 <label>Publication Date</label>
                 <div>
-                    <input type="date" name='publicationDate' value="{{post.publicationDate}}">
-                    <input type="time" name='publicationTime' value="{{post.publicationTime}}">
+                    {{post.live_date.field()}}
+                    <!-- <input type="date" name='publicationDate' value="{{post.publicationDate}}">
+                    <input type="time" name='publicationTime' value="{{post.publicationTime}}"> -->
                 </div>
             </div>
             <input-array name="tags" allow-custom="true">{{!post.tags.options}}</input-array>

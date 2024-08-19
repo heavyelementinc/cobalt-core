@@ -99,6 +99,55 @@
         width: 50%;
     }
 
+.landing-main--splash .byline {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    gap: .7em;
+    align-items: center;
+}
+
+    .landing-main--splash img.byline-avatar {
+        position: relative;
+        height: 2em;
+        width: 2em;
+        border-radius: 50%;
+    }
+
+    .landing-main--splash .author-name {
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+
+    .landing-main--splash .author-name a {
+        font-weight: normal;
+    }
+
+    .landing-main--splash .post-details {
+        font-size: .8em;
+    }
+    
+    .landing-main--splash .byline a {
+        font-weight: normal;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .landing-main--splash .byline a:hover {
+        text-decoration: underline;
+    }
+
+    .landing-main--splash.landing-splash--type-centered .byline {
+        gap: .2em;
+        margin-top: .7em;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .landing-splash--type-centered.landing-main--splash img.byline-avatar {
+        /* display: none; */
+    }
+
 .landing-primary-section {
     display: flex;
     justify-content: center;
@@ -185,6 +234,7 @@
                 display: block;
                 width: calc(33.3% - 2em);
                 background: white;
+                text-decoration: none;
                 /* height: 8em; */
             }
 
@@ -213,6 +263,23 @@
                     font-weight: normal;
                     margin: .75em;
                 }
+
+li ul.blockeditor--nestedlist {
+    margin: 0;
+}
+
+.blockeditor--blockbutton {
+    display: flex;
+    justify-content: center;
+}
+
+@-moz-document url-prefix() {
+    a.landing-main--related-page summary {
+        display: block;
+        height: 12ch;
+        overflow: hidden;
+    }
+}
 
 @media only screen and (max-width: 1280px) {
     .landing-primary-section {

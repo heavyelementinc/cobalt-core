@@ -78,6 +78,7 @@ class NewFormRequest extends HTMLElement {
         this.removeFeedback()
     }
 
+    /** @return FormData */
     get value() {
         if(this.childrenReady !== true) console.warn("This element has children that are not ready!", this);
         const elements = this.querySelectorAll(universal_input_element_query);
@@ -150,6 +151,7 @@ class NewFormRequest extends HTMLElement {
             console.warn("`data` must not be null. Aborting.")
             return
         }
+        console.log(data)
         const method  = this.getAttribute('method');
         const action  = this.getAttribute('action');
         const enctype = this.getAttribute('enctype') ?? "application/json; charset=utf-8";
@@ -204,7 +206,13 @@ class NewFormRequest extends HTMLElement {
 
     initAutoSaveListeners() {
         function autoSaveListener(event) {
-            if(this.autoSave) this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element: event.target || event.currentTarget || event.srcElement}}));
+            if(!this.autoSave) return;
+            const element = event.target || event.currentTarget || event.srcElement;
+            if(!element) return;
+            if(!element.name && element.getAttribute("name") === null) return;
+            if(["true", "ignore"].includes(element.getAttribute("autosave-ignore"))) return;
+
+            this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element}}));
         }
         const elements = this.querySelectorAll(universal_input_element_query);
         for(const el of elements) {

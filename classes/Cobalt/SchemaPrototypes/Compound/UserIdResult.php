@@ -28,7 +28,12 @@ class UserIdResult extends SchemaResult {
     function __construct() {
         $this->userCrud = new UserCRUD();
     }
-    
+
+    #[Prototype]
+    protected function _id() {
+        return $this->originalValue;
+    }
+
     #[Prototype]
     public function field(string $class = "", array $misc = [], string $tag = "input"):string {
         // return $this->input($class, $misc, "input-user");

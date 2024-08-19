@@ -1,5 +1,5 @@
 <?php
-
+require_once __ENV_ROOT__ . "/config/default_settings.php";
 global $TEMPLATE_PATHS;
 $TEMPLATE_PATHS = [
     __APP_ROOT__ . "/templates/",
@@ -64,6 +64,37 @@ function getRouteGroups() {
     return $ROUTE_GROUPS;
 }
 
+global $EXPORTED_PUBLIC_VARS;
+$EXPORTED_PUBLIC_VARS = [];
+
+global $TEMPLATE_BINDINGS;
+$TEMPLATE_BINDINGS = [
+    "html_head_binding", "noscript_binding_after", "header_binding_before",
+    "header_binding_middle", "header_binding_after", "main_content_binding_before",
+    "main_content_binding_after", "footer_binding_before", "footer_binding_after"
+];
+
+/**
+ * Append a value to a particular template binding
+ * 
+ * Valid bindings: html_head_binding, noscript_binding_after, header_binding_before, 
+ * header_binding_middle, header_binding_after, main_content_binding_before, 
+ * main_content_binding_after, footer_binding_before, footer_binding_after
+ * 
+ * @param string $binding_name the name of the binding
+ * @param string $value the value to be bound
+ * @return void
+ */
+function bind($binding_name, $value) {
+
+
+    if (!in_array($binding_name, $GLOBALS['TEMPLATE_BINDINGS'])) throw new Exception("Invalid binding");
+
+    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'][$binding_name]))
+        $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] = $value;
+    else $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] .= $value;
+}
+
 const REQUEST_ENCODE_JSON = 1;
 const REQUEST_ENCODE_FORM = 2;
 const REQUEST_ENCODE_XML = 4;
@@ -95,3 +126,5 @@ const CUSTOMIZATION_TYPE_COLOR = 'color';
 const CUSTOMIZATION_TYPE_SERIES = 'series';
 
 $DECLARED_CUSTOMIZATIONS = [];
+
+

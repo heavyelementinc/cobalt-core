@@ -220,13 +220,13 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     #[Prototype]
     protected function join($delimiter) {
-        $val = implode($delimiter, $this->getValue());
+        $val = implode($delimiter, $this->getValue() ?? []);
         return $val;
     }
 
     #[Prototype]
     protected function last() {
-        $val = $this->getValue();
+        $val = $this->getValue() ?? [];
         $v = count($val);
         return $val[$v - 1];
     }

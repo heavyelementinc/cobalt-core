@@ -38,7 +38,7 @@ use Validation\Exceptions\ValidationIssue;
 class Settings extends \Drivers\Database {
 
     const __DEFINITIONS__ = [
-        __ENV_ROOT__ . "/config/default_settings.jsonc",
+        // __ENV_ROOT__ . "/config/default_settings.jsonc",
         __APP_ROOT__ . "/config/settings.jsonc",
         __APP_ROOT__ . "/ignored/config/settings.jsonc",
         __APP_ROOT__ . "/config/settings.json",
@@ -208,7 +208,9 @@ class Settings extends \Drivers\Database {
 
     public function getSettingDefinitions(){
         try {
-            $this->raw_decode = [];
+            $this->raw_decode = [
+                'Cobalt/Settings/Settings.php' => DEFAULT_DEFINITIONS
+            ];
             foreach($this::__DEFINITIONS__ as $file) {
                 if(!file_exists($file)) continue;
                 $this->raw_decode[$file] = jsonc_decode(file_get_contents($file), true, 512, JSON_ERROR_SYNTAX);
@@ -520,24 +522,3 @@ class Settings extends \Drivers\Database {
     }
 
 }
-
-
-    // function get_definititions() {
-    //     $detect_definition = ['default','directives','meta'];
-    //     $setting_values = [];
-    //     $definitions = [];
-    //     foreach($this::__DEFINITIONS__ as $index => $file) {
-    //         if(!file_exists($file)) continue;
-    //         try {
-    //             $definitions[$file] = jsonc_decode($file,true, JSON_ERROR_SYNTAX);
-    //         } catch (\Exception $e) {
-    //             kill("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""],$file) . '`');
-    //         }
-    //         foreach($definitions[$file] as $name => $setting) {
-    //             if(gettype($setting) === "array") 
-    //         }
-    //     }
-    //     $json = array_merge(...$definitions);
-
-    //     return [$json, $definitions];
-    // }

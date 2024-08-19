@@ -18,6 +18,7 @@ ob_start();
  * @global $route_context Stores the value of the route context
  */
 $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
+if(getenv('HTTP2')) require_once __ENV_ROOT__ . "/globals/http2.php";
 try {
     /** @global $auth Access the Authentication class */
     $auth = new Auth\Authentication();

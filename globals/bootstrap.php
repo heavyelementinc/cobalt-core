@@ -13,6 +13,29 @@ if(file_exists(__APP_ROOT__ . "/ignored/DEVELOPMENT") || file_exists(__APP_ROOT_
     $db_config = __APP_ROOT__ . "/config/config.development.php";
 }
 
+/**
+ * {boostrap_mode: int, safe_mode: int, mode: int, timezone: int|false, enable_debug_routes: bool, db_driver: string, db_addr: string, db_port: string, database: string, db_usr: string|false, db_pwd: string|false, db_ssl: string|false, db_sslFile: string|false, db_invalidCerts: bool, smtp_username:string, smtp_password: string,smtp_host: string,smtp_port: string,smtp_auth: string}
+ * @return array{boostrap_mode: int,
+ * safe_mode: int,
+ * mode: int,
+ * timezone: int|false,
+ * enable_debug_routes: bool,
+ * db_driver: string,
+ * db_addr: string,
+ * db_port: string,
+ * database: string,
+ * db_usr: string|false,
+ * db_pwd: string|false,
+ * db_ssl: string|false,
+ * db_sslFile: string|false,
+ * db_invalidCerts: bool,
+ * smtp_username:string,
+ * smtp_password: string,
+ * smtp_host: string,
+ * smtp_port: string,
+ * smtp_auth: string
+ * }
+ */
 function config() {
     global $CONFIG;
     return $CONFIG;

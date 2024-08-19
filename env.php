@@ -128,9 +128,8 @@ if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->g
     $_SERVER['COBALT_TRUSTED_HOST'] = $_SERVER['HTTP_HOST'];
     $app->__settings->trusted_host = $_SERVER['COBALT_TRUSTED_HOST'];
 }
-/** @global __APP_SETTINGS__ The __APP_SETTINGS__ constant is an array of app 
- *                           settings 
- * */
+
+/** @var array DEFAULT_DEFINTIONS */
 define("__APP_SETTINGS__", $application->get_settings());
 
 session_name("COBALTID");

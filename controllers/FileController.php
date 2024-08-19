@@ -233,6 +233,7 @@ class FileController extends \Controllers\FileController {
             $priority = $data['nat_order'];
         }
         return view("sitemap/url.xml", [
+            'server_name' => server_name(),
             'location' => $location,
             'lastModified' => $lastmod,
             'priority' => $priority + 1,

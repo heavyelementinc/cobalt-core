@@ -14,4 +14,9 @@ horizontal-scroll.active {
 
 horizontal-scroll.active > * {
     pointer-events: none;
+    user-select: none;
+}
+
+horizontal-scroll > img {
+    pointer-events: none;
 }

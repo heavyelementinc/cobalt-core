@@ -1,25 +1,26 @@
 <?php
 
+use Routes\Options;
 use Routes\Route;
 
 if(app("UGC_enable_user_generated_content")) {
-    Route::get(trim_trailing_slash(app("UGC_retrieval_endpoint")) . "/{file_id}", "UGC@retrieve");
+    Route::get(new Options(trim_trailing_slash(app("UGC_retrieval_endpoint")) . "/{file_id}", "UGC@retrieve"));
 }
 
-Route::get("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']);
+Route::get(new Options("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']));
 
-Route::get("/res/fs/...","FileController@download");
+Route::get(new Options("/res/fs/...","FileController@download"));
 
-Route::get("/ServiceWorker.js", "FileController@service_worker");
+Route::get(new Options("/ServiceWorker.js", "FileController@service_worker"));
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
     if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
         $address = __APP_SETTINGS__['Posts']['public_index'];
         $length = strlen($address) - 1;
         if($address[$length] === "/") $address = substr($address, 0, -1);
-        Route::get("$address.xml", "Posts@RSS_feed");
+        Route::get("$address.xml", "Posts@rss_feed");
     }
-    Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@index", __APP_SETTINGS__['Posts']['public_index_options']);
+    Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@posts_landing", __APP_SETTINGS__['Posts']['public_index_options']);
     
     $posts = array_merge(
         __APP_SETTINGS__['Posts']['public_post_options'] ?? [], [
@@ -29,8 +30,8 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
             ]
     ]);
     
-    Route::get(__APP_SETTINGS__['Posts']['public_post'],  "Posts@post", $posts);
-    Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
+    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page", $posts);
+    // Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
 }
 
 if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {

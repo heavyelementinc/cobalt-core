@@ -113,6 +113,10 @@ class InputDateTime extends HTMLElement {
         return attr;
     }
 
+    get name() {
+        return this.getAttribute("name");
+    }
+
     initUI() {
         this.pickerButton = document.createElement("button");
         this.pickerButton.innerHTML = "<i name='chevron-down'></i>";

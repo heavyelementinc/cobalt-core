@@ -12,6 +12,11 @@ input-datetime {
     display: inline-flex;
     justify-content: space-between;
     width: 23ch;
+    cursor: default;
+}
+
+input-datetime time {
+    cursor: default;
 }
 
 input-datetime > button {
@@ -38,8 +43,10 @@ date-picker {
     box-shadow: var(--project-box-shadow);
 }
 
-date-picker[hidden='false'] {
+date-picker[hidden='false'][__custom-input="true"] {
     display: block;
+    width: 23ch;
+    box-sizing: border-box;
 }
 
 date-picker hgroup {

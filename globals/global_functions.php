@@ -15,24 +15,12 @@
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
-use Cobalt\Pages\PageManager;
-use Cobalt\Posts\PostManager;
 use Cobalt\Renderer\Render;
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
-use Controllers\CRUDController;
-use Demyanovs\PHPHighlight\Highlighter;
-use Drivers\UTCDateTime as DriversUTCDateTime;
-use Exceptions\HTTP\Confirm;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
-use Exceptions\HTTP\Reauthorize;
-use Exceptions\HTTP\Unauthorized;
-use Handlers\ApiHandler;
-use MongoDB\BSON\UTCDateTime;
-use MongoDB\Model\BSONArray;
-use Validation\Exceptions\NoValue;
-use Validation\Exceptions\ValidationIssue;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -56,235 +44,13 @@ function app($setting = null) {
     }
 }
 
-/** A getter function for accessing the current user's info.
- * 
- * Get the current user's information when called without arguments or specify
- * the name of the field you're trying to access.
- *  
- * @throws Exception 
- * @param string|null $info (Optional) The field name you're trying to access
- * @return mixed Session object, session property, or null if session does not 
- *               exist
- */
-function session($info = null) {
-    if (!isset($GLOBALS['session'])) return null;
-    if ($info === null) return $GLOBALS['session'] ?? null;
-    if (key_exists($info, $GLOBALS['session']['__dataset'])) return $GLOBALS['session']['__dataset'][$info];
-    return lookup_js_notation($info, $GLOBALS['session'], true);
-    throw new Exception("Field $info does not exist");
-}
-
-function session_refresh() {
-    $GLOBALS['auth'] = new \Auth\Authentication();
-}
-
-/**
- * Check if the session exists
- *
- * @return bool
- */
-function session_exists() {
-    if (isset($GLOBALS['session']) && $GLOBALS['session'] === null) return false;
-    if (isset($GLOBALS['session'])) return true;
-    return false;
-}
-
-
-/**
- * @param MongoDB\BSON\Document|mixed $it The Mongo document to be converted
- * @return array returns an array representation of the document
- */
-function doc_to_array($it): array {
-    if (is_array($it)) return $it;
-    $result = [];
-    foreach ($it as $key => $value) {
-        if ($value instanceof \Traversable) {
-            $result[$key] = doc_to_array($value);
-        } else {
-            $result[$key] = $value;
-        }
-    }
-    return $result;
-}
-
-function iterator_to_array_recursive($it):array {
-    $mutant = [];
-    foreach($it as $key => $value) {
-        if($value instanceof \Traversable) $value = iterator_to_array($value);
-        if(is_array($value)) $mutant[$key] = iterator_to_array_recursive($value);
-        else $mutant[$key] = $value;
-    }
-    return $mutant;
-}
-
-/**
- * Merges the elements of one or more arguments
- * @param array|Iterator $args,... Arguments
- * @return mixed 
- */
-function merge() {
-    $arguments = func_get_args();
-    try {
-        return array_merge(...$arguments);
-    } catch (TypeError $e) {
-
-    }
-    $list = [];
-    foreach($arguments as $i => $arg) {
-        if($arg instanceof \MongoDB\Model\BSONDocument) {
-            $list[$i] = doc_to_array($arg);
-            continue;
-        }
-        if($arg instanceof Iterator) {
-            $list[$i] = iterator_to_array($arg);
-            continue;
-        }
-        $list[$i] = $arg;
-    }
-    return array_merge(...$list);
-}
-
-function array_append(&$array) {
-    
-}
-
-/**
- * Check if the current user has permission.
- *
- * @throws \Exceptions\HTTP\Unauthorized if not logged in
- * @throws Exception if the permission specified does not exist
- * @param  string $perm_name the name of the permission to check for
- * @param  string|array $group the group name or list of group names. 
- *                      Can be null.
- * @return bool true if the user has permission, false otherwise
- */
-function has_permission($perm_name, $group = null, $user = null, $throw_no_session = true) {
-    return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
-}
-
-/**
- * Checks if the current user has root permission
- * @return bool
- */
-function is_root() {
-    $session = session();
-    if(!$session) return false;
-    if(!key_exists('groups',(array)$session)) return false;
-    return in_array('root',(array)$session['groups']->getArrayCopy());
-}
-
-/** This function will return a merged array of decoded JSON files that are 
- * found to exist. Later elements in the $paths argument will overwrite earlier 
- * elements of the same name.
- * 
- * If $merged is false, the decoded files will be returned as separate elements 
- * of the array.
- */
-function get_all_where_available($paths, $merged = true, $throwOnFail = false) {
-    $available = [];
-    foreach ($paths as $key => $path) {
-        $options = 0;
-        if($throwOnFail) $options = JSON_ERROR_SYNTAX;
-        try {
-            if (file_exists($path)) $available[$key] = jsonc_decode(file_get_contents($path), true, 512 ,$options);
-        } catch (Exception $e) {
-            throw new Exception("Syntax error in `" . str_replace([__APP_ROOT__, __ENV_ROOT__],[""], $path) . '`');
-        }
-        if(!isset($available[$key])) continue;
-        if($available[$key] === null || $available[$key] === []) unset($available[$key]);
-    }
-    if ($merged) return array_merge(...$available);
-    return $available;
-}
-
-// function scan_dir_all(array $paths, $contexts = [__ENV_ROOT__, __APP_ROOT__]):array {
-//     $results = [];
-//     foreach($paths as $path) {
-        
-//         $dir = scandir($path);
-//         $r = [];
-//         foreach($dir as $d) {
-            
-//         }
-
-//     }
-//     return array_unique(array_merge(...$results));
-// }
-
-/** Hand this function an array of files that might exist and this function will
- *  return an array of file paths that exist */
-function files_exist_the_hard_way($arr, $error_on_empty = true) {
-    $result = [];
-    foreach ($arr as $file) {
-        if (file_exists($file)) array_push($result, $file);
-    }
-    if ($error_on_empty && empty($result)) throw new Exception(__FUNCTION__ . " requires that it find at least one file that exists.");
-    return $result;
-}
-
-/** Hand this function an array of files that might exist and this function will
- * return an array of file paths that exist. If TRUE is used as the second 
- * argument and no files are found, an exception will be thrown.
- */
-function files_exist($arr, $error_on_empty = true) {
-    $values = array_values(array_filter($arr, "file_exists"));
-    if ($error_on_empty && empty($values)) throw new Exception(__FUNCTION__ . " requires that it find at least one file that exists.");
-    return $values;
-}
-
-/**
- * Searches for filename in given directory list.
- * 
- * Loops through an array of directories and looks for the filename inside them.
- * @param array $arr_of_paths A list of directories to search for $filename
- * @param string $filename The name of the file to find
- * @return string|false false if no file found, path name as string otherwise
- */
-function find_one_file(array $arr_of_paths, $filename) {
-    $deprecated_path = __APP_ROOT__ . "/private";
-    foreach ($arr_of_paths as $path) {
-        $file = "$path/$filename";
-        if (file_exists($file)) {
-            if(substr($deprecated_path,0,strlen($deprecated_path)) === $deprecated_path) {
-                // trigger_error("Your application's file structure is using the deprecated /private directory. Please move all your classes, templates, controllers, and routes to __APP_ROOT__", E_USER_DEPRECATED);
-            }
-            return $file;
-        }
-    }
-    return false;
-}
-
-/** Checks if non-false is returned by find_one_file and returns true, otherwise
- * returns false
- * @param string $template path relative to template dirs
- * @return bool
- */
-function template_exists($template) {
-    $file = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template);
-    if ($file !== false) return true;
-    return false;
-}
-
-/**
- * Uses the controller's `title` to generate an ID. This is automatically applied
- * to a page if no `main_id` is specified.
- * 
- * This function does not guarantee the ID generated is unique in your DOM and
- * two pages with the same .
- * 
- * @return string[]|string|null 
- */
-function get_main_id($prepend = true) {
-    if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['title'])) return "main-cobalt";
-    $final = str_to_id($GLOBALS['WEB_PROCESSOR_VARS']['title']);
-    if ($prepend) return "main-$final";
-    return $final;
-}
-
-function str_to_id($str) {
-    $replace = preg_replace("/([^\w])/", "-", $str);
-    return strtolower(preg_replace("/(-{2,})/", "-", $replace));
-}
+require_once __ENV_ROOT__ . "/globals/helpers/client.php";
+require_once __ENV_ROOT__ . "/globals/helpers/cobalt.php";
+require_once __ENV_ROOT__ . "/globals/helpers/numbers.php";
+require_once __ENV_ROOT__ . "/globals/helpers/arrays.php";
+require_once __ENV_ROOT__ . "/globals/helpers/strings.php";
+require_once __ENV_ROOT__ . "/globals/helpers/requests.php";
+require_once __ENV_ROOT__ . "/globals/helpers/routes.php";
 
 /** The autoload routine for our classes.
  * @throws Exception if $class could not be loaded
@@ -375,11 +141,15 @@ function cobalt_autoload($class) {
     }
 }
 
-function obfuscate_path_name(string $path_name):string {
-    return str_replace([__ENV_ROOT__, __APP_ROOT__], ['__ENV_ROOT__', '__APP_ROOT__'], $path_name);
-}
-
-function get_controller($controllerName, $instanced = false, $path = false) {
+/**
+ * 
+ * @param string $controllerName 
+ * @param bool $instanced 
+ * @param bool $path 
+ * @return string|object
+ * @throws HTTPException 
+ */
+function get_controller(string $controllerName, bool $instanced = false, bool $path = false) {
     $locations = [
         __APP_ROOT__ . "/controllers",
         __ENV_ROOT__ . "/controllers",
@@ -394,7 +164,7 @@ function get_controller($controllerName, $instanced = false, $path = false) {
 }
 
 /** Updates @global WEB_PROCESSOR_TEMPLATE with the parameter's value
- * @deprecated use new *set_template("/path/to/template.html")*
+ * @deprecated use *return view("/path/to/template.html")*
  * @param string $path The path name relative to TEMPLATE_PATHS
  * @return void
  */
@@ -420,7 +190,6 @@ function set_template($path, $vars = []) {
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
  * 
- * 
  * A few template vars for quick reference:
  *  * title       - The title of the page
  *  * main_id     - the main element's id
@@ -434,7 +203,7 @@ function set_template($path, $vars = []) {
  * @param array $vars MUST BE ASSOCIATIVE ARRAY
  * @return void
  */
-function add_vars($vars) {
+function add_vars($vars):void {
     if(key_exists('custom', $vars)) throw new Exception("You may not override the `custom` var.");
     if (!isset($GLOBALS['WEB_PROCESSOR_VARS'])) $GLOBALS['WEB_PROCESSOR_VARS'] = [];
     $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
@@ -450,6 +219,29 @@ function add_vars($vars) {
     $GLOBALS['WEB_PROCESSOR_VARS'] = array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars);
 }
 
+/**
+ * Set a single web processor var
+ * @param string $name 
+ * @param mixed $value 
+ * @return void 
+ * @throws Exception
+ */
+function set(string $name, mixed $value):void {
+    add_vars([$name => $value]);
+}
+
+/**
+ * Set a web processor variable as public
+ * @param string $name 
+ * @param mixed $value 
+ * @return void 
+ * @throws Exception 
+ */
+function export(string $name, mixed $value):void {
+    $GLOBAL['EXPORTED_PUBLIC_VARS'][$name] = $value;
+    set($name, $value);
+}
+
 function correct_exported_values(&$vars, $var, $val) {
     if($var[0].$var[1] !== "__") return [$var => $val];
     $correctedName = substr($var,2);
@@ -457,8 +249,6 @@ function correct_exported_values(&$vars, $var, $val) {
     unset($vars[$var]);
     return [$correctedName => $val];
 }
-
-$GLOBALS['EXPORTED_PUBLIC_VARS'] = [];
 
 function export_vars($vars) {
     $GLOBALS['EXPORTED_PUBLIC_VARS'] = array_merge($GLOBALS['EXPORTED_PUBLIC_VARS'], $vars);
@@ -473,42 +263,6 @@ function get_exportables_as_json($encode = 0) {
     return base64_encode(json_encode($GLOBALS['EXPORTED_PUBLIC_VARS'], $encode | JSON_PRETTY_PRINT));
 }
 
-$GLOBALS['TEMPLATE_BINDINGS'] = [
-    "html_head_binding", "noscript_binding_after", "header_binding_before",
-    "header_binding_middle", "header_binding_after", "main_content_binding_before",
-    "main_content_binding_after", "footer_binding_before", "footer_binding_after"
-];
-
-function set($name, $value) {
-    add_vars([$name => $value]);
-    return "";
-}
-
-function export($name,$value) {
-    // $GLOBAL['EXPORTED_PUBLIC_VARS'][$name] = $value;
-    return set($name,$value);
-}
-
-/**
- * Append a value to a particular template binding
- * 
- * Valid bindings: html_head_binding, noscript_binding_after, header_binding_before, 
- * header_binding_middle, header_binding_after, main_content_binding_before, 
- * main_content_binding_after, footer_binding_before, footer_binding_after
- * 
- * @param string $binding_name the name of the binding
- * @param string $value the value to be bound
- * @return void
- */
-function bind($binding_name, $value) {
-
-
-    if (!in_array($binding_name, $GLOBALS['TEMPLATE_BINDINGS'])) throw new Exception("Invalid binding");
-
-    if (!isset($GLOBALS['WEB_PROCESSOR_VARS'][$binding_name]))
-        $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] = $value;
-    else $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] .= $value;
-}
 
 /** 
  * This function accepts a JS object notated $path_map and searches $vars for a 
@@ -599,6 +353,9 @@ function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed 
     if($type) {
         if(isset($subject[$name])) return $subject[$name];
     }
+    if ($subject instanceof MapResult) {
+        $subject = $subject->getRaw();
+    }
     if ($subject instanceof SchemaResult) {
         if(isset($subject->{$name})) return $subject->{$name};
         $type = "SchemaResult";
@@ -625,154 +382,6 @@ function get_temp_path($path, $key) {
     return $substr;
 }
 
-/** Give this function a string and it will parse it as Markdown. $untrusted 
- * tells markdown to 
- * sanitize any HTML or links in the the parsing process.
- */
-
-
-/**
- * from_markdown
- *
- * @param  string $string - The string you wish to parse as markdown
- * @param  bool $untrusted - Whether the markdown is user input
- * @return string - HTML-formatted string
- */
-function from_markdown(?string $string, bool $untrusted = true) {
-    if(!$string) return "";
-
-    // [$string, $placeholders, $replacements] = parse_embeds($string);
-
-    $md = new ParsedownExtra();
-    $md->setSafeMode($untrusted);
-    // $md->setMarkupEscaped($untrusted);
-    $parsed = $md->text($string);
-
-    $parsed = embed_from_img_tags($parsed);
-    // $ytMatch = ["/&lt;img.*src=['\"].*(youtube).*v=[a-zA-Z0-9.*['\"].*&gt;/", "/<img.*src=['\"].*(youtube).*['\"].*>/"];
-
-    // foreach($ytMatch as $url) {
-    //     $matches = [];
-    //     preg_replace($url, $parsed, $matches);
-
-    //     $parsed = str_replace($match[0], , $parsed);
-    // }
-
-    // Implmentented reddit's ^ for superscript. Only works one word at a time.
-    return preg_replace(
-        [
-            "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
-            "/\^(\w)/",
-            
-            // "/<img src=['\"]()['\"])/"
-            // "/&lt;a(\s*[='\(\)]*.*)&gt;(.*)&lt;\/a&gt;/",
-        ],
-        [
-            "<sup>$1</sup>",
-            "<sup>$1</sup>",
-
-            // "<a$1>$2</a>",
-        ],
-        $parsed
-    );
-}
-
-function youtube_embedder(DOMElement $img, DOMDocument $doc){
-    $url = $img->getAttribute('src');
-    $rawParams = parse_url($url, PHP_URL_QUERY);
-    $host = parse_url($url, PHP_URL_HOST);
-    $id = "";
-    if($rawParams) {
-        $params = [];
-        parse_str($rawParams, $params);
-        $id = $params['v'];
-    } else {
-        switch($host) {
-            case "www.youtu.be":
-            case "youtu.be":
-                $id = parse_url($url, PHP_URL_PATH);
-                if($id[0] == "/") $id = substr($id, 1);
-                break;
-        }
-    }
-    $figure = new DOMElement('figure');
-    $doc->appendChild($figure);
-    $iframe = new DOMElement('iframe');
-    $figure->appendChild($iframe);
-
-    $figure->setAttribute('class', 'content-embed content--youtube');
-
-    $iframe->setAttribute('width', '560');
-    $iframe->setAttribute('height', '315');
-    $iframe->setAttribute('src', 'https://www.youtube.com/embed/'.$id);
-    $iframe->setAttribute('title', 'YouTube video player');
-    $iframe->setAttribute('frameborder', "0");
-    $iframe->setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
-    $iframe->setAttribute('allowfullscreen', 'allowfullscreen');
-    $img->replaceWith($figure);
-    
-}
-
-function instagram_embedder(DOMElement $img, DOMDocument $dom) {
-    $src = $img->getAttribute("src");
-    $figure = new DOMElement('figure');
-    $dom->appendChild($figure);
-    $iframe = new DOMElement('ig-embed');
-    $figure->appendChild($iframe);
-    $figure->setAttribute('class', 'content-embed content--instagram');
-    $iframe->setAttribute('src', $src); //"https://www.instagram.com/p/$src/?utm_source=ig_embed&amp;utm_campaign=loading");
-    $img->replaceWith($figure);
-}
-
-function embed_from_img_tags($html) {
-    $dom = new DOMDocument();
-    $dom->loadHTML($html);
-    $imgTags = $dom->getElementsByTagName("img");
-    /** @var DOMElement */
-    foreach($imgTags as $img) {
-        $src = $img->getAttribute('src');
-        $host = parse_url($src, PHP_URL_HOST);
-        switch($host) {
-            case "www.youtube.com":
-            case "youtu.be":
-            case "www.youtu.be":
-            case "youtube.com":
-                youtube_embedder($img, $dom);
-                break;
-            case "instagram.com":
-            case "www.instagram.com":
-                instagram_embedder($img, $dom);
-                break;
-        }
-    }
-    return $dom->saveHTML();
-}
-
-function markdown_to_plaintext(?string $string, $stripWhitespace = false) {
-    $md = from_markdown($string);
-    $md = strip_tags($md);
-    if($stripWhitespace) $md = preg_replace("/[\s]/", " ", $md);
-    $md = str_replace("\n", "\n\n", $md);
-    return trim($md);
-}
-
-/**
- * random_string
- *
- * @param  int $length
- * @param  string $string
- * @return string Random string
- */
-function random_string($length, $fromChars = null) {
-    $validChars = $fromChars ?? "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    $min = 0;
-    $max = strlen($validChars) - 1;
-    $random = "";
-    for ($i = 0; $i <= $length; $i++) {
-        $random .= $validChars[rand($min, $max)];
-    }
-    return $random;
-}
 
 /** Load a file containing JSON and parse it 
  * @param string $file_name path to a JSON file
@@ -801,81 +410,6 @@ function jsonc_decode($json, $assoc = false, $depth = 512, $flags = 0) {
     return json_decode($json, $assoc, $depth, $flags);
 }
 
-/** Used with the '...' route path symbol, provide the string as $path amd */
-function build_array_from_path(&$arr, $path, $value, $delimiter = ".") {
-    $keys = explode($delimiter, $path);
-    foreach ($keys as $key) {
-        $arr = &$arr[$key];
-    }
-    $arr = $value;
-}
-
-
-function build_object_from_paths($object) {
-    $mutant = [];
-    foreach ($object as $path => $value) {
-        $arr = [];
-        build_array_from_path($arr, $path, $value);
-        $mutant = array_merge_recursive($mutant, $arr);
-    }
-    return $mutant;
-}
-
-/**
- * Checks if the HTTPS protocol is being used.
- * 
- * @return bool 
- */
-function is_secure():bool {
-    if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match('/^https/',$_SERVER['HTTP_ORIGIN'] ?? "")) return true;
-    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || $_SERVER['SERVER_PORT'] == 443;
-}
-
-/** Used with the '...' route path symbol, provide the string as $path and valid
- * keys as $keys
- * 
- * If the path equals `/some/path/key/value` and $keys equals ['key']
- * 
- * The return value will be ['key' => 'value']
- * 
- * All other info in the string will be ignored.
- * 
- * @param string $path
- * @param array $keys a list of valid keys to parse for
- * @return array the processed associative array
- */
-function associative_array_helper(string $path, array $keys) {
-    $exploded = explode("/", $path);
-    $array = array_fill_keys($keys, null);
-    for ($i = 0; $i < count($exploded); $i++) {
-        if (in_array($exploded[$i], $keys)) {
-            $array[$exploded[$i]] = $exploded[$i + 1];
-            $i++;
-        }
-    }
-    return $array;
-}
-
-function associative_to_path(array $arr) {
-    $path = "/";
-    foreach ($arr as $name => $val) {
-        $path .= "$name/$val/";
-    }
-    return $path;
-}
-
-/**
- * Will determine if an array has string keys
- * Will provide a false positive if indexes are non-linear
- * @param mixed $array 
- * @return bool 
- */
-function is_associative_array(mixed $array) {
-    if(gettype($array) !== "array") return false;
-    if (array() === $array) return false;
-    return array_keys($array) !== range(0, count($array) - 1);
-}
 
 /**
  * A shorthand way of rendering a template and getting the results. This is
@@ -952,7 +486,6 @@ function maybe_view(string $template, array $vars = []):string {
 }
 
 
-
 function conditional_addition(string $template, bool $is_shown, $vars = []) {
     if (!$is_shown) return "";
     return view($template, $vars);
@@ -1002,17 +535,6 @@ function credit_card_form(array|object $data = [],$shipping = false):string {
     ]);
 }
 
-function url_fragment_sanitize(string $value):string {
-    $mutant = strtolower($value);
-    // Remove any character that isn't alphanumerical and replace it with a dash
-    $mutant = preg_replace("/([^a-z0-9])/", "-", $mutant);
-    // Remove any consecutive dash
-    $mutant = preg_replace("/(-){2,}/", "", $mutant);
-
-    if (!$mutant || $mutant === "-") throw new ValidationIssue("\"$value\" is not suitable to transform into a URL fragment");
-    return $mutant;
-}
-
 /** Compare two pathnames
  * 
  * $base_dir is used to substr $path after they have both been canonincalized.
@@ -1035,305 +557,6 @@ function is_child_dir($base_dir, $path) {
     return ($substr === $base_dir); // return comparison operation.
 }
 
-// function get_route_data(string $class, string $method, ?string $routeMethod = "get", string $context = null) {
-    // global $ROUTER;
-//     if($context === null) $context = "web";
-//     $controllerAlias = "$class@$method";
-//     $router = $ROUTER;
-//     if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
-//     // if($context !== $router->route_context) {
-//     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
-//     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
-//     // }
-//     // $routes = $router->routes[$context][$routeMethod];
-//     $route = null;
-//     foreach($router->routes as $routes) {
-//         foreach($routes[$routeMethod] as $r => $data) {
-//             if($data['controller'] !== $controllerAlias) continue;
-//             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
-//             return $data;
-//         }
-//     }
-// }
-
-/**
- * Limitations: this will only return the first route that uses the specified controller
- * @param string $class
- * @param string $method
- * @param array $args 
- * @param mixed $args 
- * 
- * @return string 
- */
-function get_path_from_route(string $class, string $method, array $args = [], ?string $routeMethod = "get", string $context = null) {
-    global $ROUTER;
-    if($context === null) $context = "web";
-    $controllerAlias = "$class@$method";
-    if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
-    // if($context !== $router->route_context) {
-    //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
-    //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
-    // }
-    // $routes = $router->routes[$context][$routeMethod];
-    $route = null;
-    foreach($ROUTER->routes as $routes) {
-        foreach($routes[$routeMethod] as $r => $data) {
-            if($data['controller'] !== $controllerAlias) continue;
-            $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $data['real_path'];
-            return route_replacement($data['real_path'], $args, $data);
-        }
-    }
-
-    $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $route;
-    return $route;
-}
-
-function route_replacement($path, $args, $data = []) {
-    $rt = $path;
-    $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
-    
-    $replacement = [];
-    preg_match_all($regex,$rt,$replacement);
-
-    $mutant = $rt;
-    // if(gettype($replacement[0]) !== "array") $replacement[0] = [$replacement[0]];
-    foreach($replacement[0] as $i => $replace) {
-        $mutant = str_replace($replace, $args[$i] ?? $args[0] ?? "", $mutant);
-    }
-
-    return preg_replace("/\/{2,}/","/", $mutant);
-}
-
-/**
- * This will only return the first route that uses $directiveName
- * @param string $directiveName the "Controller@method" direvitve specified in your router table
- * @param array $args Any arguments used here will get filled in as values for {variables} in route names from left to right
- * @param array $context The context to search ("web", "admin", "apiv1", etc.)
- * @return string 
- * @throws Exception 
- */
-function route(string $directiveName, array $args = [], array $context = []):string {
-    $routeMethod = $context['method'] ?? "get";
-    $ctx = $context['context'] ?? "web";
-    $split = explode("@", $directiveName);
-    
-    $route = get_path_from_route($split[0], $split[1], $args, $routeMethod, $ctx);
-    if(!$route) {
-        $flag = get_crudable_flag($split[0]);
-        if($flag === null) throw new Exception("Could not find route based on directive name.");
-        if($flag !== CRUDABLE_CONFIG_ADMIN + CRUDABLE_CONFIG_APIV1) throw new Exception("Crudable has not been configured");
-        throw new Exception("Could not find route based on directive name.");
-    }
-    return $route;
-}
-
-function validate_route($directiveName, $context) {
-    global $ROUTER;
-    $routeMethod = $context['method'] ?? "get";
-    $ctx = $context['context'] ?? "web";
-    
-    $routes = $ROUTER->routes[$ctx][$routeMethod];
-
-    foreach($routes as $r => $data) {
-        if($data['controller'] !== $directiveName) continue;
-        return true;
-    }
-
-    return false;
-}
-
-// TODO: Fix this
-/** Create a directory listing from existing web GET routes
- * 
- * with_icon, prefix, classes, id, (array) ulPrefix, (array) ulSuffix, (bool) excludeWrapper
- * 
- * @param string $directory_group the name of the key
- */
-function get_route_group_old($directory_group, $misc = []) {
-    global $ROUTER;
-    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
-    if ($misc['with_icon']) $misc['classes'] .= " directory--icon-group";
-    if ($misc['id']) $misc['id'] = "id='$misc[id]' ";
-    if ($misc['classes']) $misc['classes'] = " $misc[classes]";
-    
-    // Check if we have prefixes or suffixes specified
-    
-    $ul = "<ul $misc[id]" . "class='directory--group$misc[classes]'>";
-    if($misc['excludeWrapper'] === true) $ul = "";
-    $current_route = $ROUTER->current_route;
-    $list = $ROUTER->routes;
-
-    // handleAuxiliaryRoutes($list, $misc, $directory_group);
-
-    $group_to_process = [];
-
-    foreach($list as $context => $methods) {
-        foreach($methods as $method => $routes) {
-            $nat_order = -1;
-            foreach ($routes as $r => $route) {
-                $groups = $route['navigation'] ?? false;
-                if (!$groups) continue;
-                // Now we check if the directory group is in $groups or the key exists
-                // If both are FALSE, then we skip list assembly.
-                if (!in_array($directory_group, $groups) && !key_exists($directory_group, $groups)) continue;
-                if ($route['permission'] && !has_permission($route['permission'], null, null, false)) continue;
-                $nat_order++;
-                $group_to_process[] = [...$route, ...['r' => $r, 'context' => $context, 'current_nav_group' => $directory_group, 'nat_order' => $nat_order]];
-            }
-        }
-    }
-
-    uasort($group_to_process, function ($a, $b) {
-        $order_a = $a['anchor']['order'] ?? $a['navigation'][$a['current_nav_group']]['order'] ?? $a['nat_order'];
-        $order_b = $b['anchor']['order'] ?? $b['navigation'][$b['current_nav_group']]['order'] ?? $b['nat_order'];
-        return $order_a - $order_b;
-    });
-
-    foreach($group_to_process as $key => $route) {
-        $info = $groups[$directory_group] ?? $route['anchor'] ?? [];
-        if(key_exists('unread',$route)) $info['unread'] = $route['unread'];
-        if(!isset($info['name']) && isset($route['anchor'])) $info = array_merge($route['anchor'], $info);
-        if ($route['r'] === $current_route) $info['attributes'] = 'class="current--route"';
-        $ul .= build_directory_item($info, $misc['with_icon'], $route['context']);
-    }
-
-    $wrapper = ($misc['excludeWrapper']) ? "" : "</ul>";
-    return $ul . $wrapper;
-}
-
-function get_route_group($directory_group, $misc = []) {
-    global $ROUTER;
-    $misc = array_merge(['with_icon' => false, 'ulPrefix' => "", 'excludeWrapper' => false, 'classes' => "", 'id' => ""], $misc);
-    $rtGrp = new \Routes\RouteGroup($directory_group, $ROUTER->current_route ?? "",$misc['with_icon']);
-    $rtGrp->setID($misc['id']);
-    $rtGrp->setClassesFromString($misc['classes']);
-    $rtGrp->setExcludeWrappers($misc['excludeWrapper']);
-    $landingPages = new PageManager();
-    $pageData = [];
-    $prefix = __APP_SETTINGS__['LandingPage_route_prefix'];
-    foreach($landingPages->find($landingPages->public_query(['include_in_route_group' => true, 'route_group' => $directory_group])) as $page) {
-        $pageData[] = [
-            'href' => $prefix."$page->url_slug",
-            'label' => $page->route_link_label->getValue() ?? $page->title->getValue(),
-            'order' => $page->route_order->getValue(),
-        ];
-    }
-    if(!empty($pageData)) $rtGrp->setExternalLinks($pageData);
-    return $rtGrp->render();
-}
-
-// TODO: Fix this
-function handleAuxiliaryRoutes(&$list, $misc, $group):void {
-    $prefix = ($misc['ulPrefix']) ? $misc['ulPrefix'] : [];
-    $suffix = ($misc['ulSuffix']) ? $misc['ulSuffix'] : [];
-    // If the prefixes or suffixes are strings, make them arrays
-    if(gettype($prefix) === "string") $prefix = [$prefix];
-    if(gettype($suffix) === "string") $suffix = [$suffix];
-    $mutantPrefix = [];
-    foreach($prefix as $pfx) {
-        $mutantPrefix += auxRouteHandler($pfx, $group);
-    }
-
-    $mutantSuffix = [];
-
-    foreach($suffix as $sfx) {
-        array_push($mutantSuffix, [$sfx => auxRouteHandler($sfx, $group)]);
-    }
-
-    foreach($list as $element) {
-        array_unshift($element['get'], ...$mutantPrefix);
-        array_push($element['get'], ...$mutantSuffix);
-    }
-}
-
-// TODO: Fix this
-function auxRouteHandler($route, $group) {
-    if(is_string($route)) {
-        if(strpos($route,"@") !== false) {
-            $rt = route($route);
-            $rt['groups'] === [$group];
-            return $rt;
-        } 
-        return [
-            "/" . preg_quote($route) . "/" => [
-                'original_path' => $route,
-                'controller' => "",
-                'anchor' => [
-                    'label' => $route,
-                    'href' => $route
-                ],
-                'groups' => [$group]
-            ]
-        ];
-    } else if (is_array($route)) return route(...array_values($route));
-    throw new Exception("Provided auxiliary is not a valid auxiliary route type");
-}
-
-function build_directory_item($item, $icon = false, $context = "") {
-    $prefix = "";
-    $icon = "";
-    if ($icon) $icon = "<i name='$item[icon]'></i>";
-    $attributes = $item["attributes"] ?? '';
-    if ($context !== "web") {
-        $prefix = app('context_prefixes')[$context]['prefix'];
-        if($prefix[strlen($prefix) - 1] == "/") $prefix = substr($prefix, 0, -1);
-    }
-    $submenu = "";
-    if (isset($item['submenu_group'])) $submenu = get_route_group($item['submenu_group'], ['classes' => 'directory--submenu', 'icon' => $icon, 'prefix' => $prefix]);
-    if(strpos($submenu,'current--route')) {
-        $current_route_classes = 'current--route current--route--parent';
-        if(isset($item['attributes'])) {
-            $items['attributes'] = substr($item['attributes'],-1) . "$current_route_classes\"";
-        }
-    }
-    $unread = "";
-    if (isset($item['unread']) && $item['unread'] instanceof \Closure) $unread_count = $item['unread']($item);
-    if($unread_count) $unread = "<span class='unread'>$unread_count</span>";
-
-    return "<li><a href='$prefix$item[href]' $attributes>$icon" . "$item[name]$unread</a>$submenu</li>";
-}
-
-function get_schema_group_names(string $group_name, array $schema) {
-    $elements = [];
-    foreach ($schema as $field => $value) {
-        if (isset($value['groups']) && in_array($group_name, $value['groups'])) $elements += [$field => $value];
-    }
-    return $elements;
-}
-
-function get_schema_group_elements($group_name, $schema) {
-}
-
-function schema_group_element($tag, $attributes, $label = "") {
-    $closures = [
-        'input' => "",
-        'default' => "</$tag>"
-    ];
-    $attrs = "";
-    foreach ($attributes as $key => $value) {
-        if (is_callable(($value))) $value = $value($key, $attributes, $label);
-        $attrs = " $key=\"" . htmlspecialchars($value) . "\"";
-    }
-    return "<$tag$attributes>";
-}
-
-/** Convert seconds to pretty string */
-function prettify_seconds(?int $seconds) {
-    if(!$seconds) return "";
-    $date = new DateTime("00:00:00");
-    $date->modify("+ $seconds seconds");
-    return $date->format("g\h i\m");// . "h " . $date->format("i") . "m";
-}
-
-/** Convert cents to dollars with decimal fomatting (not prepended by a "$" dollar sign)
- * @param int $cents 
- * @return string the dollar value as a string
- * */
-function cents_to_dollars($cents) {
-    $dollars = round($cents / 100, 2);
-    return number_format($dollars, 2);
-}
-
 /** Convert a Mongo Date object to a formated date
  * @param object $date instance of MongoDB\BSON\UTCDateTime
  * @param string $fmt (optional) the format of the resulting date string
@@ -1350,34 +573,6 @@ function mongo_date($date, $fmt = "Y-m-d") {
 function date_instance($date) {
 }
 
-function phone_number_format($number, $format = "(ddd) ddd-dddd") {
-    if (!$number) return "";
-    $num_index = 0;
-    $num_max = strlen($number);
-    $formatted = "";
-    for ($i = 0; $i < strlen($format); $i++) {
-        if ($format[$i] === "d") {
-            if ($num_index >= $num_max) {
-                $formatted .= "n";
-                continue;
-            }
-            $formatted .= $number[$num_index];
-            $num_index++;
-        } else {
-            $formatted .= $format[$i];
-        }
-    }
-    return $formatted;
-}
-
-function phone_number_normalize($number) {
-    // List of characters we don't want to store in our db
-    $junk = ["(", ")", " ", "-", "."];
-
-    // Strip the junk characters out of the string
-    $value = str_replace($junk, "", $number);
-    return $value;
-}
 
 function flex_table($docs, $table, $schema) {
     $result = [];
@@ -1397,59 +592,6 @@ function flex_table($docs, $table, $schema) {
     return "<flex-table>" . implode("", $result) . "</flex-table>";
 }
 
-/**
- * Check for confirmation headers and throw an exception if they don't exist
- * 
- * @param string $message confirmation message that the user will see
- * @param array $data data that the confirmation dialog will re-submit
- * @param string $okay the message to "continue"
- * @return bool true if headers exist 
- * @throws Confirm if headers are not detected throw Confirm
- */
-function confirm($message, $data, $okay = "Continue", $dangerous = true) {
-    try {
-        $header = getHeader("X-Confirm-Dangerous");
-        if($header) return true;
-    } catch (Exception $e) {
-        throw new \Exceptions\HTTP\Confirm($message, $data, $okay, $dangerous);
-    }
-}
-
-/**
- * 
- * @param string $message - Prompt the client will display with the reauth request
- * @param mixed $resubmit - Data the client must return to complete the reauth request
- * @return true         - This function will only ever return true, it will throw an exception in any failure case
- * @throws Unauthorized - If the user is not logged in
- * @throws Reauthorize  - If the user must reauthorize or fails a password verification
- */
-function reauthorize($message = "You must re-authroize your account", $resubmit) {
-    // Check if session doesn't exist
-    if(!session()) throw new Unauthorized("You must be logged in");
-    $reauth_session_name = 'last_reauthorized';
-    
-    try {
-        // Check if the X-Reauthorization header is set
-        $reauth = getHeader("X-Reauthorization");
-    } catch(Exception $e) {
-        $reauth = false;
-    }
-
-    if($reauth) {
-        $password_plain_text = base64_decode($reauth);
-        $session_pword = session('pword');
-        if(!password_verify($password_plain_text, $session_pword)) throw new Reauthorize($message, $resubmit);
-        $_SESSION[$reauth_session_name] = time();
-        return true;
-    }
-    // Check if the session meets the minimum reauth timeline
-    if(!isset($_SESSION[$reauth_session_name]) || time() - $_SESSION[$reauth_session_name] >= app("Auth_reauth_timeout")) {
-        throw new Reauthorize($message, $resubmit);
-    }
-
-    // If everything checks out, return true;
-    return true;
-}
 
 
 function plugin($name) {
@@ -1473,253 +615,6 @@ function get_posts_from_tags(array $tags, string $controller = "Posts"):string {
 
     return $html;
 }
-
-/**
- * 
- * @param iterator $results the results of a Mongo query
- * @param string $schema_name the name of the schema class
- * @return array|null every instance of the mongo query as a Cobalt schema
- */
-function results_to_schema($results, string $schema_name) {
-    if ($results === null) return null;
-    $array  = [];
-    // if ($schema_name instanceof \Validation\Normalize === false) throw new Exception("$schema_name is not an instance of \Validation\Normalize");
-    foreach ($results as $i => $doc) {
-        $array[$i] = new $schema_name($doc);
-    }
-    return $array;
-}
-
-function fetch($url, $method = "GET", $headers = [], $return_headers = false) {
-    $client = new \GuzzleHttp\Client();
-    $request = $client->request($method, $url, [
-        'headers' => $headers
-    ]);
-    $headers = $request->getHeaders();
-    $html = $request->getBody()->getContents();
-    if (strpos($headers['Content-Type'][0], 'json')) $html = json_decode($html, true);
-    if (!$return_headers) return $html;
-    return ['body' => $html, 'headers' => $headers];
-}
-
-function post_fetch($url, $data, $headers = [], $return_headers = false) {
-    $client = new \GuzzleHttp\Client();
-    $request = $client->request('POST', $url, [
-        'headers' => $headers,
-        'form_params' => $data
-    ]);
-    $html = $request->getBody()->getContents();
-    $headers = $request->getHeaders();
-    if (strpos($headers['Content-Type'][0], 'json')) $html = json_decode($html, true);
-    if (!$return_headers) return $html;
-    return ['body' => $html, 'headers' => $headers];
-}
-
-function fetch_and_save($url) {
-}
-
-
-function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name'], $schema = "\\Cobalt\\Posts\\PostSchema") {
-    $html = "";
-    $posts = new PostManager(null, $collection);
-    $posts->set_schema($schema);
-    $count = $posts->count(['published' => true]);
-    foreach($posts->findAllAsSchema(['published' => true], ['limit' => $count + 1]) as $post) {
-        $html .= view("sitemap/url.xml", [
-            'location' => $post->{'public_link'},
-            'lastModified' => $post->publicationDate,
-            'priority' => 999,
-            // 'additional' => "<changefreq>true</changefreq>"
-        ]);
-    }
-    return $html;
-}
-
-/**
- * 
- * @param mixed $remote_url 
- * @param mixed $path 
- * @return bool true on success, false on failure
- */
-function fetch_remote_file($remote_url, $path):bool {
-    $result = copy($remote_url, $path);
-    return $result;
-    // return file_put_contents($path, $result);
-
-    // $dir            =   $path;
-    // $fileName       =   basename($remote_url);
-    // $saveFilePath   =   $dir . $fileName;
-    // $ch = curl_init($remote_url);
-    // $fp = fopen($path, 'wb');
-    // curl_setopt($ch, CURLOPT_FILE, $fp);
-    // curl_setopt($ch, CURLOPT_HEADER, 0);
-    // $result = curl_exec($ch);
-    // curl_close($ch);
-    // fclose($fp);
-    // return $result;
-
-    // //This is the file where we save the information
-    // $fp = fopen($path, 'w+');
-    // //Here is the file we are downloading, replace spaces with %20
-    // $ch = curl_init(str_replace(" ","%20",$remote_url));
-    // // make sure to set timeout to a high enough value
-    // // if this is too low the download will be interrupted
-    // curl_setopt($ch, CURLOPT_TIMEOUT, 600);
-    // // write curl response to file
-    // curl_setopt($ch, CURLOPT_FILE, $fp); 
-    // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    // // get curl response
-    // $result = curl_exec($ch); 
-    // curl_close($ch);
-    // fclose($fp);
-
-    // return $result;
-}
-
-/**
- * This function returns the maximum files size that can be uploaded 
- * in PHP
- * @return int File size in bytes
- **/
-function getMaximumFileUploadSize() {
-    return min(convertPHPSizeToBytes(ini_get('post_max_size')), convertPHPSizeToBytes(ini_get('upload_max_filesize')));
-}
-
-/**
- * This function transforms the php.ini notation for numbers (like '2M') to an integer (2*1024*1024 in this case)
- * 
- * @param string $sSize
- * @return integer The value in bytes
- */
-function convertPHPSizeToBytes($sSize) {
-    //
-    $sSuffix = strtoupper(substr($sSize, -1));
-    if (!in_array($sSuffix, array('P', 'T', 'G', 'M', 'K'))) {
-        return (int)$sSize;
-    }
-    $iValue = substr($sSize, 0, -1);
-    switch ($sSuffix) {
-        case 'P':
-            $iValue *= 1024;
-            // Fallthrough intended
-        case 'T':
-            $iValue *= 1024;
-            // Fallthrough intended
-        case 'G':
-            $iValue *= 1024;
-            // Fallthrough intended
-        case 'M':
-            $iValue *= 1024;
-            // Fallthrough intended
-        case 'K':
-            $iValue *= 1024;
-            break;
-    }
-    return (int)$iValue;
-}
-
-function async_cobalt_command($command, $context = true, $log = "/dev/null") {
-    $shell = __ENV_ROOT__ . "/core.sh";
-    if ($context) $shell = __APP_ROOT__ . "/cobalt.sh";
-    $pid = shell_exec("nohup nice -n 10 sh $shell $command > $log & printf \"%u\" $!");
-    return $pid;
-}
-
-function cobalt_command($command, $context = true, $stripControlCharacters = false) {
-    $shell = __ENV_ROOT__ . "/core.sh";
-    if ($context) $shell = __APP_ROOT__ . "/cobalt.sh";
-    if($stripControlCharacters) $shell .= " --plain-output";
-    $result = shell_exec("sh $shell $command");
-    return $result;
-}
-
-function plural($number, string $suffix = "s", string $singular = "") {
-    if ($number == 1) return $singular;
-    return $suffix;
-}
-
-
-function cookie_consent_check() {
-    return isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === "all";
-}
-
-function sanitize_path_name($path) {
-    return str_replace(["../"], "", $path);
-}
-
-function relative_time($time = false, $now = null, $limit = 86400, $format = "M jS g:i A") {
-    if($time instanceof UTCDateTime || $time instanceof DriversUTCDateTime) $time = $time->toDateTime();
-    if($time instanceof DateTime) $time = $time->getTimestamp();
-    if (empty($time) || (!is_string($time) && !is_numeric($time))) $time = time();
-    else if (is_string($time)) $time = strtotime($time);
-
-    if(is_null($now)) $now = time();
-    $relative = '';
-
-    if ($time === $now) $relative = 'now';
-    elseif ($time > $now) $relative = 'in the future';
-    else {
-        $diff = $now - $time;
-
-        if ($diff >= $limit) $relative = date($format, $time);
-        elseif ($diff < 60) {
-            $relative = 'less than one minute ago';
-        } elseif (($minutes = ceil($diff/60)) < 60) {
-            $relative = $minutes.' minute'.(((int)$minutes === 1) ? '' : 's').' ago';
-        } else {
-            $hours = ceil($diff/3600);
-            $relative = 'about '.$hours.' hour'.(((int)$hours === 1) ? '' : 's').' ago';
-        }
-    }
-
-    return $relative;
-}
-
-const FACTOR_MAP = [
-    [
-        'factor' => 1000,
-        'name' => 'thousand',
-        'precision' => 1,
-        'suffix' => 'k'
-    ], [
-        'factor' => 1000000,
-        'precision' => 1,
-        'name' => 'million',
-        'suffix' => 'm'
-    ], [
-        'factor' => 1000000000,
-        'precision' => 1,
-        'name' => 'billion',
-        'suffix' => 'b',
-    ], [
-        'factor' => 1000000000000,
-        'precision' => 1,
-        'name' => 'trillion',
-        'suffix' => 't',
-    ]
-];
-
-function pretty_rounding($number, $type = 'suffix', $join = ""):string{
-    if($number === 0) return "zero";
-    if(is_null($number)) return "zero";
-    
-    $map = FACTOR_MAP;
-    
-    if($number < $map[0]['factor']) return $number;
-
-    foreach($map as $data) {
-        if($number < $data['factor']) continue;
-        if(!key_exists($type, $data)) $type = "suffix";
-        $result = round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP) . $join . $data[$type];
-    }
-
-    return $result;
-}
-
-function pretty_numeral($number):string {
-    return pretty_rounding($number, 'name', " ");
-}
-
 
 function benchmark_start($name) {
     if(!__APP_SETTINGS__['enable_benchmark_profiling']) return;
@@ -1746,27 +641,6 @@ function benchmark_writes($modified) {
     $BENCHMARK_RESULTS[DB_BENCHMARK][DB_BENCH_WRITE] += 1;
 }
 
-function obscure_email(string $email, int $threshold = 3, string $character = "•"): string {
-    $obscured = "";
-    $temp_thresh = $threshold;
-    $domain = false;
-    for($i = 0; $i <= strlen($email) - 1; $i++) {
-        if($email[$i] === "@") {
-            $temp_thresh = $threshold;
-            $domain = true;
-        }
-        if($email[$i] === "." && $domain) $temp_thresh = 2;
-
-        if($temp_thresh <= 0) {
-            $obscured .= $character;
-            continue;
-        }
-
-        $obscured .= $email[$i];
-        $temp_thresh -= 1;
-    }
-    return $obscured;
-}
 
 
 function set_up_db_config_file(string $database, string $user, string $password, string $addr = "localhost", string $port = "27017", string $ssl = "false", string $sslFile = "", string $invalidCerts = "false", ?string $path = null) {
@@ -1792,109 +666,10 @@ function set_up_db_config_file(string $database, string $user, string $password,
 );
 }
 
-function normalize_color($val, $default = null, $normalize = null) {
-    if(!$val) $val = "#000000";
-    $matches = [];
-    $result = preg_match("/^var\((.*)\)$/", $val, $matches);
-    if($result) {
-        $name = str_replace("--project-","",$matches[1]);
-        $val = app("vars-web.$name");
-    }
-
-    if (!$val && $default !== null) return $default;
-    if (strlen($val) > 8) throw new ValidationIssue("Not a hex color.");
-    $pattern = "/^#?[0-9A-Fa-f]{3,6}$/";
-    if (!preg_match($pattern, $val)) throw new ValidationIssue("Not a hex color.");
-    if($val[0] !== "#" && $normalize) $val = "#$val";
-    $length = strlen($val);
-    if ($length <= 4) {
-        $one = 1;
-        $two = 2;
-        $three = 3;
-        if($val[0] !== "#") {
-            $one = 0;
-            $two = 1;
-            $three = 2;
-        }
-        $val = "#$val[$one]$val[$one]$val[$two]$val[$two]$val[$three]$val[$three]";
-    }
-    return preg_replace("/#{2,}/","#",strtoupper($val));
-}
 
 
-/**
- * Clamps a value between the $min and $max value;
- * @param int|float $int 
- * @param int|float $min 
- * @param int|float $max 
- * @return int|float 
- */
-function clamp(int|float $current, int|float $min, int|float $max):int|float {
-    return max($min, min($max, $current));
-}
 
-function country2flag(?string $countryCode, ?string $countryName = null): string {
-    if(!$countryCode) return "";
-    $unicode = (string) preg_replace_callback(
-        '/./',
-        static fn (array $letter) => mb_chr(ord($letter[0]) % 32 + 0x1F1E5),
-        $countryCode
-    );
-    return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
-}
 
-function getHeader($header, $headerList = null, $latest = true, $exception = true) {
-    if($headerList === null) $headerList = getallheaders();
-    $toMatch = strtolower($header);
-    $headers = [];
-    foreach($headerList as $key => $value){
-        $headers[strtolower($key)] = $value;
-    }
-    $match = null;
-    if(key_exists($toMatch, $headers)) $match = $headers[$toMatch];
-
-    if(gettype($match) === "array" && $latest) return $match[count($match) - 1];
-    if($match) return $match;
-    if($exception) throw new NoValue("The specified header was not found among the request headers");
-    return null;
-}
-
-function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
-    if(gettype($code) !== "string") $code = json_encode($code, JSON_PRETTY_PRINT);
-    $mutant = "<pre data-file='$filename' data-lang='$language'>$code</pre>";
-    $highlighter = new Highlighter($mutant, 'railscasts');
-    $highlighter->setShowLineNumbers($line_numbers);
-    $highlighter->setShowActionPanel($action_panel);
-    return $highlighter->parse();
-}
-
-function createJWT(array $header, array $payload, $secret) {
-    // Create token header as a JSON string
-    $header = json_encode(array_merge([
-        'typ' => 'JWT',
-        'alg' => 'HS256'
-    ],$header));
-
-    // Create token payload as a JSON string
-    $payload = json_encode($payload);
-
-    // Encode Header to Base64Url String
-    $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
-
-    // Encode Payload to Base64Url String
-    $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
-
-    // Create Signature Hash
-    $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
-
-    // Encode Signature to Base64Url String
-    $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
-
-    // Create JWT
-    $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
-
-    return $jwt;
-}
 
 if(!function_exists("log_item")) {
     function log_item($message, $lvl = 1, $type = "grey", $back = "normal") {
@@ -1912,173 +687,9 @@ if(!function_exists("log_item")) {
     }
 }
 
-/**
- * Special Query Keywords
- *   @form - References the form-request element that submitted the request (if any)
- *   @cookie - [set, remove] Updates a cookie value through an async reques
- *   sessionStorage - [set, remove] Stores or removes sessionStorage data
- *   localStorage - [set, remove] Stores or removes localStorage data
- * 
- * Implemented Update Parameters
- *   value - <mixed> Modify the value property of the target
- *   dispatchEvent - [event => [detail => [...]]] Dispatches an event on the target
- *   innerHTML - <string> Updates the innerHTML of the element
- *   outerHTML - <string> Updates the outerHTML of the element
- *   invalid - [true|false] Sets the `invalid` property
- *   delete - [true] Deletes the target element
- *   remove - [true] Removes the target element | <string> Queries the target for the given string and removes matching element(s)
- *   message - <string> will provide a message to the end user. It will look like a ValidationIssue
- *   src - <string> update the src attribute for an img tag
- *   attribute - <string> update arbitrary attribute
- *   attributes - <array> update a list of attributes
- *   style - <array> update a list of styles
- *   clear - [true] (@form only) - Clears the form that initiated this request
- * 
- * @param string $query 
- * @param array $value 
- * @return void 
- */
-function update(string $query, array $value) {
-    global $context_processor;
-    if($context_processor instanceof ApiHandler === false) return;
-    $context_processor->update_instructions[] = ['target' => $query, ...$value];
-}
-
-/**
- * Redirect will set a response header of either "X-Location" if "X-Request-Source"
- * is among request headers or "Location" if it's not.
- * @param string $path - The path to redirect to
- * @return void 
- */
-function redirect(string $path) {
-    $headers = apache_request_headers();
-    // If the request was sent via AsyncFetch, return `X-Location` header
-    if(key_exists("X-Request-Source",$headers)) {
-        header("X-Redirect: $path");
-        return;
-    }
-    // Otherwise, return `Location` header
-    header("Location: $path");
-}
-
-/**
- * Sets a response header using the `redirect` function and then exits.
- * @param string $path 
- * @return never 
- */
-function redirect_and_exit(string $path): never {
-    redirect($path);
-    exit;
-}
-
-/**
- * Supply a custom content group name and this function will return a hyperlink
- * for authorized user accounts where they can edit content.
- * 
- * Use this to manually place an edit link for groups of like content.
- * @param string $group 
- * @return string 
- * @throws Exception 
- */
-function edit_link($group) {
-    try {
-        if(!has_permission("Customizations_modify", null, null, false)) return "";
-    } catch (\Exceptions\HTTP\Unauthorized $e) {
-        return "";
-    }
-    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span style='display: none'>Edit This Customization</span></a>";
-}
-
-/**
- * Will return the $_FILES superglobal to a more sane format:
- * [
- *    [0] => Array
- *        (
- *             [input_name] => 'example',
- *             [name]       => 'example.jpg',
- *             [type]       => 'image/jpeg',
- *             [tmp_name]   => 'tmp/php8830t4',
- *             [error]      => 0,
- *             [size]       => 21509
- *        )
- * ]
- * @return array 
- */
-function normalize_file_array() {
-    $fileUploadArray = $_FILES;
-    $resultingDataStructure = [];
-    foreach ($fileUploadArray as $input => $infoArr) {
-        $filesByInput = [];
-        $nextIndex = count($filesByInput);
-        foreach ($infoArr as $key => $valueArr) {
-            if (is_array($valueArr)) { // file input "multiple"
-                foreach($valueArr as $i=>$value) {
-                    $filesByInput[$i][$key] = $value;
-                }
-                
-            }
-            else { // -> string, normal file input
-                $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
-                break;
-            }
-        }
-        $filesByInput[$nextIndex]['input_name'] = $input;
-        $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
-    }
-    $filteredFileArray = [];
-    foreach($resultingDataStructure as $file) { // let's filter empty & errors
-        if (!$file['error']) $filteredFileArray[] = $file;
-    }
-    return $filteredFileArray;
-}
 
 
-/**
- * Given this structure:
- * [
- *    "key" => [
- *       "value" => [
- *           "nested" => true
- *       ],
- *       "other" => false
- *    ],
- *    ...
- * ]
- * 
- * This function will return:
- * [
- *    "key.value.nested" => true,
- *    "key.other" => false,
- *    ...
- * ]
- * @param mixed $array 
- * @param string $toplevel 
- * @return void 
- */
-// function flatten_array_to_js_notation($array, $toplevel = null) {
-//     $flattened = [];
-//     // if($toplevel) $toplevel = "$toplevel.";
-//     foreach($array as $key => $val) {
-//         $mutant = [];
-//         if(is_object($val) && $val instanceof jsonSerializable) {
-//             $val = $val->__jsonSerialize();
-//         }
-//         if(is_array($val)) {
-//             $val = flatten_array_to_js_notation($array, $key);
-//             continue;
-//         }
-//         // $newkey = $toplevel.$key;
-//         $flattened[$newkey] = 
-//     }
-// }
 
-function convertFractionToChar($string) {
-    return str_replace(" ", "", str_replace(
-        ["1/4",   "1/2",   "3/4",   "1/7",    "1/9",    "1/10",   "1/3",    "2/3",    "1/5",    "2/5",    "3/5",    "4/5",    "1/6",    "5/6",    "1/8",    "3/8",    "5/8",    "7/8"],
-        ["&#188;","&#189;","&#190;","&#8528;","&#8529;","&#8530;","&#8531;","&#8532;","&#8533;","&#8534;","&#8535;","&#8536;","&#8537;","&#8538;","&#8539;","&#8540;","&#8541;","&#8542;"],
-        $string
-    ));
-}
 
 function set_crudable_flag(string $name, int $flag): int {
     global $CRUDABLE_CONFIG_TRACKER;
@@ -2090,26 +701,4 @@ function set_crudable_flag(string $name, int $flag): int {
 function get_crudable_flag(string $name): ?int {
     global $CRUDABLE_CONFIG_TRACKER;
     return $CRUDABLE_CONFIG_TRACKER[$name] ?? null;
-}
-
-/**
- * Get the current app's domain name (based on request headers and app settings).
- * If $defaultToAppSetting is true, then this function will always return a value.
- * 
- * @throws Exception if $defatulToAppSetting is true and the incoming server name doesn't exist as the apps domain_name or in the allowed_origins list
- * @return string the domain name of this app (with protocol and NO TRAILING SLASH)
- */
-function server_name(bool $defaultToAppSetting = true) {
-    $request_from = $_SERVER['SERVER_NAME'];
-    $name = "https://$request_from";
-    $isSecure = is_secure();
-    if(!$isSecure) $name = "http://$request_from";
-    if($request_from === __APP_SETTINGS__['domain_name']) {
-        return $name;
-    }
-    if(in_array($request_from, __APP_SETTINGS__['API_CORS_allowed_origins'])) {
-        return $name;
-    }
-    if($defaultToAppSetting == false) throw new Exception("Request has no valid server name. Aborting.");
-    return ($isSecure) ? "https://".__APP_SETTINGS__['domain_name'] : "http://".__APP_SETTINGS__['domain_name'];
 }

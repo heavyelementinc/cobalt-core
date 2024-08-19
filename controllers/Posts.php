@@ -1,68 +1,69 @@
 <?php
 
-use Cobalt\Posts\PostManager;
-use Controllers\ClientFSManager;
-use Controllers\PostController;
+use Cobalt\Maps\GenericMap;
+use Cobalt\Pages\PageManager;
+use Cobalt\Pages\PostMap;
+use Controllers\Landing\Page;
+use Drivers\Database;
 use Exceptions\HTTP\NotFound;
-use Exceptions\HTTP\PostNotFound;
-use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONDocument;
 
-class Posts extends PostController {
-    use ClientFSManager;
-    function __construct() {
-        $this->initialize(__APP_SETTINGS__['Posts']['collection_name']);
+class Posts extends Page {
+
+    public function get_manager(): Database {
+        return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
     }
 
-    function upload($id) {
-        $id = new ObjectId($id);
-        $query = ['_id' => $id];
-        $post = $this->postMan->findOne($query);
-
-        if(!$post) throw new PostNotFound("There's no post matching that ID");
-        $schemaName = $this->postMan->get_schema_name();
-        $schema = new $schemaName(array_merge($query,['url_slug' => $post->{'url_slug'}]));
-        $valid = $schema->validate(['attachments' => $_FILES]);
-        // update("#gallery", ['style' => ['background-image' ]])
-        return ['#gallery' => $schema->{'attachments.display'}];
+    public function get_schema($data): GenericMap {
+        return new PostMap();
     }
 
-    function downloadFile($slug, $filename) {
-        $this->download($filename);
+    public function edit($document): string {
+        return view("/pages/landing/edit.html");
     }
 
+    public function destroy(GenericMap|BSONDocument $document): array {
+        return [
+            'message' => "Are you sure you want to delete \"$document->title\"? There's no undoing this operation",
+            'post' => $_POST,
+        ];
+    }
 
-    function defaultImage($id) {
-        $_id = new ObjectId($id);
-        $this->initFS();
-        $result = $this->fs->findOne(["_id" => $_id]);
-        if(!$result) throw new NotFound("No file found.");
-        $doc = $this->postMan->findOneAsSchema(['_id' => $result->for]);
-        if(!$doc) throw new NotFound("No document paired with this file.");
-
-        $this->postMan->updateOne(['_id' => $doc->_id], [
-            '$set' => [
-                'default_image' => $result->filename
+    public function posts_landing() {
+        $result = $this->manager->find(
+            $this->manager->public_query(),
+            [
+                'sort' => [
+                    'live_date' => -1
+                ],
+                // 'projection' => $this->manager::PREVIEW_PROJECTION
             ]
+        );
+        $posts = "";
+        foreach($result as $post) {
+            if($post instanceof PostMap === false) $post = (new PostMap())->ingest($post);
+            $posts .= $this->renderPreview($post);
+        }
+        // if(!$index) throw new NotFound("There are no posts to display");
+        if(!$posts) $posts = "<p style='text-align:center'>There are no posts to show</p>";
+        add_vars([
+            'title' => __APP_SETTINGS__['Posts']['default_name'],
+            'posts' => $posts,
         ]);
 
-        $doc = $this->postMan->findOneAsSchema(['_id' => $result->for]);
-
-        update("#default_image", ['style' => ['background-image' => "url('$doc->default_image')"]]);
-
-        return $result;
+        return view('/posts/pages/index.html');
     }
-
-    function RSS_feed() {
-        if(!$this->postMan) throw new Exception("The Post Controller is not initialized");
-        $query = $this->getParams($this->postMan, ['published' => true], [], ['sort', 'page'], ['sort' => ['publicationDate' => -1], 'limit' => 10]);
-        $docs = $this->postMan->findAllAsSchema(...$query);
+    
+    public function rss_feed() {
+        $docs = $this->manager->find($this->manager->public_query());
 
         header('Content-Type: application/rss+xml; charset=utf-8');
 
-        $items = $this->docsToViews($docs, "/RSS/item.xml");
-        echo view("/RSS/feed.xml", [
-            'posts' => $items
-        ]);
+        $items = "";//$this->docsToViews($docs, "/RSS/item.xml");
+        foreach($docs as $doc) {
+            $items .= view("/RSS/item.xml", ['doc' => $doc]);
+        }
+        echo view("/RSS/feed.xml", ['posts' => $items]);
         exit;
     }
 }

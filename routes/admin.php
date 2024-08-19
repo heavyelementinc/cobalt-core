@@ -12,13 +12,14 @@ Route::get("/", "CoreAdmin@index", [
 ]);
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
-    Route::get("/posts/", "Posts@admin_index",[
-        'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
-        'navigation' => ['admin_panel'],
-    ]);
-    Route::get("/posts/{id}?", "Posts@edit",[
-        'handler' => "core/posts.js",
-    ]);
+    Posts::admin();
+    // Route::get("/posts/", "Posts@index",[
+    //     'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
+    //     'navigation' => ['admin_panel'],
+    // ]);
+    // Route::get("/posts/{id}?", "Posts@edit",[
+    //     // 'handler' => "core/posts.js",
+    // ]);
 }
 
 LandingPages::admin();

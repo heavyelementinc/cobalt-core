@@ -6,6 +6,7 @@ function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());
 }
 
+/** @return mixed|array{Cobalt\Settings\Settings::DEFAULT_DEFINITIONS} */
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
     if (setting === null) return document.GLOBAL_SETTINGS;

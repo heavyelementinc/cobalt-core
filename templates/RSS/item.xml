@@ -1,9 +1,9 @@
         <item>
             <title>{{doc.title}}</title>
-            <link>https://{{app.domain_name}}{{doc.public_link}}</link>
-            <guid>https://{{app.domain_name}}{{doc.public_link}}</guid>
-            <description>{{doc.excerpt.attrs}}</description>
-            <author>{{doc.author.attrs}}</author>
-            <pubDate>{{doc.publicationDate.gmt}}</pubDate>
-            <enclosure {{!doc.rss_attachment.attrs}} />
+            <link>@server_name();{{doc.url_slug.get_path()}}</link>
+            <guid>{{doc._id}}</guid>
+            <description>{{doc.summary}}</description>
+            <author>{{doc.author.get_name("full")}}</author>
+            <pubDate>{{doc.live_date.format("iso")}}</pubDate>
+            <enclosure {{!doc.rss_attachment}} />
         </item>

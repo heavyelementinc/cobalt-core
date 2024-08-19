@@ -101,7 +101,7 @@ class StringResult extends SchemaResult implements ArrayAccess{
     }
 
     public function offsetExists(mixed $offset): bool {
-        $length = count($this->getValue());
+        $length = strlen($this->getValue());
         if($offset < 0) return false;
         if($length >= $offset) return false;
         return true;

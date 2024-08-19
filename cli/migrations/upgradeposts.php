@@ -1,9 +1,12 @@
 <?php
 use \Cobalt\CLI\Migration;
+use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\PageMap;
 use Cobalt\Pages\PostMap;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
+use Cobalt\SchemaPrototypes\MapResult;
 use Controllers\ClientFSManager;
+use MongoDB\BSON\ObjectId;
 
 class upgradeposts extends Migration {
     use ClientFSManager;
@@ -28,15 +31,24 @@ class upgradeposts extends Migration {
         if($document instanceof PostMap) return null;
         $document['__v'] = "2.0";
         $dom = $this->convert_markdown_to_html($document->body);
+        $landingImage = new UploadImageResult();
+        $landingImage->setName("splash_image");
+        if($document->default_image) {
+            $img = new stdClass();
+            $img->__dataset = ['media' => ['filename' => '/res/fs/' . $document->default_image], 'thumbnail' => ['filename' => '/res/fs/' . $document->default_image]];
+            $landingImage->setValue($img);
+        }
+        else $landingImage->setValue(new GenericMap([],[]));
         $doc = [
-            '__pclass' => 'Q29iYWx0XFBhZ2VzXFBvc3RNYXA=',
+            '_id' => $id,
+            // '__pclass' => json_decode('{"$binary":"Q29iYWx0XFBhZ2VzXFBvc3RNYXA=", "$type": "80"}'),
             'md' => $document->body, // We'll back up the markdown for this post
             'type' => '',
             'body' => $this->convert_dom_to_blockeditor_output($dom),
-            'visibility' => ($document->published == "Published") ? PageMap::VISIBILITY_PUBLIC : PageMap::VISIBILITY_DRAFT,
+            'visibility' => ($document->published === true) ? (string)PageMap::VISIBILITY_PUBLIC : (string)PageMap::VISIBILITY_DRAFT,
             'live_date' => $document->publicationDate,
-            'summary' => $document->excerpt,
-            // 'splash_image' => (new UploadImageResult())->ingest($document->default_image),
+            'summary' => strip_tags(from_markdown($document->excerpt)),
+            'splash_image' => $landingImage,
             'splash_image_alignment' => match($document->splash_image_alignment) {
                 "center center" => ["center"],
                 "center left" => ["center","left"],
@@ -48,12 +60,20 @@ class upgradeposts extends Migration {
                 "bottom center" => ["bottom","center"],
                 "bottom right" => ["bottom","right"],
                 default => ["center"]
-            }
+            },
+
+            /** Stuff that's going to stay the same */
+            'author' => new ObjectId($document->author),
+            'title' => $document->title,
+            'url_slug' => $document->url_slug,
+            'rss_attachment' => $document->rss_attachment,
+            'attachments' => $document->attachments ?? [],
+            'tags' => $document->tags ?? []
         ];
         
-        // $result = $this->deleteOne(['_id' => $id]);
-        // $doc = (new UserPersistance())->ingest($document);
-        $result = $this->updateOne(['_id' => $document->_id], ['$set' => $doc]);
+        $result = $this->deleteOne(['_id' => $id]);
+        $doc = (new PostMap())->ingest($doc);
+        $result = $this->insertOne($doc);
         // return $result;
         return $result;
     }
@@ -229,7 +249,7 @@ class upgradeposts extends Migration {
     private function nestedList_convert(DOMDocument $dom, DOMElement $el, array &$array) {
         $arr = [
             'id' => random_string(8),
-            'type' => 'nestedList',
+            'type' => 'nestedlist',
             'data' => []
         ];
         $this::nestedListDetails($el, $arr['data']);

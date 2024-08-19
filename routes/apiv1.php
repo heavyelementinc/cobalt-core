@@ -156,6 +156,8 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
     ]);
 }
 
+Posts::apiv1();
+Route::s_post('/posts/{id}/preview-key/', 'Posts@preview_key');
 LandingPages::apiv1();
 Route::s_post('/landing-pages/{id}/preview-key/', 'LandingPages@preview_key');
 

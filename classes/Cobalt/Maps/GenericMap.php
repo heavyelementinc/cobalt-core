@@ -10,6 +10,7 @@ use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Countable;
+use Drivers\Database;
 use Iterator;
 use JsonSerializable;
 use MongoDB\BSON\ObjectId;
@@ -27,17 +28,17 @@ use TypeError;
 class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable, Countable {
     use ResultTranslator, Validatable;
     public array $__dataset = [];
-    protected int $__current_index = 0;
-
     public string $namePrefix = "";
+    public array $__hydrated = [];
+
+    protected ?ObjectId $id = null;
+    protected int $__current_index = 0;
     protected array $__schema = [];
     protected bool $__schemaHasBeenInitialized = false;
     protected array $__schemaFromConstructorArg = [];
-
-    public array $__hydrated = [];
     protected bool $__hasBeenRehydrated = false;
 
-    protected ?ObjectId $id = null;
+    private ?Database $manager = null;
 
     function __construct($document = null, array $schema = [], string $namePrefix = "") {
         $this->__namePrefix = $namePrefix;
@@ -104,6 +105,14 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         }
         $this->__hasBeenRehydrated = true;
         return $this;
+    }
+
+    public function set_manager(Database $manager):void {
+        $this->manager = $manager;
+    }
+
+    public function get_manager():Database {
+        return $this->manager;
     }
 
     private function __rehydrate(string $field, mixed $value, array|BSONDocument|BSONArray &$target, ?array &$schema = null): void {

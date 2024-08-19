@@ -245,6 +245,7 @@ abstract class Crudable {
          *  * `post` <array> The data to re-POST to this endpoint
          *  * `okay` <string> The acknowledge/affirmative button label
          *  * `dangerous` <bool> Whether or not this action is dangerous
+         * @return array{message: string, post: array{poop: bool}, okay: string, dangerous: bool}
         */
         abstract function destroy(GenericMap|BSONDocument $document):array;
 

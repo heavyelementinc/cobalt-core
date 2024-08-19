@@ -7,8 +7,18 @@ use MongoDB\BSON\UTCDateTime;
 
 class PageManager extends Database {
 
-    function __construct() {
-        parent::__construct();
+    const PREVIEW_PROJECTION = [
+        '_id' => 1,
+        'title' => 1,
+        'subtitle' => 1,
+        'summary' => 1,
+        'url_slug' => 1,
+        'splash_image' => 1,
+        'splash_image_alignment' => 1,
+    ];
+
+    function __construct($database = null, $collection = null) {
+        parent::__construct($database, $collection);
     }
 
     public function public_query(array $additional = []):array {
@@ -23,15 +33,8 @@ class PageManager extends Database {
     }
     
     function getRelatedPages(PageMap $page, ?array $projection = null):array {
-        $default_projection = [
-            '_id' => 1,
-            'title' => 1,
-            'subtitle' => 1,
-            'summary' => 1,
-            'url_slug' => 1,
-            'splash_image' => 1,
-            'splash_image_alignment' => 1,
-        ];
+        $default_projection = self::PREVIEW_PROJECTION;
+
         if($projection === null) $projection = $default_projection;
         else $projection = array_merge($projection, $default_projection);
 
@@ -54,21 +57,24 @@ class PageManager extends Database {
 
         $array = [];
         foreach($result as $i => $p) {
-            $array[$i] = (new PageMap())->ingest($p);
+            if($page instanceof PostMap) $array[$i] = (new PostMap())->ingest($p ?? []);
+            else $array[$i] = (new PageMap())->ingest($p);
             $array[$i]->splash_image = $p->splash_image;
         }
 
         if(count($array) < $min_recommended) {
             $from_author = $this->find($this->public_query([
-                'author' => $page->author->getValue(),
+                'author' => $page->author->_id(),
                 '_id' => ['$ne' => $page->_id]
             ]), [
                 'limit' => $min_recommended,
                 'sort' => ['live_date' => -1],
                 'projection' => $projection
             ]);
-            foreach($from_author as $post) {
-                $array[] = $post;
+            foreach($from_author as $i => $post) {
+                if($page instanceof PostMap) $array[$i] = (new PostMap())->ingest($post ?? []);
+                else $array[$i] = (new PageMap())->ingest($post);
+                $array[$i]->splash_image = $post->splash_image;
             }
         }
         

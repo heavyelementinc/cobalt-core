@@ -83,6 +83,15 @@ class BlockResult extends SchemaResult {
         return $ol . "</ol></nav>";
     }
 
+    #[Prototype]
+    protected function timeToRead($format = "round") {
+        // $word_count = (string)$this;
+        $fmt = TIME_TO_READ_FORMAT_ROUND;
+        if($format !== "round") $fmt = TIME_TO_READ_FORMAT_MINSEC;
+        
+        return time_to_read((string)$this, $fmt);
+    }
+
     function filter($value) {
         foreach($value['blocks'] as $block) {
             switch($block['type']) {
@@ -153,6 +162,9 @@ class BlockResult extends SchemaResult {
                     break;
                 case "codetool":
                     $html .= $this->__from_codetool($block);
+                    break;
+                case "blockbutton":
+                    $html .= $this->__from_blockbutton($block);
                     break;
                 default:
                     $html .= "<pre>Cannot render type: $block->type</pre>";
@@ -239,5 +251,9 @@ class BlockResult extends SchemaResult {
 
     private function __from_codetool($block) {
         return view("/pages/landing/block-elements/code.html", ['block' => $block]);
+    }
+
+    private function __from_blockbutton($block) {
+        return "<p class=\"blockeditor--content blockeditor--blockbutton\"><a href=\"".$block->data->url."\" class=\"button\">".$block->data->label."</a></p>";
     }
 }

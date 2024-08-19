@@ -10,9 +10,9 @@ class PostManager extends \Drivers\Database {
         return "posts";
     }
 
-    public function get_schema_name($doc = []) {
-        return "\\Cobalt\\Posts\\PostSchema";
-    }
+    // public function get_schema_name($doc = []) {
+    //     return "\\Cobalt\\Posts\\PostSchema";
+    // }
 
     public function get_public_name():string {
         if($this::class === "\\Cobalt\\Posts\\PostManager") return __APP_SETTINGS__['Posts']['default_name'];
@@ -34,14 +34,14 @@ class PostManager extends \Drivers\Database {
     }
 
     public function getPostsFromTags(array $tags, $limit = 5, $publicOnly = true):array {
-        $posts = $this->findAllAsSchema([
+        $posts = $this->find([
             'tags' => $tags,
             'published' => $publicOnly,
         ],[
             'limit' => $limit,
             'sort' => ['publicationDate' => -1]
         ]);
-        return $posts;
+        return iterator_to_array($posts);
     }
     
 }

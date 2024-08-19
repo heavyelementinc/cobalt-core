@@ -16,14 +16,16 @@ class MarkdownArea extends HTMLElement {
         <div class='toolbar'></div>
         <textarea class='editor'>${this.props.originalTextContent}</textarea>
         `
-        this.addEventListener("change", e => {
-            e.preventDefault();
-        })
+        const element = this.querySelector(".editor")
+        element.addEventListener("change", event => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
 
         this.editor = new SimpleMDE({
             autoDownloadFontAwesome: false,
-            element: this.querySelector(".editor"),
-            placeholder: this.getAttribute("placeholder"),
+            element,
+            placeholder: this.getAttribute("placeholder")
         });
         // this.value = this.props.originalTextContent;
 
@@ -35,7 +37,7 @@ class MarkdownArea extends HTMLElement {
             this.props.changed = true;
         });
 
-        this.editor.codemirror.on("blur", e => {
+        this.addEventListener("focusout", e => {
             this.triggerAutosaveChangeEvent();
         });
     }
@@ -62,6 +64,10 @@ class MarkdownArea extends HTMLElement {
     set disabled(val) {
         if(typeof val !== "boolean") val = Boolean(val);
         this.props.disabled = val;
+    }
+
+    get name() {
+        return this.getAttribute("name");
     }
 }
 

@@ -4,11 +4,13 @@ namespace Controllers\Landing;
 use Controllers\Crudable;
 use Cobalt\Pages\PageMap;
 use Cobalt\Pages\PageManager;
+use Cobalt\Pages\PostMap;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
 use DateTime;
 use Drivers\Database;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
+use MongoDB\BSON\ObjectId;
 
 abstract class Page extends Crudable {
     var string $landing_content_classes = "";
@@ -85,8 +87,9 @@ abstract class Page extends Crudable {
     }
 
     function splash(PageMap $page) {
-        // Let's get our splash view
         $view = "/pages/landing/views/splash-default.html";
+        if($page instanceof PostMap) $view = "/pages/landing/views/splash-post.html";
+        // Let's get our splash view
         
         // Set our classes so it appears properlty
         $classes = "";
@@ -105,15 +108,18 @@ abstract class Page extends Crudable {
                 break;
         }
 
+        $follow_link = "";
+        if(__APP_SETTINGS__['Posts_enable_rss_feed']) $follow_link = " &middot; <a href='".server_name().route("Posts@rss_feed")."' class=\"rss-feed-link\" target=\"_blank\"><i name=\"rss\"></i> Follow</a>";
+
         // And render it
-        return view($view, ['page' => $page, 'class' => $classes]);
+        return view($view, ['page' => $page, 'class' => $classes, 'follow_link' => $follow_link]);
     }
 
     function biography(PageMap $page) {
-        // If let's filter out any irrelevant stuff
+        // Let's filter out any irrelevant stuff
         if(!$page->include_bio->getValue()) return "";
-        if(!$page->author->getRaw()) return "";
-        if(!$page->bio->getRaw()) return "";
+        // if(!$page->author->get_name("full")) return "";
+        if(!(string)$page->bio) return "";
         
         // Let's determine how our avatar should look.
         $avatar_classes = "";
@@ -178,12 +184,58 @@ abstract class Page extends Crudable {
     function getRelated(PageMap $page) {
         if($page->flags->and($page::FLAGS_EXCLUDE_RELATED_PAGES)) return "";
         $related = $this->manager->getRelatedPages($page);
+        if(!$related) return "";
         $related_title = ($page->related_title->getValue()) ? $page->related_title->getValue() : __APP_SETTINGS__['LandingPage_related_content_title'];
         $html = "<section class=\"landing-main--related-pages\"><h2>$related_title</h2><div class=\"landing-related--container\">";
         foreach($related as $p) {
             if($p instanceof PageMap == false) continue;
-            $html .= view("/pages/landing/related.html", ['page' => $p]);
+            $html .= $this->renderPreview($p);
         }
         return $html . "</div></section>";
+    }
+
+    function renderPreview(PageMap $p) {
+        return view("/pages/landing/related.html", ['page' => $p, ]);
+    }
+
+
+    public function preview_key($id) {
+        $_id = new ObjectId($id);
+
+        /** @var PageMap */
+        $page = $this->manager->findOne(['_id' => $_id]);
+        if(!$page) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+
+        confirm("Are you sure you want to provision a new preview key? The previous key will become unusable!",$_POST,"Continue");
+        $string = uniqid();
+        $string = (double)bin2hex($string);
+        $p = strtolower(str_replace("=", "", base64_encode(sprintf("%d",($string * 1.27) << 1))));
+        // $p = hex2bin(str_replace("-","",$str));
+        $pkey = "px-";
+        $skip = false;
+        // $indexes = [7, 4, 5, 7, 8, 12];
+        // $index = 0;
+        for($i = strlen($p); $i >= 0; $i--) {
+            if($i % 7 === 1) {
+                if($skip === false) {
+                    $i += 1;
+                    $pkey .= '-';
+                    $skip = true;
+                    continue;
+                } else {
+                    $skip = false;
+                    // $index += 1;
+                }
+            }
+            $pkey .= $p[$i];
+        }
+        $result = $this->manager->updateOne(['_id' => $_id], [
+            '$set' => ['preview_key' => $pkey]
+        ]);
+        $schema = $page->__get_schema();
+        update("copy-span.preview-key", [
+            'value' => $schema['preview_key']['display']($pkey)
+        ]);
+        return $result;
     }
 }

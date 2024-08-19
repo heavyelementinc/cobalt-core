@@ -86,5 +86,4 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
     function bsonUnserialize(array $data): void {
         $this->ingest($data);
     }
-
 }

@@ -24,9 +24,9 @@ class PageMap extends PersistanceMap {
         'default' => '/pages/landing/views/default.html',
         'landing' => '/pages/landing/views/landing.html',
     ];
-    const VISIBILITY_PRIVATE = 0b00001;
-    const VISIBILITY_DRAFT   = 0b00010;
-    const VISIBILITY_PUBLIC  = 0b00100;
+    const VISIBILITY_PRIVATE = 1;
+    const VISIBILITY_DRAFT   = 2;
+    const VISIBILITY_PUBLIC  = 4;
 
     const SPLASH_POSITION_SPLIT  = 0b00001;
     const SPLASH_POSITION_FADE   = 0b00010;
@@ -66,6 +66,11 @@ class PageMap extends PersistanceMap {
                     if(str_contains($val, " ")) throw new ValidationIssue("The URL must not contain spaces.");
                     update('#url_slug', ['href' => "/$val"]);
                     return $val;
+                },
+                'get_path' => function ($val) {
+                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts']['public_post'] . $val;
+                    return __APP_SETTINGS__['LandingPage_route_prefix'] . $val;
+
                 }
             ],
             // "h1" => [
