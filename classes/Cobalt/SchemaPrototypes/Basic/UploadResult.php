@@ -258,7 +258,7 @@ class UploadResult extends MapResult {
     }
 
     function __toString():string {
-        return $this->value->media->filename ?? $this->schema['default']['media']['filename'];
+        return $this->value->media->filename ?? $this->schema['default']['media']['filename'] ?? "";
     }
 
     function jsonSerialize(): mixed {
