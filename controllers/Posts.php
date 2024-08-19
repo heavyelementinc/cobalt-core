@@ -31,7 +31,7 @@ class Posts extends Page {
 
     public function posts_landing() {
         $result = $this->manager->find(
-            $this->manager->public_query(),
+            $this->manager->public_query([], false),
             [
                 'sort' => [
                     'live_date' => -1
@@ -55,7 +55,7 @@ class Posts extends Page {
     }
     
     public function rss_feed() {
-        $docs = $this->manager->find($this->manager->public_query());
+        $docs = $this->manager->find($this->manager->public_query([], false));
 
         header('Content-Type: application/rss+xml; charset=utf-8');
 

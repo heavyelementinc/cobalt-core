@@ -33,7 +33,7 @@ abstract class Page extends Crudable {
         // Check the page's visibility criteria
         $visibility = (int)$page->visibility->getRaw();
         
-        if($visibility !== $page::VISIBILITY_PUBLIC) {
+        if($visibility >= $page::VISIBILITY_UNLISTED) {
             $pkey = (string)$page->preview_key;
             switch($visibility) {
                 case(isset($_GET['pkey']) && $pkey && $_GET['pkey'] === $pkey):

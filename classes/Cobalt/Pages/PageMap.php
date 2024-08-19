@@ -26,7 +26,8 @@ class PageMap extends PersistanceMap {
     ];
     const VISIBILITY_PRIVATE = 1;
     const VISIBILITY_DRAFT   = 2;
-    const VISIBILITY_PUBLIC  = 4;
+    const VISIBILITY_UNLISTED = 128;
+    const VISIBILITY_PUBLIC  = 256;
 
     const SPLASH_POSITION_SPLIT  = 0b00001;
     const SPLASH_POSITION_FADE   = 0b00010;
@@ -98,13 +99,23 @@ class PageMap extends PersistanceMap {
                 'valid' => [
                     self::VISIBILITY_PRIVATE => "Private",
                     self::VISIBILITY_DRAFT  => "Draft",
+                    self::VISIBILITY_UNLISTED => "Unlisted",
                     self::VISIBILITY_PUBLIC => "Public",
                 ],
+                'filter' => function ($val) {
+                    return (int)$val;
+                },
                 'index' => [
                     'title' => 'Visibility',
                     'order' => 2,
                     'view' => function () {
-                        return $this->visibility->display();
+                        return match($this->visibility->getValue()) {
+                            self::VISIBILITY_PRIVATE => "Private",
+                            self::VISIBILITY_DRAFT  => "Draft",
+                            self::VISIBILITY_UNLISTED => "Unlisted",
+                            self::VISIBILITY_PUBLIC => "Public",
+                            default => "Private"
+                        };
                     }
                 ],
             ],

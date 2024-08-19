@@ -21,9 +21,12 @@ class PageManager extends Database {
         parent::__construct($database, $collection);
     }
 
-    public function public_query(array $additional = []):array {
+    public function public_query(array $additional = [], bool $includeUnlisted = true):array {
+        $visibility = '$gt';
+        if($includeUnlisted) $visibility = '$gte';
+
         return array_merge([
-            'visibility' => (string)PageMap::VISIBILITY_PUBLIC,
+            'visibility' => [$visibility => PageMap::VISIBILITY_UNLISTED],
             'live_date' => ['$lte' => new UTCDateTime(time() * 1000)]
         ], $additional);
     }
