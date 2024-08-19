@@ -18,10 +18,6 @@ class Posts extends Page {
         return new PostMap();
     }
 
-    public function edit($document): string {
-        return view("/pages/landing/edit.html");
-    }
-
     public function destroy(GenericMap|BSONDocument $document): array {
         return [
             'message' => "Are you sure you want to delete \"$document->title\"? There's no undoing this operation",

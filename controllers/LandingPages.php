@@ -20,11 +20,6 @@ class LandingPages extends Controllers\Landing\Page {
         return new PageMap();
     }
 
-    public function edit($document): string {
-        // add_vars(["autosave" => "autosave=\"form\""]);
-        return view("/pages/landing/edit.html");
-    }
-
     public function destroy(GenericMap|BSONDocument $document): array {
         return ['message' => "Are you sure you want to delete this page?"];
     }

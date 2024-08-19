@@ -72,7 +72,7 @@
     },
     "Posts_allow_unsafe_post_content": {
         "group": "Posts",
-        "label": "Allows the user to modify the 'unsafe content' setting in posts (HTML tags).",
+        "label": "Allows the user to modify the 'unsafe content' setting in posts.",
         "dangerous": true,
         "default": false,
         "ring": 2
