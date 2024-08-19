@@ -1269,7 +1269,7 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Features",
             "subgroup" => "Blog Posts",
-            "name" => "Include \"Unlisted\" Posts in Post in RSS Feed",
+            "name" => "Include \"Unlisted\" Posts in RSS Feed",
             "type" => "input-switch"
         ],
         "validate" => [
