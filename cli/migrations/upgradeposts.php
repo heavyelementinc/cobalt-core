@@ -80,6 +80,7 @@ class upgradeposts extends Migration {
 
     private function convert_markdown_to_html(string $markdown):DOMDocument {
         $parsed_md = from_markdown($markdown, false);
+        if(!$parsed_md) $parsed_md = "<p>No content.</p>";
         $dom = new DOMDocument();
         $dom->loadHTML($parsed_md);
         return $dom;
