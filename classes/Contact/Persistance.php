@@ -26,7 +26,7 @@ class Persistance extends PersistanceMap {
                     'title' => 'Name',
                     'order' => 0,
                     'sort' => -1,
-                    'view' => fn ($val) => $val->getRaw()
+                    'view' => fn () => $this->name->getValue()
                 ]
             ],
             "organization" => [
@@ -71,8 +71,8 @@ class Persistance extends PersistanceMap {
                     'title' => 'Read Status',
                     'order' => 3,
                     'sortable' => false,
-                    'view' => function ($val) {
-                        if(in_array(session("_id"), $val)) return "Read";
+                    'view' => function () {
+                        if(in_array(session("_id"), $this->read->getValue())) return "Read";
                         return "Unread";
                     }
                 ]
@@ -82,7 +82,7 @@ class Persistance extends PersistanceMap {
                 'index' => [
                     'title' => 'Date',
                     'order' => 1,
-                    'view' => fn ($val) => $val->format("c")
+                    'view' => fn () => $this->date->format("c")
                 ]
             ],
             "ip" => new IpResult,
