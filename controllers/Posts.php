@@ -55,7 +55,7 @@ class Posts extends Page {
     }
     
     public function rss_feed() {
-        $docs = $this->manager->find($this->manager->public_query([], false));
+        $docs = $this->manager->find($this->manager->public_query([], __APP_SETTINGS__['Posts_rss_feed_include_unlisted']));
 
         header('Content-Type: application/rss+xml; charset=utf-8');
 

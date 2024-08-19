@@ -88,12 +88,16 @@ a.blockeditor--link-preview {
     gap: var(--gap);
     border: 1px solid gray;
     background-color: white;
-    margin: 0 calc(var(--block-editor-margins) * var(--margin-mod)) var(--block-editor-margins);
-
+    /* margin: 0 calc(var(--block-editor-margins) * var(--margin-mod)) var(--block-editor-margins); */
 }
+
+    a.blockeditor--link-preview:hover .blockeditor--link-title {
+        text-decoration: underline;
+    }
 
     a.blockeditor--link-preview:not(.button) {
         background-image: none;
+        text-decoration: none;
     }
 
     .blockeditor--link-preview .blockeditor--link-thumbnail {
@@ -111,16 +115,28 @@ a.blockeditor--link-preview {
 
     .blockeditor--link-preview .blockeditor--link-title {
         font-size: 1.2rem;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .blockeditor--link-description {
         font-weight: normal;
+        display: -webkit-box;
+        line-clamp: 5;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .blockeditor--site-name {
         width: 100%;
         font-style: normal;
         text-transform: uppercase;
+        font-size: 0.7em;
+        color: gray;
     }
 
 .blockeditor--embed {
@@ -171,6 +187,12 @@ ol.blockeditor--index ol {
 
 .cdx-notify {
     z-index: calc(var(--project-modal-z-index) + 1000);
+}
+
+@-moz-document url-prefix() {
+    .blockeditor--link-preview .blockeditor--link-title {
+        max-height: 8ch;
+    }
 }
 
 @media only screen and (max-width: 35em) {

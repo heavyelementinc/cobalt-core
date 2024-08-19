@@ -249,12 +249,12 @@
                 a.landing-main--related-page h1, a.landing-main--related-pages summary {
                     --line-clamp: 2;
                     display: -webkit-box;
-                    font-size: 1.1rem;
-                    text-overflow: hidden;
                     line-clamp: 2;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
+                    font-size: 1.1rem;
+                    text-overflow: hidden;
                     margin: .75em;
                 }
                 a.landing-main--related-page summary {

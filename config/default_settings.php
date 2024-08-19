@@ -1264,6 +1264,18 @@ const DEFAULT_DEFINITIONS = [
     "Posts_default_index_display" => [
         "default" => "default"
     ],
+    "Posts_rss_feed_include_unlisted" => [
+        'default' => false,
+        "meta" => [
+            "group" => "Features",
+            "subgroup" => "Blog Posts",
+            "name" => "Post RSS Feed Path",
+            "type" => "input"
+        ],
+        "validate" => [
+            "type" => "string"
+        ]
+    ],
     /* 
     If debugging is FALSE, then =>
         - The WebHandler will cache a concat of all JS files in `packages`

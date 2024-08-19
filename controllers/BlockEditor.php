@@ -94,7 +94,7 @@ class BlockEditor {
             'link' => $metaTags['og:url'] ?? $_GET['url'],
             'meta' => [
                 'title' => $metaTags['og:title'] ?? $pageTitle,
-                'site_name' => $metaName['og:site_name'] ?? $metaTags['og:url'] ?? $metaTags['og:title'],
+                'site_name' => $metaName['og:site_name'] ?? parse_url($metaTags['og:url'] ?? $metaTags['og:title'], PHP_URL_HOST),
                 'description' => $metaTags['og:description'] ?? $metaTags['description'] ?? $description,
                 'image' => [
                     'url' => $metaTags['og:image'],
