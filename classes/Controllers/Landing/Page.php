@@ -29,7 +29,8 @@ abstract class Page extends Crudable {
         $does_not_exist = "That page does not exist.";
         // If there's no result, then we know it's not found.
         if($page === null) throw new NotFound($does_not_exist, true);
-        
+        $this->manager->updateOne(['_id' => $page->_id], ['$inc' => ['views' => 1]]);
+
         // Check the page's visibility criteria
         $visibility = (int)$page->visibility->getRaw();
         
@@ -112,7 +113,7 @@ abstract class Page extends Crudable {
         if(__APP_SETTINGS__['Posts_enable_rss_feed']) $follow_link = " &middot; <a href='".server_name().route("Posts@rss_feed")."' class=\"rss-feed-link button\" target=\"_blank\"><i name=\"rss\"></i> Follow</a>";
 
         // And render it
-        return view($view, ['page' => $page, 'class' => $classes, 'follow_link' => $follow_link]);
+        return view($view, ['page' => $page, 'class' => $classes, 'follow_link' => $follow_link, 'views' => ($page->flags->and($page::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($page->views) . " view".plural($page->views)." &middot;"]);
     }
 
     function biography(PageMap $page) {

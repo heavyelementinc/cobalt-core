@@ -38,6 +38,7 @@ class PageMap extends PersistanceMap {
     const FLAGS_REQUIRES_ACCOUNT      = 0b00000001;
     const FLAGS_EXCLUDE_FROM_SITEMAP  = 0b00000010;
     const FLAGS_EXCLUDE_RELATED_PAGES = 0b00000100;
+    const FLAGS_HIDE_VIEW_COUNT       = 0b00001000;
 
     const ASIDE_SIDEBAR_NATURAL      = 0b000001;
     const ASIDE_SIDEBAR_REVERSE      = 0b000010;
@@ -55,12 +56,12 @@ class PageMap extends PersistanceMap {
             "url_slug" => [
                 new StringResult,
                 'required' => true,
-                'filter' => function ($val) {
-                    $matches = [];
-                    $filter = preg_match("/[\s]/", $val, $matches);
-                    if($filter) throw new ValidationIssue("The url_slug must not contain invalid characters");
-                    return $val;
-                },
+                // 'filter' => function ($val) {
+                //     $matches = [];
+                //     $filter = preg_match("/[\s]/", $val, $matches);
+                //     if($filter) throw new ValidationIssue("The url_slug must not contain invalid characters");
+                //     return $val;
+                // },
                 'filter' => function ($val) {
                     if(!$val) throw new ValidationIssue("The URL Slug cannot be empty");
                     if($val[0] === "/") throw new ValidationIssue("The URL must not start with a slash.");
@@ -127,7 +128,14 @@ class PageMap extends PersistanceMap {
                     'order' => 3,
                 ]
             ],
-            
+            'views' => [
+                new NumberResult,
+                'default' => 1,
+                'index' => [
+                    'title' => 'Views',
+                    'order' => 3,
+                ]
+            ],
             "splash_image" => [
                 new UploadImageResult,
                 'alt' => function () {
@@ -297,6 +305,7 @@ class PageMap extends PersistanceMap {
                     self::FLAGS_REQUIRES_ACCOUNT => 'Access Exclusive to Users',
                     self::FLAGS_EXCLUDE_FROM_SITEMAP => "Exclude Page from Sitemap",
                     self::FLAGS_EXCLUDE_RELATED_PAGES => "Do Not Show Related Pages",
+                    self::FLAGS_HIDE_VIEW_COUNT => "Hide View Count",
                 ]
             ],
             'preview_key' => [
