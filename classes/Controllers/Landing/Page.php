@@ -118,7 +118,7 @@ abstract class Page extends Crudable {
             'page' => $page,
             'class' => $classes,
             'follow_link' => $follow_link,
-            'views' => ($page->flags->and($page::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($page->views->getValue()) . " view".plural($page->views->getValue())." &middot;"
+            'views' => ($page->flags->and($page::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($page->views->getValue() + 1) . " view".plural($page->views->getValue() + 1)." &middot;"
         ]);
     }
 
