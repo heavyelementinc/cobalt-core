@@ -124,6 +124,17 @@ function cobalt_autoload($class) {
             require_once $final_name;
             return;
         }
+    } catch (ParseError $e) {
+        print("<pre>");
+        $file = $e->getFile() . ': ' . $e->getLine();
+        if (app('debug')) {
+            print("ParseError when loading $file");
+            print("\n" . $e->getMessage());
+        } else {
+            print("A error was found. Please contact your system administrator with the following error code:\n");
+            print(base64_encode($e->getMessage() . ' ' . $file));
+        }
+        exit;
     } catch (Exception $e) {
         print($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
         exit;

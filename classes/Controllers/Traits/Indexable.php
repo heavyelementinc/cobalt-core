@@ -5,6 +5,7 @@ namespace Controllers\Traits;
 use Cobalt\SchemaPrototypes\Basic\Anchor;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Exception;
 use Exceptions\HTTP\Error;
 use MongoDB\Database;
 
@@ -69,15 +70,17 @@ trait Indexable {
             $sort_direction  = 1;
             $classes = "";
 
-            if($_GET[QUERY_PARAM_SORT_NAME] == $field['name']) {
-                $sort_direction = match($_GET[QUERY_PARAM_SORT_DIR]) {
+            // if($_GET[QUERY_PARAM_SORT_NAME] == $field['name']) {
+            if(isset($this->queryParameters['sort'][$field['name']])) {
+                $sort_val = $this->queryParameters['sort'][$field['name']];
+                $sort_direction = match($sort_val) {
                     null, 0, "0", -1, "-1" => 1,
                     1, "1" => -1,
                 };
                 // Check if this field is the one being sorted by the get peram and
                 // assign the appropriate class so we can communicate the sorting
                 // of this value field to the client
-                $classes = ($_GET[QUERY_PARAM_SORT_DIR] === "-1") ? "sort-desc" : "sort-asc";
+                $classes = ($sort_val === -1) ? "sort-desc" : "sort-asc";
             }
             
             $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name']), QUERY_PARAM_SORT_DIR => urlencode($sort_direction)]);
@@ -107,7 +110,14 @@ trait Indexable {
         return $html;
     }
 
-    private function get_table_row($doc, &$html) {
+    /**
+     * 
+     * @param GenericMap $doc 
+     * @param mixed &$html 
+     * @return void 
+     * @throws Exception 
+     */
+    private function get_table_row(GenericMap $doc, &$html) {
         $html .= "<flex-row>";
         if($this->schema->__get_index_checkbox_state()) {
             $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\" value=\"$doc->_id\"></flex-cell>";
@@ -116,16 +126,28 @@ trait Indexable {
         // Get each cell's contents
         foreach($this->sortedTable as $cell) {
             $html .= "<flex-cell>";
-            $view = $cell['view'];
+            
+            // $view = $cell['view'];
             // Check if "view" is callable, if it is, let's use the result of that function
             // as what we display for this cell
-            if(is_callable($view)) $view = $view($doc[$cell['name']], $doc);
+            // if(!is_string($view) && is_callable($view)) $view = $view($doc[$cell['name']], $doc);
             // If view is not set at all at this point, what should we do?
-            if(!$view) {
-                // Check if it's a SchemaResult (it should be in most instances)
-                if($doc->{$cell['name']} instanceof SchemaResult) $view = $doc->{$cell['name']}->__defaultIndexPresentation();
-                // Otherwise, let's just get the raw value of the field
-                else $view = $doc->{$cell['name']};
+
+            // Let's extract the view for this title
+            $schema = $doc->readSchema();
+            
+            if(isset($schema[$cell['name']]['index']['view'])) {
+                $view = $schema[$cell['name']]['index']['view'];
+                if(!is_string($view) && is_callable($view)) $view = $schema[$cell['name']]['index']['view']($doc[$cell['name']], $doc);
+                
+                if(!$view && method_exists($doc->{$cell['name']}, '__defaultIndexPresentation')) {
+                    $view = $doc->{$cell['name']}->__defaultIndexPresentation();
+                }
+                if(!$view) $doc->{$cell['name']}->display();
+            } else if (method_exists($doc->{$cell['name']}, '__defaultIndexPresentation')) {
+                $view = $doc->{$cell['name']}->__defaultIndexPresentation();
+            } else {
+                $view = $doc->{$cell['name']};
             }
             // Let's establish our open/close tags
             $open = "";
@@ -235,7 +257,7 @@ trait Indexable {
     protected function param_sanity_check(array $params) {
     
         $options = [];
-        // Our sort model is that the schema should always define the default short
+        // Our sort model is that the schema should always define the default sort
         foreach($this->sortedTable as $field) {
             // Let's establish our default sort model
             if($field['sort'] === -1 || $field['sort'] === 1) {

@@ -163,6 +163,22 @@ a.blockeditor--link-preview {
         text-align: right;
     }
 
+.blockeditor--embed {
+    display: flex;
+    justify-content: center;
+}
+
+    .blockeditor--embed iframe {
+        aspect-ratio: var(--width) / var(--height);
+        /* width: 100%; */
+        display: block;
+    }
+
+    .blockeditor--embed.blockeditor--embed-service-youtube iframe{
+        width: 100%;
+        height: auto;
+    }
+
 .blockeditor--table {
     width: 100%;
 }
@@ -197,13 +213,25 @@ ol.blockeditor--index ol {
 
 @media only screen and (max-width: 35em) {
     .blockeditor--embed iframe {
-        --aspect-ratio: calc(var(--width) / var(--height));
         width: 100%;
-        height: calc(100% * var(--aspect-ratio));
+        height: auto;
     }
 
     a.blockeditor--link-preview {
         --img-size: 30px;
         --margin-mod: 1;
+        height: auto;
+        flex-direction: column;
+    }
+    .blockeditor--link-preview .vbox {
+        height: auto;
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .blockeditor--link-preview .blockeditor--link-thumbnail {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        height: 180px;
     }
 }

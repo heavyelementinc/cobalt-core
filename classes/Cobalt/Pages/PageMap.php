@@ -87,7 +87,6 @@ class PageMap extends PersistanceMap {
                 'index' => [
                     'title' => 'Title',
                     'order' => 1,
-                    'sort' => 1,
                 ],
                 'filter' => function ($val) {
                     update('#title', ['innerHTML' => $val]);
@@ -109,13 +108,13 @@ class PageMap extends PersistanceMap {
                 'index' => [
                     'title' => 'Visibility',
                     'order' => 2,
-                    'view' => function () {
-                        return match($this->visibility->getValue()) {
+                    'view' => function ($val, $document) {
+                        return match((int)$this->visibility->getValue()) {
                             self::VISIBILITY_PRIVATE => "Private",
                             self::VISIBILITY_DRAFT  => "Draft",
                             self::VISIBILITY_UNLISTED => "Unlisted",
                             self::VISIBILITY_PUBLIC => "Public",
-                            default => "Private"
+                            default => "Unknown"
                         };
                     }
                 ],
@@ -126,6 +125,7 @@ class PageMap extends PersistanceMap {
                 'index' => [
                     'title' => "Live Date",
                     'order' => 3,
+                    'sort' => -1,
                 ]
             ],
             'views' => [
@@ -312,7 +312,7 @@ class PageMap extends PersistanceMap {
                 new StringResult,
                 'display' => function ($val) {
                     $name = server_name();
-                    return $name.__APP_SETTINGS__['LandingPage_route_prefix'].$this->url_slug."?pkey=".$val;
+                    return $name.$this->url_slug->get_path()."?pkey=".$val;
                 }
             ],
 
@@ -323,6 +323,13 @@ class PageMap extends PersistanceMap {
                 'nullable' => true,
                 'permission' => 'Pages_allowed_author',
                 'default' => session('_id'),
+                'index' => [
+                    'title' => 'Author',
+                    'order' => 9,
+                    'view' => function () {
+                        return $this->author->get_name("full");
+                    }
+                ]
             ],
             "include_bio" => [
                 new BooleanResult,

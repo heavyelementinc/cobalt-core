@@ -17,7 +17,7 @@
                 <div class="url">
                     <label>{{doc.url_slug.getLabel()}} <help-span value="This is the url &quot;path&quot; that your site is accessed through. It must not start with a &quot;/&quot; but it may contain slashes!&#10;&#10;Note that there may be issues with route conflicts as this is the last route loaded."></help-span></label><br>
                     <div class="url_slug_container" __custom-input="true">
-                        <a id="url_slug" href="/{{doc.url_slug}}">
+                        <a id="url_slug" href="{{doc.url_slug.get_path()}}">
                             http://{{app.domain_name}}/</a>
                             {{doc.url_slug.field()}}
                     </div>
@@ -144,9 +144,10 @@
                     {{doc.tags.field()}}
                 </li>
                 <li>
-                    <label>{{doc.preview_key.getLabel()}} <async-button method="POST" action="/api/v1/landing-pages/{{doc._id}}/preview-key/">New Key</async-button></label>
+                    <label>{{doc.preview_key.getLabel()}} <help-span value="The Preview Key is used to grant outside access to Draft posts. You can share a preview key with as many people as you'd like.&#10;&#10;Only one Preview Key can be issued at a time.&#10;&#10;Provisioning a new Preview Key will invalidate the previous key.&#10;&#10;NOTE: This document must be set to 'Draft' visibility for a Preview Key to grant access. 'Private' posts are always inaccessible."></help-span></label>
                     <!-- {{doc.preview_key.field()}} -->
                     <copy-span class="preview-key" value="{{doc.preview_key.display()}}"></copy-span>
+                    <async-button method="POST" action="/api/v1/landing-pages/{{doc._id}}/preview-key/">New Key</async-button></label>
                 </li>
                 <li>
                     <label>{{doc.style.getLabel()}} <help-span value="Add valid CSS in this box. It will be injected into the page."></help-span></label>
@@ -289,5 +290,18 @@
     }
     switch-container {
         width: 100%;
+    }
+    @media only screen and (max-width: 35em) {
+        .main--content {
+            width: 100%;
+        }
+        aside.sidebar {
+            width: 100%;
+            max-width: unset;
+        }
+
+        .editor  {
+            flex-direction: column-reverse;
+        }
     }
 </style>

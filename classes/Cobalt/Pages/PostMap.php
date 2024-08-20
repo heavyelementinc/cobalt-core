@@ -25,6 +25,9 @@ class PostMap extends PageMap {
             'set' => false,
         ];
 
+        $schema['splash_type']['default'] = self::SPLASH_POSITION_CENTER;
+        // $schema['splash_type']['readonly'] = true;
+
         // unset($schema['include_in_route_group'], $schema['route_group'], $schema['route_link_label'], $schema['route_order']);
         return $schema;
     }

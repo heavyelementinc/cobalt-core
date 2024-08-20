@@ -73,7 +73,7 @@ class BlockEditor extends HTMLElement {
                 header: Header,
                 quote: Quote,
                 rawtool: RawTool,
-                // simpleimage: SimpleImage,
+                simpleimage: SimpleImage,
                 imagetool: {
                     class: ImageTool,
                     config: {
@@ -91,7 +91,23 @@ class BlockEditor extends HTMLElement {
                 },
                 nestedlist: NestedList,
                 codetool: CodeTool,
-                embed: Embed,
+                embed: {
+                    class: Embed,
+                    inlineToolbar: true,
+                    config: {
+                        services: {
+                            steam: {
+                                // regex: /https?:\/\/codepen.io              \/([^\/\?\&]*)\/pen\/([^\/\?\&]*)/,
+                                regex: /https?:\/\/store.steampowered.com\/app\/([^\/\?\&]*)\/([^\/\?\&]*)\//,
+                                embedUrl: 'https://store.steampowered.com/widget/<%= remote_id %>',
+                                html: '<iframe frameborder="0" width="646" height="190" allowtransparency="true"></iframe>',
+                                height: 190,
+                                width: 646,
+                                id: (groups) => groups.join('/embed/')
+                            }
+                        }
+                    }
+                },
                 // checklist: Checklist,
                 inlinecode: InlineCode,
                 table: Table,

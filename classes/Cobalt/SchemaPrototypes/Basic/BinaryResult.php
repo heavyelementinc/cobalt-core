@@ -49,7 +49,9 @@ class BinaryResult extends SchemaResult {
         return $final;
     }
 
-
+    function __defaultIndexPresentation(): string {
+        return $this->display();
+    }
     
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/

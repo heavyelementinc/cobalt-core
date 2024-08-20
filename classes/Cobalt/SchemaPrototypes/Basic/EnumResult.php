@@ -26,6 +26,10 @@ class EnumResult extends SchemaResult {
         ];
     }
 
+    function __defaultIndexPresentation(): string {
+        return $this->display();
+    }
+    
     function filter($value) {
         $enum = $this->getValid();
         
