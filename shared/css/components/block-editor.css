@@ -140,8 +140,24 @@ a.blockeditor--link-preview {
     }
 
 .blockeditor--embed {
+    display: flex;
+    justify-content: center;
     text-align: center;
+    align-items: center;
+    flex-direction: column;
 }
+
+    .blockeditor--embed iframe {
+        aspect-ratio: var(--width) / var(--height);
+        /* width: 100%; */
+        display: block;
+    }
+
+    .blockeditor--embed.blockeditor--embed-service-youtube iframe{
+        width: 100%;
+        height: auto;
+    }
+
 
 .blockeditor--quote-block {
     width: 100%;
@@ -161,22 +177,6 @@ a.blockeditor--link-preview {
     .blockeditor--quote-block footnote {
         display: block;
         text-align: right;
-    }
-
-.blockeditor--embed {
-    display: flex;
-    justify-content: center;
-}
-
-    .blockeditor--embed iframe {
-        aspect-ratio: var(--width) / var(--height);
-        /* width: 100%; */
-        display: block;
-    }
-
-    .blockeditor--embed.blockeditor--embed-service-youtube iframe{
-        width: 100%;
-        height: auto;
     }
 
 .blockeditor--table {
