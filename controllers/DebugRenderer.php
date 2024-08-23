@@ -16,7 +16,7 @@ class DebugRenderer {
             'doc' => $schema
         ]);
 
-        return set_template("/debug/schema-debug.html");
+        return view("/debug/schema-debug.html");
     }
 }
 

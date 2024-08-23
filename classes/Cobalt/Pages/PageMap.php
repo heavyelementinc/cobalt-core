@@ -13,7 +13,7 @@ use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
-use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
+use Cobalt\SchemaPrototypes\Compound\ImageResult;
 use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use Controllers\Traits\Indexable;
@@ -137,7 +137,7 @@ class PageMap extends PersistanceMap {
                 ]
             ],
             "splash_image" => [
-                new UploadImageResult,
+                new ImageResult,
                 'alt' => function () {
                     return $this->title;
                 }

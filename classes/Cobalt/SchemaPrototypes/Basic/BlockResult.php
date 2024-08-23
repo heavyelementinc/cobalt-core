@@ -139,6 +139,9 @@ class BlockResult extends SchemaResult {
                 case "header":
                     $html .= $this->__from_header($block);
                     break;
+                case "simpleimage":
+                    $html .= $this->__from_simpleimage($block);
+                    break;
                 case "imagetool":
                     $html .= $this->__from_imagetool($block);
                     break;
@@ -184,6 +187,21 @@ class BlockResult extends SchemaResult {
         return "<$tag id=\"$id\" class=\"blockeditor--content blockeditor--header\">" . $block->data->text . "</$tag>";
     }
 
+    private function __from_simpleimage($block) {
+        $classes = "blockeditor--content blockeditor--image blockeditor--simpleimage";
+        if($block->data->withBorder) $classes .= " blockeditor--image-withborder";
+        if($block->data->withBackground) $classes .= " blockeditor--image-withbackground";
+        if($block->data->stretched) $classes .= " blockeditor--image-stretched";
+        $url = $block->data->url;
+        $mime = $block->data->mime;
+        $width = $block->data->width;
+        $height = $block->data->height;
+        $accent = $block->data->accent_color;
+        $contrast = $block->data->accent_contrast;
+        $caption = $block->data->caption;
+        return $this->image($classes, $accent, $contrast, $url, $mime, $width, $height, $caption, $block);
+    }
+
     private function __from_imagetool($block) {
         $classes = "blockeditor--content blockeditor--image";
         if($block->data->withBorder) $classes .= " blockeditor--image-withborder";
@@ -195,8 +213,13 @@ class BlockResult extends SchemaResult {
         $height = $block->data->file->height;
         $accent = $block->data->file->accent_color;
         $contrast = $block->data->file->accent_contrast;
+        $caption = $block->data->caption;
+        return $this->image($classes, $accent, $contrast, $url, $mime, $width, $height, $caption, $block);
+    }
+
+    private function image($classes, $accent, $contrast, $url, $mime, $width, $height, $caption, $block) {
         $figcaption = "";
-        if($block->data->caption) $figcaption = "<figcaption>" .$block->data->caption. "</figcaption>";
+        if($caption) $figcaption = "<figcaption>" .$block->data->caption. "</figcaption>";
         $html = "<figure class=\"$classes\" style=\"--accent-color: $accent; --accent-contrast: $contrast;\"><img src=\"$url\" type=\"$mime\" width=\"$width\" height=\"$height\" alt=\"".$block->data->caption."\">$figcaption</figure>";
         return $html;
     }

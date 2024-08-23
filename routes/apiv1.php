@@ -1,5 +1,6 @@
 <?php
 
+use Routes\Options;
 use Routes\Route;
 
 if(app("UGC_enable_user_generated_content")) {
@@ -120,14 +121,14 @@ if(app("enable_debug_routes")) {
     Route::post("/proto/", "SchemaDebug@filter_test");
 }
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
-    Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
-    Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
-    Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);
-    Route::s_delete("/posts/attachment/{id}",         "Posts@delete", ['permission' => 'Posts_manage_posts']);
-    Route::s_put(   "/posts/attachment/{id}/default", "Posts@defaultImage", ['permission' => 'Posts_manage_posts']);
-    Route::s_put(   "/posts/attachment/{id}/sort",    "Posts@updateSortOrder", ['permission' => 'Posts_manage_posts']);
-}
+// if(__APP_SETTINGS__['Posts']['default_enabled']) {
+//     Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
+//     Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
+//     Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);
+//     Route::s_delete("/posts/attachment/{id}",         "Posts@delete", ['permission' => 'Posts_manage_posts']);
+//     Route::s_put(   "/posts/attachment/{id}/default", "Posts@defaultImage", ['permission' => 'Posts_manage_posts']);
+//     Route::s_put(   "/posts/attachment/{id}/sort",    "Posts@updateSortOrder", ['permission' => 'Posts_manage_posts']);
+// }
 
 if(__APP_SETTINGS__['PaymentGateways_enabled']) {
     Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);
@@ -155,6 +156,10 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
         'permission' => 'Database_database_export',
     ]);
 }
+
+Route::s_delete((new Options("/image-editor/{id}/{name}","ImageEditor@delete"))
+    ->set_permission("Customizations_delete")
+);
 
 Posts::apiv1();
 Route::s_post('/posts/{id}/preview-key/', 'Posts@preview_key');

@@ -163,7 +163,7 @@ trait Validatable {
             
             if(!key_exists('operator', $schema)) {
                 if(!key_exists('$set', $result)) $result['$set'] = [];
-                $result['$set'][$field] = $storable;
+                $result['$set'][$this->__namePrefix.$field] = $storable;
                 continue;
             }
             $operator = $schema['operator'];
@@ -171,7 +171,7 @@ trait Validatable {
             switch(gettype($operator)) {
                 case "string":
                     if(!key_exists($operator, $result)) $result[$operator] = [];
-                    $result[$operator][$field] = $storable;
+                    $result[$operator][$this->__namePrefix.$field] = $storable;
                     break;
                 case is_callable($operator):
                     $r = $operator($field, $storable);

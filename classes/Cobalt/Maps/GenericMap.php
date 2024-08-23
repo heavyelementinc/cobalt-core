@@ -6,9 +6,11 @@ use ArrayAccess;
 use ArrayObject;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Traits\Validatable;
+use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
+use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Countable;
 use Drivers\Database;
 use Iterator;
@@ -85,7 +87,10 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         return null;
     }
 
-    public function ingest(array|BSONDocument|BSONArray $values): GenericMap {
+    public function ingest($values): GenericMap {
+        if($values instanceof UploadImageResult) {
+            $values = $values->get_image_result_format();
+        }
         if($values instanceof GenericMap) {
             $this->__schema = array_merge($this->__schema, $values->readSchema());
             // if($this->__schema) $this->__schemaHasBeenInitialized = true;
@@ -129,6 +134,10 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         } else if(is_array($value) || $value instanceof ArrayObject) {
             // If it's an array or array object
             foreach($value as $i => $v) {
+                if($v instanceof MapResult) {
+                    $target[$field] = $v;
+                    continue;
+                }
                 // Loop through them and rehydrate them
                 if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
             }

@@ -15,12 +15,17 @@ use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use JsonSerializable;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use stdClass;
 
+/**
+ * @deprecated Use ImageResult instead
+ * @package Cobalt\SchemaPrototypes\Compound
+ */
 class UploadImageResult extends UploadResult implements Persistable{
 
-    function defaultSchemaValues(array $data = []): array
-    {
+    function defaultSchemaValues(array $data = []): array {
         $schema = [
             'ref' => [
                 new IdResult,
@@ -141,10 +146,6 @@ class UploadImageResult extends UploadResult implements Persistable{
         return $this->value->{$type}->meta->mimetype;
     }
 
-
-
-
-
     function filter($value) {
         // Get the uploaded file(s) and store it in $result
         $result = parent::filter(null);
@@ -164,10 +165,10 @@ class UploadImageResult extends UploadResult implements Persistable{
         $accept = $this->getDirective('accept');
         $acceptAttr = $accept ? "accept=\"$accept\"" : "";
         return view("CRUD/fields/UploadResult.html",[
-            'field' => $this,
-            'qname' => $this->queriableName($this->name),
-            'name'  => $this->name,
-            'val'   => $val,
+            'field'    => $this,
+            'qname'    => $this->queriableName($this->name),
+            'name'     => $this->name,
+            'val'      => $val,
             'filename' => $val->media->filename ?? "",
             'width'    => $val->media->meta['width'] ?? "",
             'height'   => $val->media->meta['height'] ?? "",
@@ -180,14 +181,28 @@ class UploadImageResult extends UploadResult implements Persistable{
 
     function setValue(mixed $value): void {
         $this->originalValue = $value;
-        if(gettype($value) === 'string') {
-            $value = [];
+
+        switch(gettype($value)) {
+            case "string":
+                $this->value = new DefaultUploadSchema($value, $this->schema);
+                break;
+            case "array":
+            case $value instanceof BSONDocument:
+            case $value instanceof BSONArray:
+            case $value instanceof stdClass:
+                $this->value = new DefaultUploadSchema($value);
+                break;
+            default:
+                $this->value = $value;
         }
-        if(gettype($value) === "string") {
-            $this->value = new DefaultUploadSchema($value, $this->schema);
-        } else {
-            $this->value = $value;
-        }
+        // if(gettype($value) === 'string') {
+        //     $value = [];
+        // }
+        // if(gettype($value) === "string") {
+        //     $this->value = new DefaultUploadSchema($value, $this->schema);
+        // } else {
+        //     $this->value = $value;
+        // }
     }
 
     
@@ -206,5 +221,22 @@ class UploadImageResult extends UploadResult implements Persistable{
 
     public function bsonUnserialize(array $data): void {
         $this->value = new DefaultUploadSchema($data);
+    }
+
+    public function get_image_result_format(): array {
+        $model = [
+            'ref' => $this->value->__dataset['media']['ref'],
+            'url' => $this->value->__dataset['media']['filename'],
+            'mimetype' => $this->value->__dataset['media']['meta']['mimetype'],
+            'height' => $this->value->__dataset['media']['meta']['height'],
+            'width' => $this->value->__dataset['media']['meta']['width'],
+            'accent' => $this->value->__dataset['media']['meta']['accent_color'],
+        ];
+        if(key_exists('thumb', $this->value->__dataset)) {
+            $model['thumb'] = $this->value->__dataset['thumb']['filename'];
+            $model['thumb_width'] = $this->value->__dataset['thumb']['meta']['height'];
+            $model['thumb_width'] = $this->value->__dataset['thumb']['meta']['width'];
+        }
+        return $model;
     }
 }

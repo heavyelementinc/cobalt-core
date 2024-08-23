@@ -9,6 +9,8 @@ use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Cobalt\SchemaPrototypes\Basic\UploadResult2;
+use Cobalt\SchemaPrototypes\Compound\ImageResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
@@ -134,6 +136,13 @@ class PersistanceMapTest extends PersistanceMap {
                         ],
                     ],
                 ]
+            ],
+            // 'image1' => [
+            //     new UploadImageResult(),
+            // ],
+            'image2' => [
+                new ImageResult(),
+                'alt' => 'Alt text'
             ]
         ];
     }

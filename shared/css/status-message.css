@@ -29,7 +29,7 @@ message-item{
     box-shadow: 5px 0px 20px rgba(0,0,0,.3);
     --height: 100px;
     --min-height: 100px;
-    height: var(--height);
+    /* height: var(--height); */
     --margins: 15px;
     margin: var(--margins);
     /* padding: 15px; */
@@ -52,7 +52,7 @@ message-item{
     
     message-item section{
         padding: calc(var(--margins) / 2) 0;
-        height: var(--height);
+        /* height: var(--height); */
         min-height: var(--min-height);
         max-width: calc(100 - 27%);
         flex-grow: calc(1 - .27);

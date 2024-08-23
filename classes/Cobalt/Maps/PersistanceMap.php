@@ -87,3 +87,4 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
         $this->ingest($data);
     }
 }
+

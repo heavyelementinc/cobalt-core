@@ -117,16 +117,63 @@ class UploadResult extends MapResult {
     }
 
     function defaultSchemaValues(array $data = []): array {
-        $defaultValue = [
-            'media' => [
-                'ref' => '',
-                'filename' => '/core-content/img/default.jpg',
-                'meta' => [
-                    'heght' => 150,
-                    'width' => 150,
-                ]
+        $defaultSchema = [
+            'url' => [
+                new StringResult,
+                'default' => '/core-content/img/default.jpg',
+                'get' => function ($val) {
+                    return $val ?? $this->media->filename ?? "";
+                }
             ],
-            'isset' => false
+            'thumb' => [
+                new StringResult,
+                'default' => '/core-content/img/default.jpg',
+                'get' => function ($val) {
+                    return $val ?? $this->thumbnail->filename ?? "";
+                }
+            ],
+            'height' => [
+                new NumberResult,
+                'default' => 150,
+                'get' => function ($val) {
+                    return $val ?? $this->media->height ?? "";
+                }
+            ],
+            'width' => [
+                new NumberResult,
+                'default' => 150,
+                'get' => function ($val) {
+                    return $val ?? $this->media->width ?? "";
+                }
+            ],
+            'mimetype' => [
+                new StringResult,
+                'default' => 'image/jpeg',
+                'get' => function ($val) {
+                    return $val ?? $this->media->mimetype ?? "";
+                }
+            ],
+            'accent_color' => [
+                new HexColorResult,
+                'default' => "#555555",
+                'get' => function ($val) {
+                    return $val ?? $this->media->accent_color ?? "";
+                }
+            ],
+            'alt' => [
+                new StringResult,
+            ]
+        ];
+
+        $defaultValue = [
+            'width' => 150,
+            'height' => 150,
+            'mimetype' => 'image/jpeg',
+            'accent_color' => '#204315',
+            "ref" => null,
+            "url" => '/core-content/img/default.jpg',
+            'thumb' => '/core-content/img/default.jpg',
+            'isset' => false,
         ];
         
         return [
@@ -135,6 +182,7 @@ class UploadResult extends MapResult {
             'required'  => false,
             'limit'     => 1,
             'default'   => $defaultValue,
+            'schema'    => $defaultSchema,
         ];
     }
 

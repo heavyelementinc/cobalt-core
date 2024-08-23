@@ -163,8 +163,7 @@ class Router {
                 return [$preg_pattern, $directives];
             }
         }
-
-        if ($this->current_route === null) throw new NotFound("No route discovered.");
+        if ($this->current_route === null) throw new NotFound("No route discovered for $route.");
     }
 
     function set_uri_vars($directives, $match, $route, $context) {

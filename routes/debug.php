@@ -259,4 +259,10 @@ if (app("enable_debug_routes")) {
         ],
         'anchor' => ['name' => 'SubMap Prototype']
     ]);
+    Route::get("/proto/uploadimageresult", "SchemaDebug@imageresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Images Prototype']
+    ]);
 }

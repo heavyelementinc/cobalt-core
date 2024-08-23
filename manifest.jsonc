@@ -37,6 +37,7 @@
             "components/CountdownTimer.js",
             "components/horizontal-scroll.js",
             "components/block-editor.js",
+            "components/image-result.js",
             "Cobalt/Shadowbox.js",
             "DateConverter.js",
             "TabbedUI.js",

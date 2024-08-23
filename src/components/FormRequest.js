@@ -217,6 +217,7 @@ class NewFormRequest extends HTMLElement {
         const elements = this.querySelectorAll(universal_input_element_query);
         for(const el of elements) {
             if(["file", "files"].includes(el.type)) this.fileUploadFields.push(el);
+            if(el.tagName === "IMAGE-RESULT") this.fileUploadFields.push(el);
             el.removeEventListener("change", autoSaveListener.bind(this));
             el.addEventListener("change", autoSaveListener.bind(this));
         }
@@ -236,23 +237,28 @@ class NewFormRequest extends HTMLElement {
             case "field":
             case "autosave":
                 submit[target.name || target.getAttribute("name")] = await this.getFieldValue(target);//.value;
-                this.fieldsRequiringFeedback.push(target);
+                this.addElementToFeedbackList(target);
                 break;
             case "fieldset":
                 const fieldset = target.closest("fieldset");
                 for(const el of fieldset.querySelectorAll(universal_input_element_query)) {
                     submit[el.name || target.getAttribute("name")] = await this.getFieldValue(el);//.value;
                 }
-                this.fieldsRequiringFeedback.push(fieldset);
+                this.addElementToFeedbackList(fieldset);
                 break;
             case "form":
             default:
                 const val = await this.getValue();
                 submit = val;
-                this.fieldsRequiringFeedback.push(val);
+                this.addElementToFeedbackList(this);
                 break;
         }
         return (this.fileUploadFields.length === 0) ? submit : this.encodeFormData(submit);
+    }
+
+    addElementToFeedbackList(element) {
+        if(element instanceof HTMLElement === false) throw new Error(`element is not an HTMLElement`, element);
+        this.fieldsRequiringFeedback.push(element)
     }
 
     encodeFormData(data) {
@@ -261,12 +267,14 @@ class NewFormRequest extends HTMLElement {
         if(typeof data !== "object") return form;
         
         for( const field in data ) {
-            const fields = this.querySelectorAll(`[name='${field}'][type='files'],[name='${field}'][type='file']`);
+            const fields = this.querySelectorAll(`[name='${field}'][type='files'],[name='${field}'][type='file'],image-result[name="${field}"] [type="file"]`);
             if(!fields) continue;
             for( const el of fields ) {
 
                 for( const file of el.files){
-                    form.append(`${el.name}[]` || 'files[]', file);
+                    let fieldName = field;
+                    if(el.name) fieldName = el.name;
+                    form.append(`${fieldName}[]`, file);
                     this.totalUploadSize += parseFloat(file.size);
                 }
             }
@@ -383,6 +391,28 @@ class NewFormRequest extends HTMLElement {
 
     set feedback(fdbk) {
         this.setAttribute("feedback", (['true', 'false'].includes(fdbk)) ? fdbk : "true");
+    }
+
+    get disabled() {
+        const value = this.getAttribute("disabled");
+        switch(value) {
+            case "disabled":
+            case "true":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    set disabled(value) {
+        switch(value) {
+            case "disabled":
+            case "true":
+                this.setAttribute("disabled", "disabled");
+                break;
+            default:
+                this.removeAttribute("disabled");
+        }
     }
 
     attributeChangedCallback(attribute, old, newValue) {

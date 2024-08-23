@@ -1,0 +1,93 @@
+@set("title", "MapResult Prototype");
+<h1>{{title}}</h1>
+
+<fieldset>
+    <legend>image1 (old format)</legend>
+    <table>
+        <tr>
+            <td>JSON-ified: </td><td><textarea>{{$type.image1}}</textarea></td>
+        </tr>
+        <tr>
+            <img src="{{type.image1.media.filename}}">
+        </tr>
+        <tr>
+            {{type.image1.embed()}}
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <th>Width</th>
+            <td>{{type.image1.media.meta.width}}</td>
+        </tr>
+        <tr>
+            <th>Height</th>
+            <td>{{type.image1.media.meta.height}}</td>
+        </tr>
+        <tr>
+            <th>Mimetype</th>
+            <td>{{type.image1.media.meta.mimetype}}</td>
+        </tr>
+        <tr>
+            <th>Accent Color</th>
+            <td>{{type.image1.media.meta.accent_color}}</td>
+        </tr>
+        <tr>
+            <th>Contrast Color</th>
+            <td>{{type.image1.media.meta.contrast_color}}</td>
+        </tr>
+    </table>
+</fieldset>
+<fieldset>
+<table>
+    <tr>
+        <td>JSON-ified: </td><td><textarea>{{$type.image2}}</textarea></td>
+    </tr>
+    <tr>
+        <img src="{{type.image2.url}}">
+    </tr>
+    <tr>
+        {{type.image2.embed()}}
+    </tr>
+    <tr>
+        {{type.image2.embed("thumb")}}
+    </tr>
+</table>
+<table>
+    <tr>
+        <th>Width</th>
+        <td>{{type.image2.width}}
+            {{type.image2.width.subtract(10)}}
+        </td>
+    </tr>
+    <tr>
+        <th>Height</th>
+        <td>{{type.image2.height}}</td>
+    </tr>
+    <tr>
+        <th>Mimetype</th>
+        <td>{{type.image2.mimetype}}</td>
+    </tr>
+    <tr>
+        <th>Accent Color</th>
+        <td>{{type.image2.accent}}</td>
+    </tr>
+    <tr>
+        <th>Contrast Color</th>
+        <td>{{type.image2.contrast}}</td>
+    </tr>
+</table>
+</fieldset>
+<form-request method="POST" action="/api/v1/proto/">
+    <ul class="list-panel">
+        <li>
+            <label>Filter Result</label>
+        </li>
+        <li>
+            <label>Image2</label>
+            {{type.image2.field()}}
+        </li>
+        <li>
+            <button type="submit">Filter</button>
+        </li>
+    </ul>
+</form-request>

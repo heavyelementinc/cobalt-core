@@ -4,6 +4,7 @@ namespace Cobalt\SchemaPrototypes;
 
 use ArrayAccess;
 use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Countable;
 use Iterator;
 use JsonSerializable;
@@ -16,6 +17,7 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
      * @var GenericMap
      */
     protected $value;
+    protected $type = "map";
 
     function filter($value) {
         return $this->value->validate($value);
@@ -35,6 +37,10 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
 
     public function __toString(): string {
         return "[MapResultObject]";
+    }
+
+    public function __getStorable(): mixed {
+        return $this->value->__dataset;
     }
     
     // function setName(string $name) {

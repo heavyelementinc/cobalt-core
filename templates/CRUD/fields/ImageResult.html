@@ -1,0 +1,33 @@
+<image-result class="image-field--container {{qname}}-upload-target" name="{{qname}}" __custom-input="flex-rowue">
+    <div class="hbox">
+        {{field.embedEditor("media")}}
+        <flex-table>
+            <flex-row title="{{val.width}} x {{val.height}}">
+                <flex-header>Resolution</flex-header>
+                <flex-cell><span class="width-target">{{val.width}}</span> x <span class="height-target">{{val.height}}</span>
+                </flex-cell>
+            </flex-row>
+            <flex-row class="url-row" title="{{val.url}}">
+                <flex-header>URL <copy-span mini class="filename-target" value="{{val.url}}"></copy-span></flex-header>
+                <flex-cell><span class="nowrap">{{val.url}}</span></flex-cell>
+            </flex-row>
+            <flex-row>
+                <flex-header>Thumbnail</flex-header>
+                <flex-cell class="thumb-target">{{hasThumbnail}}</flex-cell>
+            </flex-row>
+        </flex-table>
+    </div>
+    <div>
+        <input type="file">
+        <ul class="list-panel">
+            <li>
+                <label>Accent Color</label>
+                <input type="color" class="accent-target" value="{{val.accent}}"> Accent Color
+            </li>
+            <li>
+                <label>Alt Text</label>
+                <input type="text" class="alt-text" value="{{val.alt}}">
+            </li>
+        </flex-table>
+    </div>
+</image-result>
