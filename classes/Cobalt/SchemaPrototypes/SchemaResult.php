@@ -42,6 +42,7 @@ use MongoDB\Model\BSONDocument;
  *  * `private` => `bool` prevents a field from being serialized to JSON and prevents typecasting to string (returns ""),
  *  * `pattern` => `string` a regex-like pattern used to filter inputs BEFORE the native filter callback and included as an attribute in the field() callback
  *  * `pattern_flags` => 'string' flags
+ *  * `input_tag` => specify any input HTML tag and the field prototype will return that tag (for most SchemaResult children)
  * @package Cobalt\SchemaPrototypes 
  * */
 class SchemaResult implements \Stringable, JsonSerializable {
@@ -183,10 +184,16 @@ class SchemaResult implements \Stringable, JsonSerializable {
      * @return string
      */
     #[Prototype]
-    protected function options(): string {
+    protected function options($selected = null): string {
         $valid = $this->getValid();
-        $val = $this->getValue() ?? $this->value;
-        if(!is_string($val) && is_numeric($val)) $val = (string)$val;
+        
+        if($selected) {
+            if($this->getDirective("allow_custom")) $val = $selected;
+            else if (key_exists($selected, $valid)) $val = $selected;
+            else $val = $this->getValue() ?? $this->value;
+        } else $val = $this->getValue() ?? $this->value;
+
+        // if(!is_string($val) && is_numeric($val)) $val = "$val";
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
         
         // If custom is allowed
@@ -567,5 +574,29 @@ class SchemaResult implements \Stringable, JsonSerializable {
         if($allow_custom === true) return false;
 
         return true;
+    }
+
+    /**
+     * Each child of SchemaResult should return an appropriately typecast
+     * version of the $value parameter
+     * @param mixed $value 
+     * @return mixed 
+     */
+    public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
+        if($this->type === "mixed") return $value;
+        return compare_and_juggle($this->type, $value);
+    }
+
+    #[Prototype]
+    protected function get_filter_field($current_value, $operation = QUERY_TYPE_CAST_LOOKUP) {
+        $v = $this->typecast($current_value, $operation);
+        return view("/admin/crudable/filterable-item.html", [
+            'schema' => $this,
+            'value' => $v,
+            'name' => $this->name,
+            'options' => $this->options($v),
+            'QUERY_PARAM_FILTER_NAME' => QUERY_PARAM_FILTER_NAME,
+            'QUERY_PARAM_FILTER_VALUE' => QUERY_PARAM_FILTER_VALUE
+        ]);
     }
 }

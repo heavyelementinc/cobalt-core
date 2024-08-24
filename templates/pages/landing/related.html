@@ -1,5 +1,6 @@
-<a class="landing-main--related-page" href="{{page.url_slug.get_path()}}" rel="related">
+<a class="landing-main--related-page" href="{{page.url_slug.get_path()}}" rel="related" data-common-tags="{{common_tags}}">
     <img class="landing-main--splash-thumb" loading="lazy" src="{{page.splash_image.filename()}}">
     <h1>{{page.title}}</h1>
+    {{!byline_meta}}
     <div class="related-page--summary" rel="summary">{{page.summary.display()}}</div>
 </a>

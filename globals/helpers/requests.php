@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Pages\PageManager;
 use Cobalt\Posts\PostManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
@@ -103,17 +104,18 @@ function fetch_and_save($url) {
 }
 
 
-function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name'], $schema = "\\Cobalt\\Posts\\PostSchema") {
+function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name']) {
+    $manager = new PageManager(null, $collection);
+    $pages = $manager->find($manager->public_query());
+    $server_name = server_name();
+
     $html = "";
-    $posts = new PostManager(null, $collection);
-    $posts->set_schema($schema);
-    $count = $posts->count(['published' => true]);
-    foreach($posts->findAllAsSchema(['published' => true], ['limit' => $count + 1]) as $post) {
+    foreach($pages as $page) {
+        if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
         $html .= view("sitemap/url.xml", [
-            'location' => $post->{'public_link'},
-            'lastModified' => $post->publicationDate,
+            'location' => $server_name . $page->url_slug->get_path(),
+            'lastModified' => $page->live_date->format("Y-m-d"),
             'priority' => 999,
-            // 'additional' => "<changefreq>true</changefreq>"
         ]);
     }
     return $html;
@@ -281,3 +283,8 @@ function str_to_id($str) {
     return strtolower(preg_replace("/(-{2,})/", "-", $replace));
 }
 
+function is_bot(?string $useragent = null) {
+    if(!$useragent) $useragent = $_SERVER['HTTP_USER_AGENT'];
+    if(!isset($useragent)) return false;
+    return (preg_match('/bot|crawl|curl|dataprovider|search|get|spider|find|java|majesticsEO|google|yahoo|teoma|contaxe|yandex|libwww-perl|facebookexternalhit|mediapartners/i', $useragent));
+}

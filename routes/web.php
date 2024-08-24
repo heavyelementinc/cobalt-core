@@ -24,13 +24,16 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     
     $posts = array_merge(
         __APP_SETTINGS__['Posts']['public_post_options'] ?? [], [
-            'sitemap' => [
-                'children' => fn () => register_individual_post_routes(),
-                'ignore' => true
-            ]
+            
     ]);
     
-    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page", $posts);
+    Route::get((new Options(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page"))
+        ->set_sitemap([
+            'children' => fn () => register_individual_post_routes(),
+            'ignore' => true
+        ])
+        // ->set_handler('core/post2_0-handler.js')
+    );
     // Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");
 }
 

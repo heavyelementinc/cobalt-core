@@ -714,3 +714,48 @@ function get_crudable_flag(string $name): ?int {
     global $CRUDABLE_CONFIG_TRACKER;
     return $CRUDABLE_CONFIG_TRACKER[$name] ?? null;
 }
+
+function compare_and_juggle($canonical, $value) {
+    if($canonical !== $value) $value = juggler(gettype($canonical), $value);
+    return $value;
+}
+
+/**
+ * Naievely convert between types
+ * @param string $canonincal 
+ * @param mixed $value 
+ * @return mixed 
+ * @throws TypeError if a resource is set as $value
+ */
+function juggler(string $canonincal, mixed $value) {
+    switch($canonincal) {
+        case "boolean":
+            $value = (bool)$value;
+            break;
+        case "string":
+            $value = (string)$value;
+            break;
+        case "integer":
+            $value = (int)$value;
+            break;
+        case "double":
+            $value = (double)$value;
+            break;
+        case "float":
+            $value = (float)$value;
+            break;
+        case "array":
+            $value = (array)$value;
+            break;
+        case "object":
+            $value = (object)$value;
+            break;
+        case "resource":
+            throw new TypeError("Cannot convert resources");
+            break;
+        case "NULL":
+            $value = null;
+            break;
+    }
+    return $value;
+}

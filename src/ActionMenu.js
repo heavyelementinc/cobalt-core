@@ -162,6 +162,9 @@ class ActionMenu extends EventTarget {
             const type = action.getType();
             let value = true;
             switch(type) {
+                case "href":
+                    window.Cobalt.router.location = action.href;
+                    break;
                 case "request":
                     value = await this.handleRequest(action, event)
                     break;
@@ -346,6 +349,7 @@ class RegisteredAction {
     }
 
     getType() {
+        if(this.href) return "href";
         const callback = "callback";
         if(!this.requestMethod) return callback;
         if(!this.requestAction) return callback;
@@ -365,11 +369,11 @@ class RegisteredAction {
     }
 
     get icon() {
-        return this.iconContainer.name;
+        return this.iconContainer.getAttribute("name");
     }
 
     set icon(value) {
-        return this.iconContainer.name = value;
+        return this.iconContainer.setAttribute("name",value);
     }
 
     get label() {

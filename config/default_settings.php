@@ -211,7 +211,7 @@ const DEFAULT_DEFINITIONS = [
         "default" => [
             "prefix" => "Designed by",
             "name" =>   "Heavy Element, Inc.",
-            "href" =>   "https =>//heavyelement.io/",
+            "href" =>   "https//heavyelement.io/",
             "title" =>  "Maine's Premier New Media Production Studio"
         ],
         "meta" => [
@@ -1485,5 +1485,68 @@ const DEFAULT_DEFINITIONS = [
             "type" => "string",
             "confirm" => "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
         ]
+    ],
+    "SocialMedia_facebook" => [
+        'default' => '',
+        'meta' => [
+            'group' => 'Basic',
+            'subgroup' => 'Social',
+            'name' => "<i name=\"facebook\"></i> Facebook",
+            "type" => "url"
+        ],
+        'validate' => [
+            'type' => 'string'
+        ]
+    ],
+    'SocialMedia_instagram' => [
+        'default' => '',
+        'meta' => [
+            'group' => 'Basic',
+            'subgroup' => 'Social',
+            'name' => "<i name=\"instagram\"></i> Instagram",
+            "type" => "url"
+        ],
+        'validate' => [
+            'type' => 'string'
+        ]
+    ],
+    'SocialMedia_twitter' => [
+        'default' => '',
+        'meta' => [
+            'group' => 'Basic',
+            'subgroup' => 'Social',
+            'name' => "<i name=\"twitter\"></i> Twitter",
+            "type" => "url"
+        ],
+        'validate' => [
+            'type' => 'string'
+        ]
+    ],
+    'SocialMedia_mastodon' => [
+        'default' => '',
+        'meta' => [
+            'group' => 'Basic',
+            'subgroup' => 'Social',
+            'name' => "<i name=\"mastodon\"></i> Mastodon",
+            "type" => "url"
+        ],
+        'validate' => [
+            'type' => 'string'
+        ]
+    ],
+    // 'SocialMedia_' => [
+    //     'default' => '',
+    //     'meta' => [
+    //         'group' => 'Basic',
+    //         'subgroup' => 'Social',
+    //         'name' => "<i name=\"mastodon\"></i> Mastodon",
+            // "type" => "url"
+    //     ],
+    //     'validate' => [
+    //         'type' => 'string'
+    //     ]
+    // ],
+    'SocialMedia_shown' => [
+        'default' => [],
     ]
 ];

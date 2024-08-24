@@ -107,9 +107,13 @@ abstract class Database {
         return $this->collection->count($filter, $options);
     }
 
-    final function distinct($field,$filter = []):array {
+    final function distinct($field, $filter = [], $options = []):array {
         benchmark_reads();
-        return $this->collection->distinct($field, $filter);
+        return $this->collection->distinct($field, $filter, $options);
+    }
+
+    final function createIndex(array|object $key, array $options = []):string {
+        return $this->collection->createIndex($key, $options);
     }
 
     /**

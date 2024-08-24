@@ -14,3 +14,20 @@ class PostManager {
         }
     }
 }
+
+// class PublicPostManager {
+//     constructor(slug) {
+//         this.url_slug = slug;
+//         this.feed_button = document.querySelector("button.follow-button");
+//         this.init()
+//     }
+
+//     init() {
+//         if(!this.feed_button) return;
+//         this.feed_button.addEventListener("click", () => {
+//             this.actionMenu()
+//         });
+//     }
+
+    
+// }

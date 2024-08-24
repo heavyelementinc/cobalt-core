@@ -70,6 +70,16 @@ class ImageResult extends UploadResult2 {
         }
     }
 
+    #[Prototype]
+    protected function accent($size = "media") {
+        return $this->accent;
+    }
+
+    #[Prototype]
+    protected function contrast($size = "media") {
+        return $this->accent->getContrastColor();
+    }
+
     function filter($value) {
         if(key_exists('url', $value)) {
             unset($value['url']);

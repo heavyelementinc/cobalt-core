@@ -28,7 +28,7 @@ class IntegrationsController extends Controller{
         foreach($integrations as $integration) {
             $namespaced = "\\Cobalt\\Integrations\\$integration\\$integration";
             $i = new $namespaced();
-            if($i instanceof OauthBase === false) throw new Exception("Namespaced class $namespaced is not an instance of the Base Integration");
+            if($i instanceof OauthBase === false) continue;//throw new Exception("Namespaced class $namespaced is not an instance of the Base Integration");
             $html .= $i->html_oauth_button();
         }
         return $html;

@@ -1,4 +1,12 @@
 <li>
+    <label>{{doc.time_to_read.getLabel()}} <help-span class="You can put any text you want here."></help-span></label>
+    {{doc.time_to_read.field()}}
+</li>
+<li>
     <label>{{doc.views.getLabel()}}</label>
     {{doc.views.field()}}
+</li>
+<li>
+    <label>{{doc.bot_hits.getLabel()}}</label>
+    {{doc.bot_hits.field()}}
 </li>

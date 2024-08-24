@@ -12,11 +12,7 @@
                 <span class="author-name">{{page.author.get_name("full")}}
                     {{!follow_link}}
                 </span>
-                <div class="post-details">
-                    {{page.body.timeToRead()}} read
-                    &middot; {{!views}}
-                    <date><a href="{{page.url_slug.}}">{{page.live_date.relative()}}</a></date>
-                </div>
+                {{!views}}
             </div>
         </div>
     </div>

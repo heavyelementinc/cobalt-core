@@ -18,6 +18,7 @@ use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use Controllers\Traits\Indexable;
 use Validation\Exceptions\ValidationIssue;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class PageMap extends PersistanceMap {
     const VIEW_TYPE = [
@@ -35,10 +36,11 @@ class PageMap extends PersistanceMap {
     const SPLASH_POSITION_TWO_UP = 0b01000;
     const SPLASH_POSITION_CENTER = 0b10000;
 
-    const FLAGS_REQUIRES_ACCOUNT      = 0b00000001;
-    const FLAGS_EXCLUDE_FROM_SITEMAP  = 0b00000010;
-    const FLAGS_EXCLUDE_RELATED_PAGES = 0b00000100;
-    const FLAGS_HIDE_VIEW_COUNT       = 0b00001000;
+    const FLAGS_REQUIRES_ACCOUNT       = 0b00000001;
+    const FLAGS_EXCLUDE_FROM_SITEMAP   = 0b00000010;
+    const FLAGS_EXCLUDE_RELATED_PAGES  = 0b00000100;
+    const FLAGS_HIDE_VIEW_COUNT        = 0b00001000;
+    const FLAGS_READ_TIME_MANUALLY_SET = 0b00010000;
 
     const ASIDE_SIDEBAR_NATURAL      = 0b000001;
     const ASIDE_SIDEBAR_REVERSE      = 0b000010;
@@ -87,6 +89,7 @@ class PageMap extends PersistanceMap {
                 'index' => [
                     'title' => 'Title',
                     'order' => 1,
+                    'searchable' => true,
                 ],
                 'filter' => function ($val) {
                     update('#title', ['innerHTML' => $val]);
@@ -116,7 +119,8 @@ class PageMap extends PersistanceMap {
                             self::VISIBILITY_PUBLIC => "Public",
                             default => "Unknown"
                         };
-                    }
+                    },
+                    'filterable' => true,
                 ],
             ],
             'live_date' => [
@@ -130,10 +134,18 @@ class PageMap extends PersistanceMap {
             ],
             'views' => [
                 new NumberResult,
-                'default' => 1,
+                'default' => 0,
                 'index' => [
                     'title' => 'Views',
                     'order' => 3,
+                ]
+            ],
+            'bot_hits' => [
+                new NumberResult,
+                'default' => 0,
+                'index' => [
+                    'title' => 'Bots',
+                    'order' => 4
                 ]
             ],
             "splash_image" => [
@@ -225,8 +237,24 @@ class PageMap extends PersistanceMap {
             ],
             "body" => [
                 new BlockResult,
+                'filter' => function ($val) {
+                    if($this->flags->and(self::FLAGS_READ_TIME_MANUALLY_SET)) return $val;
+                    $block = new BlockResult();
+                    // This is a shitty hack.
+                    $block->setValue(json_decode(json_encode($val)));
+                    $this->time_to_read = $block->timeToRead();
+                    update('input[name="time_to_read"]',['value' => $this->time_to_read]);
+                    return $val;
+                }
             ],
-
+            "time_to_read" => [
+                new StringResult,
+                'display' => function ($val) {
+                    if(!$val) {
+                        return $this->body->timeToRead();
+                    }
+                }
+            ],
             "cta" => [
                 new StringResult,
             ],
@@ -278,15 +306,28 @@ class PageMap extends PersistanceMap {
                 'allow_custom' => true,
                 'valid' => function () {
                     $man = new PageManager();
-                    $results = $man->distinct("tags");
+                    $results = $man->distinct("tags", [], ['limit' => 1000]);
                     $array = [];
-                    
                     foreach($results as $value) {
                         $array[$value] = $value;
                     }
                     return $array;
                 },
-                'nullable' => true
+                'filter' => function ($tags) {
+                    $lowercase = [];
+                    foreach($tags as $tag) {
+                        $lowercase[] = strtolower($tag);
+                    }
+                    return array_unique($lowercase);
+                },
+                'nullable' => true,
+                'index' => [
+                    'title' => 'Tags',
+                    'view' => function () {
+                        return $this->tags->join(", ");
+                    },
+                    'searchable' => true
+                ]
             ],
             'view' => [
                 new EnumResult,
@@ -306,6 +347,7 @@ class PageMap extends PersistanceMap {
                     self::FLAGS_EXCLUDE_FROM_SITEMAP => "Exclude Page from Sitemap",
                     self::FLAGS_EXCLUDE_RELATED_PAGES => "Do Not Show Related Pages",
                     self::FLAGS_HIDE_VIEW_COUNT => "Hide View Count",
+                    self::FLAGS_READ_TIME_MANUALLY_SET => "Read Time Manually Set",
                 ]
             ],
             'preview_key' => [
@@ -328,7 +370,8 @@ class PageMap extends PersistanceMap {
                     'order' => 9,
                     'view' => function () {
                         return $this->author->get_name("full");
-                    }
+                    },
+                    'filterable' => true,
                 ]
             ],
             "include_bio" => [
@@ -409,5 +452,39 @@ class PageMap extends PersistanceMap {
             //     new UploadImageResult
             // ]
         ];
+    }
+
+    #[Prototype]
+    protected function get_follow_link() {
+        $follow_link = "";
+        if($this instanceof PostMap == false) return $follow_link;
+        if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
+            $follow_link = " &middot; <action-menu class=\"rss-feed-link button\" title=\"Follow\" icon=\"rss\">";
+            $follow_link.= "&nbsp;Follow";
+            $follow_link.= "<option onclick=\"copyToClipboard('".server_name().route("Posts@rss_feed")."', 'Copied the link to your clipboard. Now paste this into your favorite RSS reader!')\" target=\"_blank\" icon=\"rss\">RSS Feed<br><small style=\"font-weight: normal;display: block;white-space: pre-wrap;\">This will copy our RSS feed link to your clipboard. You can then paste the link into your favorite RSS reader!</small></option>";
+
+            $socials = ["SocialMedia_facebook","SocialMedia_instagram","SocialMedia_twitter","SocialMedia_mastodon"];
+            foreach($socials as $platform) {
+                if(!__APP_SETTINGS__[$platform]) continue;
+                $platformName = str_replace("SocialMedia_", "", $platform);
+                $follow_link.= "<option href=\"".__APP_SETTINGS__[$platform]."\" target=\"_blank\" icon=\"$platformName\">".ucwords($platformName)."</option>";
+            }
+            $follow_link.= "</action-menu>";
+        }
+        return $follow_link;
+    }
+
+    #[Prototype]
+    protected function get_byline_meta($linked_date = false) {
+        if($this instanceof PostMap == false) return '';
+        $html = "<div class=\"post-details\">";
+        $ttr = $this->time_to_read->getValue();
+        $html .= ($ttr) ? "$ttr read &middot; " : "";
+        $html .= ($this->flags->and(self::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($this->views->getValue() + 1) . " view".plural($this->views->getValue() + 1)." &middot; ";
+        $html .= "<date>";
+        if($linked_date) $html .= "<a href=\"$this->url_slug\">".$this->live_date->relative("datetime")."</a>";
+        else $html .= $this->live_date->relative("datetime");
+        $html .= "</date>";
+        return $html . "</div>";
     }
 }

@@ -20,7 +20,7 @@ class StatusMessage {
 
     /** @todo add action event updating */
     async update(message, icon = this.icon, action = this.action, type = this.type) {
-        const section = this.element.querySelector("section");
+        const section = this.element.querySelector(".message-container");
         const ionIcon = this.element.querySelector("i");
         this.element.setAttribute("name", type);
 
@@ -151,7 +151,7 @@ class MessageHandler {
         message.setAttribute("name",details.type);
         message.classList.add(`status-message`);
         message.setAttribute("data-id",details.id);
-        message.innerHTML = `<i name='${details.icon}'></i><section>${details.message}</section>`;
+        message.innerHTML = `<i name='${details.icon}'></i><div class="message-container">${details.message}</div>`;
         let close_btn = document.createElement("button");
         close_btn.innerHTML = window.closeGlyph;
         // close_btn.addEventListener()

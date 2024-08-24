@@ -4,6 +4,7 @@ namespace Cobalt\SchemaPrototypes\Basic;
 
 use ArrayAccess;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 // use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
@@ -16,7 +17,7 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
  * @package Cobalt\SchemaPrototypes
  */
 class StringResult extends SchemaResult implements ArrayAccess{
-    // use Fieldable;
+    use Fieldable;
     protected $type = "string";
 
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -73,10 +74,10 @@ class StringResult extends SchemaResult implements ArrayAccess{
         return strrev($this->value);
     }
 
-    #[Prototype]
-    protected function field():string {
-        return "<input type=\"Text\" name=\"$this->name\" value=\"".$this->getValue()."\">";
-    }
+    // #[Prototype]
+    // protected function field():string {
+    //     return "<input type=\"Text\" name=\"$this->name\" value=\"".$this->getValue()."\">";
+    // }
 
     #[Prototype]
     protected function substring(string $start, ?string $length = null, array $options = []) {

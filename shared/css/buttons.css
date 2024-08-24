@@ -56,6 +56,10 @@ async-button[aria-disabled="true"] {
     color: rgba(0,0,0,.4);
 }
 
+async-button[aria-disabled="true"][native] {
+    opacity: .5;
+}
+
 async-button > svg {
     display: inline-block;
     visibility: hidden;

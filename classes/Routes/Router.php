@@ -105,17 +105,17 @@ class Router {
                 'sitemap' => [
                     'ignore' => true,
                     'children' => function () {
-                        $manager = new PageManager();
-                        $pages = $manager->find($manager->public_query());
-                        $html = "";
-                        foreach($pages as $page) {
-                            if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
-                            $html .= view("sitemap/url.xml", [
-                                'location' => "/$page->url_slug",
-                                'lastModified' => $page->live_date->format("Y-m-d")
-                            ]);
-                        }
-                        return $html;
+                        return register_individual_post_routes(COBALT_PAGES_DEFAULT_COLLECTION);
+                        // $pages = $manager->find($manager->public_query());
+                        // $html = "";
+                        // foreach($pages as $page) {
+                        //     if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
+                        //     $html .= view("sitemap/url.xml", [
+                        //         'location' => "/$page->url_slug",
+                        //         'lastModified' => $page->live_date->format("Y-m-d")
+                        //     ]);
+                        // }
+                        // return $html;
                     },
                     'lastmod' => fn()=> null
                 ]

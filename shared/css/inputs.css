@@ -21,7 +21,7 @@ input-wrapper {
 }
 
 /* input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field  */
-input, textarea, button[native], [role='button'], [__custom-input] {
+input, textarea, button[native], async-button[native], a.button[native], [role='button'], [__custom-input] {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -164,6 +164,11 @@ div.upload-field img{
     justify-content: center;
     align-items: center;
     display: flex;
+  }
+
+  .image-field--container .url-row flex-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .image-field--container .nowrap {
@@ -802,3 +807,19 @@ ol.binary-list {
 ol.binary-list li:not(.active){
   opacity: .2;
 }
+
+.crudable-header--hypermedia-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.2em;
+}
+  .crudable-header--section {
+    display: flex;
+    gap: 0.2em;
+    align-items: center;
+  }
+
+  a.hypermedia--page-select {
+    font-weight: bold;
+    font-size: 1.6em;
+  }

@@ -8,7 +8,8 @@ use Exception;
 
 trait Fieldable {
     #[Prototype]
-    protected function field(string $class = "", array $misc = [], string $tag = "input"):string {
+    protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
+        if($tag === null) $tag = $this->getDirective("input_tag") ?? "input";
         return $this->input($class, $misc, $tag);
     }
 

@@ -13,6 +13,10 @@ class BinaryResult extends SchemaResult {
     use Fieldable;
     private $hydratedValid = null;
 
+    public function typecast($key, $type = QUERY_TYPE_CAST_LOOKUP) {
+        return (int)$key;
+    }
+
     function filter($value) {
         // if(is_string($value)) return $this->strToInt($value);
         if(is_integer($value)) {
@@ -58,9 +62,10 @@ class BinaryResult extends SchemaResult {
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
 
     #[Prototype]
-    protected function options():string {
+    protected function options($selected = null):string {
         $valid = $this->getValid();
-        $value = $this->getValue();
+        if($selected === null) $value = (int)$selected;
+        else $value = $this->getValue();
         $html = "";
         foreach($valid as $key => $val) {
             $selected = "";

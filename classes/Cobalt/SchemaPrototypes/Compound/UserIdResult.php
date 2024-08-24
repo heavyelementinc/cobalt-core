@@ -29,6 +29,19 @@ class UserIdResult extends SchemaResult {
         $this->userCrud = new UserCRUD();
     }
 
+    function typecast($id, $type = QUERY_TYPE_CAST_LOOKUP) {
+        // When looking up an 
+        if($type === QUERY_TYPE_CAST_OPTION) return (string)$id;
+        if($id instanceof ObjectId) return $id;
+        if(!$id) return null;
+        if(gettype($id) !== "string") return null;
+        // We don't want to *generate* an ObjectId so we need to filter
+        // out any non-objectIDs
+        if(!ctype_xdigit($id)) return null;
+        if(strlen($id) !== 24) return null;
+        return new ObjectId($id);
+    }
+
     #[Prototype]
     protected function _id() {
         return $this->originalValue;

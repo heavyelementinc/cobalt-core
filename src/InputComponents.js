@@ -245,6 +245,7 @@ class DisplayDate extends HTMLElement {
             default: "m/d/Y",
             verbose: "l, F jS Y g:i A",
             long: "l, F jS Y",
+            datetime: "F jS Y g:i A",
             "12-hour": "g:i a",
             "24-hour": "H:i",
             "seconds": "g:i:s A"

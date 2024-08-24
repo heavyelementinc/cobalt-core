@@ -107,6 +107,12 @@ const QUERY_PARAM_SORT_DIR  = 'direction';
 const QUERY_PARAM_LIMIT = 'limit';
 const QUERY_PARAM_PAGE_NUM = 'page';
 const QUERY_PARAM_SEARCH = 'query';
+const QUERY_PARAM_FILTER_NAME = "filter_name";
+const QUERY_PARAM_FILTER_VALUE = "filter_value";
+const QUERY_TYPE_CAST_LOOKUP = 0;
+const QUERY_TYPE_CAST_OPTION = 1;
+const QUERY_PARAM_SEARCH_CASE_SENSITVE = "case_sensitive";
+const QUERY_PARAM_COMPARISON_STRENGTH = "strength";
 
 const CRUDABLE_CONFIG_APIV1 = 0b0001;
 const CRUDABLE_CONFIG_ADMIN = 0b0010;
@@ -127,4 +133,4 @@ const CUSTOMIZATION_TYPE_SERIES = 'series';
 
 $DECLARED_CUSTOMIZATIONS = [];
 
-
+const COBALT_PAGES_DEFAULT_COLLECTION = "CobaltPages";

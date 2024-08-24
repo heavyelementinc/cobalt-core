@@ -16,7 +16,7 @@ message-container:empty{
 
 message-item{
     display:flex;
-    flex-direction: row;
+/*     flex-direction: row; */
     box-sizing: border-box;
     animation-play-state: running;
     animation-timing-function: ease-in-out;
@@ -33,44 +33,45 @@ message-item{
     --margins: 15px;
     margin: var(--margins);
     /* padding: 15px; */
+    position: relative;
 }
 
     message-item i{
-        height: var(--height);
-        min-height: var(--min-height);
+        min-height: 100px;
+        width: 1.2em;
         font-size: 3rem;
         white-space: nowrap;
-        min-width: 17%;
-        flex-grow: .17;
+        flex-grow: 0;
+        flex-shrink: 0;
         box-sizing: border-box;
         padding: 0 calc(var(--margins) / 2);
-        display: flex;
+        display: inline-flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
     }
     
-    message-item section{
+    message-item div.message-container{
         padding: calc(var(--margins) / 2) 0;
         /* height: var(--height); */
-        min-height: var(--min-height);
-        max-width: calc(100 - 27%);
-        flex-grow: calc(1 - .27);
         box-sizing: border-box;
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        padding-right:1em;
     }
 
     message-item button{
-        height: 100%;
-        min-height: var(--min-height);
-        min-width: 10%;
+        height: 1.5em;
+        width: 1.5em;
         background-color: var(--project-color-table-border);
         color: var(--project-color-input-border-nofocus);
         border: none;
         border-left: 1px solid var(--project-color-input-border-nofocus);
         padding: 0;
         flex-grow: .1;
+        position: absolute;
+        top: 0;
+        right: 0;
     }
 
     .status-message--opening {
@@ -89,6 +90,7 @@ message-item{
         height: 0;
         padding: 0;
         margin: 0 var(--margins);
+        opacity: 0;
     }
 }
 
@@ -96,6 +98,7 @@ message-item{
     to {
         height: 0px;
         margin: 0 var(--margins);
+        opacity: 0;
     }
 }
 

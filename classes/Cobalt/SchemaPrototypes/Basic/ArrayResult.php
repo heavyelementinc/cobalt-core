@@ -20,6 +20,7 @@ use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use MongoDB\BSON\Persistable;
 use MongoDB\Model\BSONDocument;
+use TypeError;
 
 class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Traversable{
     use ResultTranslator, Fieldable;
@@ -77,9 +78,14 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     }
 
     #[Prototype]
-    protected function options(): string {
+    protected function options($selected = null): string {
         $valid = $this->getValid();
-        $val = $this->getRaw();// ?? $this->value;
+        if($selected) {
+            if($this->getDirective("allow_custom")) $val = $selected;
+            else if (in_array($selected, $valid)) $val = $selected;
+            else $val = $this->getValue() ?? $this->value;
+        } else $val = $this->getValue() ?? $this->value;
+        // $val = $this->getRaw();// ?? $this->value;
         if(!is_string($val) && is_numeric($val)) $val = (string)$val;
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
         
@@ -231,7 +237,26 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         return $val[$v - 1];
     }
 
+    #[Prototype]
+    protected function intersect($arraylike) {
+        $arr = $this->arraylike_to_array($arraylike);
+        return array_intersect($this->getRaw() ?? [], $arr);
+    }
 
+    private function arraylike_to_array($arraylike):array {
+        if(gettype($arraylike) !== "array") {
+            if($arraylike instanceof ArrayResult) {
+                $arraylike = $arraylike->getRaw();
+            }
+            if($arraylike instanceof BSONArray) {
+                $arraylike = $arraylike->getArrayCopy();
+            }
+            if(gettype($arraylike) !== "array") {
+                throw new TypeError("arraylike must be an array");
+            }
+        }
+        return $arraylike;
+    }
 
     function valid():bool {
         $val = $this->getValue();

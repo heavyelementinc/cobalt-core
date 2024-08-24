@@ -42,7 +42,7 @@ class MarkdownResult extends StringResult {
     }
 
     #[Prototype]
-    protected function field(string $class = "", array $misc = [], string $tag = ""):string {
+    protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         return $this->markdownarea($class, $misc);
         // $isHtml = $this->asHTML;
         // $html = "<markdown-area name=\"$this->name\">" . $this->value . "</markdown-area>";

@@ -1,5 +1,5 @@
 action-menu {
-    
+    color: var(--project-action-menu-color, #000);
 }
 
 .action-menu--work-complete, .action-menu--work-error {
@@ -80,6 +80,8 @@ action-menu {
         right: .5em;
         background: transparent;
         padding: unset;
+        border: unset;
+        color: inherit;
     }
 
     .action-menu-wrapper .action-menu-header button:hover {
@@ -105,8 +107,14 @@ action-menu {
         animation-timing-function: ease-in-out;
     }
 
-    .action-menu-wrapper menu button i:not([name]) {
+    .action-menu-wrapper menu button i {
         display: none;
+    }
+
+    .action-menu-wrapper menu i[name] {
+        display: block;
+        font-size: 1.5em;
+        margin-right: .5em;
     }
 
     .action-menu-wrapper menu li {
@@ -136,6 +144,8 @@ action-menu {
         justify-content: space-between;
         align-items: center;
         min-width: 13ch;
+        color: black;
+        border: none;
     }
 
     .action-menu-wrapper menu button:hover {

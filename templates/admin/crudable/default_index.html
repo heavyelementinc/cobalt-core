@@ -1,11 +1,22 @@
 <h1>{{!title}}</h1>
-<form>
-    {{!multidelete_button}}
-    {{!previous_page}}
-    <input type="number" name="{{page_param}}" value="{{page_number}}" style="width:3ch;text-align: right;">
-    {{!next_page}}
-    <input type="search" name="{{search_param}}" value="{{search_value}}" placeholder="Search"><button type="submit"><i name="magnify"></i></button>
-</form>
+<header class="crudable-header--hypermedia-container">
+    <div class="crudable-header--section crudable-header--left">
+        {{!hypermedia.multidelete_button}}
+        {{!hypermedia.filters}}
+    </div>
+    <div class="crudable-header--section crudable-header--center">
+        {{!hypermedia.previous_page}}
+        <form>
+            <input type="number" name="{{page_param}}" value="{{page_number}}" style="width:3ch;text-align: right;">
+        </form>
+        {{!hypermedia.next_page}}
+    </div>
+    <div class="crudable-header--section crudable-header--right">
+        <form>
+            {{!hypermedia.search}}
+        </form>
+    </div>
+</header>
 <flex-table>
     {{!table_header}}
     {{!documents}}

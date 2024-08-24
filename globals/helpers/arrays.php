@@ -65,6 +65,10 @@ function is_associative_array(mixed $array) {
     return array_keys($array) !== range(0, count($array) - 1);
 }
 
+function is_dictionary_array(mixed $array) {
+    return is_associative_array($array);
+}
+
 /**
  * @param MongoDB\BSON\Document|mixed $it The Mongo document to be converted
  * @return array returns an array representation of the document

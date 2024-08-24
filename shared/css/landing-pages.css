@@ -26,12 +26,20 @@
         display: flex;
         align-items: center;
     }
-    .landing-main--splash a.rss-feed-link.button {
-        color: white;
+    .landing-main--splash action-menu[role="button"].rss-feed-link.button {
+        color: var(--project-color-button-text);
+        background: var(--project-color-button-init);
         font-size: 0.5em;
         padding: 0.4em 0.8em;
         border-radius: 1.2em;
         margin-left: 0.5em;
+        aspect-ratio: unset;
+        width: unset;
+    }
+
+    .landing-main--splash action-menu[role="button"].rss-feed-link.button:hover {
+        background: var(--project-color-button-hover);
+        color: var(--project-color-button-hover-text);
     }
 
 .landing-splash--type-fade {
@@ -67,9 +75,15 @@
         text-align: center;
     }
 
-    .landing-splash--type-fade.landing-splash--type-centered:before {
-        background-image: radial-gradient(black, transparent 75%);
-    }
+        .landing-splash--type-fade.landing-splash--type-centered:before {
+            background-image: radial-gradient(black, transparent 75%);
+        }
+
+
+        .landing-splash--type-fade.landing-splash--type-centered .author-name{
+            justify-content: center;
+        }
+
 
     .landing-splash--type-fade.direction--row-reverse {
         --gradient-direction: 90deg;
@@ -258,7 +272,7 @@
                     object-position: var(--primary-image--positioning);
                 }
 
-                a.landing-main--related-page h1, a.landing-main--related-page .related-page--summary {
+                a.landing-main--related-page h1, a.landing-main--related-page .related-page--summary, a.landing-main--related-page .post-details{
                     --line-clamp: 2;
                     display: -webkit-box;
                     line-clamp: var(--line-clamp);
@@ -267,7 +281,10 @@
                     overflow: hidden;
                     font-size: 1.1rem;
                     text-overflow: hidden;
-                    margin: .75em;
+                    margin: .75rem;
+                }
+                a.landing-main--related-page .post-details {
+                    font-size: .9em;
                 }
                 a.landing-main--related-page .related-page--summary {
                     --line-clamp: 5;

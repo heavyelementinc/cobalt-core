@@ -73,6 +73,24 @@ class ActionMenuElement extends CustomButton {
         }
     }
 
+    /**
+     * Supported options
+     * * icon
+     * * label
+     * * href - A page to link to 
+     *   * target - "_blank"
+     * * action - a route to dispatch a request to
+     *   * method - GET, POST, PUT, DELETE
+     *   * value  - JSON string
+     * * onclick
+     * * onload
+     * * onloadstart
+     * * onerror
+     * * dangerous
+     * * disabled
+     * @param {HTMLOptionElement} opt 
+     * @returns 
+     */
     actionFromOption(opt) {
         const icon = opt.getAttribute("icon");
         const action = this.menu.registerAction();
@@ -80,11 +98,10 @@ class ActionMenuElement extends CustomButton {
 
         action.label = opt.innerHTML ?? "Default";
         action.icon = icon;
-        if(opt.hasAttribute("href")) action.href = opt.getAttribute("href")
         
         action.button.addEventListener("click", event => {
             if(this.stopPropagation) event.stopPropagation();
-            this.triggerEvent(opt, "click", event, true, action)
+            this.triggerEvent(opt, "click", event, false, action)
         });
         action.button.addEventListener("load", event => {
             this.triggerEvent(opt, "load", event, false, action)
@@ -100,11 +117,16 @@ class ActionMenuElement extends CustomButton {
         action.disabled = (opt.hasAttribute("disabled")) ? opt.disabled : false
         action.original = opt
         
+        if(opt.hasAttribute("href")) {
+            action.href = opt.getAttribute("href");
+            action.target = opt.getAttribute("target");
+        }
+
         if(opt.hasAttribute("action")) {
-            let json = opt.getAttribute("value") ?? {};
+            let json = opt.getAttribute("value") ?? "{}";
             action.requestAction = opt.getAttribute("action");
             action.requestMethod = opt.getAttribute("method") ?? "POST";
-            action.requestData = json;
+            action.requestData = JSON.parse(json);
         }
         
         return action;

@@ -142,7 +142,7 @@ class Options implements Iterator, JsonSerializable {
                 'label' => $nav['label'] ?? $nav['name'] ?? throw new RouteConfigError("$group must have a 'label' or 'name' set"),
             ];
             if($nav['order']) $this->navigation[$group]['order'] = $nav['order'];
-            if($nav['href']) $this->navigation[$group]['href'] = $nav['href'];
+            if($nav['href']) $this->navigation[$group]['href'] = $nav['href'] ?? '';
         }
         return $this;
     }

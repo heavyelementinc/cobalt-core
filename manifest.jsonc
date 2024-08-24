@@ -164,6 +164,7 @@
             "calendar-header-color": "var(--project-color-button-init)",
             "calendar-header-text": "var(--project-color-button-text)",
             "action-menu-background": "var(--project-color-input-disabled)",
+            "action-menu-color": "var(--project-color-input-text-color)",
             "action-menu-border": "var(--project-color-table-border)",
             "action-menu-hover": "var(--project-color-inactive)",
             "events-banner-background": "#efefef",

@@ -489,7 +489,14 @@ class ClientRouter extends EventTarget{
     submitListener(e) {
         this.lastLocationChangeEvent = {type: e.type, detail: e.detail || {}, target: e.target || e.currentTarget || e.explicitTarget};
         e.preventDefault();
-        window.Cobalt.router.location = e.target.action || e.currentTarget.action || e.explicitTarget.action;
+        let newLocation = new URL(e.target.action || e.currentTarget.action || e.explicitTarget.action);
+        newLocation.search = ""
+        const formData = new FormData(this.lastLocationChangeEvent.target);
+        let queryParams = [];
+        for(const field of formData) {
+            queryParams.push(`${encodeURIComponent(field[0])}=${encodeURIComponent(field[1])}`);
+        }
+        window.Cobalt.router.location = newLocation + "?" + queryParams.join("&");
         return false;
     }
 

@@ -863,7 +863,7 @@ function getBlobWithLoadingBar(url, throbber, progressBar) {
     })
 }
 
-function copyToClipboard(valueToCopy) {
+function copyToClipboard(valueToCopy, msg = "Copied text to clipboard") {
     const element = document.createElement("input");
     document.body.appendChild(element);
     element.value = valueToCopy;
@@ -875,8 +875,8 @@ function copyToClipboard(valueToCopy) {
     document.body.removeChild(element);
 
     const message = new StatusMessage({
-        message: "Copied text to clipboard",
-        duration: 4000
+        message: msg,
+        duration: 10 * 1000
     })
 
     // setTimeout(() => message.close(), 4000);

@@ -75,6 +75,10 @@ class CoreSettingsPanel extends Controller {
                 $template = "/admin/settings/inputs/input.html";
                 $type = "text";
                 break;
+            case "url":
+                $template = "/admin/settings/inputs/input.html";
+                $type = "url";
+                break;
             case "number": 
                 $template = "/admin/settings/inputs/number.html";
                 $type = "number";

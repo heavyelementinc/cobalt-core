@@ -22,14 +22,20 @@ use MongoDB\Database;
  * 
  */
 trait Indexable {
+    // public Database $manager;
     protected GenericMap $schema;
     protected array $indexableSchema;
     protected array $sortedTable;
+    protected array $filterParameters = [];
     protected array $queryParameters = [];
+
+    protected array $searchableFields = [];
+    protected array $filterableFields = [];
 
     public function init(GenericMap $schema, array $params) {
         $this->schema = $schema;
         $this->indexableSchema = $schema->readSchema();
+
         $table = [];
 
         $order = 0;
@@ -53,9 +59,20 @@ trait Indexable {
         $this->param_sanity_check($params);
     }
 
+    public function get_persistent_query_params($as_array = false):string {
+        // if(!$this->queryParameters['sort']) return "";
+        $arr = [
+            QUERY_PARAM_SORT_NAME => $_GET[QUERY_PARAM_SORT_NAME],
+            QUERY_PARAM_SORT_DIR => $_GET[QUERY_PARAM_SORT_DIR]
+        ];
+        if(isset($_GET[QUERY_PARAM_SEARCH])) $arr[QUERY_PARAM_SEARCH] = $_GET[QUERY_PARAM_SEARCH];
+        if($as_array == true) return $arr;
+        return http_build_query($arr);
+    }
+
     public function get_table_header() {
         $safe_get_params = [];
-        // Let's make our get paramters safe to embed in the page
+        // Let's make our GET paramters safe to embed in the page
         foreach($_GET as $key => $value) {
             if($key === "uri") continue;
             $safe_get_params[urlencode($key)] = urlencode($value);
@@ -96,13 +113,78 @@ trait Indexable {
         return [];
     }
 
+    final private function __index_query():array {
+        // Let's check if the filter param is set
+        $name = $_GET[QUERY_PARAM_FILTER_NAME];
+        $search = $_GET[QUERY_PARAM_SEARCH];
+
+        // Return the 'default query' if it's not set
+        if(isset($name)) {
+            // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
+            // We also want to override the "default" query with filter field
+            $this->add_filter_params([
+                $name => $this->schema->{$name}->typecast($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_LOOKUP)
+            ]);
+        }
+        if(isset($search)) {
+            $searchOptions = [
+                // 'numericOrdering' => true,
+            ];
+            // if($_GET[QUERY_PARAM_SEARCH_CASE_SENSITVE] === 'on') $searchOptions['caseLevel'] = true;
+            // if(isset($_GET[QUERY_PARAM_COMPARISON_STRENGTH])) {
+            //     $searchOptions['strength'] = match($_GET[QUERY_PARAM_COMPARISON_STRENGTH]) {
+            //         "2" => 2,
+            //         "3" => 3,
+            //         default => 1
+            //     };
+            // }
+            try {
+                $indexName = $this->manager->createIndex($this->searchableFields, $searchOptions);
+            } catch (\MongoDB\Driver\Exception\CommandException $e) {
+                $indexes = $this->manager->collection->listIndexes();
+                foreach($indexes as $index) {
+                    $name = $index->getName();
+                    if($name === "_id_") continue;
+                    $this->manager->collection->dropIndex($name);
+                }
+                $indexName = $this->manager->createIndex($this->searchableFields, $searchOptions);
+            }
+            
+            $this->add_filter_params(['$text' => [
+                '$search' => $_GET[QUERY_PARAM_SEARCH]
+            ]]);
+            $this->add_query_params([
+                'projection' => [
+                    'score' => ['$meta' => 'textScore']
+                ],
+                'sort' => [
+                    'score' => ['$meta' => 'textScore']
+                ]
+            ]);
+        }
+        
+        return array_merge($this->index_query(), $this->filterParameters);
+    }
+
+    public function add_filter_params(array $params) {
+        $this->add_params($this->filterParameters, $params);
+    }
+
+    public function add_query_params(array $params) {
+        $this->add_params($this->queryParameters, $params);
+    }
+
+    private function add_params(array &$target, $params) {
+        $target = array_merge_recursive($target, $params);
+    }
+
     /** Override this in your controller to set default query options for your index */
     public function index_options():array {
         return [];
     }
 
     public function get_table_body() {
-        $result = $this->manager->find($this->index_query(), array_merge($this->index_options(), $this->queryParameters));
+        $result = $this->manager->find($this->__index_query(), array_merge($this->index_options(), $this->queryParameters));
         $html = "";
         foreach($result as $doc) {
             $this->get_table_row($doc, $html);
@@ -188,6 +270,7 @@ trait Indexable {
             $next->setDisabled(true);
             $nx_page = $total_pages;
         }
+        $next->setClass("hypermedia--page-select hypermedia--next-page");
         $next->setHref("?" . http_build_query(array_merge($_GET, [QUERY_PARAM_PAGE_NUM => $nx_page])));
         $next->setText("<i name=\"chevron-right\"></i>");
         
@@ -196,15 +279,34 @@ trait Indexable {
             $prev->setDisabled(true);
             $prev_page = 1;
         }
+        $prev->setClass("hypermedia--page-select hypermedia--prev-page");
         $prev->setHref("?" . http_build_query(array_merge($_GET, [QUERY_PARAM_PAGE_NUM => $prev_page])));
         $prev->setText("<i name=\"chevron-left\"></i>");
 
         $multidelete_button = "";
         if($this->schema->__get_index_checkbox_state()) {
-            $multidelete_button = "<async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\"><i name=\"delete\"></i></async-button>";
+            $multidelete_button = "<async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\" native><i name=\"delete\"></i></async-button>";
         }
 
-        return ['previous' => $prev, 'next' => $next, 'page' => $current_page, 'search' => '', 'multidelete_button' => $multidelete_button];
+        return [
+            'previous_page' => $prev,
+            'next_page' => $next,
+            'page' => $current_page,
+            'search' => $this->get_search_field(),
+            'multidelete_button' => $multidelete_button,
+            'filters' => "<inline-menu icon=\"filter-variant\">".implode(" ",$this->filterableFields) ."</inline-menu>",
+        ];
+    }
+
+    final protected function get_search_field() {
+        QUERY_PARAM_COMPARISON_STRENGTH;
+
+        return "<input type=\"search\" name=\"".QUERY_PARAM_SEARCH."\" value=\"".htmlspecialchars($_GET[QUERY_PARAM_SEARCH])."\" placeholder=\"Search\">
+        <button type=\"submit\" native><i name=\"magnify\"></i></button>
+        <inline-menu>
+            <label><input type=\"checkbox\" name=\"".QUERY_PARAM_SEARCH_CASE_SENSITVE."\"".(($_GET[QUERY_PARAM_SEARCH_CASE_SENSITVE] === 'on') ? " checked=\"checked\"": "")."> Case Sensitve</label>
+        </inline-menu>
+        ";
     }
 
     /** All you need in order to have a field be included in the index is to include
@@ -218,6 +320,8 @@ trait Indexable {
             'order' => $this->get_order($field, $directives),
             'sort' => $this->get_sort($field, $directives),
             'view' => $this->get_view($field, $directives),
+            'searchable' => $this->get_searchable($field, $directives),
+            'filterable' => $this->get_filterable($field, $directives),
         ];
         return $array;
     }
@@ -250,6 +354,26 @@ trait Indexable {
         $sort = $index['view'] ?? null;
         if(is_callable($sort)) return $sort($field, $directives);
         return $sort;
+    }
+
+    final protected function get_searchable(string $field, array $directives) {
+        $index = $directives['index'] ?? [];
+        $searchable = $index['searchable'] ?? false;
+        if(is_callable($searchable)) $searchable = $searchable($field, $directives);
+        if($searchable === true) $this->searchableFields[$field] = "text";
+        return $searchable;
+    }
+
+    final protected function get_filterable(string $field, array $directives) {
+        $index = $directives['index'] ?? [];
+        $filterable = $index['filterable'] ?? false;
+        if(is_callable($filterable)) $filterable = $filterable($field, $directives);
+
+        if($filterable === true) {
+            $this->filterableFields[$field] = $this->schema->{$field}
+                ->get_filter_field($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_OPTION);
+        }
+        return $filterable;
     }
 
 

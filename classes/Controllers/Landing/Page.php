@@ -48,14 +48,24 @@ abstract class Page extends Crudable {
                     break;
             }
         }
-
-        $this->manager->updateOne(['_id' => $page->_id], ['$inc' => ['views' => 1]]);
+        $now = time();
+        
+        $fifteen_minutes = 15 * 60;
+        if($now - $_SESSION['last_post_updated'] >= $fifteen_minutes || $_SESSION['last_post'] !== (string)$page->_id) {
+            $q = ['views' => 1];
+            if(is_bot()) {
+                $q['bot_hits'] = 1;
+            }
+            $this->manager->updateOne(['_id' => $page->_id], ['$inc' => $q]);
+            $_SESSION['last_post'] = (string)$page->_id;
+            $_SESSION['last_post_updated'] = $now;
+        }
 
         /** @var DateTime */
         $live_date = (int)$page->live_date->getValue()->format("U");
         
         // If the current time is less than the live date, then the page doesn't exist!
-        if($live_date > time()) throw new NotFound($does_not_exist, true);
+        if($live_date > $now) throw new NotFound($does_not_exist, true);
 
         // One more check to see if this page requires an account, throw an Unauthorized so they are prompted to log in
         if($page->flags->and($page::FLAGS_REQUIRES_ACCOUNT) && !session()) throw new Unauthorized("You must be logged in to view this content");
@@ -110,15 +120,14 @@ abstract class Page extends Crudable {
                 break;
         }
 
-        $follow_link = "";
-        if(__APP_SETTINGS__['Posts_enable_rss_feed']) $follow_link = " &middot; <a href='".server_name().route("Posts@rss_feed")."' class=\"rss-feed-link button\" target=\"_blank\"><i name=\"rss\"></i> Follow</a>";
+        
 
         // And render it
         return view($view, [
             'page' => $page,
             'class' => $classes,
-            'follow_link' => $follow_link,
-            'views' => ($page->flags->and($page::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($page->views->getValue() + 1) . " view".plural($page->views->getValue() + 1)." &middot;"
+            'follow_link' => $page->get_follow_link(),
+            'views' => $page->get_byline_meta(true),
         ]);
     }
 
@@ -196,13 +205,19 @@ abstract class Page extends Crudable {
         $html = "<section class=\"landing-main--related-pages\"><h2>$related_title</h2><div class=\"landing-related--container\">";
         foreach($related as $p) {
             if($p instanceof PageMap == false) continue;
-            $html .= $this->renderPreview($p);
+            $html .= $this->renderPreview($p, $page);
         }
         return $html . "</div></section>";
     }
 
-    function renderPreview(PageMap $p) {
-        return view("/pages/landing/related.html", ['page' => $p, ]);
+    function renderPreview(PageMap $p, ?PageMap $page = null) {
+        $common_tags = "";
+        if($page) $common_tags = implode(",",$page->tags->intersect($p->tags));
+        return view("/pages/landing/related.html", [
+            'page' => $p,
+            'byline_meta' => $p->get_byline_meta(),
+            'common_tags' => $common_tags,
+        ]);
     }
 
 

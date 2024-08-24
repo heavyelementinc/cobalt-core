@@ -1,0 +1,11 @@
+<form class="hbox crudable-hypermedia--filterable-item" style="gap: 0.6em; align-items: center;">
+    <div style="display: flex; flex-direction: column; gap: 0.4em">
+        <label>{{schema.getLabel()}}</label>
+        <input type='hidden' name='{{QUERY_PARAM_FILTER_NAME}}' value="{{name}}" class="hypermedia--filter-select">
+        <select name="{{QUERY_PARAM_FILTER_VALUE}}" data-field="{{name}}" style="display: block; width: 100%">
+            <!-- onchange="this.closest('form').submit()" -->
+        {{!options}}</select>
+    </div>
+    <button native><i name='table-search'></i></button>
+</form>
+<hr>

@@ -190,7 +190,7 @@ class FileController extends \Controllers\FileController {
         }
         $doc = view("sitemap/sitemap.xml", ['urls' => $html]);
         header('Content-Length: ' . strlen($doc));
-        header('Content-Type: text/xml');
+        header('Content-Type: application/xml');
         echo $doc;
         exit;
     }

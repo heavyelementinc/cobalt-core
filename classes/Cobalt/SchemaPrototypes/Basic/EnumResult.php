@@ -11,6 +11,7 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
  * Custom schema entries:
  * 'strict' - @bool Determines if the filter allows values not found in the enum
  * 'allow_custom' - @bool Allows the field to Overrides 'strict'
+ * 'typecast' - @string Explicitly declare which type this should be set to
  * @package Cobalt\SchemaPrototypes
  */
 
@@ -28,6 +29,27 @@ class EnumResult extends SchemaResult {
 
     function __defaultIndexPresentation(): string {
         return $this->display();
+    }
+
+    // This should only ever be passed a key.
+    public function typecast($key, $type = QUERY_TYPE_CAST_LOOKUP) {
+        $valid = $this->getValid();
+        $validKeys = array_keys($valid);
+        $directive = $this->getDirective("typecast");
+        if ($directive) {
+            return juggler($directive, $key);
+        }
+
+        // Check if we've got a dictionary-style array
+        if (!is_dictionary_array($valid)) {
+            return (int)$key;
+        } else if(in_array($key, $validKeys)) {
+            // Look up the index of the valid key
+            $v = array_search($key, $validKeys);
+            // 
+            if($v !== false) $key = compare_and_juggle($validKeys[$v], $key);
+        }
+        return $key;
     }
     
     function filter($value) {
