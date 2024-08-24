@@ -92,6 +92,11 @@ class BlockResult extends SchemaResult {
         return time_to_read((string)$this, $fmt);
     }
 
+    #[Prototype]
+    protected function lastModified($format = "Y-m-d") {
+        return date($format, $this->value['time'] / 1000);
+    }
+
     function filter($value) {
         foreach($value['blocks'] as $block) {
             switch($block['type']) {

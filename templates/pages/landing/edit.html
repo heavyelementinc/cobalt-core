@@ -140,8 +140,9 @@
                     {{doc.splash_image_alignment.field()}}
                 </li>
                 <li>
-                    <label>Tags & Keywords <help-span value=""></help-span></label>
+                    <label>Tags & Keywords</label>
                     {{doc.tags.field()}}
+                    <small>Tags are used to find how "related" two articles are. The more tags two posts have in common, the more &quot;related&quot; they are.<help-span value="If there aren't enough &quot;Related Posts&quot; to fill the section (usually 3) then the most recent articles by this author will be listed."></help-span></small>
                 </li>
                 <li>
                     <label>{{doc.preview_key.getLabel()}} <help-span value="The Preview Key is used to grant outside access to Draft posts. You can share a preview key with as many people as you'd like.&#10;&#10;Only one Preview Key can be issued at a time.&#10;&#10;Provisioning a new Preview Key will invalidate the previous key.&#10;&#10;NOTE: This document must be set to 'Draft' visibility for a Preview Key to grant access. 'Private' posts are always inaccessible."></help-span></label>

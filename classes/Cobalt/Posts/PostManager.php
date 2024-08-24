@@ -4,6 +4,10 @@ namespace Cobalt\Posts;
 
 use Exceptions\HTTP\NotFound;
 
+/**
+ * @deprecated
+ * @package Cobalt\Posts
+ */
 class PostManager extends \Drivers\Database {
 
     public function get_collection_name() {

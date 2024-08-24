@@ -106,7 +106,7 @@ function fetch_and_save($url) {
 
 function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name']) {
     $manager = new PageManager(null, $collection);
-    $pages = $manager->find($manager->public_query());
+    $pages = $manager->find($manager->public_query(), ['limit' => 100]);
     $server_name = server_name();
 
     $html = "";
@@ -114,7 +114,7 @@ function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']
         if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
         $html .= view("sitemap/url.xml", [
             'location' => $server_name . $page->url_slug->get_path(),
-            'lastModified' => $page->live_date->format("Y-m-d"),
+            'lastModified' => $page->body->lastModified(),//$page->live_date->format("Y-m-d"),
             'priority' => 999,
         ]);
     }

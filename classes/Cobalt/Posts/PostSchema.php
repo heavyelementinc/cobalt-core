@@ -12,6 +12,10 @@ use Exceptions\HTTP\UnknownError;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
 
+/**
+ * @deprecated
+ * @package Cobalt\Posts
+ */
 class PostSchema extends \Validation\Normalize {
     use ClientFSManager;
     private $soft_char_cap = 200;

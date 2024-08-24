@@ -203,9 +203,14 @@ abstract class Page extends Crudable {
         if(!$related) return "";
         $related_title = ($page->related_title->getValue()) ? $page->related_title->getValue() : __APP_SETTINGS__['LandingPage_related_content_title'];
         $html = "<section class=\"landing-main--related-pages\"><h2>$related_title</h2><div class=\"landing-related--container\">";
+        $count = 0;
         foreach($related as $p) {
             if($p instanceof PageMap == false) continue;
             $html .= $this->renderPreview($p, $page);
+            $count += 1;
+            if($count >= $p->max_related->getValue()) {
+                break;
+            }
         }
         return $html . "</div></section>";
     }

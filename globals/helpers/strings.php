@@ -346,7 +346,7 @@ function url_fragment_sanitize(string $value):string {
     return $mutant;
 }
 
-const TIME_TO_READ_WORDS_PER_MINUTE = 250;
+const TIME_TO_READ_WORDS_PER_MINUTE = 200;
 const TIME_TO_READ_FORMAT_ROUND = 0;
 const TIME_TO_READ_FORMAT_MINSEC = 1;
 /**

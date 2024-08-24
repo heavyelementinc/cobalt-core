@@ -81,30 +81,24 @@ class PageManager extends Database {
             if($page instanceof PostMap) $array[$i] = $p;
             else $array[$i] = (new PageMap())->ingest($p);
             $exclude_ids[] = $array[$i]->_id;
-            // $array[$i]->splash_image = $p->splash_image;
-            // $date = new DateResult();
-            // $date->set_value($p->live_date);
-            // $array[$i]->live_date = $date;
+
         }
 
-        // if(count($array) < $min_recommended) {
-        //     $from_author = $this->find($this->public_query([
-        //         'author' => $page->author->_id(),
-        //         '_id' => ['$nin' => $exclude_ids]
-        //     ]), [
-        //         'limit' => $min_recommended - count($array),
-        //         'sort' => ['live_date' => -1],
-        //         'projection' => $projection
-        //     ]);
-        //     foreach($from_author as $i => $post) {
-        //         if($page instanceof PostMap) $array[$i] = $post;
-        //         else $array[$i] = $post;
-        //         // $array[$i]->splash_image = $post->splash_image;
-        //         // $date = new DateResult();
-        //         // $date->set_value($p->live_date);
-        //         // $array[$i]->live_date = $date;
-        //     }
-        // }
+        if(count($array) < $min_recommended) {
+            $from_author = $this->find($this->public_query([
+                'author' => $page->author->_id(),
+                '_id' => ['$nin' => $exclude_ids]
+            ]), [
+                'limit' => $min_recommended - count($array),
+                'sort' => ['live_date' => -1],
+                'projection' => $projection
+            ]);
+            foreach($from_author as $i => $post) {
+                if($page instanceof PostMap) $array[$i] = $post;
+                else $array[$i] = $post;
+
+            }
+        }
         
         return $array;
     }

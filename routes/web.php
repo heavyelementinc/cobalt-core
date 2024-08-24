@@ -27,11 +27,23 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
             
     ]);
     
-    Route::get((new Options(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page"))
-        ->set_sitemap([
-            'children' => fn () => register_individual_post_routes(),
-            'ignore' => true
-        ])
+    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page", [
+        'sitemap' => [
+            'ignore' => true,
+            'children' => function () {
+                return register_individual_post_routes();
+            },
+            'lastmod' => fn() => null
+        ]
+    ]
+        // (new Options(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page"))
+        // ->set_sitemap([
+        //     'ignore' => true,
+        //     'children' => function () {
+        //         return register_individual_post_routes();
+        //     },
+        //     'lastmod' => fn() => null
+        // ])
         // ->set_handler('core/post2_0-handler.js')
     );
     // Route::get("/posts/{url_slug}/attachment/{filename}", "Posts@downloadFile");

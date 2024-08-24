@@ -14,6 +14,10 @@ use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 
+/**
+ * @deprecated
+ * @package Cobalt\Posts
+ */
 class PostPersistance extends PersistanceMap {
 
     public function __get_schema(): array {
