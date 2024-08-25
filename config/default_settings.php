@@ -211,7 +211,7 @@ const DEFAULT_DEFINITIONS = [
         "default" => [
             "prefix" => "Designed by",
             "name" =>   "Heavy Element, Inc.",
-            "href" =>   "https//heavyelement.io/",
+            "href" =>   "https://heavyelement.io/",
             "title" =>  "Maine's Premier New Media Production Studio"
         ],
         "meta" => [
