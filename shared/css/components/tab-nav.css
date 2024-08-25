@@ -12,7 +12,7 @@
 }
 
 :is(tab-nav,chip-nav) nav {
-    display:flex !important;
+    display:flex;
     justify-content: center;
     gap: .5em;
     background: var(--project-color-table-bg-even);
@@ -101,4 +101,21 @@ chip-nav {
 
 :is(tab-nav, chip-nav) nav a.tab-nav--validation-issue {
     text-decoration-line: spelling-error;
+}
+
+@media only screen and (max-width: 35em) {
+    :is(chip-nav, tab-nav[type="row"]) nav {
+        display: block;
+        overflow-x: scroll;
+        white-space: nowrap;
+        scrollbar-width: none;
+    }
+
+    :is(chip-nav, tab-nav[type="row"]) nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    :is(chip-nav, tab-nav[type="row"]) nav > * {
+        display: inline-block;
+    }
 }

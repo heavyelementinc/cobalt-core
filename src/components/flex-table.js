@@ -1,126 +1,125 @@
-
 class FlexTable extends HTMLElement {
-    connectedCallback() {
+    constructor() {
+        super();
+        this.props = {
+            maxWidth: null
+        }
+    }
+
+    init() {
+        this.mutationObserver = new MutationObserver(this.onRowChange.bind(this));
+        this.mutationObserver.observe(this, {childList: true});
+
+        window.addEventListener("resize", this.onWindowResize.bind(this));
 
         this.initCheckboxes();
-
-        // Get our computed width
-        this.computedWidth = parseInt(getComputedStyle(this).width.replace("px",""));
-
-        // Query for our columns
-        let columns = this.querySelectorAll("flex-row");
-
-        // The max count of columns
-        let max = 0;
-        // How many iterations we've gone without updating the column count
-        let same = 0;
-
-        let index = -1;
-
-        // First thing we need to do is find out how many columns are in this table
-        for (const i of columns) {
-            index += 1;
-            // Check if there is another row with more columns
-            if (i.childElementCount > max) max = i.childElementCount;
-
-            // If we've gone through iterations or more and they've all been the
-            // same then we abort the loop
-            if (i.childElement === max) {
-                same += 1;
-                if (same >= 3) break;
-            }
-        }
-
-        // Set the max column count
-        this.style.setProperty("--column-count", max);
-
-        // An array of each column's max widths
-        this.maxWidths = [];
-        // Next, we need to establish the values of the elements
-        for (const i of columns) {
-            // Get the cell width of the current row
-            this.getCellWidths(i);
-        }
-
-        // Get the min and max values so we can normalize our data
-        this.minColumnWidth = Math.min(...this.maxWidths);
-        this.clampLimitParentWidth = this.computedWidth / max;
-
-        // Loop through the max widths and clamp them
-        this.maxWidths.forEach((e, i) => {
-            this.maxWidths[i] = this.clamp(e,this.minColumnWidth, this.clampLimitParentWidth);
-        });
-
-        this.maxColumnWidth = Math.max(...this.maxWidths);
-
-        console.log(this.maxWidths);
-
-        
-        for (const row of columns) {
-            this.cellCallback(row, (cell, index, skip) => {
-                cell.style.setProperty("--flex-column-grow", `${this.normalizeWidths(this.maxWidths[index], this.minColumnWidth, this.maxColumnWidth)}`)
-                cell.style.setProperty("--col-width",`${this.maxWidths[index]}px`);
-                // this.calculatePercentage(this.maxWidths[index],)
-                // cell.style.setProperty("--col-width", `%`);
-                // `${this.maxWidths[index]}px`);
-            });
-        }
-        
-        // this.style.setProperty("--max-column-width", `px`);
-        this.classList.add("hydrated");
-    }
-   
-    normalizeWidths(val, min, max) {
-        return Math.abs((val - min) / (max - min));
     }
 
-    clamp(val, min, max) {
-        return Math.min(Math.max(val, min), max);
-    }
-    
-    getCellWidths(row) {
-        return this.cellCallback(row,
-            (cell, index, skip) => {
-                if(!this.maxWidths[index]) this.maxWidths[index] = 0;
-                const canvas = document.createElement("canvas");
-                const context = canvas.getContext("2d");
-                const style = getComputedStyle(cell);
-                const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-                context.font = font;
-                let {
-                    width
-                } = context.measureText(cell.innerText);
-
-                const actionMenu = cell.querySelector("action-menu");
-                if(actionMenu) {
-                    if(["options", "option"].includes(actionMenu.getAttribute("type"))) width += get_offset(actionMenu).w;
-                    else width += get_offset(actionMenu).w;
-                }
-                
-                if(width > this.maxWidths[index]) this.maxWidths[index] = Math.ceil(width);
-            }
-        )
+    connectedCallback() {
+        this.init();
+        this.initRowsAndColumns();
     }
 
-    cellCallback(row, callback = (cell) => {}) {
-        let index = 0, skip = 0;
-        for(const cell of row.children) {
-            if(skip > 0) {
-                skip -= 1;
-                index += 1;
+    disconnectedCallback() {
+        // Let's clean up after ourselves.
+        window.removeEventListener("resize", this.onWindowResize.bind(this));
+    }
+
+    initRowsAndColumns() {
+        // Create a list of max char lengths in the table
+        this.cellData = [];
+        this.maxCellLengths = [];
+        this.maxColumnCount = [];
+
+        /** @var {FlexRow} */
+        for(const row of this.children) {
+            if(row.tagName !== "FLEX-ROW") {
+                // Eject non-<flex-row> elements from the table
+                this.parentNode.insertBefore(row, this.nextSibling);
                 continue;
             }
-            callback(cell, index, skip);
-            index += 1;
-            if(cell.getAttribute("span")) {
-                skip = parseInt(cell.getAttribute("span"));
+            /** @var {int} */
+            const rowIndex = this.cellData.length;
+            let columnCount = 0;
+            // Let's set up our rows in the cell data
+            this.cellData.push([]);
+            this.maxCellLengths.push([]);
+            this.maxColumnCount.push([]);
+            
+            // Now we'll loop through our children
+            /** @var {FlexCell} */
+            for(const cell of row.children) {
+                if(cell.tagName !== "FLEX-CELL" && cell.tagName !== "FLEX-HEADER") {
+                    // Eject non-<flex-cell>-derived elements from the row
+                    this.parentNode.insertBefore(cell, this.nextSibling);
+                    continue;
+                }
+                this.cellData[rowIndex].push(cell.cellData);
+                
+                // Check if the current cell's width is greater than this column's current contender
+                if(this.maxCellLengths[columnCount] < cell.innerText.length) {
+                    this.maxCellLengths[columnCount] = cell.innerText.length;
+                }
+                columnCount += 1;
             }
+            this.maxColumnCount[rowIndex] = columnCount;
+        }
+
+        this.normalizeColumns();
+
+    }
+
+    normalizeColumns() {
+        this.normalizedCellLengths = [];
+        const ratio = Math.max.apply(Math, this.maxCellLengths) / 100,
+            l = this.maxCellLengths.length;
+
+        for (let i = 0; i < l; i++) {
+            this.normalizedCellLengths[i] = Math.round(this.maxCellLengths[i] / ratio);
+        }
+
+        let rowIndex = 0;
+        for(const row of this.children) {
+            let columnIndex = 0;
+            /** @var {FlexCell} cell */
+            for(const cell of row.children) {
+                // let column = cell.column;
+                cell.style.setProperty('--cell-width-grow', `${this.normalizedCellLengths[columnIndex]}`);
+                // columnIndex += column - columnIndex;
+                columnIndex += 1;
+            }
+            rowIndex += 1;
+            columnIndex = 0;
         }
     }
 
-    calculatePercentage(rowSize, total) {
-        return (100 * rowSize) / total;
+    onRowChange(mutationList, observer) {
+
     }
+
+    onWindowResize(event) {
+
+    }
+
+    get rowCount() {
+        return this.rowData.length;
+    }
+
+    get maxWidth() {
+        if(this.props.maxWidth !== null) return this.props.maxWidth;
+        const maxWidth = this.getAttribute("max-col-width");
+        if(maxWidth !== null) {
+            this.props.maxWidth = Number(maxWidth);
+        } else {
+            this.props.maxWidth = 30;
+        }
+        return this.props.maxWidth;
+    }
+
+    get minWidth() {
+
+    }
+
 
     get value() {
         const checked = this.querySelectorAll("input[type='checkbox']:checked,input-switch :checked");
@@ -157,7 +156,6 @@ class FlexTable extends HTMLElement {
 
         checks.forEach(element => {
             element.addEventListener("click", event => {
-                console.log(event);
                 if(event.shiftKey) {
                     this.shiftSelect(this.lastChecked, element, checks, event);
                 }
@@ -206,20 +204,94 @@ class FlexTable extends HTMLElement {
         });
     }
 
-    // static get observedAttributes() {
-    //     return ['columns'];
-    // }
 
-    // attributeChangedCallback(name, oldValue, newValue) {
-    //     const callable = `change_handler_${name.replace("-", "_")}`;
-    //     if (callable in this) {
-    //         this[callable](newValue, oldValue);
-    //     }
-    // }
-
-    // change_handler_columns(val) {
-    //     this.style.setProperty("--column-count", val);
-    // }
 }
 
 customElements.define("flex-table", FlexTable);
+
+class FlexRow extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        // this.parentTable = this.closest("flex-table");
+    }
+
+    get rowData() {
+        if(!this.parentTable) return {};
+        const rowNumber = Array.from(this.parentTable.children).indexOf(this);
+        let isHeadlineRow = this.querySelectorAll("flex-header").length == this.children.length;
+        return {
+            rowNumber,
+            isHeadlineRow,
+        }
+    }
+}
+
+customElements.define("flex-row", FlexRow);
+
+class FlexCell extends HTMLElement {
+    constructor() {
+        super();
+        this.props = {
+            column: null
+        }
+    }
+
+    connectedCallback() {
+        // this.parentRow = this.closest("flex-row");
+        // this.parentRow?.parentTable?.registerCellData(this);
+        
+    }
+
+    get cellData() {
+        return {
+            type: this.type,
+            width: this.innerText.length + this.padding,
+            columnNumber: this.parentRow.registerCellData(this)
+        }
+    }
+
+    get column() {
+        if(this.props.column !== null) return this.props.column;
+        if(!this.previousElementSibling) return 0;
+        if("column" in this.previousElementSibling) {
+            this.props = this.previousElementSibling.column + this.span;
+        }
+    }
+
+    get span() {
+        const span = this.getAttribute("span") ?? this.getAttribute("colspan") ?? null;
+        if(span !== null) return Number(span);
+        return 1
+    }
+
+    get type() {
+        switch(this.tagName) {
+            case "FLEX-HEADER":
+                return "header";
+            default:
+                return "cell";
+        }
+    }
+
+    get padding() {
+        return this.getAttribute("padding") ?? 2;
+    }
+
+    set padding(value) {
+        this.setAttribute("padding", value);
+    }
+}
+
+customElements.define("flex-cell", FlexCell);
+
+
+class FlexHeader extends FlexCell {
+    constructor() {
+        super();
+    }
+}
+
+customElements.define("flex-header", FlexHeader);

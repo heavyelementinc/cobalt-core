@@ -31,7 +31,7 @@
             <aside class="sidebar">
                 <ul class="list-panel">
                     <li>
-                        <label>{{doc.visibility.getLabel()}} <help-span value="To be publicly visible, this must be set to &quot;Public&quot;. Means only this page is only visible to users with the &quot;Edit Pages&quot; permission."></help-span></label>
+                        <label>{{doc.visibility.getLabel()}} <help-span value="&quot;Private&quot; &mdash; Post is unreadable by the public (even by the author).&#10;&#10;&quot;Draft&quot; &mdash; Shareable using a &quot;Preview Key&quot; on the settings page.&#10;&#10;&quot;Unlisted&quot; &mdash; Readable by the general public, not listed on the public Post index.&#10;&#10;&quot;Public&quot; &mdash; Readable by the general public, included on the public Post index."></help-span></label>
                         {{doc.visibility.field()}}
                     </li>
                     <li>

@@ -181,11 +181,11 @@ const DEFAULT_DEFINITIONS = [
             "merge" =>  [
                 "head" => [
                     "family" => "'Assistant', sans-serif",
-                    "import" => "Assistant =>500,800"
+                    "import" => "Assistant:500,800"
                 ],
                 "body" => [
                     "family" => "'Open Sans', sans-serif",
-                    "import" => "Open+Sans =>400,400i,800,800i"
+                    "import" => "Open+Sans:400,400i,800,800i"
                 ]
             ],
             "style" => true
@@ -817,7 +817,7 @@ const DEFAULT_DEFINITIONS = [
         "default" => "l, F jS Y"
     ],
     "Posts_date_time" => [
-        "default" => "g =>i a"
+        "default" => "g:i a"
     ],
     "enable_default_parallax" => [
         "default" => true,

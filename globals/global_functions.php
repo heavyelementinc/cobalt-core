@@ -612,6 +612,7 @@ function plugin($name) {
 
 function get_posts_from_tags(array $tags, string $controller = "Posts", int $limit = 3):string {
     $html = "";
+    /** @var \Controllers\Landing\Page */
     $postController = get_controller($controller, true);
     $posts = $postController->manager;
     

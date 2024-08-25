@@ -151,8 +151,8 @@ flex-table{
     }
 
         flex-row {
-            display: grid;
-            grid-template-columns: repeat(var(--column-count), 140px);
+            /* display: grid; */
+            /* grid-template-columns: repeat(var(--column-count), 140px); */
             width: max-content;
         }
 
