@@ -1486,6 +1486,18 @@ const DEFAULT_DEFINITIONS = [
             "confirm" => "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
         ]
     ],
+    "SocialMedia_email" => [
+        'default' => '',
+        'meta' => [
+            'group' => 'Basic',
+            'subgroup' => 'Social',
+            'name' => "<i name=\"email\"></i> Email Newsletter",
+            "type" => "input"
+        ],
+        'validate' => [
+            'type' => 'string'
+        ]
+    ],
     "SocialMedia_facebook" => [
         'default' => '',
         'meta' => [
