@@ -225,7 +225,7 @@ class BlockResult extends SchemaResult {
     private function image($classes, $accent, $contrast, $url, $mime, $width, $height, $caption, $block) {
         $figcaption = "";
         if($caption) $figcaption = "<figcaption>" .$block->data->caption. "</figcaption>";
-        $html = "<figure class=\"$classes\" style=\"--accent-color: $accent; --accent-contrast: $contrast;\"><img src=\"$url\" type=\"$mime\" width=\"$width\" height=\"$height\" alt=\"".$block->data->caption."\">$figcaption</figure>";
+        $html = "<figure class=\"$classes\" style=\"--accent-color: $accent; --accent-contrast: $contrast;\"><img src=\"$url\" type=\"$mime\" width=\"$width\" height=\"$height\" alt=\"".$block->data->caption."\" loading=\"lazy\">$figcaption</figure>";
         return $html;
     }
 
