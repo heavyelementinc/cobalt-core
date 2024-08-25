@@ -10,7 +10,7 @@ block-editor {
 }
 
 .blockeditor--content {
-    margin: var(--block-editor-margins);
+    margin: calc(var(--block-editor-margins) * .8) var(--block-editor-margins);
     box-sizing: border-box;
 }
 
@@ -164,7 +164,7 @@ a.blockeditor--link-preview {
     margin: 0;
     font-size: .9em;
     padding: 2em var(--block-editor-margins);
-    background: var(--project-body-background);
+    background: var(--project-color-input-disabled);
 }
     .blockeditor--quote-block.blockeditor--quote-alignment-center {
         text-align: center;
