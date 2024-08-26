@@ -57,8 +57,8 @@ h6.blockeditor--header {
     .blockeditor--image img {
         width: 100%;
         height: auto;
-        background: var(--accent-color);
-        color: var(--accent-contrast);
+        background: var(--accent-color, #333);
+        color: var(--accent-contrast, #FFF);
     }
     
         .blockeditor--image-withborder img {
