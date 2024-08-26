@@ -270,6 +270,7 @@
                     object-fit: cover;
                     display: block;
                     object-position: var(--primary-image--positioning);
+                    background: var(--accent-color);
                 }
 
                 a.landing-main--related-page h1, a.landing-main--related-page .related-page--summary, a.landing-main--related-page .post-details{
