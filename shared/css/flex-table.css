@@ -70,6 +70,14 @@ flex-table{
         flex-header.sort-desc:after {
             content: "\F0360";
         }
+
+        flex-cell a {
+            text-decoration: none;
+        }
+
+        flex-row:hover flex-cell  a {
+            text-decoration: underline;
+        }
     
         flex-cell,flex-header,flex-sticky{
             display: flex;
@@ -78,6 +86,10 @@ flex-table{
             width: 80px;
         }
 
+        /* .hydrated flex-row {
+            display: grid;
+            grid-template-columns: var(--col);
+        } */
         .hydrated flex-cell, .hydrated flex-header, .hydrated flex-sticky {
             flex-grow: var(--flex-column-grow);
             width: var(--col-width);

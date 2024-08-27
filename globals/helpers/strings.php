@@ -334,6 +334,30 @@ function random_string($length, $fromChars = null) {
     return $random;
 }
 
+function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
+    $string = uniqid(true) . microtime();
+    $string = (double)bin2hex($string);
+    $p = str_replace("=", "", base64_encode(sprintf("%d",($string * 1.27) << 1)));
+    if($dash_mod === -1) return $p;
+    $pkey = "$prefix";
+    $skip = false;
+    for($i = strlen($p); $i >= 0; $i--) {
+        if($i % $dash_mod === 1) {
+            if($skip === false) {
+                $i += 1;
+                $pkey .= '-';
+                $skip = true;
+                continue;
+            } else {
+                $skip = false;
+                // $index += 1;
+            }
+        }
+        $pkey .= $p[$i];
+    }
+    return $pkey;
+}
+
 
 function url_fragment_sanitize(string $value):string {
     $mutant = strtolower($value);

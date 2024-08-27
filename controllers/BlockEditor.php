@@ -19,6 +19,9 @@ class BlockEditor {
 
         $this->fs_filename_path = "block-editor-content";
 
+        
+        $_FILES['image']['name'] = sha1(time().$_FILES['image']['name']) . "." . get_extension_from_file($_FILES['image']['tmp_name'], $_FILES['image']['name'], false);
+
         $result = $this->clientUploadFile("image", null, [], $_FILES);
 
         return [

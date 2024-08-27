@@ -1,5 +1,10 @@
 <?php
+
 const DEFAULT_DEFINITIONS = [
+    
+    /*******************************************/
+    /* =============== GENERAL =============== */
+    /*******************************************/
     /* Provide a doman name that we expect to be listening for. This will later 
     be used to add CORS headers. */
     "domain_name" => [
@@ -642,6 +647,9 @@ const DEFAULT_DEFINITIONS = [
         ]
     ],
 
+    /*******************************************/
+    /* =========== EMAIL SETTINGS ============ */
+    /*******************************************/
     "Mail_username" => [
         "default" => "",
         "directives" => [
@@ -781,9 +789,6 @@ const DEFAULT_DEFINITIONS = [
             "type" => "input"
         ]
     ],
-    
-    
-
 
 
     "Cookie_consent_prompt" => [
@@ -797,6 +802,11 @@ const DEFAULT_DEFINITIONS = [
             "type" => "boolean"
         ]
     ],
+
+
+    /*******************************************/
+    /* ============ POST SETTINGS ============ */
+    /*******************************************/
 
     "Posts_enable_parallax" => [
         "default" => false,
@@ -833,6 +843,27 @@ const DEFAULT_DEFINITIONS = [
             "type" => "boolean"
         ]
     ],
+
+    "PostPages_default_aside_visibility" => [
+        "default" => true,
+        "meta" => [
+            "group" => "Features",
+            "subgroup" => "Blog Posts",
+            "name" => "Include a sidebar (with a table of contents) for posts by default",
+            "type" => "input-switch"
+        ],
+        "validate" => [
+            "type" => "boolean"
+        ]
+    ],
+    "PostPages_default_aside_flags" => [
+        //PageMap::ASIDE_STICKY + PageMap::ASIDE_INCLUDE_TOC_INDEX + PageMap::ASIDE_INDEX_BEFORE_CONTENT + INCLUDE_SOCIAL_SHARE,
+        "default" => 0b0001000 + 0b0010000 + 0b0100000 + 0b1000000,
+    ],
+
+
+
+
     "Parallax_enable_debug" => [
         "default" => false,
         "directives" =>[
@@ -958,6 +989,11 @@ const DEFAULT_DEFINITIONS = [
             ]
         ]
     ],
+
+
+    /*******************************************/
+    /* ============= LOOK & FEEL ============= */
+    /*******************************************/
     "default_color_scheme" => [
         "default" => true
     ],
@@ -970,12 +1006,30 @@ const DEFAULT_DEFINITIONS = [
     "color_mixed_percentage" => [
         "default" => 75
     ],
+
+    "loading_spinner" => [
+        "default" => "dashes",
+        "directives" => [
+            "public" => true
+        ]
+    ],
+
+
+
+
+
+
+
     "pwa" => [
         "default" => [
             "display" => "standalone",
             "background_color" => "#000"
         ]
     ],
+
+
+
+
     "session_cookie_name" => [
         "default" => "token_session" // Changing this in production will log everyone out.
     ],
@@ -985,12 +1039,7 @@ const DEFAULT_DEFINITIONS = [
             "env" => "SESSION_SECURE"
         ]
     ],
-    "loading_spinner" => [
-        "default" => "dashes",
-        "directives" => [
-            "public" => true
-        ]
-    ],
+
     /* The CSRF seed is a secret string that is prepended to the client's 
     session cookie to form a unique "password". This password is then encrypted
     and sent to the client as the CSRF Token. */

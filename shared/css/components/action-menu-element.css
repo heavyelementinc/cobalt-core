@@ -1,12 +1,15 @@
 action-menu[role="button"] {
     display: flex;
     aspect-ratio: 1 / 1;
-    width: 2ch;
+    width: 4ch;
+    height: 4ch;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--project-color-input-border-nofocus);
     background: var(--project-color-input-background);
     color: var(--project-color-input-text-color);
+    padding: 0rem 1em;
+    box-sizing: border-box;
 }
 
 action-menu:before {

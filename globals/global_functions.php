@@ -12,6 +12,7 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
+use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
@@ -759,4 +760,83 @@ function juggler(string $canonincal, mixed $value) {
             break;
     }
     return $value;
+}
+
+/**
+ * @param string 
+ * @return string|false Will return 
+ */
+function get_extension_from_file($file_path, $file_name = null, $trust_filename = false) {
+    if($file_name && $trust_filename) return pathinfo($file_name, PATHINFO_EXTENSION);
+    if(!file_exists($file_path)) return false;
+    $ext = explode("/", mime_content_type($file_path));
+    $type = $ext[0];
+    $ext = $ext[1];
+    if(substr($ext, 0, 2) == "x-") $ext = substr($ext, 2);
+    // get_usable_mime_array();
+    return match($ext) {
+        "svg+xml" => "svg",
+        "abiword" => "abw",
+        "freearc" => "arc",
+        "msvideo" => "avi",
+        "vnd.amazon.ebook" => "azw",
+        "octet-stream" => "bin",
+        "bzip" => "bz",
+        "bzip2" => "bz2",
+        "cdf" => "cda",
+        "msword" => "doc",
+        "vnd.openxmlformats-officedocument.wordprocessingml.document" => "docx",
+        "vnd.ms-fontobject" => "eot",
+        "epub+zip" => "epub",
+        "gzip" => "gz",
+        "vnd.microsoft.icon" => "ico",
+        "java-archive" => "jar",
+        "javascript" => "js",
+        "ld+json" => "jsonld",
+        "mpeg" => ($type == "audio") ? "mp3" : "mpeg",
+        "vnd.apple.installer+xml" => "mpkg",
+        "vnd.oasis.opendocument.presentation" => "opd",
+        "vnd.oasis.opendocument.spreadsheet" => "ods",
+        "vnd.oasis.opendocument.text" => "odt",
+        "ogg" => ($type == "audio") ? "oga" : (($type == "video") ? "ogv" : "ogx"),
+        "httpd-php" => "php",
+        "vnd.ms-powerpoint" => "ppt",
+        "vnd.openxmlformats-officedocument.presentationml.presentation" => "pptx",
+        "vnd.rar" => "rar",
+        "mp2t" => "ts",
+        "plain" => "txt",
+        "xhtml+xml" => "xhtml",
+        // "vnd.ms-excel" => "",
+        default => $ext
+    };
+}
+
+const USABLE_MIME_TYPE_CACHE_NAME = "mime_type.json";
+const USABLE_MIME_TYPE_SOURCE_URL = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
+const MIME_TYPE_CACHE_EXPIRES = 60 * 60 * 24 * 30;
+
+function get_usable_mime_array(){
+    $cacheMan = new Manager(USABLE_MIME_TYPE_CACHE_NAME);
+    if ($cacheMan->cache_exists() && $cacheMan->modified() - time() < MIME_TYPE_CACHE_EXPIRES) return $cacheMan->get("json");
+    $s = [];
+    // Download and explode our file so we can loop through the lines
+    foreach(@explode("\n",@file_get_contents(USABLE_MIME_TYPE_SOURCE_URL)) as $line) {
+        $out = [];
+        // If there is not first character set, skip
+        if(!isset($line[0])) continue;
+        // If the first character signifies a commented line, skip
+        if($line[0] === "#") continue;
+        // If preg_match_all returns false, skip
+        if(preg_match_all('#([^\s]+)#', $line, $out) === false) continue;
+        // If the regex didn't find a match, skip
+        if(!isset($out[1])) continue;
+        // Check how many items there are in the array. If it's less than or equal to one, skip
+        if(($counted_items_in_array = count($out[1])) <= 1) continue;
+        for($i=1; $i<$counted_items_in_array; $i++) {
+            $s[$out[1][0]] = $out[1][$i];
+        }
+    }
+    $cacheMan->set($s, true);
+    return $s;
+    // return @sort($s)?'$mime_types = array(<br />'.implode($s,',<br />').'<br />);':false;
 }

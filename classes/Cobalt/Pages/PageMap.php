@@ -42,12 +42,13 @@ class PageMap extends PersistanceMap {
     const FLAGS_HIDE_VIEW_COUNT        = 0b00001000;
     const FLAGS_READ_TIME_MANUALLY_SET = 0b00010000;
 
-    const ASIDE_SIDEBAR_NATURAL      = 0b000001;
-    const ASIDE_SIDEBAR_REVERSE      = 0b000010;
-    const ASIDE_SIDEBAR_FOOTER       = 0b000100;
-    const ASIDE_STICKY               = 0b001000;
-    const ASIDE_INCLUDE_TOC_INDEX    = 0b010000;
-    const ASIDE_INDEX_BEFORE_CONTENT = 0b100000;
+    const ASIDE_SIDEBAR_NATURAL      = 0b0000001;
+    const ASIDE_SIDEBAR_REVERSE      = 0b0000010;
+    const ASIDE_SIDEBAR_FOOTER       = 0b0000100;
+    const ASIDE_STICKY               = 0b0001000;
+    const ASIDE_INCLUDE_TOC_INDEX    = 0b0010000;
+    const ASIDE_INDEX_BEFORE_CONTENT = 0b0100000;
+    const ASIDE_INCLUDE_SOCIAL_SHARE = 0b1000000;
 
     const BIO_AVATAR_RADIUS_ROUNDED  = 0b0001;
     const BIO_AVATAR_RADIUS_CIRCULAR = 0b0010;
@@ -138,6 +139,10 @@ class PageMap extends PersistanceMap {
                 'index' => [
                     'title' => 'Views',
                     'order' => 3,
+                    'view' => function ($val) {
+                        $val = $this->views->getValue();
+                        return "<strong>".$val . "</strong> (". ($val - $this->bot_hits->getValue()) .")";
+                    }
                 ]
             ],
             'bot_hits' => [

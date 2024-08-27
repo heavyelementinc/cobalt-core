@@ -175,11 +175,17 @@ trait ClientFSManager {
         $arbitrary_data = array_merge($arbitrary_data, ['meta' => $meta]);
 
         $thumb_id = $this->fs->upload($file_array,$index,$arbitrary_data);
-        $returnable = ['id' => $thumb_id, 'filename' => $file_array['name']];
+        $returnable = ['id' => $thumb_id, 'filename' => $this->filter_filename($file_array['name'])];
         if($meta) {
             $returnable['meta'] = $arbitrary_data['meta'];
         }
         return $returnable;
+    }
+
+    private function filter_filename($filename) {
+        $file = preg_replace("/[\\?&<>\":|*]/", "", $filename);
+        if(!$file) return $filename;
+        return $file;
     }
 
     public function clientUploadFiles($key, $arbitrary_data = null, $files = null, $meta = false) {

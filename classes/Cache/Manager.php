@@ -20,6 +20,11 @@ class Manager {
 
     private $cache_dir = __APP_ROOT__ . "/cache";
 
+    public $reference;
+    public $file_path;
+    public $exists;
+    public $last_modified;
+
     function __construct($filename) {
         if (!is_dir($this->cache_dir)) mkdir($this->cache_dir);
         $this->reference = $filename;
