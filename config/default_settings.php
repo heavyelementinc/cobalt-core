@@ -845,7 +845,7 @@ const DEFAULT_DEFINITIONS = [
     ],
 
     "PostPages_default_aside_visibility" => [
-        "default" => true,
+        "default" => false,
         "meta" => [
             "group" => "Features",
             "subgroup" => "Blog Posts",
