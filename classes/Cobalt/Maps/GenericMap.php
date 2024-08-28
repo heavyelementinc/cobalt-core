@@ -39,6 +39,7 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     protected bool $__schemaHasBeenInitialized = false;
     protected array $__schemaFromConstructorArg = [];
     protected bool $__hasBeenRehydrated = false;
+    
 
     private ?Database $manager = null;
 
@@ -47,6 +48,16 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         $this->__schemaFromConstructorArg = $schema ?? [];
         $this->__initialize_schema();
         if($document) $this->ingest($document);
+    }
+
+    protected bool $index_add_id_checkbox = false;
+    
+    function __set_index_checkbox_state(bool $state) {
+        $this->index_add_id_checkbox = $state;
+    }
+
+    function __get_index_checkbox_state(): bool {
+        return $this->index_add_id_checkbox;
     }
 
     public function __initialize_schema($schema = null): void {

@@ -860,7 +860,12 @@ const DEFAULT_DEFINITIONS = [
         //PageMap::ASIDE_STICKY + PageMap::ASIDE_INCLUDE_TOC_INDEX + PageMap::ASIDE_INDEX_BEFORE_CONTENT + INCLUDE_SOCIAL_SHARE,
         "default" => 0b0001000 + 0b0010000 + 0b0100000 + 0b1000000,
     ],
-
+    "PostMap_predefined_tags" => [
+        "default" => [],
+    ],
+    "PageMap_predefined_tags" => [
+        "default" => [],
+    ],
 
 
 

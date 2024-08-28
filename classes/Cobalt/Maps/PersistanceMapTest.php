@@ -14,9 +14,14 @@ use Cobalt\SchemaPrototypes\Compound\ImageResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
+use Drivers\Database;
 use Validation\Exceptions\ValidationIssue;
 
 class PersistanceMapTest extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+    }
     function __get_schema():array {
         return [
             'array' => [

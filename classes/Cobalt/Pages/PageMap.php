@@ -19,6 +19,7 @@ use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use Controllers\Traits\Indexable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Drivers\Database;
 
 class PageMap extends PersistanceMap {
     const VIEW_TYPE = [
@@ -310,13 +311,7 @@ class PageMap extends PersistanceMap {
                 new ArrayResult,
                 'allow_custom' => true,
                 'valid' => function () {
-                    $man = new PageManager();
-                    $results = $man->distinct("tags", [], ['limit' => 1000]);
-                    $array = [];
-                    foreach($results as $value) {
-                        $array[$value] = $value;
-                    }
-                    return $array;
+                    return $this->get_tags();
                 },
                 'filter' => function ($tags) {
                     $lowercase = [];
@@ -459,6 +454,18 @@ class PageMap extends PersistanceMap {
         ];
     }
 
+    function get_tags() {
+        $man = $this->__get_manager();
+        $results = $man->distinct("tags", [], ['limit' => 1000]);
+        $array = [];
+        foreach($results as $value) {
+            $array[$value] = $value;
+        }
+        $predefined_tags = __APP_SETTINGS__['PageMap_predefined_tags'];
+        if($this instanceof PostMap) $predefined_tags = __APP_SETTINGS__['PostMap_predefined_tags'];
+        return array_merge($array, $predefined_tags ?? []);
+    }
+
     #[Prototype]
     protected function get_follow_link() {
         $follow_link = "";
@@ -491,5 +498,9 @@ class PageMap extends PersistanceMap {
         else $html .= $this->live_date->relative("datetime");
         $html .= "</date>";
         return $html . "</div>";
+    }
+
+    function __set_manager(?Database $manager = null):?Database {
+        return new PageManager();
     }
 }

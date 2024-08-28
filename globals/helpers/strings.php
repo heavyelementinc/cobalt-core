@@ -395,3 +395,34 @@ function time_to_read(string $string, int $output = TIME_TO_READ_FORMAT_ROUND) {
             return "$minutes min";
     }
 }
+
+const FAILURE_NOT_A_DATA_URI = -1;
+const CONVERT_URI_MAKE_PATH = 0b11111111;
+/**
+ * Converts a `data:file/mimetype;base64,ai63138b7...` data URI into a file
+ * @param string $filename - The location the decoded file should be written to
+ * @param string $uri - The URI to be decoded
+ * @param int $flags - Also valid are file_put_contents flags: FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
+ * @return int|false
+ */
+function convert_data_uri_to_file(string $filename, string $uri, int $flags = 0):int|false {
+    if(substr($uri, 0, 5) !== "data:") return FAILURE_NOT_A_DATA_URI;
+    // if($flags & CONVERT_URI_MAKE_PATH) {
+    //     if(!file_exists($filename)) 
+    //     // Let's clean up
+    //     $flags -= CONVERT_URI_MAKE_PATH;
+    // }
+    // Find the base64 portion of the string
+    $substr = substr($uri, strpos($uri,",") + 1);
+    // Decode the base64
+    $decoded = base64_decode(str_replace(' ', '+', $substr));
+    // Save it to a file
+    $put_result = file_put_contents($filename, $decoded, $flags);
+    return $put_result;
+}
+
+function is_data_uri($uri):bool {
+    if(!is_string($uri)) return false;
+    if(substr($uri, 0, 5) === "data:") return true;
+    return false;
+}

@@ -8,6 +8,8 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 class ImageResult extends UploadResult2 {
     protected $type = "image";
+    /** @var PersistanceMap */
+    protected GenericMap $__reference;
 
     #[Prototype]
     protected function field() {
@@ -31,10 +33,19 @@ class ImageResult extends UploadResult2 {
 
     #[Prototype]
     protected function embedEditor($embedSize, array $misc = []) {
-        $delete = " delete-action=\"/api/v1/image-editor/".(string)$this->__reference->_id."/$this->name\"";
-        $rename =  "rename-action=\"/api/v1/image-editor/".(string)$this->__reference->_id."/$this->name\"";
-        if(!$this->getDirective("renameable")) $rename = "";
-        return "<image-editor$delete $rename>".$this->embed($embedSize, $misc)."</image-editor>";
+        $manager_name = $this->__reference->__get_manager();
+        $delete = "";
+        $rename = "";
+        $change = "";
+        // if(!$this->getDirective("renameable")) $rename = "";
+        if($manager_name) {
+            $url_component = (string)$this->__reference->_id."/$this->name";
+            $manager_name = base64_encode(get_class($manager_name));
+            $delete =  " delete-action=\"/api/v1/image-editor/$manager_name/$url_component\"";
+            $rename =  " rename-action=\"/api/v1/image-editor/$manager_name/$url_component\"";
+            // $change = " replace-action=\"/api/v1/image-editor/$manager_name/$url_component\"";
+        }
+        return "<image-editor$delete"."$rename"."$change>".$this->embed($embedSize, $misc)."</image-editor>";
     }
 
     #[Prototype]
@@ -87,30 +98,42 @@ class ImageResult extends UploadResult2 {
             unset($value['accent']);
             $result = $this->upload_filter($value);
             
-            // Let's update any fields we need to change
-            update("image-result[name='$this->name'] img", [
-                'src' => $result['url'],
-                'setAttribute' => [
-                    'height' => $result['height'],
-                    'width' => $result['width'],
-                    'atl' => $result['alt'] ?? '',
-                ]
-            ]);
-            update("image-result[name='$this->name'] .url-row", ['setAttribute' => ['title' => $result['url']]]);
-            update("image-result[name='$this->name'] .url-row copy-span[mini]", ['value'=> $result['url']]);
-            update("image-result[name='$this->name'] .url-row flex-cell", ['innerText' => $result['url']]);
-            update("image-result[name='$this->name'] .width-target", ['innerText' => $result['width']]);
-            update("image-result[name='$this->name'] .height-target", ['innerText' => $result['height']]);
-            update("image-result[name='$this->name'] flex-row:has(.width-target)", [
-                'setAttribute' => [
-                    'title' => "$result[width] x $result[height]"
-            ]]);
-
-
-        } else {
-            $map = new GenericMap([], $this->schema['schema'] ?? $this->schema ?? [], "$this->name.");
-            $result = $map->__validate($value);
+            $this->set_updates($result);
+            return $result;
         }
+        
+        $map = new GenericMap([], $this->schema['schema'] ?? $this->schema ?? [], "$this->name.");
+        $result = $map->__validate($value);
+
+        $this->set_updates($result);
+
+        foreach($result->__validatedFields as $field => $value) {
+            $result->__validatedFields[$this->name.".$field"] = $value;
+            unset($result->__validatedFields[$field]);
+        }
+
+        return $result;
+    }
+
+    function set_updates($result) {
+        // Let's update any fields we need to change
+        update("image-result[name='$this->name'] img", [
+            'src' => $result['url'],
+            'setAttribute' => [
+                'height' => $result['height'],
+                'width' => $result['width'],
+                'atl' => $result['alt'] ?? '',
+            ]
+        ]);
+        update("image-result[name='$this->name'] .url-row", ['setAttribute' => ['title' => $result['url']]]);
+        update("image-result[name='$this->name'] .url-row copy-span[mini]", ['value'=> $result['url']]);
+        update("image-result[name='$this->name'] .url-row flex-cell", ['innerText' => $result['url']]);
+        update("image-result[name='$this->name'] .width-target", ['innerText' => $result['width']]);
+        update("image-result[name='$this->name'] .height-target", ['innerText' => $result['height']]);
+        update("image-result[name='$this->name'] flex-row:has(.width-target)", [
+            'setAttribute' => [
+                'title' => "$result[width] x $result[height]"
+        ]]);
 
         if(isset($result->alt)) {
             update("image-result[name='$this->name'] image-editor img", ['alt' => $result['alt'] ?? '']);
@@ -119,7 +142,5 @@ class ImageResult extends UploadResult2 {
         if(isset($result->accent)) {
             update("image-result[name='$this->name'] .accent-target", ['value' => $result['accent']]);
         }
-
-        return $result;
     }
 }

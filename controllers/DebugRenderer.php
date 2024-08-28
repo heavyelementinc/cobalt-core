@@ -3,6 +3,7 @@
 use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class DebugRenderer {
     function render($userInput = "Test") {
@@ -21,6 +22,11 @@ class DebugRenderer {
 }
 
 class TestSchema extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+    }
+    
     public function __get_schema(): array {
         return [
             'html' => [

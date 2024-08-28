@@ -5,8 +5,13 @@ namespace Cobalt\Notifications;
 use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class NotificationActionSchema extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return new NotificationManager();
+    }
 
     public function __get_schema(): array {
         return [

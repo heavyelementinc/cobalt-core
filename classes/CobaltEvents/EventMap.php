@@ -12,8 +12,13 @@ use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Compound\HrefResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
+use Drivers\Database;
 
 class EventMap extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return new EventManager();
+    }
     function __get_schema():array {
         return [
             'name' => [

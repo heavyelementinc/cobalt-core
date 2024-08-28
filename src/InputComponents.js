@@ -272,6 +272,7 @@ class DisplayDate extends HTMLElement {
         if (this.relative === "true" || this.getAttribute("format") === "relative") {
             return this.startRelativeTime();
         }
+        if(!this.date) return;
         let date = new DateConverter(this.date, this.format);
         this.innerText = date.format();
     }
@@ -279,6 +280,7 @@ class DisplayDate extends HTMLElement {
     startRelativeTime() {
         // clearTimeout(this.timeout);
         // this.relative = "false";
+        if(!this.date) return;
         if (/[\d]+/.test(this.date) === false) this.date = JSON.parse(this.date);
         else this.date = Number(this.date);
         let result = relativeTime(new Date(this.date), null, "object");

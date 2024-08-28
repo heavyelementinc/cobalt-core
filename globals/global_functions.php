@@ -16,6 +16,8 @@ use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Pages\PageMap;
+use Cobalt\Pages\PostMap;
 use Cobalt\Renderer\Render;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
@@ -628,6 +630,16 @@ function get_posts_from_tags(array $tags, string $controller = "Posts", int $lim
     }
 
     return $html;
+}
+
+function get_related_posts(PageMap|array $relative_posts_or_tags, ?array $projection = null, string $controller = "Posts") {
+    if(is_array($relative_posts_or_tags)) $tags = (new PageMap())->ingest(['tags' => $relative_posts_or_tags]);
+    
+    /** @var \Controllers\Landing\Page */
+    $postController = get_controller($controller, true);
+    $posts = $postController->manager;
+
+    return $posts->getRelatedPages($tags, $projection);
 }
 
 function benchmark_start($name) {

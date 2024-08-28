@@ -4,6 +4,7 @@ namespace Cobalt\Pages;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class PostMap extends PageMap {
     function __get_schema(): array {
@@ -28,9 +29,12 @@ class PostMap extends PageMap {
         $schema['splash_type']['default'] = self::SPLASH_POSITION_CENTER;
         $schema['include_aside']['default'] = __APP_SETTINGS__['PostPages_default_aside_visibility'];
         $schema['aside_positioning']['default'] = __APP_SETTINGS__['PostPages_default_aside_flags'];
-        // $schema['splash_type']['readonly'] = true;
 
         // unset($schema['include_in_route_group'], $schema['route_group'], $schema['route_link_label'], $schema['route_order']);
         return $schema;
+    }
+
+    function __set_manager(?Database $manager = null):?Database {
+        return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
     }
 }

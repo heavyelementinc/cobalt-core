@@ -11,8 +11,13 @@ use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
 use Cobalt\SchemaPrototypes\Compound\EmailAddressResult;
 use Cobalt\SchemaPrototypes\Compound\UniqueResult;
+use Drivers\Database;
 
 class UserPersistance extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return new UserCRUD();
+    }
 
     public function __get_schema(): array {
         return [

@@ -1,0 +1,80 @@
+<h1>{{!title}}</h1>
+<header class="crudable-header--hypermedia-container">
+    <div class="crudable-header--section crudable-header--left">
+        {{!hypermedia.multidelete_button}}
+        {{!hypermedia.filters}}
+    </div>
+    <div class="crudable-header--section crudable-header--center">
+        {{!hypermedia.previous_page}}
+        <form>
+            <input type="number" name="{{page_param}}" value="{{page_number}}" style="width:3ch;text-align: right;">
+        </form>
+        {{!hypermedia.next_page}}
+    </div>
+    <div class="crudable-header--section crudable-header--right">
+        <form>
+            {{!hypermedia.search}}
+        </form>
+    </div>
+</header>
+<flex-table>
+    {{!table_header}}
+</flex-table>
+<div class="filemanager-container">
+    {{!documents}}
+</div>
+<!-- <a href="{{!href}}" class="floater--new-item"></a> -->
+<style>
+    .filemanager-container{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .fs-filemanager {
+        width: 200px;
+        height: 200px;
+        display: flex;
+        color: var(--contrast-color);
+        position: relative;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background-color: transparent;
+    }
+    .fs-filemanager img {
+        width: 200px;
+        height: 200px;
+    }
+    .fs-filemanager.thumbnail:before{ 
+        content: \F0C8F;
+        font-family: "Material Design Icons";
+    }
+    .fs-filemanager .badges {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        font-size: 20pt;
+        background: linear-gradient(0deg, var(--accent-color), transparent);
+        width:100%;
+    }
+
+    .fs-filemanager .badges:after {
+        content: "";
+        height: calc(1em - 2px);
+        width:  calc(1em - 2px);
+        display: block;
+        background: var(--accent-color);
+        border: 2px solid var(--contrast-color);
+    }
+    .action-menu-header h1{
+        font-size: 1rem;
+        font-family: monospace;
+    }
+    .action-menu-header img {
+        height: 2em;
+        width: 2em;
+        object-fit: contain;
+    }
+</style>

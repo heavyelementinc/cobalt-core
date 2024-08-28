@@ -48,6 +48,12 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
+    final function getUserByUsername($username) {
+        return $this->findOneAsSchema([
+            'uname' => $username,
+        ]);
+    }
+
     final function getUsersByPermission($permissions, $status = true, $options = null) {
         if(!$options) $options = [
             'limit' => 50

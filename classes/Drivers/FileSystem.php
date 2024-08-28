@@ -97,13 +97,22 @@ class FileSystem {
         $type = gettype($file_data);
         if($type === "string") $file_array = $this->path_or_key($file_data, $key);
         else $file_array = $file_data;
-
         $farray = $this->validate_file_array($file_array);
+        // Let's prevent duplication
+        // $md5 = md5_file($file_data['tmp_name']);
+        // $found = $this->findOne(['md5' => $md5]);
+        // if($found) {
+        //     $id = $found->_id;
+        //     $setQuery = ['$addToSet' => ['filename' => $farray['name']]];
+        //     if(is_string($found->filename)) $setQuery = ['$set' => ['filename' => array_unique([$found->filename, $farray['name']])]];
+        //     $this->updateOne(['_id' => $id], $setQuery);
+        //     return $id;
+        // } else {
+            $resource = fopen($farray['tmp_name'], 'r');
+            if($resource === false) throw new \Exceptions\HTTP\ServiceUnavailable("The upload returned an unexpected error");
+            $id = $this->bucket->uploadFromStream($farray['name'], $resource);
+        // }
 
-        $resource = fopen($farray['tmp_name'], 'r');
-        if($resource === false) throw new \Exceptions\HTTP\ServiceUnavailable("The upload returned an unexpected error");
-        $id = $this->bucket->uploadFromStream($farray['name'], $resource);
-        
         if(is_array($arbitrary_data)) {
             $collection = $this->bucket->getFilesCollection();
             $result = $collection->updateOne(
@@ -145,7 +154,7 @@ class FileSystem {
     }
 
     final public function findMany($filter = [], array $options = []) {
-        return $this->bucket->findMany($filter, $options);
+        return $this->bucket->find($filter, $options);
     }
 
     final public function updateOne($filter, array $options = []) {

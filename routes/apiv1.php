@@ -157,9 +157,13 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
     ]);
 }
 
-Route::s_delete((new Options("/image-editor/{id}/{name}","ImageEditor@delete"))
+Route::s_delete((new Options("/image-editor/{id}/{name}?","ImageEditor@delete"))
     ->set_permission("Customizations_delete")
 );
+
+Route::delete("/crudable-files/{id}", "CrudableFiles@delete_file_by_id", [
+    'permission' => "Customizations_delete"
+]);
 
 Posts::apiv1();
 Route::s_post('/posts/{id}/preview-key/', 'Posts@preview_key');
@@ -171,3 +175,5 @@ if(__APP_SETTINGS__['Block_Editor_endpoints']) {
     Route::s_post('/block-editor/upload/', "BlockEditor@fileUpload");
     Route::s_get('/block-editor/link-fetch/', "BlockEditor@linkFetcher");
 }
+
+CrudableFiles::apiv1();

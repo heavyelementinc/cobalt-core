@@ -212,7 +212,7 @@ class CoreSettingsPanel extends Controller {
         $page -= 1;
         $limit = 50;
 
-        $result = $man->find([], ['sort' => ['_id' => 1], 'skip' => $limit * $page, 'limit' => $limit]);
+        $result = $man->find([], ['sort' => ['_id' => -1], 'skip' => $limit * $page, 'limit' => $limit]);
 
         $html = "";
         foreach($result as $data) {

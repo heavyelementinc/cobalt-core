@@ -26,6 +26,7 @@ class AsyncFetch extends EventTarget {
         this.reject = null;
         this.totalUploadSize = 0;
         this.form = form;
+        this.errorHandled = false;
         
         this.data = "";
         this.response = null; // The raw response from the fetch request
@@ -117,7 +118,7 @@ class AsyncFetch extends EventTarget {
         this.response = client.response;
         this.setResponseHeaders(client.getAllResponseHeaders());
         this.dispatchHeaderDirectives();
-        if(client.status !== 200) {
+        if(client.status !== 200 && this.errorHandled === false) {
             const nonOkResponse = this.handleNonOkResponse(event, client, resolve);
             if(nonOkResponse === true) return true;
         }
@@ -131,7 +132,7 @@ class AsyncFetch extends EventTarget {
             }
         }
 
-        if(client.status >= 300) {
+        if(client.status >= 300 && this.errorHandled === false) {
             return this._communicatedError(event);
         }
 
@@ -702,6 +703,7 @@ class XConfirm extends HeaderDirective {
         const xhr = this.props.xhrRequest;
         const responseBody = JSON.parse(xhr.response);
         const fulfillment = responseBody.fulfillment;
+        this.props.xhrRequest.errorHandled = true;
         let confirm = await modalConfirm(fulfillment.error, fulfillment.data.okay, "Cancel", fulfillment.data.dangerous);
         if(confirm === false) return xhr.dispatchEvent(new CustomEvent("resubmission", {detail: false}));
         xhr.dispatchEvent(new CustomEvent("resubmission", {detail: true}));
@@ -716,6 +718,7 @@ class XReauth extends HeaderDirective {
         const xhr = this.props.xhrRequest;
         const responseBody = JSON.parse(xhr.response);
         const fulfillment = responseBody.fulfillment;
+        this.props.xhrRequest.errorHandled = true;
         let password = await modalInput("Please supply your password to verify your identity", {okay: fulfillment.data.okay, cancel: "cancel"});
         xhr.setRequestHeader("X-Reauthorization", btoa(password));
         const result = await xhr.submit(fulfillment.data.return);

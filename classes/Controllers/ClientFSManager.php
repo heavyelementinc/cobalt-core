@@ -69,9 +69,16 @@ trait ClientFSManager {
     public function delete($id, $skipConfirm = false) {
         $this->initFS();
         $_id = new \MongoDB\BSON\ObjectId($id);
+        /** @var GenericMap */
         $result = $this->fs->findOne(["_id" => $_id]);
         if($result === null) throw new NotFound("That file was not found");
-        if($skipConfirm == false) confirm("Are you sure you want to delete <strong>" . htmlspecialchars($result->filename) . "</strong>?",[]);
+        $message = "Are you sure you want to delete <strong>";
+        if(is_string($result->filename)) {
+            $message .= "$result->filename</strong>?";
+        } else {
+            $message .= $result->filename[0] . "</strong>?<br><br>It's currently being used in multiple places in this application!";
+        }
+        if($skipConfirm == false) confirm($message,[]);
 
         if($result->thumbnail_id) $this->fs->delete($result->thumbnail_id);
         $result = $this->fs->delete($_id);

@@ -93,3 +93,8 @@ Route::get("/sitemap.xml", "FileController@sitemap");
 Route::get("/auth/{id}/register", "IntegrationsController@oauth_receive");
 Route::get("/auth/{id}/deauthorize","IntegrationsController@oauth_deauthorize");
 Route::s_get("/me", "UserAccounts@me");
+
+// if()
+Route::s_get("/file-picker/", "CrudableFiles@file_picker", [
+    'permission' => 'Customizations_modify'
+]);

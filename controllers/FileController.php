@@ -245,4 +245,5 @@ class FileController extends \Controllers\FileController {
     private function generate_blog_post_entry($data) {
         
     }
+    
 }

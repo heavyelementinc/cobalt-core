@@ -243,8 +243,8 @@ async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern =
     })
 }
 
-async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true, event = null }) {
-    return new Promise((resolve, reject) => {
+async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true, event = null, form_selector = "form-request", before_callback = async (form, resolve, reject) => {return true}, initialize_callback = async () => {}}) {
+    return new Promise(async (resolve, reject) => {
         const modal = new Modal({
             url: url,
             event: event,
@@ -259,7 +259,9 @@ async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_c
                 okay: {
                     label: okay,
                     callback: async (event) => {
-                        const form = modal.dialog.querySelector("form-request");
+                        const form = modal.dialog.querySelector(form_selector);
+                        const callbackValue = await before_callback(form, resolve, reject, modal);
+                        if(callbackValue === false) return false;
                         let result = null;
                         try {
                             result = await form.send(event);
@@ -276,7 +278,8 @@ async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_c
                 }
             }
         })
-        modal.draw();
+        await modal.draw();
+        initialize_callback(modal.container, modal)
     });
 }
 

@@ -8,6 +8,7 @@ use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
 use Exceptions\HTTP\Error;
 use MongoDB\Database;
+use MongoDB\Model\BSONDocument;
 
 /** An "index" is the landing page that shows a table of available database entries.
  * To define what fields of a DB entry are shown in the index, provide an 'index'
@@ -187,6 +188,7 @@ trait Indexable {
         $result = $this->manager->find($this->__index_query(), array_merge($this->index_options(), $this->queryParameters));
         $html = "";
         foreach($result as $doc) {
+            if($doc instanceof BSONDocument) $doc = $this->get_schema($doc);
             $this->get_table_row($doc, $html);
         }
         return $html;
@@ -199,7 +201,7 @@ trait Indexable {
      * @return void 
      * @throws Exception 
      */
-    private function get_table_row(GenericMap $doc, &$html) {
+    function get_table_row(GenericMap $doc, &$html) {
         $html .= "<flex-row>";
         if($this->schema->__get_index_checkbox_state()) {
             $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\" value=\"$doc->_id\"></flex-cell>";

@@ -4,6 +4,9 @@
  class TabNav extends HTMLElement {
     constructor() {
         super();
+        this.props = {
+            initialNavStyle: null
+        }
         this.currentNavClass = "tab-nav--current-tab";
         this.currentContentClass = "tab-nav--current-content";
         this.TABNAV_ERROR = "tab-nav--validation-issue";
@@ -14,12 +17,16 @@
     }
     
     connectedCallback() {
+        this.initialNavStyle = this.getAttribute("type");
         this.classList.add("tab-nav--hydrated");
         this.init();
+        this.mediaCallback();
+        window.addEventListener("resize", this.mediaCallback.bind(this));
     }
 
     disconnectedCallback() {
         window.removeEventListener("hashchange", this.hashUpdate);
+        window.removeEventListener("resize", this.mediaCallback);
     }
 
     init() {
@@ -91,6 +98,21 @@
         if(target) target.classList.add(this.currentContentClass);
 
         window.addEventListener("hashchange",this.hashUpdate.bind(this),{once:true});
+    }
+
+    mediaCallback(event = {}) {
+        // If we're a chip nav, we want to always stay a row
+        if(this.constructor.name !== "TabNav") return;
+        // If the type was set when the value was initialized, we want to stay with that explicit definition
+        if(this.props.initialNavStyle !== null) return;
+        // If we match this media query then we know we're a mobile screen
+        if(window.matchMedia("(max-width: 35em").matches == true) {
+            // We're a small screen, so let's check if we should change the layout of our tabnav
+            this.setAttribute("type", "row")
+            return;
+        }
+        // Otherwise we remove the type attribute
+        this.removeAttribute("type");
     }
 }
 

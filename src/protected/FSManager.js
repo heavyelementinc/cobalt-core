@@ -2,48 +2,52 @@ class FSManager {
     /**
      * @param {HTMLElement} target 
      */
-    constructor(target) {
-        this.target = target;
+    constructor() {
         this.init();
     }
 
     init() {
-        const t = this.target;
-        let actions = [];
-        let id = t.getAttribute("data-id");
-
-        if(id) {
-            actions.push({
-                label: "Rename",
-                dangerous: false,
-                callback: async (element, event, asyncRequest) => {
-                    await modalView(`/admin/settings/fs-manager/${id}/rename`);
-                    return true;
-                }
-            })
-
-            actions.push({
-                label: "Delete",
-                dangerous: true,
-                request: {
-                    method: "DELETE",
-                    action: t.getAttribute("data-delete") ?? `/api/v1/fs-manager/${id}/delete`
-                }
-            });
+        const files = document.querySelectorAll(".fs-filemanager");
+        for(const file of files) {
+            this.setUpTarget(file);
         }
+    }
 
-        t.addEventListener("contextmenu", event => {
-            const menu = new ActionMenu({
-                event,
-                title: `Update ${t.getAttribute("data-name") ?? "Image"}`,
+    setUpTarget(target) {        
+        let id = target.getAttribute("data-id");
+        if(!id) return;
+        
+        const actionMenu = new ActionMenu(target, "modal");
+        actionMenu.title = `<img src="${target.querySelector("img").src}"> ${id}`;
+        const deleteAction = actionMenu.registerAction();
+        deleteAction.label = "Delete";
+        deleteAction.requestMethod = "DELETE";
+        deleteAction.requestAction = `/api/v1/crudable-files/${id}`;
 
-            })
+        // target.addEventListener("click", event => {
+        //     actionMenu.openMenu();
+        // })
+        // actions.push({
+        //     label: "Rename",
+        //     dangerous: false,
+        //     callback: async (element, event, asyncRequest) => {
+        //         await modalView(`/admin/settings/fs-manager/${id}/rename`);
+        //         return true;
+        //     }
+        // })
 
-            actions.forEach(e => {
-                menu.registerAction(e);
-            });
+        // actions.push({
+        //     label: "Delete",
+        //     dangerous: true,
+        //     request: {
+        //         method: "DELETE",
+        //         action: t.getAttribute("data-delete") ?? `/api/v1/fs-manager/${id}/delete`
+        //     }
+        // });
 
-            actions.draw();
-        })
+    }
+
+    highlightError(target) {
+        target.classList.add("error");
     }
 }

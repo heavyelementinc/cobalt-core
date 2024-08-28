@@ -7,6 +7,7 @@ use Cobalt\Maps\PersistanceException\DirectiveException;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
+use Drivers\Database;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Iterator;
@@ -52,6 +53,7 @@ use Validation\Exceptions\ValidationIssue;
 abstract class PersistanceMap extends GenericMap implements Persistable {
     
     protected bool $index_add_id_checkbox = false;
+    protected ?Database $__manager = null;
 
     function __construct($doc = null, $schema = [], $__namePrefix = "") {
         parent::__construct($doc, $schema, $__namePrefix);
@@ -71,8 +73,14 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
      */
     abstract function __get_schema():array;
 
-    function __initialize_schema($schema = null): void
-    {
+    public function __get_manager():?Database {
+        return $this->__manager;
+    }
+
+    abstract function __set_manager(?Database $manager = null):?Database;
+
+    function __initialize_schema($schema = null): void {
+        $this->__manager = $this->__set_manager();
         $schema = array_merge($this->__get_schema(), $this->__schema ?? []);
         parent::__initialize_schema($schema);
     }

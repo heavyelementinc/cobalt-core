@@ -1,11 +1,13 @@
 <?php
 
+use Auth\UserCRUD;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\PageManager;
 use Cobalt\Pages\PostMap;
 use Controllers\Landing\Page;
 use Drivers\Database;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
 
 class Posts extends Page {
@@ -26,8 +28,17 @@ class Posts extends Page {
     }
 
     public function posts_landing() {
+        $query = [];
+        if(isset($_GET['tag'])) $query['tags'] = $_GET['tag'];
+        if(isset($_GET['author'])) {
+            $uman = new UserCRUD();
+            $user = $uman->getUserByUsername($_GET['author']);
+            if(!$user) throw new NotFound("Author not found", true);
+            if(!has_permission("Posts_allowed_author", null, $user)) throw new NotFound("Author not found", true);
+            $query['author'] = $user->_id;
+        }
         $result = $this->manager->find(
-            $this->manager->public_query([], false),
+            $this->manager->public_query($query, false),
             [
                 'sort' => [
                     'live_date' => -1

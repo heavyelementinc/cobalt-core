@@ -13,9 +13,14 @@ use Cobalt\SchemaPrototypes\Compound\UniqueResult;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
+use Drivers\Database;
 use Validation\Exceptions\ValidationIssue;
 
 class UserMap extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return new UserCRUD();
+    }
 
     public function __get_schema(): array {
         return [

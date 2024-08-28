@@ -31,7 +31,10 @@ trait Fieldable {
         if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
 
         [$misc, $attrs] = $this->defaultFieldData($misc);
-        return "<$tag class=\"$classes\" $attrs value=\"" . htmlspecialchars($value) . "\"$pattern>$closingTag";
+        return "<$tag class=\"$classes\" $attrs value=\"" . str_replace(
+            ['"',      "'",      '<',    '>'],
+            ['&quot;', '&#039;', '&lt;', "&gt;"],
+            $value) . "\"$pattern>$closingTag";
     }
 
     protected function inputDate($classes = "", $misc = []) {

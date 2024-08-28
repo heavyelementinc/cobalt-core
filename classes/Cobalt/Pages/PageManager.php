@@ -4,6 +4,7 @@ namespace Cobalt\Pages;
 
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Drivers\Database;
+use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
 class PageManager extends Database {
@@ -49,31 +50,9 @@ class PageManager extends Database {
 
         $min_recommended = $page->max_related->getValue();
         $tags = $page->tags->getRaw();
-        $result = $this->aggregate(
-            [
-                ['$match' => $this->public_query([
-                    'tags' => ['$in' => $tags],
-                    '_id' => ['$ne' => $page->_id]
-                    ])
-                ],
-                ['$project' => array_merge(
-                    $projection, [
-                    'tags_intersection' => [
-                        '$setIntersection' => [$tags, '$tags']
-                    ]]
-                )],
-                ['$project' => array_merge(
-                    $projection, [
-                    'tags_intersection' => 1,
-                    'tag_size' => [
-                        '$size' => '$tags_intersection'
-                    ]]
-                )],
-                ['$sort' => [
-                    'tag_size' => -1
-                ]],
-            ]
-        );
+        $result = $this->aggregate($this->getRelatedPagePipeline(
+            $tags, $page->_id, $projection,
+        ));
 
         $exclude_ids = [$page->_id];
         $array = [];
@@ -81,7 +60,6 @@ class PageManager extends Database {
             if($page instanceof PostMap) $array[$i] = $p;
             else $array[$i] = (new PageMap())->ingest($p);
             $exclude_ids[] = $array[$i]->_id;
-
         }
 
         if(count($array) < $min_recommended) {
@@ -101,6 +79,35 @@ class PageManager extends Database {
         }
         
         return $array;
+    }
+
+    function getRelatedPagePipeline(array $tags, ?ObjectId $exclude_id = null, array $projection = []) {
+        $public_query = [
+            'tags' => ['$in' => $tags],
+        ];
+
+        if($exclude_id) $public_query['_id'] = ['$ne' => $exclude_id];
+
+        $pipeline = [
+            ['$match' => $this->public_query($public_query)],
+            ['$project' => array_merge(
+                $projection, [
+                'tags_intersection' => [
+                    '$setIntersection' => [$tags, '$tags']
+                ]]
+            )],
+            ['$project' => array_merge(
+                $projection, [
+                'tags_intersection' => 1,
+                'tag_size' => [
+                    '$size' => '$tags_intersection'
+                ]]
+            )],
+            ['$sort' => [
+                'tag_size' => -1
+            ]],
+        ];
+        return $pipeline;
     }
 
     function getPagesFromTags(array $tags, int $limit = 3) {

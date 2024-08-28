@@ -104,8 +104,10 @@ abstract class Crudable {
             return $this->new_document($instance);
         }
 
-        static public function creatable_permissions(array $defaultValue = [], array $userSuppliedValue = []):array {
-            return array_merge(['permission' => "CRUDControllerPermission",], $defaultValue, $userSuppliedValue);
+        static public function route_details_create(array $options = null):array {
+            return array_merge([
+                'permission' => "CRUDControllerPermission",
+            ], $options);
         }
 
     // =========================================================================
@@ -159,8 +161,20 @@ abstract class Crudable {
             return $index;
         }
         
-        static public function readable_permissions(array $defaultValue = [], array $userSuppliedValue = []):array {
-            return array_merge(['permission' => "CRUDControllerPermission",], $defaultValue, $userSuppliedValue);
+        static public function route_details_read(array $options = []):array {
+            return array_merge([
+                'permission' => "CRUDControllerPermission",
+            ], $options);
+        }
+
+        static public function route_details_index(array $options = []):array {
+            return array_merge([
+                'anchor' => [
+                    'name' => $options['anchor'] ?? self::generate_friendly_name()
+                ],
+                'navigation' => [$options['navigation'] ?? 'admin_panel'],
+                'permission' => "CRUDControllerPermission",
+            ], $options);
         }
 
     // =========================================================================
@@ -231,8 +245,10 @@ abstract class Crudable {
             return $this->edit($doc);
         }
 
-        static public function updateable_permissions(array $defaultValue = [], array $userSuppliedValue = []):array {
-            return array_merge(['permission' => "CRUDControllerPermission",], $defaultValue, $userSuppliedValue);
+        static public function route_details_update(array $options = null):array {
+            return array_merge([
+                'permission' => "CRUDControllerPermission",
+            ], $options);
         }
 
     
@@ -280,8 +296,10 @@ abstract class Crudable {
             header("X-Redirect: " . route("$this->name@__index"));
         }
 
-        static public function destroyable_permissions(array $defaultValue = [], array $userSuppliedValue = []):array {
-            return array_merge(['permission' => "CRUDControllerPermission",], $defaultValue, $userSuppliedValue);
+        static public function route_details_destroy(array $options = null):array {
+            return array_merge([
+                'permission' => "CRUDControllerPermission",
+            ], $options);
         }
 
     // =========================================================================
@@ -298,11 +316,11 @@ abstract class Crudable {
             $class   = self::className();
             $mutant  = self::generate_prefix($prefix);
 
-            Route::get("$mutant/{id}", "$class@__read", self::readable_permissions($options['read'] ?? []));
-            Route::post("$mutant/create", "$class@__create", self::creatable_permissions($options['create'] ?? []));
-            Route::post("$mutant/update/{id}", "$class@__update", self::updateable_permissions($options['update'] ?? []));
-            Route::delete("$mutant/delete/{id}", "$class@__destroy", self::destroyable_permissions($options['destroy'] ?? []));
-            Route::delete("$mutant/multi-delete/", "$class@__multidestroy", self::destroyable_permissions($options['destroy'] ?? []));
+            Route::get("$mutant/{id}", "$class@__read",   static::route_details_read($options['read'] ?? []));
+            Route::post("$mutant/create", "$class@__create", static::route_details_create($options['create'] ?? []));
+            Route::post("$mutant/update/{id}", "$class@__update", static::route_details_update($options['update'] ?? []));
+            Route::delete("$mutant/delete/{id}", "$class@__destroy", static::route_details_destroy($options['destroy'] ?? []));
+            Route::delete("$mutant/multi-delete/", "$class@__multidestroy", static::route_details_destroy($options['destroy'] ?? []));
             set_crudable_flag($class, CRUDABLE_CONFIG_APIV1);
         }
 
@@ -316,15 +334,9 @@ abstract class Crudable {
             $class   = self::className();
             $mutant  = self::generate_prefix($prefix);
 
-            Route::get("$mutant/", "$class@__index", self::readable_permissions([
-                    'anchor' => ['name' => $options['index']['anchor'] ?? self::generate_friendly_name()],
-                    'navigation' => [$options['index']['navigation'] ?? 'admin_panel']
-                ],
-                $options['index'] ?? []
-                )
-            );
-            Route::get("$mutant/new", "$class@__new_document", self::creatable_permissions($options['new'] ?? []));
-            Route::get("$mutant/edit/{id}", "$class@__edit", self::updateable_permissions($options['edit'] ?? []));
+            Route::get("$mutant/", "$class@__index", static::route_details_index($options['index'] ?? []));
+            Route::get("$mutant/new", "$class@__new_document", static::route_details_create($options['new_document'] ?? []));
+            Route::get("$mutant/edit/{id}", "$class@__edit", static::route_details_update($options['edit'] ?? []));
             set_crudable_flag($class, CRUDABLE_CONFIG_ADMIN);
         }
 

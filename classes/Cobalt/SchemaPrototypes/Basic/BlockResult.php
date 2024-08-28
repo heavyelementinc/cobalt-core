@@ -2,10 +2,12 @@
 
 namespace Cobalt\SchemaPrototypes\Basic;
 
+use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use DOMDocument;
+use Drivers\FileSystem;
 use Exception;
 use Validation\Exceptions\ValidationIssue;
 
@@ -98,6 +100,17 @@ class BlockResult extends SchemaResult {
     }
 
     function filter($value) {
+        $manager = null;
+        $orphaned_images = [];
+        if($this->__reference instanceof PersistanceMap) $manager = $this->__reference->__get_manager();
+        if($manager) {
+            $full_document = $manager->findOne(['_id' => $this->__reference->_id]);
+            foreach($full_document->{$this->name}->blocks as $blk) {
+                if($blk['type'] === 'imagetool') {
+                    $orphaned_images[$blk['id']] = $blk;
+                }
+            }
+        }
         foreach($value['blocks'] as $block) {
             switch($block['type']) {
                 case "rawtool":
@@ -106,8 +119,17 @@ class BlockResult extends SchemaResult {
                 case "header":
                     $this->filter_header($block);
                     break;
+                case "imagetool":
+                    $this->filter_imagetool($block, $orphaned_images);
+                    break;
+                case "simpleimage":
+                    $this->filter_simpleimage($block);
+                    break;
             }
         }
+
+        if(count($orphaned_images)) header("X-Message: @warning There are ".count($orphaned_images)." orphaned images from this post!");
+
         return $value;
     }
 
@@ -131,6 +153,25 @@ class BlockResult extends SchemaResult {
     private function filter_header(&$block):void {
         if(!$block['data']['text']) return;
         $block['data']['id'] = url_fragment_sanitize($block['data']['text']);
+    }
+
+    private function filter_imagetool(&$block, &$orphaned_images):void {
+        if(key_exists($block['id'], $orphaned_images)) unset($orphaned_images[$block['id']]);
+    }
+
+    private function filter_simpleimage(&$block): void {
+        if(is_data_uri($block['data']['url'])) {
+            $tmp_name = "/tmp/".uniqid("", true);
+            $result = convert_data_uri_to_file($tmp_name, $block['data']['url']);
+            if($result === false) throw new ValidationIssue("Failed to convert a data URI to a file");
+            $aesthetic_name = random_string(24).".".get_extension_from_file($tmp_name);
+            $fs = new FileSystem();
+            $result = $fs->upload([
+                'name' => $aesthetic_name,
+                'tmp_name' => $tmp_name
+            ]);
+            $block['data']['url'] = "/res/fs/" . $aesthetic_name;
+        }
     }
 
     function __toString(): string {

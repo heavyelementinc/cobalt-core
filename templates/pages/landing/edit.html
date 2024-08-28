@@ -3,7 +3,8 @@
     <chip-nav>
         <nav>
             <a href="#editor">Editor</a>
-            <a href="#aside">Aside Content</a>
+            <a href="#meta">Metadata</a>
+            <a href="#sidebar">Sidebar Content</a>
             <a href="#bio">Author Details</a>
             <a href="#settings">Settings</a>
         </nav>
@@ -71,7 +72,29 @@
                 </ul>
             </aside>
         </div>
-        <div id="aside">
+        <div id="meta">
+            <div class="main--content">
+                <ul class="list-panel">
+                    <li>
+                        <label>{{doc.opengraph_title.getLabel()}} <help-span value="This is the title of this page as seen through link previews on social meida.&#10;&#10;If no value is set, this will default to the title of this post."></help-span></label>
+                        {{doc.opengraph_title.field()}}
+                    </li>
+                    <li>
+                        <label>{{doc.related_title.getLabel()}} <help-span value="The headline of the Related Content section. The default value can be updated in the settings."></help-span></label>
+                        {{doc.related_title.field()}}
+                    </li>
+                    <li>
+                        <label>Tags & Keywords</label>
+                        {{doc.tags.field()}}
+                        <small>Tags are used to find how "related" two articles are. The more tags two posts have in common, the more &quot;related&quot; they are.<help-span value="If there aren't enough &quot;Related Posts&quot; to fill the section (usually 3) then the most recent articles by this author will be listed."></help-span></small>
+                    </li>
+                </ul>
+            </div>
+            <aside class="sidebar">
+
+            </aside>
+        </div>
+        <div id="sidebar">
             <div class="main--content">
                 <label>{{doc.aside.getLabel()}} Content <help-span value="What content should live in the sidebar?"></help-span></label>
                 {{doc.aside.field()}}
@@ -127,23 +150,12 @@
         </div>
         <div id="settings">
             <ul class="list-panel">
-                <li>
-                    <label>{{doc.opengraph_title.getLabel()}} <help-span value="This is the title of this page as seen through link previews on social meida.&#10;&#10;If no value is set, this will default to the title of this post."></help-span></label>
-                    {{doc.opengraph_title.field()}}
-                </li>
-                <li>
-                    <label>{{doc.related_title.getLabel()}} <help-span value="The headline of the Related Content section. The default value can be updated in the settings."></help-span></label>
-                    {{doc.related_title.field()}}
-                </li>
+
                 <li>
                     <label>{{doc.splash_image_alignment.getLabel()}}</label>
                     {{doc.splash_image_alignment.field()}}
                 </li>
-                <li>
-                    <label>Tags & Keywords</label>
-                    {{doc.tags.field()}}
-                    <small>Tags are used to find how "related" two articles are. The more tags two posts have in common, the more &quot;related&quot; they are.<help-span value="If there aren't enough &quot;Related Posts&quot; to fill the section (usually 3) then the most recent articles by this author will be listed."></help-span></small>
-                </li>
+                
                 <li>
                     <label>{{doc.preview_key.getLabel()}} <help-span value="The Preview Key is used to grant outside access to Draft posts. You can share a preview key with as many people as you'd like.&#10;&#10;Only one Preview Key can be issued at a time.&#10;&#10;Provisioning a new Preview Key will invalidate the previous key.&#10;&#10;NOTE: This document must be set to 'Draft' visibility for a Preview Key to grant access. 'Private' posts are always inaccessible."></help-span></label>
                     <!-- {{doc.preview_key.field()}} -->

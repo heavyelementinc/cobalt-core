@@ -82,7 +82,7 @@ class ImageEditor extends HTMLElement {
         this.actionMenuButton.innerHTML = `<i class="dots-vertical"></i>`
         this.actionMenu = new ActionMenu(this.actionMenuButton, "popover");
 
-        const defaultActions = ['registerDelete', 'registerRename'];
+        const defaultActions = ['registerReplace', 'registerRename', 'registerDelete'];
         for(const action of defaultActions) {
             switch(action){
                 case "registerDelete":
@@ -90,6 +90,9 @@ class ImageEditor extends HTMLElement {
                     break;
                 case "registerRename":
                     this.registerRename(this.actionMenu);
+                    break;
+                case "registerReplace":
+                    this.registerReplace(this.actionMenu);
                     break;
             }
         }
@@ -116,6 +119,35 @@ class ImageEditor extends HTMLElement {
             const fetch = new AsyncFetch(renameRoute, "PUT");
             const result = await fetch.submit({rename: newName});
             this.dispatchEvent(new CustomEvent("rename", {detail: {newName, result}}));
+        }
+    }
+
+    registerReplace(menu) {
+        const replaceRoute = this.getAttribute("replace-action");
+        if(!replaceRoute) return;
+        const action = menu.registerAction();
+        action.label = "Replace with an Existing Image";
+        action.callback = async () => {
+            const new_id = await modalForm(replaceRoute, {
+                form_selector: ".filemanager-container", 
+                // initialize_callback: (modalContainer, modalInstance) => {
+                //     const okayButton = modalContainer.querySelector(".modal-button-okay");
+                //     okayButton.disabled = true;
+                //     const radioSelects = modalContainer.querySelectorAll(".filemanager-container input[type='radio']");
+                //     radioSelects.forEach(e => {
+                //         e.addEventListener("change", evt => okayButton.disabled = false);
+                //     })
+                // },
+                // before_callback: (form, resolve, reject, modal) => {
+                //     const selected = form.querySelector("input[type='radio']:checked");
+                //     if(!selected) return false;
+                //     resolve(selected.value);
+                //     modal.close();
+                //     return false;
+                // }
+            });
+            // console.log(new_id);
+            // this.dispatchEvent(new CustomEvent("existingimageselected", {detail: new_id}))
         }
     }
 

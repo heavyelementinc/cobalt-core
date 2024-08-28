@@ -11,8 +11,13 @@ use Cobalt\SchemaPrototypes\Compound\IpResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\Compound\PhoneNumberResult;
 use Cobalt\SchemaPrototypes\Compound\UserIdArrayResult;
+use Drivers\Database;
 
 class Persistance extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return new ContactManager();
+    }
 
     public function __get_schema(): array {
         $addtl = new AdditionalContactFields();
