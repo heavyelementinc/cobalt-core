@@ -20,8 +20,8 @@ class Persistance extends PersistanceMap {
     }
 
     public function __get_schema(): array {
-        $addtl = new AdditionalContactFields();
         $this->__set_index_checkbox_state(true);
+        $addtl = new AdditionalContactFields();
         $fields = $addtl->__get_schema();
         $schema = [
             "name" => [
@@ -87,7 +87,7 @@ class Persistance extends PersistanceMap {
                 'index' => [
                     'title' => 'Date',
                     'order' => 1,
-                    'view' => fn () => $this->date->format("c")
+                    // 'view' => fn () => $this->date->format("c")
                 ]
             ],
             "ip" => new IpResult,

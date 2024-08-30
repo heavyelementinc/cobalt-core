@@ -180,10 +180,38 @@
     gap: 1em;
     /* width: 100%; */
 }
+
+    :is(block-editor, .landing-primary-section) a[href*="?author="],
+    :is(block-editor, .landing-primary-section) a[href*="&author="] {
+        color: var(--project-color-button-init);
+        font-weight: bold;
+    }
+
+    :is(block-editor, .landing-primary-section) a[href*="?author="]:hover,
+    :is(block-editor, .landing-primary-section) a[href*="&author="]:hover {
+        color: var(--project-color-button-hover);
+        
+    }
+
+    :is(block-editor, .landing-primary-section) a[href*="?tag="], 
+    :is(block-editor, .landing-primary-section) a[href*="&tag="] {
+        color: var(--project-action-menu-hover);
+        text-decoration: none;
+        font-style: italic;
+    }
+
+    :is(block-editor, .landing-primary-section) a[href*="?tag="]:hover,
+    :is(block-editor, .landing-primary-section) a[href*="&tag="]:hover {
+        color: black;
+        text-decoration: underline;
+    }
+
     .landing-main--content {
         width: var(--project-landing-page-content-width);
         margin: 0 auto;
     }
+        
+
     .landing-main--content, .aside--content {
         --content-margins: 1.1em;
         position: relative;

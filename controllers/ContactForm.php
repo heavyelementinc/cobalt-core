@@ -35,20 +35,20 @@ class ContactForm extends Crudable {
         ];
     }
 
-    function index():string {
-        // $conMan = new ContactManager();
-        // $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
-        // $lines = "";
-        // foreach($results as $doc) {
-        //     $lines .= view("/admin/contact-form/index-item.html", ['doc' => $doc]);
-        // }
-        // // $lines = $this->docsToViews($results, );
-        // add_vars([
-        //     'title' => 'Contact Form Submissions',
-        //     'lines' => $lines
-        // ]);
-        return view("/admin/contact-form/index.html");
-    }
+    // function index():string {
+    //     // $conMan = new ContactManager();
+    //     // $results = $conMan->find(...$this->getParams($conMan,[],[],[],['sort' => ['date' => -1]]));
+    //     // $lines = "";
+    //     // foreach($results as $doc) {
+    //     //     $lines .= view("/admin/contact-form/index-item.html", ['doc' => $doc]);
+    //     // }
+    //     // // $lines = $this->docsToViews($results, );
+    //     // add_vars([
+    //     //     'title' => 'Contact Form Submissions',
+    //     //     'lines' => $lines
+    //     // ]);
+    //     return view("/admin/contact-form/index.html");
+    // }
 
     function read_status($id) {
         $conMan = new ContactManager();

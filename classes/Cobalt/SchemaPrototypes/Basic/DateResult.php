@@ -35,7 +35,7 @@ class DateResult extends SchemaResult {
     public function __defaultIndexPresentation(): string {
         $val = $this->getValue();
         if(!$val) return "No date set";
-        return $this->format('no-dow');
+        return $this->relative();
     }
 
     public function setValue($value):void {

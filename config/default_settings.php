@@ -586,7 +586,7 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Keywords <help-span value=\"A comma-delimited list of keywords included in the head of your document. NOTE => This has little-to-no real-world SEO value.\"></help-span>",
+            "name" => "Keywords <help-span value=\"A comma-delimited list of keywords included in the head of your document. NOTE: This has little-to-no real-world SEO value.\"></help-span>",
             "type" => "textarea"
         ],
         "validate" => [
@@ -1437,11 +1437,11 @@ const DEFAULT_DEFINITIONS = [
         ]
     ],
     "Robots_txt_config" => [
-        "default" => "User-agent => *\nAllow => /\nDisallow => /admin",
+        "default" => "User-agent: *\nAllow: /\nDisallow: /admin",
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Robots.txt file <help-span value=\"Each User-agent rule must be followed by distinct 'Allow => /' or 'Disallow => /' rules. One Allow or Disallow rule per route.\"></help-span>",
+            "name" => "Robots.txt file <help-span value=\"Each User-agent rule must be followed by distinct 'Allow: /' or 'Disallow: /' rules. One Allow or Disallow rule per route.\"></help-span>",
             "type" => "textarea"
         ],
         "validate" => [

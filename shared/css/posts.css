@@ -4,8 +4,8 @@
     gap: 1em;
     width: 80vw;
     margin: 2em auto;
+    justify-content: center;
 }
-
 
 
 #main-posts .cobalt-query-controls {
