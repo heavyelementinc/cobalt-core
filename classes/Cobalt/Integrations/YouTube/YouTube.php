@@ -10,9 +10,14 @@ use DateTime;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Unauthorized;
+use Cobalt\Integrations\Base;
+use Drivers\Database;
 
 class YouTube extends OauthBase {
 
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+    }
     public function status(): int {
         return self::STATUS_CHECK_OK;
     }

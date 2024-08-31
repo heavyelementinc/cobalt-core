@@ -6,8 +6,13 @@ use Cobalt\Integrations\Config as IntegrationsConfig;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class Config extends IntegrationsConfig {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;//new YouTube();
+    }
 
     public function getToken(): string {
         $tokens = session("integrations.YouTube");

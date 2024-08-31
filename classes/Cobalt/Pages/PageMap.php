@@ -56,7 +56,7 @@ class PageMap extends PersistanceMap {
 
     public function __get_schema(): array {
         $this->__set_index_checkbox_state(true);
-        return [
+        $schema = [
             "url_slug" => [
                 new StringResult,
                 'required' => true,
@@ -108,6 +108,14 @@ class PageMap extends PersistanceMap {
                     self::VISIBILITY_PUBLIC => "Public",
                 ],
                 'filter' => function ($val) {
+                    switch($val) {
+                        case self::VISIBILITY_UNLISTED:
+                        case self::VISIBILITY_PUBLIC:
+                            if(!has_permission("Posts_publish_posts", null, session(), false)) {
+                                throw new ValidationIssue("Your account doesn't have permission to make a Public or Unlisted post");
+                                break;
+                            }
+                    }
                     return (int)$val;
                 },
                 'index' => [
@@ -142,7 +150,8 @@ class PageMap extends PersistanceMap {
                     'order' => 3,
                     'view' => function ($val) {
                         $val = $this->views->getValue();
-                        return "<strong>".$val . "</strong> (". ($val - $this->bot_hits->getValue()) .")";
+                        if(has_permission("Posts_enable_privileged_fields", null, null, false)) return "<strong>".$val . "</strong> (". ($val - $this->bot_hits->getValue()) .")";
+                        return $val;
                     }
                 ]
             ],
@@ -452,6 +461,11 @@ class PageMap extends PersistanceMap {
             //     new UploadImageResult
             // ]
         ];
+        if(!has_permission("Posts_enable_privileged_fields", null, null, false)) {
+            unset($schema['bot_hits']['index']);
+            $schema['bot_hits']['readonly'] = true;
+        }
+        return $schema;
     }
 
     function get_tags() {

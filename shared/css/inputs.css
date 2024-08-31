@@ -823,3 +823,24 @@ ol.binary-list li:not(.active){
     font-weight: bold;
     font-size: 1.6em;
   }
+
+@media only screen and (max-width: 35em) {
+  .crudable-header--hypermedia-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.2em;
+    flex-wrap: wrap;
+  }
+    .crudable-header--right{
+      width: 100%;
+    }
+    .crudable-header--hypermedia-container .search-form {
+      display: flex;
+      margin-top: 0.2em;
+      gap: 0.2em;
+      flex-grow: 1;
+    }
+      .crudable-header--hypermedia-container .search-form input[type='search'] {
+        flex-grow: 1;
+      }
+}

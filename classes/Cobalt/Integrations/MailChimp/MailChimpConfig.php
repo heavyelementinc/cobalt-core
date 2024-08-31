@@ -6,9 +6,14 @@ use Cobalt\Integrations\Config as IntegrationsConfig;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class MailChimpConfig extends IntegrationsConfig {
 
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+        // return new MailChimp();
+    }
     public function getToken(): string {
         return $this->api_key->getValue();
     }

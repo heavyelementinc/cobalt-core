@@ -5,8 +5,14 @@ namespace Cobalt\Integrations\Facebook;
 use Cobalt\Integrations\Config;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class FBConfig extends Config {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        // return new Facebook();
+        return null;
+    }
 
     public function fields(): array {
         return [

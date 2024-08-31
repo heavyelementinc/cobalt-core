@@ -270,4 +270,5 @@ abstract class Page extends Crudable {
         // add_vars(["autosave" => "autosave=\"form\""]);
         return view("/pages/landing/edit.html", ['admin_fields' => (has_permission('Posts_allow_unsafe_post_content')) ? view("/pages/landing/admin-fields.html") : ""]);
     }
+
 }

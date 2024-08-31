@@ -163,7 +163,8 @@ flex-table{
     }
 
         flex-row {
-            width: max-content;
+            /* width: max-content; */
+            display: table-row;
         }
 
             flex-cell,
@@ -172,13 +173,14 @@ flex-table{
                 grid-column: auto;
                 width: 100%;
                 box-sizing: border-box;
+                display: table-cell;
             }
 
             flex-sticky {
                 position: sticky;
                 left: 0;
                 font-weight: bold;
-                background: inherit
+                background: inherit;
             }
 }
 

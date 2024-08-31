@@ -35,7 +35,7 @@ class IntegrationsController extends Controller{
     }
 
     private function load_classes($dir) {
-        $scandir = scandir($dir);
+        $scandir = @scandir($dir);
         $candidates = [];
         foreach($scandir as $file) {
             if($file === "." || $file === "..") continue;

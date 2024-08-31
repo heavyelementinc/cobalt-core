@@ -77,6 +77,83 @@
         "default": false,
         "ring": 2
     },
+    "Posts_enable_privileged_fields": {
+        "group": "Posts",
+        "label": "Allows the user to access privileged Page/Post fields.",
+        "dangerous": false,
+        "default": false,
+        "ring": 2
+    },
+    "Post_index": {
+        "group": "Posts",
+        "label": "View Posts Index",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_read": {
+        "group": "Posts",
+        "label": "Read Posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_create": {
+        "group": "Posts",
+        "label": "Create Posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_update": {
+        "group": "Posts",
+        "label": "Update Posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_destroy": {
+        "group": "Posts",
+        "label": "Delete Posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_create": {
+        "group": "Pages",
+        "label": "Create Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_read": {
+        "group": "Pages",
+        "label": "Read Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_index": {
+        "group": "Pages",
+        "label": "View Page Index",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_update": {
+        "group": "Pages",
+        "label": "Update Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_destroy": {
+        "group": "Pages",
+        "label": "Delete Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
     "Auth_allow_creating_users": {
         "group": "Users",
         "label": "Able to create new user accounts.",
@@ -184,14 +261,14 @@
     },
     "Database_database_export": {
         "group": "Admin",
-        "label:": "Allow the user to export database files",
+        "label": "Allow the user to export database files",
         "dangerous": true,
         "default": false,
         "ring": 1
     },
     "Database_database_import": {
         "group": "Admin",
-        "label:": "Allow the user to import database files",
+        "label": "Allow the user to import database files",
         "dangerous": true,
         "default": false,
         "ring": 1
