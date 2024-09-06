@@ -108,5 +108,13 @@ abstract class BaseExtension {
      */
     function session_creation(&$session) {}
 
+    /**
+     * Add additional fields to user accounts
+     * @param array &$session 
+     * @return void
+     */
+    function register_user_fields(array &$fields) {}
 
+    
+    function register_user_editor_tabs(array &$tabs) {}
 }

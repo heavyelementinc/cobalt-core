@@ -226,7 +226,9 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
 
     #[Prototype]
     protected function join($delimiter) {
-        $val = implode($delimiter, $this->getValue() ?? []);
+        $array = $this->getValue();
+        if($array instanceof BSONDocument) $array = $array->getArrayCopy();
+        $val = implode($delimiter, $array ?? []);
         return $val;
     }
 
@@ -241,6 +243,22 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     protected function intersect($arraylike) {
         $arr = $this->arraylike_to_array($arraylike);
         return array_intersect($this->getRaw() ?? [], $arr);
+    }
+
+    #[Prototype]
+    protected function includes(string $needle) {
+        $value = $this->getValue();
+        if($value instanceof BSONDocument) {
+            $value = $value->getArrayCopy();
+        }
+        return in_array($needle, $value);
+    }
+
+    #[Prototype]
+    protected function key_exists($needle) {
+        $value = (array)$this->getValue();
+        // $value = $value->getArrayCopy();
+        return in_array($needle, $value);
     }
 
     private function arraylike_to_array($arraylike):array {
@@ -277,7 +295,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     }
 
     public function offsetExists(mixed $offset): bool {
-        return key_exists($offset, $this->getValue());
+        return key_exists($offset, (array)$this->getValue());
     }
 
     public function offsetGet(mixed $offset): mixed {

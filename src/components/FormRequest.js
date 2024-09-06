@@ -3,6 +3,7 @@
  * @attribute action   - The endpoint to submit data to
  * @attribute autosave - [false, element, autosave, fieldset, form] If no submit button is found, then defaults to "element"
  * @attribute enctype  - "application/json; charset=utf-8"
+ * @attribute headers  - A semicolon-delimited list of headers to send with each request
  * @emits submission   - Fires when an element wants to submit the form
  * @emits submit       - Fires when AsyncFetch begins submitting, cancellable
  * @emits aborted      - Fires when AsyncFetch submit is cancelled or abort is called
@@ -160,7 +161,7 @@ class NewFormRequest extends HTMLElement {
             return this.submitGetRequest(data, event);
         }
 
-        const api = new AsyncFetch(action, method, {format: enctype, form: this});
+        const api = new AsyncFetch(action, method, {format: enctype, form: this, headers: this.getHeadersFromAttribute()});
         api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
         api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
         api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));
@@ -174,6 +175,20 @@ class NewFormRequest extends HTMLElement {
             this.handleAsyncErrorEvent(error, event);
         }
         this.abort = () => {};
+    }
+
+    getHeadersFromAttribute() {
+        if(this.hasAttribute('headers') === false) return {};
+        let headers = {};
+        for(const header of this.getAttribute("headers").split(";")) {
+            const split = header.split(":");
+            headers[split[0].trim()] = split[1].trim();
+        }
+        return headers;
+    }
+
+    get headers() {
+        return this.getHeadersFromAttribute();
     }
 
     submitGetRequest(data, event) {

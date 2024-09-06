@@ -16,6 +16,7 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONDocument;
 
+/** @package  */
 class ContactForm extends Crudable {
     function get_manager(): Database {
         return new ContactManager();
@@ -170,4 +171,23 @@ class ContactForm extends Crudable {
         return $id;
     }
 
+    static public function route_details_create():array {
+        return ['permission' => 'Contact_form_submissions_access'];
+    }
+
+    static public function route_details_index():array {
+        return ['permission' => 'Contact_form_submissions_access'];
+    }
+
+    static public function route_details_destroy(): array {
+        return ['permission' => 'Contact_form_submissions_delete'];
+    }
+
+    static public function route_details_read(): array {
+        return ['permission' => 'Contact_form_submissions_access'];
+    }
+
+    static public function route_details_update(): array {
+        return ['permission' => 'Contact_form_submissions_access'];
+    }
 }

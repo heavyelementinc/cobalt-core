@@ -1,5 +1,5 @@
 <hgroup><h1>{{title}} "<span id="title">{{doc.title}}</span>"</h1><action-menu>{{!delete_option}}</action-menu></hgroup>
-<form-request method="{{method}}" action="{{action}}" {{!autosave}}>
+<form-request id="page-editor" method="{{method}}" action="{{action}}" headers="X-Editor-Token: {{token}}" {{!autosave}}>
     <chip-nav>
         <nav>
             <a href="#editor">Editor</a>

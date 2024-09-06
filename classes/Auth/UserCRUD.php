@@ -34,11 +34,11 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function getUserById($id) {
-        return $this->findOneAsSchema(['_id' => $this->__id($id)]);
+        return $this->findOne(['_id' => $this->__id($id)]);
     }
 
     final function getUserByUnameOrEmail($uname_or_email) {
-        return $this->findOneAsSchema(
+        return $this->findOne(
             [
                 '$or' => [
                     ['uname' => $uname_or_email],
@@ -49,7 +49,7 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function getUserByUsername($username) {
-        return $this->findOneAsSchema([
+        return $this->findOne([
             'uname' => $username,
         ]);
     }
@@ -61,14 +61,14 @@ class UserCRUD extends \Drivers\Database {
         if (gettype($permissions) === "string") $permissions = [$permissions];
         $perms = [
             '$or' => [
-                ['groups' => 'root']
+                ['is_root' => true]
             ]
         ];
         foreach($permissions as $permission) {
             $perms['$or'][count($perms['$or'])] = ["permissions.$permission" => $status];
         }
         
-        return $this->findAllAsSchema(
+        return $this->findOne(
             $perms,
             $options
         );
@@ -79,17 +79,17 @@ class UserCRUD extends \Drivers\Database {
             'limit' => 50
         ];
         if (gettype($groups) === "string") $groups = [$groups];
-        return $this->findAllAsSchema([
+        return $this->findOne([
             'group' => $groups
         ], $options);
     }
 
     final function getRootUsers() {
-        return iterator_to_array($this->find(['groups' => 'root']));
+        return iterator_to_array($this->find(['is_root' => true]));
     }
 
     final function findUserByToken(string $name, string $token):?UserSchema {
-        $result = $this->findOneAsSchema([
+        $result = $this->findOne([
             'token.name' => $name,
             'token.value' => $token,
         ]);
@@ -169,7 +169,7 @@ class UserCRUD extends \Drivers\Database {
                 "permissions.$permission" => $value
             ]
         ]);
-        return $this->findOneAsSchema($query)->permissions;
+        return $this->findOne($query)->permissions;
     }
 
     final function set_token($id, $type, $expires_in = "+15 minutes"): Token {

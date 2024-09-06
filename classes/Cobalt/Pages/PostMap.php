@@ -29,6 +29,7 @@ class PostMap extends PageMap {
         $schema['splash_type']['default'] = self::SPLASH_POSITION_CENTER;
         $schema['include_aside']['default'] = __APP_SETTINGS__['PostPages_default_aside_visibility'];
         $schema['aside_positioning']['default'] = __APP_SETTINGS__['PostPages_default_aside_flags'];
+        $schema['author']['permission'] = 'Post_allowed_author';
 
         // unset($schema['include_in_route_group'], $schema['route_group'], $schema['route_link_label'], $schema['route_order']);
         return $schema;

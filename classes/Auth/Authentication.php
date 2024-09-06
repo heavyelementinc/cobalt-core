@@ -7,6 +7,7 @@
 
 namespace Auth;
 
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\Token;
 use DateTime;
 use Exception;
@@ -56,7 +57,7 @@ class Authentication {
         }
 
         $login_state = 10;
-        if($user['tfa']['enabled']) $login_state = 0;
+        if($user->tfa?->enabled) $login_state = 0;
 
         /** Update the user's session information */
         $result = $this->session->login_session($user['_id'], $stay_logged_in, $login_state);
@@ -90,14 +91,12 @@ class Authentication {
      * @param  string|true $perm_name the name of the permission to check for OR
      *                     a boolean true to confirm an authenticated session
      *                     exists
-     * @param  string|null $group the group name or list of group names. 
-     *                      Can be null.
+     * @param  string|null $group deprecated
      * @param  null|MongoDocument $user if null, the current session will be used
      * @return bool true if the user has permission, false otherwise
      */
-    function has_permission($permission, $group = null, $user = null, $throw_no_session = true) {
+    function has_permission($permission, $isRoot = null, $user = null, $throw_no_session = true) {
         if ($user === null) $user = $this->user;
-        if ($group === null) $group = $this->permissions->valid[$permission]['group'];
 
         // If the user is not logged in, they obviously don't have permission
         if ($throw_no_session === false && !$user) return false;
@@ -110,36 +109,36 @@ class Authentication {
         // If the permission is NOT valid, we throw an exception.
         if (!isset($this->permissions->valid[$permission])) throw new \Exception("The \"$permission\" permission cannot be validated!");
 
-        // If the app allows root users AND the user belongs to the root group, 
-        // they have permission no matter what
-        if (app('Auth_enable_root_group') && in_array('root', (array)$user->groups)) return true;
-
         // If user account requires a password reset, a PasswordUpdateRequired
         // error is thrown.
-        if (($user->flags['password_reset_required'] ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("This authenticated user has the 'password reset' flag set, a password reset is required.", "You must update your password.");
+        if (($user->flags->key_exists('password_reset_required') && $user->flags->password_reset_required->getValue() ?? false) === true && $user === $this->user) throw new \Exceptions\HTTP\PasswordUpdateRequired("This authenticated user has the 'password reset' flag set, a password reset is required.", "You must update your password.");
+
+        // If the app allows root users AND the user belongs to the root group, 
+        // they have permission no matter what
+        if (__APP_SETTINGS__['Auth_enable_root_group'] && $user->is_root->getValue() === true) return true;
 
         // app('Auth_require_verified_status') && 
 
-        // Check if user permissions is a BSONDocument or not
-        $user_permissions = $user->permissions;
-        // If it is a BSONDocument, get an array copy
-        if($user_permissions instanceof BSONDocument) $user_permissions = $user_permissions->getArrayCopy();
-        
-        // If the user account stores the permission, we return that value, 
-        // whatever it may be
-        if (key_exists($permission, $user_permissions)) return $user_permissions[$permission];
+        // Check if the user has a given permission set, if they do, return that value.
+        $user_permissions = (array)$user->permissions->getValue();
+        if (key_exists($permission, $user_permissions)) {
+            // if($user_permissions[$permission] instanceof BSONDocument) return $user_permissions[$permission];
+            return $user_permissions[$permission];
+        }
+
 
         // If the permission's default value is true, we return true.
         if ($this->permissions->valid[$permission]['default']) return true;
 
+        return $this->permissions->valid[$permission]['default'];
         // If NO group is specified, return the permission's default value
-        if ($group === null) return $this->permissions->valid[$permission]['default'];
+        // if ($group === null) 
 
         // Check if the user HAS the group in their groups
-        if (in_array($group, (array)$user->groups)) return true;
+        // if (in_array($group, (array)$user->groups)) return true;
 
         // Check if this permission belongs to the group specified
-        if (isset($this->permissions->valid[$permission]['group'][$group])) return $this->permissions->valid[$permission]['group'][$group];
+        // if (isset($this->permissions->valid[$permission]['group'][$group])) return $this->permissions->valid[$permission]['group'][$group];
 
         // If we've made it here, we *probably* don't have the permission.
         return false;

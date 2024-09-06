@@ -43,10 +43,10 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
         return $this->value->__dataset;
     }
     
-    // function setName(string $name) {
-    //     return;
-    //     // TODO: Set the appropriate name
-    // }
+    function setName(string $name) {
+        $this->name = $name;
+        $this->value = $this->__getInstancedMap(null, $this->schema['schema'] ?? [], "$this->name.");
+    }
 
     function setSchema(?array $schema): void {
         $this->schema = array_merge(
@@ -59,7 +59,11 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
 
     function setValue(mixed $value): void {
         $this->originalValue = $value;
-        $this->value = new GenericMap($value, $this->schema['schema'] ?? [], "$this->name.");
+        $this->value = $this->value->ingest($value);
+    }
+
+    function __getInstancedMap($value):GenericMap {
+        return new GenericMap($value, $this->schema['schema'] ?? [], "$this->name.");
     }
 
     function __getHydrated():array {
@@ -71,10 +75,12 @@ class MapResult extends SchemaResult implements Iterator, Traversable, ArrayAcce
     }
 
     public function offsetExists(mixed $offset): bool {
+        if(!$this->value) return false;
         return $this->value->offsetExists($offset);
     }
 
     public function offsetGet(mixed $offset): mixed {
+        if(!$this->value) return null;
         return $this->value->offsetGet($offset);
     }
 

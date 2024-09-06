@@ -61,7 +61,8 @@
             "protected/UserPanel.js",
             "protected/UserManager.js",
             "protected/EventManager.js",
-            "protected/FSManager.js"
+            "protected/FSManager.js",
+            "protected/PageEditor.js"
         ],
         "append": [
             "components/FormRequest.js",

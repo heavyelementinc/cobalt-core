@@ -2,6 +2,7 @@
 
 namespace Cobalt\SchemaPrototypes\Compound;
 
+use ArrayAccess;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
@@ -23,7 +24,7 @@ use stdClass;
  * @deprecated Use ImageResult instead
  * @package Cobalt\SchemaPrototypes\Compound
  */
-class UploadImageResult extends UploadResult implements Persistable{
+class UploadImageResult extends UploadResult implements Persistable, ArrayAccess{
 
     function defaultSchemaValues(array $data = []): array {
         $schema = [
@@ -239,4 +240,21 @@ class UploadImageResult extends UploadResult implements Persistable{
         }
         return $model;
     }
+
+    public function offsetExists(mixed $offset): bool {
+        return isset($this->value[$offset]);
+    }
+
+    public function offsetGet(mixed $offset): mixed {
+        return $this->value[$offset];
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void {
+        $this->value[$offset] = $value;
+    }
+
+    public function offsetUnset(mixed $offset): void {
+        unset($this->value[$offset]);
+    }
+    
 }

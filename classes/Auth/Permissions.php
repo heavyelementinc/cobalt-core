@@ -62,17 +62,26 @@ class Permissions extends Database {
         $table = [];
         $groups = "";
         $valid = $this->valid;
-        $root_group = "";
+
+        $root_group = "<fieldset><legend>Basic Permissions</legend><ul class='list-panel'>";
+        $self_group_checked = json_encode(has_permission("self", null, $user));
+        $root_group .= "<li>
+            <input-switch name=\"permissions.self\"></input-switch> Able to modify basic info for their own account<small>This includes their name, email, TOTP enrollment status, notification subscriptions and more.</small>";
         /** If the app has enabled the `root` user group, add it to the root user */
-        if (app("Auth_enable_root_group")) {
+        if (app("Auth_enable_root_group") && session()->is_root->getValue()) {
             $checked = "false";
-            if (in_array("root", (array)$user->groups)) $checked = "true";
-            $root_group =  "<li><input-switch name='groups.root' checked='$checked'></input-switch> Root <help-span
-            value=\"WARNING: Root membership gives this user TOTAL CONTROL over this application.\"></help-span></li>";
+            if ($user->is_root->getValue()) $checked = "true";
+            $root_group .=  "
+            <li>
+                <input-switch name='is_root' checked='$checked'></input-switch> <span>Root Privilege <help-span value=\"Override *all permissions checks* for this user.\"></help-span></span>
+                <small>WARNING: Enabling this permission is extremely dangerous. Root privileges give a user TOTAL CONTROL over this application.</small>
+            </li>";
         }
+        $root_group .= "</ul></fieldset>";
+
         /** Loop through the list of valid permissions */
         foreach ($valid as $name => $item) {
-
+            if(isset($item['display']) && $item['display'] === false) continue;
             $dangerous = "";
 
             /** Check the user's permission status for this permission */
@@ -85,14 +94,14 @@ class Permissions extends Database {
             if (in_array($group, (array)$user->groups)) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
-                $table[$group] = "<fieldset><legend>$group</legend>\n<ul class='list-panel'>";
+                $table[$group] = "<details><summary>$group</summary>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
             /** Concat our current permission into the group */
             $table[$group] .= "<li><input-switch checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
-        return ['permissions' => implode("</ul></fieldset>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$root_group $groups</ul>"];
+        return ['permissions' => "$root_group" . implode("</ul></details>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$groups</ul>"];
     }
 
     function validate($id, $request) {

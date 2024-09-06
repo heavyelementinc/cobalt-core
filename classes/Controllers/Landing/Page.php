@@ -268,7 +268,62 @@ abstract class Page extends Crudable {
 
     public function edit($document): string {
         // add_vars(["autosave" => "autosave=\"form\""]);
-        return view("/pages/landing/edit.html", ['admin_fields' => (has_permission('Posts_allow_unsafe_post_content')) ? view("/pages/landing/admin-fields.html") : ""]);
+        $token = random_string(12);
+        $this->manager->updateOne(['_id' => $document->id], ['$set' => ['token' => $token]]);
+        $privileged_field_permission = ($this::className() === "Pages") ? 'Posts_enable_privileged_fields' : 'Pages_enable_privileged_fields';
+        return view("/pages/landing/edit.html", [
+            'admin_fields' => (has_permission($privileged_field_permission)) ? view("/pages/landing/admin-fields.html") : "",
+            'token' => $token,
+        ]);
     }
 
+    public function api_validate_token($id) {
+        $_id = new ObjectId($id);
+        $document = $this->manager->findOne(['_id' => $_id], ['projection' => ['token' => 1]]);
+        if(!$document) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+
+        return $this->token_validation($document->token);
+    }
+
+    protected function token_validation($document_token, $header_token = null) {
+        if($header_token === null) {
+            $headers = apache_request_headers();
+            $header_token = $headers['X-Editor-Token'] ?? $headers['x-editor-token'];
+        }
+        return $document_token === $header_token;
+    }
+
+            
+    static public function route_details_read():array {
+        return ['permission' => static::route_permission("_read")];
+    }
+
+    static public function route_details_index():array {
+        return ['permission' => static::route_permission("_index")];
+    }
+
+    static public function route_details_create():array {
+        return ['permission' => static::route_permission("_create")];
+    }
+
+    static public function route_details_destroy():array {
+        return ['permission' => static::route_permission("_destroy")];
+    }
+
+    static public function route_details_update():array {
+        return ['permission' => static::route_permission("_update")];
+    }
+
+    static protected function route_permission(string $suffix): string {
+        $name = static::className();
+        switch($name) {
+            case "LandingPages":
+                $name = "Pages";
+                break;
+            default:
+                $name = "Post";
+                break;
+        }
+        return $name . $suffix;
+    }
 }

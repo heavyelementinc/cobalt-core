@@ -19,6 +19,8 @@ try {
     Extensions::invoke("register_permissions", $PERMISSIONS);
 
     Extensions::invoke("register_shared_dir", $SHARED_CONTENT);
+
+    Extensions::invoke("register_user_fields", $ADDITIONAL_USER_FIELDS);
 } catch (Exception $e) {
     kill("EXTENSION ERROR: " . $e->getMessage());
 }

@@ -2,6 +2,7 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\Maps\Exceptions\DirectiveException;
+use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\FakeResult;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
@@ -20,33 +21,6 @@ class UploadResult2 extends MapResult {
     use BinaryStorage;
     use ImageManipulation;
     protected $type = "upload";
-
-    function defaultSchemaValues(array $data = []): array {
-        return [
-            'schema' => [
-                'ref' => [
-                    new IdResult,
-                    'nullable' => true
-                ],
-                'url' => new StringResult,
-                'height' => new NumberResult,
-                'width' => new NumberResult,
-                'accent' => new HexColorResult,
-                // 'contrast' => [
-                //     new FakeResult,
-                //     'get' => fn () => $this->accent->getContrastColor(),
-                // ],
-                'mimetype' => new StringResult,
-                'thumb' => new StringResult,
-                'thumb_height' => new NumberResult,
-                'thumb_width' => new NumberResult,
-                'alt' => [
-                    new StringResult,
-                    'filter' => fn ($val) => throw new ValidationIssue("You can't do that"),
-                ],
-            ]
-        ];
-    }
 
     #[Prototype]
     protected function display():string {
@@ -137,11 +111,11 @@ class UploadResult2 extends MapResult {
                 ];
             default:
                 return [
-                    'url' => $this->value->url->getValue(),
-                    'height' => $this->value->height->getValue(),
-                    'width' => $this->value->width->getValue(),
-                    'mimetype' => $this->value->mimetype->getValue(),
-                    'accent' => $this->value->accent->getValue(),
+                    'url' => $this->value->url?->getValue(),
+                    'height' => $this->value->height?->getValue(),
+                    'width' => $this->value->width?->getValue(),
+                    'mimetype' => $this->value->mimetype?->getValue(),
+                    'accent' => $this->value->accent?->getValue(),
                 ];
         }
     }
@@ -200,22 +174,22 @@ class UploadResult2 extends MapResult {
         
         // Let's reformat the data we are storing...
         $resource = [
-            'url'      => "/res/fs/$filename[0]",
+            // 'url'      => "/res/fs/$filename[0]",
             'ref'      => $media['ref'],
-            'mimetype' => $media['meta']['mimetype'],
-            'height'   => $media['meta']['height'],
-            'width'    => $media['meta']['width'],
+            // 'mimetype' => $media['meta']['mimetype'],
+            // 'height'   => $media['meta']['height'],
+            // 'width'    => $media['meta']['width'],
             'accent'   => $media['meta']['accent_color'],
-            'alt'      => $mergedata['alt'] ?? '',
+            // 'alt'      => $mergedata['alt'] ?? '',
         ];
 
         if(isset($this->schema['thumbnail'])) {
             if($resource['mimetype'] !== "image/svg+xml") {
                 $thumbnail = $this->storeThumbnail($filename[1], $result, ['for' => $media['ref']]);
-                $resource['thumb'] = "/res/fs/$filename[1]";
+                // $resource['thumb'] = "/res/fs/$filename[1]";
                 $resource['thumb_ref'] = $thumbnail['ref'];
-                $resource['thumb_height'] = $thumbnail['meta']['height'];
-                $resource['thumb_width'] = $thumbnail['meta']['height'];
+                // $resource['thumb_height'] = $thumbnail['meta']['height'];
+                // $resource['thumb_width'] = $thumbnail['meta']['height'];
             }
         }
         $this->setValue($resource);
@@ -293,5 +267,86 @@ class UploadResult2 extends MapResult {
             $fromSchema, // Get additional data
             $supplemental
         );
+    }
+
+    /**
+     * TODO: Replace with with a value that makes more sense
+     * Practically, just query the fs.files collection based on the IDs
+     * @param mixed $value 
+     * @return void 
+     */
+    function setValue(mixed $value): void {
+        $this->__initFS();
+        $ids = [$value['ref'] ?? $value['media']->id];
+        // if(!$ids[0]) 
+        if(isset($value['thumb_ref'])) $ids[] = $value['thumb_ref'];
+        if(isset($value['thumb']->id)) $ids[] = $value['thumb']->_id;
+        $files = $this->__collection->find(['_id' => ['$in' => $ids]]);
+        $this->originalValue = $value;
+        // If we don't have a ref set, set as default
+        if ($value === null) $this->value = $this->schema['default'];
+        $details = [];
+        $loop_count = 0;
+        foreach($files as $file) {
+            if(isset($file['isThumbnail'])) {
+                $this->setThumbDetails($file, $details);
+                continue;
+            }
+            $this->setMediaDetails($file, $details);
+            $loop_count += 1;
+        }
+
+        $this->value = $this->__getInstancedMap($details);
+
+        if($loop_count === 0) $this->value = $this->schema['default'];
+    }
+
+    function setMediaDetails($media, &$details) {
+        $details['ref']      = $media['_id'];
+        $details['url']      = "/res/fs$media[filename]";
+        $details['ref']      = $media['ref'];
+        $details['mimetype'] = $media['meta']['mimetype'];
+        $details['height']   = $media['meta']['height'];
+        $details['width']    = $media['meta']['width'];
+        $details['accent']   = $media['meta']['accent_color'];
+        $details['alt']      = $mergedata['alt'] ?? '';
+    }
+
+    function setThumbDetails($thumb, &$details) {
+        $details['thumb'] = "/res/fs$thumb[filename]";
+        $details['thumb_ref'] = $thumb['_id'];
+        $details['thumb_height'] = $thumb['meta']['height'];
+        $details['thumb_width'] = $thumb['meta']['height'];
+    }
+
+    function __getInstancedMap($value): GenericMap {
+        return new DefaultUploadSchema($value, $this->schema['schema'] ?? [], "$this->name.");
+    }
+
+    function defaultSchemaValues(array $data = []): array {
+        return [
+            'schema' => [
+                'ref' => [
+                    new IdResult,
+                    'nullable' => true
+                ],
+                'url' => new StringResult,
+                'height' => new NumberResult,
+                'width' => new NumberResult,
+                'accent' => new HexColorResult,
+                // 'contrast' => [
+                //     new FakeResult,
+                //     'get' => fn () => $this->accent->getContrastColor(),
+                // ],
+                'mimetype' => new StringResult,
+                'thumb' => new StringResult,
+                'thumb_height' => new NumberResult,
+                'thumb_width' => new NumberResult,
+                'alt' => [
+                    new StringResult,
+                    'filter' => fn ($val) => throw new ValidationIssue("You can't do that"),
+                ],
+            ]
+        ];
     }
 }

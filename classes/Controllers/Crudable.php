@@ -104,10 +104,8 @@ abstract class Crudable {
             return $this->new_document($instance);
         }
 
-        static public function route_details_create(array $options = null):array {
-            return array_merge([
-                'permission' => "CRUDControllerPermission",
-            ], $options);
+        static public function route_details_create():array {
+            return [];
         }
 
     // =========================================================================
@@ -161,21 +159,14 @@ abstract class Crudable {
             return $index;
         }
         
-        static public function route_details_read(array $options = []):array {
-            return array_merge([
-                'permission' => "CRUDControllerPermission",
-            ], $options);
+        static public function route_details_read():array {
+            return [];
         }
 
-        static public function route_details_index(array $options = []):array {
-            return array_merge([
-                'anchor' => [
-                    'name' => $options['anchor'] ?? self::generate_friendly_name()
-                ],
-                'navigation' => [$options['navigation'] ?? 'admin_panel'],
-                'permission' => "CRUDControllerPermission",
-            ], $options);
+        static public function route_details_index():array {
+            return [];
         }
+        
 
     // =========================================================================
     // ================================ CREATE =================================
@@ -245,10 +236,8 @@ abstract class Crudable {
             return $this->edit($doc);
         }
 
-        static public function route_details_update(array $options = null):array {
-            return array_merge([
-                'permission' => "CRUDControllerPermission",
-            ], $options);
+        static public function route_details_update():array {
+            return [];
         }
 
     
@@ -296,10 +285,8 @@ abstract class Crudable {
             header("X-Redirect: " . route("$this->name@__index"));
         }
 
-        static public function route_details_destroy(array $options = null):array {
-            return array_merge([
-                'permission' => "CRUDControllerPermission",
-            ], $options);
+        static public function route_details_destroy():array {
+            return [];
         }
 
     // =========================================================================
@@ -316,11 +303,11 @@ abstract class Crudable {
             $class   = self::className();
             $mutant  = self::generate_prefix($prefix);
 
-            Route::get("$mutant/{id}", "$class@__read",   static::route_details_read($options['read'] ?? []));
-            Route::post("$mutant/create", "$class@__create", static::route_details_create($options['create'] ?? []));
-            Route::post("$mutant/update/{id}", "$class@__update", static::route_details_update($options['update'] ?? []));
-            Route::delete("$mutant/delete/{id}", "$class@__destroy", static::route_details_destroy($options['destroy'] ?? []));
-            Route::delete("$mutant/multi-delete/", "$class@__multidestroy", static::route_details_destroy($options['destroy'] ?? []));
+            Route::get("$mutant/{id}", "$class@__read",   static::route_details(['permission' => "CRUDControllerPermission"],$options['read'] ?? [], "route_details_read"));
+            Route::post("$mutant/create", "$class@__create", static::route_details(['permission' => "CRUDControllerPermission"],$options['create'] ?? [], "route_details_create"));
+            Route::post("$mutant/update/{id}", "$class@__update", static::route_details(['permission' => "CRUDControllerPermission"],$options['update'] ?? [], "route_details_update"));
+            Route::delete("$mutant/delete/{id}", "$class@__destroy", static::route_details(['permission' => "CRUDControllerPermission"],$options['destroy'] ?? [], "route_details_destroy"));
+            Route::delete("$mutant/multi-delete/", "$class@__multidestroy", static::route_details(['permission' => "CRUDControllerPermission"],$options['destroy'] ?? [], "route_details_destroy"));
             set_crudable_flag($class, CRUDABLE_CONFIG_APIV1);
         }
 
@@ -334,12 +321,38 @@ abstract class Crudable {
             $class   = self::className();
             $mutant  = self::generate_prefix($prefix);
 
-            Route::get("$mutant/", "$class@__index", static::route_details_index($options['index'] ?? []));
-            Route::get("$mutant/new", "$class@__new_document", static::route_details_create($options['new_document'] ?? []));
-            Route::get("$mutant/edit/{id}", "$class@__edit", static::route_details_update($options['edit'] ?? []));
+            Route::get("$mutant/", "$class@__index", self::route_details(
+                    [
+                    'anchor' => [
+                        'name' => $options['anchor'] ?? self::generate_friendly_name()
+                    ],
+                    'navigation' => [$options['navigation'] ?? 'admin_panel'],
+                    'permission' => "CRUDControllerPermission",
+                ],
+                $options['index'] ?? [],
+                "route_details_index"
+            ));
+            Route::get("$mutant/new", "$class@__new_document", self::route_details(
+                [
+                    'permission' => "CRUDControllerPermission",
+                ],
+                $options['new_document'] ?? [],
+                "route_details_create"
+            ));
+            Route::get("$mutant/edit/{id}", "$class@__edit", self::route_details(
+                [
+                    'permission' => "CRUDControllerPermission",
+                ],
+                $options['edit'] ?? [],
+                "route_details_update"
+            ));
             set_crudable_flag($class, CRUDABLE_CONFIG_ADMIN);
         }
 
+        static function route_details(array $default_values, array $details, string $callable) {
+            $callable_results = static::$callable($details);
+            return array_merge($default_values, $details, $callable_results);
+        }
 
         static function generate_prefix($supplied):string {
             if($supplied) {

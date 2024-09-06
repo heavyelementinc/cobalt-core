@@ -5,6 +5,7 @@ namespace Cobalt\SchemaPrototypes\Compound;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\UploadResult2;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use MongoDB\Model\BSONDocument;
 
 class ImageResult extends UploadResult2 {
     protected $type = "image";
@@ -88,6 +89,7 @@ class ImageResult extends UploadResult2 {
 
     #[Prototype]
     protected function contrast($size = "media") {
+        if(!$this->accent) return null;
         return $this->accent->getContrastColor();
     }
 
@@ -143,4 +145,28 @@ class ImageResult extends UploadResult2 {
             update("image-result[name='$this->name'] .accent-target", ['value' => $result['accent']]);
         }
     }
+
+    // function setValue(mixed $value): void {
+    //     if($value instanceof BSONDocument) {
+    //         $this->upgrade($value);
+    //         return;
+    //     }
+    //     if(key_exists('media', $value)) {
+    //         $this->upgrade($value);
+    //         return;
+    //     }
+    //     $this->value = $value;
+    // }
+
+    // function upgrade($value) {
+    //     $this->value = [
+    //         'url' => $value['media']['filename'],
+    //         'res' => $value['media']['res'],
+    //         'height' => $value['media']['height'],
+    //         'width' => $value['media']['width'],
+    //         'accent' => $value['media']['accent_color'],
+    //         'thumb' => $value['thumb']['filename'] ?? null
+    //     ];
+    //     return;
+    // }
 }

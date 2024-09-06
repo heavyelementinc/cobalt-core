@@ -122,27 +122,40 @@ Route::get("/me/", "UserAccounts@me",
     ]);
 
     if (app('Auth_logins_enabled')) {
-
-        Route::get("/users/", "CoreAdmin@list_all_users", [
-            'name' => "Users",
-            'handler' => "core/user_panel.js",
-            'anchor' => [
-                'name' => 'Users',
-                'icon' => "account-group-outline",
-                'icon_color' => "#FF5964"
+        CoreUserAccounts::admin(null, [
+            'index' => [
+                'permission' => 'Auth_allow_editing_users',
+                'anchor' => [
+                    'name' => 'Users',
+                    'icon' => 'account-group-outline',
+                    'icon_color' => '#FF5964'
+                ],
+                'navigation' => ['application_settings']
             ],
-        'navigation' => ['application_settings']
+            'edit' => [
+                'permission' => 'Auth_allow_editing_users',
+            ]
         ]);
+        // Route::get("/users/", "CoreAdmin@list_all_users", [
+        //     'name' => "Users",
+        //     'handler' => "core/user_panel.js",
+        //     'anchor' => [
+        //         'name' => 'Users',
+        //         'icon' => "account-group-outline",
+        //         'icon_color' => "#FF5964"
+        //     ],
+        // 'navigation' => ['application_settings']
+        // ]);
 
-        Route::get("/create-user", "CoreAdmin@create_user", [
-            'handler' => 'core/create_user.js',
-            'permission' => 'Auth_allow_creating_users'
-        ]);
+        // Route::get("/create-user", "CoreAdmin@create_user", [
+        //     'handler' => 'core/create_user.js',
+        //     'permission' => 'Auth_allow_creating_users'
+        // ]);
 
-        Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
-            'handler' => 'core/user_manager.js',
-            'permission' => "Auth_allow_editing_users"
-        ]);
+        // Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
+        //     'handler' => 'core/user_manager.js',
+        //     'permission' => "Auth_allow_editing_users"
+        // ]);
     }
 
     // Route::get("/settings/fs-manager", "CoreSettingsPanel@fileManager",[

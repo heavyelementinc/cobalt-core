@@ -20,7 +20,7 @@ class Persistance extends PersistanceMap {
     }
 
     public function __get_schema(): array {
-        $this->__set_index_checkbox_state(true);
+        $this->__set_index_checkbox_state(has_permission("Contact_form_submissions_delete", null, null, false));
         $addtl = new AdditionalContactFields();
         $fields = $addtl->__get_schema();
         $schema = [

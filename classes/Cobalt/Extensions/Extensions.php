@@ -244,6 +244,11 @@ class Extensions extends \Drivers\Database {
             'name' => "Modify user session login data before storage",
             'icon' => 'login',
             'default' => false
+        ],
+        "register_user_fields" => [
+            'name' => "Add fields to a user account",
+            'icon' => 'user',
+            'default' => false
         ]
     ];
 

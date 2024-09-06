@@ -26,7 +26,7 @@ class HTTPException extends \Exception {
         $this->clientMessage = $clientMessage;
         if($clientMessage === true) $this->clientMessage = $message;
         $this->exit = $GLOBALS['allowed_to_exit_on_exception'] ?? false;
-        $this->data = $data;
+        $this->data = $data ?? [];
 
         // Check if we're being passed the old way way order and fix it
         if(gettype($clientMessage) === "array" && $data === null) {

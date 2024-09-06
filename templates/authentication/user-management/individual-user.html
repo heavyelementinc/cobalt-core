@@ -1,12 +1,12 @@
 <hgroup>
     <div class="vbox">
-        <h1><span id="fname">{{user_account.fname}}</span> <span id="lname">{{user_account.lname}}</span></h2>
-        <label><span id="uname">{{user_account.uname}}</span> &mdash; <span id='user_id'>{{user_account._id}}</span></label>
+        <h1><span id="fname">{{doc.fname}}</span> <span id="lname">{{doc.lname}}</span></h2>
+        <label><span id="uname">{{doc.uname}}</span> &mdash; <span id='user_id'>{{doc._id}}</span></label>
     </div>
     <action-menu title="Manage User">
-        <option method="DELETE" action="/api/v1/user/{{user_account._id}}/avatar">Reset Avatar to Default</option>
-        <option method="DELETE" action="/api/v1/user/{{user_account._id}}/delete" dangerous>Delete {{user_account.fname}}</option>
-        <option method="PUT" action="/api/v1/user/{{user_account._id}}/update" value="{&quot;flags.locked&quot;: true}">Lock user account</option>
+        <option method="DELETE" action="/api/v1/user/{{doc._id}}/avatar">Reset Avatar to Default</option>
+        <option method="DELETE" action="/api/v1/user/{{doc._id}}/delete" dangerous>Delete {{doc.fname}}</option>
+        <option method="PUT" action="/api/v1/user/{{doc._id}}/update" value="{&quot;flags.locked&quot;: true}">Lock user account</option>
     </action-menu>
 </hgroup>
 
@@ -21,41 +21,39 @@
             <a href="#sessions"><i name="list-status"></i> Sessions</a>
         </nav>
         <section id="basics" class="">
-            <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{user_account._id}}/update"
+            <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{doc._id}}/update"
                 autosave="autosave">
                 <fieldset>
                     <legend>Basic Info</legend>
                 <ul class="list-panel">
                     <li>
                         <label>Name</label>
-                        <input name="fname" value="{{user_account.fname}}" placeholder="First name" for="#fname"> <input
-                            name="lname" value="{{user_account.lname}}" placeholder="Last name" for="#lname">
+                        <input name="fname" value="{{doc.fname}}" placeholder="First name" for="#fname"> <input
+                            name="lname" value="{{doc.lname}}" placeholder="Last name" for="#lname">
                     </li>
                     <li>
                         <label>Username</label>
-                        <input name="uname" value="{{user_account.uname}}" for="#uname">
+                        <input name="uname" value="{{doc.uname}}" for="#uname">
                     </li>
                     <li>
                         <label>Email</label>
-                        <input type="email" name="email" value="{{user_account.email}}">
+                        <input type="email" name="email" value="{{doc.email}}">
                     </li>
                     <!-- <li>
                         <label>Biography</label>
-                        <block-editor name="biography"><script type="application/json">{{!user_account.biography}}</script></block-editor>
+                        <block-editor name="biography"><script type="application/json">{{doc.biography}}</script></block-editor>
                     </li> -->
                 </ul>
                 </fieldset>
             </form-request>
     
     
-                <form-request id="profile-picture" method='POST' action="/api/v1/user/{{user_account._id}}/avatar">
+                <form-request id="profile-picture" method='POST' action="/api/v1/user/{{doc._id}}/avatar">
                     <fieldset>
                         <legend>Profile Picture</legend>
                         <ul class="list-panel">
                             <li>
-                                {{!user_account.avatar.display}}
-                                <input type="file" name="avatar">
-                                <button type="submit">Upload</button>
+                                {{doc.avatar.field()}}
                             </li>
                         </ul>
                     </fieldset>
@@ -63,7 +61,7 @@
         </section>
         {{!notifications}}
         <section id="permissions" class="drawer-list--item">
-            <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{user_account._id}}/permissions"
+            <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{doc._id}}/permissions"
                 autosave="autosave">
                 <div style="flex-grow:1">
                     {{!permission_table.permissions}}
@@ -83,17 +81,26 @@
         {{!additional_panel}}
         <!-- <section id="statistics" class="drawer-list--item">
             <h2>Statistics</h2>
-            <p>Placeholder section for {{user_account.uname}}'s statistics</p>
+            <p>Placeholder section for {{doc.uname}}'s statistics</p>
         </section> -->
         <section id="manage" class="drawer-list--item">
-            <form-request id="account-flags" method="PUT" action="/api/v1/user/{{user_account._id}}/update"
+            <form-request id="account-flags" method="PUT" action="/api/v1/user/{{doc._id}}/update"
                     autosave="autosave">
+                <fieldset>
+                    <legend>User State</legend>
+                    <ul class="list-panel">
+                        <li>
+                            <label>{{doc.state.getLabel()}}</label>
+                            {{doc.state.field()}}
+                        </li>
+                    </ul>
+                </fieldset>
                 <fieldset>
                     <legend>Account Flags</legend>
                     {{!account_flags}}
                 </fieldset>
             </form-request>
-            <form-request id="password-reset" method="PUT" action="/api/v1/user/{{user_account._id}}/password">
+            <form-request id="password-reset" method="PUT" action="/api/v1/user/{{doc._id}}/password">
                 <fieldset>
                     <legend>Change Password</legend>
                     <ul class='list-panel'>

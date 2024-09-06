@@ -177,23 +177,34 @@ class User {
     }
 
     function promote($user_or_email) {
-        return $this->root_status($user_or_email, '$addToSet', '$each', $message = "Granted " . fmt($user_or_email, 'i') . " root permissions");
+        return $this->root_status($user_or_email, true, "Granted " . fmt($user_or_email, 'i') . " root permissions");
     }
 
     function demote($user_or_email) {
-        return $this->root_status($user_or_email, '$pull', '$in', "Revoked " . fmt("$user_or_email", "i") . "'s root permissions");
+        return $this->root_status($user_or_email, false, "Revoked " . fmt("$user_or_email", "i") . "'s root permissions");
     }
 
-    private function root_status($u, $operator, $from, $success_message) {
+    private function root_status($u, $value, $success_message) {
         $ua = new Auth\UserCRUD();
         $user = $ua->getUserByUnameOrEmail($u);
         if ($user === null) throw new Exception("No user found");
         $result = $ua->updateOne(
             ['_id' => $user['_id']],
-            [$operator => ['groups' => [$from => ['root']]]]
+            ['$set' => ['is_root' => $value]]
         );
         $message = $success_message;
         if ($result->getMatchedCount() !== 1) $message = "No user account found";
+        if ($result->getModifiedCount() !== 1) {
+            switch($value) {
+                case true:
+                    $message = "User was already root";
+                    break;
+                case false:
+                    $message = "User already lacked root privilege";
+                    break;
+            }
+        }
+        
         return fmt($message);
     }
 

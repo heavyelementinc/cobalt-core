@@ -42,6 +42,8 @@ if (app('Auth_logins_enabled')) {
     Route::s_put("/user/password",         "UserAccounts@change_my_password", ['permission' => 'self']);
     Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
 
+    CoreUserAccounts::apiv1();
+
     Route::s_put("/settings/update/", "CoreSettingsPanel@update", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);

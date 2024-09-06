@@ -94,7 +94,7 @@ class DatabaseManagement {
             $val = $map->{$key};
             if($value['type'] instanceof MapResult) {
                 if($val->value === null) continue;
-                $__dataset[$key] = $this->preserveMap($val->value);
+                $__dataset[$key] = $this->preserveMap($val->getValue());
                 continue;
             }
             $__dataset[$key] = $val;
@@ -140,8 +140,9 @@ class DatabaseManagement {
             $collections_restored++;
             foreach($docs as $row) {
                 $json_row = json_encode($row);
-                $bson = \MongoDB\BSON\fromJSON($json_row);
-                $row = \MongoDB\BSON\toPHP($bson);
+                
+                $bson = \MongoDB\BSON\fromJSON($json_row); // @phpstan-ignore-line
+                $row = \MongoDB\BSON\toPHP($bson); // @phpstan-ignore-line
 
                 if($row instanceof GenericMap) {
                     // $row->__dataset['_id'] = $row->id;

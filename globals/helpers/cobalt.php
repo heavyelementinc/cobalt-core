@@ -1,5 +1,6 @@
 <?php
 
+use Auth\UserPersistance;
 
 function async_cobalt_command($command, $context = true, $log = "/dev/null") {
     $shell = __ENV_ROOT__ . "/core.sh";
@@ -30,7 +31,7 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
 function session($info = null) {
     if (!isset($GLOBALS['session'])) return null;
     if ($info === null) return $GLOBALS['session'] ?? null;
-    if (key_exists($info, $GLOBALS['session']['__dataset'])) return $GLOBALS['session']['__dataset'][$info];
+    if (key_exists($info, $GLOBALS['session']->__dataset)) return $GLOBALS['session']->{$info}?->getValue() ?? null;
     return lookup_js_notation($info, $GLOBALS['session'], true);
     throw new Exception("Field $info does not exist");
 }
@@ -61,7 +62,7 @@ function session_exists() {
  *                      Can be null.
  * @return bool true if the user has permission, false otherwise
  */
-function has_permission($perm_name, $group = null, $user = null, $throw_no_session = true):bool {
+function has_permission($perm_name, $group = null, ?UserPersistance $user = null, $throw_no_session = true):bool {
     return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 

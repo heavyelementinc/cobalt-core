@@ -31,11 +31,11 @@
                     </li>
                     <li>
                         <label>Username</label>
-                        <input type="text" name="uname" value="{{doc.uname}}" placeholder="Username">
+                        {{doc.uname.field()}}
                     </li>
                     <li>
                         <label>Email Address</label>
-                        <input type="email" name="email" value="{{doc.email}}" placeholder="Email address">
+                        {{doc.email.field()}}
                     </li>
                 </ul>
             </fieldset>
@@ -44,8 +44,7 @@
                 <ul class="list-panel">
                     <li>
                         <label>Avatar</label>
-                        {{!doc.avatar.display}}
-                        <input type="file" accept="image/svg+xml,image/*" name="avatar">
+                        {{doc.avatar.field()}}
                     </li>
                 </ul>
             </fieldset>

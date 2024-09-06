@@ -15,9 +15,9 @@ class PasswordUpdateRequired extends HTTPException {
     public $status_code = 401;
     public $name = "Password Update Required";
 
-    function __construct($message, $data = []) {
+    function __construct($message, ?string $clientMessage = null, $data = []) {
         $data['template'] = "authentication/user-management/password_update.html";
         add_vars(['headline' => $message]);
-        parent::__construct($message, $data);
+        parent::__construct($message, $clientMessage, $data);
     }
 }

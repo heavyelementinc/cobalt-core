@@ -53,10 +53,15 @@ use Validation\Exceptions\ValidationIssue;
 abstract class PersistanceMap extends GenericMap implements Persistable {
     
     protected bool $index_add_id_checkbox = false;
+    private bool $__include_immutables = false;
     protected ?Database $__manager = null;
 
     function __construct($doc = null, $schema = [], $__namePrefix = "") {
         parent::__construct($doc, $schema, $__namePrefix);
+    }
+
+    function __include_immutable_fields(bool $value) {
+        $this->__include_immutables = $value;
     }
 
     function __set_index_checkbox_state(bool $state) {
@@ -88,6 +93,9 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
     /** @return array */
     function bsonSerialize(): array|\stdClass|Document {
         $serializationResult = $this->__dataset;
+        if($this->__include_immutables) {
+            $serializationResult['_id'] = $this->id;
+        }
         return $serializationResult;
     }
 

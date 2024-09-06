@@ -23,30 +23,30 @@ class CoreAdmin {
         return view("/authentication/admin-dashboard/index.html");
     }
 
-    function list_all_users($page = 0) {
-        $collection = \db_cursor('users');
-        $list = "<flex-table><flex-row>
-            <flex-header>Name</flex-header>
-            <flex-header>Username</flex-header>
-            <flex-header>Email</flex-header>
-            <flex-header>Groups</flex-header>
-            <flex-header>Verified</flex-header>
-            <flex-header style='width:20px'></flex-header>
-        </flex-row>";
-        foreach ($collection->find([]) as $user) {
-            $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
-            $list .= view("/admin/users/user.html", [
-                'user' => new UserSchema($user),
-                'groups' => (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>"),
-            ]);
-        }
-        $list .= "</flex-table>";
-        add_vars([
-            'title' => "Manage users",
-            "users" => $list
-        ]);
-        return view("/authentication/user-management/list-users.html");
-    }
+    // function list_all_users($page = 0) {
+    //     $collection = \db_cursor('users');
+    //     $list = "<flex-table><flex-row>
+    //         <flex-header>Name</flex-header>
+    //         <flex-header>Username</flex-header>
+    //         <flex-header>Email</flex-header>
+    //         <flex-header>Groups</flex-header>
+    //         <flex-header>Verified</flex-header>
+    //         <flex-header style='width:20px'></flex-header>
+    //     </flex-row>";
+    //     foreach ($collection->find([]) as $user) {
+    //         $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
+    //         $list .= view("/admin/users/user.html", [
+    //             'user' => new UserSchema($user),
+    //             'groups' => (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>"),
+    //         ]);
+    //     }
+    //     $list .= "</flex-table>";
+    //     add_vars([
+    //         'title' => "Manage users",
+    //         "users" => $list
+    //     ]);
+    //     return view("/authentication/user-management/list-users.html");
+    // }
 
     private function user_link($id, $target = "#basics") {
         $link = "<a href='/admin" . app("Auth_user_manager_individual_page") . "/" . (string)$id . "$target'>";

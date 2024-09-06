@@ -10,10 +10,10 @@ use SensitiveParameter;
 
 class MultiFactorManager {
 
-    function get_multifactor_enrollment(UserSchema $user) {
+    function get_multifactor_enrollment(UserPersistance $user) {
 
         if(!app("TwoFactorAuthentication_enabled")) return $this->get_not_supported_stub();
-        if($user['tfa']['enabled']) return $this->get_already_enrolled_stub();
+        if($user->tfa->enabled) return $this->get_already_enrolled_stub();
 
         $secret = null;
         if(isset($user->__dataset['tfa']['secret'])) $secret = $user->__dataset['tfa']['secret'];
@@ -49,7 +49,7 @@ class MultiFactorManager {
         return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>This Cobalt app has Two-Factor Authentication disabled. Please contact your system administrator to enable TOTP support</p></fieldset>";
     }
 
-    function enroll_user(UserSchema $user, #[SensitiveParameter] string $passwd) {
+    function enroll_user(UserPersistance $user, #[SensitiveParameter] string $passwd) {
         if(!$this->verify_otp($user, $passwd)) throw new Unauthorized("OTP verification failed","There was an error validating the provided one-time password");
         $crud = new UserCRUD();
         $backups = $this->generate_backup_codes();
@@ -68,12 +68,12 @@ class MultiFactorManager {
         return $backups;
     }
 
-    function verify_otp(UserSchema $user, string $passwd) {
+    function verify_otp(UserPersistance $user, string $passwd) {
         $tfa = new TwoFactorAuth();
         return $tfa->verifyCode($user->__dataset['tfa']['secret'], $passwd);
     }
 
-    function unenroll_user(UserSchema $user) {
+    function unenroll_user(UserPersistance $user) {
         $crud = new UserCRUD();
 
         $result = $crud->updateOne(['_id' => $user->_id],[

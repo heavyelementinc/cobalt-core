@@ -21,6 +21,7 @@
 
 namespace Cobalt\SchemaPrototypes;
 
+use ArrayAccess;
 use Exception;
 use TypeError;
 use JsonSerializable;
@@ -401,7 +402,11 @@ class SchemaResult implements \Stringable, JsonSerializable {
     function __toString(): string {
         if($this->__isPrivate()) return "";
         $read = $this->getValue();
-        $type = gettype($read);
+        // $type = gettype($read);
+        // switch($type) {
+        //     case $read instanceof BSONDocument:
+        //         return json_encode($type);
+        // }
         return $read ?? "";
     }
 
@@ -599,4 +604,5 @@ class SchemaResult implements \Stringable, JsonSerializable {
             'QUERY_PARAM_FILTER_VALUE' => QUERY_PARAM_FILTER_VALUE
         ]);
     }
+
 }

@@ -27,7 +27,7 @@ class UserAccounts extends \Controllers\Pages {
     function update_push($id) {
         $_id = new ObjectId($id);
         $ua = new UserCRUD();
-        $user = $ua->findOneAsSchema(['_id' => $_id]);
+        $user = $ua->findOne(['_id' => $_id]);
         if(!$user) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         $push = new PushNotifications();
         $updateable = [];
@@ -99,7 +99,7 @@ class UserAccounts extends \Controllers\Pages {
         $update = $_POST;
         $ua = new UserCRUD();
         if(key_exists('avatar', $update)) {
-            $schema = $ua->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $schema = $ua->findOne(['_id' => new ObjectId($id)]);
             try {
                 $schema->deleteAvatar();
             } catch(NotFound $e) {
@@ -108,7 +108,7 @@ class UserAccounts extends \Controllers\Pages {
             }
         }
         if(key_exists("flags.locked", $update)) {
-            $schema = $ua->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $schema = $ua->findOne(['_id' => new ObjectId($id)]);
             if(confirm("Are you sure you want to lock $schema->name's account? Doing so will log $schema->them out from all devices and $this->they will not be able to log back in until $schema->their account is unlocked!", $_POST)) {
                 $session = new SessionManager();
                 $result = $session->destroy_session_by_user_id($id);
@@ -276,7 +276,7 @@ class UserAccounts extends \Controllers\Pages {
         } else {
             if(!has_permission("Auth_allow_editing_users")) throw new Unauthorized("You are not authorized to modify this resource.");
             $man = new UserCRUD();
-            $user = $man->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $user = $man->findOne(['_id' => new ObjectId($id)]);
             $message = "this user's";
         }
         confirm("This action will <strong>permanently delete</strong> $message avatar. Are you sure you want to continue?", $_POST);

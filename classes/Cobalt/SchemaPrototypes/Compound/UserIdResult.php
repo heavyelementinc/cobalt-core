@@ -138,7 +138,8 @@ class UserIdResult extends SchemaResult {
         $crud = new UserCRUD();
         
         $valid = [];
-        foreach($crud->{$options[$type]['method']}(...$options[$type]['query']) as $doc) {
+        $result = $crud->{$options[$type]['method']}(...$options[$type]['query']);
+        foreach($result as $doc) {
             $valid[(string)$doc->_id] = $value($doc);
         }
 
@@ -159,12 +160,12 @@ class UserIdResult extends SchemaResult {
                 return "$user->fname $user->lname";
             case "first":
             case "fname":
-                return $user->fname;
+                return "$user->fname";
             case "last":
             case "lname":
-                return $user->lname;
+                return "$user->lname";
             default:
-                return $user->uname;
+                return "$user->uname";
         }
     }
 
