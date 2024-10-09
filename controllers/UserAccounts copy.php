@@ -16,7 +16,7 @@ use Validation\Exceptions\ValidationFailed;
 
 class UserAccounts extends \Controllers\Pages {
 
-    /** @deprecated */
+    /* Working Jun 10 2021 */
     function update_permissions($id) {
         $permissions = $_POST;
         $validated = $GLOBALS['auth']->permissions->validate($id, $permissions);

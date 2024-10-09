@@ -10,20 +10,22 @@ use Cobalt\SchemaPrototypes\Basic\BlockResult;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\Basic\FakeResult;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\ObjectResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
 use Cobalt\SchemaPrototypes\Compound\EmailAddressResult;
+use Cobalt\SchemaPrototypes\Compound\HrefResult;
 use Cobalt\SchemaPrototypes\Compound\ImageResult;
 use Cobalt\SchemaPrototypes\Compound\UniqueResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Drivers\Database;
+use Validation\Exceptions\ValidationIssue;
 
 class UserPersistance extends PersistanceMap {
     private ?AdditionalUserFields $additional = null;
 
     const STATE_USER_VERIFIED        = 0b0000000001;
-    
 
     public function __set_manager(?Database $manager = null): ?Database {
         return new UserCRUD();
@@ -114,21 +116,79 @@ class UserPersistance extends PersistanceMap {
             'public_name' => [
                 new StringResult
             ],
+            'display_name' => [
+                new FakeResult,
+                'get' => function() {
+                    $name = $this->fname;
+                    if($name) $name .= " $this->lname";
+                    if(!$name) $name = $this->uname;
+                    return $name;
+                }
+            ],
             'biography' => [
                 new BlockResult,
             ],
+            'fediverse_profile' => [
+                new StringResult,
+                'filter' => function ($val) {
+                    $result = preg_match("/@\w*@\w*.\w*/",$val);
+                    switch($result) {
+                        case false:
+                            throw new ValidationIssue("Regex error occurred");
+                        case 0:
+                            throw new ValidationIssue("This does not appear to be a fediverse account");
+                    }
+                    return $val;
+                },
+                'meta_tag' => function () {
+                    $value = $this->fediverse_profile->getValue();
+                    if(!$value) return "";
+                    return "<meta name=\"fediverse:creator\" content=\"$value\" />";
+                }
+            ],
+            'facebook_profile' => [
+                new HrefResult
+            ],
+            'twitter_profile' => [
+                new HrefResult
+            ],
+            'instagram_profile' => [
+                new HrefResult
+            ],
+            'youtube_profile' => [
+                new HrefResult
+            ],
+            
+            'integrations' => [
+                new MapResult,
+                'schema' => [
+                    'YouTube' => [
+                        new ArrayResult,
+                        'hydrate' => false
+                        // 'each' => [
+                        //     'details' => [
+                        //         new MapResult,
+                        //         'schema' => [
+                        //             'access_token' => new StringResult,
+                        //             'expires_in' => new NumberResult,
+                        //             'scope' => new StringResult,
+                        //             'token_type' => new StringResult
+                        //         ]
+                        //     ],
+                        //     'expiration' => new DateResult,
+                        // ]
+                    ],
+                    'Facebook' => [
+                        new ArrayResult,
+                        'hydrate' => false
+                    ]
+                ]
+            ]
         ], 
         $GLOBALS['ADDITIONAL_USER_FIELDS'],
         $app_fields);
 
         return $fields;
-    }
-    
-    public function display_name() {
-        $name = $this->fname;
-        if($name) $name .= " $this->lname";
-        if(!$name) $name = $this->uname;
-        return $name;
     }
 
     public function name() {

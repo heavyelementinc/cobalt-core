@@ -97,6 +97,7 @@ class Authentication {
      */
     function has_permission($permission, $isRoot = null, $user = null, $throw_no_session = true) {
         if ($user === null) $user = $this->user;
+        if ($user instanceof BSONDocument) throw new Exception("Detected obsolete user details. Please run the upgrade process.", true);
 
         // If the user is not logged in, they obviously don't have permission
         if ($throw_no_session === false && !$user) return false;

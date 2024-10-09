@@ -59,6 +59,7 @@ class IntegrationsController extends Controller{
 
         add_vars([
             'title' => $i->config->publicName,
+            'receiveEndpoint' => str_replace("http://", "https://", server_name()) . route("IntegrationsController@oauth_receive", [$index]),
             'name' => $i->config->name,
             'publicName' => $i->config->publicName,
             'tokenName' => $i->config->tokenName,

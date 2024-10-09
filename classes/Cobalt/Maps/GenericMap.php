@@ -6,6 +6,7 @@ use ArrayAccess;
 use ArrayObject;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Traits\Validatable;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
@@ -150,12 +151,13 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
                     continue;
                 }
                 // Loop through them and rehydrate them
-                if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
+                // if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
             }
         }
         
         // Reference our target so we can recursively set values
-        $target[$field] = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
+        $hydrated_result = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
+        $target[$field] = $hydrated_result;
         return;
     }
 

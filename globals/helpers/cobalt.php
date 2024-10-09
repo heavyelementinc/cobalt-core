@@ -29,10 +29,11 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
  *               exist
  */
 function session($info = null) {
-    if (!isset($GLOBALS['session'])) return null;
-    if ($info === null) return $GLOBALS['session'] ?? null;
-    if (key_exists($info, $GLOBALS['session']->__dataset)) return $GLOBALS['session']->{$info}?->getValue() ?? null;
-    return lookup_js_notation($info, $GLOBALS['session'], true);
+    global $session;
+    if (!isset($session)) return null;
+    if ($info === null) return $session ?? null;
+    if (key_exists($info, $session->__dataset ?? [])) return $session->{$info}?->getValue() ?? null;
+    return lookup_js_notation($info, $session, true);
     throw new Exception("Field $info does not exist");
 }
 

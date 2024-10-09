@@ -31,7 +31,7 @@ class Persistance extends PersistanceMap {
                     'title' => 'Name',
                     'order' => 0,
                     'sort' => -1,
-                    'view' => fn () => $this->name->getValue()
+                    'view' => fn () => $this->name
                 ]
             ],
             "organization" => [

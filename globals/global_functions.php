@@ -24,6 +24,7 @@ use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use MongoDB\Driver\Cursor;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
  * setting as the only argument, calling this function without an argument will 
@@ -518,6 +519,7 @@ function view_each(string $template, Iterator|array $docs, string $var_name = 'd
 }
 
 function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
+    if(!is_array($docs) && is_iterable($docs)) $docs = iterator_to_array_recursive($docs);
     $array = [];
     $d = $docs;
     if(gettype($docs) === "array") {

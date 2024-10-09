@@ -10,7 +10,7 @@ use DateTime;
 use Drivers\Database;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
-use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\ObjectId;  
 
 abstract class Page extends Crudable {
     var string $landing_content_classes = "";
@@ -80,6 +80,7 @@ abstract class Page extends Crudable {
                 'image' => $page->splash_image->filename(),
                 'image_x' => $page->splash_image->width(),
                 'image_y' => $page->splash_image->height(),
+                'author_tags' => $page->author->getValue()->fediverse_profile->meta_tag()
             ],
             'splash' => $this->splash($page),
             'aside' => $this->aside($page),

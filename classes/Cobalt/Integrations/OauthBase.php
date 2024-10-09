@@ -17,27 +17,32 @@ abstract class OauthBase extends Base {
      * @return string
      */
     function html_oauth_button($state = null, int $redirect_uri = 0):string {
+        
+        return view("/admin/integrations/oauth/button.html", [
+            'config' => $this->config,
+            'name' => $this->config->name,
+            'publicName' => $this->config->publicName,
+            'icon' => $this->config->icon,
+            'link' => $this->get_oauth_link($state, $redirect_uri),
+        ]);
+    }
+
+    function get_oauth_link($state = null, int $redirect_uri = 0) {
         $response_type = "code";
-        if(!empty($this->config->scope->getValue())) {
-            $delimiter = $this->config->getDirective("scope", "delimiter") ?? " ";
-            $query['scope'] = $this->config->scope->join($delimiter);
-        }
         $query = [
             'client_id' => (string)$this->config->client_id,
             'redirect_uri' => $this->config->redirect_uris[$redirect_uri],
             'response_type' => (string)$response_type,
             'access_type' => (string)$this->config->access_type,
         ];
+        if(!empty($this->config->scope->getValue())) {
+            $delimiter = $this->config->getDirective("scope", "delimiter") ?? " ";
+            $query['scope'] = implode($delimiter, $this->config->scope->getValue());
+        }
+
         if($state !== null) $query['state'] = $state;
         else $query['state'] = $_SERVER['REDIRECT_URL'];
-        return view("/admin/integrations/oauth/button.html", [
-            'config' => $this->config,
-            'name' => $this->config->name,
-            'publicName' => $this->config->publicName,
-            'icon' => $this->config->icon,
-            'uri' => $this->config->auth_uri,
-            'params' => http_build_query($query),
-        ]);
+        return $this->config->auth_uri."?".http_build_query($query);
     }
 
     /**
@@ -86,10 +91,10 @@ abstract class OauthBase extends Base {
      * 
      * !!! OTHER KEYS ARE IGNORED !!!
      * 
-     * @param mixed $response 
+     * @param mixed $authcode
      * @return array 
      */
-    public function oauth_fetch_credentials($authcode): array {
+    public function oauth_fetch_credentials(mixed $authcode): array {
         $r = $this->fetch(
             "POST",
             (string)$this->config->token_uri,

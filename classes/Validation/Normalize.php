@@ -68,6 +68,7 @@
 namespace Validation;
 
 use ArrayAccess;
+use Cobalt\SchemaPrototypes\MapResult;
 use Countable;
 use Exception;
 use Iterator;
@@ -280,8 +281,9 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
      */
     public function __validate($data, $createSubset = true) {
         $this->__to_validate = &$data;
-        if ($createSubset) $schema = $this->get_schema_subset(array_keys($data));
+        if($createSubset) $schema = $this->get_schema_subset(array_keys($data));
         else $schema = $this->init_schema();
+
         $this->issues = [];
         foreach ($schema as $name => $value) {
             if (!isset($data[$name]) && $createSubset === true) continue;
@@ -582,10 +584,27 @@ abstract class Normalize extends NormalizationHelpers implements JsonSerializabl
 
     private function get_schema_subset($keys) {
         $result = [];
-        foreach ($this->__schema as $key => $val) {
+        $schema = [];
+        $this->enumerate_explicit_schema_as_dot_notation($schema, $this->__schema);
+        foreach ($schema as $key => $val) {
             if (in_array($key, $keys)) $result[$key] = $val;
         }
         return $result;
+    }
+
+    function enumerate_explicit_schema_as_dot_notation(array &$schema, array $target, string $key_prefix = "") {
+        foreach($target as $key => $val) {
+            $newKey = ($key_prefix) ? "$key_prefix"."$key" : $key;
+            if(!$val[0]) {
+                $schema[$newKey] = $val;
+                continue;
+            }
+            if(key_exists('schema', $val)) {
+                $this->enumerate_explicit_schema_as_dot_notation($schema, $val['schema'], "$newKey.");
+                continue;
+            }
+            $schema[$newKey] = $val;
+        }
     }
 
 

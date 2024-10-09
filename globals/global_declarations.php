@@ -49,8 +49,8 @@ $CLASSES_DIR = [
 $CRUDABLE_CONFIG_TRACKER = [];
 
 /** @global ?UserSchema */
-global $session;
-$session = null;
+// global $session;
+// $session = null;
 
 global $WEB_PROCESSOR_VARS;
 $WEB_PROCESSOR_VARS = [];

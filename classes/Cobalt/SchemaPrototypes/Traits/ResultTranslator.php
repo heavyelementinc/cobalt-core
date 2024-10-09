@@ -88,11 +88,12 @@ trait ResultTranslator {
             }
             return $mutant;
         }
+        if(key_exists('hydrate',$schemaDirectives) && $schemaDirectives['hydrate'] == false) return $elements;
         // If we don't have an 'each' directive set, let's just translate each
         // element of this array into a <Type>Result
         $mutant = [];
         foreach($elements as $index => $arrayItem) {
-            $mutant[$index] = $this->__toResult($this->name.".$index", $arrayItem, [], $this->__reference);
+            $mutant[$index] = $this->__toResult($index, $arrayItem, [], $this->__reference);
         }
         return $mutant;
         // if(!$elements) return [];

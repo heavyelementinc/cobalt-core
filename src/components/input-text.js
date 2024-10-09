@@ -49,6 +49,7 @@ class InputText extends HTMLElement {
 
     set value(val) {
         this.input.value = val;
+        this.updateCharCount();
     }
 
     initFields() {

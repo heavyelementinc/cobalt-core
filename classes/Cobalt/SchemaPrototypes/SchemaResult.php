@@ -407,6 +407,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
         //     case $read instanceof BSONDocument:
         //         return json_encode($type);
         // }
+        if($read && gettype($read) !== "string") return json_encode($read);
         return $read ?? "";
     }
 

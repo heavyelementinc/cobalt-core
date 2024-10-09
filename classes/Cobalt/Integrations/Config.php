@@ -64,7 +64,7 @@ abstract class Config extends PersistanceMap {
      * @throws TypeError 
      */
     function authenticate(array &$request, Client $client):void {
-        switch($this->__auth_mode) {
+        switch($this->__auth_mode->getValue()) {
             case self::AUTH_BASIC:
                 // throw new TypeError("AUTH_BASIC is currently not supported");
                 $request['headers']['Authorization'] = "Basic ". base64_encode($this->getParam().":".$this->getToken());

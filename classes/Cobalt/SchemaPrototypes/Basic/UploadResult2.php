@@ -103,11 +103,11 @@ class UploadResult2 extends MapResult {
             case "thumbnail":
             case "small":
                 return [
-                    'url' => $this->value->thumb->getValue(),
-                    'height' => $this->value->thumb_height->getValue(),
-                    'width' => $this->value->thumb_width->getValue(),
-                    'mimetype' => $this->value->mimetype->getValue(),
-                    'accent' => $this->value->accent->getValue(),
+                    'url' => ($this->value->thumb) ? $this->value->thumb->getValue() : $this->value->url?->getValue(),
+                    'height' => ($this->value->thumb_height) ? $this->value->thumb_height->getValue() : $this->value->height?->getValue(),
+                    'width' => ($this->value->thumb_width) ? $this->value->thumb_width->getValue() : $this->value->width?->getValue(),
+                    'mimetype' => ($this->value->mimetype) ? $this->value->mimetype->getValue() : $this->value->mimetype?->getValue(),
+                    'accent' => ($this->value->accent) ? $this->value->accent->getValue() : $this->value->accent?->getValue(),
                 ];
             default:
                 return [
@@ -120,6 +120,9 @@ class UploadResult2 extends MapResult {
         }
     }
 
+    function __toString(): string {
+        return $this->url->getValue();
+    }
 
     /******************* UPLOAD HANDLING **********************/
     function upload_filter($values) {

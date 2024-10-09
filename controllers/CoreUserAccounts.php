@@ -70,4 +70,11 @@ class CoreUserAccounts extends Crudable {
         return ['message' => "Are you sure you want to delete $document->fname $document->lname?"];
     }
     
+    function update_permissions($user_id) {
+        $array_of_permissions = $_POST;
+        $validated = $GLOBALS['auth']->permissions->validate($user_id, $array_of_permissions);
+        return $validated;
+    }
+    
+
 }

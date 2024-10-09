@@ -55,7 +55,9 @@ class ActionMenu extends EventTarget {
         headline.appendChild(this.headlineTitle);
         headline.appendChild(this.closeGlyph);
         this.wrapper.appendChild(this.actionMenuItems);
-        document.querySelector("main").appendChild(this.wrapper);
+        // If this element lives in main, we want to place its wrapper in main,
+        // otherwise, we want it in the body tag.
+        this.button.closest("main,body").appendChild(this.wrapper);
         this.closeGlyph.addEventListener("mousedown", () => this.closeMenu())
     }
 

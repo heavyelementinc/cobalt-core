@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\ResponseInterface;
 use ReflectionClass;
 use RuntimeException;
 
@@ -18,6 +19,13 @@ abstract class Base extends Database {
     
     const STATUS_CHECK_OK   = 0;
     const STATUS_CHECK_FAIL = 1;
+
+    const ERROR_HANDLING = [
+        "CONTINUE_REQUEST" => 0,
+        "RESTART_REQUEST" => 1,
+        "ABORT_REQUEST" => 2,
+        "UNHANDLED_ERROR" => 10,
+    ];
 
     public Config $config;
     public bool $configured = false;
@@ -93,11 +101,12 @@ abstract class Base extends Database {
      * @param array $data - Any data to be submitted with the request
      * @param array $headers - Any additional headers to apply to the request
      * @param bool $authenticate - Automatically add authentication headers/params to this request
-     * @return array - Fields include 'response' (decoded response body), 'headers' (response headers), and 'result' (ResponseInterface)
-     * @throws GuzzleException 
-     * @throws RuntimeException 
+     * @return array{response:ResponseInterface|null, headers:array, result:mixed, error: ClientException|null}
+     * @throws GuzzleException
+     * @throws RuntimeException
+     * @throws IntegrationRemoteException
      */
-    public function fetch($method, $action, $data = [], $headers = [], $authenticate = true) {
+    public function fetch(string $method, string $action, array $data = [], array $headers = [], bool $authenticate = true):array {
         $client = new Client();
         $method_type = strtoupper($method);
         $headers = $this->requestHeaders($headers);
@@ -109,10 +118,24 @@ abstract class Base extends Database {
         }
 
         if($authenticate) $this->config->authenticate($rq, $client);
+        $request = [];
         try {
             $request = $client->request($method_type, $action, $rq);
         } catch(ClientException $error) {
-            throw new IntegrationRemoteException($error->getMessage(), $error);
+            $errorHandlingResult = $this->handleError($error, $request);
+            switch($errorHandlingResult) {
+                case self::ERROR_HANDLING['ABORT_REQUEST']:
+                    return ['response' => null, 'headers' => [], 'result' => null, 'error' => $error];
+                case self::ERROR_HANDLING['CONTINUE_REQUEST']:
+                    break;
+                case self::ERROR_HANDLING['RESTART_REQUEST']:
+                    return $this->fetch($method, $action, $data, $headers, $authenticate);
+                case self::ERROR_HANDLING['UNHANDLED_ERROR']:
+                default:
+                    $response = $error->getResponse();
+                    $responseBodyAsString = $response->getBody()->getContents();
+                    throw new IntegrationRemoteException($responseBodyAsString, $error);
+            }
         }
         $response = $request->getBody()->getContents();
         $responseHeaders = $request->getHeaders();
@@ -120,14 +143,18 @@ abstract class Base extends Database {
         if(strpos($responseHeaders['Content-Type'][0], 'json')) $result = json_decode($response, true);
         else if(strpos($responseHeaders['Content-Type'][0], 'urlencoded')) parse_str($response, $result);
         else $result = $response;
-        return ['response' => $result, 'headers' => $responseHeaders, 'result' => $response];
+        return ['response' => $result, 'headers' => $responseHeaders, 'result' => $response, 'error' => null];
+    }
+
+    public function handleError($error, &$request):int {
+        return self::ERROR_HANDLING['UNHANDLED_ERROR'];
     }
 
     public function requestHeaders(array $headers = [], bool $authenticate = false): array {
         return $headers;
     }
 
-    public function requestBody(mixed $data) {
+    public function requestBody(mixed $data):array {
         // return $data;
         switch((int)$this->config->__requestEncoding) {
             case REQUEST_ENCODE_JSON:

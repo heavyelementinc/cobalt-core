@@ -514,6 +514,11 @@ class PageMap extends PersistanceMap {
         return $html . "</div>";
     }
 
+    #[Prototype]
+    protected function get_author_meta_tags() {
+        
+    }
+
     function __set_manager(?Database $manager = null):?Database {
         return new PageManager();
     }

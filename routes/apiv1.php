@@ -32,15 +32,15 @@ if (app('Auth_logins_enabled')) {
         Route::s_put("/me/totp/enroll",    "UserAccounts@totp_enroll");
         Route::s_delete("/me/totp/unenroll", "UserAccounts@totp_unenroll");
     }
-    Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
-    Route::s_put("/user/{id}/permissions", "UserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
-    Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
+    Route::s_put("/core-user-accounts/{id}/permissions", "CoreUserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
+    // Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
     Route::s_put("/user/{id}/push",        "UserAccounts@update_push",        ['permission' => 'Auth_allow_editing_users']);
     // Route::s_put("/user/{id}/push/enrollment", "UserAccounts@update_push_enrollment", ['permission' => 'Auth_allow_editing_users']);
-    Route::s_put("/user/{id}/password",    "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
-    Route::s_post("/user/{id}/avatar",     "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_put("/core-user-accounts/{id}/password",    "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_post("/user/{id}/avatar",     "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
     Route::s_put("/user/password",         "UserAccounts@change_my_password", ['permission' => 'self']);
-    Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
+    // Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
 
     CoreUserAccounts::apiv1();
 
@@ -57,7 +57,6 @@ if (app('Auth_logins_enabled')) {
     ]);
 
     Route::s_delete("/sessions/{id}", "UserAccounts@log_out_session_by_id");
-    
 }
 
 if (app('Web_main_content_via_api')) {

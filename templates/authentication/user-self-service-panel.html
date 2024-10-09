@@ -9,6 +9,7 @@
 <tab-nav>
     <nav>
         <a href="#basic"><i name="card-account-details-outline"></i> Basic Info</a>
+        <a href="#social"><i name="share-variant"></i> Social Accounts</a>
         <a href="#security"><i name="shield-lock-open"></i> Security</a>
         <a href="#preferences"><i name="tune"></i> Preferences</a>
         {{!links}}
@@ -50,6 +51,9 @@
             </fieldset>
         </div>
     </form-request>
+    <div id="social">
+        @view("/authentication/user-management/social-accounts.html");
+    </div>
     <div id="security" class="vbox">
         <hgroup><h2><i name="shield-lock-open"></i> Account Security</h2></hgroup>
         <div class="vbox">

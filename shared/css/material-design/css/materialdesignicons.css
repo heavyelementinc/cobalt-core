@@ -18,6 +18,16 @@ i[name]:before {
   -moz-osx-font-smoothing: grayscale;
 }
 
+i[name="fediverse"]::before {
+  content: "\2042";
+  font-family: monospace;
+  font-weight: bold;
+}
+
+i[name="patreon"]::before {
+  content: "data:image/svg+xml,%3Csvg width='150mm' height='150mm' viewBox='0 0 150 150' id='svg1' xml:space='preserve' xmlns:inkscape='http://www.inkscape.org/namespaces/inkscape' xmlns:sodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd' xmlns='http://www.w3.org/2000/svg' xmlns:svg='http://www.w3.org/2000/svg'%3E%3Csodipodi:namedview id='namedview1' pagecolor='transparent' bordercolor='transparent' borderopacity='0.25' showguides='false' /%3E%3Cdefs id='defs1' /%3E%3Cg inkscape:label='Layer 1' inkscape:groupmode='layer' id='layer1'%3E%3Cpath style='fill:%23FFF' d='M 37.173311,149.50656 C 21.472075,147.31483 11.520736,130.07294 8.0802779,99.099401 7.1650198,90.859561 6.9028188,85.639181 6.8980388,75.561192 6.8931808,65.31772 7.1619498,61.349081 8.3225549,54.526816 11.752099,34.367282 20.890645,19.688594 35.369909,11.082303 53.427862,0.34888492 82.57222,-2.7027501 106.71225,3.6122209 c 13.06212,3.417019 22.99375,10.2015931 29.80284,20.3591531 3.14333,4.689099 5.05711,9.295992 6.09852,14.680442 0.69883,3.613243 0.63968,10.638952 -0.12571,14.93062 -2.06218,11.562929 -8.49621,21.500099 -18.21111,28.126485 -5.28226,3.60296 -9.65645,5.46143 -18.19555,7.73081 -8.04314,2.13757 -10.95421,3.13651 -15.08125,5.17518 -4.09119,2.02096 -7.17121,4.27394 -10.20617,7.465629 -3.86941,4.06924 -6.12071,7.89615 -11.082405,18.83861 -6.455222,14.23628 -10.096906,20.00245 -15.142511,23.97636 -2.251623,1.77337 -5.991843,3.63726 -8.428065,4.20002 -2.1917,0.50628 -6.778954,0.71654 -8.967528,0.41103 z' id='path1' sodipodi:nodetypes='csssssssssssssssc' /%3E%3C/g%3E%3C/svg%3E"
+}
+
 i[name="ab-testing"]::before {
   content: "\F01C9";
 }

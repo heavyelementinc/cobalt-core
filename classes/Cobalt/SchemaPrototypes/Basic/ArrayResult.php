@@ -18,14 +18,23 @@ use MongoDB\Model\BSONArray;
 use Traversable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Countable;
 use MongoDB\BSON\Persistable;
 use MongoDB\Model\BSONDocument;
 use TypeError;
 
-class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Traversable{
+/**
+ *  * hydrate - <bool> if false, arrays won't be hydrated
+ * @package Cobalt\SchemaPrototypes\Basic
+ */
+class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Traversable, Countable{
     use ResultTranslator, Fieldable;
     protected $type = "array";
     protected $__index = 0;
+
+    public function count(): int {
+        return count($this->value);
+    }
 
     function setValue($value):void {
         $this->originalValue = $value;

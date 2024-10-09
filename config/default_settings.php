@@ -1552,6 +1552,18 @@ const DEFAULT_DEFINITIONS = [
             'type' => 'string'
         ]
     ],
+    "SocialMedia_fediverse" => [
+        'default' => '',
+        'meta' => [
+            'group' => 'Basic',
+            'subgroup' => 'Social',
+            'name' => "<i name=\"fediverse\"></i> Fediverse",
+            "type" => "url"
+        ],
+        'validate' => [
+            'type' => 'string'
+        ]
+    ],
     "SocialMedia_facebook" => [
         'default' => '',
         'meta' => [

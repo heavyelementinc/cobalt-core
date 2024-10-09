@@ -4,9 +4,10 @@
         <label><span id="uname">{{doc.uname}}</span> &mdash; <span id='user_id'>{{doc._id}}</span></label>
     </div>
     <action-menu title="Manage User">
-        <option method="DELETE" action="/api/v1/user/{{doc._id}}/avatar">Reset Avatar to Default</option>
+        {{!delete_option}}
+        <!-- <option method="DELETE" action="/api/v1/user/{{doc._id}}/avatar">Reset Avatar to Default</option>
         <option method="DELETE" action="/api/v1/user/{{doc._id}}/delete" dangerous>Delete {{doc.fname}}</option>
-        <option method="PUT" action="/api/v1/user/{{doc._id}}/update" value="{&quot;flags.locked&quot;: true}">Lock user account</option>
+        <option method="PUT" action="/api/v1/user/{{doc._id}}/update" value="{&quot;flags.locked&quot;: true}">Lock user account</option> -->
     </action-menu>
 </hgroup>
 
@@ -21,8 +22,7 @@
             <a href="#sessions"><i name="list-status"></i> Sessions</a>
         </nav>
         <section id="basics" class="">
-            <form-request id="basic-info-form" method='PUT' action="/api/v1/user/{{doc._id}}/update"
-                autosave="autosave">
+            <form-request id="basic-info-form" method='{{method}}' action="{{endpoint}}" autosave="autosave">
                 <fieldset>
                     <legend>Basic Info</legend>
                 <ul class="list-panel">
@@ -48,7 +48,7 @@
             </form-request>
     
     
-                <form-request id="profile-picture" method='POST' action="/api/v1/user/{{doc._id}}/avatar">
+                <form-request id="profile-picture" method='{{method}}' action="{{endpoint}}" autosave="autosave">
                     <fieldset>
                         <legend>Profile Picture</legend>
                         <ul class="list-panel">
@@ -61,7 +61,7 @@
         </section>
         {{!notifications}}
         <section id="permissions" class="drawer-list--item">
-            <form-request id="permissions-form" method="PUT" action="/api/v1/user/{{doc._id}}/permissions"
+            <form-request id="permissions-form" method="PUT" action="/api/v1/core-user-accounts/{{doc._id}}/permissions"
                 autosave="autosave">
                 <div style="flex-grow:1">
                     {{!permission_table.permissions}}
@@ -84,8 +84,8 @@
             <p>Placeholder section for {{doc.uname}}'s statistics</p>
         </section> -->
         <section id="manage" class="drawer-list--item">
-            <form-request id="account-flags" method="PUT" action="/api/v1/user/{{doc._id}}/update"
-                    autosave="autosave">
+            @view("/authentication/user-management/social-accounts.html");
+            <form-request id="account-flags"  method='{{method}}' action="{{endpoint}}" autosave="autosave">
                 <fieldset>
                     <legend>User State</legend>
                     <ul class="list-panel">
@@ -100,7 +100,7 @@
                     {{!account_flags}}
                 </fieldset>
             </form-request>
-            <form-request id="password-reset" method="PUT" action="/api/v1/user/{{doc._id}}/password">
+            <form-request id="password-reset" method='{{method}}' action="{{endpoint}}">
                 <fieldset>
                     <legend>Change Password</legend>
                     <ul class='list-panel'>
