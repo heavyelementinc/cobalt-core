@@ -182,7 +182,9 @@ trait ClientFSManager {
         $arbitrary_data = array_merge($arbitrary_data, ['meta' => $meta]);
 
         $thumb_id = $this->fs->upload($file_array,$index,$arbitrary_data);
-        $returnable = ['id' => $thumb_id, 'filename' => $this->filter_filename($file_array['name'])];
+        $result = $this->fs->findOne(['_id' => $thumb_id]);
+        // $returnable = ['id' => $thumb_id, 'filename' => $this->filter_filename($file_array['name'])];
+        $returnable = doc_to_array($result);
         if($meta) {
             $returnable['meta'] = $arbitrary_data['meta'];
         }

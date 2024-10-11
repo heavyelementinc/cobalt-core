@@ -101,7 +101,10 @@ class ImageResult extends UploadResult2 {
             $result = $this->upload_filter($value);
             
             $this->set_updates($result);
-            return $result;
+            return [
+                'ref' => $result['ref'],
+                'accent' => $result['accent'],
+            ];
         }
         
         $map = new GenericMap([], $this->schema['schema'] ?? $this->schema ?? [], "$this->name.");
@@ -114,7 +117,10 @@ class ImageResult extends UploadResult2 {
             unset($result->__validatedFields[$field]);
         }
 
-        return $result;
+        return [
+            'ref' => $result['ref'],
+            'accent' => $result['accent'],
+        ];
     }
 
     function set_updates($result) {

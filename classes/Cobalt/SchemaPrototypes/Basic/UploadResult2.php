@@ -15,6 +15,7 @@ use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 
@@ -127,10 +128,14 @@ class UploadResult2 extends MapResult {
 
     /******************* UPLOAD HANDLING **********************/
     function upload_filter($values) {
-        // Let's run checks on our values before we do any uploading of the file
-        // to our database. If validation fails, we don't want to have an orphaned
-        // file in the FS.
-        $values = $this->value->__validate($values);
+        if(!empty($values)) {
+            // Let's run checks on our values before we do any uploading of the file
+            // to our database. If validation fails, we don't want to have an orphaned
+            // file in the FS.
+            $values = $this->__getInstancedMap($values)->__validate($values);
+        } else {
+            $values = $this->__getInstancedMap($values);
+        }
 
         // If everything passed, let's grab our uploaded file
         $uploadedFiles = $this->__get_uploaded_files();
@@ -163,8 +168,8 @@ class UploadResult2 extends MapResult {
         if(count($errors) >= 1) throw new ValidationIssue(implode("\n", $errors));
         
         // Store our files
-        $this->storeFile($uploadedFiles[0], $values->__validatedFields);
-        return $this->value;
+        $result = $this->storeFile($uploadedFiles[0], $values->__validatedFields ?? []);
+        return $result;
     }
 
     public function storeFile(?array $result, array $mergedata = []) {
@@ -175,16 +180,15 @@ class UploadResult2 extends MapResult {
 
         // Upload our main file to the database filesystem
         $media = $this->upload_file($filename[0], array_merge($result, $map));
-        
         // Let's reformat the data we are storing...
         $resource = [
-            // 'url'      => "/res/fs/$filename[0]",
+            'url'      => "/res/fs/$filename[0]",
             'ref'      => $media['ref'],
-            // 'mimetype' => $media['meta']['mimetype'],
-            // 'height'   => $media['meta']['height'],
-            // 'width'    => $media['meta']['width'],
+            'mimetype' => $media['meta']['mimetype'],
+            'height'   => $media['meta']['height'],
+            'width'    => $media['meta']['width'],
             'accent'   => $media['meta']['accent_color'],
-            // 'alt'      => $mergedata['alt'] ?? '',
+            'alt'      => $mergedata['alt'] ?? '',
         ];
 
         if(isset($this->schema['thumbnail'])) {
@@ -196,8 +200,8 @@ class UploadResult2 extends MapResult {
                 // $resource['thumb_width'] = $thumbnail['meta']['height'];
             }
         }
-        $this->setValue($resource);
-        return $result;
+        $doc = new BSONDocument($resource);
+        return $doc;
     }
 
     /**
@@ -291,14 +295,16 @@ class UploadResult2 extends MapResult {
         // Practically speaking, the value we get will only be in one of
         // the following formats
         // NEW format
-        if($value->ref instanceof ObjectId) $ids[] = $value->ref;
+        if(is_array($value) && $value['ref'] instanceof ObjectId) $ids[] = $value['ref'];
+        else if($value->ref instanceof ObjectId) $ids[] = $value->ref;
         // OLD format
         else if($value->media->ref instanceof ObjectId) $ids[] = $value->media->ref;
         // Weird middle format
         else if($value->media->id instanceof ObjectId) $ids[] = $value->media->id;
 
         // NEW format
-        if($value->thumb_ref instanceof ObjectId) $ids[] = $value->thumb_ref;
+        if(is_array($value) && $value['thumb_ref'] instanceof ObjectId) $ids[] = $value['thumb_ref'];
+        else if($value->thumb_ref instanceof ObjectId) $ids[] = $value->thumb_ref;
         // OLD format
         else if($value->thumb->ref instanceof ObjectId) $ids[] = $value->thumb->ref;
         // Weird middle format

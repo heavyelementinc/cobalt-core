@@ -99,15 +99,16 @@ class FileSystem {
         else $file_array = $file_data;
         $farray = $this->validate_file_array($file_array);
         // Let's prevent duplication
-        // $md5 = md5_file($file_data['tmp_name']);
-        // $found = $this->findOne(['md5' => $md5]);
-        // if($found) {
-        //     $id = $found->_id;
-        //     $setQuery = ['$addToSet' => ['filename' => $farray['name']]];
-        //     if(is_string($found->filename)) $setQuery = ['$set' => ['filename' => array_unique([$found->filename, $farray['name']])]];
-        //     $this->updateOne(['_id' => $id], $setQuery);
-        //     return $id;
-        // } else {
+        $md5 = md5_file($file_data['tmp_name']);
+        $deduplication_search_result = $this->findOne(['md5' => $md5]);
+        if($deduplication_search_result !== null) {
+            $id = $deduplication_search_result->_id;
+            // $setQuery = ['$addToSet' => ['filename' => $farray['name']]];
+            // if(is_string($deduplication_search_result->filename)) $setQuery = ['$set' => ['filename' => array_unique([$deduplication_search_result->filename, $farray['name']])]];
+            // $this->updateOne(['_id' => $id], $setQuery);
+            return $id;
+        }
+        // else {
             $resource = fopen($farray['tmp_name'], 'r');
             if($resource === false) throw new \Exceptions\HTTP\ServiceUnavailable("The upload returned an unexpected error");
             $id = $this->bucket->uploadFromStream($farray['name'], $resource);
