@@ -54,6 +54,8 @@ class PageMap extends PersistanceMap {
     const BIO_AVATAR_RADIUS_ROUNDED  = 0b0001;
     const BIO_AVATAR_RADIUS_CIRCULAR = 0b0010;
 
+    const METADATA_FEDIVERSE_CREDIT_PUBLICATION = 0b0001;
+
     public function __get_schema(): array {
         $this->__set_index_checkbox_state(true);
         $schema = [
@@ -336,6 +338,12 @@ class PageMap extends PersistanceMap {
                         return $this->tags->join(", ");
                     },
                     'searchable' => true
+                ]
+            ],
+            "metadata_flags" => [
+                new BinaryResult,
+                'valid' => [
+                    self::METADATA_FEDIVERSE_CREDIT_PUBLICATION => "Credit Publication on Fediverse"
                 ]
             ],
             'view' => [

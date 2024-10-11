@@ -101,10 +101,12 @@ abstract class Page extends Crudable {
         return view($page::VIEW_TYPE[$v]);
     }
 
-    private function get_fediverse_tag($page) {
+    private function get_fediverse_tag(PageMap $page) {
         $author_details = $page->author->getValue();
         $value = "";
-        if($author_details) $value = (string)$author_details->fediverse_profile;
+        if($author_details) {
+            if(!$page->metadata_flags->and($page::METADATA_FEDIVERSE_CREDIT_PUBLICATION)) $value = (string)$author_details->fediverse_profile;
+        }
         if(!$value) {
             $value = __APP_SETTINGS__['SocialMedia_fediverse'];
             if(!$value) return "";
