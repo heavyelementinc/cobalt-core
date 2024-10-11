@@ -70,6 +70,8 @@ abstract class Page extends Crudable {
         // One more check to see if this page requires an account, throw an Unauthorized so they are prompted to log in
         if($page->flags->and($page::FLAGS_REQUIRES_ACCOUNT) && !session()) throw new Unauthorized("You must be logged in to view this content");
 
+        
+
         // Set up our (messy) variable table
         add_vars([
             'title' => $page['title'],
@@ -80,7 +82,7 @@ abstract class Page extends Crudable {
                 'image' => $page->splash_image->filename(),
                 'image_x' => $page->splash_image->width(),
                 'image_y' => $page->splash_image->height(),
-                'author_tags' => $page->author->getValue()->fediverse_profile->meta_tag()
+                'author_tags' => $this->get_fediverse_tag($page),
             ],
             'splash' => $this->splash($page),
             'aside' => $this->aside($page),
@@ -97,6 +99,18 @@ abstract class Page extends Crudable {
         // Get our view and check if it's in the view types
         $v = (string)$page->view;
         return view($page::VIEW_TYPE[$v]);
+    }
+
+    private function get_fediverse_tag($page) {
+        $author_details = $page->author->getValue();
+        $value = "";
+        if($author_details) $value = $author_details->fediverse_profile;
+        if(!$value) {
+            $fedi = __APP_SETTINGS__['SocialMedia_fediverse'];
+            if(!$fedi) return "";
+            $value = fediverse_href_to_user_tag($fedi);
+        }
+        return "<meta name=\"fediverse:creator\" content=\"$value\" />";
     }
 
     function splash(PageMap $page) {

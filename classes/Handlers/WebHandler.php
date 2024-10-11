@@ -151,6 +151,7 @@ class WebHandler implements RequestHandler {
         if(__APP_SETTINGS__['debug_exceptions_publicly']) $embed .= "<pre class=\"error--message\">" . base64_encode($e->getMessage()) . "</pre>";
 
         $this->add_vars([
+            'versionHash' => VERSION_HASH,
             'title' => $e->status_code,
             'message' => $message,
             'embed' => $embed,
@@ -252,6 +253,7 @@ class WebHandler implements RequestHandler {
         
         $header = $this->load_template($this->header_template);
         $this->add_vars([
+            'versionHash' => VERSION_HASH,
             'header_nav' => $this->header_nav(),
             'masthead' => (app("display_masthead")) ? $masthead : "",
             'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
@@ -382,7 +384,7 @@ class WebHandler implements RequestHandler {
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
             if ($generate_script_content === false) {
-                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
+                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{versionHash}}\"></script>";
             } else {
                 $files = files_exist([
                     __APP_ROOT__ . "/src/$package",
@@ -396,13 +398,13 @@ class WebHandler implements RequestHandler {
         foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
             if (!file_exists($private)) continue;
             if ($generate_script_content) {
-                $script_tags .= "<script src='$public?{{app.version}}'></script>";
+                $script_tags .= "<script src='$public?{{versionHash}}'></script>";
             } else {
                 $compiled .= "\n\n" . file_get_contents($private);
             }
         }
 
-        if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
+        if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
 
         if ($compiled !== "") {
             $minifier = new \MatthiasMullie\Minify\JS();
@@ -437,7 +439,7 @@ class WebHandler implements RequestHandler {
     //     $compiled = "";
     //     foreach (app('packages') as $package) {
     //         if ($debug) {
-    //             $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
+    //             $script_tags .= "<script src=\"/core-content/js/$package?{{versionHash}}\"></script>";
     //         } else {
     //             $files = files_exist([
     //                 __APP_ROOT__ . "/src/$package",
@@ -450,13 +452,13 @@ class WebHandler implements RequestHandler {
     //     foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
     //         if (!file_exists($private)) continue;
     //         if ($debug) {
-    //             $script_tags .= "<script src='$public?{{app.version}}'></script>";
+    //             $script_tags .= "<script src='$public?{{versionHash}}'></script>";
     //         } else {
     //             $compiled .= "\n\n" . file_get_contents($private);
     //         }
     //     }
 
-    //     if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
+    //     if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
 
     //     if ($compiled !== "") {
     //         $minifier = new \MatthiasMullie\Minify\JS();
@@ -485,7 +487,7 @@ class WebHandler implements RequestHandler {
                 $path = "/res/css/";
                 if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
                 else if(empty($files)) throw new NotFound("That file does not exist");
-                $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{versionHash}}\">";
             } else {
                 $compiled .= "\n\n/* $package */";
                 $compiled .= file_get_contents($files[0]);
@@ -496,12 +498,12 @@ class WebHandler implements RequestHandler {
             $file = file_exists($private);
             if (!$file) continue;
             if ($package_style_content === true) {
-                $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{versionHash}}\">";
             } else {
                 $compiled .= "\n\n" . file_get_contents($file);
             }
         }
-        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
+        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{versionHash}}\">";
 
         $minify = __APP_SETTINGS__['Package_style_minify'];
         if(config()['bootstrap_mode'] === COBALT_BOOSTRAP_ALWAYS) $minify = false;

@@ -5,6 +5,13 @@ use Drivers\UTCDateTime as DriversUTCDateTime;
 use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationIssue;
 
+function fediverse_href_to_user_tag($href) {
+    // https://mastodon.social/@heavyelementinc
+    $url = parse_url($href);
+    $username = substr($url['path'], 1);
+    return "$username@$url[host]";
+}
+
 function phone_number_format($number, $format = "(ddd) ddd-dddd") {
     if (!$number) return "";
     $num_index = 0;

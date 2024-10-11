@@ -142,6 +142,7 @@ class UserPersistance extends PersistanceMap {
                 },
                 'meta_tag' => function () {
                     $value = $this->fediverse_profile->getValue();
+                    if(!$value) $value = __APP_SETTINGS__['SocialMedia_fediverse'];
                     if(!$value) return "";
                     return "<meta name=\"fediverse:creator\" content=\"$value\" />";
                 }

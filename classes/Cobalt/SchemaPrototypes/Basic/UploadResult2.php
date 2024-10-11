@@ -14,6 +14,7 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use Exceptions\HTTP\BadRequest;
+use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 
@@ -273,21 +274,70 @@ class UploadResult2 extends MapResult {
     }
 
     /**
-     * TODO: Replace with with a value that makes more sense
      * Practically, just query the fs.files collection based on the IDs
      * @param mixed $value 
      * @return void 
      */
-    function setValue(mixed $value): void {
+    function setValue(mixed $value = null): void {
+        $this->originalValue = $value; // Store our original value
+
+        // Init our FS client
         $this->__initFS();
-        $ids = [$value['ref'] ?? $value['media']->id];
-        // if(!$ids[0]) 
-        if(isset($value['thumb_ref'])) $ids[] = $value['thumb_ref'];
-        if(isset($value['thumb']->id)) $ids[] = $value['thumb']->_id;
-        $files = $this->__collection->find(['_id' => ['$in' => $ids]]);
-        $this->originalValue = $value;
-        // If we don't have a ref set, set as default
-        if ($value === null) $this->value = $this->schema['default'];
+
+        $ids = [];
+        // If the value is just an ObjectId, add it to our list
+        if($value instanceof ObjectId) $ids[] = $value;
+        
+        // Practically speaking, the value we get will only be in one of
+        // the following formats
+        // NEW format
+        if($value->ref instanceof ObjectId) $ids[] = $value->ref;
+        // OLD format
+        else if($value->media->ref instanceof ObjectId) $ids[] = $value->media->ref;
+        // Weird middle format
+        else if($value->media->id instanceof ObjectId) $ids[] = $value->media->id;
+
+        // NEW format
+        if($value->thumb_ref instanceof ObjectId) $ids[] = $value->thumb_ref;
+        // OLD format
+        else if($value->thumb->ref instanceof ObjectId) $ids[] = $value->thumb->ref;
+        // Weird middle format
+        else if($value->thumb->id instanceof ObjectId) $ids[] = $value->thumb->id;
+
+        // Set up our query
+        $query = ['_id' => ['$in' => $ids]];
+
+        // Let's double check if we have at least one ID to look up
+        if(empty($ids)) {
+            $filenames = [];
+            // If we don't, let's build a list of filenames to look up instead
+            if(isset($value->media->url)) $filenames[] = str_replace("/res/fs/","",$value->media->url);
+            if(isset($value->media->filename)) $filenames[] = str_replace("/res/fs/","",$value->media->filename);
+            if(isset($value->thumbnail->url)) $filenames[] = str_replace("/res/fs/","",$value->thumbnail->url);
+            if(isset($value->thumbnail->filename)) $filenames[] = str_replace("/res/fs/","",$value->thumbnail->filename);
+            
+            // Set up our query one more time
+            $query = ['filename' => ['$in' => $filenames]];
+        }
+
+        // Let's query for those files
+        $files = $this->__collection->find($query);
+        
+        if($files === null) {
+            // If value is null, then we should just return the default
+            $this->value = $this->__getInstancedMap($this->schema['default'] ?? [
+                'ref' => null,
+                'url' => 'missing.jpg',
+                'mimetype' => 'image/jpeg',
+                'height' => 0,
+                'width' => 0,
+                'accent' => "#000000",
+                'alt' => "Missing",
+            ]);
+            return;
+        }
+
+        // Now that we have our files
         $details = [];
         $loop_count = 0;
         foreach($files as $file) {
@@ -305,9 +355,9 @@ class UploadResult2 extends MapResult {
     }
 
     function setMediaDetails($media, &$details) {
+        // $details['ref']      = $media['ref'];
         $details['ref']      = $media['_id'];
-        $details['url']      = "/res/fs$media[filename]";
-        $details['ref']      = $media['ref'];
+        $details['url']      = "/res/fs" . (($media['filename'][0] === "/") ? $media['filename'] : "/$media[filename]");
         $details['mimetype'] = $media['meta']['mimetype'];
         $details['height']   = $media['meta']['height'];
         $details['width']    = $media['meta']['width'];
@@ -352,4 +402,9 @@ class UploadResult2 extends MapResult {
             ]
         ];
     }
+
+    // function __get($name) {
+    //     $this->setValue();
+    //     return parent::__get($name);
+    // }
 }

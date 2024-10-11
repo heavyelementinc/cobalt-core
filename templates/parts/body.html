@@ -11,7 +11,7 @@
     <title data-suffix=" | {{app.app_name}}">{{title}} | {{app.app_name}}</title>
     <meta name="description" content="{{app.opengraph.description}}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="version" content='{{app.version}}'>
+    <meta name="version" content='{{versionHash}}'>
     <meta name="theme-color" content="#fafafa">
     <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
     @maybe_with("$og_template");
@@ -26,7 +26,7 @@
     @style_meta@
     {{!html_head_binding}}
     @router_table@
-    <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{app.version}}">
+    <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{versionHash}}">
     <script>
         window.__ = JSON.parse(atob('@get_exportables_as_json(true);'));
     </script>
@@ -91,6 +91,6 @@
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="/core-content/js/editorjs/simpleimage.js"></script>
     @script_content@
-    <!-- <script src="/core-content/js/moduleshim.js?v={{app.version}}" type="module"></script> -->
+    <!-- <script src="/core-content/js/moduleshim.js?v={{versionHash}}" type="module"></script> -->
 </body>
 </html>

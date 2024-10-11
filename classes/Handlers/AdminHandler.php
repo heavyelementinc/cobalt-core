@@ -32,7 +32,7 @@ class AdminHandler extends WebHandler {
         //     'settings' => ($settings) ? "<option icon='cog' onclick=\"Cobalt.router.location = ''; return true;\">Settings</option>" : ""
         // ]
 
-        $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{app.version}}'>";
+        $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{versionHash}}'>";
 
         $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='admin-panel--nav-group directory--group'>";
     
@@ -70,7 +70,7 @@ class AdminHandler extends WebHandler {
     //         if ($debug === true) {
     //             $path = "/res/css/";
     //             if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
-    //             $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
+    //             $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{versionHash}}\">";
     //         } else {
     //             $compiled .= "\n\n" . file_get_contents($files[0]);
     //         }
@@ -80,12 +80,12 @@ class AdminHandler extends WebHandler {
     //         $file = file_exists($private);
     //         if (!$file) continue;
     //         if ($debug === true) {
-    //             $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
+    //             $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{versionHash}}\">";
     //         } else {
     //             $compiled .= "\n\n" . file_get_contents($file);
     //         }
     //     }
-    //     if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/admin.css?{{app.version}}\">";
+    //     if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/admin.css?{{versionHash}}\">";
 
     //     if ($compiled !== "") {
     //         $minifier = new \MatthiasMullie\Minify\CSS();

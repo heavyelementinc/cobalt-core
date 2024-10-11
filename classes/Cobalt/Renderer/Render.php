@@ -31,6 +31,7 @@ class Render {
         $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
         $this->stock_vars = [
             'app'  => __APP_SETTINGS__,
+            'versionHash' => VERSION_HASH,
             'get'  => $_GET,
             'post' => $_POST,
             // '$main_id' => 'main-content',
