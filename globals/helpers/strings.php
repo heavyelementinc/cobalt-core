@@ -5,7 +5,8 @@ use Drivers\UTCDateTime as DriversUTCDateTime;
 use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationIssue;
 
-function fediverse_href_to_user_tag($href) {
+function fediverse_href_to_user_tag(string $href) {
+    if(!$href) return;
     // https://mastodon.social/@heavyelementinc
     $url = parse_url($href);
     $username = substr($url['path'], 1);

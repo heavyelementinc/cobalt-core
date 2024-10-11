@@ -105,11 +105,11 @@ abstract class Page extends Crudable {
         $author_details = $page->author->getValue();
         $value = "";
         if($author_details) $value = $author_details->fediverse_profile;
-        if(!$value) {
-            $fedi = __APP_SETTINGS__['SocialMedia_fediverse'];
-            if(!$fedi) return "";
-            $value = fediverse_href_to_user_tag($fedi);
+        if(!$value->value) {
+            $value = __APP_SETTINGS__['SocialMedia_fediverse'];
+            if(!$value) return "";
         }
+        $value = fediverse_href_to_user_tag($value);
         return "<meta name=\"fediverse:creator\" content=\"$value\" />";
     }
 
