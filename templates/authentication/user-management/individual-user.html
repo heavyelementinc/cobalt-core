@@ -39,10 +39,10 @@
                         <label>Email</label>
                         <input type="email" name="email" value="{{doc.email}}">
                     </li>
-                    <!-- <li>
-                        <label>Biography</label>
-                        <block-editor name="biography"><script type="application/json">{{doc.biography}}</script></block-editor>
-                    </li> -->
+                    <li>
+                        <label>Default Author Bio</label>
+                        {{doc.default_bio_blurb.field()}}
+                    </li>
                 </ul>
                 </fieldset>
             </form-request>

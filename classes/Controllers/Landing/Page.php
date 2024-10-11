@@ -150,7 +150,9 @@ abstract class Page extends Crudable {
         // Let's filter out any irrelevant stuff
         if(!$page->include_bio->getValue()) return "";
         // if(!$page->author->get_name("full")) return "";
-        if(!(string)$page->bio) return "";
+        $bio = (string)$page->bio;
+        if(!$bio) $bio = (string)$page->author->getValue()->default_bio_blurb;
+        if(!$bio) return "";
         
         // Let's determine how our avatar should look.
         $avatar_classes = "";

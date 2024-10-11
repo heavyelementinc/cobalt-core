@@ -244,7 +244,7 @@ class UserAccounts extends \Controllers\Pages {
         if(!$session) throw new Unauthorized("You're not logged in");
         
         // Only allow these fields to be updated through this method
-        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar', 'fediverse_profile', 'youtube_profile', 'instagram_profile', 'facebook_profile', 'twitter_profile'];
+        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar', 'fediverse_profile', 'youtube_profile', 'instagram_profile', 'facebook_profile', 'twitter_profile', 'default_bio_blurb'];
         $update = [];
         foreach($filter as $key){
             if(key_exists($key, $_POST)) $update[$key] = $_POST[$key];

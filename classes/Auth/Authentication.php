@@ -26,10 +26,10 @@ class Authentication {
         if (!app("Auth_user_accounts_enabled")) return false;
 
         $this->session = new CurrentSession();
+        $this->permissions = new Permissions();
         if (isset($this->session->session->user_id)) $ua = new UserCRUD();
         else return $this;
         $this->user = $ua->getUserById($this->session->session->user_id);
-        $this->permissions = new Permissions();
         if (!$this->user) {
             $GLOBALS['session'] = null;
             return $this;
