@@ -66,6 +66,8 @@ class AsyncFetch extends EventTarget {
 
             this.client = client;
 
+            if(!this.method) throw new TypeError(`this.method must not be an empty string`);
+            if(!this.string) console.warn("this.action is an empty string. This probably isn't right.");
             client.open(this.method, this.action);
 
             for(const h in this.requestHeaders) {

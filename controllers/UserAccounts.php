@@ -4,6 +4,7 @@ use Auth\AdditionalUserFields;
 use Auth\MultiFactorManager;
 use Auth\SessionManager;
 use \Auth\UserCRUD;
+use Auth\UserPersistance;
 use Auth\UserSchema;
 use \Auth\UserValidate;
 use Cobalt\Notifications\PushNotifications;
@@ -13,6 +14,7 @@ use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\BadMethodCallException;
 use Validation\Exceptions\ValidationFailed;
+use Validation\Exceptions\ValidationIssue;
 
 class UserAccounts extends \Controllers\Pages {
 
@@ -230,6 +232,8 @@ class UserAccounts extends \Controllers\Pages {
             'links' => $links,
             'extensions' => $extensions,
             'sessions' => "<div id='sessions'>$sessions</div>",
+            'method' => "POST",
+            'endpoint' => "/api/v1/user/me/"
         ]);
 
         return view("/authentication/user-self-service-panel.html");
@@ -240,14 +244,17 @@ class UserAccounts extends \Controllers\Pages {
         if(!$session) throw new Unauthorized("You're not logged in");
         
         // Only allow these fields to be updated through this method
-        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar'];
+        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar', 'fediverse_profile', 'youtube_profile', 'instagram_profile', 'facebook_profile', 'twitter_profile'];
         $update = [];
         foreach($filter as $key){
             if(key_exists($key, $_POST)) $update[$key] = $_POST[$key];
         }
 
-        $schema = new UserSchema();
-        $validated = $schema->validate($update);
+        if(empty($update)) throw new BadRequest("There are no fields to update","Your request could not be processed");
+
+        $schema = new UserPersistance();
+        
+        $validated = $schema->__validate($update)->__validatedFields;
 
         if(key_exists('avatar', $_POST)) {
             $avatar = $session['avatar'] ?? [];

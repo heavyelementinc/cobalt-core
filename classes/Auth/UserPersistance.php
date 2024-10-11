@@ -130,21 +130,22 @@ class UserPersistance extends PersistanceMap {
             ],
             'fediverse_profile' => [
                 new StringResult,
-                'filter' => function ($val) {
-                    $result = preg_match("/@\w*@\w*.\w*/",$val);
-                    switch($result) {
-                        case false:
-                            throw new ValidationIssue("Regex error occurred");
-                        case 0:
-                            throw new ValidationIssue("This does not appear to be a fediverse account");
-                    }
-                    return $val;
-                },
+                // 'filter' => function ($val) {
+                //     $result = preg_match("/@\w*@\w*.\w*/",$val);
+                //     switch($result) {
+                //         case false:
+                //             throw new ValidationIssue("Regex error occurred");
+                //         case 0:
+                //             throw new ValidationIssue("This does not appear to be a fediverse account");
+                //     }
+                //     return $val;
+                // },
                 'meta_tag' => function () {
                     $value = $this->fediverse_profile->getValue();
-                    if(!$value) $value = __APP_SETTINGS__['SocialMedia_fediverse'];
-                    if(!$value) return "";
-                    return "<meta name=\"fediverse:creator\" content=\"$value\" />";
+                    // if(!$value) $value = __APP_SETTINGS__['SocialMedia_fediverse'];
+                    // if(!$value) return "";
+                    // return "<meta name=\"fediverse:creator\" content=\"$value\" />";
+                    return fediverse_href_to_user_tag($value);
                 }
             ],
             'facebook_profile' => [
