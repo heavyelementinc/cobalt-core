@@ -104,8 +104,8 @@ abstract class Page extends Crudable {
     private function get_fediverse_tag($page) {
         $author_details = $page->author->getValue();
         $value = "";
-        if($author_details) $value = $author_details->fediverse_profile;
-        if(!$value->value) {
+        if($author_details) $value = (string)$author_details->fediverse_profile;
+        if(!$value) {
             $value = __APP_SETTINGS__['SocialMedia_fediverse'];
             if(!$value) return "";
         }
