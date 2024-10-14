@@ -346,6 +346,7 @@ class PageMap extends PersistanceMap {
                     self::METADATA_FEDIVERSE_CREDIT_PUBLICATION => "Credit Publication on Fediverse"
                 ]
             ],
+            "token" => new StringResult,
             'view' => [
                 new EnumResult,
                 'default' => 'default',

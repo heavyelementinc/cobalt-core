@@ -8,6 +8,7 @@ use Cobalt\Pages\PostMap;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
 use DateTime;
 use Drivers\Database;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;  
@@ -285,10 +286,16 @@ abstract class Page extends Crudable {
         return $result;
     }
 
+    function update($post_data, $id): array {
+        $this->api_validate_token($id);
+        return $post_data;
+    }
+
     public function edit($document): string {
         // add_vars(["autosave" => "autosave=\"form\""]);
         $token = random_string(12);
-        $this->manager->updateOne(['_id' => $document->id], ['$set' => ['token' => $token]]);
+        $result = $this->manager->updateOne(['_id' => $document->getId()], ['$set' => ['token' => $token]]);
+        
         $privileged_field_permission = ($this::className() === "Pages") ? 'Posts_enable_privileged_fields' : 'Pages_enable_privileged_fields';
         return view("/pages/landing/edit.html", [
             'admin_fields' => (has_permission($privileged_field_permission)) ? view("/pages/landing/admin-fields.html") : "",
@@ -309,7 +316,8 @@ abstract class Page extends Crudable {
             $headers = apache_request_headers();
             $header_token = $headers['X-Editor-Token'] ?? $headers['x-editor-token'];
         }
-        return $document_token === $header_token;
+        if($document_token !== $header_token) throw new BadRequest(ERROR_STALE_TOKEN, "Someone else is editing this article in another tab! Refresh this page to become the editor.");
+        return ;
     }
 
             

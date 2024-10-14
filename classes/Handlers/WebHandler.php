@@ -37,6 +37,7 @@ class WebHandler implements RequestHandler {
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
     var $encoding_mode;
+    /** @var Render */
     var $renderer;
     var $_stage_bootstrap;
     protected string $mainTemplateFilename;
@@ -604,7 +605,8 @@ class WebHandler implements RequestHandler {
             $this->renderer->set_body($this->template_body);
             if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
             $this->renderer->set_vars($this->template_vars);
-            return $this->renderer->execute();
+            $buffer = $this->renderer->execute();
+            return $buffer;
         } catch (TemplateException $e) {
             $debug = new Debugger($e);
             return $debug->render();

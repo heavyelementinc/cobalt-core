@@ -100,9 +100,9 @@ class InputArray extends AutoCompleteInterface {
         if(!Array.isArray(val)) throw new TypeError("Invalid assignment to input-array element");
         this.updateTags(val);
         this.values = val;
-        console.log(compare_arrays(this.was, this.values))
+        // console.log(compare_arrays(this.was, this.values))
         if(!compare_arrays(this.was,this.values)) {
-            console.log("input-array is firing a change event",{was: this.was, is: this.values});
+            // console.log("input-array is firing a change event",{was: this.was, is: this.values});
             this.dispatchEvent(new Event("input"));
             // this.dispatchEvent(new Event("change"));
         }
@@ -139,7 +139,7 @@ class InputArray extends AutoCompleteInterface {
         for(const i of this.querySelectorAll("option[selected='selected']")) {
             value.push(i.value);
         }
-        console.log(value);
+        // console.log(value);
 
         return value;
     }

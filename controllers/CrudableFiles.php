@@ -10,6 +10,7 @@ use Controllers\Crudable;
 use Drivers\Database;
 use Drivers\FSManager;
 use Exceptions\HTTP\BadRequest;
+use MongoDB\BSON\ObjectId;
 use MongoDB\DeleteResult;
 use MongoDB\Model\BSONDocument;
 
@@ -127,5 +128,22 @@ class CrudableFiles extends Crudable {
         $this->index = "/admin/crudable/file-picker.html";
         $this->manager->fromDataView = "/admin/crudable/file-picker-container.html";
         return $this->__index();
+    }
+
+    function reset_metadata($id) {
+        $_id = new ObjectId($id);
+        $this->initFS();
+        $tmp = "/tmp/". uniqid();
+        $stream = fopen($tmp, 'w+b');
+        $this->fs->getBucket()->downloadToStream($_id, $stream);
+        fclose($stream);
+        $metadata = $this->getMetadata($tmp);
+
+        update("[data-id=\"$id\"]", ['style' => [
+            '--contrast-color' => $metadata['contrast_color'],
+            '--accent-color' => $metadata['accent_color'],
+        ]]);
+        $this->updateMetadata(['_id' => $_id], ['$set' => ['meta' => $metadata]]);
+        unlink($tmp);
     }
 }

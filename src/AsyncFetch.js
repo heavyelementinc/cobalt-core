@@ -501,6 +501,10 @@ class AsyncUpdate {
 
     fn_style(el, value, instructions) {
         for(const v in value) {
+            if(v.indexOf("-") >= 0) {
+                el.style.setProperty(v, value[v]);
+                continue;
+            }
             el.style[v] = value[v];
         }
     }

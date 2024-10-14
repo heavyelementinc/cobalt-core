@@ -5,6 +5,7 @@ namespace Drivers;
 use Exception;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\RangeNotSatisfiable;
+use MongoDB\GridFS\Bucket;
 
 class FileSystem {
     // public $db = __APP_SETTINGS__['database'];
@@ -63,6 +64,10 @@ class FileSystem {
         fpassthru($stream);
 
         exit;
+    }
+
+    final public function getBucket(): Bucket {
+        return $this->bucket;
     }
 
     final public function count(array $filter) {

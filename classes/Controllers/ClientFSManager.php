@@ -6,6 +6,9 @@ use Drivers\FileSystem;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
+use League\ColorExtractor\Color as ColorExtractorColor;
+use League\ColorExtractor\ColorExtractor;
+use League\ColorExtractor\Palette;
 use MikeAlmond\Color\Color;
 use MongoDB\BSON\ObjectId;
 
@@ -289,10 +292,11 @@ trait ClientFSManager {
 
     public function renameFile($id, $submittedName = null) {
         $this->initFS();
-        if(is_null($submittedName)) $submittedName = $_POST['rename'];
+        if(is_null($submittedName)) $submittedName = $_POST['name'];
         $_id = new ObjectId($id);
         $q = ['_id' => $_id];
 
+        confirm("You're changing the name of this file. Any references to this file in your application will become broken.", $_POST);
         $newName = $this->prefixFilename($submittedName);
         $result = $this->fs->findOne($q);
 
@@ -328,6 +332,10 @@ trait ClientFSManager {
         }
         
         return $returnValues;
+    }
+
+    public function resetMetadata($id) {
+
     }
 
     /**
@@ -465,6 +473,38 @@ trait ClientFSManager {
     }
 
     public function getImageMetadata($path_to_file, $mime_type = null) {
+        if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
+        
+        $metadata = getimagesize($path_to_file);
+        if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($path_to_file)];
+        $metadata['mimetype'] = mime_content_type($path_to_file);
+        // $avg = \image_average_color($path_to_file, true);
+        // $img = imagecreatefromstring(file_get_contents($path_to_file));
+        // $scaled = imagescale($img, 1, 1);
+        // if($scaled !== false) {
+        //     $index = imagecolorat($scaled, 0, 0);
+        //     $rgb = imagecolorsforindex($scaled, $index);
+    
+        //     $avg = sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+        // } else $avg = "#fff";
+        $palette = Palette::fromFilename($path_to_file);
+        $extractor = new ColorExtractor($palette);
+        $colors = $extractor->extract(2);
+        $accent = ColorExtractorColor::fromIntToHex($colors[0]);
+        $secondary = ColorExtractorColor::fromIntToHex($colors[1]);
+        
+        $meta = [
+            'width' => $metadata[0],
+            'height' => $metadata[1],
+            'mimetype' => $metadata['mimetype'],
+            'accent_color' => $accent,
+            'secondary_color' => $secondary,
+            'contrast_color' => (Color::fromHex($accent)->isDark()) ? "#FFFFFF" : "#000000"
+        ];
+        return $meta;
+    }
+
+    public function getImageMetadataLegacy($path_to_file, $mime_type = null) {
         if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
         
         $metadata = getimagesize($path_to_file);

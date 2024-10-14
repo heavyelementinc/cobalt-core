@@ -165,6 +165,12 @@ Route::s_delete((new Options("/image-editor/{id}/{name}?","ImageEditor@delete"))
 Route::delete("/crudable-files/{id}", "CrudableFiles@delete_file_by_id", [
     'permission' => "Customizations_delete"
 ]);
+Route::post("/crudable-files/{id}/rename", "CrudableFiles@renameFile", [
+    'permission' => 'Customizations_modify'
+]);
+Route::get("/crudable-files/{id}/reset", "CrudableFiles@reset_metadata", [
+    'permission' => 'Customizations_modify'
+]);
 
 Posts::apiv1();
 Route::s_post('/posts/{id}/preview-key/', 'Posts@preview_key');

@@ -37,12 +37,14 @@
         position: relative;
         padding: 0;
         border: 0;
+        margin: 2px;
         border-radius: 0;
-        background-color: transparent;
+        background-color: var(--accent-color);
     }
     .fs-filemanager img {
         width: 200px;
         height: 200px;
+        object-fit: contain;
     }
     .fs-filemanager.thumbnail:before{ 
         content: \F0C8F;
@@ -73,8 +75,14 @@
         font-family: monospace;
     }
     .action-menu-header img {
-        height: 2em;
-        width: 2em;
+        height: 3em;
+        width: 3em;
         object-fit: contain;
+        margin-right: 1ch;
+    }
+
+    .action-menu-header h1 {
+        display: flex;
+        align-items: center;
     }
 </style>

@@ -175,7 +175,7 @@ class ActionMenu extends EventTarget {
                     if(typeof action.callback !== "function") {
                         throw new Error("callback is not a function!");
                     }
-                    value = await action.callback(action.actionContainer, event, {})
+                    value = await action.callback(action.actionContainer, event, {menu: this})
                     break;
             }
 
@@ -197,6 +197,7 @@ class ActionMenu extends EventTarget {
             result = await api.submit(action.requestData);
         } catch (e) {
             action.throbberError(e);
+            this.close();
             return "";
         }
         action.throbberComplete(10);

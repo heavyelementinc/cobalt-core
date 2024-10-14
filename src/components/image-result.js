@@ -80,6 +80,7 @@ class ImageEditor extends HTMLElement {
         if(this.actionMenu) return;
         this.actionMenuButton = document.createElement("button");
         this.actionMenuButton.innerHTML = `<i class="dots-vertical"></i>`
+        this.appendChild(this.actionMenuButton)
         this.actionMenu = new ActionMenu(this.actionMenuButton, "popover");
 
         const defaultActions = ['registerReplace', 'registerRename', 'registerDelete'];
@@ -97,7 +98,6 @@ class ImageEditor extends HTMLElement {
             }
         }
         
-        this.appendChild(this.actionMenuButton)
     }
 
     registerDelete(menu) {
