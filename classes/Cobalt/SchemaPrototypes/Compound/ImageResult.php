@@ -38,15 +38,36 @@ class ImageResult extends UploadResult2 {
         $delete = "";
         $rename = "";
         $change = "";
+        $ident = "";
         // if(!$this->getDirective("renameable")) $rename = "";
         if($manager_name) {
+            $ident = " data-id=\"".$this->id($embedSize)."\"";
             $url_component = (string)$this->__reference->_id."/$this->name";
             $manager_name = base64_encode(get_class($manager_name));
             $delete =  " delete-action=\"/api/v1/image-editor/$manager_name/$url_component\"";
             $rename =  " rename-action=\"/api/v1/image-editor/$manager_name/$url_component\"";
             // $change = " replace-action=\"/api/v1/image-editor/$manager_name/$url_component\"";
         }
-        return "<image-editor$delete"."$rename"."$change>".$this->embed($embedSize, $misc)."</image-editor>";
+        return "<image-editor".$ident.$delete.$rename.$change.">".$this->embed($embedSize, $misc)."</image-editor>";
+        
+        // $id = "";
+        // $src = "";
+        // $height = "";
+        // $width = "";
+        // $id = " data-id=\"".$this->id("media")."\"";
+
+        // return "<image-container$id"."$src"."$height"."$width>".$this->embed($embedSize, $misc)."</image-container>";
+    }
+
+    #[Prototype]
+    protected function id($size) {
+        switch($size) {
+            case "thumb":
+            case "thumbnail":
+                return $this->value->__dataset['thumb_ref'];
+            default:
+                return $this->value->__dataset['ref'];
+        }
     }
 
     #[Prototype]

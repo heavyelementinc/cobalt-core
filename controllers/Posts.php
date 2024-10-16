@@ -11,33 +11,6 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
 
 class Posts extends Page {
-    
-    // static public function route_details_index(?array $options = []): array { 
-    //     $val = static::permission("Post_index",$options);
-    //     return $val;
-    // }
-
-    // static public function route_details_create(?array $option = null): array { 
-    //     $val = static::permission("Post_create",$option);;
-    //     return $val;
-    // }
-
-    // static public function route_details_read(?array $options = []): array { 
-    //     return static::permission("Post_read",$options);
-    // }
-
-    // static public function route_details_update(?array $options = null): array { 
-    //     return static::permission("Post_update",$options);
-    // }
-
-    // static public function route_details_destroy(?array $options = null): array { 
-    //     return static::permission("Post_destroy",$options);
-    // }
-
-    // private static function permission(string $value, ?array $options): array {
-    //     return array_merge(['permission' => "$value",], $options);
-    // }
-
 
     public function get_manager(): Database {
         return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
