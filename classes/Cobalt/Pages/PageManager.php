@@ -104,7 +104,8 @@ class PageManager extends Database {
                 ]]
             )],
             ['$sort' => [
-                'tag_size' => -1
+                'tag_size' => -1,
+                'live_date' => -1,
             ]],
         ];
         return $pipeline;
