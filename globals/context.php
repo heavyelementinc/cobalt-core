@@ -71,7 +71,6 @@ try {
         require_once __ENV_ROOT__ . "/globals/init.php";
     }
 
-
     // The router takes care of much of the rest of this process.
     $ROUTER = new Routes\Router($route_context);
 

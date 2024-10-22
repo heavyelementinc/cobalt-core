@@ -1,3 +1,10 @@
+.cobalt-posts--header-group {
+    border-bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
 .cobalt-posts--public-index {
     display: flex;
     flex-wrap: wrap;

@@ -95,6 +95,7 @@ abstract class Page extends Crudable {
             'classes' => $this->landing_content_classes,
             'keywords' => $page->tags->join(", "),
             'related' => $this->getRelated($page),
+            'footer' => $this->getFooter($page),
         ]);
 
         // Get our view and check if it's in the view types
@@ -233,6 +234,19 @@ abstract class Page extends Crudable {
             }
         }
         return $html . "</div></section>";
+    }
+
+    function getFooter(PageMap $page) {
+        if(!$page->metadata_flags->and($page::METADATA_INCLUDE_FOOTER)) return "";
+        $footer = "<footer class=\"cobalt-posts--footer\">";
+        $nav = "";
+        foreach($page->tags as $tag) {
+            $html_tag = htmlspecialchars((string)$tag);
+            $url_tag = urlencode((string)$tag);
+            $nav .= "<a href=\"".__APP_SETTINGS__['Posts']['public_index']."?tag=$url_tag\">$html_tag</a>";
+        }
+        if($nav) $nav = "<strong>Tags for this post</strong><nav>$nav</nav>";
+        return "$footer$nav</footer>";
     }
 
     function renderPreview(PageMap $p, ?PageMap $page = null) {

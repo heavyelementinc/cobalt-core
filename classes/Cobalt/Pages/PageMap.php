@@ -55,6 +55,7 @@ class PageMap extends PersistanceMap {
     const BIO_AVATAR_RADIUS_CIRCULAR = 0b0010;
 
     const METADATA_FEDIVERSE_CREDIT_PUBLICATION = 0b0001;
+    const METADATA_INCLUDE_FOOTER               = 0b0010;
 
     public function __get_schema(): array {
         $this->__set_index_checkbox_state(true);
@@ -343,8 +344,10 @@ class PageMap extends PersistanceMap {
             "metadata_flags" => [
                 new BinaryResult,
                 'valid' => [
-                    self::METADATA_FEDIVERSE_CREDIT_PUBLICATION => "Credit Publication on Fediverse"
-                ]
+                    self::METADATA_FEDIVERSE_CREDIT_PUBLICATION => "Credit Publication on Fediverse",
+                    self::METADATA_INCLUDE_FOOTER => "Include tag links in post footer",
+                ],
+                'default' => (__APP_SETTINGS__['LandingPages_include_footer_by_default']) ? self::METADATA_INCLUDE_FOOTER : 0,
             ],
             "token" => new StringResult,
             'view' => [

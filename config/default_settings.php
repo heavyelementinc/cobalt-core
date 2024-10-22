@@ -1448,6 +1448,24 @@ const DEFAULT_DEFINITIONS = [
             "type" => "string"
         ]
     ],
+    "Robots_txt_block_known_ai_crawlers" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Configuration",
+            "subgroup" => "SEO",
+            "name" => "Request AI Web Crawlers Ignore Site <small>This will set up your robots.txt file to deny access to AI web crawlers. Note that this <strong>does not block facebookexternalhit</strong> since that would also break link previews.</small>",
+            "type" => "input-switch"
+        ]
+    ],
+    "Forbid_AI_webcrawler_access" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Configuration",
+            "subgroup" => "SEO",
+            "name" => "Forbid Access for AI Web Crawlers <small>This will throw a 403 Forbidden when AI bots crawl your application.<help-span value=\"This is heavy-handed and may break things.\"></help-span></small>",
+            "type" => "input-switch"
+        ]
+    ],
     "Block_Editor_endpoints" => [
         "default" => true
     ],
@@ -1502,6 +1520,9 @@ const DEFAULT_DEFINITIONS = [
         "validate" => [
             "type" => "boolean"
         ]
+    ],
+    "LandingPages_include_footer_by_default" => [
+        "default" => false,
     ],
     "LandingPage_bio_default_headline" => [
         "default" => "About the Author",

@@ -68,7 +68,7 @@ class UserCRUD extends \Drivers\Database {
             $perms['$or'][count($perms['$or'])] = ["permissions.$permission" => $status];
         }
         
-        return $this->findOne(
+        return $this->find(
             $perms,
             $options
         );
@@ -79,7 +79,7 @@ class UserCRUD extends \Drivers\Database {
             'limit' => 50
         ];
         if (gettype($groups) === "string") $groups = [$groups];
-        return $this->findOne([
+        return $this->find([
             'group' => $groups
         ], $options);
     }

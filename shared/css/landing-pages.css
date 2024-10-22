@@ -321,6 +321,23 @@
                     font-weight: normal;
                     margin: .75em;
                 }
+    
+    footer.cobalt-posts--footer {
+        display: block;
+        padding: var(--content-margins);
+        background-color: none;
+    }
+    footer.cobalt-posts--footer strong {
+        display: block;
+    } 
+    footer.cobalt-posts--footer nav {
+        display: block;
+    }
+
+    footer.cobalt-posts--footer nav a:not(:last-of-type)::after {
+        content: ", ";
+    }
+
 
 li ul.blockeditor--nestedlist {
     margin: 0;

@@ -84,6 +84,10 @@ trait Fieldable {
     }
 
     protected function inputBinary($classes = "", $misc = []) {
+        // [$misc, $attrs] = $this->defaultFieldData($misc);
+        // $options = $this->binaryOptions();
+        // // return $this->select($classes, $misc, "input-binary");
+        // return "<input-binary class=\"$classes\" $attrs>$options</input-binary>";
         return $this->select($classes, $misc, "input-binary");
     }
 

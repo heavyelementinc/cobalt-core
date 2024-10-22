@@ -43,7 +43,7 @@
         "default": false,
         "ring": 1
     },
-    "Posts_allowed_author": {
+    "Post_allowed_author": {
         "group": "Posts",
         "label": "Allows user to be credited a Post an author",
         "dangerous": false,

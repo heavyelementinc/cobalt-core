@@ -6,6 +6,7 @@ use Cobalt\Pages\PageManager;
 use Cobalt\Pages\PostMap;
 use Controllers\Landing\Page;
 use Drivers\Database;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
@@ -29,13 +30,21 @@ class Posts extends Page {
 
     public function posts_landing() {
         $query = [];
-        if(isset($_GET['tag'])) $query['tags'] = $_GET['tag'];
+        $title = __APP_SETTINGS__['Posts']['default_name'];
+        $filter = "";
+        if(isset($_GET['tag'])) {
+            $strippedTags = strip_tags((string)$_GET['tag']);
+            if($_GET['tag'] !== $strippedTags) throw new BadRequest("Request contained invalid content", true);
+            $query['tags'] = $_GET['tag'];
+            $filter = "<div class='cobalt-posts--index-filter'>Filtering by tag \"" . htmlspecialchars($strippedTags) . "\"</div>";
+        }
         if(isset($_GET['author'])) {
             $uman = new UserCRUD();
             $user = $uman->getUserByUsername($_GET['author']);
             if(!$user) throw new NotFound("Author not found", true);
-            if(!has_permission("Posts_allowed_author", null, $user)) throw new NotFound("Author not found", true);
+            if(!has_permission("Post_allowed_author", null, $user)) throw new NotFound("Author not found", true);
             $query['author'] = $user->_id;
+            $filter = "<div class='cobalt-posts--index-filter'>Showing posts by " . strip_tags((string)$user->display_name) . "</div>";
         }
         $result = $this->manager->find(
             $this->manager->public_query($query, false),
@@ -54,8 +63,9 @@ class Posts extends Page {
         // if(!$index) throw new NotFound("There are no posts to display");
         if(!$posts) $posts = "<p style='text-align:center'>There are no posts to show</p>";
         add_vars([
-            'title' => __APP_SETTINGS__['Posts']['default_name'],
+            'title' => $title,
             'posts' => $posts,
+            'filter' => $filter,
         ]);
 
         return view('/posts/pages/index.html');

@@ -132,6 +132,19 @@ if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->g
 /** @var array DEFAULT_DEFINTIONS */
 define("__APP_SETTINGS__", $application->get_settings());
 define("VERSION_HASH", substr(md5(__COBALT_VERSION . __APP_SETTINGS__['version']), 0, 12));
+
+// if(__APP_SETTINGS__['Forbid_AI_webcrawler_access']) {
+//     $useragents = get_json(__ENV_ROOT__."/config/robots.json");
+//     foreach($useragents as $name => $details) {
+//         if(in_array($name, ['facebookexternalhit'])) continue;
+//         if(preg_match("/$name/", $_SERVER['HTTP_USER_AGENT']) == false) continue;
+//         header("HTTP/1.1 403 Forbidden");
+//         header("Content-Type: text/plain");
+//         print("Forbidden.\n");
+//         exit;
+//     }
+// }
+
 session_name("COBALTID");
 $cobalt_session_started = session_start([
     'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,

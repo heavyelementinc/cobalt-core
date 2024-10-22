@@ -50,8 +50,13 @@ class UserIdResult extends SchemaResult {
     #[Prototype]
     public function field(string $class = "", array $misc = [], string $tag = "input"):string {
         // return $this->input($class, $misc, "input-user");
-        return "<input-user class=\"$class\" name=\"$this->name\" value=\"".$this->getRaw()."\">".$this->options()."</input-user>";
+        $options = $this->options();
+        return "<input-user class=\"$class\" name=\"$this->name\" value=\"".$this->getRaw()."\">$options</input-user>";
     }
+
+    // public function options($selected = nul):string {
+    //     return "";
+    // }
 
     public function getValue():mixed {
         $this->initialize();
@@ -134,11 +139,24 @@ class UserIdResult extends SchemaResult {
             ],
         ];
         if(!key_exists($type, $options)) throw new Exception("$type is an invalid way to look up users");
-
         $crud = new UserCRUD();
+
+        $result = [];
+        switch($type) {
+            case "permission":
+                $result = $crud->getUsersByPermission([$groupOrPermission]);
+                break;
+            case "group":
+                $result = $crud->getUsersByGroup([$groupOrPermission]);
+                break;
+            case "all":
+            default:
+                $result = $crud->find();
+                break;
+        }
+
         
         $valid = [];
-        $result = $crud->{$options[$type]['method']}(...$options[$type]['query']);
         foreach($result as $doc) {
             $valid[(string)$doc->_id] = $value($doc);
         }

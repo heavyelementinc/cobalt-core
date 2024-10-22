@@ -165,7 +165,9 @@ class FileController extends \Controllers\FileController {
 
         if(!$file) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
-        $view = view("robots.txt");
+        $ai_bots = "";
+        // if(__APP_SETTINGS__["Robots_txt_block_known_ai_crawlers"]) $ai_bots = view("known-ai-robots.txt");
+        $view = view("robots.txt", ['ai_bots' => $ai_bots]);
         header('Content-Length: ' . strlen($view));
         header('Content-Type: text');
         echo $view;

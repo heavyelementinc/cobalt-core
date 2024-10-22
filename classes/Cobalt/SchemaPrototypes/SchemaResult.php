@@ -22,6 +22,7 @@
 namespace Cobalt\SchemaPrototypes;
 
 use ArrayAccess;
+use Auth\UserPersistance;
 use Exception;
 use TypeError;
 use JsonSerializable;
@@ -230,6 +231,7 @@ class SchemaResult implements \Stringable, JsonSerializable {
                     $data .= " data-$attr=\"$val\"";
                 }
             }
+
             $selected = "";
             switch ($type) {
                 case "string":

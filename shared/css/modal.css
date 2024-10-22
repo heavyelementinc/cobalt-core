@@ -44,7 +44,7 @@ modal-container {
       max-height: 95vh;
   }
 
-  modal-container>button.modal-close-button {
+  modal-container > button.modal-close-button {
       border: none;
       background: transparent;
       font-size: 2rem;
@@ -53,6 +53,7 @@ modal-container {
       top: 0;
       color: black;
       text-shadow: 1px 1px white, 1px -1px white, -1px -1px white, -1px 1px white;
+      z-index: 10;
   }
 
 modal-box {
