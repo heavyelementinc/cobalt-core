@@ -50,6 +50,20 @@ class DateResult extends SchemaResult {
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
 
     #[Prototype]
+    protected function getMilliseconds() {
+        $result = ($this->getValue());
+        if(!$result) return "0";
+        return (string)$result;
+    }
+
+    #[Prototype]
+    protected function getSeconds() {
+        $result = ($this->getValue());
+        if(!$result) return "0";
+        return floor($result->getTimestamp());
+    }
+
+    #[Prototype]
     protected function field($class = "", $misc = []) {
         return $this->inputDate($class, $misc);
     }
