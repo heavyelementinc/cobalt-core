@@ -126,3 +126,7 @@ function merge() {
 function array_append(&$array) {
     
 }
+
+function get_random_array_element(array $array):mixed {
+    return $array[rand(0,count($array) - 1)];
+}

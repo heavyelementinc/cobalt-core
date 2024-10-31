@@ -53,7 +53,7 @@ class DateResult extends SchemaResult {
     protected function getMilliseconds() {
         $result = ($this->getValue());
         if(!$result) return "0";
-        return (string)$result;
+        return $result->getTimestamp() * 1000;
     }
 
     #[Prototype]

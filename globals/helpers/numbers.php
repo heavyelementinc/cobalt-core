@@ -150,3 +150,13 @@ function pretty_rounding($number, $type = 'suffix', $join = ""):string{
 function pretty_numeral($number):string {
     return pretty_rounding($number, 'name', " ");
 }
+
+function countSetBits($n) {
+    $count = 0;
+    while ($n)
+    {
+        $count += $n & 1;
+        $n >>= 1;
+    }
+    return $count;
+}
