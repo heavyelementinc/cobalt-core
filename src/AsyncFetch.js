@@ -668,13 +668,13 @@ class XRedirect extends HeaderDirective {
     }
 
     redirect() {
-        Cobalt.router.location = this.content;
+        Cobalt.router.addEventListener("navigateend",() => {Cobalt.router.replaceState(this.content);}, {once: true});
     }
 }
 
 class XReplace extends XRedirect {
     redirect() {
-        Cobalt.router.replaceState({}, )
+        Cobalt.router.replaceState(this.content)
     }
 }
 

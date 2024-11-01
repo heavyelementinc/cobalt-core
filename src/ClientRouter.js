@@ -275,7 +275,6 @@ class ClientRouter extends EventTarget{
             return;
         }
         
-        this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
 
         this.updateContent(result);
         this.updateScroll();
@@ -294,6 +293,7 @@ class ClientRouter extends EventTarget{
 
         this.setPushStateMode();
         
+        this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
     }
 
     updateScroll() {
@@ -331,24 +331,6 @@ class ClientRouter extends EventTarget{
             this.location = location;
         });
     }
-
-    // pushState(location, {
-    //     target = "main", 
-    //     updateProperty = "innerHTML", 
-    //     skipRequest = false, 
-    //     skipUpdate = false
-    // } = {}) {
-    //     this.setPushStateMode();
-    //     this.historyMode  = "pushState";
-    //     this.updateTarget = (typeof target === "string") ? document.querySelector(target) : target;
-    //     this.updateProperty = updateProperty;
-    //     this.skipRequest = skipRequest;
-    //     this.skipUpdate  = skipUpdate;
-    //     return new Promise(resolve =>{
-    //         this.addEventListener("navigateend", e => resolve(e.detail), {once: true});
-    //         this.location = location;
-    //     });
-    // }
 
     setPushStateMode() {
         this.historyMode  = "pushState";
