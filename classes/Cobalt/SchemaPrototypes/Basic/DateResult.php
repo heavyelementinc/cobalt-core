@@ -90,11 +90,13 @@ class DateResult extends SchemaResult {
         ];
         if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
-            $dateTime = $value->toDateTime();
-            $dateTime->setTimezone(new DateTimeZone($_SESSION['timezone'] ?? config()['timezone']));
-            $value = $dateTime->format("U");
-            return date($format, $value);
+            $value = $value->toDateTime();
         }
+        if($value instanceof DateTime) {
+            $value->setTimezone(new DateTimeZone($_SESSION['timezone'] ?? config()['timezone']));
+        }
+        // $value = $dateTime->format("U");
+        // return date($format, $value);
         return $value->format($format);
     }
 

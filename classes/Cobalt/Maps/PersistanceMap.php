@@ -4,6 +4,7 @@ namespace Cobalt\Maps;
 
 use ArrayAccess;
 use Cobalt\Maps\PersistanceException\DirectiveException;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
@@ -86,6 +87,12 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
 
     function __initialize_schema($schema = null): void {
         $this->__manager = $this->__set_manager();
+        $this->__schema['creationDate'] = [
+            'type' => new DateResult,
+            'set' => false,
+            'immutable' => true,
+            'default' => fn () => new UTCDateTime($this->id->getTimestamp() * 1000),
+        ];
         $schema = array_merge($this->__get_schema(), $this->__schema ?? []);
         parent::__initialize_schema($schema);
     }
