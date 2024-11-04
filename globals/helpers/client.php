@@ -41,7 +41,7 @@ function update(string $query, array $value) {
  * @return void 
  */
 function redirect(string $path) {
-    $headers = getHeader("X-Request-Source");
+    $headers = getHeader("X-Request-Source", null, true, false);
     // If the request was sent via AsyncFetch, return `X-Location` header
     if($headers) {
         header("X-Redirect: $path");
