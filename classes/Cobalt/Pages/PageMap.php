@@ -23,8 +23,9 @@ use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Drivers\Database;
 use MongoDB\BSON\UTCDateTime;
 use Traversable;
-use Webmention\Server;
+// use Webmention\Server;
 use Webmention\WebmentionDocument;
+use Webmention\WebmentionHandler;
 
 class PageMap extends PersistanceMap implements WebmentionDocument {
     const VIEW_TYPE = [
@@ -528,7 +529,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if($this instanceof PostMap == false) return '';
         $mentionCount = 0;
         if($mentions === true) {
-            $mentionManger = new Server();
+            $mentionManger = new WebmentionHandler();
             $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);
             $mentionCount = $mentionManger->countBySlug($path);
         }

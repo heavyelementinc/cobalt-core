@@ -2,8 +2,7 @@
 
 use Cobalt\Tasks\TaskManager;
 use Controllers\Controller;
-use PEAR2\Services\Linkback\Server as LinkbackServer;
-use Webmention\Server;
+use Webmention\WebmentionHandler;
 
 class Webhooks extends Controller {
 
@@ -19,7 +18,7 @@ class Webhooks extends Controller {
     function linkback() {
         $taskMan = new TaskManager();
         $task = $taskMan->task();
-        $task->set_class(new Server());
+        $task->set_class(new WebmentionHandler());
         $task->set_method("process_task");
         $task->set_additional_data($_POST);
         $task->set_timer(60);

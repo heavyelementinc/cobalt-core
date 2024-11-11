@@ -118,3 +118,24 @@ if($missing !== "") kill("Your runtime is missing the following required functio
 //         exit;
 //     }
 // }
+
+const __ENV_COMPOSER__ = __ENV_ROOT__ . "/composer.json";
+const __APP_COMPOSER__ = __APP_ROOT__ . "/composer.json";
+
+// Let's make sure that if our app has a `composer.json` file, then it at a bare
+// minimum requires the same dependencies as Cobalt Engine. (This should prevent
+// the weird errors where packages installed in `core` cannot be loaded)
+if(file_exists(__APP_COMPOSER__)) {
+    $composer = __APP_ROOT__ . "/vendor/autoload.php";
+    $__dependency_dir = "app root";
+    $env_comp = json_decode(file_get_contents(__ENV_COMPOSER__), true);
+    $app_comp = json_decode(file_get_contents(__APP_COMPOSER__), true);
+    $intersection = array_intersect_key($env_comp['require'] ?? [], $app_comp['require'] ?? []);
+    if($intersection !== $env_comp['require']) {
+        kill("Your app configuration specifies a <code>composer.json</code> file but it is missing at least one Cobalt Engine dependency!", INTERNAL_SERVER_ERROR);
+    }
+    unset($env_comp, $app_comp, $intersection);
+} else {
+    $composer = __ENV_ROOT__ . "/vendor/autoload.php";
+    $__dependency_dir = "cobalt-core";
+}

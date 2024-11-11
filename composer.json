@@ -19,7 +19,8 @@
         "robthree/twofactorauth": "^2.0",
         "chillerlan/php-qrcode": "^4.3",
         "league/color-extractor": "^0.4.0",
-        "pear2/services_linkback": "^0.3.0"
+        "indieweb/mention-client": "^1.2",
+        "masterminds/html5": "^2.9"
     },
     "config": {
         "allow-plugins": {

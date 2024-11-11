@@ -6,10 +6,12 @@ use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\Tasks\Task;
 use Drivers\Database;
 use Exception;
+use IndieWeb\MentionClient;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use PEAR2\Services\Linkback\Client;
 use Tasks;
+use Webmention\WebmentionDocument;
 
 class PageManager extends Database {
 
@@ -129,7 +131,7 @@ class PageManager extends Database {
     function webmention_send_task(Task $task):int {
         // $_id = new ObjectId($id);
         $_id = $task->get_for();
-        /** @var \Webmentions\WebmentionDocument $doc */
+        /** @var WebmentionDocument $doc */
         $doc = $this->findOne(['_id' => $_id]);
         if(!$doc) return Task::TASK_FINISHED;
         if($doc->webmention_is_locked()) return Task::GENERAL_TASK_ERROR;
@@ -137,16 +139,7 @@ class PageManager extends Database {
         $responses = [];
         try {
             foreach($doc->webmention_get_urls_to_notify() as $link) {
-                $linkbackClient = new Client();
-                $request = $linkbackClient->getRequest();
-                $request->setConfig([
-                    'ssl_verify_peer' => false,
-                    'ssl_verify_host' => false,
-                ]);
-                $request->setHeader('user-agent', 'Cobalt Engine Webmention Discovery Bot');
-                $linkbackClient->setRequestTemplate($request);
-                $response = $linkbackClient->send($doc->webmention_get_canonincal_url(), $link);
-                array_push($responses, $response);
+                $this->send_linkback($link, $doc, $responses);
             }
         } catch(Exception $e) {
             $doc->webmention_unlock();
@@ -155,5 +148,29 @@ class PageManager extends Database {
 
         $doc->webmention_unlock();
         return Task::TASK_FINISHED;
+    }
+
+    // private function send_linkback_old() {
+    //     $linkbackClient = new Client();
+    //     $request = $linkbackClient->getRequest();
+    //     $request->setConfig([
+    //         'ssl_verify_peer' => false,
+    //         'ssl_verify_host' => false,
+    //     ]);
+    //     $request->setHeader('user-agent', 'Cobalt Engine Webmention Discovery Bot');
+    //     $linkbackClient->setRequestTemplate($request);
+    //     $response = $linkbackClient->send($doc->webmention_get_canonincal_url(), $link);
+    //     array_push($responses, $response);
+    // }
+
+    private function send_linkback($link, WebmentionDocument $doc, &$responses): void {
+        $client = new MentionClient();
+        $client::setUserAgent('Cobalt Engine Webmention Discovery Bot');
+        $url = $doc->webmention_get_canonincal_url();
+        $responses[] = $client->sendWebmention($url, $link);
+        $responses[] = $client->sendPingback($url, $link);
+        // $client->sendPingback($link, $doc->webmention_get_canonical_url());
+        // $client->sendWebmention($url, $link);
+        return;
     }
 }

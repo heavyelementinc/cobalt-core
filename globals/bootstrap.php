@@ -2,6 +2,9 @@
 /**
  * @global int COBALT_BOOTSTRAP_AS_NEEDED - 0
  */
+
+use MongoDB\Client;
+
 define("COBALT_BOOSTRAP_AS_NEEDED", 0);
 // define("COBALT_BOOTSTRAP_");
 define("COBALT_BOOSTRAP_ALWAYS",  999);
@@ -124,7 +127,7 @@ function db_cursor($collection, $database = null, $returnClient = false, $return
         if(!$CONFIG['db_ssl']) unset($authentication['ssl']);
         if(!$CONFIG['db_sslFile']) unset($authentication['sslCAFile']);
         if(!$CONFIG['db_invalidCerts']) unset($authentication['sslAllowInvalidCertificates']);
-        $client = new MongoDB\Client("mongodb://{$CONFIG['db_addr']}:{$CONFIG['db_port']}",$authentication);
+        $client = new Client("mongodb://{$CONFIG['db_addr']}:{$CONFIG['db_port']}",$authentication);
         if($returnDatabase) return $client->{$database};
         if($returnClient) return $client;
     } catch (Exception $e) {

@@ -9,6 +9,7 @@ use MongoDB\BSON\UTCDateTime;
 
 class TaskManager extends Database {
     const SANITY_CHECK_FAILURE_INC = 999;
+    const MARK_JOBS_COMPLETE = false;
     public function get_collection_name() {
         return "task_queue";
     }
@@ -48,7 +49,7 @@ class TaskManager extends Database {
             try {
                 $job_status = $this->execute($task);
                 if($job_status === null || $job_status === Task::TASK_FINISHED) {
-                        $this->mark_as_complete($task);
+                    if(self::MARK_JOBS_COMPLETE) $this->mark_as_complete($task);
                 }
                 if($job_status === Task::TASK_SKIP) {
                     continue;

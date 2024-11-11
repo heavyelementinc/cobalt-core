@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "57566f703827e4416b256718beea9b41",
+    "content-hash": "a9847b2f02d17c768f114c5c2ee5aa7c",
     "packages": [
         {
             "name": "brick/math",
@@ -916,6 +916,52 @@
             "time": "2023-12-03T20:05:35+00:00"
         },
         {
+            "name": "indieweb/mention-client",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/indieweb/mention-client-php.git",
+                "reference": "6807f4b1b96df7f47ea425eebfc7c032768652cf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/indieweb/mention-client-php/zipball/6807f4b1b96df7f47ea425eebfc7c032768652cf",
+                "reference": "6807f4b1b96df7f47ea425eebfc7c032768652cf",
+                "shasum": ""
+            },
+            "require": {
+                "mf2/mf2": ">=0.2",
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "IndieWeb": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Parecki",
+                    "email": "aaron@parecki.com",
+                    "homepage": "http://aaronparecki.com/"
+                }
+            ],
+            "description": "Client library for sending webmention and pingback notifications",
+            "homepage": "https://github.com/indieweb/mention-client-php",
+            "support": {
+                "issues": "https://github.com/indieweb/mention-client-php/issues",
+                "source": "https://github.com/indieweb/mention-client-php/tree/1.2.1"
+            },
+            "time": "2021-02-02T13:13:07+00:00"
+        },
+        {
             "name": "james-heinrich/getid3",
             "version": "v1.9.23",
             "source": {
@@ -1166,6 +1212,73 @@
             "time": "2021-06-05T11:34:12+00:00"
         },
         {
+            "name": "masterminds/html5",
+            "version": "2.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Masterminds/html5-php.git",
+                "reference": "f5ac2c0b0a2eefca70b2ce32a5809992227e75a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/f5ac2c0b0a2eefca70b2ce32a5809992227e75a6",
+                "reference": "f5ac2c0b0a2eefca70b2ce32a5809992227e75a6",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8.35 || ^5.7.21 || ^6 || ^7 || ^8 || ^9"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Masterminds\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matt Butcher",
+                    "email": "technosophos@gmail.com"
+                },
+                {
+                    "name": "Matt Farina",
+                    "email": "matt@mattfarina.com"
+                },
+                {
+                    "name": "Asmir Mustafic",
+                    "email": "goetas@gmail.com"
+                }
+            ],
+            "description": "An HTML5 parser and serializer.",
+            "homepage": "http://masterminds.github.io/html5-php",
+            "keywords": [
+                "HTML5",
+                "dom",
+                "html",
+                "parser",
+                "querypath",
+                "serializer",
+                "xml"
+            ],
+            "support": {
+                "issues": "https://github.com/Masterminds/html5-php/issues",
+                "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
+            },
+            "time": "2024-03-31T07:05:07+00:00"
+        },
+        {
             "name": "matthiasmullie/minify",
             "version": "1.3.71",
             "source": {
@@ -1288,6 +1401,68 @@
                 "source": "https://github.com/matthiasmullie/path-converter/tree/1.1.3"
             },
             "time": "2019-02-05T23:41:09+00:00"
+        },
+        {
+            "name": "mf2/mf2",
+            "version": "v0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/microformats/php-mf2.git",
+                "reference": "ddc56de6be62ed4a21f569de9b80e17af678ca50"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/microformats/php-mf2/zipball/ddc56de6be62ed4a21f569de9b80e17af678ca50",
+                "reference": "ddc56de6be62ed4a21f569de9b80e17af678ca50",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
+                "mf2/tests": "dev-master#e9e2b905821ba0a5b59dab1a8eaf40634ce9cd49",
+                "phpcompatibility/php-compatibility": "^9.3",
+                "phpunit/phpunit": "^5.7",
+                "squizlabs/php_codesniffer": "^3.6.2"
+            },
+            "suggest": {
+                "barnabywalters/mf-cleaner": "To more easily handle the canonical data php-mf2 gives you",
+                "masterminds/html5": "Alternative HTML parser for PHP, for better HTML5 support."
+            },
+            "bin": [
+                "bin/fetch-mf2",
+                "bin/parse-mf2"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "Mf2/Parser.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0-1.0"
+            ],
+            "authors": [
+                {
+                    "name": "Barnaby Walters",
+                    "homepage": "http://waterpigs.co.uk"
+                }
+            ],
+            "description": "A pure, generic microformats2 parser — makes HTML as easy to consume as a JSON API",
+            "keywords": [
+                "html",
+                "microformats",
+                "microformats 2",
+                "parser",
+                "semantic"
+            ],
+            "support": {
+                "issues": "https://github.com/microformats/php-mf2/issues",
+                "source": "https://github.com/microformats/php-mf2/tree/v0.5.0"
+            },
+            "time": "2022-02-10T01:05:27+00:00"
         },
         {
             "name": "mikealmond/color",
@@ -2117,291 +2292,6 @@
                 "source": "https://github.com/paragonie/sodium_compat/tree/v1.20.0"
             },
             "time": "2023-04-30T00:54:53+00:00"
-        },
-        {
-            "name": "pear/http2",
-            "version": "v1.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pear/HTTP2.git",
-                "reference": "b87527415aa1439d5abc2c620a37f0047c3b1568"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pear/HTTP2/zipball/b87527415aa1439d5abc2c620a37f0047c3b1568",
-                "reference": "b87527415aa1439d5abc2c620a37f0047c3b1568",
-                "shasum": ""
-            },
-            "require-dev": {
-                "pear/pear-core": "*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "HTTP2": "./"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "include-path": [
-                "./"
-            ],
-            "license": [
-                "BSD-2-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Wallner",
-                    "email": "mike@php.net",
-                    "role": "Lead"
-                },
-                {
-                    "name": "Philippe Jausions",
-                    "email": "jausions@php.net",
-                    "role": "Lead"
-                }
-            ],
-            "description": "Miscellaneous HTTP utilities",
-            "homepage": "http://pear.php.net/package/HTTP2",
-            "support": {
-                "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=HTTP2",
-                "source": "https://github.com/pear/HTTP2"
-            },
-            "time": "2016-08-10T19:11:15+00:00"
-        },
-        {
-            "name": "pear/http_request2",
-            "version": "v2.6.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pear/HTTP_Request2.git",
-                "reference": "f010a16ccddd1ee7d2ee085e8006ee712c00f706"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pear/HTTP_Request2/zipball/f010a16ccddd1ee7d2ee085e8006ee712c00f706",
-                "reference": "f010a16ccddd1ee7d2ee085e8006ee712c00f706",
-                "shasum": ""
-            },
-            "require": {
-                "pear/net_url2": "^2.2.0",
-                "pear/pear_exception": "^1.0.0",
-                "php": ">=5.6.0"
-            },
-            "require-dev": {
-                "yoast/phpunit-polyfills": "^1.0.0"
-            },
-            "suggest": {
-                "ext-curl": "Allows using cURL as a request backend.",
-                "ext-fileinfo": "Adds support for looking up mime-types using finfo.",
-                "ext-openssl": "Allows handling SSL requests when not using cURL.",
-                "ext-zlib": "Allows handling gzip compressed responses."
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "HTTP_Request2": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Alexey Borzov",
-                    "email": "avb@php.net"
-                }
-            ],
-            "description": "Provides an easy way to perform HTTP requests.",
-            "homepage": "https://pear.php.net/package/HTTP_Request2",
-            "keywords": [
-                "PEAR",
-                "curl",
-                "http",
-                "request"
-            ],
-            "support": {
-                "docs": "https://pear.php.net/manual/en/package.http.http-request2.php",
-                "issues": "https://github.com/pear/HTTP_Request2/issues",
-                "source": "https://github.com/pear/HTTP_Request2"
-            },
-            "time": "2023-11-01T19:51:41+00:00"
-        },
-        {
-            "name": "pear/net_url2",
-            "version": "v2.2.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pear/Net_URL2.git",
-                "reference": "07fd055820dbf466ee3990abe96d0e40a8791f9d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pear/Net_URL2/zipball/07fd055820dbf466ee3990abe96d0e40a8791f9d",
-                "reference": "07fd055820dbf466ee3990abe96d0e40a8791f9d",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.1.4"
-            },
-            "require-dev": {
-                "phpunit/phpunit": ">=3.3.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.2.x-dev"
-                }
-            },
-            "autoload": {
-                "classmap": [
-                    "Net/URL2.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "include-path": [
-                "./"
-            ],
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "David Coallier",
-                    "email": "davidc@php.net"
-                },
-                {
-                    "name": "Tom Klingenberg",
-                    "email": "tkli@php.net"
-                },
-                {
-                    "name": "Christian Schmidt",
-                    "email": "chmidt@php.net"
-                }
-            ],
-            "description": "Class for parsing and handling URL. Provides parsing of URLs into their constituent parts (scheme, host, path etc.), URL generation, and resolving of relative URLs.",
-            "homepage": "https://github.com/pear/Net_URL2",
-            "keywords": [
-                "PEAR",
-                "net",
-                "networking",
-                "rfc3986",
-                "uri",
-                "url"
-            ],
-            "support": {
-                "issues": "https://pear.php.net/bugs/search.php?cmd=display&package_name[]=Net_URL2",
-                "source": "https://github.com/pear/Net_URL2"
-            },
-            "time": "2017-08-25T06:16:11+00:00"
-        },
-        {
-            "name": "pear/pear_exception",
-            "version": "v1.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pear/PEAR_Exception.git",
-                "reference": "b14fbe2ddb0b9f94f5b24cf08783d599f776fff0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pear/PEAR_Exception/zipball/b14fbe2ddb0b9f94f5b24cf08783d599f776fff0",
-                "reference": "b14fbe2ddb0b9f94f5b24cf08783d599f776fff0",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "<9"
-            },
-            "type": "class",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "classmap": [
-                    "PEAR/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "include-path": [
-                "."
-            ],
-            "license": [
-                "BSD-2-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Helgi Thormar",
-                    "email": "dufuz@php.net"
-                },
-                {
-                    "name": "Greg Beaver",
-                    "email": "cellog@php.net"
-                }
-            ],
-            "description": "The PEAR Exception base class.",
-            "homepage": "https://github.com/pear/PEAR_Exception",
-            "keywords": [
-                "exception"
-            ],
-            "support": {
-                "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=PEAR_Exception",
-                "source": "https://github.com/pear/PEAR_Exception"
-            },
-            "time": "2021-03-21T15:43:46+00:00"
-        },
-        {
-            "name": "pear2/services_linkback",
-            "version": "v0.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pear2/Services_Linkback.git",
-                "reference": "afee0b32c171c999e20ac199361eb6df650f6483"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pear2/Services_Linkback/zipball/afee0b32c171c999e20ac199361eb6df650f6483",
-                "reference": "afee0b32c171c999e20ac199361eb6df650f6483",
-                "shasum": ""
-            },
-            "require": {
-                "pear/http2": "~1.1",
-                "pear/http_request2": "~2.2",
-                "pear/net_url2": "~2.2"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "*",
-                "squizlabs/php_codesniffer": "~2.6"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "PEAR2\\Services\\Linkback\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-3.0+"
-            ],
-            "authors": [
-                {
-                    "name": "Christian Weiske",
-                    "email": "cweiske@php.net",
-                    "homepage": "http://cweiske.de/"
-                }
-            ],
-            "description": "Pingback+webmention client and server implementation ",
-            "homepage": "http://pear2.php.net/PEAR2_Services_Linkback",
-            "support": {
-                "email": "pear-general@lists.php.net",
-                "issues": "https://github.com/pear2/Services_Linkback/issues/",
-                "source": "https://github.com/pear2/Services_Linkback/tree/v0.3.0"
-            },
-            "time": "2016-08-10T19:33:01+00:00"
         },
         {
             "name": "phar-io/manifest",

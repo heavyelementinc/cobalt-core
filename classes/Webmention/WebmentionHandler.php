@@ -6,22 +6,23 @@ use Cobalt\Tasks\Task;
 use DOMDocument;
 use Drivers\Database;
 use Exception;
-use HTTP_Request2;
-use HTTP_Request2_Response;
-use PEAR2\Services\Linkback\Server as LinkbackServer;
-use PEAR2\Services\Linkback\Server\Callback\ILink;
-use PEAR2\Services\Linkback\Server\Callback\ISource;
-use PEAR2\Services\Linkback\Server\Callback\IStorage;
-use PEAR2\Services\Linkback\Server\Callback\ITarget;
+use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 use Routes\Router;
 
-class Server extends Database implements ITarget, ISource, ILink, IStorage {
+class WebmentionHandler extends Database {
+    private ResponseInterface $response;
 
     public function get_collection_name() {
         return "webmentions";
     }
 
-    public function verifyTargetExists($target) {
+    /**
+     * Verify that the local target is a valid page on this server
+     * @param string $target The URL on this server
+     * @return bool
+     **/
+    public function verifyTargetExists(string $target):bool {
         $url = parse_url($target);
 
         // Check if the hostname is valid
@@ -42,13 +43,13 @@ class Server extends Database implements ITarget, ISource, ILink, IStorage {
         return false;
     }
 
-    public function fetchSource($url) {
-        $client = new HTTP_Request2($url, HTTP_Request2::METHOD_GET);
-        $response = $client->send();
-        return $response;
+    public function fetchSource(string $url) {
+        $client = new Client();
+        $this->response = $client->request("GET", $url);
+        return $this->response;
     }
 
-    public function verifyLinkExists($target, $source, $sourceBody, HTTP_Request2_Response $res) {
+    public function verifyLinkExists(string $target, string $source, string $sourceBody, ResponseInterface $res) {
         $dom = new DOMDocument();
         $dom->loadHTML($sourceBody);
 
@@ -62,7 +63,7 @@ class Server extends Database implements ITarget, ISource, ILink, IStorage {
         return false;
     }
 
-    public function storeLinkback($target, $source, $sourceBody, HTTP_Request2_Response $res) {
+    public function storeWebmention(string $target, string $source, string $sourceBody, ResponseInterface $res):void {
         $path = parse_url($target);
         $url = $path;
         $url['withQuery'] = ($url['query']) ? "$url[path]?$url[query]" : "$url[path]";
@@ -102,12 +103,16 @@ class Server extends Database implements ITarget, ISource, ILink, IStorage {
     }
 
     public function process_task(Task $task):int {
-        $restore = $_POST;
-        $_POST = $task->get_additional_data(); // Criminally stupid workaround for the LinkbackServer library.
-        $server = new LinkbackServer(); // This library fucking sucks
-        $server->addCallback(new Server());
-        $server->run();
-        $_POST = $restore;
+        $data = $task->get_additional_data();
+        $doesTargetExist = $this->verifyTargetExists($data['target']);
+        if(!$doesTargetExist) return Task::GENERAL_TASK_ERROR;
+        $response = $this->fetchSource($data['source']);
+        if($response->getStatusCode() >= 300) return Task::GENERAL_TASK_ERROR;
+        $body = $response->getBody();
+        $doesLinkExist = $this->verifyLinkExists($data['target'], $data['source'], $body, $response);
+        if(!$doesLinkExist) return Task::GENERAL_TASK_ERROR;
+        $this->storeWebmention($data['target'], $data['source'], $body, $response);
+        
         return Task::TASK_FINISHED;
     }
 }

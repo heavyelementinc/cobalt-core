@@ -32,8 +32,6 @@ $GLOBALS['BENCHMARK_RESULTS']['env_invoke'] = [DB_BENCH_START => microtime(true)
 
 require_once __DIR__ . "/globals/logs.php";
 require_once __DIR__ . "/globals/global_exceptions.php";
-// Let's make sure our environment is configured properly.
-require_once __DIR__ . "/globals/env_probe.php";
 
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
@@ -53,6 +51,9 @@ else {
 define("__APP_ROOT__", realpath($app_root));
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
+// Let's make sure our environment is configured properly.
+require_once __DIR__ . "/globals/env_probe.php";
+
 define("COBALT_LOG_PATH", __APP_ROOT__ . "/ignored/logs/" . date("Y-m-d-") . "cobalt.log");
 define("COBALT_LOG_MESSAGE", 0);
 define("COBALT_LOG_NOTICE", 1);
@@ -67,6 +68,7 @@ function cobalt_log($source, $string, $level = COBALT_LOG_MESSAGE) {
     $logfile = COBALT_LOG_PATH;
     if(!is_dir($logpath)) mkdir($logpath, 0777, true);
     $resource = fopen($logfile, "a+");
+    if(!$resource) return;
     $date = date("c");
     fwrite($resource,"[$date] [".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string).PHP_EOL);
     fclose($resource);
@@ -89,16 +91,9 @@ require_once __DIR__ . "/globals/global_csrf.php";
 $app_env = __APP_ROOT__ . "/app_env.php";
 if(file_exists($app_env)) require_once $app_env;
 
-// Import Composer's autoload
-$composer = __APP_ROOT__ . "/vendor/autoload.php";
-$__dependency_dir = "app root";
-if (!file_exists($composer) && !file_exists(__APP_ROOT__ . "/composer.json")) {
-    $composer = __ENV_ROOT__ . "/vendor/autoload.php";
-    $__dependency_dir = "cobalt-core";
-}
-if (!file_exists($composer)) {
-    kill("Dependencies have not been installed. Run `composer install` in the $__dependency_dir directory as your webserver user");
-}
+// $composer is defined in env_probe.php
+if (!file_exists($composer)) kill("Dependencies have not been installed. Run `composer install` in the $__dependency_dir directory as your webserver user");
+
 require_once $composer;
 
 // And then define our own autoload function (specified in global_functions.php)
