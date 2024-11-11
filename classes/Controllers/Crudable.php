@@ -184,6 +184,15 @@ abstract class Crudable {
         }
 
         /**
+         * Called after a document is updated
+         * @param GenericMap|BSONDocument|null $doc - The document that was updated
+         * @return void 
+         */
+        function after_update(GenericMap|BSONDocument|null $doc):void {
+
+        }
+
+        /**
          * In this function, you must define the edit route just like you normally would
          * any other route. Note that the return value of this function is sent directly
          * to the client with no post-processing.
@@ -216,7 +225,9 @@ abstract class Crudable {
             $query = ['_id' => new ObjectId($id)];
             $result = $this->manager->updateOne($query, $update, ['upsert' => false]);
             if($result->getMatchedCount() === 0) throw new NotFound("No document matched request", "No found");
-            return $this->__read($id);
+            $doc = $this->__read($id);
+            $this->after_update($doc);
+            return $doc;
         }
 
         final public function __edit(string $id): string {
@@ -393,7 +404,7 @@ abstract class Crudable {
     }
 
     /** $type - can be blank or "options" */
-    function __get_action_menu(string $type = "", GenericMap|BSONDocument|null $document):string {
+    function __get_action_menu(string $type = "", GenericMap|BSONDocument|null $document = null):string {
         $class = self::className();
         $html = "";
         if($this->index_display_action_menu | CRUDABLE_DELETEABLE) {

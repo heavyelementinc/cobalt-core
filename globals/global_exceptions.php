@@ -1,5 +1,6 @@
 <?php
 const INTERNAL_SERVER_ERROR = 0;
+const UNKNOWN_ERROR = 0;
 const ERROR_ARRAY = [
     [
         'header' => "HTTP/1.0 500 Internal Server Error",
@@ -14,6 +15,7 @@ const ERROR_STALE_TOKEN = "Stale token detected. You're no longer the author of 
 function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_ERROR) {
     if(!key_exists($error_type, ERROR_ARRAY)) $error_type = 0;
     [$header, $title, $message] = ERROR_ARRAY[$error_type];
+    if(!$header) [$header, $title, $message] = ERROR_ARRAY[UNKNOWN_ERROR];
     header($header);
     $msg = $message;
     if($specific_message) $msg = $specific_message;

@@ -24,12 +24,14 @@ namespace Routes;
 use Cobalt\Extensions\Extensions;
 use Cobalt\Pages\PageManager;
 use Cobalt\Pages\PageMap;
+use Controllers\Attributes\Attribute;
 use Exception;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\NotImplemented;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\UTCDateTime;
+use ReflectionObject;
 
 class Router {
 
@@ -42,6 +44,7 @@ class Router {
     private $router_table_loaded = false;
     public $routes = null;
     public $method = null;
+    public bool $headRequest = false;
     public $uri = null;
     public $context_prefix = null;
     public $cache_resource = null;
@@ -139,6 +142,12 @@ class Router {
         if ($query   === null) $query   = $_SERVER['QUERY_STRING'];
         if ($method  === null) $method  = $this->method;
         if ($context === null) $context = $this->route_context;
+
+        if (strtolower($method) === "head") {
+            $this->headRequest = true;
+            $method = "get";
+        }
+
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
          */
@@ -187,6 +196,10 @@ class Router {
         if($route   === null) $route   = $this->current_route;
         if($method  === null) $method  = $this->method;
         if($context === null) $context = $this->route_context;
+
+        if($method === "head") {
+            $method = "get";
+        }
 
         /** Store our route data for easy access */
         $exe = $this->routes[$context][$method][$route];
@@ -253,6 +266,12 @@ class Router {
 
         // Instantiate our controller and then execute it
         $ctrl = new $controller_name();
+
+        // Execute any attributes that have been assigned to this controller
+        $this->execute_route_attributes($ctrl, $controller_method, $exe, $exe['matches']);
+        if($this->headRequest === true) return;
+
+        // Make sure that we're actually calling this method with 
         if (!method_exists($ctrl, $controller_method)) throw new \Exceptions\HTTP\MethodNotAllowed("Specified method was not found.");
         $test = new \ReflectionMethod($controller_name, $controller_method);
         /** We check to make sure that we're not going to have callable exception 
@@ -265,10 +284,26 @@ class Router {
          */
         if ($test->getNumberOfRequiredParameters() > count($exe['matches'])) throw new \Exceptions\HTTP\BadRequest("Method supplied too few arguments.");
         if (gettype($exe['matches']) !== "array") $exe['matches'] = [$exe['matches']];
-        
+
         /** Execute our method */
         return $ctrl->{$controller_method}(...$exe['matches']);
-        
+    }
+
+    function execute_route_attributes($controller, $method, $details, $arguments):void {
+        if(!$controller) return;
+        $classReflection = new ReflectionObject($controller);
+        $methodReflection = $classReflection->getMethod($method);
+        $attributes = $methodReflection->getAttributes();
+        foreach($attributes as $attr) {
+            // $attr->execute($arguments);
+            $name = $attr->getName();
+            $args = $attr->getArguments();
+            /** @var Attribute $attribute */
+            $attribute = new $name(...$args);
+            if($details instanceof Options === false) $details = new Options($details['original_path'], $details['controller'], $details);
+            $attribute->set_route_details($details);
+            $attribute->execute($arguments);
+        }
     }
 
     public $router_js_table = [

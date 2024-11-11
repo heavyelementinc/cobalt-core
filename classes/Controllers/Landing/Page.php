@@ -1,17 +1,24 @@
 <?php
 namespace Controllers\Landing;
 
+use Cobalt\Maps\GenericMap;
 use Controllers\Crudable;
 use Cobalt\Pages\PageMap;
 use Cobalt\Pages\PageManager;
 use Cobalt\Pages\PostMap;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
+use Cobalt\Tasks\TaskManager;
 use DateTime;
+use DOMDocument;
 use Drivers\Database;
+use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
-use MongoDB\BSON\ObjectId;  
+use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONDocument;
+use stdClass;
+use Traversable;
 
 abstract class Page extends Crudable {
     var string $landing_content_classes = "";
@@ -138,8 +145,6 @@ abstract class Page extends Crudable {
                 $classes .= " landing-splash--type-fade";
                 break;
         }
-
-        
 
         // And render it
         return view($view, [
@@ -303,6 +308,26 @@ abstract class Page extends Crudable {
     function update($post_data, $id): array {
         $this->api_validate_token($id);
         return $post_data;
+    }
+
+    /**
+     * 
+     * @param PageMap|null $doc 
+     * @return void 
+     * @throws Exception 
+     */
+    function after_update(GenericMap|BSONDocument|null $doc): void {
+        if(__APP_SETTINGS__['Webmentions_enable_sending'] === false) return;
+        if($doc->visibility->getValue() <= $doc::VISIBILITY_DRAFT) return;
+        $taskManager = new TaskManager();
+        $task = $taskManager->task($doc->_id);
+        $task->set_class($this->manager);
+        $task->set_method("webmention_send_task");
+        $task->set_for($doc->_id);
+        $task->set_timer(60 * 5); // Set a five min timer from now
+        $taskManager->update_item($task);
+        // async_cobalt_command("webmention dispatch ".escapeshellarg(get_class($this->manager))." $doc->_id");
+        return;
     }
 
     public function edit($document): string {

@@ -111,19 +111,22 @@ class BlockResult extends SchemaResult {
                 }
             }
         }
-        foreach($value['blocks'] as $block) {
+        foreach($value['blocks'] as $index => $block) {
             switch($block['type']) {
+                case "paragraph":
+                    $value['blocks'][$index] = $this->filter_paragraph($block);
+                    break;
                 case "rawtool":
-                    $this->filter_htmltool($block);
+                    $value['blocks'][$index] = $this->filter_htmltool($block);
                     break;
                 case "header":
-                    $this->filter_header($block);
+                    $value['blocks'][$index] = $this->filter_header($block);
                     break;
                 case "imagetool":
-                    $this->filter_imagetool($block, $orphaned_images);
+                    $value['blocks'][$index] = $this->filter_imagetool($block, $orphaned_images);
                     break;
                 case "simpleimage":
-                    $this->filter_simpleimage($block);
+                    $value['blocks'][$index] = $this->filter_simpleimage($block);
                     break;
             }
         }
@@ -133,8 +136,20 @@ class BlockResult extends SchemaResult {
         return $value;
     }
 
-    private function filter_htmltool(&$block):void {
-        if(!$block['data']['html']) return;
+    private function filter_paragraph(&$block):array {
+        $dom = new DOMDocument();
+        $dom->loadHTML($block['data']['text']);
+        $block['data']['links'] = [];
+        $links = $dom->getElementsByTagName("a");
+        foreach($links as $link) {
+            $anchorAttribute = $link->attributes->getNamedItem("href");
+            if($anchorAttribute->value) $block['data']['links'][] = $anchorAttribute->value;
+        }
+        return $block;
+    }
+
+    private function filter_htmltool(&$block):array {
+        if(!$block['data']['html']) return $block;
         $dom = new DOMDocument();
         try {
             $parsed = $dom->loadHTML($block['data']['html']);
@@ -148,18 +163,21 @@ class BlockResult extends SchemaResult {
         // foreach($scripts as $script) {
         //     if($script->textContent) throw new ValidationIssue("script tags may only load scripts, they cannot contain JavaScript!");
         // }
+        return $block;
     }
 
-    private function filter_header(&$block):void {
-        if(!$block['data']['text']) return;
+    private function filter_header(&$block):array {
+        if(!$block['data']['text']) return $block;
         $block['data']['id'] = url_fragment_sanitize($block['data']['text']);
+        return $block;
     }
 
-    private function filter_imagetool(&$block, &$orphaned_images):void {
+    private function filter_imagetool(&$block, &$orphaned_images):array {
         if(key_exists($block['id'], $orphaned_images)) unset($orphaned_images[$block['id']]);
+        return $block;
     }
 
-    private function filter_simpleimage(&$block): void {
+    private function filter_simpleimage(&$block): array {
         if(is_data_uri($block['data']['url'])) {
             $tmp_name = "/tmp/".uniqid("", true);
             $result = convert_data_uri_to_file($tmp_name, $block['data']['url']);
@@ -172,6 +190,7 @@ class BlockResult extends SchemaResult {
             ]);
             $block['data']['url'] = "/res/fs/" . $aesthetic_name;
         }
+        return $block;
     }
 
     function __toString(): string {

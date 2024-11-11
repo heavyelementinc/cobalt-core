@@ -64,22 +64,34 @@ class Route {
 
     static function s_get(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'get');
-        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'get');
+        Route::add_route($pattern, $controller, array_merge($options, [
+            'csrf_required' => app("Router_csrf_required_default"),
+            'require_session' => true, 
+        ]), 'get');
     }
 
     static function s_post(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'post');
-        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'post');
+        Route::add_route($pattern, $controller, array_merge($options, [
+            'csrf_required' => app("Router_csrf_required_default"),
+            'require_session' => true, 
+        ]), 'post');
     }
 
     static function s_put(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'put');
-        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'put');
+        Route::add_route($pattern, $controller, array_merge($options, [
+            'csrf_required' => app("Router_csrf_required_default"),
+            'require_session' => true, 
+        ]), 'put');
     }
 
     static function s_delete(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'delete');
-        Route::add_route($pattern, $controller, array_merge($options, ['require_session' => true]), 'delete');
+        Route::add_route($pattern, $controller, array_merge($options, [
+            'csrf_required' => app("Router_csrf_required_default"),
+            'require_session' => true, 
+        ]), 'delete');
     }
 
     static function throw_without_session($access = "modify") {
@@ -193,7 +205,7 @@ class Route {
             'route_file' => $file,   // The route.php file and the line number it was defined on!
             
             // API authentication stuff
-            'csrf_required' => $options['requires_csrf'] ?? app("Router_csrf_required_default"),
+            'csrf_required' => $options['csrf_required'] ?? $options['requires_csrf'] ?? false,
             
             // Cache Control stuff is only honored by API page requests
             'cache_control' => array_merge($options['cache_control'] ?? [], $cache_control),
@@ -268,6 +280,8 @@ class Route {
 
     static function map_route_groups(&$value) {
         global $ROUTE_GROUPS;
+        if(!$ROUTE_GROUPS) $ROUTE_GROUPS = [];
+
         foreach($value['navigation'] as $index => $navItem) {
             $group = $navItem;
             if(gettype($group) === "array") $group = $index;

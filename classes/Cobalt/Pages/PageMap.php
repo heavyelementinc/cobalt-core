@@ -4,6 +4,7 @@ namespace Cobalt\Pages;
 
 use Cobalt\Maps\GenericMap;
 use Cobalt\Maps\PersistanceMap;
+use Cobalt\Posts\PostManager;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
@@ -20,8 +21,12 @@ use Controllers\Traits\Indexable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Drivers\Database;
+use MongoDB\BSON\UTCDateTime;
+use Traversable;
+use Webmention\Server;
+use Webmention\WebmentionDocument;
 
-class PageMap extends PersistanceMap {
+class PageMap extends PersistanceMap implements WebmentionDocument {
     const VIEW_TYPE = [
         'default' => '/pages/landing/views/default.html',
         'landing' => '/pages/landing/views/landing.html',
@@ -56,6 +61,8 @@ class PageMap extends PersistanceMap {
 
     const METADATA_FEDIVERSE_CREDIT_PUBLICATION = 0b0001;
     const METADATA_INCLUDE_FOOTER               = 0b0010;
+
+    const WEBMENTION_UPDATE_TIMEOUT = 60 * 2; // Two minute lock
 
     public function __get_schema(): array {
         $this->__set_index_checkbox_state(true);
@@ -473,9 +480,13 @@ class PageMap extends PersistanceMap {
             //     new UploadImageResult
             // ]
         ];
-        if(!has_permission("Posts_enable_privileged_fields", null, null, false)) {
-            unset($schema['bot_hits']['index']);
-            $schema['bot_hits']['readonly'] = true;
+        try {
+            if($GLOBALS['auth'] && !has_permission("Posts_enable_privileged_fields", null, null, false)) {
+                unset($schema['bot_hits']['index']);
+                $schema['bot_hits']['readonly'] = true;
+            }
+        } catch (\Error $e) {
+            return $schema;
         }
         return $schema;
     }
@@ -513,12 +524,20 @@ class PageMap extends PersistanceMap {
     }
 
     #[Prototype]
-    protected function get_byline_meta($linked_date = false) {
+    protected function get_byline_meta($linked_date = false, $mentions = true) {
         if($this instanceof PostMap == false) return '';
+        $mentionCount = 0;
+        if($mentions === true) {
+            $mentionManger = new Server();
+            $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);
+            $mentionCount = $mentionManger->countBySlug($path);
+        }
+
         $html = "<div class=\"post-details\">";
         $ttr = $this->time_to_read->getValue();
         $html .= ($ttr) ? "$ttr read &middot; " : "";
         $html .= ($this->flags->and(self::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($this->views->getValue() + 1) . " view".plural($this->views->getValue() + 1)." &middot; ";
+        $html .= ($mentionCount) ? "<span title=\"$mentionCount share".plural($mentionCount)." across the web\"><i name=\"repeat-variant\"></i> $mentionCount &middot; </span>" : "";
         $html .= "<date>";
         if($linked_date) $html .= "<a href=\"$this->url_slug\">".$this->live_date->relative("datetime")."</a>";
         else $html .= $this->live_date->relative("datetime");
@@ -533,5 +552,70 @@ class PageMap extends PersistanceMap {
 
     function __set_manager(?Database $manager = null):?Database {
         return new PageManager();
+    }
+
+    private function get_linkback_urls(&$urlsToLinkback, $item) {
+        if($item->type === "paragraph") {
+            if(is_iterable($item->data->links)) array_push($urlsToLinkback, ...$item->data->links);
+        } else if($item->type === "linktool") {
+            array_push($urlsToLinkback, $item->data->link);
+        }
+    }
+
+    public function webmention_get_urls_to_notify(): array {
+        $urlsToLinkback = [];
+        foreach($this->body->getValue()->blocks as $key => $item) {
+            $this->get_linkback_urls($urlsToLinkback, $item);
+        }
+
+        foreach($this->aside->getValue()->blocks as $item) {
+            $this->get_linkback_urls($urlsToLinkback, $item);
+        }
+
+        foreach($this->bio->getValue()->blocks as $item) {
+            $this->get_linkback_urls($urlsToLinkback, $item);
+        }
+        return $urlsToLinkback;
+    }
+
+    // public function webmention_get_completed_urls(): array {
+    //     return $this->completedUrls->getArrayCopy();
+    // }
+
+    // public function webmention_set_completed_urls(array $completed): void {
+    //     $this->__manager->updateOne(['_id' => $this->id], ['$set' => ['completedUrls' => $completed]]);
+    // }
+
+    public function webmention_get_canonincal_url(): string {
+        $host = server_name();
+        if($this->__manager instanceof PostManager) {
+            return $host . route("Posts@page", [$this->url_slug->getValue()]);
+        }
+        return $host . route("LandingPages@page", [$this->url_slug->getValue()]);
+    }
+
+    function webmention_lock():void {
+        $this->__manager->updateOne(['_id' => $this->id],['$set' => ['__webmentionLock' => new UTCDateTime()]]);
+    }
+
+    function webmention_unlock():void {
+        $this->__manager->updateOne(['_id' => $this->id],['$set' => ['__webmentionLock' => false]]);
+    }
+
+    function webmention_is_locked():bool {
+        if($this->visibility->getValue() <= self::VISIBILITY_DRAFT) return true;
+        $val = $this->__webmentionLock;
+        // If we're simply a boolean result (normally false)
+        if($val instanceof BooleanResult) return $val->getValue();
+        // If we've got this far and we're not a date result, we'll assume we're
+        // not locked.
+        if($val instanceof DateResult === false) return false;
+        $val = $val->getSeconds();
+        $now = time();
+        // We want to accomodate slow responses, so we will time out locking
+        // this entry at (2 min). If elapsed time since lock is greater than or
+        // equal to timeout, return false
+        if($now - $val >= self::WEBMENTION_UPDATE_TIMEOUT) return false;
+        return true;
     }
 }

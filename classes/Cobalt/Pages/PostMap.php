@@ -1,6 +1,7 @@
 <?php
 namespace Cobalt\Pages;
 
+use Cobalt\Posts\PostManager;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
@@ -36,6 +37,7 @@ class PostMap extends PageMap {
     }
 
     function __set_manager(?Database $manager = null):?Database {
-        return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
+        // return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
+        return new PostManager();
     }
 }

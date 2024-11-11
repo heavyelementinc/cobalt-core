@@ -721,6 +721,7 @@ if(!function_exists("log_item")) {
 
 function set_crudable_flag(string $name, int $flag): int {
     global $CRUDABLE_CONFIG_TRACKER;
+    if(!$CRUDABLE_CONFIG_TRACKER) $CRUDABLE_CONFIG_TRACKER = [];
     if(!key_exists($name, $CRUDABLE_CONFIG_TRACKER)) $CRUDABLE_CONFIG_TRACKER[$name] = 0;
     $CRUDABLE_CONFIG_TRACKER[$name] += $flag;
     return $CRUDABLE_CONFIG_TRACKER[$name];

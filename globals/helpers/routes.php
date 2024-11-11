@@ -23,6 +23,7 @@
 // }
 
 use Cobalt\Pages\PageManager;
+use Routes\Router;
 
 /**
  * Limitations: this will only return the first route that uses the specified controller
@@ -35,9 +36,17 @@ use Cobalt\Pages\PageManager;
  */
 function get_path_from_route(string $class, string $method, array $args = [], ?string $routeMethod = "get", string $context = null) {
     global $ROUTER;
+    global $ROUTE_LOOKUP_CACHE;
     if($context === null) $context = "web";
     $controllerAlias = "$class@$method";
-    if(key_exists($controllerAlias, $GLOBALS['ROUTE_LOOKUP_CACHE'])) return route_replacement($GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias], $args, []);
+    if(!$ROUTER) {
+        $ROUTER = new Router("web", "GET");
+    } 
+    $ROUTER->init_route_table();
+    $ROUTER->get_routes();
+    if(key_exists($controllerAlias, $ROUTE_LOOKUP_CACHE) && $ROUTE_LOOKUP_CACHE[$controllerAlias] !== null) {
+        return route_replacement($ROUTE_LOOKUP_CACHE[$controllerAlias], $args, []);
+    }
     // if($context !== $router->route_context) {
     //     if(isset($GLOBALS['api_router'])) $router = $GLOBALS['api_router'];
     //     if($context !== $router->route_context) throw new Error("Could not establish proper context");
@@ -52,13 +61,13 @@ function get_path_from_route(string $class, string $method, array $args = [], ?s
         }
     }
 
-    $GLOBALS['ROUTE_LOOKUP_CACHE'][$controllerAlias] = $route;
+    $ROUTE_LOOKUP_CACHE[$controllerAlias] = $route;
     return $route;
 }
 
 function route_replacement($path, $args, $data = []) {
     $rt = $path;
-    $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)/";
+    $regex = "/(\{{1}[a-zA-Z0-9]*\}{1}\??)|\.{3}/";
     
     $replacement = [];
     preg_match_all($regex,$rt,$replacement);

@@ -53,20 +53,22 @@ else {
 define("__APP_ROOT__", realpath($app_root));
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
-$cobaltlogpath = __APP_ROOT__ . "/ignored/logs/" . date("Y-m-d-") . "cobalt.log";
+define("COBALT_LOG_PATH", __APP_ROOT__ . "/ignored/logs/" . date("Y-m-d-") . "cobalt.log");
 define("COBALT_LOG_MESSAGE", 0);
 define("COBALT_LOG_NOTICE", 1);
 define("COBALT_LOG_WARNING", 2);
 define("COBALT_LOG_ERROR", 3);
+define("COBALT_LOG_EXCEPTION", 4);
 
 function cobalt_log($source, $string, $level = COBALT_LOG_MESSAGE) {
-    $levels = ['MESSAGE','NOTICE ','WARNING',' ERROR '];
-    global $cobaltlogpath;
-    $logpath = pathinfo($cobaltlogpath, PATHINFO_DIRNAME);
-    $logfile = $cobaltlogpath;
+    if($level < config()['log_level']) return;
+    $levels = ['MESSAGE','NOTICE','WARNING','ERROR','EXCEPTION'];
+    $logpath = pathinfo(COBALT_LOG_PATH, PATHINFO_DIRNAME);
+    $logfile = COBALT_LOG_PATH;
     if(!is_dir($logpath)) mkdir($logpath, 0777, true);
     $resource = fopen($logfile, "a+");
-    fwrite($resource,PHP_EOL."[".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string));
+    $date = date("c");
+    fwrite($resource,"[$date] [".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string).PHP_EOL);
     fclose($resource);
 }
 
@@ -117,8 +119,10 @@ try {
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
+    cobalt_log("Settings", $e->getMessage(), COBALT_LOG_EXCEPTION);
     kill($e->getMessage());
 } catch (Error $e) {
+    cobalt_log("Settings", $e->getMessage(), COBALT_LOG_ERROR);
     kill($e->getMessage());
 }
 
@@ -151,6 +155,10 @@ $cobalt_session_started = session_start([
     // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
     // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
+// Let's check to see that we have a CSRF token created
+if($_SESSION[CSRF_TOKEN_KEY] === null) csrf_generate_token();
+// Ensure we have a fresh CSRF token for this session!
+csrf_get_token();
 
 // $_SESSION['timezone'] = apache_request_headers()['X-Timezone'];
 

@@ -1647,5 +1647,11 @@ const DEFAULT_DEFINITIONS = [
     // ],
     'SocialMedia_shown' => [
         'default' => [],
+    ],
+    'Webmentions_enable_recieving' => [
+        'default' => true,
+    ],
+    'Webmentions_enable_sending' => [
+        'default' => true,
     ]
 ];

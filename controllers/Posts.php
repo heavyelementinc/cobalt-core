@@ -4,6 +4,7 @@ use Auth\UserCRUD;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\PageManager;
 use Cobalt\Pages\PostMap;
+use Cobalt\Posts\PostManager;
 use Controllers\Landing\Page;
 use Drivers\Database;
 use Exceptions\HTTP\BadRequest;
@@ -14,7 +15,8 @@ use MongoDB\Model\BSONDocument;
 class Posts extends Page {
 
     public function get_manager(): Database {
-        return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
+        // return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
+        return new PostManager();
     }
 
     public function get_schema($data): GenericMap {

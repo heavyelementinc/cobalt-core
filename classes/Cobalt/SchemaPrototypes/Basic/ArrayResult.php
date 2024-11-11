@@ -270,6 +270,11 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         return in_array($needle, $value);
     }
 
+    #[Prototype]
+    protected function getArrayCopy():array {
+        return $this->arraylike_to_array($this);
+    }
+
     private function arraylike_to_array($arraylike):array {
         if(gettype($arraylike) !== "array") {
             if($arraylike instanceof ArrayResult) {

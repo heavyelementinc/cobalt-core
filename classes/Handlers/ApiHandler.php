@@ -21,6 +21,7 @@
 namespace Handlers;
 
 use Cobalt\Notifications\NotificationManager;
+use Exceptions\HTTP\BadRequest;
 
 class ApiHandler implements RequestHandler {
     private $methods_from_stdin = ['POST', 'PUT', 'PATCH', 'DELETE'];
@@ -138,55 +139,73 @@ class ApiHandler implements RequestHandler {
 
     function request_validation($directives) {
 
-        /** Handle Cross-Origin Resource Sharing validation */
+        // Handle Cross-Origin Resource Sharing validation
         $this->cors_management();
-        $file_upload = false;
-        # Check if we need to search for CSRF token in the header.
+
+        // Check if we need to search for CSRF token in the header.
         if ($this->method !== "GET" && isset($directives) && $directives['csrf_required']) {
-            # Check if the X-CSRF-Mitigation token is specified
-            // if (!key_exists("X-Mitigation", $this->headers)) throw new \Exceptions\HTTP\Unauthorized("Missing CSRF Token");
-            // if (!\validate_csrf_token($this->headers['X-Mitigation'])) {
-            //     throw new \Exceptions\HTTP\Unauthorized("CSRF Failure");
-            // }
+            // The token can be sent through any one of the following ways,
+            // so let's coalesce down to the first available token
+            $csrf_token = $_GET[CSRF_INCOMING_FIELD] ?? $_POST[CSRF_INCOMING_FIELD] ?? getHeader(CSRF_INCOMING_HEADER, null, true, false);
+            // Check if the token is specified, if not, throw a BadRequest
+            if(!$csrf_token) throw new BadRequest("Missing CSRF Token");
+            // If it's not valid, we'll throw a BadRequest
+            if (csrf_is_valid($csrf_token) === false) throw new BadRequest("CSRF Failure");
         }
 
-        /** Check if our request is using a valid method. */
+        // Check if our request is using a valid method.
         if (!in_array($this->method, $this->methods_from_stdin)) return;
 
         $incoming_content_type = isset($_SERVER['CONTENT_TYPE']) ? trim($_SERVER['CONTENT_TYPE']) : '';
 
-        $is_json = false;
-
-        switch($incoming_content_type) {
-            case ($incoming_content_type === $this->content_type):
-            case preg_match("/json/", strtolower($incoming_content_type)) === 1:
-                $is_json = true;
+        $content_type = explode(";",$incoming_content_type)[0];
+        // Now let's normalize our submitted data
+        switch($content_type) {
+            case "application/x-www-form-urlencoded":
+            case "x-www-form-urlencoded":
+                $this->handle_url_encoded_form_data($directives, $incoming_content_type);
                 break;
+            case "multipart/form-data":
+                $this->handle_multipart_form_data($directives, $incoming_content_type);
+                break;
+            case "application/json":
+            case "application/ld+json":
+            // case preg_match("/json/", strtolower($incoming_content_type)) === 1:
+                $this->handle_json_post_data($directives, $incoming_content_type);
+                break;
+            case "application/xml":
+            case "text/xml":
+            case "application/xhtml+xml":
+                $this->handle_xml_post_data($directives, $incoming_content_type);
+                break;
+            default:
+                throw new BadRequest("Unknown Content-Type");
         }
+    }
 
-        /** Check if our content is in JSON format and get it if it is. */
-        if ($is_json) $incoming_stream = trim(file_get_contents("php://input"));
+    private function handle_url_encoded_form_data($directives, $incoming_content_type) {
+        // Do nothing. PHP handles this contingency on its own.
+        return;
+    }
 
+    private function handle_json_post_data() {
+        $incoming_stream = trim(file_get_contents("php://input"));
+        $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    private function handle_multipart_form_data($directives, $incoming_content_type) {
         $multipart_form_data = "multipart/form-data;";
-        // $form_data = "Content-Disposition: form-data;";
-
-        /** Now we check if we're getting a file upload and handle it appropriately
-         * since we can't use php://input while we're doing this. */
-        if (empty($incoming_stream)) {
-            $max_upload = getMaximumFileUploadSize();
-            if ((int)getHeader('Content-Length') > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
-            if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0) {
-                $incoming_stream = $_POST['json_payload'];
-                $file_upload = true;
-            }
+        $max_upload = getMaximumFileUploadSize();
+        if ((int)getHeader('Content-Length') > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
+        if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0) {
+            $_POST = json_decode($_POST['json_payload'], true, 512, JSON_THROW_ON_ERROR);
         }
+    }
 
-        /** Throw an error if we haven't recieved any usable data. Do we need
-         * to do this? Not sure. */
-        if (empty($incoming_stream) && !$file_upload) throw new \Exceptions\HTTP\BadRequest("No data was specified.");
-
-        /** Set the $_POST superglobal to equal our incoming JSON. */
-        if (!empty($incoming_stream)) $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
+    private function handle_xml_post_data($directives, $incoming_content_type) {
+        /** @var \SimpleXMLElement */
+        $incoming_stream = simplexml_load_file(trim(file_get_contents("php://input", "SimpleXMLElement", LIBXML_NOCDATA)));
+        $_POST = (array)$incoming_stream;
     }
 
     // This might need some refactoring. Is HTTP_ORIGIN where we want to be 

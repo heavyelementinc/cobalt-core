@@ -114,7 +114,7 @@ trait Indexable {
         return [];
     }
 
-    final private function __index_query():array {
+    private function __index_query():array {
         // Let's check if the filter param is set
         $name = $_GET[QUERY_PARAM_FILTER_NAME];
         $search = $_GET[QUERY_PARAM_SEARCH];

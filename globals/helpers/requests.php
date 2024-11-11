@@ -4,6 +4,7 @@ use Cobalt\Pages\PageManager;
 use Cobalt\Posts\PostManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
+use GuzzleHttp\Exception\GuzzleException;
 use Validation\Exceptions\NoValue;
 
 /**
@@ -12,8 +13,10 @@ use Validation\Exceptions\NoValue;
  * @return bool 
  */
 function is_secure():bool {
+    if(!isset($_SERVER['HTTP_REFERER']) && !isset($_SERVER['HTTP_ORIGIN'])) return __APP_SETTINGS__['session_secure_status'];
     $origin = preg_match('/^https/',$_SERVER['HTTP_ORIGIN'] ?? "");
     $referer = preg_match('/^https/',$_SERVER['HTTP_REFERRER'] ?? "");
+    if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === "https") return true;
     if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $origin || $referer) return true;
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || $_SERVER['SERVER_PORT'] == 443;
@@ -74,7 +77,16 @@ function reauthorize($message = "You must re-authroize your account", $resubmit)
     return true;
 }
 
-
+/**
+ * 
+ * @param mixed $url 
+ * @param string $method 
+ * @param array $headers 
+ * @param bool $return_headers 
+ * @return string|array{body:string, headers:array}
+ * @throws GuzzleException 
+ * @throws RuntimeException 
+ */
 function fetch($url, $method = "GET", $headers = [], $return_headers = false) {
     $client = new \GuzzleHttp\Client();
     $request = $client->request($method, $url, [

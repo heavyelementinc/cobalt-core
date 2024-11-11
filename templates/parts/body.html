@@ -13,8 +13,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="version" content='{{versionHash}}'>
     <meta name="theme-color" content="#fafafa">
+    <meta name="mitigation" content="@csrf_get_token();">
     <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
     @maybe_with("$og_template");
+    {{!webmention}}
     <link
         href="https://fonts.googleapis.com/css?family={{app.fonts.head.import}}|{{app.fonts.body.import}}&display=swap"
         rel="stylesheet">

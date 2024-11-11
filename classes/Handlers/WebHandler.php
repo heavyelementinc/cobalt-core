@@ -89,6 +89,7 @@ class WebHandler implements RequestHandler {
         if ($this->encoding_mode === "text/html") {
             $this->context_mode = $GLOBALS['route_context'];
             $this->template_body = $this->load_template("parts/body.html"); // Load the main HTML template
+            // $this->template_vars['webmention'] = (__APP_SETTINGS__['Webmentions_enable_recieving']) ? "<link rel=\"webmention\" href=\"".server_name() . "/webhooks/linkback/\">" : "";
         } else {
             $this->template_body = $this->main_content_replacement;
         }
@@ -150,6 +151,7 @@ class WebHandler implements RequestHandler {
         // If we're in debug mode, let's embed the actual error message
         $embed = "$message";
         if(__APP_SETTINGS__['debug_exceptions_publicly']) $embed .= "<pre class=\"error--message\">" . base64_encode($e->getMessage()) . "</pre>";
+
 
         $this->add_vars([
             'versionHash' => VERSION_HASH,

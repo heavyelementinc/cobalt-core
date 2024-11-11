@@ -63,7 +63,7 @@ if(file_exists($db_config)) {
         'safe_mode'       => fn ($val) => is_bool($val),
         'timezone'        => function ($value) {
             return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
-        }
+        },
     ];
 
     // Default values allow the config file to omit any value with the following
@@ -77,7 +77,8 @@ if(file_exists($db_config)) {
         'db_invalidCerts' => false,
         'bootstrap_mode'  => COBALT_BOOSTRAP_AS_NEEDED,
         'safe_mode'       => false,
-        'timezone'        => 'America/New_York'
+        'timezone'        => 'America/New_York',
+        'log_level'       => COBALT_LOG_ERROR,
     ];
 
     foreach($sanity_check as $key => $value) {

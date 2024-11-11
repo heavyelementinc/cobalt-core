@@ -22,7 +22,7 @@ use Drivers\Database;
 class PostPersistance extends PersistanceMap {
 
     public function __set_manager(?Database $manager = null): ?Database {
-        return null;
+        return new PostManager();
     }
 
     public function __get_schema(): array {

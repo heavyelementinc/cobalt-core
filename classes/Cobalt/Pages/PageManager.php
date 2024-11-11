@@ -3,9 +3,13 @@
 namespace Cobalt\Pages;
 
 use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\Tasks\Task;
 use Drivers\Database;
+use Exception;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use PEAR2\Services\Linkback\Client;
+use Tasks;
 
 class PageManager extends Database {
 
@@ -120,5 +124,36 @@ class PageManager extends Database {
             ],
             'limit' => $limit
         ]);
+    }
+
+    function webmention_send_task(Task $task):int {
+        // $_id = new ObjectId($id);
+        $_id = $task->get_for();
+        /** @var \Webmentions\WebmentionDocument $doc */
+        $doc = $this->findOne(['_id' => $_id]);
+        if(!$doc) return Task::TASK_FINISHED;
+        if($doc->webmention_is_locked()) return Task::GENERAL_TASK_ERROR;
+        $doc->webmention_lock();
+        $responses = [];
+        try {
+            foreach($doc->webmention_get_urls_to_notify() as $link) {
+                $linkbackClient = new Client();
+                $request = $linkbackClient->getRequest();
+                $request->setConfig([
+                    'ssl_verify_peer' => false,
+                    'ssl_verify_host' => false,
+                ]);
+                $request->setHeader('user-agent', 'Cobalt Engine Webmention Discovery Bot');
+                $linkbackClient->setRequestTemplate($request);
+                $response = $linkbackClient->send($doc->webmention_get_canonincal_url(), $link);
+                array_push($responses, $response);
+            }
+        } catch(Exception $e) {
+            $doc->webmention_unlock();
+            return Task::GENERAL_TASK_ERROR;
+        }
+
+        $doc->webmention_unlock();
+        return Task::TASK_FINISHED;
     }
 }

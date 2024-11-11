@@ -39,8 +39,10 @@ class AsyncFetch extends EventTarget {
             'x-refresh': XRefresh,
             'x-confirm': XConfirm,
             'x-reauthorization': XReauth,
+            // 'x-mitigation-update': 
         }
         this.headerReactions = {};
+        this.requestHeaders['X-Mitigation'] = document.querySelector("meta[name='mitigation']").content;
     }
 
     submit(data = {}) {
