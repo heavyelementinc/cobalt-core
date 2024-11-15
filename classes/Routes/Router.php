@@ -114,7 +114,7 @@ class Router {
                         // foreach($pages as $page) {
                         //     if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
                         //     $html .= view("sitemap/url.xml", [
-                        //         'location' => "/$page->url_slug",
+                        //         'location' => "/".$page->url_slug->get_path(),
                         //         'lastModified' => $page->live_date->format("Y-m-d")
                         //     ]);
                         // }

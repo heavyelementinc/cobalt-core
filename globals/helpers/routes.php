@@ -187,10 +187,9 @@ function get_route_group($directory_group, $misc = []) {
     $rtGrp->setExcludeWrappers($misc['excludeWrapper']);
     $landingPages = new PageManager();
     $pageData = [];
-    $prefix = __APP_SETTINGS__['LandingPage_route_prefix'];
     foreach($landingPages->find($landingPages->public_query(['include_in_route_group' => true, 'route_group' => $directory_group])) as $page) {
         $pageData[] = [
-            'href' => $prefix."$page->url_slug",
+            'href' => $page->url_slug->get_path(),
             'label' => $page->route_link_label->getValue() ?? $page->title->getValue(),
             'order' => $page->route_order->getValue(),
         ];

@@ -194,9 +194,26 @@ class NewFormRequest extends HTMLElement {
     submitGetRequest(data, event) {
         let encodedPairs = [];
         for(const key in data) {
-            encodedPairs.push(
-                `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
-            );
+            switch(typeof data[key]) {
+                case "object":
+                    if(Array.isArray(data[key])) {
+                        data[key].forEach(el => {
+                            encodedPairs.push(
+                                `${encodeURIComponent(key)}[]=${encodeURIComponent(el)}`
+                            );
+                        })
+                        break;
+                    }
+                    for(const d in data[key]) {
+                        encodedPairs.push(
+                            `${encodeURIComponent(key)}[${d}]=${encodeURIComponent(data[key][d])}`
+                        );
+                    }
+                default:
+                    encodedPairs.push(
+                        `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
+                    );
+            }
         }
         const fullUrl = `${this.getAttribute("action")}?${encodedPairs.join("&")}`;
         const method = this.getAttribute("method");

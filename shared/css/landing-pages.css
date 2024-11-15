@@ -348,6 +348,33 @@ li ul.blockeditor--nestedlist {
     justify-content: center;
 }
 
+.landing-comments--container {
+    display: flex;
+    align-items:center;
+    padding: var(--content-margins);
+}
+/* .landing-comments--container:before {
+    content: "";
+    border: var(--project-calendar-borders);
+} */
+.landing-comments--container ul {
+    display: inline-block;
+    padding: 0;
+    margin: 0 0 0 .4em;
+    list-style: none;
+    vertical-align: center;
+}
+
+.landing-comments--container li {
+}
+
+.landing-comments--container .webmention--like img {
+    height: 1lh;
+    width: 1lh;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
 /* @-moz-document url-prefix() {
     a.landing-main--related-page .related-page--summary {
         display: block;

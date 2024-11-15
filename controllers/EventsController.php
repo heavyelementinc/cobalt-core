@@ -1,8 +1,35 @@
 <?php
 
+use Cobalt\Maps\GenericMap;
 use CobaltEvents\EventManager;
+use CobaltEvents\EventMap;
+use CobaltEvents\EventMap2;
 use CobaltEvents\EventSchema;
+use Controllers\Crudable;
+use Drivers\Database;
 use Exceptions\HTTP\NotFound;
+use MongoDB\Model\BSONDocument;
+
+// class EventsController extends Crudable {
+
+//     public function get_manager(): Database {
+//         return new EventManager();
+//     }
+
+//     public function get_schema($data): GenericMap {
+//         return new EventMap2();
+//     }
+
+//     /** @var EventMap2 $document */
+//     public function edit($document): string {
+//         return view($document->__get_editor_template_path());
+//     }
+
+//     public function destroy(GenericMap|BSONDocument $document): array {
+//         return ['message' => "Are you sure you want to delete $document->internal_name?", 'post' => $_POST];
+//     }
+    
+// }
 
 class EventsController {
     var $events;

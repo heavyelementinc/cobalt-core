@@ -3,12 +3,14 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\Maps\PersistanceMap;
+use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use DOMDocument;
 use Drivers\FileSystem;
 use Exception;
+use ParsedownExtra;
 use Validation\Exceptions\ValidationIssue;
 
 /** @package Cobalt\SchemaPrototypes\Basic */
@@ -234,6 +236,12 @@ class BlockResult extends SchemaResult {
                 case "blockbutton":
                     $html .= $this->__from_blockbutton($block);
                     break;
+                case "reply":
+                    $html .= $this->__from_reply($block);
+                    break;
+                case "like":
+                    $html .= $this->__from_like($block);
+                    break;
                 default:
                     $html .= "<pre>Cannot render type: $block->type</pre>";
                     break;
@@ -343,5 +351,37 @@ class BlockResult extends SchemaResult {
 
     private function __from_blockbutton($block) {
         return "<p class=\"blockeditor--content blockeditor--blockbutton\"><a href=\"".$block->data->url."\" class=\"button\">".$block->data->label."</a></p>";
+    }
+
+    private function __from_reply($block) {
+        $link_title = parse_url($block->data->to_url, PHP_URL_HOST);
+        $parsedown = new ParsedownExtra();
+        if($block->data->to_quote) $link_title = "<div class=\"attribution\">Quote from $link_title:</div>".$parsedown->parse($block->data->to_quote);
+        else if($block->data->to_url) $link_title = "In response to $link_title";
+        
+        $paragraph = $parsedown->parse($block->data->response);
+        /** @var UserIdResult */
+        if(isset($this->__reference)) $author = $this->__reference->author->get_hcard("p-author");
+        return "<div class=\"h-entry blockeditor--content blockeditor--reply\">
+            <a href=\"".$block->data->to_url."\" class=\"u-in-reply-to\">
+            <blockquote>$link_title</blockquote>
+            </a>
+            $author
+            <div class=\"p-name p-content\">$paragraph</div>
+        </div>";
+    }
+
+    private function __from_like($block) {
+        $link_title = parse_url($block->data->to_url);
+        $link_title = "$link_title[host]$link_title[path]";
+        if($block->data->label) $link_title = $block->data->label;
+        /** @var UserIdResult */
+        if(isset($this->__reference)) $author = $this->__reference->author->get_hcard("p-author");
+        return "
+            <div class=\"h-entry blockeditor--content blockeditor--like\">
+                $author <i name=\"heart\"></i> 
+                <a href=\"".$block->data->to_url."\" class=\"u-like-of\">$link_title</a>
+            </div>
+        ";
     }
 }

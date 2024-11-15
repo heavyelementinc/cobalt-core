@@ -83,6 +83,10 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
         return $this->__manager;
     }
 
+    public function __get_editor_template_path():?string {
+        return null;
+    }
+
     abstract function __set_manager(?Database $manager = null):?Database;
 
     function __initialize_schema($schema = null): void {

@@ -208,7 +208,7 @@ abstract class Crudable {
          *  * `delete_option` - The delete option for an action-menu element (will be empty on a new doc)
          *  * `doc` - The current document to be edited
          * 
-         * @return string Genereally this is going to be a `view("/some/template")` call
+         * @return string usually this is going to be a `view($document->__get_editor_template_path())` call
          */
         abstract function edit($document):string;
 
@@ -240,11 +240,15 @@ abstract class Crudable {
                 'endpoint' => $route . "$id",
                 'autosave' => 'autosave="autosave"',
                 'submit_button' => '',
-                'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@__destroy")."$id\" dangerous=\"true\">Delete</option>",
+                'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@__destroy")."$id\" dangerous=\"true\">".$this->getDeleteOptionLabel($doc)."</option>",
                 'doc' => $doc,
             ]);
             
             return $this->edit($doc);
+        }
+
+        public function getDeleteOptionLabel(GenericMap $doc) {
+            return "Delete";
         }
 
         static public function route_details_update():array {
@@ -267,7 +271,7 @@ abstract class Crudable {
         */
         abstract function destroy(GenericMap|BSONDocument $document):array;
 
-        final public function __destroy($id) {
+        public function __destroy($id) {
             $read = $this->__read($id);
             if(!$read) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
             $default_confirm_message = "Are you sure you want to delete this record?";
@@ -282,7 +286,7 @@ abstract class Crudable {
             return $result->getDeletedCount();
         }
 
-        final public function __multidestroy() {
+        public function __multidestroy() {
             $upgraded = [];
             foreach($_POST[CRUDABLE_MULTIDESTROY_FIELD] as $id) {
                 if(!$id) throw new BadRequest("Invalid ID found", "Invalid ID supplied");

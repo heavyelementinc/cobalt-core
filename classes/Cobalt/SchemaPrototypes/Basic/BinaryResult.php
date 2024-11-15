@@ -64,8 +64,8 @@ class BinaryResult extends SchemaResult {
     #[Prototype]
     protected function options($selected = null):string {
         $valid = $this->getValid();
-        if($selected === null) $value = (int)$selected;
-        else $value = $this->getValue();
+        if($selected !== null) $value = (int)$selected;
+        else $value = $this->value;
         $html = "";
         foreach($valid as $key => $val) {
             $selected = "";

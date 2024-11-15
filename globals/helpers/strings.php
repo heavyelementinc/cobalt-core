@@ -434,3 +434,8 @@ function is_data_uri($uri):bool {
     if(substr($uri, 0, 5) === "data:") return true;
     return false;
 }
+
+function is_function(mixed $subject):bool {
+    if(is_string($subject)) return false;
+    return is_callable($subject);
+}

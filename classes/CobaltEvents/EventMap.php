@@ -19,6 +19,11 @@ class EventMap extends PersistanceMap {
     public function __set_manager(?Database $manager = null): ?Database {
         return new EventManager();
     }
+
+    function __get_editor_template_path(): ?string {
+        return "/cobalt_events/edit.v1.html";
+    }
+
     function __get_schema():array {
         return [
             'name' => [

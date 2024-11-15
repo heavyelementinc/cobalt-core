@@ -27,6 +27,7 @@ class PostMap extends PageMap {
             'set' => false,
         ];
 
+        $schema['flags']['default'] = self::FLAGS_INCLUDE_PERMALINK;
         $schema['splash_type']['default'] = self::SPLASH_POSITION_CENTER;
         $schema['include_aside']['default'] = __APP_SETTINGS__['PostPages_default_aside_visibility'];
         $schema['aside_positioning']['default'] = __APP_SETTINGS__['PostPages_default_aside_flags'];

@@ -20,7 +20,7 @@
     {
         "type": "DefaultType",
         "name": "Process Tasks",
-        "class": "\\Tasks\\TaskManager",
+        "class": "\\Cobalt\\Tasks\\TaskManager",
         "class_args": [],
         "method": "process_queue",
         "method_args": [],

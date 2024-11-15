@@ -64,13 +64,15 @@ define("COBALT_LOG_EXCEPTION", 4);
 function cobalt_log($source, $string, $level = COBALT_LOG_MESSAGE) {
     if($level < config()['log_level']) return;
     $levels = ['MESSAGE','NOTICE','WARNING','ERROR','EXCEPTION'];
+    $date = date("c");
+    $log_line = "[$date] [".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string).PHP_EOL;
+    if(function_exists("say")) say($log_line);
     $logpath = pathinfo(COBALT_LOG_PATH, PATHINFO_DIRNAME);
     $logfile = COBALT_LOG_PATH;
     if(!is_dir($logpath)) mkdir($logpath, 0777, true);
     $resource = fopen($logfile, "a+");
     if(!$resource) return;
-    $date = date("c");
-    fwrite($resource,"[$date] [".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string).PHP_EOL);
+    fwrite($resource,$log_line);
     fclose($resource);
 }
 

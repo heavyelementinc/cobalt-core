@@ -61,95 +61,118 @@ require_once __ENV_ROOT__ . "/globals/helpers/routes.php";
  * @todo do we *want* this class to 
  * @param string $class the class name
  */
-function cobalt_autoload($class) {
+function cobalt_autoload_fallback($class) {
     global $CLASSES_DIR;
     $namespace_to_path = str_replace("\\", "/", $class) . ".php";
     
     $file = find_one_file($CLASSES_DIR, $namespace_to_path) ?? "";
 
-    try {
+    if ($file !== false) {
+        try{
+            class_loader($file, $class, "PHASE_2_FIND_ONE");
+        } catch (ParseError $e) {
+            kill("Syntax error in ".obfuscate_path_name($e->getFile()));
+        }
+        return;
+    }
+    $controllers_special_case = '/Controllers/';
+    if (preg_match($controllers_special_case, $class)) {
+        $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class);
         if ($file !== false) {
-            try{
-                require_once $file;
-            } catch (ParseError $e) {
-                kill("Syntax error in ".obfuscate_path_name($e->getFile()));
-            }
+            class_loader($file, $class, "PHASE_2_CONTROLLER");
+
             return;
         }
-        $controllers_special_case = '/Controllers/';
-        if (preg_match($controllers_special_case, $class)) {
-            $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class);
-            if ($file !== false) {
-                require_once $file;
+    }
 
-                return;
-            }
-        }
-
-        $has_namespace = strpos("\\", $class);
-        if($has_namespace === false) {
-            $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class . ".php");
-            if ($file !== false) {
-                require_once $file;
-                return;
-            }
-        }
-
-
-        // Load class databases
-        if (!isset($GLOBALS['class_directory'])) $GLOBALS['class_directory'] = get_all_where_available([__ENV_ROOT__ . '/classes/class_directory.json', __APP_ROOT__ . '/private/classes/class_directory.json']);
-        $load = null;
-        // Check if the class we're trying to load exists in the classes property
-        if (key_exists($class, $GLOBALS['class_directory']['classes'])) {
-            $load = $GLOBALS['class_directory']['classes'][$class];
-        }
-        if ($class[0] === "\\") $class = substr($class, 1);
-        $explode = explode("\\", $class);
-        $match_pattern = "/(.*)\\(\w+$)/";
-        if (count($explode) === 2) {
-            $namespace = $explode[0];
-            $class_name = $explode[1];
-            if (key_exists($namespace, $GLOBALS['class_directory']['namespaces'])) {
-                $load = $GLOBALS['class_directory']['namespaces'][$namespace];
-            }
-        }
-
-        // Throw an error if we don't have a load candidate
-        if ($load === null) throw new Exception("Could not load $class");
-
-        // If the path key exists, process the strings and require the file
-        if (key_exists('path', $load)) {
-            $final_name = str_replace(
-                ['__ENV_CLASSES__', '__APP_CLASSES__'],
-                [__ENV_ROOT__ . "/classes/", __APP_ROOT__, "/private/classes/"],
-                $load['path']
-            );
-            if (pathinfo($final_name, PATHINFO_EXTENSION) !== "php") $final_name .= "$class_name.php";
-            require_once $final_name;
+    $has_namespace = strpos("\\", $class);
+    if($has_namespace === false) {
+        $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class . ".php");
+        if ($file !== false) {
+            class_loader($file, $class, "PHASE_2_HAS_NAMESPACE");
             return;
         }
+    }
+
+
+    // Load class databases
+    if (!isset($GLOBALS['class_directory'])) $GLOBALS['class_directory'] = get_all_where_available([__ENV_ROOT__ . '/classes/class_directory.json', __APP_ROOT__ . '/private/classes/class_directory.json']);
+    $load = null;
+    // Check if the class we're trying to load exists in the classes property
+    if (key_exists($class, $GLOBALS['class_directory']['classes'])) {
+        $load = $GLOBALS['class_directory']['classes'][$class];
+    }
+    if ($class[0] === "\\") $class = substr($class, 1);
+    $explode = explode("\\", $class);
+    $match_pattern = "/(.*)\\(\w+$)/";
+    if (count($explode) === 2) {
+        $namespace = $explode[0];
+        $class_name = $explode[1];
+        if (key_exists($namespace, $GLOBALS['class_directory']['namespaces'])) {
+            $load = $GLOBALS['class_directory']['namespaces'][$namespace];
+        }
+    }
+
+    // Throw an error if we don't have a load candidate
+    if ($load === null) throw new Exception("Could not load $class");
+
+    // If the path key exists, process the strings and require the file
+    if (key_exists('path', $load)) {
+        $final_name = str_replace(
+            ['__ENV_CLASSES__', '__APP_CLASSES__'],
+            [__ENV_ROOT__ . "/classes/", __APP_ROOT__, "/private/classes/"],
+            $load['path']
+        );
+        if (pathinfo($final_name, PATHINFO_EXTENSION) !== "php") $final_name .= "$class_name.php";
+        class_loader($final_name, $class, "PHASE_2_CLASS_MAP");
+        return;
+    }
+    
+}
+
+function cobalt_autoload($class) {
+    $namespace_to_path = "/" . str_replace("\\", "/", $class) . ".php";
+    $file = __APP_ROOT__ . $namespace_to_path;
+    if(file_exists($file)) {
+        class_loader($file, $class, "PHASE_1_APPLICATION");
+        return;
+    }
+
+    $file = __ENV_ROOT__ . $namespace_to_path;
+    if(file_exists($file)) {
+        class_loader($file, $class, "PHASE_1_ENVIRONMENT");
+        return;
+    }
+
+    return cobalt_autoload_fallback($class);
+}
+
+function class_loader($path, $originalName, $stage) {
+    try {
+        require_once $path;
     } catch (ParseError $e) {
         print("<pre>");
         $file = $e->getFile() . ': ' . $e->getLine();
         if (app('debug')) {
-            print("ParseError when loading $file");
+            print("ParseError when loading ". obfuscate_path_name($e->getFile()));
             print("\n" . $e->getMessage());
         } else {
-            print("A error was found. Please contact your system administrator with the following error code:\n");
+            print("A error was encountered in $stage. Please contact your system administrator with the following error code:\n");
             print(base64_encode($e->getMessage() . ' ' . $file));
         }
         exit;
     } catch (Exception $e) {
-        print($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+        print("Exception in stage $stage when loading " . obfuscate_path_name($e->getFile()) . ' ' . $e->getLine());
+        print("\n".$e->getMessage() );
         exit;
     } catch (Error $e) {
         print("<pre>");
-        $file = $e->getFile() . ': ' . $e->getLine();
+        $file = obfuscate_path_name($e->getFile()) . ': ' . $e->getLine();
         if (app('debug')) {
-            print("Fatal error when loading $file");
+            print("Fatal error in $stage when loading $file");
             print("\n" . $e->getMessage());
         } else {
-            print("A error was found. Please contact your system administrator with the following error code:\n");
+            print("A error was encountered. Please contact your system administrator with the following error code:\n");
             print(base64_encode($e->getMessage() . ' ' . $file));
         }
         exit;
@@ -353,8 +376,9 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
      * appending to the $looked_up string when we successfully find the object
      */
     if ($looked_up === "$path_map.") return $mutant;
-    else if ($throw_on_fail == "warn") throw new Exception("Could not find `$path_map`");
-    else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
+    else if ($throw_on_fail == "warn") {
+        // throw new Exception("Could not find `$path_map`");
+    } else if ($throw_on_fail === true) throw new Exception("Could not look up `$path_map`");
     else return; // Return undefined
 }
 

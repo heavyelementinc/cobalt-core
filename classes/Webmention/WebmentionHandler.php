@@ -4,14 +4,22 @@ namespace Webmention;
 
 use Cobalt\Tasks\Task;
 use DOMDocument;
+use DOMElement;
+use DOMNode;
+use DOMXPath;
 use Drivers\Database;
 use Exception;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
+use Rct567\DomQuery\DomQuery;
 use Routes\Router;
 
 class WebmentionHandler extends Database {
     private ResponseInterface $response;
+    private $mention;
+
+    const P_CONTENT = "p-content";
+    const P_AUTHOR = "p-author";
 
     public function get_collection_name() {
         return "webmentions";
@@ -49,43 +57,89 @@ class WebmentionHandler extends Database {
         return $this->response;
     }
 
-    public function verifyLinkExists(string $target, string $source, string $sourceBody, ResponseInterface $res) {
-        $dom = new DOMDocument();
-        $dom->loadHTML($sourceBody);
+    public function buildLinkData(string $target, string $source, string $sourceBody, ResponseInterface $res):int {
 
-        $list = $dom->getElementsByTagName("a");
-        foreach($list as $link) {
-            if(!$link->hasAttributes()) continue;
-            $href = $link->attributes->getNamedItem("href");
-            if($href === $target) return true;
+        // If there are no .h-entry on the page, let's just look for a link instead.
+        // if($result) return $this->linkDataFromBasicLinks($target, $dom, $res);
+        $dom = new DomQuery($sourceBody);
+        $h_entries = $dom->find(".h-entry");
+        // Here we have our list of .h-entry elements. We will now search each .h-entry
+        // to determine if it's a reply, like, repost, or response
+        foreach($h_entries as $index => $entry) {
+            $mention = new Mention();
+            $mention->setSource($source);
+            $mention->setDomElements($dom, $entry);
+            
+            $result = $mention->setTarget($target);
+            $mention->discoverReply($entry);
+            $mention->discoverLike($entry);
+            $mention->discoverRepost($entry);
+            // return $mention;
+            $this->storeWebmention($mention);
         }
 
-        return false;
+        return Task::TASK_FINISHED;
     }
 
-    public function storeWebmention(string $target, string $source, string $sourceBody, ResponseInterface $res):void {
+    public function linkDataFromBasicLinks(string $target, DomQuery $dom, ResponseInterface $res):?Mention {
+        $list = $dom->getElementsByTagName("a");
+        /** @var DOMNode $link */
+        foreach($list as $link) {
+            if(!$link->hasAttributes()) continue;
+            /** @var DOMNode $var */
+            $href = $link->attributes->getNamedItem("href");
+            if($href->value === $target) {
+                $mention->discoverReply($ancestor, $link);
+                // $this->isLike($ancestor, $link);
+            };
+        }
+        return null;
+    }
+
+    private function getClosestAncestorWithClass(DOMNode $elem, $classToFind, $ref) {
+        $class = $elem->attributes->getNamedItem("class");
+        $exists = preg_match("/$classToFind/", $class->value);
+        if($exists !== false) {
+            return $elem;
+        }
+
+        if(!isset($elem->parentNode)) return false;
+        return $this->getClosestAncestorWithClass($elem->parentNode, $classToFind, $ref);
+    }
+
+    public function storeWebmention(Mention $mention):int {
+        $target = $mention->getTarget();
+        $source = $mention->getSource();
         $path = parse_url($target);
-        $url = $path;
-        $url['withQuery'] = ($url['query']) ? "$url[path]?$url[query]" : "$url[path]";
-        $doc = [
+
+        $query = [
             'target' => $target,
             'source' => $source,
-            'url' => $url,
         ];
+        
+        // Check if this needs to be inserted
+        $exists = $this->findOne($query);
+        if($exists !== null) $this->deleteOne(['_id' => $exists->_id]);
 
-        $this->updateOne($doc, [
-            '$set' => $doc
-        ], [
-            'upsert' => true
-        ]);
+        // If it's not anything, don't insert it.
+        // if(!$mention->isReply() && !$mention->isLike() && !$mention->isRepost()) return Task::TASK_FINISHED;
+        $inserted = $this->insertOne($mention);
+        if($inserted->getInsertedCount() === 1) return Task::TASK_FINISHED;
+        return Task::GENERAL_TASK_ERROR;
     }
 
-    public function findBySlug($path) {
-        return $this->find($this->getQuery($path));
+    public function findBySlug($path, array $options = []) {
+        return $this->find($this->getQuery($path), $options);
     }
 
     public function countBySlug($path) {
         return $this->count($this->getQuery($path));
+    }
+
+    public function findCommentsBySlug($path, array $options = []) {
+        $query = $this->getQuery($path);
+        $query['comment'] = ['$exists' => true];
+        return $this->find($query, array_merge(['limit' => 100], $options));
     }
 
     public function getQuery($path){
@@ -93,7 +147,6 @@ class WebmentionHandler extends Database {
             '$or' => [
                 [
                     'url.path' => $path
-                    
                 ],
                 [
                     'url.withQuery' => $path
@@ -109,10 +162,9 @@ class WebmentionHandler extends Database {
         $response = $this->fetchSource($data['source']);
         if($response->getStatusCode() >= 300) return Task::GENERAL_TASK_ERROR;
         $body = $response->getBody();
-        $doesLinkExist = $this->verifyLinkExists($data['target'], $data['source'], $body, $response);
-        if(!$doesLinkExist) return Task::GENERAL_TASK_ERROR;
-        $this->storeWebmention($data['target'], $data['source'], $body, $response);
-        
-        return Task::TASK_FINISHED;
+        $mention = $this->buildLinkData($data['target'], $data['source'], $body, $response);
+        if(!$mention) return Task::GENERAL_TASK_ERROR;
+        // return $this->storeWebmention($mention);
+        return $mention;
     }
 }

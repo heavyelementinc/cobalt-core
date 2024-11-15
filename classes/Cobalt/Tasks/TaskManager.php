@@ -4,12 +4,13 @@ namespace Cobalt\Tasks;
 use Drivers\Database;
 use Error;
 use Exception;
+use GuzzleHttp\Exception\ClientException;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
 class TaskManager extends Database {
     const SANITY_CHECK_FAILURE_INC = 999;
-    const MARK_JOBS_COMPLETE = false;
+    const MARK_JOBS_COMPLETE = true;
     public function get_collection_name() {
         return "task_queue";
     }
@@ -42,28 +43,35 @@ class TaskManager extends Database {
     }
     
     public function process_queue($since = null) {
-        $results = $this->find($this->get_query($since));
-        cobalt_log("TaskManager", "Started process queue", COBALT_LOG_NOTICE);
+        $start = microtime(true);
+        $query = $this->get_query($since);
+        $count = $this->count($query);
+        if($count === 0) return cobalt_log("TaskManager", "No tasks to execute", COBALT_LOG_NOTICE);
+        cobalt_log("TaskManager", "Enumerated $count tasks to be processed", COBALT_LOG_NOTICE);
+        $results = $this->find($query);
         $count = 0;
         foreach($results as $task) {
             try {
+                $job_start = microtime(true);
                 $job_status = $this->execute($task);
                 if($job_status === null || $job_status === Task::TASK_FINISHED) {
                     if(self::MARK_JOBS_COMPLETE) $this->mark_as_complete($task);
                 }
+                $job_end = microtime(true);
+                cobalt_log("TaskManager", "Job \"".$task->get_class()."::".$task->get_method()."\" completed in " ($job_end - $job_start)." seconds");
                 if($job_status === Task::TASK_SKIP) {
                     continue;
                 }
             } catch(Exception $e) {
-                cobalt_log("TaskManager", "Failed to process ".$task->getClass()."::".$task->getMethod() . " " . $e->getMessage(), COBALT_LOG_EXCEPTION);
+                cobalt_log("TaskManager", "Failed to process ".$task->get_class()."::".$task->get_method() . " " . $e->getMessage(), COBALT_LOG_EXCEPTION);
                 $this->failure($task);
             } catch (Error $e) {
-                cobalt_log("TaskManager", "Failed to process ".$task->getClass()."::".$task->getMethod() . " " . $e->getMessage(), COBALT_LOG_ERROR);
+                cobalt_log("TaskManager", "Failed to process ".$task->get_class()."::".$task->get_method() . " " . $e->getMessage(), COBALT_LOG_ERROR);
                 $this->failure($task);
             }
             $count += 1;
         }
-        if($count >= 1) cobalt_log("TaskManager", "Ran $count tasks", COBALT_LOG_NOTICE);
+        if($count >= 1) cobalt_log("TaskManager", "Ran $count tasks in ".(time() - $start)." seconds", COBALT_LOG_NOTICE);
     }
 
     public function execute(Task $task) {
@@ -81,6 +89,12 @@ class TaskManager extends Database {
         if(!method_exists($instance, $method)) return $task::ERROR_METHOD_DOES_NOT_EXIST;
         try {
             $result = $instance->{$method}($task, ...$args);
+        } catch (ClientException $error ) {
+            switch($error->getCode()) {
+                case 404:
+                default:
+                    return $task::TASK_FINISHED;
+            }
         } catch (Exception $error) {
             return $task::GENERAL_TASK_ERROR;
         }

@@ -123,6 +123,14 @@ class UserPersistance extends PersistanceMap {
                     if($name) $name .= " $this->lname";
                     if(!$name) $name = $this->uname;
                     return $name;
+                },
+                'hcard' => function ($display_name, $ref = "", $misc, $classes, $img_classes = "avatar") {
+                    return view("/authentication/user-h-card.html",[
+                        'doc' => $this,
+                        'class' => $classes,
+                        'img_class' => $img_classes,
+                        'href' => server_name(),
+                    ]);
                 }
             ],
             'default_bio_blurb' => [

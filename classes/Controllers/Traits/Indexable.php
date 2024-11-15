@@ -197,14 +197,28 @@ trait Indexable {
     /**
      * 
      * @param GenericMap $doc 
+     * @return array{string:row_class,string:row_style,bool:checkbox_checked,bool:checkbox_disabled}
+     */
+    function getRowDetails(GenericMap $doc):array {
+        return [];
+    }
+    /**
+     * 
+     * @param GenericMap $doc 
      * @param mixed &$html 
      * @return void 
      * @throws Exception 
      */
     function get_table_row(GenericMap $doc, &$html) {
-        $html .= "<flex-row>";
+        $row_details = $this->getRowDetails($doc);
+        $row_class = (isset($row_details['row_class'])) ? " class=\"$row_details[row_class]\"" : "";
+        $row_style = (isset($row_details['row_style'])) ? " style=\"$row_details[row_style]\"" : "";
+        $html .= "<flex-row$row_class"."$row_style>";
+
         if($this->schema->__get_index_checkbox_state()) {
-            $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\" value=\"$doc->_id\"></flex-cell>";
+            $checked = ($row_details['checkbox_checked']) ? " checked=\"checked\"" : "";
+            $disabled = ($row_details['checkbox_disabled']) ? " disabled=\"disabled\"" : "";
+            $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\"$checked value=\"$doc->_id\"$disabled></flex-cell>";
         }
         $route = route("$this->name@__edit", [$doc->_id]);
         // Get each cell's contents

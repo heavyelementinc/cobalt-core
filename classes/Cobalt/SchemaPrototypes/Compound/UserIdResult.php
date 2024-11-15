@@ -192,4 +192,9 @@ class UserIdResult extends SchemaResult {
         $user = $this->getValue();
         return $user->avatar;
     }
+
+    #[Prototype]
+    protected function get_hcard($class = "", $img_class = "") {
+        return $this->getValue()->display_name->hcard("", $class, $img_class);
+    }
 }

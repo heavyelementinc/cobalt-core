@@ -16,6 +16,7 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONDocument;
 use stdClass;
 use Traversable;
@@ -25,13 +26,63 @@ abstract class Page extends Crudable {
     /** @var PageManager */
     public Database $manager;
     
-    function get_page_data($query):?PageMap {
-        $result = $this->manager->findOne(['url_slug' => $query]);
+    function get_page_data($queryPath):?PageMap {
+        $_id = null;
+        $query = null;
+        if(strpos($queryPath, "/")) {
+            $exploded = explode("/", $queryPath);
+            $query = $exploded[0];
+            try{
+                $_id = new ObjectId($exploded[1]);
+            } catch (Exception $e) {
+                $_id = null;
+            }
+        }
+
+        if($_id) {
+            $result = $this->manager->findOne([
+                '_id' => $_id,
+                'deleted' => ['$exists' => false]
+            ]);
+    
+            if($result) {
+                // Check to ensure we're not duplicating our routes
+                return $result;
+            }
+        }
+
+        $result = $this->manager->findOne([
+            'url_slug' => $query ?? $queryPath,
+            'deleted' => ['$exists' => false]
+        ]);
+
+        // If we've found a result for the url_slug query, we're done, return it.
+        if($result) return $result;
+        // If we couldn't find a result and there's no ID set, then the page doesn't exist.
+        if(!$_id) return null;
+        
+        // We have an ID left to try, so let's do that.
+        $result = $this->manager->findOne([
+            '_id' => $_id,
+            'deleted' => ['$exists' => false]
+        ]);
+
+        // If there's no result now, the page doesn't exist.
         if(!$result) return null;
+        
+        // We're done!
         return $result;
     }
 
-    function page($query = null) {
+    function redirect_on_no_permalink(string $queryPath, PageMap $page) {
+        $requires_permalink = $page->flags->and($page::FLAGS_INCLUDE_PERMALINK);
+        if($requires_permalink != $page::FLAGS_INCLUDE_PERMALINK) return null;
+        $regex = preg_match("/".preg_quote($page->_id)."/",$queryPath);
+        if($regex === false || $regex === 0) redirect_and_exit($page->url_slug->get_path());
+        return null;
+    }
+
+    function page($query = null) {        
         // Let's get our page data
         $page = $this->get_page_data($query);
         $does_not_exist = "That page does not exist.";
@@ -56,6 +107,9 @@ abstract class Page extends Crudable {
                     break;
             }
         }
+
+        $this->redirect_on_no_permalink($query, $page);
+
         $now = time();
         
         $fifteen_minutes = 15 * 60;
@@ -103,6 +157,8 @@ abstract class Page extends Crudable {
             'keywords' => $page->tags->join(", "),
             'related' => $this->getRelated($page),
             'footer' => $this->getFooter($page),
+            'comments' => $this->getComments($page),
+            'likes' => $this->getLikes($page),
         ]);
 
         // Get our view and check if it's in the view types
@@ -254,6 +310,19 @@ abstract class Page extends Crudable {
         return "$footer$nav</footer>";
     }
 
+    function getLikes(PageMap $page) {
+        return view("/pages/landing/likes.html", ['page' => $page, 'details' => $page->get_webmention_details()]);
+    }
+
+    function getComments(PageMap $page) {
+        $details = $page->get_webmention_details();
+        if($details['replyCount'] === 0) return;
+        return view("/pages/landing/comments.html", [
+            'page' => $page,
+            'details' => $details,
+        ]);
+    }
+
     function renderPreview(PageMap $p, ?PageMap $page = null) {
         $common_tags = "";
         if($page) $common_tags = implode(",",$page->tags->intersect($p->tags));
@@ -336,10 +405,16 @@ abstract class Page extends Crudable {
         $result = $this->manager->updateOne(['_id' => $document->getId()], ['$set' => ['token' => $token]]);
         
         $privileged_field_permission = ($this::className() === "Pages") ? 'Posts_enable_privileged_fields' : 'Pages_enable_privileged_fields';
+    
         return view("/pages/landing/edit.html", [
             'admin_fields' => (has_permission($privileged_field_permission)) ? view("/pages/landing/admin-fields.html") : "",
             'token' => $token,
+            'deleted' => (isset($document->__dataset['deleted'])) ? "<small>This post was deleted " . $document->deleted->getValue()->toDateTime()->format("c") . ".</small>" : "",
         ]);
+    }
+
+    public function getDeleteOptionLabel(GenericMap $doc) {
+        return (isset($doc->__dataset['deleted'])) ? "Undelete" : "Delete";
     }
 
     public function api_validate_token($id) {
@@ -359,6 +434,45 @@ abstract class Page extends Crudable {
         return ;
     }
 
+    public function __destroy($id) {
+        $read = $this->__read($id);
+        if(!$read) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+
+        $default_confirm_message = "Are you sure you want to delete this record?";
+        $confirm_message = $this->destroy($read);
+        $action = "delete";
+        if(isset($read->__dataset['deleted'])) {
+            $confirm_message = ['message' => "This will undelete this post and restore it to its current visibility status. Are you sure you want to continue?", 'post' => $confirm_message['post']];
+            $action = "undelete";
+        }
+        confirm($confirm_message['message'] ?? $confirm_message[0] ?? $default_confirm_message, $confirm_message['post'] ?? $_POST, $confirm_message['okay'] ?? "Yes", $confirm_message['dangerous'] ?? true);
+        
+        switch($action) {
+            case "undelete":
+                $result = $this->manager->updateOne(['_id' => $read->_id], ['$unset' => ['deleted' => 1]]);
+                break;
+            default:
+                $result = $this->manager->updateOne(['_id' => $read->_id], ['$set'   => ['deleted' => new UTCDateTime()]]);
+                break;
+        }
+        header("X-Refresh: @now");
+        return $result->getModifiedCount();
+    }
+
+    public function __multidestroy() {
+        $upgraded = [];
+        foreach($_POST[CRUDABLE_MULTIDESTROY_FIELD] as $id) {
+            if(!$id) throw new BadRequest("Invalid ID found", "Invalid ID supplied");
+            $upgraded[] = new ObjectId($id);
+        }
+        $query = ['_id' => ['$in' => $upgraded]];
+        $results = $this->manager->count($query);
+        confirm("This will delete $results document".plural($results).". Do you want to continue?", $_POST);
+
+        $deleted = $this->manager->updateMany($query, ['$set' => ['deleted' => new UTCDateTime()]]);
+        header("X-Refresh: @now");
+        return $deleted->getModifiedCount();
+    }
             
     static public function route_details_read():array {
         return ['permission' => static::route_permission("_read")];
@@ -391,5 +505,14 @@ abstract class Page extends Crudable {
                 break;
         }
         return $name . $suffix;
+    }
+
+    public function getRowDetails(GenericMap $doc): array {
+        $arr = [];
+        if(isset($doc->__dataset['deleted'])) {
+            $arr['checkbox_disabled'] = true;
+            $arr['row_style'] = "text-decoration: line-through;color: rgba(0,0,0, .5)";
+        }
+        return $arr;
     }
 }

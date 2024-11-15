@@ -41,8 +41,12 @@ $TIME_TO_UPDATE = false;
 $env_class_root = __ENV_ROOT__ . "/classes/";
 global $CLASSES_DIR;
 $CLASSES_DIR = [
+    __APP_ROOT__ . "/Cobalt/Components/",
+    __APP_ROOT__ . "/Components/",
     __APP_ROOT__ . "/classes",
     __APP_ROOT__ . "/private/classes/",
+    __ENV_ROOT__ . "/Cobalt/Components/",
+    __ENV_ROOT__ . "/Components/",
     $env_class_root,
 ];
 

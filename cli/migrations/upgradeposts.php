@@ -65,7 +65,7 @@ class upgradeposts extends Migration {
             /** Stuff that's going to stay the same */
             'author' => new ObjectId($document->author),
             'title' => $document->title,
-            'url_slug' => $document->url_slug,
+            'url_slug' => $document->url_slug->get_path(),
             'rss_attachment' => $document->rss_attachment,
             'attachments' => $document->attachments ?? [],
             'tags' => $document->tags ?? []

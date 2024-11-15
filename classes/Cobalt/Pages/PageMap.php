@@ -5,6 +5,7 @@ namespace Cobalt\Pages;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Maps\PersistanceMap;
 use Cobalt\Posts\PostManager;
+use Cobalt\Renderer\Exceptions\TemplateException;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
@@ -21,6 +22,8 @@ use Controllers\Traits\Indexable;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Drivers\Database;
+use Exception;
+use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\UTCDateTime;
 use Traversable;
 // use Webmention\Server;
@@ -48,6 +51,8 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     const FLAGS_EXCLUDE_RELATED_PAGES  = 0b00000100;
     const FLAGS_HIDE_VIEW_COUNT        = 0b00001000;
     const FLAGS_READ_TIME_MANUALLY_SET = 0b00010000;
+    const FLAGS_INCLUDE_PERMALINK      = 0b00100000;
+    const FLAGS_HIDE_WEBMENTIONS       = 0b01000000;
 
     const ASIDE_SIDEBAR_NATURAL      = 0b0000001;
     const ASIDE_SIDEBAR_REVERSE      = 0b0000010;
@@ -64,6 +69,8 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     const METADATA_INCLUDE_FOOTER               = 0b0010;
 
     const WEBMENTION_UPDATE_TIMEOUT = 60 * 2; // Two minute lock
+
+    private ?array $mentions = null;
 
     public function __get_schema(): array {
         $this->__set_index_checkbox_state(true);
@@ -85,8 +92,9 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                     return $val;
                 },
                 'get_path' => function ($val) {
-                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts']['public_post'] . $val;
-                    return __APP_SETTINGS__['LandingPage_route_prefix'] . $val;
+                    $permalink = ($this->flags->getValue() & self::FLAGS_INCLUDE_PERMALINK) ? "/$this->_id" : "";
+                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts']['public_post'] . "$val" . $permalink;
+                    return __APP_SETTINGS__['LandingPage_route_prefix'] . "$val" . $permalink;
 
                 }
             ],
@@ -377,6 +385,8 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                     self::FLAGS_EXCLUDE_RELATED_PAGES => "Do Not Show Related Pages",
                     self::FLAGS_HIDE_VIEW_COUNT => "Hide View Count",
                     self::FLAGS_READ_TIME_MANUALLY_SET => "Read Time Manually Set",
+                    self::FLAGS_INCLUDE_PERMALINK => "Include Permalink in URL",
+                    self::FLAGS_HIDE_WEBMENTIONS => "Hide Webmention Interactions",
                 ]
             ],
             'preview_key' => [
@@ -528,10 +538,8 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     protected function get_byline_meta($linked_date = false, $mentions = true) {
         if($this instanceof PostMap == false) return '';
         $mentionCount = 0;
-        if($mentions === true) {
-            $mentionManger = new WebmentionHandler();
-            $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);
-            $mentionCount = $mentionManger->countBySlug($path);
+        if($mentions) {
+            $mentionCount = $this->get_webmention_details()['repostCount'];
         }
 
         $html = "<div class=\"post-details\">";
@@ -540,7 +548,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         $html .= ($this->flags->and(self::FLAGS_HIDE_VIEW_COUNT)) ? "" : pretty_rounding($this->views->getValue() + 1) . " view".plural($this->views->getValue() + 1)." &middot; ";
         $html .= ($mentionCount) ? "<span title=\"$mentionCount share".plural($mentionCount)." across the web\"><i name=\"repeat-variant\"></i> $mentionCount &middot; </span>" : "";
         $html .= "<date>";
-        if($linked_date) $html .= "<a href=\"$this->url_slug\">".$this->live_date->relative("datetime")."</a>";
+        if($linked_date) $html .= "<a href=\"".$this->url_slug->get_path()."\">".$this->live_date->relative("datetime")."</a>";
         else $html .= $this->live_date->relative("datetime");
         $html .= "</date>";
         return $html . "</div>";
@@ -549,6 +557,45 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     #[Prototype]
     protected function get_author_meta_tags() {
         
+    }
+
+    /**
+     * 
+     * @return array{replyCount:int,reply:string,likeCount:int,like:string,repostCount:int,repost:string}
+     * @throws Exception 
+     * @throws NotFound 
+     * @throws TemplateException 
+     */
+    public function get_webmention_details() {
+        $empty = [
+            'replyCount' => 0,
+            'reply' => "",
+            'likeCount' => 0,
+            'like' => "",
+            'repostCount' => 0,
+            'repost' => "",
+        ];
+        if($this->flags->and(self::FLAGS_HIDE_WEBMENTIONS) !== self::FLAGS_HIDE_WEBMENTIONS) return $empty;
+        if($this->mentions !== null) return $this->mentions;
+        $mentionManger = new WebmentionHandler();
+        $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);
+        $mentions = $mentionManger->findBySlug($path, ['limit' => 100]);
+        $this->mentions = $empty;
+        foreach($mentions as $mention) {
+            if($mention->isReply())  {
+                $this->mentions['reply'] .= view('/parts/webmentions/reply.html',['mention' => $mention]);
+                $this->mentions['replyCount'] += 1;
+            }
+            if($mention->isLike())   {
+                $this->mentions['like'] .= view('/parts/webmentions/like.html',['mention' => $mention]);
+                $this->mentions['likeCount'] += 1;
+            }
+            if($mention->isRepost()) {
+                $this->mentions['repost'] .= view('/parts/webmentions/repost.html',['mention' => $mention]);
+                $this->mentions['repostCount'] += 1;
+            }
+        }
+        return $this->mentions;
     }
 
     function __set_manager(?Database $manager = null):?Database {
@@ -590,9 +637,9 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     public function webmention_get_canonincal_url(): string {
         $host = server_name();
         if($this->__manager instanceof PostManager) {
-            return $host . route("Posts@page", [$this->url_slug->getValue()]);
+            return $host . route("Posts@page", [$this->url_slug->get_path()]);
         }
-        return $host . route("LandingPages@page", [$this->url_slug->getValue()]);
+        return $host . route("LandingPages@page", [$this->url_slug->get_path()]);
     }
 
     function webmention_lock():void {
