@@ -153,7 +153,7 @@ class ActionMenu extends EventTarget {
      *  -> requestAction - ?string, the API endpoint to dispatch the request to
      *  -> requestData - mixed, the value is submitted with the API request (can be a function, return value is sent)
      *  -> callback - function, return truthy to close the menu, falsey to keep the menu open
-     * @returns RegisteredAction
+     * @returns {RegisteredAction}
      */
     registerAction() {
         const index = this.props.registeredActions.length

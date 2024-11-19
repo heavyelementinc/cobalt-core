@@ -87,6 +87,7 @@ class CobaltEvent_default {
         const stored = this[this.storageMedium](this.data._id.$oid);
         const hasBeenClosed = stored?.closed ?? null;
         const includePathnameMatch = this.pathname(this.data.advanced.included_paths);
+        if (!includePathnameMatch) return false;
 
         // Let's get a malliable version of our pathnames
         let excludedPathnames = [...this.data.advanced.excluded_paths];
@@ -101,7 +102,6 @@ class CobaltEvent_default {
             if(this.hasSessionPolicyExpired(stored)) return true;
             if(!this.hasBeenChanged(stored)) return false;
         };
-        if (includePathnameMatch) return true;
         return true;
     }
 
