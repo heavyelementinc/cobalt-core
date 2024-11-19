@@ -114,7 +114,7 @@ class EventsController {
             'event' => $event
         ]);
 
-        return view("/cobalt_events/edit.html");
+        return view("/cobalt_events/edit.v1.html");
     }
 
     function update_event($ident = null) {

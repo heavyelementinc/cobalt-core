@@ -9,19 +9,32 @@ use Stringable;
 class MixedType implements Stringable {
     protected bool $isSet = false;
     protected $value;
+    protected string $name;
+    protected bool $hasModel = false;
+    protected Model $model;
+
     protected array $directives = [];
 
+    /**
+     * The getValue() function will return the present value or the 
+     * 'default' directive if it's not set. If no default is set, null
+     * is returned
+     * @return void|mixed 
+     */
     public function getValue() {
+        if(!$this->isSet) return ($this->hasDirective('default')) ? $this->getDirective("default") : null;
+        if(!$this->value) return ($this->hasDirective('default')) ? $this->getDirective("default") : null;
         return $this->value;
     }
 
     public function setValue($value):void {
-        $this->isSet = true;
         $this->value = $value;
+        $this->isSet = true;
     }
 
-    protected bool $hasModel = false;
-    protected Model $model;
+    public function setName(string $name):void {
+        $this->name = $name;
+    }
 
     public function setModel(Model $model):void {
         $this->model = $model;
@@ -29,6 +42,7 @@ class MixedType implements Stringable {
 
     public function setDirectives(array $directives) {
         $this->directives = $directives;
+        unset($this->directives['type']);
     }
 
     /**
@@ -46,18 +60,24 @@ class MixedType implements Stringable {
         return $this->directives[$name];
     }
 
+    public function hasDirective($name) {
+        return key_exists($name, $this->directives);
+    }
+
     /*************** OVERLOADING  ***************/
     public function __get($property) {
         switch($property) {
+            case "value":
+                return $this->getValue();
             case "raw":
             case "original":
                 return $this->originalValue;
-            case "value":
-                return $this->value;
             case "model":
                 return $this->model;
             case "type":
                 return gettype($this->value);
+            case "name":
+                return $this->name;
             default:
                 return null;
         }
@@ -65,10 +85,13 @@ class MixedType implements Stringable {
 
     public function __isset($property) {
         switch($property) {
+            case "value":
+                return $this->hasDirective('default') || $this->isSet;
             case "raw":
             case "original":
-            case "value":
                 return $this->isSet;
+            case "name":
+                return isset($this->name);
             case "model":
                 return $this->hasModel;
             default:
@@ -77,6 +100,6 @@ class MixedType implements Stringable {
     }
 
     public function __toString(): string {
-        return (string)$this->value;
+        return (string)$this->getValue();
     }
 }

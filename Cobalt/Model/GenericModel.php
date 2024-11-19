@@ -4,6 +4,7 @@ namespace Cobalt\Model;
 
 use ArrayAccess;
 use Cobalt\Model\Exceptions\Undefined;
+use Cobalt\Model\Traits\Defineable;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
 use Iterator;
@@ -11,12 +12,12 @@ use JsonSerializable;
 use Traversable;
 
 class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable {
-    use Schemable, Viewable;
+    use Schemable, Viewable, Defineable;
 
     /*************** INITIALIZATION ***************/
     function __construct(?array $schema = [], ?array $dataset = null) {
-        $this->__schema = $this->__defineSchema($schema);
-        if(!$dataset) $this->bsonUnserialize($dataset);
+        $this->__defineSchema($schema);
+        if(!$dataset) $this->bsonUnserialize($dataset ?? []);
     }
 
     /*************** OVERLOADING ***************/
@@ -31,7 +32,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     public function __set($property, $value) {
         $reserved = [];
         if(in_array($property, $reserved)) throw new \TypeError("Cannot set $property as the name is reserved!");
-        $this->define($property, $value);
+        $this->define($this->__dataset, $property, $value, null, $this);
     }
 
     public function __isset($name) {

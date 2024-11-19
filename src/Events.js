@@ -93,13 +93,46 @@ class CobaltEvent_default {
         // Check if an pathname has been specified. If it has, push it to the excluded list
         if (this.data.call_to_action_href) excludedPathnames.push(this.data.call_to_action_href);
         const excludePathnameMatch = this.pathname(excludedPathnames);
+        if (excludePathnameMatch) return false;
 
         if (hasBeenClosed === true) {
+            // If the SessionPolicy has expired, we'll return true
+            // otherwise we'll return false
+            if(this.hasSessionPolicyExpired(stored)) return true;
             if(!this.hasBeenChanged(stored)) return false;
         };
         if (includePathnameMatch) return true;
-        if (excludePathnameMatch) {
-            return false;
+        return true;
+    }
+
+    /**
+     * 
+     * @param {Object{date:string}} stored 
+     * @returns {bool}
+     */
+    hasSessionPolicyExpired(stored) {
+        const closedDate = new Date(stored.date).getTime(); // 199029
+        const now = new Date().getTime();                   // 200010
+        const diff = now - closedDate;                      // 981
+
+        switch(this.data.session_policy) {
+            case "nag":
+                return true;
+            case "with_session":
+            case "24_hours":
+                return diff > (1000 * 60 * 60 * 24);
+            case "12_hours":
+                return diff > (1000 * 60 * 60 * 12);
+            case "hours":
+                return diff > (1000 * 60 * 60 * this.data.session_policy_hours);
+            case "half_date":
+                const end = new DateConverter(this.data.start_time).date.getTime();
+                const date = now + (end - now / 2);
+                // If less than 12 hours, just ignore
+                if (date <= 1000 * 60 * 60 * 12) return false;
+                return diff > date; 
+            case "never":
+                return false;
         }
         return true;
     }

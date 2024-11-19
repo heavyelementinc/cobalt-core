@@ -240,25 +240,7 @@ class Router {
         $controller_name = $explode[0];
         $controller_method = $explode[1];
 
-        $controller_search = [
-            __APP_ROOT__ . "/controllers",
-            __APP_ROOT__ . "/private/controllers",
-            // ...array_values($this->registered_plugin_controllers),
-            __ENV_ROOT__ . "/controllers"
-        ];
-
-        extensions()::invoke("register_controller_dir", $controller_search);
-
-        try {
-            // We are doing these in reverse order because we want our app's 
-            // controllers to override the core's controllers.
-            $controller_file = find_one_file($controller_search, "$controller_name.php");
-            if(!$controller_file) kill("Controller not found");
-        } catch (\Exception $e) {
-            // throw new NotImplemented("Controller $controller_name not found.");
-            // header("HTTP/")
-            kill("Controller $controller_name not found.");
-        }
+        $controller_file = $this->find_controller($controller_name);
 
         // We need to require this because the controllers folder is outside of our 
         // classes path and the developer is going to be able to create new controllers
@@ -287,6 +269,31 @@ class Router {
 
         /** Execute our method */
         return $ctrl->{$controller_method}(...$exe['matches']);
+    }
+
+    function find_controller(string $controller_name):string {
+        $controller_search = [
+            __APP_ROOT__, // Let's support the new namespace-to-app-path syntaxt we're using
+            __ENV_ROOT__, // Let's support the new namespace-to-app-path syntaxt we're using
+            __APP_ROOT__ . "/controllers",
+            __APP_ROOT__ . "/private/controllers",
+            // ...array_values($this->registered_plugin_controllers),
+            __ENV_ROOT__ . "/controllers"
+        ];
+
+        extensions()::invoke("register_controller_dir", $controller_search);
+
+        try {
+            // We are doing these in reverse order because we want our app's 
+            // controllers to override the core's controllers.
+            $controller_file = find_one_file($controller_search, str_replace("\\","/",$controller_name.".php"));
+            if(!$controller_file) kill("Controller not found");
+        } catch (\Exception $e) {
+            // throw new NotImplemented("Controller $controller_name not found.");
+            // header("HTTP/")
+            kill("Controller $controller_name not found.");
+        }
+        return $controller_file;
     }
 
     function execute_route_attributes($controller, $method, $details, $arguments):void {

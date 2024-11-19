@@ -265,4 +265,11 @@ if (app("enable_debug_routes")) {
         ],
         'anchor' => ['name' => 'Images Prototype']
     ]);
+
+    Route::get("/debug/route", '\Cobalt\Model\Controllers\Debug@test',[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Modal Test']
+    ]);
 }

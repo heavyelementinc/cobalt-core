@@ -2,6 +2,8 @@
 require_once __ENV_ROOT__ . "/config/default_settings.php";
 global $TEMPLATE_PATHS;
 $TEMPLATE_PATHS = [
+    __APP_ROOT__,
+    __ENV_ROOT__,
     __APP_ROOT__ . "/templates/",
     __APP_ROOT__ . "/private/templates/",
 ];

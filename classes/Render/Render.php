@@ -163,7 +163,7 @@ class Render {
     function from_template(string $template_path) {
         // Create our template cache if it doesn't exist
         // if (!\property_exists($GLOBALS, "template_cache")) $GLOBALS['TEMPLATE_CACHE'] = [];
-        
+
         // Check if we need to replace our template path with he appropriate CORE or APP path
         if ($template_path[0] === "_") {
             $template_path = str_replace(

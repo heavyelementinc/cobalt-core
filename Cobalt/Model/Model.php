@@ -17,7 +17,6 @@ use Traversable;
 
 abstract class Model extends GenericModel implements Persistable {
     use Accessible;
-
     /**
      * Specify the schema used by this model
      * @return array{}

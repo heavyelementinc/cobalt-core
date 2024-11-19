@@ -2,6 +2,7 @@
 
 namespace Cobalt\Model\Traits;
 
+use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\StringType;
 use MongoDB\BSON\Document;
@@ -10,52 +11,37 @@ use stdClass;
 
 trait Schemable {
     protected bool $__has_been_unserialized = false;
+    protected bool $__has_schema_set = false;
     protected ?ObjectId $_id = null;
     /** @var array $__dataset a set of directives*/
     protected array $__dataset = [];
     protected array $__schema = [];
+
+    abstract protected function define(array &$target, string|int $property, $value, MixedType $instance = null, ?GenericModel $model = null,$name = null):void;
 
     protected function __defineSchema(array $schema):void {
         // Check if we there's an explicit `defineSchema` function set
         if(method_exists($this, "defineSchema")) {
             $schema = array_merge($this->defineSchema($schema), $schema);
         }
-        foreach($schema as $field => $directive) {
-            // Check if the field is a `type`
-            if($field === 0 && !isset($schema['type'])) {
-                $schema['type'] = $directive;
-                unset($schema[$field]);
+        foreach($schema as $field => $directives) {
+            // Let's check if we need to reformat this directive into an array
+            if($directives instanceof MixedType) {
+                $directives = ['type' => $directives];
+            } else if ($directives[0] instanceof MixedType){
+                $directives['type'] = $directives[0];
+                unset($directives[0]);
             }
             // Define the schema directives
-            $this->__schema[$field] = $schema;
-        }
-    }
-
-    final protected function define(string $property, $value):void {
-        $instance = null;
-        // Let's check to see if our schema has defined a 
-        if(key_exists($property, $this->__schema) && $this->__schema[$property]['type']){
-            if($this->__schema[$property]['type'] instanceof MixedType) $instance = $this->__schema[$property]['type'];
-        } 
-        
-        if($instance === null) {
-            $type = gettype($value);
-            switch($type) {
-                case "string":
-                    $instance = new StringType();
-                    break;
-                case "int":
-                    // $this->__dataset[$property] =
-                    // break;
-                default:
-                    $instance = new MixedType();
+            $this->__schema[$field] = $directives;
+            if(!key_exists($field, $this->__dataset)) {
+                $this->__dataset[$field] = new $directives['type'];
+                $this->__dataset[$field]->setName($field);
+                $this->__dataset[$field]->setModel($this);
+                $this->__dataset[$field]->setDirectives($directives);
             }
         }
-
-        $instance->setValue($property);
-        $instance->setModel($this);
-        $this->__dataset[$property] = $instance;
-
+        $this->__has_schema_set = true;
     }
 
     public function bsonSerialize(): array|stdClass|Document {

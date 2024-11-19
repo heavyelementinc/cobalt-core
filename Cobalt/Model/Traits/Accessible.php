@@ -23,7 +23,7 @@ trait Accessible {
         if($this->client) return;
         if(!$collection) $collection = $this->getCollectionName();
         $this->client = db_cursor($collection, $database, true);
-        $this->db = $this->client->{config()[$database ?? 'database']};
+        $this->db = $this->client->{$database ?? config()['database']};
         $this->collection = $this->db->{$collection};
     }
 
@@ -62,10 +62,22 @@ trait Accessible {
         return $this->collection->find($filter, $options);
     }
 
+    /**
+     * @deprecated 1.4
+     * @param mixed $filter 
+     * @param array $options 
+     * @return int 
+     */
     final function count($filter, $options = []):int {
         $this->__initAccessible();
         benchmark_reads();
         return $this->collection->count($filter, $options);
+    }
+
+    final function countDocuments($filter, $options = []):int {
+        $this->__initAccessible();
+        benchmark_reads();
+        return $this->collection->countDocuments($filter, $options);
     }
 
     final function distinct($field, $filter = [], $options = []):array {

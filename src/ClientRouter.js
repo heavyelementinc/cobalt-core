@@ -463,6 +463,7 @@ class ClientRouter extends EventTarget{
     applyFormListeners() {
         const forms = document.querySelectorAll("form");
         for( const form of forms ) {
+            if(['post', 'put', 'delete'].includes(form.method.toLowerCase())) continue;
             form.removeEventListener("submit", this.submitListener);
             form.addEventListener("submit", this.submitListener);
         }
