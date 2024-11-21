@@ -164,7 +164,7 @@
                         </li>
                         <li>
                             <label>Included paths <help-span
-                                    value="If the user has navigated to a path which matches one of the entries on this list, this event will be considered 'showable'. Leave blank to ignore.">
+                                    value="If the user has navigated to a path which matches one of the entries on this list, this event will be considered 'showable'. Leave blank to ignore.\n\If you specify /about and you have a page /about/example, the event will appear on /about/example too. To prevent subpages, end your path with a $ so /about$ or /about/?$">
                                 </help-span>
                             </label>
                             <input-array name="advanced.included_paths" value="{{@event.advanced.included_paths}}" allow-custom="true">

@@ -22,4 +22,12 @@ abstract class Model extends GenericModel implements Persistable {
      * @return array{}
      */
     abstract function defineSchema(array $schema = []): array;
+
+    public function bsonSerialize(): array|stdClass|Document {
+        return $this->getData();
+    }
+
+    public function bsonUnserialize(array $data): void {
+        $this->setData($data);
+    }
 }

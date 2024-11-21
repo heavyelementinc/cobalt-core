@@ -16,6 +16,7 @@ use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Model\GenericModel;
 use Cobalt\Pages\PageMap;
 use Cobalt\Pages\PostMap;
 use Cobalt\Renderer\Render;
@@ -346,6 +347,11 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
                 $mutated_path = str_replace("custom.$key", "value", $path_map);
             }
 
+            if($mutant instanceof GenericModel) {
+                $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
+                return lookup($temp_path, $mutant, $throw_on_fail);
+            }
+
             if(is_a($mutant, "\\Cobalt\\Maps\\GenericMap")) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
                 return lookup($temp_path, $mutant, $throw_on_fail);
@@ -388,16 +394,16 @@ function get_custom(string $name):?CustomSchema {
 }
 
 function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed {
-    $type = is_array($subject) || $subject instanceof ArrayAccess;
-    if($type) {
-        if(isset($subject[$name])) return $subject[$name];
-    }
     if ($subject instanceof MapResult) {
         $subject = $subject->getRaw();
     }
     if ($subject instanceof SchemaResult) {
         if(isset($subject->{$name})) return $subject->{$name};
         $type = "SchemaResult";
+    }
+    $type = is_array($subject) || $subject instanceof ArrayAccess;
+    if($type) {
+        if(isset($subject[$name])) return $subject[$name];
     }
     if(strpos($name, ".") >= 0) {
         $exploded = explode(".", $name);

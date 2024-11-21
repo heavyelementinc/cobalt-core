@@ -1114,6 +1114,9 @@ const DEFAULT_DEFINITIONS = [
     "Web_display_designer_credit" => [
         "default" => true
     ],
+    "Render_all_templates_as_native" => [
+        "default" => true
+    ],
     "Render_strict_variable_parsing" => [
         "default" => false
     ],

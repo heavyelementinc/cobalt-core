@@ -18,20 +18,34 @@ class Debug extends Controller {
 
     public function test() {
         $id = 1;
-        $this->model->updateOne(['_id' => $id], [
-            '$set' => [
-                'some_string' => "Here's a secret message from uncharted space!",
-                // 'other_string' => "Test",
-                'array_type' => ["Here's a secret message", 2],
-                'model' => [
-                    'details' => 1,
-                    'string' => "Test String",
+        $doc = [
+            'some_string' => "Here's a secret message from **uncharted** space!",
+            // 'other_string' => "Test",
+            'array_type' => ["Here's a secret message", 2],
+            'model' => [
+                'details' => 1,
+                'string' => "Test String",
+            ],
+            'submodel' => [
+                'data' => [
+                    'another_model' => 4
                 ]
             ]
-        ], ['upsert' => true]);
-        $doc = $this->model->findOne(['_id' => $id]);
+        ];
+        if($this->model->countDocuments(["_id"=>$id]) === 0) {
+            $model = new $this->model();
+            $model->setData(array_merge(['_id' => $id],$doc));
+            $model->includeId(true);
+            $this->model->insertOne($model);
+        } else {
+            $this->model->updateOne(['_id' => $id], ['$set' => $doc]);
+        }
+        
+        $document = $this->model->findOne(['_id' => $id]);
+        
+        // $str = $document->some_string->md();
 
-        return view("/Cobalt/Model/Templates/test.html", ['doc' => $doc]);
+        return view("/Cobalt/Model/Testing/Templates/test.html", ['doc' => $document]);
     }
 
 }

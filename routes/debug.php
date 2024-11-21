@@ -266,10 +266,24 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => 'Images Prototype']
     ]);
 
-    Route::get("/debug/route", '\Cobalt\Model\Controllers\Debug@test',[
+    Route::get("/route", '\Cobalt\Model\Controllers\Debug@test',[
         'navigation' => [
             'debug_prototypes'
         ],
         'anchor' => ['name' => 'Modal Test']
+    ]);
+
+    Route::get("/compiler", '\Cobalt\Templates\Tests\Controllers\TemplateTest@compiler_output',[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Compiler']
+    ]);
+    
+    Route::get("/compiler/render", '\Cobalt\Templates\Tests\Controllers\TemplateTest@compiler_render',[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'compiler_render']
     ]);
 }

@@ -88,7 +88,7 @@ class WebHandler implements RequestHandler {
         $this->encoding_mode = __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['mode'];
         if ($this->encoding_mode === "text/html") {
             $this->context_mode = $GLOBALS['route_context'];
-            $this->template_body = $this->load_template("parts/body.html"); // Load the main HTML template
+            $this->template_body = $this->load_template("parts/body.php"); // Load the main HTML template
             // $this->template_vars['webmention'] = (__APP_SETTINGS__['Webmentions_enable_recieving']) ? "<link rel=\"webmention\" href=\"".server_name() . "/webhooks/linkback/\">" : "";
         } else {
             $this->template_body = $this->main_content_replacement;

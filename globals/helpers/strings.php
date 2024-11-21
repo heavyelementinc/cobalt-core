@@ -208,23 +208,13 @@ function convertCommonTextElements($string) {
  */
 function from_markdown(?string $string, bool $untrusted = true) {
     if(!$string) return "";
-
-    // [$string, $placeholders, $replacements] = parse_embeds($string);
-
+    
     $md = new ParsedownExtra();
     $md->setSafeMode($untrusted);
     // $md->setMarkupEscaped($untrusted);
     $parsed = $md->text($string);
 
     $parsed = embed_from_img_tags($parsed);
-    // $ytMatch = ["/&lt;img.*src=['\"].*(youtube).*v=[a-zA-Z0-9.*['\"].*&gt;/", "/<img.*src=['\"].*(youtube).*['\"].*>/"];
-
-    // foreach($ytMatch as $url) {
-    //     $matches = [];
-    //     preg_replace($url, $parsed, $matches);
-
-    //     $parsed = str_replace($match[0], , $parsed);
-    // }
 
     // Implmentented reddit's ^ for superscript. Only works one word at a time.
     return preg_replace(

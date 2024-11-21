@@ -2,18 +2,25 @@
 
 namespace Cobalt\Model\Types;
 
+use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
+use Cobalt\Model\Traits\Prototypable;
 use Error;
+use ReflectionObject;
 use Stringable;
 
 class MixedType implements Stringable {
+    use Prototypable;
     protected bool $isSet = false;
     protected $value;
     protected string $name;
     protected bool $hasModel = false;
-    protected Model $model;
+    protected GenericModel $model;
 
-    protected array $directives = [];
+    // Here we provide some sane defaults
+    protected array $directives = [
+        'asHTML' => false,
+    ];
 
     /**
      * The getValue() function will return the present value or the 
@@ -36,18 +43,17 @@ class MixedType implements Stringable {
         $this->name = $name;
     }
 
-    public function setModel(Model $model):void {
+    public function setModel(GenericModel $model):void {
         $this->model = $model;
     }
 
     public function setDirectives(array $directives) {
-        $this->directives = $directives;
+        $this->directives = array_merge($this->directives, $directives);
         unset($this->directives['type']);
     }
 
     /**
-     * @param string $directive - The name of the directive you want
-     * @return void 
+     * @param string $directive - The name of the directive you want 
      */
     public function getDirective() {
         $args = func_get_args();
@@ -101,5 +107,9 @@ class MixedType implements Stringable {
 
     public function __toString(): string {
         return (string)$this->getValue();
+    }
+
+    public function __getStorable() {
+        return $this->value;
     }
 }

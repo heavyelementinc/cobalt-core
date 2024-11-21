@@ -11,13 +11,19 @@ use Iterator;
 use JsonSerializable;
 use Traversable;
 
+/**
+ * GenericModels may be accessed using the -> syntax *or* accessed as an array.
+ *  * Accessing using the $model->key syntax will return an instance of the MixedType with the value, originalValue, its prototype methods, etc.
+ *  * Accessing using the $model->['key'] syntax will return the literal value of the MixedType as if you accessed $model->key->value
+ * @package Cobalt\Model
+ */
 class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable {
     use Schemable, Viewable, Defineable;
 
     /*************** INITIALIZATION ***************/
     function __construct(?array $schema = [], ?array $dataset = null) {
         $this->__defineSchema($schema);
-        if(!$dataset) $this->bsonUnserialize($dataset ?? []);
+        if(!$dataset || !empty($dataset)) $this->setData($dataset ?? []);
     }
 
     /*************** OVERLOADING ***************/
@@ -52,7 +58,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     }
 
     public function offsetGet(mixed $offset): mixed {
-        return $this->__dataset[$offset];
+        return $this->__dataset[$offset]->value;
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {

@@ -74,12 +74,18 @@
 namespace Render;
 
 use BadFunctionCallException;
+use Cache\Manager;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Model\GenericModel;
+use Cobalt\Model\Types\MixedType;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\Templates\Compiler;
 use Exception;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
+use stdClass;
+use Stringable;
 use TypeError;
 
 class Render {
@@ -106,22 +112,7 @@ class Render {
         // Check if we need to parse for multiline function calls in scripts.
         // $this->function = (app("Renderer_parse_for_multiline_functions")) ? $this->multiline_function : $this->function;
 
-        $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
-        $this->stock_vars = [
-            'app'  => __APP_SETTINGS__,
-            'get'  => $_GET,
-            'post' => $_POST,
-            // '$main_id' => 'main-content',
-            'session' => session(),
-            'request' => [
-                'url' => server_name() . "$_SERVER[REQUEST_URI]$query_string",
-                'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
-            ],
-            'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
-            'og_template' => "/parts/opengraph/default.html",
-            // 'extensions' => extensions(),
-            // 'custom' => new CustomizationManager(),
-        ];
+        $this->stock_vars = [];
 
         // $this->custom = new CustomizationManager();
     }
@@ -161,9 +152,13 @@ class Render {
      * @return void
      */
     function from_template(string $template_path) {
+        $is_native_template = __APP_SETTINGS__["Render_all_templates_as_native"];
         // Create our template cache if it doesn't exist
         // if (!\property_exists($GLOBALS, "template_cache")) $GLOBALS['TEMPLATE_CACHE'] = [];
-
+        $extension = pathinfo($template_path, PATHINFO_EXTENSION);
+        if(strtolower($extension) === "php") {
+            $is_native_template = true;
+        }
         // Check if we need to replace our template path with he appropriate CORE or APP path
         if ($template_path[0] === "_") {
             $template_path = str_replace(
@@ -174,15 +169,22 @@ class Render {
             // If the file doesn't exist, let's throw an error
             if (!file_exists($template_path)) throw new \Exceptions\HTTP\NotFound("That template was not found");
             // Let's load our template and save it to the temporary cache
-            $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($template_path);
+            if(!$is_native_template) {
+                $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($template_path);
+            }
         } else if (!key_exists($template_path, $GLOBALS['TEMPLATE_CACHE'])) { // We do not have the file saved to the template cache
             // Load our template from the specified paths
             $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
             if($contenders === false) throw new Error("The template \"$template_path\" was not found", "Internal server error");
+            
             // Load the template
-            $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($contenders);
+            if(!$is_native_template) {
+                $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($contenders);
+            } else {
+                $template_path = $contenders;
+            }
         }
-        $this->set_body($GLOBALS['TEMPLATE_CACHE'][$template_path], $template_path);
+        $this->set_body($GLOBALS['TEMPLATE_CACHE'][$template_path] ?? $is_native_template, $template_path);
     }
 
     /** Set the body html template. $body is the template we'll be parsing for 
@@ -200,6 +202,9 @@ class Render {
 
     /** Start the template parsing process. Will return the finished template. */
     function execute() {
+        if($this->body === true) {
+            return $this->execute_advanced_template();
+        }
         $this->add_stock_vars(); // Add stock variables so they're accessible
         
         $matched_functions = $this->parse_for_functions();
@@ -209,6 +214,38 @@ class Render {
         $mutant = $this->replace_vars($mutant, $matched_variables);
 
         return $mutant;
+    }
+    private string $compiled_cache_name;
+    function execute_advanced_template() {
+        $this->construct_file_name();
+        $cache = new Manager($this->compiled_cache_name);
+        if(!$cache->cache_exists()) {
+            $this->compile_to_cache($cache);
+        }
+        if($cache->outdated($this->name)) {
+            $this->compile_to_cache($cache);
+        }
+        ob_start();
+        // $cache = __APP_ROOT__ . "/cache/" . $this->compiled_cache_name;
+        $cache_file = $cache->file_path;
+        require $cache_file;
+        $result = ob_get_clean();
+        return $result;
+    }
+
+    function construct_file_name() {
+        // $md5 = substr(md5($this->name), 0, 5);
+        $filename = obfuscate_path_name($this->name);
+        $name = preg_replace("/\/{2,}/", "/", $filename);
+        $name = str_replace("/","_",$name);
+        $this->compiled_cache_name = "compiled/$name.php";
+    }
+
+    function compile_to_cache(Manager $cache){
+        $comp = new Compiler();
+        $comp->set_template($this->name);
+        $compiled = $comp->compile();
+        $cache->set($compiled, false);
     }
 
     /** Merge the stock variables */
@@ -237,6 +274,7 @@ class Render {
         $search = [];
         $replace = [];
         foreach ($replacements[0] as $i => $replacement) {
+            // Reset everything to the default safe state.
             $search[$i] = $replacement;
             $name = $replacements[1][$i];
             $is_inline_html = false;
@@ -292,22 +330,15 @@ class Render {
 
             $replace[$i] = $this->lookup_value($name, $process_vars);
 
-            if($replace[$i] instanceof \Cobalt\SchemaPrototypes\SchemaResult) {
+            // At this point, we should have our value. If it's a model, then we should see about converting it to a function
+            if($replace[$i] instanceof GenericModel) {
+                $is_inline_html = true;
+                $replace[$i] = $this->call_prototype_function($replace[$i], $function, $arguments, $replacements, $i, $subject);
+                if($replace[$i] instanceof GenericModel) $replace[$i] = "[object GenericModel]";
+            } else if(gettype($replace[$i]) === "object" && method_exists($replace[$i], "htmlSafe")) {
                 $replace[$i]->htmlSafe($is_inline_html);
                 $is_inline_html = true;
-                if($function) {
-                    // if(!$args) $args = [];
-                    try {
-                        // if(__APP_SETTINGS__['Renderer_debug_process']) $replace[$i]->setDebugTarget();
-                        $replace[$i] = $replace[$i]->{$function}(...$arguments);
-                    } catch(BadFunctionCallException $e) {
-                        $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
-                    } catch(TypeError $e) {
-                        $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
-                    }
-                } else {
-                    $replace[$i] = $replace[$i];//->getValue();
-                }
+                $replace[$i] = $this->call_prototype_function($replace[$i], $function, $arguments, $replacements, $i, $subject);
             }
 
             if($replace[$i] instanceof GenericMap) {
@@ -332,6 +363,23 @@ class Render {
         return str_replace($search, $replace, $subject);
     }
 
+    function call_prototype_function(&$replace, $function, $arguments, $replacements, $i, $subject) {
+        if($function) {
+            // if(!$args) $args = [];
+            try {
+                // if(__APP_SETTINGS__['Renderer_debug_process']) $replace[$i]->setDebugTarget();
+                $replace = $replace->{$function}(...$arguments);
+            } catch(BadFunctionCallException $e) {
+                $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
+            } catch(TypeError $e) {
+                $this->debug_template($replacements[0][$i], $e->getMessage(), $subject);
+            }
+        } else {
+            $replace = $replace;//->getValue();
+        }
+        return $replace;
+    }
+
     function lookup_value($name, $process = true) {
         // $custom = "custom.";
         // if($name === "custom") $this->custom->{str_replace("custom.","",$name)};
@@ -349,6 +397,8 @@ class Render {
                 $value = \json_encode($val); // Is this what we want?
                 break;
             case "object":
+                if($val instanceof MixedType) return $val;
+                if($val instanceof GenericModel) return $val;
                 if($val instanceof SchemaResult) return $val;
                 if($val instanceof ObjectId) return (string)$val;
                 if (method_exists($val, "__toString")) {
@@ -473,7 +523,14 @@ class Render {
         $error_highlighted = str_replace($funct,"<code class='error'>$funct</code>",$highlighted);
         echo $error_highlighted;
         // echo "</pre>";
-        echo "<style>
+        echo <<<HTML
+        <style>
+        .code-block-wrapper {
+            max-width: calc(100vw - 4rem);
+            overflow: scroll;
+            max-height: calc(100vh - 4rem);
+            box-sizing: border-box;
+        }
         body {
             display: flex;
             flex-direction: column !important;
@@ -510,7 +567,8 @@ class Render {
         pre code.error{
             color:red;
             font-weight:bold;
-        }</style>";
+        }</style>
+        HTML;
         kill();
     }
 

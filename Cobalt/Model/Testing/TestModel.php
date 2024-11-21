@@ -26,8 +26,22 @@ class TestModel extends Model {
             ],
             'model' => [
                 new ModelType,
+            ],
+            'submodel' => [
+                new ModelType,
+                'schema' => [
+                    'data' => [
+                        new ModelType,
+                        'schema' => [
+                            'another_model' => 1
+                        ]
+                    ]
+                ]
             ]
         ];
     }
 
+    public function prototype_test() {
+        return "Here's a <em>really</em> secret message from uncharted space";
+    }
 }

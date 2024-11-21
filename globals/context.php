@@ -25,8 +25,23 @@ try {
 } catch (Exception $e) {
     kill($e->getMessage());
 }
-$WEB_PROCESSOR_VARS['custom'] = new Cobalt\Customization\CustomizationManager();
 
+$WEB_PROCESSOR_VARS = array_merge($WEB_PROCESSOR_VARS, [
+    'app'  => __APP_SETTINGS__,
+    'get'  => $_GET,
+    'post' => $_POST,
+    'session' => session(),
+    'request' => [
+        'url' => server_name() . $_SERVER['REQUEST_URI'] . ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "",
+        'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
+    ],
+    'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
+    // '$main_id' => 'main-content',
+    'og_template' => "/parts/opengraph/default.html",
+    // 'extensions' => extensions(),
+    // 'custom' => new CustomizationManager(),
+    'custom' => new Cobalt\Customization\CustomizationManager()
+]);
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
 $processor = "Handlers\WebHandler";
 $permission_needed = false;

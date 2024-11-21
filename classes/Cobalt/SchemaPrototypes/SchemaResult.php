@@ -34,6 +34,7 @@ use MongoDB\BSON\Persistable;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Cobalt\Maps\Exceptions\DirectiveException;
+use Cobalt\Model\Traits\HtmlSafeable;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use MongoDB\Model\BSONDocument;
 
@@ -48,13 +49,13 @@ use MongoDB\Model\BSONDocument;
  * @package Cobalt\SchemaPrototypes 
  * */
 class SchemaResult implements \Stringable, JsonSerializable {
+    use HtmlSafeable;
     protected $value;
     protected $originalValue;
     protected $type = "mixed";
     protected string $name;
     protected $schema;
     protected GenericMap $__reference;
-    protected bool $asHTML = false;
 
     public function jsonSerialize(): mixed {
         return $this->originalValue;
@@ -96,16 +97,6 @@ class SchemaResult implements \Stringable, JsonSerializable {
         $this->originalValue = $value;
         if ($value === null) $this->value = $this->schema['default'];
         else $this->value = $value;
-    }
-
-    /**
-     * When $enableAsHTML is `false`, htmlspecialchars will be applied
-     * to this variable.
-     * @param bool $enableAsHTML 
-     * @return void 
-     */
-    public function htmlSafe(bool $enableAsHTML) {
-        $this->asHTML = $enableAsHTML;
     }
 
     /**

@@ -65,6 +65,9 @@ trait Defineable {
             $instance = new ModelType();
             $value = $value->getArrayCopy();
         }
+        if($instance === null) {
+            $instance = new MixedType();
+        }
         return $instance;
     }
 }
