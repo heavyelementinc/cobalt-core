@@ -38,6 +38,7 @@
             "components/horizontal-scroll.js",
             "components/block-editor.js",
             "components/image-result.js",
+            "components/NumberReveal.js",
             "Cobalt/Shadowbox.js",
             "DateConverter.js",
             "TabbedUI.js",
