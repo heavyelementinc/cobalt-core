@@ -92,6 +92,8 @@
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="/core-content/js/editorjs/simpleimage.js"></script>
+    <!-- <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src=""></script> -->
+
     @script_content@
     <!-- <script src="/core-content/js/moduleshim.js?v={{versionHash}}" type="module"></script> -->
 </body>

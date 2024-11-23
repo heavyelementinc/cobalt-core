@@ -206,6 +206,9 @@ class UserAccounts extends \Controllers\Pages {
         $push = new PushNotifications();
         $multifactor = new \Auth\MultiFactorManager($session);
 
+        $method = "POST";
+        $action = "/api/v1/user/me/";
+
         $addtl = new AdditionalUserFields();
         $fields = $addtl->__get_additional_user_tabs();
         $links = "";
@@ -217,7 +220,14 @@ class UserAccounts extends \Controllers\Pages {
             $icon = $data['icon'] ?? 'card-bulleted-outline';
             $data['name'] = "<i name='$icon'></i> $data[name]";
             $links .= "<a href='#$field'>$data[name]</a>";
-            $extensions .= "<div id='$field'>".view($view, ['user_account' => $session])."</div>";
+            $extensions .= "<div id='$field'>".view($view, [
+                'user_account' => $session,
+                'doc' => $session,
+                'method' => $method,
+                'action' => $action,
+                'endpoint' => $action,
+                ]
+            )."</div>";
         }
 
         $sessionMan = new SessionManager();
@@ -232,8 +242,9 @@ class UserAccounts extends \Controllers\Pages {
             'links' => $links,
             'extensions' => $extensions,
             'sessions' => "<div id='sessions'>$sessions</div>",
-            'method' => "POST",
-            'endpoint' => "/api/v1/user/me/"
+            'method' => $method,
+            'endpoint' => $action,
+            'action' => $action,
         ]);
 
         return view("/authentication/user-self-service-panel.html");
@@ -245,6 +256,13 @@ class UserAccounts extends \Controllers\Pages {
         
         // Only allow these fields to be updated through this method
         $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar', 'fediverse_profile', 'youtube_profile', 'instagram_profile', 'facebook_profile', 'twitter_profile', 'default_bio_blurb'];
+
+        // Let's build a list of allowable fields based on AdditionalUserFields
+        $addtl = new AdditionalUserFields();
+        foreach($addtl->__get_additional_schema() as $field => $directives) {
+            if(key_exists('self_service', $directives)) $filter[] = $field;
+        }
+
         $update = [];
         foreach($filter as $key){
             if(key_exists($key, $_POST)) $update[$key] = $_POST[$key];

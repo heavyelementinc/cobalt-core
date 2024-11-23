@@ -228,6 +228,7 @@ class Render {
         ob_start();
         // $cache = __APP_ROOT__ . "/cache/" . $this->compiled_cache_name;
         $cache_file = $cache->file_path;
+        $vars = $this->vars;
         require $cache_file;
         $result = ob_get_clean();
         return $result;
