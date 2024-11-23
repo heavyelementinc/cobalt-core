@@ -139,13 +139,28 @@ class BlockResult extends SchemaResult {
     }
 
     private function filter_paragraph(&$block):array {
+        if(!__APP_SETTINGS__['BlockContent_paragraph_external_links_to_blank']) return $block;
         $dom = new DOMDocument();
-        $dom->loadHTML($block['data']['text']);
-        $block['data']['links'] = [];
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput       = true;
+        $dom->loadHTML("<p>".$block['data']['text']."</p>");
+        // $block['data']['links'] = [];
         $links = $dom->getElementsByTagName("a");
-        foreach($links as $link) {
-            $anchorAttribute = $link->attributes->getNamedItem("href");
-            if($anchorAttribute->value) $block['data']['links'][] = $anchorAttribute->value;
+        /** @var DOMElement $tag */
+        foreach($links as $tag) {
+            $href = $tag->getAttribute('href');
+            $url = parse_url($href);
+            if(key_exists('host', $url) && $url['host'] !== __APP_SETTINGS__['domain_name']) {
+                $tag->setAttribute('target', "_blank");
+            }
+        }
+        $paragraph = $dom->getElementsByTagName("p");
+        $block['data']['text'] = "";
+        /** @var DOMNode */
+        foreach($paragraph as $p) {
+            foreach($p->childNodes as $c) {
+                $block['data']['text'] .= $dom->saveHTML($c);
+            }
         }
         return $block;
     }
@@ -251,7 +266,10 @@ class BlockResult extends SchemaResult {
     }
 
     private function __from_paragraph($block) {
-        return "<p class=\"blockeditor--content blockeditor--paragraph\">" . $block->data->text . "</p>";
+        $html = "<p class=\"blockeditor--content blockeditor--paragraph\">";
+        $html .= $block->data->text;
+        $html .= "</p>";
+        return $html;
     }
 
     private function __from_header($block) {

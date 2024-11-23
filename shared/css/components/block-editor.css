@@ -80,6 +80,15 @@ h6.blockeditor--header {
         display: none;
     }
 
+a[target="_blank"]:after {
+    /* content: "\F03CC"; */
+    font-family: 'Material Design Icons';
+    vertical-align: super;
+    font-size: 0.65em;
+}
+
+
+
 a.blockeditor--link-preview {
     --img-size: 20ch;
     --gap: 1em;

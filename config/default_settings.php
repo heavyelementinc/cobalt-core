@@ -1472,6 +1472,9 @@ const DEFAULT_DEFINITIONS = [
     "Block_Editor_endpoints" => [
         "default" => true
     ],
+    "BlockContent_paragraph_external_links_to_blank" => [
+        "default" => true,
+    ],
     "LandingPages_enabled" => [
         "default" => true
     ],
