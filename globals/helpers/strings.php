@@ -206,8 +206,9 @@ function convertCommonTextElements($string) {
  * @param  bool $untrusted - Whether the markdown is user input
  * @return string - HTML-formatted string
  */
-function from_markdown(?string $string, bool $untrusted = true) {
+function from_markdown($string, bool $untrusted = true) {
     if(!$string) return "";
+    if(gettype($string) !== "string") return $string;
     
     $md = new ParsedownExtra();
     $md->setSafeMode($untrusted);
