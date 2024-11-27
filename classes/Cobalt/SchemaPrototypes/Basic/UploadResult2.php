@@ -123,7 +123,7 @@ class UploadResult2 extends MapResult {
     }
 
     function __toString(): string {
-        return $this->url->getValue();
+        return $this->url?->getValue() ?? "";
     }
 
     /******************* UPLOAD HANDLING **********************/

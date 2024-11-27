@@ -162,9 +162,8 @@ class WebmentionHandler extends Database {
         $response = $this->fetchSource($data['source']);
         if($response->getStatusCode() >= 300) return Task::GENERAL_TASK_ERROR;
         $body = $response->getBody();
-        $mention = $this->buildLinkData($data['target'], $data['source'], $body, $response);
-        if(!$mention) return Task::GENERAL_TASK_ERROR;
-        // return $this->storeWebmention($mention);
-        return $mention;
+        $result = $this->buildLinkData($data['target'], $data['source'], $body, $response);
+        if($result !== Task::TASK_FINISHED) return Task::GENERAL_TASK_ERROR;
+        return $result;
     }
 }

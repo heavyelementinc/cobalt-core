@@ -58,7 +58,7 @@ class TaskManager extends Database {
                     if(self::MARK_JOBS_COMPLETE) $this->mark_as_complete($task);
                 }
                 $job_end = microtime(true);
-                cobalt_log("TaskManager", "Job \"".$task->get_class()."::".$task->get_method()."\" completed in " ($job_end - $job_start)." seconds");
+                // cobalt_log("TaskManager", "Job \"".$task->get_class()."::".$task->get_method()."\" completed in " ($job_end - $job_start)." seconds");
                 if($job_status === Task::TASK_SKIP) {
                     continue;
                 }
@@ -98,6 +98,7 @@ class TaskManager extends Database {
         } catch (Exception $error) {
             return $task::GENERAL_TASK_ERROR;
         }
+        return $result;
     }
 
     public function mark_as_complete(Task $task) {

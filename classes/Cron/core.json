@@ -25,14 +25,5 @@
         "method": "process_queue",
         "method_args": [],
         "interval": 60
-    },
-    {
-        "type": "DefaultType",
-        "name": "Process Webmentions",
-        "class": "\\Webmentions\\Server",
-        "class_args": [],
-        "method": "process",
-        "method_args": [],
-        "interval": 240
     }
 ]

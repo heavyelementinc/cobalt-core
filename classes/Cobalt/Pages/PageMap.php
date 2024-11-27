@@ -575,7 +575,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
             'repostCount' => 0,
             'repost' => "",
         ];
-        if($this->flags->and(self::FLAGS_HIDE_WEBMENTIONS) !== self::FLAGS_HIDE_WEBMENTIONS) return $empty;
+        if($this->flags->and(self::FLAGS_HIDE_WEBMENTIONS) === self::FLAGS_HIDE_WEBMENTIONS) return $empty;
         if($this->mentions !== null) return $this->mentions;
         $mentionManger = new WebmentionHandler();
         $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);

@@ -21,7 +21,7 @@ class Webhooks extends Controller {
         $task->set_class(new WebmentionHandler());
         $task->set_method("process_task");
         $task->set_additional_data($_POST);
-        $task->set_timer(60);
+        $task->set_timer(2);
         $taskMan->queue_item($task);
         header("HTTP/1.1 202 Accepted");
         exit;

@@ -3,6 +3,8 @@
 namespace Cron;
 
 class Task {
+    protected array $task = [];
+    protected $date;
     function __construct($task, $date) {
         $this->task = $task;
         $this->date = $date;

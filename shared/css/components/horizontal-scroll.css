@@ -8,6 +8,10 @@ horizontal-scroll {
     cursor: grab;
 }
 
+horizontal-scroll > * {
+    vertical-align:middle;
+}
+
 horizontal-scroll.active {
     cursor: grabbing
 }
@@ -20,3 +24,19 @@ horizontal-scroll.active > * {
 horizontal-scroll > img {
     pointer-events: none;
 }
+horizontal-scroll[paginated] {
+    scroll-behavior: smooth;
+}
+
+horizontal-scroll[paginated]:not(.active) {
+    scroll-snap-type: x proximity;
+}
+
+horizontal-scroll[paginated] > * {
+    scroll-snap-align: left;
+}
+
+horizontal-scroll[paginated="center"] > * {
+    scroll-snap-align: center;
+}
+

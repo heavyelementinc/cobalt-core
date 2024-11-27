@@ -311,7 +311,10 @@ abstract class Page extends Crudable {
     }
 
     function getLikes(PageMap $page) {
-        return view("/pages/landing/likes.html", ['page' => $page, 'details' => $page->get_webmention_details()]);
+        if($page->flags->and($page::FLAGS_HIDE_WEBMENTIONS)) return "";
+        $webmention_details = $page->get_webmention_details();
+        if($webmention_details['likeCount'] === 0) return "";
+        return view("/pages/landing/likes.html", ['page' => $page, 'details' => $webmention_details]);
     }
 
     function getComments(PageMap $page) {
