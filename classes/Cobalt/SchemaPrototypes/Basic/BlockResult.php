@@ -245,7 +245,7 @@ class BlockResult extends SchemaResult {
     private function __from_paragraph($block) {
         $html = "<p class=\"blockeditor--content blockeditor--paragraph\">";
         if(__APP_SETTINGS__['BlockContent_paragraph_external_links_to_blank']) {
-            return add_target_blank_to_external_links($block->data->text);
+            $html .= add_target_blank_to_external_links($block->data->text);
         } else $html .= $block->data->text;
         $html .= "</p>";
         return $html;
@@ -299,7 +299,7 @@ class BlockResult extends SchemaResult {
     }
 
     private function __from_quote($block) {
-        return view("/pages/landing/block-elements/quote.html", ['block' => $block]);
+        return view("/pages/landing/block-elements/quote.php", ['block' => $block]);
     }
 
     private function __from_rawtool($block) {

@@ -217,7 +217,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
     // $parsed = embed_from_img_tags($parsed);
 
     // Implmentented reddit's ^ for superscript. Only works one word at a time.
-    return preg_replace(
+    return add_target_blank_to_external_links(preg_replace(
         [
             "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
             "/\^(\w)/",
@@ -232,7 +232,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
             // "<a$1>$2</a>",
         ],
         $parsed
-    );
+    ));
 }
 
 function youtube_embedder(DOMElement $img, DOMDocument $doc){
@@ -433,10 +433,10 @@ function is_function(mixed $subject):bool {
 
 function add_target_blank_to_external_links(string $html, string $t = "p"):string {
     $dom = new DOMDocument();
-    $dom->preserveWhiteSpace = false;
+    $dom->preserveWhiteSpace = true;
     $dom->formatOutput       = true;
-    $dom->loadHTML("<$t>$html</$t>");//.$block['data']['text']."</$tag>");
-
+    // $dom->loadHTML("<$t>$html</$t>");//.$block['data']['text']."</$tag>");
+    $dom->loadHTML(mb_convert_encoding("<$t>$html</$t>", 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
     $links = $dom->getElementsByTagName("a");
     if(count($links) === 0) return $html;
     /** @var DOMElement $tag */
@@ -444,17 +444,17 @@ function add_target_blank_to_external_links(string $html, string $t = "p"):strin
         $href = $tag->getAttribute('href');
         $url = parse_url($href);
         if(key_exists('host', $url) && $url['host'] !== __APP_SETTINGS__['domain_name']) {
-            // $tag->setAttribute('target', "_blank");
-            $html = preg_replace("/href=[\"']".$href."[\"']/", "href=\"$href\" target=\"blank\"", $html);
+            $tag->setAttribute('target', "_blank");
+            // $html = preg_replace("/href=[\"']".$href."[\"']/", "href=\"$href\" target=\"blank\"", $html);
         }
     }
-    // $paragraph = $dom->getElementsByTagName($t);
-    // $html = "";
-    // /** @var DOMNode */
-    // foreach($paragraph as $p) {
-    //     foreach($p->childNodes as $c) {
-    //         $html .= $dom->saveHTML($c);
-    //     }
-    // }
+    $paragraph = $dom->getElementsByTagName($t);
+    $html = "";
+    /** @var DOMNode */
+    foreach($paragraph as $p) {
+        foreach($p->childNodes as $c) {
+            $html .= $dom->saveHTML($c);
+        }
+    }
     return $html ?? ""; 
 }
