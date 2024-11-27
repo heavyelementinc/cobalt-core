@@ -217,7 +217,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
     // $parsed = embed_from_img_tags($parsed);
 
     // Implmentented reddit's ^ for superscript. Only works one word at a time.
-    return add_target_blank_to_external_links(preg_replace(
+    return preg_replace(
         [
             "/&lt;sup&gt;(.*)&lt;\/sup&gt;/",
             "/\^(\w)/",
@@ -232,7 +232,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
             // "<a$1>$2</a>",
         ],
         $parsed
-    ));
+    );
 }
 
 function youtube_embedder(DOMElement $img, DOMDocument $doc){
