@@ -14,7 +14,11 @@ message-container:empty{
     display:none;
 }
 
-message-item{
+.cdx-notify {
+    z-index: var(--project-modal-z-index) + 100;
+}
+
+message-item {
     display:flex;
 /*     flex-direction: row; */
     box-sizing: border-box;

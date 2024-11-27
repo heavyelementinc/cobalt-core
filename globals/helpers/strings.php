@@ -214,7 +214,7 @@ function from_markdown(?string $string, bool $untrusted = true) {
     // $md->setMarkupEscaped($untrusted);
     $parsed = $md->text($string);
 
-    $parsed = embed_from_img_tags($parsed);
+    // $parsed = embed_from_img_tags($parsed);
 
     // Implmentented reddit's ^ for superscript. Only works one word at a time.
     return preg_replace(
@@ -282,6 +282,7 @@ function instagram_embedder(DOMElement $img, DOMDocument $dom) {
     $img->replaceWith($figure);
 }
 
+/** @deprecated  */
 function embed_from_img_tags($html) {
     $dom = new DOMDocument();
     $dom->loadHTML($html);
@@ -428,4 +429,32 @@ function is_data_uri($uri):bool {
 function is_function(mixed $subject):bool {
     if(is_string($subject)) return false;
     return is_callable($subject);
+}
+
+function add_target_blank_to_external_links(string $html, string $t = "p"):string {
+    $dom = new DOMDocument();
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput       = true;
+    $dom->loadHTML("<$t>$html</$t>");//.$block['data']['text']."</$tag>");
+
+    $links = $dom->getElementsByTagName("a");
+    if(count($links) === 0) return $html;
+    /** @var DOMElement $tag */
+    foreach($links as $tag) {
+        $href = $tag->getAttribute('href');
+        $url = parse_url($href);
+        if(key_exists('host', $url) && $url['host'] !== __APP_SETTINGS__['domain_name']) {
+            // $tag->setAttribute('target', "_blank");
+            $html = preg_replace("/href=[\"']".$href."[\"']/", "href=\"$href\" target=\"blank\"", $html);
+        }
+    }
+    // $paragraph = $dom->getElementsByTagName($t);
+    // $html = "";
+    // /** @var DOMNode */
+    // foreach($paragraph as $p) {
+    //     foreach($p->childNodes as $c) {
+    //         $html .= $dom->saveHTML($c);
+    //     }
+    // }
+    return $html ?? ""; 
 }

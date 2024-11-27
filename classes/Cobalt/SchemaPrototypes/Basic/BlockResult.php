@@ -139,29 +139,6 @@ class BlockResult extends SchemaResult {
     }
 
     private function filter_paragraph(&$block):array {
-        if(!__APP_SETTINGS__['BlockContent_paragraph_external_links_to_blank']) return $block;
-        $dom = new DOMDocument();
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput       = true;
-        $dom->loadHTML("<p>".$block['data']['text']."</p>");
-        // $block['data']['links'] = [];
-        $links = $dom->getElementsByTagName("a");
-        /** @var DOMElement $tag */
-        foreach($links as $tag) {
-            $href = $tag->getAttribute('href');
-            $url = parse_url($href);
-            if(key_exists('host', $url) && $url['host'] !== __APP_SETTINGS__['domain_name']) {
-                $tag->setAttribute('target', "_blank");
-            }
-        }
-        $paragraph = $dom->getElementsByTagName("p");
-        $block['data']['text'] = "";
-        /** @var DOMNode */
-        foreach($paragraph as $p) {
-            foreach($p->childNodes as $c) {
-                $block['data']['text'] .= $dom->saveHTML($c);
-            }
-        }
         return $block;
     }
 
@@ -169,7 +146,7 @@ class BlockResult extends SchemaResult {
         if(!$block['data']['html']) return $block;
         $dom = new DOMDocument();
         try {
-            $parsed = $dom->loadHTML($block['data']['html']);
+            $parsed = $dom->loadHTML(mb_convert_encoding($block['data']['html'], 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
         } catch (Exception $e) {
             throw new ValidationIssue("Raw HTML must evaluate to valid HTML");
         }
@@ -267,7 +244,9 @@ class BlockResult extends SchemaResult {
 
     private function __from_paragraph($block) {
         $html = "<p class=\"blockeditor--content blockeditor--paragraph\">";
-        $html .= $block->data->text;
+        if(__APP_SETTINGS__['BlockContent_paragraph_external_links_to_blank']) {
+            return add_target_blank_to_external_links($block->data->text);
+        } else $html .= $block->data->text;
         $html .= "</p>";
         return $html;
     }

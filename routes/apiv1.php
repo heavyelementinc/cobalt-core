@@ -178,9 +178,18 @@ LandingPages::apiv1();
 Route::s_post('/landing-pages/{id}/preview-key/', 'LandingPages@preview_key');
 
 if(__APP_SETTINGS__['Block_Editor_endpoints']) {
-    Route::s_post('/block-editor/upload/url/', "BlockEditor@fileByURL");
-    Route::s_post('/block-editor/upload/', "BlockEditor@fileUpload");
-    Route::s_get('/block-editor/link-fetch/', "BlockEditor@linkFetcher");
+    
+    Route::s_post('/block-editor/upload/url/', "BlockEditor@fileByURL", [
+        'csrf_required' => false
+    ]);
+    
+    Route::s_post('/block-editor/upload/', "BlockEditor@fileUpload", [
+        'csrf_required' => false
+    ]);
+    
+    Route::s_get('/block-editor/link-fetch/', "BlockEditor@linkFetcher", [
+        'csrf_required' => false
+    ]);
 }
 
 CrudableFiles::apiv1();

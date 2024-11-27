@@ -65,7 +65,7 @@ class Route {
     static function s_get(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'get');
         Route::add_route($pattern, $controller, array_merge($options, [
-            'csrf_required' => app("Router_csrf_required_default"),
+            'csrf_required' => $options['csrf_required'] ?? app("Router_csrf_required_default"),
             'require_session' => true, 
         ]), 'get');
     }
@@ -73,7 +73,7 @@ class Route {
     static function s_post(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'post');
         Route::add_route($pattern, $controller, array_merge($options, [
-            'csrf_required' => app("Router_csrf_required_default"),
+            'csrf_required' => $options['csrf_required'] ?? app("Router_csrf_required_default"),
             'require_session' => true, 
         ]), 'post');
     }
@@ -81,7 +81,7 @@ class Route {
     static function s_put(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'put');
         Route::add_route($pattern, $controller, array_merge($options, [
-            'csrf_required' => app("Router_csrf_required_default"),
+            'csrf_required' => $options['csrf_required'] ?? app("Router_csrf_required_default"),
             'require_session' => true, 
         ]), 'put');
     }
@@ -89,7 +89,7 @@ class Route {
     static function s_delete(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'delete');
         Route::add_route($pattern, $controller, array_merge($options, [
-            'csrf_required' => app("Router_csrf_required_default"),
+            'csrf_required' => $options['csrf_required'] ?? app("Router_csrf_required_default"),
             'require_session' => true, 
         ]), 'delete');
     }
