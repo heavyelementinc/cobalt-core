@@ -3,9 +3,9 @@ namespace Cobalt\Pages\Controllers;
 
 use Cobalt\Maps\GenericMap;
 use Controllers\Crudable;
-use Cobalt\Pages\Classes\PageMap;
 use Cobalt\Pages\Classes\PageManager;
-use Cobalt\Pages\Classes\PostMap;
+use Cobalt\Pages\Models\PageMap;
+use Cobalt\Pages\Models\PostMap;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
 use Cobalt\Tasks\TaskManager;
 use DateTime;

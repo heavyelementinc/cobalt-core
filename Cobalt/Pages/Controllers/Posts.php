@@ -6,7 +6,7 @@ use Auth\UserCRUD;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\Controllers\AbstractPageController;
 use Cobalt\Pages\Classes\PostManager;
-use Cobalt\Pages\Classes\PostMap;
+use Cobalt\Pages\Models\PostMap;
 use Drivers\Database;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;

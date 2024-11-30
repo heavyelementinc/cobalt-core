@@ -38,12 +38,12 @@ class Tasks {
     }
 
     function upcoming($n = 10) {
-        $result = $this->taskMan->find([], ['sort' => ['date' => 1], 'limit' => $n]);
-        $now = "";
-        /** @var Task*/
-        foreach($result as $task) {
-            $task->
-        }
+        // $result = $this->taskMan->find([], ['sort' => ['date' => 1], 'limit' => $n]);
+        // $now = "";
+        // /** @var Task*/
+        // foreach($result as $task) {
+        //     $task->
+        // }
     }
 
 }

@@ -2,6 +2,8 @@
 
 namespace Cobalt\Pages\Classes;
 
+use Cobalt\Pages\Models\PageMap;
+use Cobalt\Pages\Models\PostMap;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\Tasks\Task;
 use Drivers\Database;

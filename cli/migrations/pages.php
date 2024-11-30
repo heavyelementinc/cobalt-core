@@ -1,7 +1,7 @@
 <?php
 
 use \Cobalt\CLI\Migration;
-use Cobalt\Pages\Classes\PageMap;
+use Cobalt\Pages\Models\PageMap;
 
 class pages extends Migration {
 

@@ -1,5 +1,5 @@
 <?php
-namespace Cobalt\Pages\Classes;
+namespace Cobalt\Pages\Models;
 
 use Cobalt\Pages\Classes\PostManager;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;

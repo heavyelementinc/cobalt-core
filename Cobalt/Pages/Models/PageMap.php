@@ -1,9 +1,11 @@
 <?php
 
-namespace Cobalt\Pages\Classes;
+namespace Cobalt\Pages\Models;
 
 use Cobalt\Maps\GenericMap;
 use Cobalt\Maps\PersistanceMap;
+use Cobalt\Pages\Classes\PageManager;
+use Cobalt\Pages\Classes\PostManager;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;

@@ -23,7 +23,6 @@ namespace Routes;
 
 use Cobalt\Extensions\Extensions;
 use Cobalt\Pages\Classes\PageManager;
-use Cobalt\Pages\PageMap;
 use Controllers\Attributes\Attribute;
 use Exception;
 use Exceptions\HTTP\MethodNotAllowed;

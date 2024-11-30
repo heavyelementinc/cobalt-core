@@ -1,7 +1,7 @@
 <?php
 
 use \Cobalt\CLI\Migration;
-use Cobalt\Pages\Classes\PostMap;
+use Cobalt\Pages\Models\PostMap;
 require_once __CLI_ROOT__ . "/migrations/pages.php";
 
 class posts extends pages {

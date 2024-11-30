@@ -5,7 +5,7 @@ namespace Cobalt\Pages\Controllers;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\Controllers\AbstractPageController;
 use Cobalt\Pages\Classes\PageManager;
-use Cobalt\Pages\Classes\PageMap;
+use Cobalt\Pages\Models\PageMap;
 use Drivers\Database;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
