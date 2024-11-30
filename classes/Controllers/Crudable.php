@@ -374,7 +374,8 @@ abstract class Crudable {
                 if($supplied[0] !== "/") $supplied = "/$supplied";
                 return $supplied;
             }
-            $prefix = preg_replace('/([A-Z])/', '-$1',self::className());
+            $supplied = (new \ReflectionClass(self::className()))->getShortName();
+            $prefix = preg_replace('/([A-Z])/', '-$1',$supplied);
             if($prefix[0] == "-") $prefix = substr($prefix, 1);
             return "/" . strtolower($prefix);
         }
@@ -391,8 +392,8 @@ abstract class Crudable {
 
     static function generate_friendly_name(?string $supplied = null):string {
         if($supplied) return $supplied;
-        
-        $prefix = preg_replace('/([A-Z])/', ' $1',self::className());
+        $supplied = (new \ReflectionClass(self::className()))->getShortName();
+        $prefix = preg_replace('/([A-Z])/', ' $1',$supplied);
         if($prefix[0] == "-") $prefix = substr($prefix, 1);
         return trim($prefix);
     }

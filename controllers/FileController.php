@@ -2,7 +2,6 @@
 
 use Cobalt\Extensions\Extensions;
 use Cobalt\Notifications\PushNotifications;
-use Cobalt\Posts\PostManager;
 use Controllers\ClientFSManager;
 use Exceptions\HTTP\NotFound;
 

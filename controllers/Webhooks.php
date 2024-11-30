@@ -11,7 +11,7 @@ class Webhooks extends Controller {
     }
 
     /**
-     * This route method accepts incoming linkbacks and queues them for processing
+     * This route method accepts incoming Webmentions and queues them for processing
      * @return never 
      * @throws TypeError 
      */
@@ -23,6 +23,7 @@ class Webhooks extends Controller {
         $task->set_additional_data($_POST);
         $task->set_timer(2);
         $taskMan->queue_item($task);
+        cobalt_log("LINKBACK", "Scheduling linkback handling from $_POST[source]");
         header("HTTP/1.1 202 Accepted");
         exit;
     }

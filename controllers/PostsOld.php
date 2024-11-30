@@ -1,6 +1,5 @@
 <?php
 
-use Cobalt\Posts\PostManager;
 use Controllers\ClientFSManager;
 use Controllers\PostController;
 use Exceptions\HTTP\NotFound;

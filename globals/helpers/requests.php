@@ -1,7 +1,6 @@
 <?php
 
-use Cobalt\Pages\PageManager;
-use Cobalt\Posts\PostManager;
+use Cobalt\Pages\Classes\PageManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
 use GuzzleHttp\Exception\GuzzleException;

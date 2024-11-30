@@ -1,15 +1,18 @@
 <?php
 
+namespace Cobalt\Pages\Controllers;
+
 use Cobalt\Maps\GenericMap;
-use Cobalt\Pages\PageManager;
-use Cobalt\Pages\PageMap;
+use Cobalt\Pages\Controllers\AbstractPageController;
+use Cobalt\Pages\Classes\PageManager;
+use Cobalt\Pages\Classes\PageMap;
 use Drivers\Database;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
 
 /** @package  */
-class LandingPages extends Controllers\Landing\Page {
+class LandingPages extends AbstractPageController {
 
 
     // static public function route_details_create(?array $option = null): array { 

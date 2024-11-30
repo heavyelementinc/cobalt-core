@@ -20,14 +20,14 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
         if($address[$length] === "/") $address = substr($address, 0, -1);
         Route::get("$address.xml", "Posts@rss_feed");
     }
-    Route::get(__APP_SETTINGS__['Posts']['public_index'], "Posts@posts_landing", __APP_SETTINGS__['Posts']['public_index_options']);
+    Route::get(__APP_SETTINGS__['Posts']['public_index'], "\\Cobalt\\Pages\\Controllers\\Posts@posts_landing", __APP_SETTINGS__['Posts']['public_index_options']);
     
     $posts = array_merge(
         __APP_SETTINGS__['Posts']['public_post_options'] ?? [], [
             
     ]);
     
-    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page", [
+    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "\\Cobalt\\Pages\\Controllers\\Posts@page", [
         'sitemap' => [
             'ignore' => true,
             'children' => function () {

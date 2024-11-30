@@ -22,7 +22,7 @@
 //     }
 // }
 
-use Cobalt\Pages\PageManager;
+use Cobalt\Pages\Classes\PageManager;
 use Routes\Router;
 
 /**

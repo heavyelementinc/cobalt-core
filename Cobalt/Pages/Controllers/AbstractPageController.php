@@ -1,11 +1,11 @@
 <?php
-namespace Controllers\Landing;
+namespace Cobalt\Pages\Controllers;
 
 use Cobalt\Maps\GenericMap;
 use Controllers\Crudable;
-use Cobalt\Pages\PageMap;
-use Cobalt\Pages\PageManager;
-use Cobalt\Pages\PostMap;
+use Cobalt\Pages\Classes\PageMap;
+use Cobalt\Pages\Classes\PageManager;
+use Cobalt\Pages\Classes\PostMap;
 use Cobalt\SchemaPrototypes\Basic\BlockResult;
 use Cobalt\Tasks\TaskManager;
 use DateTime;
@@ -21,7 +21,7 @@ use MongoDB\Model\BSONDocument;
 use stdClass;
 use Traversable;
 
-abstract class Page extends Crudable {
+abstract class AbstractPageController extends Crudable {
     var string $landing_content_classes = "";
     /** @var PageManager */
     public Database $manager;
@@ -137,7 +137,7 @@ abstract class Page extends Crudable {
         // Set up our (messy) variable table
         add_vars([
             'title' => $page['title'],
-            'og_template' => '/pages/landing/opengraph.html',
+            'og_template' => '/Cobalt/Pages/templates/parts/opengraph.html',
             'description' => strip_tags(str_replace(["&#039;","&amp;#039;","\""],["'", "'", "'"], $page->summary ?? $page->body->firstParagraph())),
             'og' => [
                 'title' => $page['title'],
@@ -181,8 +181,8 @@ abstract class Page extends Crudable {
     }
 
     function splash(PageMap $page) {
-        $view = "/pages/landing/views/splash-default.html";
-        if($page instanceof PostMap) $view = "/pages/landing/views/splash-post.html";
+        $view = "/Cobalt/Pages/templates/views/splash-default.html";
+        if($page instanceof PostMap) $view = "/Cobalt/Pages/templates/views/splash-post.html";
         // Let's get our splash view
         
         // Set our classes so it appears properlty
@@ -225,7 +225,7 @@ abstract class Page extends Crudable {
         else if($page->bio_flags->and($page::BIO_AVATAR_RADIUS_ROUNDED)) $avatar_classes = "border-radius--rounded";
         
         // Finally, let's render out our biography section
-        return view("/pages/landing/biography.html", [
+        return view("/Cobalt/Pages/templates/parts/biography.html", [
             'page' => $page,
             'headline' => ($page->bio_headline->getValue()) ? $page->bio_headline->getValue() : __APP_SETTINGS__['LandingPage_bio_default_headline'],
             'cta' => ($page->bio_cta->getValue()) ? $page->bio_cta->getValue() : $page->cta->getValue(),
@@ -314,13 +314,13 @@ abstract class Page extends Crudable {
         if($page->flags->and($page::FLAGS_HIDE_WEBMENTIONS)) return "";
         $webmention_details = $page->get_webmention_details();
         if($webmention_details['likeCount'] === 0) return "";
-        return view("/pages/landing/likes.html", ['page' => $page, 'details' => $webmention_details]);
+        return view("/Cobalt/Pages/templates/parts/likes.html", ['page' => $page, 'details' => $webmention_details]);
     }
 
     function getComments(PageMap $page) {
         $details = $page->get_webmention_details();
         if($details['replyCount'] === 0) return;
-        return view("/pages/landing/comments.html", [
+        return view("/Cobalt/Pages/templates/parts/comments.html", [
             'page' => $page,
             'details' => $details,
         ]);
@@ -329,7 +329,7 @@ abstract class Page extends Crudable {
     function renderPreview(PageMap $p, ?PageMap $page = null) {
         $common_tags = "";
         if($page) $common_tags = implode(",",$page->tags->intersect($p->tags));
-        return view("/pages/landing/related.html", [
+        return view("/Cobalt/Pages/templates/parts/related.html", [
             'page' => $p,
             'byline_meta' => $p->get_byline_meta(),
             'common_tags' => $common_tags,
@@ -409,8 +409,8 @@ abstract class Page extends Crudable {
         
         $privileged_field_permission = ($this::className() === "Pages") ? 'Posts_enable_privileged_fields' : 'Pages_enable_privileged_fields';
     
-        return view("/pages/landing/edit.html", [
-            'admin_fields' => (has_permission($privileged_field_permission)) ? view("/pages/landing/admin-fields.html") : "",
+        return view("/Cobalt/Pages/templates/admin/edit.html", [
+            'admin_fields' => (has_permission($privileged_field_permission)) ? view("/Cobalt/Pages/templates/admin/admin-fields.html") : "",
             'token' => $token,
             'deleted' => (isset($document->__dataset['deleted'])) ? "<small>This post was deleted " . $document->deleted->getValue()->toDateTime()->format("c") . ".</small>" : "",
         ]);

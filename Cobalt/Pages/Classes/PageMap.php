@@ -1,10 +1,9 @@
 <?php
 
-namespace Cobalt\Pages;
+namespace Cobalt\Pages\Classes;
 
 use Cobalt\Maps\GenericMap;
 use Cobalt\Maps\PersistanceMap;
-use Cobalt\Posts\PostManager;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;
@@ -32,8 +31,8 @@ use Webmention\WebmentionHandler;
 
 class PageMap extends PersistanceMap implements WebmentionDocument {
     const VIEW_TYPE = [
-        'default' => '/pages/landing/views/default.html',
-        'landing' => '/pages/landing/views/landing.html',
+        'default' => '/Cobalt/Pages/templates/views/default.html',
+        'landing' => '/Cobalt/Pages/templates/views/landing.html',
     ];
     const VISIBILITY_PRIVATE = 1;
     const VISIBILITY_DRAFT   = 2;
@@ -637,9 +636,9 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     public function webmention_get_canonincal_url(): string {
         $host = server_name();
         if($this->__manager instanceof PostManager) {
-            return $host . route("Posts@page", [$this->url_slug->get_path()]);
+            return $host . route("\\Cobalt\\Pages\\Controllers\\Posts@page", [$this->url_slug->get_path()]);
         }
-        return $host . route("LandingPages@page", [$this->url_slug->get_path()]);
+        return $host . route("\\Cobalt\\Pages\\Controllers\\LandingPages@page", [$this->url_slug->get_path()]);
     }
 
     function webmention_lock():void {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Pages;
+namespace Cobalt\Pages\Classes;
 
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\Tasks\Task;

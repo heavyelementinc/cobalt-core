@@ -22,7 +22,7 @@
 namespace Routes;
 
 use Cobalt\Extensions\Extensions;
-use Cobalt\Pages\PageManager;
+use Cobalt\Pages\Classes\PageManager;
 use Cobalt\Pages\PageMap;
 use Controllers\Attributes\Attribute;
 use Exception;
@@ -104,7 +104,7 @@ class Router {
         // Specify any follow-up router table options here
         if(__APP_SETTINGS__['LandingPages_enabled']) {
             $ROUTE_TABLE_ADDRESS = "web";
-            Route::get(__APP_SETTINGS__['LandingPage_route_prefix']."...", "LandingPages@page", [
+            Route::get(__APP_SETTINGS__['LandingPage_route_prefix']."...", "\\Cobalt\\Pages\\Controllers\\LandingPages@page", [
                 'sitemap' => [
                     'ignore' => true,
                     'children' => function () {

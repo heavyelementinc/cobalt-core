@@ -295,15 +295,15 @@ class BlockResult extends SchemaResult {
     }
 
     private function __from_linktool($block) {
-        return view("/pages/landing/block-elements/linktool.html", ['block' => $block]);
+        return view("/Cobalt/Pages/templates/block-elements/linktool.html", ['block' => $block]);
     }
 
     private function __from_quote($block) {
-        return view("/pages/landing/block-elements/quote.php", ['block' => $block]);
+        return view("/Cobalt/Pages/templates/block-elements/quote.php", ['block' => $block]);
     }
 
     private function __from_rawtool($block) {
-        return view("/pages/landing/block-elements/rawtool.html", ['block' => $block]);
+        return view("/Cobalt/Pages/templates/block-elements/rawtool.html", ['block' => $block]);
     }
 
     private function __from_nestedlist($block) {
@@ -339,11 +339,11 @@ class BlockResult extends SchemaResult {
     }
 
     private function __from_embed($block) {
-        return view("/pages/landing/block-elements/embed.html", ['block' => $block]);
+        return view("/Cobalt/Pages/templates/block-elements/embed.html", ['block' => $block]);
     }
 
     private function __from_codetool($block) {
-        return view("/pages/landing/block-elements/code.html", ['block' => $block]);
+        return view("/Cobalt/Pages/templates/block-elements/code.html", ['block' => $block]);
     }
 
     private function __from_blockbutton($block) {

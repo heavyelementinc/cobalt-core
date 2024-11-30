@@ -1,18 +1,19 @@
 <?php
 
+namespace Cobalt\Pages\Controllers;
+
 use Auth\UserCRUD;
 use Cobalt\Maps\GenericMap;
-use Cobalt\Pages\PageManager;
-use Cobalt\Pages\PostMap;
-use Cobalt\Posts\PostManager;
-use Controllers\Landing\Page;
+use Cobalt\Pages\Controllers\AbstractPageController;
+use Cobalt\Pages\Classes\PostManager;
+use Cobalt\Pages\Classes\PostMap;
 use Drivers\Database;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
 
-class Posts extends Page {
+class Posts extends AbstractPageController {
 
     public function get_manager(): Database {
         // return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);

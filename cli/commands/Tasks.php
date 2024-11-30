@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Tasks\Task;
 use Cobalt\Tasks\TaskManager;
 
 /**
@@ -14,6 +15,10 @@ class Tasks {
         'count' => [
             'description' => "Count the number of tasks in the queue",
             'context_required' => true
+        ],
+        'upcoming' => [
+            'description' => 'List the next 10 tasks',
+            'context_required' => true,
         ]
     ];
     private TaskManager $taskMan;
@@ -30,6 +35,15 @@ class Tasks {
         $count = $this->taskMan->count($this->taskMan->get_query());;
         say("Tasks in queue: ". fmt($count, "i"));
         return;
+    }
+
+    function upcoming($n = 10) {
+        $result = $this->taskMan->find([], ['sort' => ['date' => 1], 'limit' => $n]);
+        $now = "";
+        /** @var Task*/
+        foreach($result as $task) {
+            $task->
+        }
     }
 
 }

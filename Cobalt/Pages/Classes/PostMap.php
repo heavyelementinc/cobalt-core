@@ -1,7 +1,7 @@
 <?php
-namespace Cobalt\Pages;
+namespace Cobalt\Pages\Classes;
 
-use Cobalt\Posts\PostManager;
+use Cobalt\Pages\Classes\PostManager;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;

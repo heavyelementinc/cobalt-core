@@ -12,7 +12,7 @@ Route::get("/", "CoreAdmin@index", [
 ]);
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
-    Posts::admin();
+    Cobalt\Pages\Controllers\Posts::admin();
     // Route::get("/posts/", "Posts@index",[
     //     'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
     //     'navigation' => ['admin_panel'],
@@ -22,7 +22,7 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     // ]);
 }
 
-LandingPages::admin();
+\Cobalt\Pages\Controllers\LandingPages::admin();
 
 Route::get("/me/", "UserAccounts@me",
     [

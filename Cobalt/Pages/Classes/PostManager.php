@@ -1,7 +1,7 @@
 <?php
-namespace Cobalt\Posts;
+namespace Cobalt\Pages\Classes;
 
-use Cobalt\Pages\PageManager;
+use Cobalt\Pages\Classes\PageManager;
 
 class PostManager extends PageManager {
     public function get_collection_name() {
