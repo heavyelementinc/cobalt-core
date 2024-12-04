@@ -75,7 +75,7 @@ class ImageResult extends UploadResult2 {
         switch($size) {
             case "thumb":
             case "thumbnail":
-                return $this->thumb;
+                return $this->thumb ?? $this->url;
             default:
                 return $this->url;
         }

@@ -1,22 +1,33 @@
 horizontal-scroll {
     display: block;
     white-space: nowrap;
+    overflow-x: hidden;
+    position: relative;
+}
+
+horizontal-scroll .scrollable-track {
+    display: block;
+    white-space: nowrap;
     overflow-x: scroll;
     user-select: none;
     -ms-overflow-style: none;
     scrollbar-width: none;
     cursor: grab;
+    scroll-behavior: smooth;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-horizontal-scroll > * {
-    vertical-align:middle;
+horizontal-scroll .scrollable-track> * {
+    vertical-align: middle;
 }
 
-horizontal-scroll.active {
+horizontal-scroll.active .scrollable-track {
     cursor: grabbing
 }
 
-horizontal-scroll.active > * {
+horizontal-scroll.active .scrollable-track > * {
     pointer-events: none;
     user-select: none;
 }
@@ -25,18 +36,42 @@ horizontal-scroll > img {
     pointer-events: none;
 }
 horizontal-scroll[paginated] {
-    scroll-behavior: smooth;
 }
 
 horizontal-scroll[paginated]:not(.active) {
-    scroll-snap-type: x proximity;
+    /* scroll-snap-type: x proximity; */
 }
 
 horizontal-scroll[paginated] > * {
-    scroll-snap-align: left;
+    /* scroll-snap-align: left; */
 }
 
 horizontal-scroll[paginated="center"] > * {
-    scroll-snap-align: center;
+    /* scroll-snap-align: center; */
 }
 
+horizontal-scroll ul.pagination-controls {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    translate: -50%;
+    gap: .25em;
+}
+
+horizontal-scroll ul.pagination-controls li button {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 0.5em;
+    cursor: pointer;
+    padding: 0;
+    opacity: .3;
+    transition: opacity .3s;
+}
+
+horizontal-scroll ul.pagination-controls li.current button {
+    opacity: 1;
+}

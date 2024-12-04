@@ -70,7 +70,8 @@ class UploadResult2 extends MapResult {
             //     return "<a href=''></a>";
             case "image":
             default:
-                return "<img$class src=\"$value[url]\"$alt width=\"$w\" height=\"$h\" style=\"background-color: ".$value['accent']."\">";
+                $backgroundColor = ($misc['bg']) ? "style=\"background-color: ".$value['accent'] : "";
+                return "<img$class src=\"$value[url]\"$alt width=\"$w\" height=\"$h\" $backgroundColor\">";
         }
 
         return $rt;
@@ -86,7 +87,8 @@ class UploadResult2 extends MapResult {
                     "ref-id" => $this->thumb_ref
                 ],
                 $misc['data'] ?? []
-            )
+            ),
+            'bg' => true,
         ], $misc);
         return $merge;
     }

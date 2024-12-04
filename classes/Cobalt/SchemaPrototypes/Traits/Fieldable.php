@@ -70,7 +70,7 @@ trait Fieldable {
         $pattern = $this->getDirective("pattern", false);
         if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
 
-        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-date>";
+        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-datetime>";
     }
 
     protected function select($classes = "", $misc = [], $tag = "select") {

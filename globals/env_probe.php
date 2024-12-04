@@ -5,7 +5,7 @@
 if (!version_compare(PHP_VERSION, "8.1", ">=")) kill("You must be running PHP version 8.1.0 or greater (".PHP_VERSION.")");
 
 /* Cobalt Version Number */
-define("__COBALT_VERSION", "2.1.2");
+define("__COBALT_VERSION", "2.1.3");
 
 /* A list of modules we don't allow along with anonymous functions which may
    configure it to work correctly.

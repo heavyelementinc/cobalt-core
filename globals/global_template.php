@@ -80,7 +80,7 @@ function individual_var($name, $vars, $arguments, $posStart, $posEnd) {
     }
 
     if ($is_inline_json) $literal_value = json_encode($literal_value, $is_pretty_print); // Convert to JSON
-    if (!$is_inline_html) $literal_value = htmlspecialchars($literal_value ?? '', $options); // < = &lt;
+    if (!$is_inline_html) $literal_value = htmlspecialchars((string)$literal_value ?? '', $options); // < = &lt;
         // if (gettype($replace[$i]) === "object") $replace[$i] = "[object]";
     // }
 

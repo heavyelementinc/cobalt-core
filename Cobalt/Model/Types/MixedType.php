@@ -2,15 +2,17 @@
 
 namespace Cobalt\Model\Types;
 
+use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
+use Cobalt\Model\Traits\Filterable;
 use Cobalt\Model\Traits\Prototypable;
 use Error;
 use ReflectionObject;
 use Stringable;
 
 class MixedType implements Stringable {
-    use Prototypable;
+    use Prototypable, Filterable;
     protected bool $isSet = false;
     protected $value;
     protected string $name;
@@ -19,7 +21,23 @@ class MixedType implements Stringable {
 
     // Here we provide some sane defaults
     protected array $directives = [
+        # 'default' => null, // We're enumerating this here but commenting it out.
+        
+        /** @var bool 'asHTML' controls whether the value of this type is HTML escaped or not before being rendered */
         'asHTML' => false,
+        
+        /** @var bool 'immutable' types prevent the changing of a value once it's set
+         * @todo Make the immutable directive also control the mutability when filtering user input
+         */
+        'immutable' => false,
+
+        /** @var bool 'operator' By default all types use the MongoDB '$set' operator
+         * You may specify any other valid MongoDB update operator https://www.mongodb.com/docs/manual/reference/operator/update/
+         */
+        'operator' => '$set',
+
+        /** @var bool 'filter' */
+        #'filter' => fn ($val) => $val,
     ];
 
     /**
@@ -35,6 +53,7 @@ class MixedType implements Stringable {
     }
 
     public function setValue($value):void {
+        if($this->isSet && $this->getDirective('immutable')) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
         $this->value = $value;
         $this->isSet = true;
     }
@@ -48,10 +67,25 @@ class MixedType implements Stringable {
     }
 
     public function setDirectives(array $directives) {
-        $this->directives = array_merge($this->directives, $directives);
+        $d = [];
+        if(method_exists($this,"initDirectives")) $d = $this->initDirectives();
+        $this->directives = array_merge($this->directives, $d, $directives);
         unset($this->directives['type']);
     }
 
+    /**
+     * Filters input from the client before the input is stored in the database
+     * @param mixed $value the user input
+     * @return mixed Returns the value to the be stored, may be transformed 
+     */
+    public function filter($value) {
+        if($this->isSet && $this->getDirective('immutable')) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->hasDirective('valid')) {
+            $this->getDirective('valid');
+        }
+        if($this->hasDirective('filter')) $value = $this->getDirective('filter', $value);
+        return $value;
+    }
     /**
      * @param string $directive - The name of the directive you want 
      */

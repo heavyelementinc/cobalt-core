@@ -25,8 +25,20 @@ body {
     color: var(--project-body-color);
 }
 
-a {
+a, button[link] {
     color: var(--project-href-color-normal);
+}
+
+button[link], button[link]:hover {
+    font-size: 1em;
+    border: 0;
+    background: none;
+    color: inherit;
+    padding: 0;
+    margin: 0;
+    text-align: inherit;
+    cursor: pointer;
+    width: fit-content;
 }
 
 a:visited {
