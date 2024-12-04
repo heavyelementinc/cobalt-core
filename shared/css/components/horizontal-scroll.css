@@ -3,23 +3,25 @@ horizontal-scroll {
     white-space: nowrap;
     overflow-x: hidden;
     position: relative;
+    user-select: none;
+    -ms-overflow-style: none;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 horizontal-scroll .scrollable-track {
     display: block;
     white-space: nowrap;
-    overflow-x: scroll;
-    user-select: none;
-    -ms-overflow-style: none;
     scrollbar-width: none;
-    cursor: grab;
-    scroll-behavior: smooth;
     position: relative;
-    width: 100%;
-    box-sizing: border-box;
+    margin-bottom: 2em;
 }
 
-horizontal-scroll .scrollable-track> * {
+horizontal-scroll .scrollable-track {
+    cursor: grab;
+}
+
+horizontal-scroll .scrollable-track > * {
     vertical-align: middle;
 }
 
