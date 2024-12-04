@@ -581,6 +581,18 @@ const DEFAULT_DEFINITIONS = [
             ]
         ]
     ],
+    "fb_app_id" => [
+        "default" => "",
+        "meta" => [
+            "group" => "OpenGraph",
+            "subgroup" => "Facebook",
+            "name" => "Facebook App ID",
+            "type" => "input"
+        ],
+        "validate" => [
+            
+        ]
+    ],
     "keywords" => [
         "default" => "",
         "meta" => [
