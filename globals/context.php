@@ -26,13 +26,16 @@ try {
     kill($e->getMessage());
 }
 
+$_REQUEST['url'] = server_name() . $_SERVER['REQUEST_URI'];
+$_REQUEST['url'] .= ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
+
 $WEB_PROCESSOR_VARS = array_merge($WEB_PROCESSOR_VARS, [
     'app'  => __APP_SETTINGS__,
     'get'  => $_GET,
     'post' => $_POST,
     'session' => session(),
     'request' => [
-        'url' => server_name() . $_SERVER['REQUEST_URI'] . ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "",
+        'url' => $_REQUEST['url'],
         'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
     ],
     'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
