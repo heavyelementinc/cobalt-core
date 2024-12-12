@@ -101,6 +101,8 @@ class NewProject{
 
     function __construct(){
         $this->app_root = __CLI_ROOT__ . "/../../";
+        if(!defined("__ENV_ROOT__")) define("__ENV_ROOT__", __CLI_ROOT__ . "/../");
+        // if(!defined("__APP_ROOT__")) define("__APP_ROOT__", __CLI_ROOT__ . "/../");
     }
 
     function __collect_new_project_settings($arguments = []){

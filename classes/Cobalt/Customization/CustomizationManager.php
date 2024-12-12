@@ -97,4 +97,45 @@ class CustomizationManager extends \Drivers\Database {
             }
         }
     }
+
+    function export() {
+        // if(is_callable(("say")) say
+
+        $result = $this->find([],['limit' => $this->count([]) + 1]);
+        $file = "<?php\nuse Cobalt\Customization\CustomSchema;\n";
+        foreach($result as $customization) {
+            $const = "";
+            $value = $customization->value;
+            switch($customization->type) {
+                case CUSTOMIZATION_TYPE_TEXT:
+                    $const = "CUSTOMIZATION_TYPE_TEXT";
+                    break;
+                case CUSTOMIZATION_TYPE_MARKDOWN:
+                    $const = "CUSTOMIZATION_TYPE_MARKDOWN";
+                    break;
+                case CUSTOMIZATION_TYPE_IMAGE:
+                    $const = "CUSTOMIZATION_TYPE_IMAGE";
+                    break;
+                case CUSTOMIZATION_TYPE_HREF:
+                    $const = "CUSTOMIZATION_TYPE_HREF";
+                    break;
+                case CUSTOMIZATION_TYPE_VIDEO:
+                    $const = "CUSTOMIZATION_TYPE_VIDEO";
+                    break;
+                case CUSTOMIZATION_TYPE_AUDIO:
+                    $const = "CUSTOMIZATION_TYPE_AUDIO";
+                    break;
+                case CUSTOMIZATION_TYPE_COLOR:
+                    $const = "CUSTOMIZATION_TYPE_COLOR";
+                    break;
+                case CUSTOMIZATION_TYPE_SERIES:
+                    $const = "CUSTOMIZATION_TYPE_SERIES";
+                    break;
+            }
+            $file .= "CustomSchema::define($const, ". json_encode($customization->unique_name).", ". json_encode($customization->group).", ". json_encode($value) . ");\n";
+        }
+        $output = __APP_ROOT__ . "/ignored/customization-export-" . time() . ".php";
+        file_put_contents($output, $file);
+        return "Wrote file to " . fmt($output, "i");
+    }
 }

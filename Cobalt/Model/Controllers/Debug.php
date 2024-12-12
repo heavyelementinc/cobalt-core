@@ -21,7 +21,11 @@ class Debug extends Controller {
         $doc = [
             'some_string' => "Here's a secret message from **uncharted** space!",
             // 'other_string' => "Test",
-            'array_type' => ["Here's a secret message", 2],
+            'array_type' => [
+                ['field' => 3],
+                ['field' => 2]
+            ],
+            'number' => 2,
             'model' => [
                 'details' => 1,
                 'string' => "Test String",
@@ -45,7 +49,7 @@ class Debug extends Controller {
         
         // $str = $document->some_string->md();
 
-        return view("/Cobalt/Model/Testing/Templates/test.html", ['doc' => $document]);
+        return view("/Cobalt/Model/Testing/Templates/test.php", ['doc' => $document]);
     }
 
 }

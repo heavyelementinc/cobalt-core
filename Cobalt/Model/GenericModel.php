@@ -4,11 +4,13 @@ namespace Cobalt\Model;
 
 use ArrayAccess;
 use Cobalt\Model\Exceptions\Undefined;
-use Cobalt\Model\Traits\Defineable;
+use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
 use Iterator;
 use JsonSerializable;
+use MongoDB\Model\BSONDocument;
+use Stringable;
 use Traversable;
 
 /**
@@ -17,14 +19,17 @@ use Traversable;
  *  * Accessing using the $model->['key'] syntax will return the literal value of the MixedType as if you accessed $model->key->value
  * @package Cobalt\Model
  */
-class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable {
-    use Schemable, Viewable, Defineable;
+class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable, Stringable {
+    use Schemable, Viewable, Hydrateable;
+    public ?string $name_prefix = null;
 
     /*************** INITIALIZATION ***************/
-    function __construct(?array $schema = [], ?array $dataset = null) {
+    function __construct(?array $schema = [], null|array|BSONDocument $dataset = null, ?string $name_prefix = null) {
+        $this->name_prefix = $name_prefix;
         $this->__defineSchema($schema);
         if(!$dataset || !empty($dataset)) $this->setData($dataset ?? []);
     }
+
 
     /*************** OVERLOADING ***************/
     public function __get($property) {
@@ -32,13 +37,13 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         if($property === "_id") return $this->_id; 
         // Let's check to ensure that the property exists.
         if(key_exists($property, $this->__dataset)) return $this->__dataset[$property];
-        throw new Undefined("The property $property does not exist!");
+        throw new Undefined($property, "The property $property does not exist!");
     }
 
     public function __set($property, $value) {
         $reserved = [];
         if(in_array($property, $reserved)) throw new \TypeError("Cannot set $property as the name is reserved!");
-        $this->define($this->__dataset, $property, $value, null, $this);
+        $this->hydrate($this->__dataset, $property, $value, null, $this, (($this->name_prefix) ? "$this->name_prefix"."$property" : null));
     }
 
     public function __isset($name) {
@@ -48,6 +53,11 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
 
     public function __unset($name) {
         unset($this->__dataset[$name]);
+    }
+
+    
+    public function __toString(): string {
+        return "[object GenericModel]";
     }
     
     /*************** ARRAY ACCESS ***************/

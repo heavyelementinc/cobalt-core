@@ -150,7 +150,15 @@ class WebHandler implements RequestHandler {
 
         // If we're in debug mode, let's embed the actual error message
         $embed = "$message";
-        if(__APP_SETTINGS__['debug_exceptions_publicly']) $embed .= "<pre class=\"error--message\">" . base64_encode($e->getMessage()) . "</pre>";
+        if(config()["mode"] === COBALT_MODE_DEVELOPMENT) {
+            $embed .= "<pre class=\"error--message\">";
+            if(__APP_SETTINGS__['debug_exceptions_publicly']) {
+                $embed .= $e->getMessage();
+            } else {
+                $embed .= base64_encode($e->getMessage());
+            }
+            $embed .= "</pre>";
+        }
 
 
         $this->add_vars([
@@ -224,9 +232,9 @@ class WebHandler implements RequestHandler {
         foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
             $vars .= "--project-$var: $value;\n";
         }
-        foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
-            $vars .= "--project-$name-family: $family[family];\n";
-        }
+        // foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
+        //     $vars .= "--project-$name-family: $family[family];\n";
+        // }
         
         $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;

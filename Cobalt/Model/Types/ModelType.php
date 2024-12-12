@@ -3,6 +3,7 @@
 namespace Cobalt\Model\Types;
 
 use ArrayAccess;
+use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
 
@@ -19,7 +20,8 @@ class ModelType extends MixedType implements ArrayAccess {
         // Otherwise, we'll grab the schema for this value and we'll instance
         // a GenericModel
         $schema = ($this->hasDirective('schema')) ? $this->getDirective('schema') : [];
-        $this->value = new GenericModel($schema, $value);
+        $this->value = new GenericModel($schema, $value, $this->name.".");
+        // $this->value->name_prefix = $this->name;
         $this->isSet = true;
     }
 
@@ -54,5 +56,11 @@ class ModelType extends MixedType implements ArrayAccess {
 
     public function offsetUnset(mixed $offset): void {
         $this->value->offsetUnset($offset);
+    }
+
+    #[Directive()]
+    public function defineSchema(array $schema):ModelType {
+        $this->__defineDirective('schema', $schema);
+        return $this;
     }
 }

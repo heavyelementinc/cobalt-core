@@ -17,6 +17,7 @@ use Traversable;
 
 abstract class Model extends GenericModel implements Persistable {
     use Accessible;
+
     /**
      * Specify the schema used by this model
      * @return array{}
@@ -28,6 +29,7 @@ abstract class Model extends GenericModel implements Persistable {
     }
 
     public function bsonUnserialize(array $data): void {
+        parent::__construct($this->defineSchema());
         $this->setData($data);
     }
 }

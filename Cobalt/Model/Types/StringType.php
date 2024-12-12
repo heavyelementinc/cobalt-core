@@ -2,6 +2,7 @@
 
 namespace Cobalt\Model\Types;
 
+use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Attributes\Prototype;
 use Validation\Exceptions\ValidationIssue;
 
@@ -12,8 +13,10 @@ use Validation\Exceptions\ValidationIssue;
 class StringType extends MixedType {
 
     function filter($value) {
+        $value = parent::filter($value);
         $this->character_limit($value);
         $this->illegal_chars($value);
+        $this->str_replace($value);
         return $value;
     }
 
@@ -31,7 +34,7 @@ class StringType extends MixedType {
     }
     
     function illegal_chars($value) {
-        if(!key_exists('illegal_chars', $this->schema)) return $value;
+        if(!$this->hasDirective("illegal_chars")) return $value;
         // Split our string of illegal characters into an array
         $illegal = str_split($this->getDirective('illegal_chars'));
         // Remove any illegal characters from the subject
@@ -40,6 +43,30 @@ class StringType extends MixedType {
         // the subject must have contained illegal characters
         if($mutant !== $value) throw new ValidationIssue("This entry contains illegal characters.");
         return $value;
+    }
+
+    function str_replace($value) {
+        if(!$this->hasDirective('str_replace')) return $value;
+        $directive = $this->getDirective();
+        return str_replace($directive[0], $directive[1], $value);
+    }
+
+    #[Directive()]
+    public function defineCharacterLimit(int $value):StringType {
+        $this->__defineDirective('character_limit', $value);
+        return $this;
+    }
+
+    #[Directive()]
+    public function defineIllegalChars(string $value):StringType {
+        $this->__defineDirective('illegal_chars', $value);
+        return $this;
+    }
+
+    #[Directive()]
+    public function defineStrReplace(string|array $replaced_chars, string|array $replace_with):StringType {
+        $this->__defineDirective('str_replace', [$replaced_chars, $replace_with]);
+        return $this;
     }
     
     #[Prototype]

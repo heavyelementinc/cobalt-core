@@ -5,6 +5,7 @@ namespace Cobalt\Model\Testing;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\ModelType;
+use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
 
 class TestModel extends Model {
@@ -17,12 +18,21 @@ class TestModel extends Model {
         return [
             'some_string' => new StringType,
             'other_string' => [
-                new StringType,
-                'default' => "Default Value"
+                new NumberType,
+                'default' => 3
             ],
             'array_type' => [
                 new ArrayType,
-                'default' => ['one', 2],
+                'default' => [
+                    ['field' => 1],
+                    ['field' => 2]
+                ],
+                'each' => [
+                    new ModelType,
+                    'schema' => [
+                        'field' => new NumberType
+                    ]
+                ]
             ],
             'model' => [
                 new ModelType,
@@ -33,7 +43,7 @@ class TestModel extends Model {
                     'data' => [
                         new ModelType,
                         'schema' => [
-                            'another_model' => 1
+                            'another_model' => new NumberType
                         ]
                     ]
                 ]

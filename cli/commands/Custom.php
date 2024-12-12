@@ -18,6 +18,10 @@ class Custom {
         'reset' => [
             'description' => "Overrides all curretly set values with definitions in customizations file",
             'context_required' => true
+        ],
+        'export' => [
+            'description' => 'Exports current customizations to a "customizations.php" file.',
+            'context_required' => true
         ]
     ];
 
@@ -29,5 +33,10 @@ class Custom {
     function reset() {
         $manager = new CustomizationManager();
         $manager->import(true);
+    }
+
+    function export() {
+        $manager = new CustomizationManager();
+        return $manager->export(true);
     }
 }

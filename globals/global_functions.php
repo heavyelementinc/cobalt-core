@@ -16,6 +16,7 @@ use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
 use Cobalt\Pages\PageMap;
 use Cobalt\Pages\PostMap;
@@ -349,7 +350,7 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
 
             if($mutant instanceof GenericModel) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
-                return lookup($temp_path, $mutant, $throw_on_fail);
+                return recursive_lookup(explode(".",$temp_path), $mutant);
             }
 
             if(is_a($mutant, "\\Cobalt\\Maps\\GenericMap")) {
@@ -427,6 +428,21 @@ function get_temp_path($path, $key) {
     return $substr;
 }
 
+
+function recursive_lookup(array $split_path, mixed $mutant):mixed {
+    $key = array_shift($split_path);
+    $split_count = count($split_path);
+    if(isset($mutant->{$key})) {
+        if($split_count === 0) return $mutant->{$key};
+        return recursive_lookup($split_path, $mutant->{$key});
+    }
+    if(isset($mutant[(string)$key])) {
+        if($split_count === 0) return $mutant[$key];
+        return recursive_lookup($split_path, $mutant[$key]);
+    }
+
+    return new Undefined($key, "Value $split_path is undefined");
+}
 
 /** Load a file containing JSON and parse it 
  * @param string $file_name path to a JSON file

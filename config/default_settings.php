@@ -1,5 +1,6 @@
 <?php
-
+const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
+const TEMPLATE_DEBUG_RENDER_TYPES = 0b0010;
 const DEFAULT_DEFINITIONS = [
     
     /*******************************************/
@@ -73,7 +74,7 @@ const DEFAULT_DEFINITIONS = [
         "default" => [
             "media" =>[
                 "id" => null,
-                "filename" => "\/core-content\/img\/branding\/cobalt-logo.svg",
+                "filename" => '/core-content/img/branding/cobalt-logo.svg',
                 "meta" =>[
                     "width" => 1500,
                     "height" => 1500,
@@ -82,7 +83,7 @@ const DEFAULT_DEFINITIONS = [
             ],
             "thumb" =>[
                 "id" => null,
-                "filename" => "\/core-content\/img\/branding\/cobalt-logo.svg",
+                "filename" => '/core-content/img/branding/cobalt-logo.svg',
                 "meta" =>[
                     "width" => 150,
                     "height" => 150,
@@ -216,8 +217,8 @@ const DEFAULT_DEFINITIONS = [
         "default" => [
             "prefix" => "Designed by",
             "name" =>   "Heavy Element, Inc.",
-            "href" =>   "https://heavyelement.io/",
-            "title" =>  "Maine's Premier New Media Production Studio"
+            "href" =>   "https://heavyelement.com/",
+            "title" =>  "Midcoast Maine's Premier Media Studio"
         ],
         "meta" => [
             "group" => "Basic",
@@ -1137,6 +1138,9 @@ const DEFAULT_DEFINITIONS = [
     ],
     "RenderV2_throw_template_exception_on_no_value" => [
         "default" => true
+    ],
+    "Template_debug_state" => [
+        "default" => 0
     ],
     /* A meta setting which will disable ALL user account settings. Anything
     that requires privileges, has to do with user accounts, or sessions should

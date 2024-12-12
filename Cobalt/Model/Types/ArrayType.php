@@ -3,21 +3,35 @@
 namespace Cobalt\Model\Types;
 
 use ArrayAccess;
-use Cobalt\Model\Traits\Defineable;
+use Cobalt\Model\Attributes\Directive;
+use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
+use Cobalt\Model\Traits\Hydrateable;
+use Stringable;
 
-class ArrayType extends MixedType implements ArrayAccess {
-    use Defineable;
+class ArrayType extends MixedType implements ArrayAccess, Stringable {
+    use Hydrateable;
 
     public function setValue($array):void {
         $this->value = [];
+        $each = $this->getDirective('each');
         foreach($array as $index => $value) {
-            $this->define($this->value, $index, $value, null, $this->model, $this->name."[".$index."]");
+            if($each) {
+                if($each[0] instanceof MixedType) $each['type'] = $each[0];
+                else if($each instanceof MixedType) $each = ['type' => $each];
+                else if($each['type'] instanceof MixedType) {/* no-op */}
+                else throw new DirectiveDefinitionFailure("Failed to find explicit 'type' declaration");
+                $this->value[$index] = new $each[0]($each, $value);
+                $this->value[$index]->setName($this->name.".$index");
+                $this->hydrate($this->value, $index, $value, null, $this->model, $this->name.".$index");
+            } else {
+                $this->hydrate($this->value, $index, $value, null, $this->model, $this->name.".$index");
+            }
         }
         $this->isSet = true;
     }
 
     public function __toString(): string {
-        return join(", ", $this->__getStorable());
+        return implode(", ", $this->__getStorable());
     }
 
     public function __getStorable() {
@@ -37,10 +51,11 @@ class ArrayType extends MixedType implements ArrayAccess {
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {
-        $this->define($this->value, $offset, $value, null, $this->model, $this->name."[".$offset."]");
+        $this->hydrate($this->value, $offset, $value, null, $this->model, $this->name.".$offset");
     }
 
     public function offsetUnset(mixed $offset): void {
         unset($this->value[$offset]);
     }
+
 }

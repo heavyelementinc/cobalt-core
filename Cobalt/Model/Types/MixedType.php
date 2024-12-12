@@ -2,43 +2,22 @@
 
 namespace Cobalt\Model\Types;
 
+use ArrayAccess;
 use Cobalt\Model\Exceptions\ImmutableTypeError;
+use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
-use Cobalt\Model\Model;
+use Cobalt\Model\Traits\Directives;
 use Cobalt\Model\Traits\Filterable;
 use Cobalt\Model\Traits\Prototypable;
-use Error;
-use ReflectionObject;
 use Stringable;
 
-class MixedType implements Stringable {
-    use Prototypable, Filterable;
+class MixedType implements Stringable, ArrayAccess {
+    use Prototypable, Filterable, Directives;
     protected bool $isSet = false;
     protected $value;
     protected string $name;
     protected bool $hasModel = false;
     protected GenericModel $model;
-
-    // Here we provide some sane defaults
-    protected array $directives = [
-        # 'default' => null, // We're enumerating this here but commenting it out.
-        
-        /** @var bool 'asHTML' controls whether the value of this type is HTML escaped or not before being rendered */
-        'asHTML' => false,
-        
-        /** @var bool 'immutable' types prevent the changing of a value once it's set
-         * @todo Make the immutable directive also control the mutability when filtering user input
-         */
-        'immutable' => false,
-
-        /** @var bool 'operator' By default all types use the MongoDB '$set' operator
-         * You may specify any other valid MongoDB update operator https://www.mongodb.com/docs/manual/reference/operator/update/
-         */
-        'operator' => '$set',
-
-        /** @var bool 'filter' */
-        #'filter' => fn ($val) => $val,
-    ];
 
     /**
      * The getValue() function will return the present value or the 
@@ -66,13 +45,6 @@ class MixedType implements Stringable {
         $this->model = $model;
     }
 
-    public function setDirectives(array $directives) {
-        $d = [];
-        if(method_exists($this,"initDirectives")) $d = $this->initDirectives();
-        $this->directives = array_merge($this->directives, $d, $directives);
-        unset($this->directives['type']);
-    }
-
     /**
      * Filters input from the client before the input is stored in the database
      * @param mixed $value the user input
@@ -86,23 +58,7 @@ class MixedType implements Stringable {
         if($this->hasDirective('filter')) $value = $this->getDirective('filter', $value);
         return $value;
     }
-    /**
-     * @param string $directive - The name of the directive you want 
-     */
-    public function getDirective() {
-        $args = func_get_args();
-        $name = array_shift($args);
-        if(!key_exists($name,$this->directives)) throw new Error("No directive exists by the name `$name`");
-        // Let's check if the directive is a function or not
-        if(is_function($this->directives[$name])) {
-            return $this->directives[$name](...$args);
-        }
-        return $this->directives[$name];
-    }
-
-    public function hasDirective($name) {
-        return key_exists($name, $this->directives);
-    }
+    
 
     /*************** OVERLOADING  ***************/
     public function __get($property) {
@@ -126,7 +82,7 @@ class MixedType implements Stringable {
     public function __isset($property) {
         switch($property) {
             case "value":
-                return $this->hasDirective('default') || $this->isSet;
+                return $this->hasDirective('defaultValue') || $this->isSet;
             case "raw":
             case "original":
                 return $this->isSet;
@@ -139,11 +95,55 @@ class MixedType implements Stringable {
         }
     }
 
+    public function __set($property, $value) {
+        switch($property) {
+            case "value":
+                $this->__filter($value);
+                break;
+            // case "raw":
+            // case "original":
+            //     return $this->isSet;
+            // case "name":
+            //     return isset($this->name);
+            // case "model":
+            //     return $this->hasModel;
+            default:
+                // return false;
+                throw new Undefined($property, "Cannot set $property.");
+        }
+    }
+
+    public function __unset($property) {
+        switch($property) {
+            case "value":
+                unset($this->value);
+                break;
+            default:
+                throw new Undefined($property, "Property `$property` does not exist");
+        }
+    }
+
     public function __toString(): string {
         return (string)$this->getValue();
     }
 
     public function __getStorable() {
         return $this->value;
+    }
+
+    public function offsetExists(mixed $offset): bool {
+        return $this->__isset($offset);
+    }
+
+    public function offsetGet(mixed $offset): mixed {
+        return $this->__get($offset);
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void {
+        $this->__set($offset, $value);
+    }
+
+    public function offsetUnset(mixed $offset): void {
+        $this->__unset($offset);
     }
 }

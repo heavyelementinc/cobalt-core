@@ -17,9 +17,7 @@
     <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
     @maybe_with("$og_template");
     {{!webmention}}
-    <link
-        href="https://fonts.googleapis.com/css?family={{app.fonts.head.import}}|{{app.fonts.body.import}}&display=swap"
-        rel="stylesheet">
+    @fonts_tag();
     <link href="/core-content/css/material-design/css/material.min.css?{{app.verion}}" rel="stylesheet">
     <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
     @app_settings@

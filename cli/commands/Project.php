@@ -14,6 +14,8 @@ class Project {
         ],
     ];
 
+    private NewProject $np;
+
     function init() {
         $this->np = new NewProject();
         $this->np->__collect_new_project_settings(func_get_args());

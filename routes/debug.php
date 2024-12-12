@@ -266,7 +266,7 @@ if (app("enable_debug_routes")) {
         'anchor' => ['name' => 'Images Prototype']
     ]);
 
-    Route::get("/route", '\Cobalt\Model\Controllers\Debug@test',[
+    Route::get("/model-test", '\Cobalt\Model\Controllers\Debug@test',[
         'navigation' => [
             'debug_prototypes'
         ],
