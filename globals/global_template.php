@@ -2,6 +2,7 @@
 
 use Cobalt\Maps\GenericMap;
 use Cobalt\Model\GenericModel;
+use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\Templates\Classes\NotAFunction;
 
 function render($name, $posStart, $posEnd, $vars, $func_args) {
@@ -115,8 +116,9 @@ function individual_var($name, $vars, $arguments, $posStart, $posEnd) {
 
     if ($is_inline_json) $literal_value = json_encode($literal_value, $is_pretty_print); // Convert to JSON
     
+    if($literal_value instanceof SchemaResult) $literal_value->htmlSafe($is_inline_html);
     // if(gettype($literal_value) === "object" && method_exists($literal_value, '__toString')) $literal_value = $literal_value->__toString();
-    if (!$is_inline_html) $literal_value = htmlspecialchars((string)$literal_value ?? '', $options); // < = &lt;
+    else if (!$is_inline_html) $literal_value = htmlspecialchars((string)$literal_value ?? '', $options); // < = &lt;
     
     return $final_value . $literal_value . $closing_tag;
 }
