@@ -45,7 +45,7 @@ try {
      * 
      * */
 
-    // Let's get find our current route and then execute
+    // Let's find our current route and then execute
     $router = new Routes\Router($route_context);
     $router->init_route_table();
     $router->get_routes();

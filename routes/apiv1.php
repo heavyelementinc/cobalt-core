@@ -174,8 +174,10 @@ Route::get("/crudable-files/{id}/reset", "CrudableFiles@reset_metadata", [
 
 Cobalt\Pages\Controllers\Posts::apiv1();
 Route::s_post('/posts/{id}/preview-key/', '\\Cobalt\\Pages\\Controllers\\Posts@preview_key');
-Cobalt\Pages\Controllers\LandingPages::apiv1();
-Route::s_post('/landing-pages/{id}/preview-key/', '\\Cobalt\\Pages\\Controllers\\LandingPages@preview_key');
+if(__APP_SETTINGS__['LandingPages_enabled']) {
+    Cobalt\Pages\Controllers\LandingPages::apiv1();
+    Route::s_post('/landing-pages/{id}/preview-key/', '\\Cobalt\\Pages\\Controllers\\LandingPages@preview_key');
+}
 
 if(__APP_SETTINGS__['Block_Editor_endpoints']) {
     

@@ -41,11 +41,12 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     const VISIBILITY_UNLISTED = 128;
     const VISIBILITY_PUBLIC  = 256;
 
-    const SPLASH_POSITION_SPLIT  = 0b00001;
-    const SPLASH_POSITION_FADE   = 0b00010;
-    const SPLASH_POSITION_FLOAT  = 0b00100;
-    const SPLASH_POSITION_TWO_UP = 0b01000;
-    const SPLASH_POSITION_CENTER = 0b10000;
+    const SPLASH_POSITION_SPLIT  = 0b000001;
+    const SPLASH_POSITION_FADE   = 0b000010;
+    const SPLASH_POSITION_FLOAT  = 0b000100;
+    const SPLASH_POSITION_TWO_UP = 0b001000;
+    const SPLASH_POSITION_CENTER = 0b010000;
+    const SPLASH_IMAGE_ONLY      = 0b100000;
 
     const FLAGS_REQUIRES_ACCOUNT       = 0b00000001;
     const FLAGS_EXCLUDE_FROM_SITEMAP   = 0b00000010;
@@ -226,6 +227,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                     self::SPLASH_POSITION_SPLIT => "Split (image on one half)",
                     self::SPLASH_POSITION_FLOAT => "Float (image is 25% of width of screen)",
                     self::SPLASH_POSITION_TWO_UP => "Two Up (fills normal content width)",
+                    self::SPLASH_IMAGE_ONLY => "Image Only",
                 ],
                 'filter' => function ($val) {
                     $val = (int)$val;

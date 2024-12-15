@@ -98,25 +98,27 @@ class WebHandler implements RequestHandler {
     }
 
     /** INTERFACE REQUIREMENTS */
-    public function _stage_init($context_meta) {
-        $this->prepare_html_framework();
+    public function _stage_init($context_meta):void {
         return;
     }
 
-    public function _stage_route_discovered($route, $directives) {
+    public function _stage_route_discovered($route, $directives):bool {
         $this->renderer->stock_vars['route'] = $directives;
         $this->renderer->stock_vars['PATH'] = $GLOBALS['PATH'];
+
         return true;
     }
 
-    public function _stage_execute($router_result = "") {
+    public function _stage_execute($router_result = ""):void {
         $this->template_main_content = $router_result;
         // if($router_result)
         // if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
         // if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
     }
 
-    public function _stage_output($context_result) {
+    public function _stage_output($context_result):mixed {
+        $this->prepare_html_framework();
+
         if ($this->encoding_mode === "text/html") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
@@ -124,10 +126,10 @@ class WebHandler implements RequestHandler {
 
             $this->results_sent_to_client = true;
         }
-        return;
+        return null;
     }
 
-    public function _public_exception_handler($e) {
+    public function _public_exception_handler($e):mixed {
         // Prevent trying to load a template that might not exist already.
         unset($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
 
@@ -161,7 +163,7 @@ class WebHandler implements RequestHandler {
         }
 
 
-        $this->add_vars([
+        add_vars([
             'versionHash' => VERSION_HASH,
             'title' => $e->status_code,
             'message' => $message,
@@ -218,8 +220,8 @@ class WebHandler implements RequestHandler {
     }
 
     function app_meta() {
-        $template = $this->load_template("parts/meta.html");
-        return $template;
+        // $template = $this->load_template("parts/meta.html");
+        return view("parts/meta.html");
     }
 
 
@@ -262,15 +264,16 @@ class WebHandler implements RequestHandler {
             $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
         }
         
-        $header = $this->load_template($this->header_template);
-        $this->add_vars([
+        add_vars([
             'versionHash' => VERSION_HASH,
             'header_nav' => $this->header_nav(),
             'masthead' => (app("display_masthead")) ? $masthead : "",
             'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
         ]);
+        // $header = $this->load_template($this->header_template);
+
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
-        return $header;
+        return view($this->header_template);
     }
 
     function header_nav() {
@@ -293,19 +296,19 @@ class WebHandler implements RequestHandler {
     }
 
     function post_header() {
-        return $this->load_template("/parts/post-header.html");
+        return view("/parts/post-header.html");
     }
 
     function cookie_consent() {
         if (!app("Cookie_consent_prompt")) return "";
         if (isset($_COOKIE['cookie_consent'])) return "";
-        return $this->load_template("/parts/cookie-consent.html");
+        return view("/parts/cookie-consent.html");
     }
 
     var $footer_template = "parts/footer.html";
 
     function footer_content() {
-        return $this->load_template($this->footer_template);
+        return view($this->footer_template);
     }
 
     function footer_credits() {
@@ -536,13 +539,13 @@ class WebHandler implements RequestHandler {
         $template = "";
         if (app("Auth_account_creation_enabled")) $template = "user_panel.html";
         else $template = "user_panel_login_only.html";
-        return $this->load_template("authentication/user-panel/" . $template);
+        return view("authentication/user-panel/" . $template);
     }
 
     function main_content_from_template($template) {
 
         /** Load the template in question */
-        $this->template_main_content = $this->load_template($template);
+        $this->template_main_content = view($template);
 
         /** If the template body is empty, let's just set the template body equal
          * to the template we just loaded.*/
@@ -555,6 +558,7 @@ class WebHandler implements RequestHandler {
 
     /** @todo restore .session.html functionality */
     function load_template($template_name) {
+        // return view($template_name);
         $ext = pathinfo($template_name, PATHINFO_EXTENSION);
         $session_template_name = str_replace($ext, "session.$ext", $template_name);
         global $TEMPLATE_PATHS;
@@ -588,6 +592,8 @@ class WebHandler implements RequestHandler {
     }
 
     function add_vars($vars) {
+        // add_vars($vars);
+        // return;
         $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
 
         // Let's reset these every time vars are added

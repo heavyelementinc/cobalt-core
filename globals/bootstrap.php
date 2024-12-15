@@ -67,6 +67,7 @@ if(file_exists($db_config)) {
         'timezone'        => function ($value) {
             return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
         },
+        'mode'            => fn ($val) => in_array($val, [COBALT_MODE_DEVELOPMENT, COBALT_MODE_PRODUCTION]),
     ];
 
     // Default values allow the config file to omit any value with the following
@@ -82,6 +83,7 @@ if(file_exists($db_config)) {
         'safe_mode'       => false,
         'timezone'        => 'America/New_York',
         'log_level'       => COBALT_LOG_ERROR,
+        'mode'            => COBALT_MODE_PRODUCTION,
     ];
 
     foreach($sanity_check as $key => $value) {

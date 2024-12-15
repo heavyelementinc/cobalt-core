@@ -670,7 +670,9 @@ class XRedirect extends HeaderDirective {
     }
 
     redirect() {
-        Cobalt.router.addEventListener("navigateend",() => {Cobalt.router.replaceState(this.content);}, {once: true});
+        // Cobalt.router.addEventListener("navigateend",() => {
+            Cobalt.router.replaceState(this.content);
+        // }, {once: true});
     }
 }
 

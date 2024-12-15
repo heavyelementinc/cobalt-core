@@ -3,3 +3,4 @@
 <link rel="manifest" href="/core-content/site.webmanifest?{{versionHash}}" crossorigin="use-credentials">
 <meta name="keywords" content="{{keywords}}"/>
 <meta property="fb:app_id" content="{{app.fb_app_id}}">
+<link rel="canonical" href="<?= ($this->vars['canonical'] ?? $this->vars['request']['url']) ?>">

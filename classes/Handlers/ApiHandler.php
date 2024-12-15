@@ -51,20 +51,21 @@ class ApiHandler implements RequestHandler {
     }
 
 
-    public function _stage_init($context_meta) {
+    public function _stage_init($context_meta):void {
     }
 
-    public function _stage_route_discovered($route, $directives) {
+    public function _stage_route_discovered($route, $directives):bool {
         /** The request validation is pretty straight-forward, so let's do that */
-        return $this->request_validation($directives);
+        $this->request_validation($directives);
+        return true;
     }
 
-    public function _stage_execute($router_result) {
+    public function _stage_execute($router_result):void {
         $this->router_result = $router_result;
-        return $this->router_result;
+        // return $this->router_result;
     }
 
-    public function _stage_output($context_output = "") {
+    public function _stage_output($context_output = ""):mixed {
         $return_value = [];
 
         $return_value = $this->fulfillmentHandling($this->router_result);
@@ -123,7 +124,7 @@ class ApiHandler implements RequestHandler {
         return $ntfy->getUnreadNotificationCountForUser();
     }
 
-    public function _public_exception_handler($e) {
+    public function _public_exception_handler($e):mixed {
         // $errorMessage = $e->clientMessage;
         $errorMessage = "Unknown Error";
         if(method_exists($e, "publicMessage")) $errorMessage = $e->publicMessage();

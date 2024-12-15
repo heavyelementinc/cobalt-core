@@ -159,11 +159,10 @@ class Router {
         // $route = null;
         /** Search through our current routes and look for a match */
         foreach ($this->routes[$context][$method] as $preg_pattern => $directives) {
-            $match = [];
+            $directives['matches'] = [];
             /** Regular Expression against our uri, store any matches in $match */
-            if (preg_match($preg_pattern, $this->uri, $match) === 1) {
-                if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern, $context);
-
+            if (preg_match($preg_pattern, $this->uri, $directives['matches']) === 1) {
+                if ($directives['matches'] !== null) $this->set_uri_vars($directives, $directives['matches'], $preg_pattern, $context);
                 $this->current_route = $preg_pattern;
                 if ($route[strlen($route) - 1] === "/") {
                     $GLOBALS['PATH'] = "../";
@@ -263,7 +262,7 @@ class Router {
          * 
          * Otherwise, we'll throw a 400 Bad Request.
          */
-        if ($test->getNumberOfRequiredParameters() > count($exe['matches'])) throw new \Exceptions\HTTP\BadRequest("Method supplied too few arguments.");
+        if ($test->getNumberOfRequiredParameters() > count($exe['matches'] ?? [])) throw new \Exceptions\HTTP\BadRequest("Method supplied too few arguments.");
         if (gettype($exe['matches']) !== "array") $exe['matches'] = [$exe['matches']];
 
         /** Execute our method */

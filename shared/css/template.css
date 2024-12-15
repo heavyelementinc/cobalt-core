@@ -179,9 +179,16 @@
     margin-left: -20px;
 }
 
-footer {
+.template-site footer {
     background: var(--project-template-footer-bg, #483519);
     color: var(--project-template-footer-color, #fff);
     margin: 0;
     padding: 3em;
+}
+
+@media only screen and (max-width: 35em) {
+    .template-splash {
+        --image-width: 100%;
+        flex-direction: column;
+    }
 }

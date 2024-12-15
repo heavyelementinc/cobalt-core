@@ -17,24 +17,24 @@ class CliHandler implements RequestHandler {
     }
 
 
-    public function _stage_init($context_meta) {
+    public function _stage_init($context_meta):void {
         
     }
 
-    public function _stage_route_discovered($route, $directives) {
+    public function _stage_route_discovered($route, $directives):bool {
+        return false;
+    }
+
+    public function _stage_execute($router_result):void {
         
     }
 
-    public function _stage_execute($router_result) {
-        
+    public function _stage_output($context_output):mixed {
+        return null;
     }
 
-    public function _stage_output($context_output) {
-        
-    }
-
-    public function _public_exception_handler($e) {
-        
+    public function _public_exception_handler($e):mixed {
+        return null;
     }
 
     function request_validation($directives) {

@@ -22,7 +22,9 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
     // ]);
 }
 
-\Cobalt\Pages\Controllers\LandingPages::admin();
+if(__APP_SETTINGS__['LandingPages_enabled']) {
+    \Cobalt\Pages\Controllers\LandingPages::admin();
+}
 
 Route::get("/me/", "UserAccounts@me",
     [

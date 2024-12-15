@@ -125,6 +125,15 @@
         width: 50%;
     }
 
+.landing-splash--type-image-only .landing-main--title-container {
+    display: none;
+}
+
+    .landing-main--splash.landing-splash--type-image-only img {
+        display: block;
+        width: 100%;
+    }
+
 .landing-main--splash .byline {
     position: relative;
     isolation: isolate;
