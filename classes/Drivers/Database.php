@@ -15,19 +15,28 @@
 
 namespace Drivers;
 
+use Cobalt\Model\Traits\Accessible;
+use Cobalt\Maps\GenericMap;
+use Cobalt\Maps\PersistanceMap;
+use Contact\Persistance;
 use MongoDB\BSON\ObjectId;
 use Drivers\UTCDateTime;
+use MongoDB\BSON\Persistable;
 use MongoDB\Collection;
+use MongoDB\Driver\Cursor;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Normalize;
 
 abstract class Database {
-    public $db = null;
-    public $collection;
+    use Accessible;
+    // public $db = null;
+    // public Collection $collection;
     public string $__schema;
-    public $collectionSpecifiedAtConstruction;
+    // public $collectionSpecifiedAtConstruction;
 
-    /** @return string the name of the database collection (table) */
+    // /** @return string the name of the database collection (table) */
     abstract function get_collection_name();
     
     /**
@@ -47,10 +56,15 @@ abstract class Database {
     }
 
     function __construct($database = null, $collection = null) {
-        $this->db = $GLOBALS['CONFIG']['database'];
-        if ($database !== null) $this->db = $database;
+        // $this->db = $GLOBALS['CONFIG']['database'];
+        // if ($database !== null) $this->db = $database;
         if ($collection !== null) $this->collectionSpecifiedAtConstruction = $collection;
-        $this->collection = db_cursor($collection ?? $this->get_collection_name(), $this->db);
+        $this->__initAccessible($database, $collection);
+        // $this->collection = db_cursor($collection ?? $this->get_collection_name(), $this->db);
+    }
+
+    function getCollectionName($collection = null): string {
+        return $this->get_collection_name();
     }
 
     /* HELPERS */
@@ -65,36 +79,49 @@ abstract class Database {
         return $date->timestamp;
     }
 
-    /* CREATE */
-    final function insertOne($document, array $options = []) {
-        return $this->collection->insertOne($document, $options);
-    }
+    // /* CREATE */
+    // final function insertOne($document, array $options = []) {
+    //     $cursor = $this->collection->insertOne($document, $options);
+    //     benchmark_writes($cursor->getInsertedCount());
+    //     return $cursor;
+    // }
 
-    final function insertMany($documents, array $options = []) {
-        return $this->collection->insertMany($documents, $options);
-    }
+    // final function insertMany($documents, array $options = []) {
+    //     $cursor = $this->collection->insertMany($documents, $options);
+    //     benchmark_writes($cursor->getInsertedCount());
+    //     return $cursor;
+    // }
 
 
-    /* READ */
-    final function findOne($filter, array $options = []) {
-        return $this->collection->findOne($filter, $options);
-    }
+    // /* READ */
+    // final function findOne($filter, array $options = []) {
+    //     benchmark_reads();
+    //     return $this->collection->findOne($filter, $options);
+    // }
 
-    final function findOneAndUpdate($filter, $update, array $options = []) {
-        return $this->collection->findOneAndUpdate($filter, $update, $options);
-    }
+    // final function findOneAndUpdate($filter, $update, array $options = []) {
+    //     benchmark_reads();
+    //     return $this->collection->findOneAndUpdate($filter, $update, $options);
+    // }
 
-    final function find($filter = [], array $options = []) {
-        return $this->collection->find($filter, $options);
-    }
+    // final function find($filter = [], array $options = []) {
+    //     benchmark_reads();
+    //     return $this->collection->find($filter, $options);
+    // }
 
-    final function count($filter, $options = []) {
-        return $this->collection->count($filter, $options);
-    }
+    // final function count($filter, $options = []):int {
+    //     benchmark_reads();
+    //     return $this->collection->count($filter, $options);
+    // }
 
-    final function distinct($field,$filter = []) {
-        return $this->collection->distinct($field, $filter);
-    }
+    // final function distinct($field, $filter = [], $options = []):array {
+    //     benchmark_reads();
+    //     return $this->collection->distinct($field, $filter, $options);
+    // }
+
+    // final function createIndex(array|object $key, array $options = []):string {
+    //     return $this->collection->createIndex($key, $options);
+    // }
 
     /**
      * @deprecated 
@@ -132,26 +159,36 @@ abstract class Database {
         return $processed;
     }
 
-    /* UPDATE */
-    final function updateOne($filter, $fields, array $options = []) {
-        return $this->collection->updateOne($filter, $fields, $options);
-    }
+    // /* UPDATE */
+    // final function updateOne($filter, $fields, array $options = []) {
+    //     $cursor = $this->collection->updateOne($filter, $fields, $options);
+    //     benchmark_writes($cursor->getModifiedCount() + $cursor->getUpsertedCount());
+    //     return $cursor;
+    // }
 
-    final function updateMany($filter, $fields, array $options = []) {
-        return $this->collection->updateMany($filter, $fields, $options);
-    }
+    // final function updateMany($filter, $fields, array $options = []) {
+    //     $cursor = $this->collection->updateMany($filter, $fields, $options);
+    //     benchmark_writes($cursor->getModifiedCount() + $cursor->getUpsertedCount());
+    //     return $cursor;
+    // }
 
 
-    /* DESTROY */
-    final function deleteOne($filter, array $options = []) {
-        return $this->collection->deleteOne($filter, $options);
-    }
+    // /* DESTROY */
+    // final function deleteOne($filter, array $options = []) {
+    //     $cursor = $this->collection->deleteOne($filter, $options);
+    //     benchmark_writes($cursor->getDeletedCount());
+    //     return $cursor;
+    // }
 
-    final function deleteMany($filter, array $options = []) {
-        return $this->collection->deleteMany($filter, $options);
-    }
+    // final function deleteMany($filter, array $options = []) {
+    //     $cursor = $this->collection->deleteMany($filter, $options);
+    //     benchmark_writes($cursor->getDeletedCount());
+    //     return $cursor;
+    // }
 
-    final function aggregate($pipeline, $options = []) {
-        return $this->collection->aggregate($pipeline, $options);
-    }
+    // final function aggregate($pipeline, $options = []) {
+    //     $cursor = $this->collection->aggregate($pipeline, $options);
+    //     benchmark_reads();
+    //     return $cursor;
+    // }
 }

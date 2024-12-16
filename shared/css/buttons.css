@@ -7,6 +7,7 @@ a.custom-element-edit-link {
 async-button{
     transition: padding 1s;
 }
+
 async-button:not(.link, [link]) {
     appearance: initial;
     border-radius: 5px;
@@ -32,7 +33,7 @@ async-button:not(.link, [link]) {
     text-align: center;
     justify-content: center;
     align-items: center;
-    padding: .2em 1.2em .2em 0.2em;
+    padding: 0.2em;
 }
 
 async-button.link, async-button[link]{
@@ -48,6 +49,15 @@ async-button.working > svg {
     margin-right: .5em;
     visibility: visible;
     opacity: 1;
+}
+
+async-button[aria-disabled="true"] {
+    pointer-events: none;
+    color: rgba(0,0,0,.4);
+}
+
+async-button[aria-disabled="true"][native] {
+    opacity: .5;
 }
 
 async-button > svg {

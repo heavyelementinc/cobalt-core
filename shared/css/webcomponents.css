@@ -163,7 +163,118 @@ form-request{
   overflow: hidden;
 }
 
-help-span{
+
+copy-span {
+  display: inline-block;
+  border: 1px solid var(--project-color-input-border-nofocus);
+  border-radius: 4px;
+  background: var(--project-color-input-background);
+  position: relative;
+  box-sizing: border-box;
+}
+
+  copy-span[mini] {
+    background: transparent;
+    border: none;
+  }
+
+    copy-span[mini] input {
+      display: none;
+    }
+
+    copy-span[mini] button {
+      font-size: 1em;
+      box-sizing: border-box;
+      border-left: 0;
+      padding: 0;
+
+    }
+
+  
+  copy-span input {
+    display: inline-block;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: calc(.4rem - 2px);
+    box-sizing: border-box;
+    width:100%;
+  }
+
+  copy-span input:focus{
+    outline: 1px solid transparent;
+    border: 1px solid transparent;
+    background: transparent;
+  }
+
+  copy-span:focus-within{
+    border: 1px solid var(--project-color-input-border-focus);
+  }
+
+  :is(copy-span:focus-within) :is(button){
+    border-left-color: var(--project-color-input-border-focus);
+    color:black;
+  }
+
+  copy-span button{
+    border: none;
+    background: var(--project-color-input-background);
+    border-left: 1px solid var(--project-color-input-border-nofocus);
+    border-radius: 0 4px 4px 0;
+    color:var(--project-color-input-border-nofocus);
+    height: 100%;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  copy-span button:hover{
+    color: black;
+  }
+
+  copy-span .copy-span--confirm{
+    position: absolute;
+    width: 100%;
+    top: calc(100% - 4px);
+    animation: 800ms ease forwards 1;
+    text-align: center;
+    border: inherit;
+    background: inherit;
+    box-shadow: 0 3px 5px rgba(0,0,0,.3);
+    border-radius: 0 0 4px 4px;
+    box-sizing: inherit;
+    /* color: var(--project-color-input-border-nofocus); */
+    cursor: normal;
+  }
+
+  copy-spawn .copy-span--spawn{
+    animation-name: MessageSpawnIn;
+  }
+
+  copy-spawn .copy-span--disappear{
+    animation-name: MessageDespawn;
+  }
+
+  @keyframes MessageSpawnIn{
+    from{
+      opacity: 0;
+    }
+    to{
+      opacity: 1;
+    }
+  }
+
+  @keyframes MessageDespawn{
+    from {
+      opacity: 1
+    }
+    to{
+      opacity: 0;
+    }
+  }
+
+
+help-span, copy-span[mini] button {
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -203,8 +314,9 @@ help-span[warning]{
     content: "\F02FD"
   }
 
-  .help-span-article {
-    visibility: hidden;
+  :is(.help-span-article, .help-span-article[popover]) {
+    /* visibility: hidden; */
+    inset: unset;
     width: max-content;
     max-width: 270px;
     font-size: 1rem;
@@ -215,6 +327,7 @@ help-span[warning]{
     color:black;
     /* top: 50%; */
     left: 100%;
+    left: anchor(middle);
     position: absolute;
     padding: .2rem .4rem;
     border-radius: 4px;
@@ -228,7 +341,7 @@ help-span[warning]{
   }
 
   .help-span-article--shown {
-    visibility: visible;
+    /* visibility: visible; */
   }
 
   .help-span-article.help-span-article--right-justified {
@@ -239,3 +352,35 @@ help-span[warning]{
 markdown-div {
   white-space: pre-wrap;
 }
+
+image-editor {
+  display: inline-block;
+  position: relative;
+}
+
+  image-editor button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1em;
+    width: 1em;
+    background: var(--project-body-background);
+    color: var(--project-body-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    font-size: 1em;
+  }
+
+  image-editor button:hover {
+    background: var(--project-body-color);
+    color: var(--project-body-background);
+  }
+
+  image-editor button:before {
+    content: "\F01D9";
+    color: inherit;
+    font-family: "Material Design Icons";
+  }

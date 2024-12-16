@@ -9,6 +9,7 @@ use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use DateTimeZone;
 
 class DateResult extends SchemaResult {
     use Fieldable;
@@ -17,16 +18,24 @@ class DateResult extends SchemaResult {
     
     public function getValue():mixed {
         $value = $this->value;
-        if($this->value instanceof UTCDateTime) $value = $this->value->toDateTime();
-        if(key_exists("get", $this->schema) && is_callable($this->schema['get'])) $value = $this->schema['get'];
+        if(is_callable($value)) {
+            $value = $value();
+        }
+        if($value instanceof UTCDateTime) $value = $value->toDateTime();
+        if(key_exists("get", $this->schema ?? []) && is_callable($this->schema['get'])) $value = $this->schema['get'];
         return $value;
     }
 
-    public function __toString(): string
-    {
+    public function __toString(): string {
         $val = $this->getValue();
         if(!$val) return "";
         return $val->format('c');
+    }
+
+    public function __defaultIndexPresentation(): string {
+        $val = $this->getValue();
+        if(!$val) return "No date set";
+        return $this->relative();
     }
 
     public function setValue($value):void {
@@ -39,6 +48,20 @@ class DateResult extends SchemaResult {
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
+
+    #[Prototype]
+    protected function getMilliseconds() {
+        $result = ($this->getValue());
+        if(!$result) return "0";
+        return $result->getTimestamp() * 1000;
+    }
+
+    #[Prototype]
+    protected function getSeconds() {
+        $result = ($this->getValue());
+        if(!$result) return "0";
+        return floor($result->getTimestamp());
+    }
 
     #[Prototype]
     protected function field($class = "", $misc = []) {
@@ -55,29 +78,33 @@ class DateResult extends SchemaResult {
         $value = $this->getValue();
         if($value === null) return "";
         $shorthands = [
+            'iso' => 'c',
             'input' => "Y-m-d",
             'default' => 'm/d/Y',
             "verbose" => "l, F jS Y g:i A",
+            "no-dow"  => "F jS Y g:i A",
             "long" => "l, F jS Y",
             "12-hour" => "g:i a",
             "24-hour" => "H:i",
             "seconds" => "g:i:s A",
         ];
-        if($format === "relative") {
-            return "<date-span relative='true' value=\"$value\"></date-span>";
-        }
         if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
-            $dateTime = $value->toDateTime();
-            $value = $dateTime->format("U");
-            return date($format, $value);
+            $value = $value->toDateTime();
         }
+        if($value instanceof DateTime) {
+            $value->setTimezone(new DateTimeZone($_SESSION['timezone'] ?? config()['timezone']));
+        }
+        // $value = $dateTime->format("U");
+        // return date($format, $value);
         return $value->format($format);
     }
 
     #[Prototype]
-    protected function relative($strtoparse) {
-        
+    protected function relative($format = "verbose") {
+        $date = $this->format("U");
+        if(!$date) $date = 0;
+        return "<date-span format='$format' relative='true' value='" .($date * 1000). "'></date-span>";
     }
 
     public function filter($value) {

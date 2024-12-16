@@ -3,6 +3,7 @@
 use Cobalt\Extensions\Extensions;
 use Cobalt\Notifications\PushNotifications;
 use Controllers\ClientFSManager;
+use Exceptions\HTTP\NotFound;
 
 class FileController extends \Controllers\FileController {
     use ClientFSManager;
@@ -152,4 +153,98 @@ class FileController extends \Controllers\FileController {
         header('Content-Length: ' . $filesize);
         // exit;
     }
+
+    function robots() {
+        $file = find_one_file([
+            __APP_ROOT__ . "/templates/",
+            // ...$extensions ?? [],
+            __ENV_ROOT__ . "/templates/",
+            // ...$SHARED_CONTENT
+        ], "robots.txt");
+
+        if(!$file) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+
+        $ai_bots = "";
+        // if(__APP_SETTINGS__["Robots_txt_block_known_ai_crawlers"]) $ai_bots = view("known-ai-robots.txt");
+        $view = view("robots.txt", ['ai_bots' => $ai_bots]);
+        header('Content-Length: ' . strlen($view));
+        header('Content-Type: text');
+        echo $view;
+        exit;
+    }
+
+    function sitemap() {
+        global $ROUTER;
+        $html = "";
+        foreach($ROUTER->routes['web']['get'] as $route => $data) {
+            $includeRawRoute = true;
+            $registered = null;
+            if(isset($data['sitemap'])) {
+                if($data['sitemap']['children']) $registered = $data['sitemap']['children'];
+                if($data['sitemap']['ignore']) $includeRawRoute = !$data['sitemap']['ignore'];
+            }
+            if($includeRawRoute) $html .= $this->generate_site_map_entry($route, $data);
+            if($registered) {
+                if(is_callable($registered)) $html .= $registered();
+                else $html .= $registered;
+            }
+        }
+        $doc = view("sitemap/sitemap.xml", ['urls' => $html]);
+        header('Content-Length: ' . strlen($doc));
+        header('Content-Type: application/xml');
+        echo $doc;
+        exit;
+    }
+    
+    private function generate_site_map_entry($route, $data) {
+        $location = $data['anchor']['href'];
+        $priority = $data['anchor']['order'];
+        if(!$location) {
+            foreach($data['navigation'] as $d => $value) {
+                if(!is_array($value)) continue;
+                if(key_exists('priority', $value)) $priority = $value;
+                if(key_exists('href', $value)) $location = $value['href'];
+            }
+        }
+        if(!$location) {
+            $fc = 'FileController';
+            if(strpos($data['original_path'], "{") !== false) {
+                return "";
+            } else if (substr($data['controller'], 0, strlen($fc)) === $fc) {
+                return "";
+            } else {
+                $location = $data['original_path'];
+            }
+        }
+
+        $lastmod = $data['sitemap']['lastmod'];
+        if(is_callable($lastmod)) $lastmod = $lastmod();
+        if(!$lastmod) {
+            $controller = explode("@", $data['controller'])[0];
+            try {
+                $file = get_controller($controller, false, true);
+            } catch(Exception $e) {
+                return "";
+            }
+            $modifiedTime = filemtime($file);
+            $lastmod = date("Y-m-d", $modifiedTime);
+        }
+
+        if(!$priority) {
+            $priority = $data['nat_order'];
+        }
+        return view("sitemap/url.xml", [
+            'server_name' => server_name(),
+            'location' => $location,
+            'lastModified' => $lastmod,
+            'priority' => $priority + 1,
+            'route' => $route,
+            'data' => $data
+        ]);
+    }
+
+    private function generate_blog_post_entry($data) {
+        
+    }
+    
 }

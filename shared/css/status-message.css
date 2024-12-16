@@ -14,9 +14,13 @@ message-container:empty{
     display:none;
 }
 
-message-item{
+.cdx-notify {
+    z-index: var(--project-modal-z-index) + 100;
+}
+
+message-item {
     display:flex;
-    flex-direction: row;
+/*     flex-direction: row; */
     box-sizing: border-box;
     animation-play-state: running;
     animation-timing-function: ease-in-out;
@@ -27,50 +31,60 @@ message-item{
     background: white;
     border-radius: 4px;
     box-shadow: 5px 0px 20px rgba(0,0,0,.3);
-    --height: 100px;
-    --min-height: 100px;
-    height: var(--height);
+    /* --height: 100px; */
+    /* --min-height: 100px; */
+    height: auto;
+    max-height: calc(100vh - calc(var(--margins) * 4));
     --margins: 15px;
     margin: var(--margins);
     /* padding: 15px; */
+    position: relative;
+    interpolate-size: allow-keywords;
+    @starting-style {
+        height: 0;
+    }
 }
 
     message-item i{
-        height: var(--height);
-        min-height: var(--min-height);
+        min-height: 100px;
+        width: 1.2em;
         font-size: 3rem;
         white-space: nowrap;
-        min-width: 17%;
-        flex-grow: .17;
+        flex-grow: 0;
+        flex-shrink: 0;
         box-sizing: border-box;
         padding: 0 calc(var(--margins) / 2);
-        display: flex;
+        display: inline-flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
     }
     
-    message-item section{
+    message-item div.message-container{
         padding: calc(var(--margins) / 2) 0;
-        height: var(--height);
-        min-height: var(--min-height);
-        max-width: calc(100 - 27%);
-        flex-grow: calc(1 - .27);
+        /* height: var(--height); */
         box-sizing: border-box;
-        display: flex;
+        display: inline-block;
         align-items: center;
+        padding-right: 1em;
+        max-height: 100%;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        box-sizing: border-box;
     }
 
     message-item button{
-        height: 100%;
-        min-height: var(--min-height);
-        min-width: 10%;
+        height: 1.5em;
+        width: 1.5em;
         background-color: var(--project-color-table-border);
         color: var(--project-color-input-border-nofocus);
         border: none;
         border-left: 1px solid var(--project-color-input-border-nofocus);
         padding: 0;
         flex-grow: .1;
+        position: absolute;
+        top: 0;
+        right: 0;
     }
 
     .status-message--opening {
@@ -89,6 +103,7 @@ message-item{
         height: 0;
         padding: 0;
         margin: 0 var(--margins);
+        opacity: 0;
     }
 }
 
@@ -96,6 +111,7 @@ message-item{
     to {
         height: 0px;
         margin: 0 var(--margins);
+        opacity: 0;
     }
 }
 

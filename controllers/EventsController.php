@@ -1,8 +1,35 @@
 <?php
 
+use Cobalt\Maps\GenericMap;
 use CobaltEvents\EventManager;
+use CobaltEvents\EventMap;
+use CobaltEvents\EventMap2;
 use CobaltEvents\EventSchema;
+use Controllers\Crudable;
+use Drivers\Database;
 use Exceptions\HTTP\NotFound;
+use MongoDB\Model\BSONDocument;
+
+// class EventsController extends Crudable {
+
+//     public function get_manager(): Database {
+//         return new EventManager();
+//     }
+
+//     public function get_schema($data): GenericMap {
+//         return new EventMap2();
+//     }
+
+//     /** @var EventMap2 $document */
+//     public function edit($document): string {
+//         return view($document->__get_editor_template_path());
+//     }
+
+//     public function destroy(GenericMap|BSONDocument $document): array {
+//         return ['message' => "Are you sure you want to delete $document->internal_name?", 'post' => $_POST];
+//     }
+    
+// }
 
 class EventsController {
     var $events;
@@ -31,7 +58,7 @@ class EventsController {
             'title' => 'Events',
             'events' => $views
         ]);
-        set_template("/cobalt_events/public-index.html");
+        return view("/cobalt_events/public-index.html");
     }
 
     function list_events() {
@@ -74,7 +101,7 @@ class EventsController {
             'main' => implode("", $result)
         ]);
 
-        set_template("/cobalt_events/index.html");
+        return view("/cobalt_events/index.html");
     }
 
     function edit_event($id = null) {
@@ -87,7 +114,7 @@ class EventsController {
             'event' => $event
         ]);
 
-        set_template("/cobalt_events/edit.html");
+        return view("/cobalt_events/edit.v1.html");
     }
 
     function update_event($ident = null) {
@@ -100,7 +127,7 @@ class EventsController {
             ['upsert' => true]
         );
         // if($result->getModifiedCount() !== 1 && $result->getUpsertedCount() !== 1)
-        if (!$ident) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
+        if ($ident === null) header("X-Redirect: /admin/cobalt-events/edit/" . (string)$id);
         return $this->events->findOneAsSchema(['_id' => $id]);
     }
 

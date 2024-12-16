@@ -23,7 +23,7 @@ interface RequestHandler {
      * @param $context_meta all relevant data regarding the current route context
      * @return void
      */
-    public function _stage_init($context_meta);
+    public function _stage_init($context_meta): void;
 
     /** 
      * Called after the router discovers the route
@@ -36,7 +36,7 @@ interface RequestHandler {
      * @param array $directives - The route 
      * @return bool
      */
-    public function _stage_route_discovered($route, $directives);
+    public function _stage_route_discovered($route, $directives): bool;
 
     /**
      * Called after the route controller has been executed.
@@ -47,7 +47,7 @@ interface RequestHandler {
      * @param $router_result - the return value of the route controller
      * @return void - this method should write to the output
      */
-    public function _stage_execute($router_result);
+    public function _stage_execute($router_result): void;
 
     /**
      * Called at the end of the context.php
@@ -56,9 +56,9 @@ interface RequestHandler {
      * 
      * @param $router_result - the return value of the route controller
      * @deprecated - use _stage_execute instead
-     * @return void - this method should write to the output
+     * @return mixed - return some value that is then processed and sent to the client
      */
-    public function _stage_output($context_result);
+    public function _stage_output($context_result): mixed;
 
     /**
      * Called when an Exception\HTTP\* error is thrown.
@@ -68,5 +68,5 @@ interface RequestHandler {
      * 
      * @param object $error - The error object as thrown
      */
-    public function _public_exception_handler($error);
+    public function _public_exception_handler($error): mixed;
 }

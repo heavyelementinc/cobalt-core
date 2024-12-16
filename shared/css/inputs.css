@@ -21,7 +21,7 @@ input-wrapper {
 }
 
 /* input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field  */
-input, textarea, button[native], [role='button'], [__custom-input] {
+input, textarea, button[native], async-button[native], a.button[native], [role='button'], [__custom-input] {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -125,6 +125,14 @@ input:disabled, textarea:disabled, markdown-area[aria-disabled="true"], markdown
   background: var(--project-color-input-disabled);
 }
 
+div.image-field {
+  display: flex;
+  flex-direction: column;
+}
+
+div.upload-field {
+  
+}
 
 div.upload-field img{
   width: 210px;
@@ -132,12 +140,64 @@ div.upload-field img{
   object-fit: contain;
 }
 
+.image-field--container {
+  font-size: .8em;
+}
+  .image-field--container img {
+    width: 10em;
+    height: 10em;
+    object-fit: contain;
+  }
+  
+  .image-field--container flex-table {
+    font-size: .9em;
+  }
+
+  .image-field--container flex-header {
+    max-width: 10ch;
+  }
+
+  .image-field--container copy-span[mini] {
+    height: 1em;
+    width: 1em;
+    font-size: 1em;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+  }
+
+  .image-field--container .url-row flex-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .image-field--container .nowrap {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .image-field--container :is(input[type="file"], input[type="text"]) {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .image-field--container ul.list-panel li {
+    padding: .6em;
+  }
 
 input-user {
   display: flex;
   padding: 0;
   align-items: center;
   overflow: hidden;
+  justify-content: space-between;
+  width: 20ch;
+}
+
+input-user option {
+  display: none;
 }
 
 input-user fieldset.autocomplete--search-container{
@@ -147,8 +207,10 @@ input-user fieldset.autocomplete--search-container{
   flex-grow: 1;
 }
 
-input-user button {
+input-user > button {
   background: inherit;
+  width: 3.5ch;
+  padding: .5ch;
 }
 
 input-user.value fieldset.autocomplete--search-container {
@@ -157,6 +219,11 @@ input-user.value fieldset.autocomplete--search-container {
 
 input-user [type='search'] {
   border: none;
+}
+
+input-user > div[value] {
+  flex-grow: 1;
+  width: 100%;
 }
 
 input-user .cobalt-user--profile-display {
@@ -477,96 +544,6 @@ input-object-array {
     margin-left:auto;
   }
 
-copy-span {
-  display: inline-block;
-  border: 1px solid var(--project-color-input-border-nofocus);
-  border-radius: 4px;
-  background: var(--project-color-input-background);
-  position: relative;
-  box-sizing: border-box;
-}
-
-  copy-span input {
-    display: inline-block;
-    border: 1px solid transparent;
-    background: transparent;
-    padding: calc(.4rem - 2px);
-    box-sizing: border-box;
-    width:100%;
-  }
-
-  copy-span input:focus{
-    outline: 1px solid transparent;
-    border: 1px solid transparent;
-    background: transparent;
-  }
-
-  copy-span:focus-within{
-    border: 1px solid var(--project-color-input-border-focus);
-  }
-
-  :is(copy-span:focus-within) :is(button){
-    border-left-color: var(--project-color-input-border-focus);
-    color:black;
-  }
-
-  copy-span button{
-    border: none;
-    background: var(--project-color-input-background);
-    border-left: 1px solid var(--project-color-input-border-nofocus);
-    border-radius: 0 4px 4px 0;
-    color:var(--project-color-input-border-nofocus);
-    height: 100%;
-    box-sizing: border-box;
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-
-  copy-span button:hover{
-    color: black;
-  }
-
-  copy-span .copy-span--confirm{
-    position: absolute;
-    width: 100%;
-    top: calc(100% - 4px);
-    animation: 800ms ease forwards 1;
-    text-align: center;
-    border: inherit;
-    background: inherit;
-    box-shadow: 0 3px 5px rgba(0,0,0,.3);
-    border-radius: 0 0 4px 4px;
-    box-sizing: inherit;
-    /* color: var(--project-color-input-border-nofocus); */
-    cursor: normal;
-  }
-
-  copy-spawn .copy-span--spawn{
-    animation-name: MessageSpawnIn;
-  }
-
-  copy-spawn .copy-span--disappear{
-    animation-name: MessageDespawn;
-  }
-
-  @keyframes MessageSpawnIn{
-    from{
-      opacity: 0;
-    }
-    to{
-      opacity: 1;
-    }
-  }
-
-  @keyframes MessageDespawn{
-    from {
-      opacity: 1
-    }
-    to{
-      opacity: 0;
-    }
-  }
 
 .floater--new-item{
   position:fixed;
@@ -829,4 +806,41 @@ ol.binary-list {
 
 ol.binary-list li:not(.active){
   opacity: .2;
+}
+
+.crudable-header--hypermedia-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.2em;
+}
+  .crudable-header--section {
+    display: flex;
+    gap: 0.2em;
+    align-items: center;
+  }
+
+  a.hypermedia--page-select {
+    font-weight: bold;
+    font-size: 1.6em;
+  }
+
+@media only screen and (max-width: 35em) {
+  .crudable-header--hypermedia-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.2em;
+    flex-wrap: wrap;
+  }
+    .crudable-header--right{
+      width: 100%;
+    }
+    .crudable-header--hypermedia-container .search-form {
+      display: flex;
+      margin-top: 0.2em;
+      gap: 0.2em;
+      flex-grow: 1;
+    }
+      .crudable-header--hypermedia-container .search-form input[type='search'] {
+        flex-grow: 1;
+      }
 }

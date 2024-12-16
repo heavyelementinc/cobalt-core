@@ -11,23 +11,45 @@ use Cobalt\SchemaPrototypes\Compound\IpResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\Compound\PhoneNumberResult;
 use Cobalt\SchemaPrototypes\Compound\UserIdArrayResult;
+use Drivers\Database;
 
 class Persistance extends PersistanceMap {
 
+    public function __set_manager(?Database $manager = null): ?Database {
+        return new ContactManager();
+    }
+
     public function __get_schema(): array {
+        $this->__set_index_checkbox_state(has_permission("Contact_form_submissions_delete", null, null, false));
         $addtl = new AdditionalContactFields();
         $fields = $addtl->__get_schema();
         $schema = [
             "name" => [
                 new StringResult,
                 'char_limit' => 150,
+                'index' => [
+                    'title' => 'Name',
+                    'order' => 0,
+                    'sort' => -1,
+                    'view' => fn () => $this->name
+                ]
             ],
             "organization" => [
                 new StringResult,
                 'char_limit' => 150,
-                'illegal_chars' => '<>'
+                'illegal_chars' => '<>',
+                'index' => [
+                    'title' => 'Org',
+                    'order' => 1
+                ]
             ],
-            "email" => new EmailAddressResult,
+            "email" => [
+                new EmailAddressResult,
+                'index' => [
+                    'title' => 'Email',
+                    'order' => 2,
+                ]
+            ],
             "phone" => new PhoneNumberResult,
             "preferred" => [
                 new EnumResult,
@@ -49,9 +71,25 @@ class Persistance extends PersistanceMap {
                 'status' => function ($val, $ref) {
                     if($val) return "read";
                     return "unread";
-                }
+                },
+                'index' => [
+                    'title' => 'Read Status',
+                    'order' => 3,
+                    'sortable' => false,
+                    'view' => function () {
+                        if(in_array(session("_id"), $this->read->getValue())) return "Read";
+                        return "Unread";
+                    }
+                ]
             ],
-            "date" => new DateResult,
+            "date" => [
+                new DateResult,
+                'index' => [
+                    'title' => 'Date',
+                    'order' => 1,
+                    // 'view' => fn () => $this->date->format("c")
+                ]
+            ],
             "ip" => new IpResult,
         ];
         $schema += $fields;

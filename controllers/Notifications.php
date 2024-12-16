@@ -2,11 +2,13 @@
 
 use Auth\UserCRUD;
 use Cobalt\Notifications\Notification;
+use Cobalt\Notifications\NotificationAddresseeSchema;
 use Cobalt\Notifications\NotificationManager;
 use Cobalt\Notifications\PushNotifications;
 use Controllers\Controller;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 
 class Notifications extends Controller {
     private $ntfy;
@@ -65,14 +67,22 @@ class Notifications extends Controller {
     }
 
     function sendNotification() {
-        $mutant = $_POST;
-        if(key_exists('for.user[]', $mutant)) {
-            $mutant['for.user'] = explode(",",$mutant['for.user[]']);
-            unset($mutant['for.user[]']);
+        $note = new Notification();
+        $submission = $_POST;        
+        $users = $submission['users'];
+        $submission['users'] = [];
+
+        foreach($submission as $users => $id) {
+            $schema = new NotificationAddresseeSchema();
+            array_push($submission['users'], $schema->__validate(['user' => $id]));
         }
-        if(!key_exists('action', $mutant)) $mutant['action'] = [
-            'path' => parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)
-        ];
+        
+        
+        $mutant = $note->__validate($submission);
+        
+        if(!key_exists('action', $submission)) {
+            $mutant->action->path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+        }
         return $this->ntfy->sendNotification($mutant);
     }
 
@@ -90,7 +100,7 @@ class Notifications extends Controller {
         $_id = new ObjectId($id);
         $query = ['_id' => $_id];
         $note = $this->ntfy->findOne($query);
-        if(!$note) throw new NotFound("Resource does not exist");
+        if(!$note) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         // confirm("Are you sure you want to delete this notification?", $_POST);
         $result = $this->ntfy->deleteOne($query);
         return $result->getDeletedCount();
@@ -99,7 +109,7 @@ class Notifications extends Controller {
     function status($id, $status) {
         $_id = new ObjectId($id);
         $note = $this->ntfy->findOne(['_id' => $_id]);
-        if(!$note) throw new NotFound("Resource does not exist");
+        if(!$note) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
         $this->ntfy->setReadState($_id, session('_id'), $status);
         header("Content-Type: text\html");
@@ -120,6 +130,7 @@ class Notifications extends Controller {
                 session()['_id']
             ]
         ];
+        $note->sent = new UTCDateTime();
 
         
         // [

@@ -19,7 +19,7 @@ class CobaltCLI{
     ];
 
     function __construct($commands) {
-        if(empty($commands)) die("No command specified!");
+        if(empty($commands)) kill("No command specified!");
         if($this->find_command(array_shift($commands), $commands)) continue;
         $this->subcommand = $commands[0];
         $this->remaining_commands = $commands;
@@ -39,7 +39,7 @@ class CobaltCLI{
     function run() {
         $class = $this->parsed['command'];
         $this->instance = new $class();
-        if(!method_exists($this->instance,"main")) die("No entry point 'main' for command.");
+        if(!method_exists($this->instance,"main")) kill("No entry point 'main' for command.");
         foreach($this->flags as $name => $value) {
             if(!is_numeric($name)) {
                 if(method_exists($this->instance,$name)) $this->instance->{$name}(...$value);

@@ -4,40 +4,42 @@ namespace Cobalt\Customization;
 
 use DOMXPath;
 use Exception;
+use Exceptions\HTTP\Error;
+use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 use Validation\Normalize;
 
 class CustomSchema extends Normalize {
     var $valid_meta = [
-        'text' => [
+        CUSTOMIZATION_TYPE_TEXT => [
             'name' => 'Text',
             'view' => '/customizations/editor/text.html'
         ],
-        'markdown' => [
+        CUSTOMIZATION_TYPE_MARKDOWN => [
             'name' => 'Markdown',
             'view' => '/customizations/editor/markdown.html'
         ],
-        'image' => [
+        CUSTOMIZATION_TYPE_IMAGE => [
             'name' => 'Image',
             'view' => '/customizations/editor/image.html'
         ],
-        'href' => [
+        CUSTOMIZATION_TYPE_HREF => [
             'name' => 'Embedded URL',
             'view' => '/customizations/editor/embed.html',
         ],
-        'video' => [
+        CUSTOMIZATION_TYPE_VIDEO => [
             'name' => 'Video',
             'view' => '/customizations/editor/video.html',
         ],
-        'audio' => [
+        CUSTOMIZATION_TYPE_AUDIO => [
             'name' => 'Audio',
             'view' => '/customizations/editor/audio.html',
         ],
-        'color' => [
+        CUSTOMIZATION_TYPE_COLOR => [
             'name' => 'Color',
             'view' => '/customizations/editor/color.html',
         ],
-        'series' => [
+        CUSTOMIZATION_TYPE_SERIES => [
             'name' => 'Series',
             'view' => '/customizations/editor/series.html',
         ]
@@ -151,6 +153,16 @@ class CustomSchema extends Normalize {
             'meta.allowfullscreen' => [
                 'get' => fn($val) => $this->getDefault($val,'meta.allowfullscreen'),
             ],
+            'action_menu_options' => [
+                'get' => function () {
+                    return "
+                    <option onclick='modalForm(\"/admin/customizations/update/$this->_id\",{})'>Update Parameters</option>
+                    <option onclick='copyToClipboard(\"&#123;&#123;custom.$this->unique_name&#125;&#125;\")'>Copy Slug to Clipboard</option>
+                    <option method=\"PUT\" action=\"/api/v1/customizations/reset/$this->_id\">Reset To Default Values</option>
+                    <option method=\"DELETE\" action=\"/api/v1/customizations/$this->_id\">Delete This Item</option>";
+                },
+                'set' => false
+            ]
         ];
     }
 
@@ -213,5 +225,29 @@ class CustomSchema extends Normalize {
             $this->__dataset["meta.$attr"] = $value;
         }
         return $rt;
+    }
+
+    static function define(string $type, string $slug, string $group, mixed $value, bool $allow_HTML = false, string $description = "") {
+        global $DECLARED_CUSTOMIZATIONS;
+        $pretty_name = ucwords(str_replace("_", " ", $slug));
+
+        $result = new CustomSchema();
+        
+        try {
+            $result->allowNameCollision($slug);
+            $definition = $result->validate([
+                'type' => $type,
+                'unique_name' => $slug,
+                'name' => $pretty_name,
+                'value' => $value,
+                'group' => $group,
+                'description' => $description,
+                'allow_HTML' => $allow_HTML,
+            ]);
+        } catch (ValidationFailed $e) {
+            throw new Error("Configuration failure. " . $e->getMessage());
+        }
+
+        array_push($DECLARED_CUSTOMIZATIONS, $definition);
     }
 }

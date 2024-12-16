@@ -59,7 +59,7 @@
             </pre>
         </details>
     </form-request>
-    <form-request id="theme">
+    <form-request id="theme" action="/api/v1/settings/update/" method="PUT">
         <hgroup><h2><i name="palette"></i> Theme</h2></hgroup>
         <fieldset>
             <legend>Base Theme</legend>
@@ -67,9 +67,9 @@
                 <li>
                     <label>Primary Theme</label>
                     <div class="hbox">
-                        <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;">Light <i name="brightness-5"></i></span>
-                        <input-switch name="dark_theme_enabled" disabled="disabled" tiny style="margin: 0 .5rem 0"></input-switch>
                         <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;"><i name="brightness-4"></i> Dark</span>
+                        <input-switch name="default_color_scheme" tiny style="margin: 0 .5rem 0" checked="{{app.default_color_scheme}}"></input-switch>
+                        <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;">Light <i name="brightness-5"></i></span>
                     </div>
                 </li>
             </ul>
@@ -80,26 +80,27 @@
                 <li>
                     <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
                         <div>
+                            <label>Primary Accent Color</label>
+                            <small>This color is used to as the banner header
+                                color. It's also used to derive all button, 
+                                input, and other color values.</small>
+                        </div>
+                        <input type="color" name="color_primary" value="{{app.color_primary}}">
+                    </div>
+                </li>
+                <li>
+                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
+                        <div>
                             <label>Background Color</label>
                             <small>This value is used as the background color
                                 for the HTML body. It also is used to derive the
                                 color for odd table backgrounds, 
                             </small>
                         </div>
-                        <input type="color" name="background" value="white" disabled>
+                        <input type="color" name="color_background" value="{{app.color_background}}">
                     </div>
                 </li>
-                <li>
-                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
-                        <div>
-                            <label>Primary Accent Color</label>
-                            <small>This color is used to as the banner header
-                                color. It's also used to derive all button, 
-                                input, and other color values.</small>
-                        </div>
-                        <input type="color" name="accent" value="white" disabled>
-                    </div>
-                </li>
+                
                 <!-- <li>
                     <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
                         <div>
@@ -124,7 +125,57 @@
                 </li> -->
             </ul>
         </fieldset>
-    </fieldset>
+        <fieldset>
+            <legend>Accents</legend>
+            <table>
+                <tr>
+                    <th colspan="6">Accent Colors</th>
+                </tr>
+                <tr>
+                    <td class="color-swatch" style="background-color: var(--primary-000);color: var(--primary-000-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--primary-100);color: var(--primary-100-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--primary-200);color: var(--primary-200-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--primary-300);color: var(--primary-300-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--primary-400);color: var(--primary-400-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--primary-500);color: var(--primary-500-c)">Text</td>
+                </tr>
+                <tr>
+                    <th colspan="6">Background Colors</th>
+                </tr>
+                <tr>
+                    <td class="color-swatch" style="background-color: var(--background-000);color: var(--background-000-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--background-100);color: var(--background-100-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--background-200);color: var(--background-200-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--background-300);color: var(--background-300-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--background-400);color: var(--background-400-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--background-500);color: var(--background-500-c)">Text</td>
+                </tr>
+                <tr>
+                    <th colspan="6">Mixed Colors</th>
+                </tr>
+                <tr>
+                    <td class="color-swatch" style="background-color: var(--mixed-000);color: var(--mixed-000-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--mixed-100);color: var(--mixed-100-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--mixed-200);color: var(--mixed-200-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--mixed-300);color: var(--mixed-300-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--mixed-400);color: var(--mixed-400-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--mixed-500);color: var(--mixed-500-c)">Text</td>
+                </tr>
+                <tr>
+                    <th colspan="6">UI Colors</th>
+                </tr>
+                <tr>
+                    <td class="color-swatch" style="background-color: var(--contrast-color)"></td>
+                    <td class="color-swatch" style="background-color: var(--input-invalid)"></td>
+                    <!-- <td class="color-swatch" style="background-color: var(--mixed-100)"></td>
+                    <td class="color-swatch" style="background-color: var(--mixed-200)"></td>
+                    <td class="color-swatch" style="background-color: var(--mixed-300)"></td>
+                    <td class="color-swatch" style="background-color: var(--mixed-400)"></td>
+                    <td class="color-swatch" style="background-color: var(--mixed-500)"></td> -->
+                </tr>
+            </table>
+        </fieldset>
+    </form-request>
 </tab-nav>
 
 <style>
@@ -132,6 +183,11 @@
         background:gray;
         object-fit:contain;
         max-width: 100px;
+    }
+    .color-swatch {
+        --square: 50px;
+        height: 50px;
+        width: 50px;
     }
 
     .list-panel form-request {

@@ -17,7 +17,12 @@
         "minishlink/web-push": "^8.0",
         "james-heinrich/getid3": "^1.9",
         "robthree/twofactorauth": "^2.0",
-        "chillerlan/php-qrcode": "^4.3"
+        "chillerlan/php-qrcode": "^4.3",
+        "league/color-extractor": "^0.4.0",
+        "indieweb/mention-client": "^1.2",
+        "masterminds/html5": "^2.9",
+        "rct567/dom-query": "^1.1",
+        "league/html-to-markdown": "^5.1"
     },
     "config": {
         "allow-plugins": {

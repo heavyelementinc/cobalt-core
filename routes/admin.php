@@ -12,13 +12,18 @@ Route::get("/", "CoreAdmin@index", [
 ]);
 
 if(__APP_SETTINGS__['Posts']['default_enabled']) {
-    Route::get("/posts/", "Posts@admin_index",[
-        'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
-        'navigation' => ['admin_panel'],
-    ]);
-    Route::get("/posts/{id}?", "Posts@edit",[
-        'handler' => "core/posts.js",
-    ]);
+    Cobalt\Pages\Controllers\Posts::admin();
+    // Route::get("/posts/", "Posts@index",[
+    //     'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
+    //     'navigation' => ['admin_panel'],
+    // ]);
+    // Route::get("/posts/{id}?", "Posts@edit",[
+    //     // 'handler' => "core/posts.js",
+    // ]);
+}
+
+if(__APP_SETTINGS__['LandingPages_enabled']) {
+    \Cobalt\Pages\Controllers\LandingPages::admin();
 }
 
 Route::get("/me/", "UserAccounts@me",
@@ -119,39 +124,54 @@ Route::get("/me/", "UserAccounts@me",
     ]);
 
     if (app('Auth_logins_enabled')) {
-
-        Route::get("/users/", "CoreAdmin@list_all_users", [
-            'name' => "Users",
-            'handler' => "core/user_panel.js",
-            'anchor' => [
-                'name' => 'Users',
-                'icon' => "account-group-outline",
-                'icon_color' => "#FF5964"
+        CoreUserAccounts::admin(null, [
+            'index' => [
+                'permission' => 'Auth_allow_editing_users',
+                'anchor' => [
+                    'name' => 'Users',
+                    'icon' => 'account-group-outline',
+                    'icon_color' => '#FF5964'
+                ],
+                'navigation' => ['application_settings']
             ],
-        'navigation' => ['application_settings']
+            'edit' => [
+                'permission' => 'Auth_allow_editing_users',
+            ]
         ]);
+        // Route::get("/users/", "CoreAdmin@list_all_users", [
+        //     'name' => "Users",
+        //     'handler' => "core/user_panel.js",
+        //     'anchor' => [
+        //         'name' => 'Users',
+        //         'icon' => "account-group-outline",
+        //         'icon_color' => "#FF5964"
+        //     ],
+        // 'navigation' => ['application_settings']
+        // ]);
 
-        Route::get("/create-user", "CoreAdmin@create_user", [
-            'handler' => 'core/create_user.js',
-            'permission' => 'Auth_allow_creating_users'
-        ]);
+        // Route::get("/create-user", "CoreAdmin@create_user", [
+        //     'handler' => 'core/create_user.js',
+        //     'permission' => 'Auth_allow_creating_users'
+        // ]);
 
-        Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
-            'handler' => 'core/user_manager.js',
-            'permission' => "Auth_allow_editing_users"
-        ]);
+        // Route::get("/users/manage/{user}", "CoreAdmin@individual_user_management_panel", [
+        //     'handler' => 'core/user_manager.js',
+        //     'permission' => "Auth_allow_editing_users"
+        // ]);
     }
 
-    Route::get("/settings/fs-manager", "CoreSettingsPanel@fileManager",[
-        'permission' => 'Customizations_modify',
-        'anchor' => [
-            'name' => "FS Manager",
-            'icon' => 'palette-swatch-outline',
-            'icon_color' => 'linear-gradient(to bottom, #DA627D, #FF495C 80%)'
-        ],
-        'navigation' => ['application_settings'],
-        'handler' => 'admin/fs-manager.js'
-    ]);
+    // Route::get("/settings/fs-manager", "CoreSettingsPanel@fileManager",[
+    //     'permission' => 'Customizations_modify',
+    //     'anchor' => [
+    //         'name' => "FS Manager",
+    //         'icon' => 'palette-swatch-outline',
+    //         'icon_color' => 'linear-gradient(to bottom, #DA627D, #FF495C 80%)'
+    //     ],
+    //     'navigation' => ['application_settings'],
+    //     'handler' => 'admin/fs-manager.js'
+    // ]);
+    // Route::get("/settings/fs-manager", "CrudableFiles@__index");
+    CrudableFiles::admin();
 /** 
 *  ========================================================
 *  ================= ADVANCED SETTINGS ====================
@@ -219,6 +239,15 @@ Route::get("/me/", "UserAccounts@me",
         ]);
     }
 
+Route::get("/integrations/", "IntegrationsController@index", [
+    'anchor' => [
+        'name' => 'Integrations',
+        'icon' => 'api'
+    ],
+    'navigation' => ['advanced_settings']
+]);
+Route::get("/integrations/{class}", "IntegrationsController@token_editor");
+
 /** 
 *  ========================================================
 *  ================ MISCELLANEOUS ROUTES ==================
@@ -226,18 +255,31 @@ Route::get("/me/", "UserAccounts@me",
 */
 
 if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
-    Route::get("/contact-form/", "ContactForm@index", [
-        'permission' => 'Contact_form_submissions_access',
-        'anchor' => [
-            'name' => "Contact Form",
-            'icon' => 'chat-alert-outline',
-        ],
-        'navigation' => ['admin_panel'],
-        'unread' => function () {
-            return (new ContactManager())->get_unread_count_for_user(session());
-        },
-        'handler' => '/core/contact-form.js'
+    ContactForm::admin(null, [
+        'index' => [
+            'anchor' => [
+                'name' => "Contact Form",
+                'icon' => 'chat-alert-outline',
+            ],
+            'navigation' => ['admin_panel'],
+            'unread' => function () {
+                return (new ContactManager())->get_unread_count_for_user(session());
+            },
+            'handler' => '/core/contact-form.js'
+        ]
     ]);
+    // Route::get("/contact-form/", "ContactForm@__index", [
+    //     'permission' => 'Contact_form_submissions_access',
+    //     'anchor' => [
+    //         'name' => "Contact Form",
+    //         'icon' => 'chat-alert-outline',
+    //     ],
+    //     'navigation' => ['admin_panel'],
+    //     'unread' => function () {
+    //         return (new ContactManager())->get_unread_count_for_user(session());
+    //     },
+    //     'handler' => '/core/contact-form.js'
+    // ]);
     Route::get("/contact-form/{id}", "ContactForm@read", ['permission' => 'Contact_form_submissions_access']);
 }
 

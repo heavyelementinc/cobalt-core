@@ -3,31 +3,42 @@
 
 <table>
     <tr>
-        <td>Value: </td><td>{{type.array.json()}}</td>
+        <th>Value: </th><td>{{type.array.json()}}</td>
     </tr>
     <tr>
-        <td>Display: </td><td>{{type.array.display()}}</td>
+        <th>Display: </th><td>{{type.array.display()}}</td>
     </tr>
     <tr>
-        <td>Join: </td><td>{{type.array.join("... ")}}</td>
+        <th>Join: </th><td>{{type.array.join("; ")}}</td>
     </tr>
     <tr>
-        <td>Push: </td><td>{{$type.array.push("push")}}</td>
+        <th>Push: </th><td>{{$type.array.push("push")}}</td>
     </tr>
     <tr>
-        <td>Pop: </td><td>{{type.array.pop()}}</td>
+        <th>Pop: </th><td>{{type.array.pop()}}</td>
     </tr>
     <tr>
-        <td>Shift: </td><td>{{type.array.shift()}}</td>
+        <th>Shift: </th><td>{{type.array.shift()}}</td>
     </tr>
     <tr>
-        <td>Unshift: </td><td>{{$type.array.unshift()}}</td>
+        <th>Unshift: </th><td>{{$type.array.unshift()}}</td>
     </tr>
     <tr>
-        <td>Array Select: </td><td>{{type.array.1}}</td>
+        <th>Array Select: </th><td>{{type.array.1}}</td>
     </tr>
     <tr>
-        <td>Array Last: </td><td>{{type.array.last()}}</td>
+        <th>Array Last: </th><td>{{type.array.last()}}</td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <th>Array 0: </th>
+        <td>{{type.array.0.toUpperCase()}}</td>
+    </tr>
+    <tr>
+        <th>Array 1: </th>
+        <td>{{type.array.1}}</td>
     </tr>
 </table>
 

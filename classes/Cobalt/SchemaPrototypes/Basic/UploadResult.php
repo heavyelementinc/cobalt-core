@@ -3,7 +3,6 @@
 namespace Cobalt\SchemaPrototypes\Basic;
 
 use Cobalt\SchemaPrototypes\MapResult;
-use Cobalt\SchemaPrototypes\SubMapResult;
 use Cobalt\SchemaPrototypes\Traits\ImageManipulation;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Drivers\BinaryStorage;
@@ -82,6 +81,8 @@ class UploadResult extends MapResult {
                 $allow = $value['meta']['allow'];
                 $title = $value['meta']['title'];
                 return "<iframe class=\"$class\" src=\"$rt\" name=\"$enc\" scrolling=\"no\" frameborder=\"0\" width=\"$w\" height=\"$h\" $fs $allow $title></iframe>";
+            case "zip":
+                return "<a href=''></a>";
             case "image":
             default:
                 return "<img class=\"$class\" src=\"$value[filename]\" width=\"$w\" height=\"$h\" style=\"background-color: ".$value['meta']['accent']."\">";
@@ -116,16 +117,63 @@ class UploadResult extends MapResult {
     }
 
     function defaultSchemaValues(array $data = []): array {
-        $defaultValue = [
-            'media' => [
-                'ref' => '',
-                'filename' => '/core-content/img/default.jpg',
-                'meta' => [
-                    'heght' => 150,
-                    'width' => 150,
-                ]
+        $defaultSchema = [
+            'url' => [
+                new StringResult,
+                'default' => '/core-content/img/default.jpg',
+                'get' => function ($val) {
+                    return $val ?? $this->media->filename ?? "";
+                }
             ],
-            'isset' => false
+            'thumb' => [
+                new StringResult,
+                'default' => '/core-content/img/default.jpg',
+                'get' => function ($val) {
+                    return $val ?? $this->thumbnail->filename ?? "";
+                }
+            ],
+            'height' => [
+                new NumberResult,
+                'default' => 150,
+                'get' => function ($val) {
+                    return $val ?? $this->media->height ?? "";
+                }
+            ],
+            'width' => [
+                new NumberResult,
+                'default' => 150,
+                'get' => function ($val) {
+                    return $val ?? $this->media->width ?? "";
+                }
+            ],
+            'mimetype' => [
+                new StringResult,
+                'default' => 'image/jpeg',
+                'get' => function ($val) {
+                    return $val ?? $this->media->mimetype ?? "";
+                }
+            ],
+            'accent_color' => [
+                new HexColorResult,
+                'default' => "#555555",
+                'get' => function ($val) {
+                    return $val ?? $this->media->accent_color ?? "";
+                }
+            ],
+            'alt' => [
+                new StringResult,
+            ]
+        ];
+
+        $defaultValue = [
+            'width' => 150,
+            'height' => 150,
+            'mimetype' => 'image/jpeg',
+            'accent_color' => '#204315',
+            "ref" => null,
+            "url" => '/core-content/img/default.jpg',
+            'thumb' => '/core-content/img/default.jpg',
+            'isset' => false,
         ];
         
         return [
@@ -134,6 +182,7 @@ class UploadResult extends MapResult {
             'required'  => false,
             'limit'     => 1,
             'default'   => $defaultValue,
+            'schema'    => $defaultSchema,
         ];
     }
 
@@ -257,7 +306,7 @@ class UploadResult extends MapResult {
     }
 
     function __toString():string {
-        return $this->value->media->filename ?? $this->schema['default']['media']['filename'];
+        return $this->value->media->filename ?? $this->schema['default']['media']['filename'] ?? "";
     }
 
     function jsonSerialize(): mixed {

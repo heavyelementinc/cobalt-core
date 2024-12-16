@@ -6,6 +6,9 @@ use Drivers\FileSystem;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
+use League\ColorExtractor\Color as ColorExtractorColor;
+use League\ColorExtractor\ColorExtractor;
+use League\ColorExtractor\Palette;
 use MikeAlmond\Color\Color;
 use MongoDB\BSON\ObjectId;
 
@@ -69,9 +72,16 @@ trait ClientFSManager {
     public function delete($id, $skipConfirm = false) {
         $this->initFS();
         $_id = new \MongoDB\BSON\ObjectId($id);
+        /** @var GenericMap */
         $result = $this->fs->findOne(["_id" => $_id]);
         if($result === null) throw new NotFound("That file was not found");
-        if($skipConfirm == false) confirm("Are you sure you want to delete <strong>" . htmlspecialchars($result->filename) . "</strong>?",[]);
+        $message = "Are you sure you want to delete <strong>";
+        if(is_string($result->filename)) {
+            $message .= "$result->filename</strong>?";
+        } else {
+            $message .= $result->filename[0] . "</strong>?<br><br>It's currently being used in multiple places in this application!";
+        }
+        if($skipConfirm == false) confirm($message,[]);
 
         if($result->thumbnail_id) $this->fs->delete($result->thumbnail_id);
         $result = $this->fs->delete($_id);
@@ -175,11 +185,19 @@ trait ClientFSManager {
         $arbitrary_data = array_merge($arbitrary_data, ['meta' => $meta]);
 
         $thumb_id = $this->fs->upload($file_array,$index,$arbitrary_data);
-        $returnable = ['id' => $thumb_id, 'filename' => $file_array['name']];
+        $result = $this->fs->findOne(['_id' => $thumb_id]);
+        // $returnable = ['id' => $thumb_id, 'filename' => $this->filter_filename($file_array['name'])];
+        $returnable = doc_to_array($result);
         if($meta) {
             $returnable['meta'] = $arbitrary_data['meta'];
         }
         return $returnable;
+    }
+
+    private function filter_filename($filename) {
+        $file = preg_replace("/[\\?&<>\":|*]/", "", $filename);
+        if(!$file) return $filename;
+        return $file;
     }
 
     public function clientUploadFiles($key, $arbitrary_data = null, $files = null, $meta = false) {
@@ -274,10 +292,11 @@ trait ClientFSManager {
 
     public function renameFile($id, $submittedName = null) {
         $this->initFS();
-        if(is_null($submittedName)) $submittedName = $_POST['rename'];
+        if(is_null($submittedName)) $submittedName = $_POST['name'];
         $_id = new ObjectId($id);
         $q = ['_id' => $_id];
 
+        confirm("You're changing the name of this file. Any references to this file in your application will become broken.", $_POST);
         $newName = $this->prefixFilename($submittedName);
         $result = $this->fs->findOne($q);
 
@@ -313,6 +332,10 @@ trait ClientFSManager {
         }
         
         return $returnValues;
+    }
+
+    public function resetMetadata($id) {
+
     }
 
     /**
@@ -361,7 +384,7 @@ trait ClientFSManager {
         // Loop through available docs
         foreach($docs as $doc) {
             // Execute the tag_start callback:
-            $string .= "<" . $container["tag_start"]($doc, $href, $options['lazy']) . " data-id='".(string)$doc->_id."'";
+            $string .= "<div><" . $container["tag_start"]($doc, $href, $options['lazy']) . " data-id='".(string)$doc->_id."'";
             foreach($options['child'] as $property => $value) {
                 $string .= " $property='".htmlspecialchars($value)."'"; // Add properties
             }
@@ -372,6 +395,8 @@ trait ClientFSManager {
 
             // If we have 
             $string .= ($container['tag_end']) ? "</$container[tag_end]>" : "";
+            if($container['container'] !== "carousel") $string .= "<button><i name=\"dots-vertical\"></i></button>";
+            $string .= "</div>";
         }
         return $string . "</$container[container]>";
     }
@@ -448,6 +473,38 @@ trait ClientFSManager {
     }
 
     public function getImageMetadata($path_to_file, $mime_type = null) {
+        if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
+        
+        $metadata = getimagesize($path_to_file);
+        if(!$metadata) $metadata = [null, null, 'mimetype' => mime_content_type($path_to_file)];
+        $metadata['mimetype'] = mime_content_type($path_to_file);
+        // $avg = \image_average_color($path_to_file, true);
+        // $img = imagecreatefromstring(file_get_contents($path_to_file));
+        // $scaled = imagescale($img, 1, 1);
+        // if($scaled !== false) {
+        //     $index = imagecolorat($scaled, 0, 0);
+        //     $rgb = imagecolorsforindex($scaled, $index);
+    
+        //     $avg = sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
+        // } else $avg = "#fff";
+        $palette = Palette::fromFilename($path_to_file);
+        $extractor = new ColorExtractor($palette);
+        $colors = $extractor->extract(2);
+        $accent = ColorExtractorColor::fromIntToHex($colors[0]);
+        $secondary = ColorExtractorColor::fromIntToHex($colors[1]);
+        
+        $meta = [
+            'width' => $metadata[0],
+            'height' => $metadata[1],
+            'mimetype' => $metadata['mimetype'],
+            'accent_color' => $accent,
+            'secondary_color' => $secondary,
+            'contrast_color' => (Color::fromHex($accent)->isDark()) ? "#FFFFFF" : "#000000"
+        ];
+        return $meta;
+    }
+
+    public function getImageMetadataLegacy($path_to_file, $mime_type = null) {
         if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
         
         $metadata = getimagesize($path_to_file);

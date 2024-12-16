@@ -14,6 +14,11 @@
 
 namespace Validation\Exceptions;
 
+/**
+ * Throw a ValidationContinue if you want a field to be omitted from 
+ * the final validated PersistanceMap.
+ * @package Validation\Exceptions
+ */
 class ValidationContinue extends \Exception {
     function __construct($message) {
         parent::__construct($message);

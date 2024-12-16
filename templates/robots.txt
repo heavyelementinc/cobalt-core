@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin
+
+User-agent: *
+Disallow: /api
+
+User-agent: *
+Disallow: /login
+
+{{!app.Robots_txt_config}}
+{{!ai_bots}}
+Sitemap: http://{{app.domain_name}}/sitemap.xml

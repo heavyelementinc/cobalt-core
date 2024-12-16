@@ -116,6 +116,7 @@ class Extensions extends \Drivers\Database {
         return str_replace([__APP_ROOT__, __ENV_ROOT__, "//"], [$app, $core, "/"], $path);
     }
 
+    // TODO: Write to the DB in a deferred way
     private function register_extension($manifest) {
         return $this->updateOne(
             ['uuid' => $manifest['uuid']],
@@ -242,6 +243,11 @@ class Extensions extends \Drivers\Database {
         "session_creation" => [
             'name' => "Modify user session login data before storage",
             'icon' => 'login',
+            'default' => false
+        ],
+        "register_user_fields" => [
+            'name' => "Add fields to a user account",
+            'icon' => 'user',
             'default' => false
         ]
     ];

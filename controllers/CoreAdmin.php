@@ -20,33 +20,33 @@ class CoreAdmin {
             'plugin_count' => Extensions::get_active_count(),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
         ]);
-        set_template("/authentication/admin-dashboard/index.html");
+        return view("/authentication/admin-dashboard/index.html");
     }
 
-    function list_all_users($page = 0) {
-        $collection = \db_cursor('users');
-        $list = "<flex-table><flex-row>
-            <flex-header>Name</flex-header>
-            <flex-header>Username</flex-header>
-            <flex-header>Email</flex-header>
-            <flex-header>Groups</flex-header>
-            <flex-header>Verified</flex-header>
-            <flex-header style='width:20px'></flex-header>
-        </flex-row>";
-        foreach ($collection->find([]) as $user) {
-            $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
-            $list .= view("/admin/users/user.html", [
-                'user' => new UserSchema($user),
-                'groups' => (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>"),
-            ]);
-        }
-        $list .= "</flex-table>";
-        add_vars([
-            'title' => "Manage users",
-            "users" => $list
-        ]);
-        set_template("/authentication/user-management/list-users.html");
-    }
+    // function list_all_users($page = 0) {
+    //     $collection = \db_cursor('users');
+    //     $list = "<flex-table><flex-row>
+    //         <flex-header>Name</flex-header>
+    //         <flex-header>Username</flex-header>
+    //         <flex-header>Email</flex-header>
+    //         <flex-header>Groups</flex-header>
+    //         <flex-header>Verified</flex-header>
+    //         <flex-header style='width:20px'></flex-header>
+    //     </flex-row>";
+    //     foreach ($collection->find([]) as $user) {
+    //         $groups = str_replace("root", "<strong>root</strong>", implode(", ", (array)$user['groups']));
+    //         $list .= view("/admin/users/user.html", [
+    //             'user' => new UserSchema($user),
+    //             'groups' => (($groups) ? $groups : "<span style='opacity:.6'>No groups</span>"),
+    //         ]);
+    //     }
+    //     $list .= "</flex-table>";
+    //     add_vars([
+    //         'title' => "Manage users",
+    //         "users" => $list
+    //     ]);
+    //     return view("/authentication/user-management/list-users.html");
+    // }
 
     private function user_link($id, $target = "#basics") {
         $link = "<a href='/admin" . app("Auth_user_manager_individual_page") . "/" . (string)$id . "$target'>";
@@ -77,8 +77,9 @@ class CoreAdmin {
         try {
             $auth = new \Auth\AdditionalUserFields();
             $additional = $auth->__get_additional_user_tabs();
-            foreach($additional as $user => $value) {
-                if($value['name'][0].$value['name'][1] !== "<i") $additional[$user]['name'] = "<i name='card-bulleted-outline'></i> " . $value['name'];
+            foreach($additional as $usr => $value) {
+                $icon = $i['icon'] ?? "card-bulleted-outline";
+                $additional[$usr]['name'] = "<i name='$icon'></i> " . $value['name'];
             }
         } catch (\Error $e) {
             $additional = "";
@@ -97,14 +98,14 @@ class CoreAdmin {
             ]);
         }
 
-        set_template("/authentication/user-management/individual-user.html");
+        return view("/authentication/user-management/individual-user.html",[]);
     }
 
     function create_user() {
         add_vars([
             'title' => "Create user"
         ]);
-        set_template("/authentication/user-management/create_new_user_basic.html");
+        return view("/authentication/user-management/create_new_user_basic.html");
     }
 
     function plugin_manager() {
@@ -114,7 +115,7 @@ class CoreAdmin {
             'title' => "Plugin Manager",
             'main' => $content
         ]);
-        set_template("plugins/index.html");
+        return view("plugins/index.html");
     }
 
     function plugin_individual_manager($plugin_id) {
@@ -124,7 +125,7 @@ class CoreAdmin {
             'title' => $plugin['name'],
             'plugin' => $plugin
         ]);
-        set_template("plugins/individual.html");
+        return view("plugins/individual.html");
     }
 
     function settings_index() {
@@ -137,11 +138,11 @@ class CoreAdmin {
             // 'public_settings_panel'   => get_route_group("public_settings_panel",['with_icon' => true]),
         ]);
 
-        set_template("/admin/settings/control-panel.html");
+        return view("/admin/settings/control-panel.html");
     }
 
     function app_settings() {
-        set_template("/admin/settings/basic-settings.html");
+        return view("/admin/settings/basic-settings.html");
     }
 
     function cron_panel() {
@@ -155,7 +156,7 @@ class CoreAdmin {
             // 'widgets ' => $widgets,
             'tasks' => $tasks
         ]);
-        set_template("/admin/cron/cron-task-index.html");
+        return view("/admin/cron/cron-task-index.html");
     }
 
 
@@ -174,6 +175,6 @@ class CoreAdmin {
             'paypal' => $paypal,
         ]);
 
-        set_template("/admin/settings/payment-gateways.html");
+        return view("/admin/settings/payment-gateways.html");
     }
 }

@@ -1,0 +1,452 @@
+{
+    "time": 1723306723945,
+    "blocks": [
+        {
+            "id": "FrgaF9veIW",
+            "type": "embed",
+            "data": {
+                "service": "youtube",
+                "source": "https://www.youtube.com/embed/apHJXsUsDnc",
+                "embed": "https://www.youtube.com/embed/apHJXsUsDnc",
+                "width": 580,
+                "height": 320,
+                "caption": ""
+            }
+        },
+        {
+            "id": "GJJVkxc630",
+            "type": "rawtool",
+            "data": {
+                "html": "test"
+            }
+        },
+        {
+            "id": "8t1GKL48Qp",
+            "type": "paragraph",
+            "data": {
+                "text": "It's 2024. In a digital landscape where everyone's constantly bombarded by social media white noise, <i>your website is a big deal</i>. Most importantly because <b>it's your chance to cut through the noise</b>.&nbsp; "
+            }
+        },
+        {
+            "id": "qZ2nN1ITfs",
+            "type": "paragraph",
+            "data": {
+                "text": "Trust us when we say, we've worked with clients on here in Maine, on a national scale, and even internationally. Your website is a critical facet of your business."
+            }
+        },
+        {
+            "id": "VeMRB62yby",
+            "type": "paragraph",
+            "data": {
+                "text": "However, it's not enough for a site to draw attention to your business. If it's not converting visitors into paying customers you're leaving money on the table."
+            }
+        },
+        {
+            "id": "vcXzJJHODJ",
+            "type": "paragraph",
+            "data": {
+                "text": "With that in mind, here are five ways your website is failing your business."
+            }
+        },
+        {
+            "id": "f48xsuU66l",
+            "type": "nestedlist",
+            "data": {
+                "style": "unordered",
+                "items": [
+                    {
+                        "content": "Any String",
+                        "items": [
+                            {
+                                "content": "Any String (level 2)",
+                                "items": []
+                            },
+                            {
+                                "content": "Another string (level 2)",
+                                "items": [
+                                    {
+                                        "content": "Another String (level 3)",
+                                        "items": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "content": "Level 1",
+                        "items": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "pINPb-mFwo",
+            "type": "header",
+            "data": {
+                "text": "You're Missing Key Information",
+                "level": 2
+            }
+        },
+        {
+            "id": "MXKEPERCdC",
+            "type": "imagetool",
+            "data": {
+                "caption": "This sign is missing critical details",
+                "withBorder": false,
+                "withBackground": false,
+                "stretched": true,
+                "file": {
+                    "url": "/res/fs/block-editor-content/lost-cat-tree-sign-fun-159868.webp",
+                    "mime": "image/webp",
+                    "width": 1920,
+                    "height": 1280,
+                    "accent_color": "#D4D2E0",
+                    "accent_contrast": "#000000",
+                    "id": ""
+                }
+            }
+        },
+        {
+            "id": "yWJrAakx0r",
+            "type": "paragraph",
+            "data": {
+                "text": "Your website needs to be the&nbsp;<i>last stage of the sales funnel.</i>&nbsp;But it's also a visitor's first impression of your brand. Websites are a unique opportunity on the web to have control over the conversation, what your visitors see, and (crucially) the story they're presented with.&nbsp;"
+            }
+        },
+        {
+            "id": "KWLMveqMMg",
+            "type": "paragraph",
+            "data": {
+                "text": "Most business owners think of their website as a billboard, where they put a few pictures and their contact information. Then they call it a day. "
+            }
+        },
+        {
+            "id": "U0XNAbEYoQ",
+            "type": "paragraph",
+            "data": {
+                "text": "But I'm here to tell you that a phone number and email address isn't enough. Those are the <i>how</i>. Your website needs the <i>why.</i>"
+            }
+        },
+        {
+            "id": "jn52ZSSogQ",
+            "type": "paragraph",
+            "data": {
+                "text": "If you're not connecting with your customers on a deeper level—sharing tips and tricks and demonstrating your knowledge—then your website is <i>failing your business</i>."
+            }
+        },
+        {
+            "id": "HukWfwEoTe",
+            "type": "quote",
+            "data": {
+                "text": "TIP: Connect with your visitors and convert them into customers by telling your story and establishing yourself as an authority in your field.",
+                "caption": "",
+                "alignment": "left"
+            }
+        },
+        {
+            "id": "3RV6k5agxm",
+            "type": "header",
+            "data": {
+                "text": "It's Being Neglected",
+                "level": 2
+            }
+        },
+        {
+            "id": "NKETf5ULyF",
+            "type": "imagetool",
+            "data": {
+                "caption": "Yeah... kinda like that.",
+                "withBorder": false,
+                "withBackground": false,
+                "stretched": true,
+                "file": {
+                    "url": "/res/fs/block-editor-content/neglected-old-door-3647075.webp",
+                    "mime": "image/webp",
+                    "width": 1920,
+                    "height": 1280,
+                    "accent_color": "#A18B9E",
+                    "accent_contrast": "#000000",
+                    "id": ""
+                }
+            }
+        },
+        {
+            "id": "mgeIoKh8jV",
+            "type": "paragraph",
+            "data": {
+                "text": "If your site hasn't been updated in a hot minute, that's a problem. (Or, worse yet, you don't have a site and rely on Facebook for your online presence.)"
+            }
+        },
+        {
+            "id": "Mg-TIo3ni5",
+            "type": "paragraph",
+            "data": {
+                "text": "Look, we get it. As business owners, we all get busy. There are things we <i>know</i>&nbsp;we should be doing... yet there are bigger fish to fry."
+            }
+        },
+        {
+            "id": "tDeIm-kqrq",
+            "type": "paragraph",
+            "data": {
+                "text": "If you're not in the digital media world, it can seem daunting. You didn't get into your line of work so you could manage a website, after all."
+            }
+        },
+        {
+            "id": "cOqQrEZ31t",
+            "type": "paragraph",
+            "data": {
+                "text": "However, new content is what keeps your site relevant with search engines and what draws viewers to your site. This can be text, video, images, a portfolio section--the choice is yours."
+            }
+        },
+        {
+            "id": "IIoNQnjZsi",
+            "type": "paragraph",
+            "data": {
+                "text": "When you create content, make sure you use the keywords for your business. Things like \"Maine,\" \"web design,\" and \"video production\" would be a few we'd use."
+            }
+        },
+        {
+            "id": "p_igAvsoMP",
+            "type": "quote",
+            "data": {
+                "text": "TIP: Set up a content schedule and stick to it. It can be as simple as \"on Mondays I write a quick post about X for the site and post it to social media.\" Again, it's critical to stick with your schedule and create new content with some regularity.",
+                "caption": "",
+                "alignment": "left"
+            }
+        },
+        {
+            "id": "SBecu_WZ52",
+            "type": "header",
+            "data": {
+                "text": "You're Telling, Not Showing",
+                "level": 2
+            }
+        },
+        {
+            "id": "s0lUyd0AiP",
+            "type": "imagetool",
+            "data": {
+                "caption": "If your site is as inviting as brutalist architecture... you might think about switching things up.",
+                "withBorder": false,
+                "withBackground": false,
+                "stretched": true,
+                "file": {
+                    "url": "/res/fs/block-editor-content/pexels-photo-17700234.webp",
+                    "mime": "image/webp",
+                    "width": 1920,
+                    "height": 1081,
+                    "accent_color": "#A1BACD",
+                    "accent_contrast": "#000000",
+                    "id": ""
+                }
+            }
+        },
+        {
+            "id": "UaSob95tGr",
+            "type": "paragraph",
+            "data": {
+                "text": "Most people only skim the headlines. You know it's true because you do it, too. "
+            }
+        },
+        {
+            "id": "R7zEKcsKMw",
+            "type": "paragraph",
+            "data": {
+                "text": "Everyone does."
+            }
+        },
+        {
+            "id": "x_R-mtXsYz",
+            "type": "paragraph",
+            "data": {
+                "text": "If your website is a wall of text or the design doesn't leave your visitors with a chance to catch their breath, you've got a problem."
+            }
+        },
+        {
+            "id": "cpDplO3fcu",
+            "type": "paragraph",
+            "data": {
+                "text": "Images draw the eye. Skillfully chosen ones grab attention and generate intrigue."
+            }
+        },
+        {
+            "id": "KHOAjw2yRz",
+            "type": "quote",
+            "data": {
+                "text": "TIP: Use simple well-written copy, beautiful photos, relevant illustrations, and lots of white space to show your audience why you're the clear choice for the job.",
+                "caption": "",
+                "alignment": "left"
+            }
+        },
+        {
+            "id": "VqJcqylrDO",
+            "type": "header",
+            "data": {
+                "text": "It's Just Feels Off",
+                "level": 2
+            }
+        },
+        {
+            "id": "hRyJze33LE",
+            "type": "imagetool",
+            "data": {
+                "caption": "Hey, we're a sucker for retro computing... but there's no question this is obsolete.",
+                "withBorder": false,
+                "withBackground": false,
+                "stretched": true,
+                "file": {
+                    "url": "/res/fs/block-editor-content/Screenshot 2024-08-09 221209.png",
+                    "mime": "image/png",
+                    "width": 3840,
+                    "height": 2160,
+                    "accent_color": "#000000",
+                    "accent_contrast": "#FFFFFF",
+                    "id": ""
+                }
+            }
+        },
+        {
+            "id": "oM0Q2ZuQcZ",
+            "type": "paragraph",
+            "data": {
+                "text": "Picture this: your website takes <i>seconds</i> to load, your site features broken images, or it uses obsolete tech (like Adobe Flash 🤮). Does this cast your brand in a negative light?"
+            }
+        },
+        {
+            "id": "UdTEG5MEzl",
+            "type": "paragraph",
+            "data": {
+                "text": "Worse yet, if your site is loaded with typos, it features poorly-written articles, obvious AI slop, or it just feels amateur—these also reflect negatively on your business and do more harm than good!"
+            }
+        },
+        {
+            "id": "DcfQxmR_3w",
+            "type": "quote",
+            "data": {
+                "text": "TIP: Clean &amp; professional design, well-written articles, and use of modern web technology will lend credibility to your business.",
+                "caption": "",
+                "alignment": "left"
+            }
+        },
+        {
+            "id": "MsFMeGv0Fq",
+            "type": "header",
+            "data": {
+                "text": "It's Inaccessible",
+                "level": 2
+            }
+        },
+        {
+            "id": "SbIQQsIMwN",
+            "type": "imagetool",
+            "data": {
+                "caption": "You wouldn't turn someone away from your shop because they're in a wheelchair...",
+                "withBorder": false,
+                "withBackground": false,
+                "stretched": true,
+                "file": {
+                    "url": "/res/fs/block-editor-content/shvets.webp",
+                    "mime": "image/webp",
+                    "width": 1269,
+                    "height": 1080,
+                    "accent_color": "#B6B7B0",
+                    "accent_contrast": "#000000",
+                    "id": ""
+                }
+            }
+        },
+        {
+            "id": "RGGIvVXBvD",
+            "type": "paragraph",
+            "data": {
+                "text": "Have you ever tried browsing your website with your eyes closed? That's not a joke."
+            }
+        },
+        {
+            "id": "CbrY8Vbkpy",
+            "type": "paragraph",
+            "data": {
+                "text": "Try enabling a screen reader application and try using it on your website. If you find that it's hard—or even impossible—that's a <i>serious</i>&nbsp;issue."
+            }
+        },
+        {
+            "id": "utSHOADvHl",
+            "type": "paragraph",
+            "data": {
+                "text": "One in five Americans have a visual impairment while <a href=\"https://nfb.org/resources/blindness-statistics\">nearly 1 in 40 are considered legally blind</a>. If your site misses the mark for these folks, you're not only doing your potential customers a disservice, but you could also be&nbsp;<a href=\"/accessibility-and-seo\">harming Search Engine Optimization</a>."
+            }
+        },
+        {
+            "id": "oh_vzBBUt1",
+            "type": "quote",
+            "data": {
+                "text": "TIP: assistive technology exists for a reason. Embrace it. Use ARIA attributes and best practices in your HTML. Also, test your site with a screen reader before publishing any changes.",
+                "caption": "",
+                "alignment": "left"
+            }
+        },
+        {
+            "id": "ogYro2SWjU",
+            "type": "header",
+            "data": {
+                "text": "Your Calls To Action Miss the Mark",
+                "level": 2
+            }
+        },
+        {
+            "id": "jHg4RfzasE",
+            "type": "imagetool",
+            "data": {
+                "caption": "Just don't shout...",
+                "withBorder": false,
+                "withBackground": false,
+                "stretched": false,
+                "file": {
+                    "url": "/res/fs/block-editor-content/pexels-photo-3761509.webp",
+                    "mime": "image/webp",
+                    "width": 2000,
+                    "height": 1500,
+                    "accent_color": "#6E6654",
+                    "accent_contrast": "#FFFFFF",
+                    "id": ""
+                }
+            }
+        },
+        {
+            "id": "gWU9RbM7jF",
+            "type": "paragraph",
+            "data": {
+                "text": "If your site doesn't feature calls to action that move the needle, you're missing out on conversions and sales."
+            }
+        },
+        {
+            "id": "haJwK1Lenb",
+            "type": "paragraph",
+            "data": {
+                "text": "You can spend a lot of time explaining the work you do and how you can help your clients, but at the end of the day, a call to action is what closes the deal."
+            }
+        },
+        {
+            "id": "mwQzZUHvPQ",
+            "type": "paragraph",
+            "data": {
+                "text": "Speaking of, our experience in this space gives us the know-how and the capacity to help you finally put your site to work!"
+            }
+        },
+        {
+            "id": "rez-GSrwxw",
+            "type": "rawtool",
+            "data": {
+                "html": "<div class=\"hbox\" style=\"justify-content: center\"><a href=\"/contact/\" class=\"button\">Book a Free Conslutation</a></div>"
+            }
+        },
+        {
+            "id": "4KoGaz7PYY",
+            "type": "paragraph",
+            "data": {
+                "text": "Cheeky, aren't I? 😉"
+            }
+        }
+    ],
+    "version": "2.30.2"
+}

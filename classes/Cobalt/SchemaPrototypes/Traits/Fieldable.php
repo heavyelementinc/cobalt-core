@@ -4,10 +4,12 @@ namespace Cobalt\SchemaPrototypes\Traits;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Exception;
 
 trait Fieldable {
     #[Prototype]
-    protected function field(string $class = "", array $misc = [], string $tag = "input"):string {
+    protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
+        if($tag === null) $tag = $this->getDirective("input_tag") ?? "input";
         return $this->input($class, $misc, $tag);
     }
 
@@ -18,7 +20,6 @@ trait Fieldable {
      * The field method returns an editable field
      */
     protected function input($classes = "", $misc = [], $tag = "input"):string {
-        [$misc, $attrs] = $this->defaultFieldData($misc);
         $closingTag = "";
         if($tag !== "input") $closingTag = "</$tag>";
         
@@ -28,7 +29,12 @@ trait Fieldable {
         $value = $this->getValue();
         $pattern = $this->getDirective("pattern", false);
         if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
-        return "<$tag class=\"$classes\" $attrs value=\"" . htmlspecialchars($value) . "\"$pattern>$closingTag";
+
+        [$misc, $attrs] = $this->defaultFieldData($misc);
+        return "<$tag class=\"$classes\" $attrs value=\"" . str_replace(
+            ['"',      "'",      '<',    '>'],
+            ['&quot;', '&#039;', '&lt;', "&gt;"],
+            $value) . "\"$pattern>$closingTag";
     }
 
     protected function inputDate($classes = "", $misc = []) {
@@ -64,7 +70,7 @@ trait Fieldable {
         $pattern = $this->getDirective("pattern", false);
         if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
 
-        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-date>";
+        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-datetime>";
     }
 
     protected function select($classes = "", $misc = [], $tag = "select") {
@@ -78,11 +84,26 @@ trait Fieldable {
     }
 
     protected function inputBinary($classes = "", $misc = []) {
+        // [$misc, $attrs] = $this->defaultFieldData($misc);
+        // $options = $this->binaryOptions();
+        // // return $this->select($classes, $misc, "input-binary");
+        // return "<input-binary class=\"$classes\" $attrs>$options</input-binary>";
         return $this->select($classes, $misc, "input-binary");
     }
 
     protected function inputArray($classes = "", $misc = []) {
         return $this->select($classes, $misc, "input-array");
+    }
+
+    protected function inputObjectArray($classes = "", $misc = []) {
+        $template = $this->getDirective("view");
+        if($template) $final = view($template, ['doc' => $this, 'field' => $this->value[0]]);
+        else {
+            $template = $this->getDirective("template");
+            $final = view_from_string($template, ['doc' => $this, 'field' => $this->value[0]]);
+        }
+        if(!$template) throw new Exception("Cannot create a field for $this->name, must set a 'view' or 'template' directive");
+        return "<input-object-array name='$this->name'><template>$final</template><var>".json_encode($this->value)."</var></input-object-array>";
     }
 
     public function textarea($classes = "", $misc = [], $tag = "textarea") {

@@ -1,211 +1,236 @@
-class ActionMenu {
-    constructor({ event, title = "", mode = null, withIcons = true, attachTo = null, closeCallback = () => {}, menuClasses = [] }) {
-        // Only one instance of a menu is allowed on a single page
-        if (window.menu_instance) {
-            window.menu_instance.closeMenu();
-            window.menu_instance = null;
+/**
+ * @emits actionmenustate
+ * @emits actionmenurequest
+ * @emits actionmenuselect
+ */
+class ActionMenu extends EventTarget {
+    constructor(button = null, mode = null) {
+        super();
+        // Constants
+        this.ACTION_MENU_CLASS = "action-menu-wrapper";
+        this.ACTION_MENU_TYPES = [
+            "popover",
+            "modal",
+        ];
+        this.SCROLL_LOCK_CLASS = "scroll-locked";
+        this.BUTTON_TARGET_ACTION_COMPLETE = "action-menu--work-complete";
+        this.BUTTON_TARGET_ACTION_ERROR = "action-menu--work-error";
+
+        // Properties
+        this.props = {
+            registeredActions: [],
+            type: this.ACTION_MENU_TYPES[0], // Defaults to 'popover'
         }
-        event.preventDefault();
-        this.event = event;
-        this.title = title;
-        this.mode = mode || (window.matchMedia("only screen and (max-width: 35em)").matches) ? "modal" : "element";
-        this.withIcons = withIcons;
-        this.toggle = false;
-        this.attachTo = attachTo;
-        this.closeCallback = closeCallback;
-        this.menuClasses = menuClasses;
-        /** @property the list of actions to display in the menu */
-        this.actions = [];
-        /** @property the default properties of a single action */
-        this.actionDefaultProperties = {
-            label: "{{Default}}",
-            icon: null,
-            dangerous: false,
-            request: {
-                // Specify an endpoint and an action
-                // method: "POST",
-                // action: "/api/v1/some/endpoint",
-                // data: {}
-            },
-            callback: async (element, event, asyncRequest) => {
-                return true; // Return true to dismiss menu
-            },
-            disabled: false
-        }
-        this.wrapper = null;
-        this.menu = null;
-        this.menuList = document.createElement('action-menu-items');
+
+        // Initialization
+        this.wrapper = document.createElement("div");
+        this.button = button;
+        this.headlineTitle = document.createElement("h1");
+        this.actionMenuItems = document.createElement("menu");
+        this.closeGlyph = document.createElement("button");
+        this.closeGlyph.innerHTML =  `<span class='close-glyph'></span>`;
+        this.initWrapper();
+        
+        this.type = mode;
+        // if(window.menu_instance) window.menu_instance.closeMenu()
     }
 
-    registerAction(action) {
-        action = { ...this.actionDefaultProperties, ...action }
-        this.actions.push(action);
-    }
-
-    renderAction(action) {
-        const button = document.createElement('button');
-        if (this.withIcons) button.innerHTML = action.icon;
-
-        const label = document.createElement("span");
-        label.innerText = action.label;
-        button.appendChild(label);
-
-        for(const i in action) {
-            if(i[0] === "o" && i[1] === "n") {
-                button[i] = action[i];
-            }
+    initWrapper() {
+        // Set up our wrapper
+        this.wrapper.classList.add(this.ACTION_MENU_CLASS);
+        this.wrapper.setAttribute("popover", "auto");
+        
+        // Set up our button target, if we have one
+        if(this.button) {
+            this.wrapper.id = random_string();
+            this.button.setAttribute("popovertarget", this.wrapper.id);
         }
 
-        if (action.dangerous) button.classList.add("action-menu-item--dangerous");
-        if (action.disabled) button.disabled = action.disabled;
-        button.addEventListener("click", (ev) => {
-            this.handleAction(action, ev);
-        });
-        this.menuList.appendChild(button);
-        document.addEventListener("click", this.handleClickOut);
+        this.wrapper.addEventListener("beforetoggle", event => this.beforeToggleEvent(event));
+        this.wrapper.addEventListener("toggle", event => this.toggleEvent(event));
+
+        var headline = document.createElement("div");
+        headline.classList.add("action-menu-header");
+        this.wrapper.appendChild(headline);
+        headline.appendChild(this.headlineTitle);
+        headline.appendChild(this.closeGlyph);
+        this.wrapper.appendChild(this.actionMenuItems);
+        // If this element lives in main, we want to place its wrapper in main,
+        // otherwise, we want it in the body tag.
+        this.button.closest("main,body").appendChild(this.wrapper);
+        this.closeGlyph.addEventListener("mousedown", () => this.closeMenu())
     }
 
-    async draw() {
-        this.menu = document.createElement("div");
-        this.menu.classList.add("action-menu");
-        let header = document.createElement("div");
-        header.classList.add('header')
-        header.innerHTML = `<h1>${this.title}</h1><button>${window.closeGlyph}</button>`
-        this.menu.appendChild(header);
+    get isOpen() {
+        return this.wrapper.matches(":popover-open");
+    }
 
-        header.querySelector("button").addEventListener("click", this.closeMenu.bind(this))
-        // await wait_for_animation("action-menu--deploy");
-        // const api = new ApiFetch("", "GET");
-        // const options = await api.send("");
+    get title() {
+        return this.headlineTile.innerText;
+    }
 
-        for (const i of this.actions) {
-            this.renderAction(i);
+    set title(value) {
+        this.headlineTitle.innerHTML = value;
+    }
+
+    get type() {
+        return this.wrapper.getAttribute("mode");
+    }
+
+    set type(value) {
+        let mode = value;
+        let max = this.ACTION_MENU_TYPES.length
+        if(this.ACTION_MENU_TYPES.includes(value)) mode = value;
+        else if(mode >= 0 && mode < max) mode = this.ACTION_MENU_TYPES[mode];
+        else mode = this.ACTION_MENU_TYPES[0]
+
+        // Check if we're in mobile mode
+        if(window.matchMedia("only screen and (max-width: 35em)")) {
+            mode = this.ACTION_MENU_TYPES[1];
         }
-        this.menu.appendChild(this.menuList);
+        // There can only be one type set
+        this.wrapper.setAttribute("mode", mode);
+        if(this.type === "modal") {
+            this.button.style.setProperty("anchor-name", '');
+            // this.wrapper.style.bottom = ``;
+            // this.wrapper.style.right = ``;
+            this.wrapper.style.top = ``;
+            this.wrapper.style.left = ``;
+            return;
+        }
+        const anchorId = `--anchor-${this.button.getAttribute("popovertarget")}`;
+        this.button.style.setProperty("anchor-name", anchorId);
+        this.wrapper.style.setProperty("position-anchor", anchorId);
+        // this.wrapper.style.right = `anchor(${anchorId} left)`;
+        // this.wrapper.style.top = `anchor(${anchorId} bottom)`;
+        // this.wrapper.style.left = `anchor(${anchorId} left)`;
+    }
 
-        this.wrapper = document.createElement('action-menu-wrapper');
-        this.wrapper.appendChild(this.menu);
-        this.wrapper.classList.add(this.mode, ...this.menuClasses);
-        document.querySelector('body').appendChild(this.wrapper);
+    get mode() {
+        return this.type;
+    }
 
-        window.menu_instance = this;
+    set mode(value) {
+        this.type = value;
+    }
 
-        await reflow();
 
-        const spawnIndex = spawn_priority(this.event);
-        if (spawnIndex) this.menu.style.zIndex = spawnIndex + 1;
+    beforeToggleEvent(event) {
+        if(this.button) {
+            this.button.classList.remove(this.BUTTON_TARGET_ACTION_COMPLETE);
+        }
+    }
 
-        this.positionMenu();
+    toggleEvent(event) {
+        if(event.newState === "open") {
+            this.dispatchEvent(new CustomEvent("actionmenustate", {detail: {type: "open", open: true}}));
+            const supports_CSS_anchor = CSS.supports("top", "anchor(bottom)");
+            if(!supports_CSS_anchor) this.positionMenu();
+            return
+        }
+
+        this.dispatchEvent(new CustomEvent("actionmenustate", {detail: {type: "closed", open: false}}));
+        for(const action of this.props.registeredActions) {
+            if(action.actionContainer.classList.contains(action.REQUEST_STATES.COMPLETE)) action.throbberEnd();
+        }
     }
 
     /**
-     * 
-     * @param {object} action - The parameters of the action
-     * @param {event} event - The event that triggered the callback
+     * @deprecated
      */
-    async handleAction(action, event) {
-        let spinner = event.target.closest("button").querySelector("loading-spinner");
-        if (spinner == null) spinner = document.createElement("loading-spinner");
-        
-        if("original" in action) action.original.dispatchEvent(new Event("loadstart", {detail: {action, event}}))
-        
-        action.loading = {
-            start: () => {
-                event.target.closest("button").appendChild(spinner);
-            },
-            end: () => {
-                spinner.parentElement.removeChild(spinner)
-            },
-            error: (errorMessage) => {
-                spinner.innerHTML = `<ion-icon name='warning' style='color:red;pointer-events:none;'></ion-icon>`;
-                console.log(errorMessage.error);
-                spinner.title = errorMessage
-            }
-        }
-        action.loading.start()
-        let result = null;
-        let requestData = null;
-        const api = new AsyncFetch(action.request.action, action.request.method,{});
-        if("method" in action.request && "action" in action.request) {
-            try {
-                const toSubmit = this.toSubmit(action, event);
-                requestData = await api.submit(toSubmit);
-                // event.target.dispatchEvent(new Event("load", {detail: {requestData}}));
-                if("original" in action) action.original.dispatchEvent(new Event("load", {detail: {action, event, result: requestData}}))
-            } catch (error) {
-                console.log(api);
-                action.loading.error(error);
-                if(api.client.status === 300) {
-                    this.closeMenu();
-                    const promise = new Promise((resolve, reject) => {
-                        api.addEventListener("done", e => {
-                            resolve(e.detail);
-                        });
-                    });
-                    await promise;
-                    if(!promise) return;
-                    requestData = api.resolved.fulfillment;
-                } else {
-                    if("original" in action) action.original.dispatchEvent(new Event("error", {detail: {action, event, result: api.result}}))
-                    return;
-                }
-            }
-        }
-        try {
-            result = await action.callback(action, event, requestData);
-            this.event.target.dispatchEvent(new CustomEvent("actionmenucomplete",{detail: {action, event, requestData, result}}));
-        } catch (error) {
-            console.log(error);
-            console.log(requestData);
-            action.loading.error(error);
-            new StatusError({message: requestData.error, icon: "ion-warning"});
-            return;
-        }
-        action.loading.end();
-        if (result === true) this.closeMenu();
+    draw() {
+        console.warn("Calling `draw` on an ActionMenu is deprecated and will throw an error in a later release of Cobalt Engine");
+        this.openMenu();
     }
 
-    toSubmit(action, event) {
-        let data = event.target.getAttribute("value") || action.request.value || event.target.closest("button").getAttribute("value");
-        try {
-            if(data) data = JSON.parse(data);
-        } catch (error) {
-            // Do nothing.
-        }
-        return action.value || data || {};
+    /**
+     * Returns a registered action for you to manipulate. Valid properties are:
+     *  -> icon - string, should be a valid MDI icon name, sets the `name` of the <i> element
+     *  -> label - string, the label for this button, HTML supported
+     *  -> dangerous - bool, let's the user know the action is dangerous
+     *  -> disabled - bool, `true` to disable, `false` to enable
+     *  -> requestMethod - ?string, the method (`POST`, `GET`, `DELETE`, etc) to 
+     *  -> requestAction - ?string, the API endpoint to dispatch the request to
+     *  -> requestData - mixed, the value is submitted with the API request (can be a function, return value is sent)
+     *  -> callback - function, return truthy to close the menu, falsey to keep the menu open
+     * @returns {RegisteredAction}
+     */
+    registerAction() {
+        const index = this.props.registeredActions.length
+        const action = new RegisteredAction(this, index);
+        this.props.registeredActions.push(action);
+        this.actionMenuItems.appendChild(action.actionContainer);
+        action.actionContainer.addEventListener("click", async event => {
+            const type = action.getType();
+            let value = true;
+            switch(type) {
+                case "href":
+                    window.Cobalt.router.location = action.href;
+                    break;
+                case "request":
+                    value = await this.handleRequest(action, event)
+                    break;
+                case "callback":
+                default:
+                    if(typeof action.callback !== "function") {
+                        throw new Error("callback is not a function!");
+                    }
+                    value = await action.callback(action.actionContainer, event, {menu: this})
+                    break;
+            }
+
+            // Handle closure of this menu
+            const actionmenuselect = new CustomEvent("actionmenuselect", {detail: {result: value, action: action}})
+            this.dispatchEvent(actionmenuselect);
+            if(actionmenuselect.defaultPrevented) return; // If the default is prevented, do nothing!
+            
+            if(value == true) this.closeMenu();
+        });
+        return action;
     }
 
-    /** Close this menu */
+    async handleRequest(action, event) {
+        const api = new AsyncFetch(action.requestAction, action.requestMethod);
+        action.throbberStart();
+        let result
+        try {
+            result = await api.submit(action.requestData);
+        } catch (e) {
+            action.throbberError(e);
+            this.close();
+            return "";
+        }
+        action.throbberComplete(10);
+        this.dispatchEvent(new CustomEvent("actionmenurequest", {detail: result}));
+        value = await action.callback(action.actionContainer, event, result);
+        return value;
+    }
+
     closeMenu() {
-        document.body.classList.remove("scroll-locked");
-        this.wrapper.style.display = "none";
-        setTimeout(() => {
-            if ("parentNode" in this.wrapper && this.wrapper.parentNode) this.wrapper.parentNode.removeChild(this.wrapper);
-        }, 1000);
-        this.clearEvent();
-        this.closeCallback();
+        if(this.type === "modal") unlock_viewport();
+        this.wrapper.hidePopover();
     }
 
-    clearEvent() {
-        document.removeEventListener("click", this.handleClickOut)
+    close() {
+        this.closeMenu();
     }
 
-    handleClickOut(e) {
-        // If the spawning target is also the current event target:
-        if (window.menu_instance.event.target === e.target && window.menu_instance.toggle === false) {
-            window.menu_instance.toggle = true;
-            return;
-        }
-
-        // If we're in modal mode and the event is on the wrapper
-        if (window.menu_instance.mode === "modal" && e.target === window.menu_instance.wrapper)
-            window.menu_instance.closeMenu();
-
-        // If the target has an action-menu-wrapper ancestor don't close
-        if (e.target.closest("action-menu-wrapper")) return;
-        window.menu_instance.closeMenu();
+    openMenu() {
+        if(this.type === "modal") lock_viewport();
+        this.wrapper.showPopover();
     }
 
+    open() {
+        this.openMenu();
+    }
+
+    toggle() {
+        this.wrapper.togglePopover();
+    }
+
+    /**
+     * @deprecated - As soon as Firefox and Safari support CSS anchors, we're going to delete this polyfill
+     */
     positionMenu() {
         if (this.mode === "modal") {
             document.body.classList.add("scroll-locked");
@@ -223,7 +248,7 @@ class ActionMenu {
             originX -= Math.abs((originX + menuWidth + 5) - viewportWidth);
             if(this.attachTo !== null) {
                 // Set the origin right now since we need to not be seeing the
-                // fucking scrollbar as that throws off the attachTo X location.
+                // scrollbar as that throws off the attachTo X location.
                 this.wrapper.style.left = `${originX}px`;
                 this.wrapper.style.top = `${originY}px`;
                 // reflow();
@@ -242,6 +267,9 @@ class ActionMenu {
         this.wrapper.style.top = `${originY}px`;
     }
 
+    /**
+     * @deprecated - As soon as Firefox and Safari support CSS anchors, we're going to delete this polyfill
+     */
     getAbsolutePosition(type) {
         let translation = {
             left: 'X',
@@ -252,13 +280,11 @@ class ActionMenu {
         // return this.event['page' + translation[type]];
     }
 
+    /**
+     * @deprecated - As soon as Firefox and Safari support CSS anchors, we're going to delete this polyfill
+     */
     getAbsolutePositionElement(type) {
-        let target = this.event.target ?? this.event.srcElement;
-        if(target.parentNode.tagName === "BUTTON") target = target.parentNode
-        if(this.attachTo) target = this.attachTo;
-        else {
-            target = this.event.target.closest("button, input[type='button'], input[type='submit'], async-button, split-button") ?? target;
-        }
+        let target = this.button;
 
         switch(type) {
             case "right":
@@ -275,11 +301,209 @@ class ActionMenu {
             left: 'Left',
             top: 'Top'
         }
-        
 
         let offset = target[`offset${translation[type]}`];
 
         if (type === "top") offset += target.offsetHeight;
         return offset;
+    }
+
+}
+
+class RegisteredAction {
+    constructor(menu, index) {
+        this.REQUEST_STATES = {
+            WORKING: "action-menu--request-working",
+            COMPLETE: "action-menu--request-complete",
+            ERROR: "action-menu--request-error",
+        }
+
+        this.props = {
+            menu: menu,
+            index: index,
+            href: null,
+            // label: "{{DEFAULT}}",
+            // icon: null,
+            dangerous: false,
+            request: {
+                method: null,
+                action: null,
+                data: (context) => {},
+            },
+            callback: async (element, event, asyncRequest) => {
+                return true
+            },
+            disabled: false,
+        }
+
+        this.throbberCompleteTimeout = null;
+
+        this.actionContainer = document.createElement("li")
+        this.buttonContainer = document.createElement("button");
+        this.iconContainer = document.createElement("i");
+        this.labelContainer = document.createElement("label");
+        this.throbberContainer = document.createElement("div");
+        this.throbberContainer.classList.add("throbber");
+
+        this.actionContainer.appendChild(this.buttonContainer);
+        this.buttonContainer.appendChild(this.iconContainer);
+        this.buttonContainer.appendChild(this.labelContainer);
+        this.buttonContainer.appendChild(this.throbberContainer);
+    }
+
+    getType() {
+        if(this.href) return "href";
+        const callback = "callback";
+        if(!this.requestMethod) return callback;
+        if(!this.requestAction) return callback;
+        return "request";
+    }
+
+    get option() {
+        return this.props.option;
+    }
+
+    set option(reference) {
+        this.props.option = reference;
+    }
+
+    get button() {
+        return this.buttonContainer;
+    }
+
+    get icon() {
+        return this.iconContainer.getAttribute("name");
+    }
+
+    set icon(value) {
+        return this.iconContainer.setAttribute("name",value);
+    }
+
+    get label() {
+        return this.labelContainer.innerHTML;
+    }
+
+    set label(value) {
+        return this.labelContainer.innerHTML = value
+    }
+
+    get href() {
+        return this.props.href;
+    }
+    
+    set href(value) {
+        this.props.href = value;
+    }
+    
+    get dangerous() {
+        const dangerous = this.buttonContainer.getAttribute("dangerous");
+        if(["true", "dangerous"].indexOf(dangerous)) return true;
+        return false;
+    }
+
+    set dangerous(value) {
+        if(value == true) this.buttonContainer.setAttribute("dangerous", "dangerous");
+        this.buttonContainer.setAttribute("dangerous", "false");
+    }
+
+    get disabled() {
+        return this.buttonContainer.disabled;
+    }
+
+    set disabled(value) {
+        this.buttonContainer.disabled = value;
+    }
+
+    get requestMethod() {
+        return this.props.request.method;
+    }
+
+    set requestMethod(value) {
+        return this.props.request.method = value;
+    }
+    
+    get requestAction() {
+        return this.props.request.action;
+    }
+
+    set requestAction(value) {
+        return this.props.request.action = value;
+    }
+    
+    get requestData() {
+        const data = this.props.request.data;
+        if(typeof data === "function") return data(this);
+        return data;
+    }
+
+    set requestData(value) {
+        return this.props.request.data = value;
+    }
+
+    get callback() {
+        return this.props.callback;
+    }
+
+    set callback(value) {
+        return this.props.callback = value;
+    }
+
+    actionActivated(originalEvent) {
+        let detail = {}
+        if(this.hasAttribute())
+        if(this.hasAttribute("event")) {
+            this.dispatchEvent(new Event(this.getAttribute("event")))
+        }
+    }
+
+    dispatchEvent(event) {
+        this.props.menu.dispatchEvent(event);
+    }
+
+    setRequestFeedback(state) {
+        for(const states in this.REQUEST_STATES) {
+            this.actionContainer.classList.remove(this.REQUEST_STATES[states])
+        }
+        if(state) this.actionContainer.classList.add(state);
+    }
+
+    throbberStart() {
+        clearTimeout(this.throbberCompleteTimeout);
+        this.setRequestFeedback(this.REQUEST_STATES.WORKING);
+        this.disabled = true;
+        this.throbberContainer.innerHTML = "<loading-spinner></loading-spinner>";
+        this.throbberContainer.style.opacity = 1;
+        this.throbberContainer.style.color = "";
+        this.actionContainer.title = "";
+    }
+
+    throbberComplete(delay = 10) {
+        this.setRequestFeedback(this.REQUEST_STATES.COMPLETE);
+        this.disabled = false;
+        this.throbberContainer.innerHTML = "<i name='check-circle-outline'></i>";
+        this.throbberContainer.style.color = "var(--project-color-acknowledge)";
+        if(delay) this.throbberCompleteTimeout = setTimeout(() => this.throbberEnd(), delay * 1000)
+        if(this.props.menu.button && !this.props.menu.isOpen) {
+            this.props.menu.button.classList.add(this.props.menu.BUTTON_TARGET_ACTION_COMPLETE);
+        }
+    }
+
+    throbberEnd() {
+        this.setRequestFeedback('');
+        this.disabled = false;
+        this.throbberContainer.style.opacity = 0;
+        this.throbberContainer.style.color = "";
+        this.actionContainer.title = "";
+    }
+    
+    throbberError(description) {
+        this.setRequestFeedback(this.REQUEST_STATES.ERROR);
+        this.disabled = false;
+        this.throbberContainer.innerHTML = "<i name='alert'></i>";
+        this.throbberContainer.style.color = "var(--project-color-problem)";
+        this.actionContainer.title = description;
+        if(this.props.menu.button && !this.props.menu.isOpen) {
+            this.props.menu.button.classList.add(this.props.menu.BUTTON_TARGET_ACTION_ERROR);
+        }
     }
 }

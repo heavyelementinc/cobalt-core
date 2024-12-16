@@ -1,90 +1,132 @@
-class ActionMenuElement extends HTMLElement {
+class ActionMenuElement extends CustomButton {
     constructor() {
         super();
         this.tabIndex = 0;
         this.options = this.querySelectorAll("option");
         this.type = this.getAttribute("type");
-        this.menuId = random_string();
-        this.menu = null;
+        
+        this.menu = new ActionMenu(this);
+
         this.stopPropagation = this.hasAttribute("stop-propagation");
         this.setAttribute("aria-pressed", "false");
         this.setAttribute("aria-role", "button");
         this.setAttribute("__custom-input", "true");
-        this.initListeners();
     }
 
-    initListeners() {
-        this.addEventListener("click", this.toggleButton);
-        this.addEventListener("keyup", this.toggleButtonWithKeypress);
-    }
-
-    toggleButton(event) {
-        if(this.stopPropagation) {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            event.preventDefault();
-        }
-        if(this.getAttribute("aria-pressed") === "true") {
-            this.menu.closeMenu();
-            this.menu = null;
-            this.setAttribute("aria-pressed", "false");
-            return;
-        }
-        this.menu = new ActionMenu({
-            event,
-            title: this.title,
-            // withIcons: true,
-            attachTo: this,
-            closeCallback: () => {
-                this.menu = null;
-                this.setAttribute("aria-pressed", "false");
-            },
-            menuClasses: ["action-menu-element-toggled"]
-        });
+    connectedCallback() {
+        super.connectedCallback();
+        this.menu.title = this.title ?? "Edit";
+        this.menu.mode = this.mode;
         this.getOptions();
-        this.menu.draw();
-        this.setAttribute("aria-pressed", "true");
+
+        this.addEventListener("click", event => {
+            if(this.stopPropagation) {
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }
+            const currentState = this.menu.isOpen;
+            if(currentState) return;
+            this.menu.toggle();
+        });
+
+        this.menu.addEventListener("actionmenustate", event => {
+            this.dispatchEvent(new CustomEvent("actionmenustate", {detail: event.detail}));
+            if(event.detail.open) this.setAttribute("aria-pressed", "true");
+            if(!event.detail.open) this.setAttribute("aria-pressed", "false");
+        });
+
+        this.menu.addEventListener("actionmenurequest", event => {
+            this.dispatchEvent(new CustomEvent("actionmenurequest", {detail: event.detail}));
+        });
+
+        this.menu.addEventListener("actionmenuselect", event => {
+            this.dispatchEvent(new CustomEvent("actionmenuselect", {detail: event.detail}));
+        });
     }
+
+    get mode() {
+        return this.getAttribute("mode") ?? "popover";
+    }
+
+    set mode(value) {
+        this.menu.mode = value;
+        this.setAttribute("mode", value);
+    }
+
+    get stopPropagation() {
+        return JSON.parse(this.getAttribute("stop-propagation"))
+    }
+
+    set stopPropagation(value) {
+        if(typeof value !== "boolean") throw new TypeError("Must be a boolean value");
+        this.setAttribute("stop-propagation", JSON.parse(value));
+    }
+    // toggleButton(event) {
+
+    // }
 
     getOptions() {
         this.menu.actions = [];
         this.options = this.querySelectorAll("option");
         for(const opt of this.options) {
-            this.menu.registerAction(this.actionFromOption(opt));
+            this.actionFromOption(opt);
         }
     }
 
+    /**
+     * Supported options
+     * * icon
+     * * label
+     * * href - A page to link to 
+     *   * target - "_blank"
+     * * action - a route to dispatch a request to
+     *   * method - GET, POST, PUT, DELETE
+     *   * value  - JSON string
+     * * onclick
+     * * onload
+     * * onloadstart
+     * * onerror
+     * * dangerous
+     * * disabled
+     * @param {HTMLOptionElement} opt 
+     * @returns 
+     */
     actionFromOption(opt) {
         const icon = opt.getAttribute("icon");
-        let action = {
-            label: opt.innerHTML || "Default",
-            icon: (icon) ? `<i name="${icon}"></i>` : "",
-            onloadstart: event => 
-                this.triggerEvent(opt, "loadstart", event), // <- loadstart has worked a few times...
-            onload:  event => 
-                this.triggerEvent(opt, "load", event),
-            onerror: event => 
-                this.triggerEvent(opt, "error", event), // <- error has worked 
-            onclick: event => 
-                this.triggerEvent(opt, "click", event), // <- Triggers correctly
-            dangerous: opt.hasAttribute("dangerous"),
-            disabled: opt.hasAttribute("disabled"),
-            original: opt
+        const action = this.menu.registerAction();
+        action.option = opt;
+
+        action.label = opt.innerHTML ?? "Default";
+        action.icon = icon;
+        
+        action.button.addEventListener("click", event => {
+            if(this.stopPropagation) event.stopPropagation();
+            this.triggerEvent(opt, "click", event, false, action)
+        });
+        action.button.addEventListener("load", event => {
+            this.triggerEvent(opt, "load", event, false, action)
+        });
+        action.button.addEventListener("loadstart", event => {
+            this.triggerEvent(opt, "loadstart", event, true, action)
+        });
+        action.button.addEventListener("error", event => {
+            this.triggerEvent(opt, "error", event, false, action)
+        });
+        
+        action.dangerous = opt.hasAttribute("dangerous");
+        action.disabled = (opt.hasAttribute("disabled")) ? opt.disabled : false
+        action.original = opt
+        
+        if(opt.hasAttribute("href")) {
+            action.href = opt.getAttribute("href");
+            action.target = opt.getAttribute("target");
         }
 
-        // if(opt.onclick) action.callback = opt.onclick;
         if(opt.hasAttribute("action")) {
-            let json = opt.getAttribute("value") ?? {};
-            // try {
-            //     json = JSON.parse(opt.getAttribute("value"));
-            // } catch (error) {
-            //     json = opt.getAttribute("value");
-            // }
-            action.request = {
-                action: opt.getAttribute("action"),
-                method: opt.getAttribute("method") ?? "POST",
-                value: json,
-            }
+            let json = opt.getAttribute("value") ?? "{}";
+            action.requestAction = opt.getAttribute("action");
+            action.requestMethod = opt.getAttribute("method") ?? "POST";
+            action.requestData = JSON.parse(json);
         }
         
         return action;
@@ -95,6 +137,10 @@ class ActionMenuElement extends HTMLElement {
         if(custom) event_object = new CustomEvent(event.type, {detail: {option, event}});
         else event_object = new Event(event.type, {detail: {option, event}});
         option.dispatchEvent(event_object);
+        const details = {};
+        if(option.hasAttribute("details")) details = option.getAttribute("details");
+        if(option.hasAttribute("event")) this.dispatchEvent(option.getAttribute("event"), {detail: details});
+        if(option.hasAttribute("custom-event")) this.dispatchEvent(option.getAttribute("custom-event"), {detail: details});
     }
 
     toggleButtonWithKeypress(event) {

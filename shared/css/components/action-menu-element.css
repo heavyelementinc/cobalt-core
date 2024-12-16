@@ -1,10 +1,17 @@
-action-menu {
+action-menu[role="button"] {
     display: flex;
     aspect-ratio: 1 / 1;
-    width: 2ch;
+    width: 4ch;
+    height: 4ch;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--project-color-input-border-nofocus);
+    background: var(--project-color-input-background);
+    color: var(--project-color-input-text-color);
+    padding: 0rem 1em;
+    box-sizing: border-box;
 }
+
 action-menu:before {
     content: "\F035C";
     font-family: "Material Design Icons";
@@ -13,12 +20,19 @@ action-menu:before {
 action-menu option{
     display: none;
 }
+
 action-menu[aria-pressed="true"] {
     background: var(--project-action-menu-background);
 }
+
+action-menu:hover:not([aria-pressed="true"]) {
+    background: var(--project-color-button-hover);
+}
+
 .action-menu-element-toggled .action-menu {
     background: var(--project-color-input-background);
 }
+
 action-menu[type="options"] {
     display: inline-block;
     border: none;
@@ -41,7 +55,11 @@ inline-menu, inline-menu[status="closed"] {
     border: var(--project-action-menu-border);
     border-radius: 4px;
     padding: 4px;
-    aspect-radio: 1 / 1;
+    /* aspect-ratio: 1 / 1; */
+}
+
+inline-menu hr:last-child {
+    display: none;
 }
 
 inline-menu[status="open"] {
@@ -50,6 +68,8 @@ inline-menu[status="open"] {
     opacity: 1;
     isolation: isolate;
     z-index: var(--project-modal-z-index);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 0.6em;
 }
 
 inline-menu radio-group {

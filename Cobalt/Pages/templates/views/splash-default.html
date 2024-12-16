@@ -1,0 +1,11 @@
+<section class="landing-main--splash{{class}}
+ direction--{{page.splash_reverse}}"
+ {{page.splash_image_alignment.display()}}
+>
+    {{page.splash_image.embed()}}
+    <div class="landing-main--title-container">
+        <h1>{{page.title}}</h1>
+        {{page.subtitle.md()}}
+        <a href="{{page.cta_href}}" class="button">{{page.cta}}</a>
+    </div>
+</section>

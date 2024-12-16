@@ -33,9 +33,11 @@ class SessionManager extends \Drivers\Database {
         return $result->getDeletedCount();
     }
 
-    public function session_manager_ui_by_user_id(ObjectId $id) {
-        $result = $this->findAllAsSchema(['user_id' => $id]);
-        $html = view_each("/authentication/user-management/sessions/session-item.html", ['doc' => $result]);
+    public function session_manager_ui_by_user_id(null|ObjectId $id) {
+        if($id === null) return "";
+        $result = $this->find(['user_id' => $id]);
+        
+        $html = view_each("/authentication/user-management/sessions/session-item.html", ['doc' => iterator_to_array($result)]);
 
         return view("/authentication/user-management/sessions/session-ui.html", ['html' => $html]);
     }

@@ -1,9 +1,7 @@
 <hgroup>
     <h1>{{title}}</h1>
     <action-menu>
-        <option onclick='copyToClipboard("&#123;&#123;!custom.{{doc.unique_name}}.embed&#125;&#125;")'>Copy slug to clipboard</option>
-        <option onclick='modalForm("/admin/customizations/update/{{doc._id}}",{})'>Update parameters</option>
-        <option method="DELETE" action="/api/v1/customizations/{{doc._id}}">Delete this item</option>
+        {{!doc.action_menu_options}}
     </action-menu>
 </hgroup>
 <div>

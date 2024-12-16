@@ -207,6 +207,7 @@ class AutoCompleteInterface extends HTMLElement {
 
     async filterOptions(filter, custom = {}, all = false) {
         const val = this.value;
+        if("options" in this === false) throw new Error("Classes extending `AutoCompleteInterface` must implement an `options` getter");
         let opts = this.options ?? [];
         let finalOptions = [];
 
@@ -230,7 +231,7 @@ class AutoCompleteInterface extends HTMLElement {
                     if(val === attr) continue;
                     break;
             }
-            if(filter.test(i.innerText) || all) finalOptions.push({
+            if(filter && filter.test(i.innerText) || all) finalOptions.push({
                 value: attr,
                 label: i.innerText,
                 custom: false

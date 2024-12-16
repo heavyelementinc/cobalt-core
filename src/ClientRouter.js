@@ -133,13 +133,19 @@ class ClientRouter extends EventTarget{
         this.setPushStateMode();
         this.initListeners();
         history.replaceState({ // Let's set up initial pages so async popstates work well
-                title: document.title,
+                title: this.getTitle(document.title),
                 url: window.location.toString(),
                 scrollY: window.scrollY,
                 scrollX: window.scrollX
             }, '', window.location.toString()
         );
         
+    }
+
+    getTitle(title) {
+        const titleElement = document.querySelector("title");
+        const suffix = titleElement.dataset.suffix ?? "";
+        return `${title}${suffix}`;
     }
 
     get location() {
@@ -164,6 +170,50 @@ class ClientRouter extends EventTarget{
         const result = this.navigate(route);
     }
 
+    get hash() {
+        return window.location.hash;
+    }
+
+    set hash(newHash) {
+        window.location.hash = newHash;
+    }
+
+    // set hashObject(hash) {
+    //     let decoded = this.hashObject;
+    //     let object = hash;
+    //     switch(typeof hash){
+    //         case "string":
+    //             object = hash.split("/");
+    //             break;
+    //     }
+    //     decoded = {
+    //         ...decoded,
+    //         ...hash
+    //     };
+    //     window.location.hash = this.serializeHashObject(decoded);
+    // }
+
+    // get hashObject() {
+    //     return this.deserializeHashObject(window.location.hash);
+    // }
+
+    // deserializeHashObject(hash) {
+    //     const encoded = hash;
+    //     let arr = encoded.split("/");
+    //     const decoded = {};
+    //     for(let i = 0; i >= arr.length; i += 2) {
+    //         decoded[arr[i]] = arr[i + 1];
+    //     }
+    //     return decoded;
+    // }
+
+    // serializeHashObject(object) {
+    //     let string = "";
+    //     for(let i = 0; i >= Object.keys(object).length; i += 2) {
+            
+    //     }
+    // }
+
     get routeBoundaries() {
         return this.properties.routeBoundaries;
     }
@@ -171,7 +221,7 @@ class ClientRouter extends EventTarget{
     async navigate(route) {
         const forms = document.querySelectorAll("form-request");
         for(const f of forms) {
-            if(f.unsavedChanges) {
+            if(await f.unsavedChanges()) {
                 const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
                 if(!conf) return;
             }
@@ -185,13 +235,13 @@ class ClientRouter extends EventTarget{
         const current = history.state;
         history.replaceState(
             {
-                title: document.title,
-                url: current.url,
+                title: this.getTitle(document.title),
+                url: current?.url ?? this.location.toString(),
                 scrollY: window.scrollY,
                 scrollX: window.scrollX,
             }, 
             '',
-            current.url
+            current?.url ?? this.location.toString()
         );
 
         this.progressBar.classList.add("navigation-start");
@@ -225,7 +275,6 @@ class ClientRouter extends EventTarget{
             return;
         }
         
-        this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
 
         this.updateContent(result);
         this.updateScroll();
@@ -235,7 +284,7 @@ class ClientRouter extends EventTarget{
         }
         
         history[this.historyMode]({
-                title: document.title,
+                title: this.getTitle(document.title),
                 url: route.originalRoute,
                 scrollY: window.scrollY,
                 scrollX: window.scrollX,
@@ -244,16 +293,23 @@ class ClientRouter extends EventTarget{
 
         this.setPushStateMode();
         
+        this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
     }
 
     updateScroll() {
+        // Prevent smooth scrolling when transitioning pages
+        document.body.parentNode.style.scrollBehavior = "auto";
+
         let scrollX = 0;
         let scrollY = 0;
         if(this.lastLocationChangeEvent.type === "popstate") {
             scrollX = this.lastLocationChangeEvent.state.scrollX;
             scrollY = this.lastLocationChangeEvent.state.scrollY;
         }
+        
         window.scrollTo(scrollX, scrollY);
+        // Restore initial scrolling behavior now that we've scrolled
+        document.body.parentNode.style.scrollBehavior = '';
     }
 
     replaceState(location, {
@@ -275,24 +331,6 @@ class ClientRouter extends EventTarget{
             this.location = location;
         });
     }
-
-    // pushState(location, {
-    //     target = "main", 
-    //     updateProperty = "innerHTML", 
-    //     skipRequest = false, 
-    //     skipUpdate = false
-    // } = {}) {
-    //     this.setPushStateMode();
-    //     this.historyMode  = "pushState";
-    //     this.updateTarget = (typeof target === "string") ? document.querySelector(target) : target;
-    //     this.updateProperty = updateProperty;
-    //     this.skipRequest = skipRequest;
-    //     this.skipUpdate  = skipUpdate;
-    //     return new Promise(resolve =>{
-    //         this.addEventListener("navigateend", e => resolve(e.detail), {once: true});
-    //         this.location = location;
-    //     });
-    // }
 
     setPushStateMode() {
         this.historyMode  = "pushState";
@@ -329,12 +367,12 @@ class ClientRouter extends EventTarget{
     }
 
     updateContent(pageData, query = this.updateTarget) {
-        document.title = pageData.title || app("app_name");
+        document.title = this.getTitle(pageData.title || app("app_name"));
         let main;
         if(typeof query === "string") main = document.querySelector(query);
         else main = query;
-        main.id = pageData.main_id || "main";
-        main[this.updateProperty] = pageData.body || "";
+        main.id = pageData?.main_id || "main";
+        main[this.updateProperty] = pageData?.body || "";
 
         this.applyLinkListeners();
         this.applyFormListeners();
@@ -415,6 +453,7 @@ class ClientRouter extends EventTarget{
         if(target.getAttribute("href")[0] === "#") return true;
         if(e.ctrlKey) return true;
         if(e.button !== 0) return true;
+        if(target.hasAttribute("target")) return true;
         this.lastLocationChangeEvent = {type: e.type, detail: e.detail || {}, target: e.target || e.currentTarget || e.explicitTarget};
         e.preventDefault();
         window.Cobalt.router.location = target.href;
@@ -424,6 +463,7 @@ class ClientRouter extends EventTarget{
     applyFormListeners() {
         const forms = document.querySelectorAll("form");
         for( const form of forms ) {
+            if(['post', 'put', 'delete'].includes(form.method.toLowerCase())) continue;
             form.removeEventListener("submit", this.submitListener);
             form.addEventListener("submit", this.submitListener);
         }
@@ -432,7 +472,14 @@ class ClientRouter extends EventTarget{
     submitListener(e) {
         this.lastLocationChangeEvent = {type: e.type, detail: e.detail || {}, target: e.target || e.currentTarget || e.explicitTarget};
         e.preventDefault();
-        window.Cobalt.router.location = e.target.action || e.currentTarget.action || e.explicitTarget.action;
+        let newLocation = new URL(e.target.action || e.currentTarget.action || e.explicitTarget.action);
+        newLocation.search = ""
+        const formData = new FormData(this.lastLocationChangeEvent.target);
+        let queryParams = [];
+        for(const field of formData) {
+            queryParams.push(`${encodeURIComponent(field[0])}=${encodeURIComponent(field[1])}`);
+        }
+        window.Cobalt.router.location = newLocation + "?" + queryParams.join("&");
         return false;
     }
 

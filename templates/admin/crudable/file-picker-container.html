@@ -1,0 +1,6 @@
+<label class='fs-filemanager' data-thumbnail-id='{{data.thumbnail_id}}' 
+    style='--contrast-color: {{data.meta.contrast_color}}; --accent-color: {{data.meta.accent_color}};'>
+    <input type="radio" name="file-selection" value="{{data._id}}">
+    <div class='badges'>{{!badge}}</div>
+    <img src='/res/fs/{{data.filename.display()}}'>
+</label>

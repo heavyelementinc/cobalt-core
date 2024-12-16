@@ -16,6 +16,6 @@ class SharedHandler extends WebHandler {
     private $core_content = __ENV_ROOT__ . "/shared/";
     private $filename = "";
 
-    public function _stage_execute($router_result = "") {
+    public function _stage_execute($router_result = ""):void {
     }
 }

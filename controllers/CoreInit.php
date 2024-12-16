@@ -23,6 +23,6 @@ class CoreInit extends \Controllers\Pages {
     // this request which should result in an initialized site.
     header("Location: /");
 
-    set_template("/initialization/create_user_prompt.html");
+    return view("/initialization/create_user_prompt.html");
   }
 }

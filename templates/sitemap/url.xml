@@ -1,0 +1,6 @@
+    <url>
+        <loc>{{server_name}}{{location}}</loc>
+        <lastmod>{{lastModified}}</lastmod>
+        <priority>{{priority}}</priority>
+        {{!additional}}
+    </url>

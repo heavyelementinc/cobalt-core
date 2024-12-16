@@ -1,0 +1,325 @@
+<hgroup><h1>{{title}} "<span id="title">{{doc.title}}</span>"</h1>{{!deleted}}<action-menu>{{!delete_option}}</action-menu></hgroup>
+<form-request id="page-editor" method="{{method}}" action="{{action}}" headers="X-Editor-Token: {{token}}" {{!autosave}}>
+    <chip-nav>
+        <nav>
+            <a href="#editor">Editor</a>
+            <a href="#meta">Metadata</a>
+            <a href="#sidebar">Sidebar Content</a>
+            <a href="#bio">Author Details</a>
+            <a href="#settings">Settings</a>
+        </nav>
+        <div id="editor" class="editor">
+            <div class="main--content">
+                <div class="title">
+                    <label>{{doc.title.getLabel()}} <help-span value="This is the Page title used in the &lt;title&gt; tag as well as the landing splash section (and, if no OpenGraph title is set, it's used there, too.)"></help-span></label><br>
+                    <h1>{{doc.title.field()}}</h1>
+                </div>
+                <br>
+                <div class="url">
+                    <label>{{doc.url_slug.getLabel()}} <help-span value="This is the url &quot;path&quot; that your site is accessed through. It must not start with a &quot;/&quot; but it may contain slashes!&#10;&#10;Note that there may be issues with route conflicts as this is the last route loaded."></help-span></label><br>
+                    <div class="url_slug_container" __custom-input="true">
+                        <a id="url_slug" href="{{doc.url_slug.get_path()}}">
+                            http://{{app.domain_name}}/</a>
+                            {{doc.url_slug.field()}}
+                    </div>
+                </div>
+                <br>
+                <div class="body">
+                    <label>{{doc.body.getLabel()}}</label><br>
+                    {{doc.body.field()}}
+                </div>
+            </div>
+            <aside class="sidebar">
+                <ul class="list-panel">
+                    <li>
+                        <label>{{doc.visibility.getLabel()}} <help-span value="&quot;Private&quot; &mdash; Post is unreadable by the public (even by the author).&#10;&#10;&quot;Draft&quot; &mdash; Shareable using a &quot;Preview Key&quot; on the settings page.&#10;&#10;&quot;Unlisted&quot; &mdash; Readable by the general public, not listed on the public Post index.&#10;&#10;&quot;Public&quot; &mdash; Readable by the general public, included on the public Post index."></help-span></label>
+                        {{doc.visibility.field()}}
+                    </li>
+                    <li>
+                        <label>{{doc.live_date.getLabel()}} <help-span value="The live date controls when this page is visible. It is also used as the &quot;Last Updated&quot; field in the site map."></help-span></label>
+                        {{doc.live_date.field()}}
+                    </li>
+                    <li>
+                        <label>{{doc.summary.getLabel()}}/Description <help-span value="This is a short summary that is displayed in link previews and in search results"></help-span></label>
+                        <textarea name="summary">{{!doc.summary}}</textarea>
+                    </li>
+                </ul>
+                <ul class="list-panel">
+                    <li>
+                        <label>Splash Panel Image</label>
+                        {{doc.splash_image.field()}}
+                    </li>
+                    <li>
+                        <label>Splash Panel Layout</label>
+                        {{doc.splash_type.field()}}
+                    </li>
+                    <li>
+                        <label>Splash Direction</label>
+                        {{doc.splash_reverse.field()}}
+                    </li>
+                    <li>
+                        <label>{{doc.subtitle.getLabel()}}</label>
+                        <textarea name="subtitle">{{doc.subtitle}}</textarea>
+                    </li>
+                    <li>
+                        <label>{{doc.cta.getLabel()}}</label>
+                        {{doc.cta.field()}}
+                    </li>
+                    <li>
+                        <label>{{doc.cta_href.getLabel()}}</label>
+                        {{doc.cta_href.field()}}
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div id="meta">
+            <div class="main--content">
+                <ul class="list-panel">
+                    <li>
+                        <label>{{doc.opengraph_title.getLabel()}} <help-span value="This is the title of this page as seen through link previews on social meida.&#10;&#10;If no value is set, this will default to the title of this post."></help-span></label>
+                        {{doc.opengraph_title.field()}}
+                    </li>
+                    <li>
+                        <label>{{doc.related_title.getLabel()}} <help-span value="The headline of the Related Content section. The default value can be updated in the settings."></help-span></label>
+                        {{doc.related_title.field()}}
+                    </li>
+                    <li>
+                        <label>Tags & Keywords</label>
+                        {{doc.tags.field()}}
+                        <small>Tags are used to find how "related" two articles are. The more tags two posts have in common, the more &quot;related&quot; they are.<help-span value="If there aren't enough &quot;Related Posts&quot; to fill the section (usually 3) then the most recent articles by this author will be listed."></help-span></small>
+                    </li>
+                </ul>
+            </div>
+            <aside class="sidebar">
+                <ul class="list-panel">
+                    <li>
+                        <label>Flags</label>
+                        {{doc.metadata_flags.field()}}
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div id="sidebar">
+            <div class="main--content">
+                <label>{{doc.aside.getLabel()}} Content <help-span value="What content should live in the sidebar?"></help-span></label>
+                {{doc.aside.field()}}
+            </div>
+            <aside class="sidebar">
+                <ul class="list-panel">
+                    <li>
+                        <switch-container>
+                            <label>Include Sidebar <help-span value="Should this page show a sidebar?"></help-span></label>
+                            {{doc.include_aside.field()}}
+                        </switch-container>
+                    </li>
+                    <li>
+                        <label>{{doc.aside_positioning.getLabel()}}</label>
+                        {{doc.aside_positioning.field()}}
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div id="bio">
+            <div class="main--content">
+                <div class="vbox">
+                    <label>Section Title</label>
+                    <h1>{{doc.bio_headline.field()}}</h1>
+                </div>
+                <label>{{doc.bio.getLabel()}} <help-span value="This is your chance to build credibility with the reader. Explain who you are, what you do, and why your opinion matters!"></help-span></label>
+                {{doc.bio.field()}}
+            </div>
+            <aside class="sidebar">
+                <ul class="list-panel">
+                    
+                    <li>
+                        <label>{{doc.author.getLabel()}} <help-span value="Choose a user to be credited as the author of this page."></help-span></label>
+                        {{doc.author.field()}}
+                    </li>
+                    <li>
+                        <switch-container>
+                            <label>{{doc.include_bio.getLabel()}} <help-span value="Should this page show a biography of the author?"></help-span></label>
+                            {{doc.include_bio.field()}}
+                        </switch-container>
+                    </li>
+                    <li>
+                        <label>Biography CTA Button Label</label>
+                        {{doc.bio_cta.field()}}
+                    </li>
+                    <li>
+                        <label>Misc Author Settings</label>
+                        {{doc.bio_flags.field()}}
+                        <small>* denotes priority</small>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div id="settings">
+            <ul class="list-panel">
+
+                <li>
+                    <label>{{doc.splash_image_alignment.getLabel()}}</label>
+                    {{doc.splash_image_alignment.field()}}
+                </li>
+                
+                <li>
+                    <label>{{doc.preview_key.getLabel()}} <help-span value="The Preview Key is used to grant outside access to Draft posts. You can share a preview key with as many people as you'd like.&#10;&#10;Only one Preview Key can be issued at a time.&#10;&#10;Provisioning a new Preview Key will invalidate the previous key.&#10;&#10;NOTE: This document must be set to 'Draft' visibility for a Preview Key to grant access. 'Private' posts are always inaccessible."></help-span></label>
+                    <!-- {{doc.preview_key.field()}} -->
+                    <copy-span class="preview-key" value="{{doc.preview_key.display()}}"></copy-span>
+                    <async-button method="POST" action="/api/v1/landing-pages/{{doc._id}}/preview-key/">New Key</async-button></label>
+                </li>
+                <li>
+                    <label>{{doc.style.getLabel()}} <help-span value="Add valid CSS in this box. It will be injected into the page."></help-span></label>
+                    {{doc.style.field()}}
+                </li>
+            </ul>
+            <aside class="sidebar">
+                <label>Route Groups</label>
+                <ul class="list-panel">
+                    <li>
+                        <switch-container>
+                            <label>{{doc.include_in_route_group.getLabel()}} <help-span value="If this is off, this page will not be included in the route group."></help-span></label>
+                            {{doc.include_in_route_group.field()}}
+                        </switch>
+                    </li>
+                    <li>
+                        <label>{{doc.route_group.getLabel()}} <help-span value="Pages may only be added to `web context` route groups. Listed above are all web context route groups in your application."></help-span></label>
+                        {{doc.route_group.field()}}
+                        <small>Choose an available route group.</small>
+                    </li>
+                    <li>
+                        <label>{{doc.route_link_label.getLabel()}} <help-span value="This is the visible text of the hyperlink. If nothing is defined here, the title of your page will be used."></help-span></label>
+                        {{doc.route_link_label.field()}}
+                        <small>Give your link a label.</small>
+                    </li>
+                    <li>
+                        <label>{{doc.route_order.getLabel()}} <help-span value="This is the order that your link should fall in within the group. Note that it's possible to use negative numbers but we recommend against using them since it quickly becomes confusing."></help-span></label>
+                        {{doc.route_order.field()}}
+                    </li>
+                    <li>
+                        <details>
+                            <summary>About Route Groups</summary>
+                            <small>
+                                "Route Groups" are used to generate navigation links. This section lets you dynamically 
+                                add your page to any predefined Route Group (thus showing your page as a navigation link).
+                            </small>
+                        </details>
+                    </li>
+                </ul>
+                <label>Misc. Settings</label>
+                <ul class="list-panel">
+                    <li>
+                        <switch-container>
+                            <label>Main Navigation <help-span value="Display the main navigation in the header of your app on this page."></help-span></label>
+                            {{doc.show_main_nav.field()}}
+                        </switch-container>
+                    </li>
+                    <li>
+                        <label>Flags</label>
+                        {{doc.flags.field()}}
+                    </li>
+                    <li>
+                        <details>
+                            <summary>About Flags</summary>
+                            <small>Flags are miscellaneous settings relative to this page.<br><br>They control access and
+                                visibilty for the page among other things.<br><br>
+                                <strong>Access Exclusive To Users</strong> means that a user must be logged in to access this page<br><br>
+                                <strong>Exclude Page From Sitemap</strong> will prevent this page from appearing on the <a href="/sitemap.xml">sitemap</a><br><br>
+                                <strong>Do Not Show Related Pages</strong> will hide the "Related Pages" section that normally appears just above the footer
+                            </small>
+                        </details>
+                    </li>
+                    {{!admin_fields}}
+                </ul>
+            </aside>
+        </div>
+        
+        
+    </chip-nav>
+    
+    {{!submit_button}}
+</form-request>
+<style>
+    #url_slug {
+        white-space: nowrap;
+    }
+    input[name="title"]{
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    input, textarea, [__custom-input] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .url_slug_container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 0 0 .4em;
+    }
+
+    .url_slug_container input{
+        border: 0;
+        width: 100%;
+    }
+
+    .main--content {
+        width: 70%;
+        gap: 1em;
+    }
+
+    .tab-nav--current-content hgroup {
+        display: none;
+    }
+
+    .tab-nav--current-content {
+        gap: 1em;
+    }
+
+    aside.sidebar {
+        place-self: flex-start;
+        flex-grow: 1;
+        height: 100%;
+        max-width: 280px;
+    }
+    .sidebar .upload-field {
+        width:100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar .upload-field input[type='file'] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .sidebar .upload-field flex-header,
+    .sidebar .upload-field fold-out {
+        display: none;
+    }
+
+    select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    textarea {
+        display: flex;
+        width: 100%;
+        min-height: 13ch;
+    }
+    switch-container {
+        width: 100%;
+    }
+    @media only screen and (max-width: 35em) {
+        .main--content {
+            width: 100%;
+        }
+        aside.sidebar {
+            width: 100%;
+            max-width: unset;
+        }
+
+        .editor  {
+            flex-direction: column-reverse;
+        }
+    }
+</style>

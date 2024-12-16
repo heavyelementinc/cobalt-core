@@ -15,7 +15,8 @@ class BooleanResult extends SchemaResult {
     /**============= PROTOTYPE METHODS =============**/
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
     
-    #[Prototype] protected function field($class = "", $misc = []) {
+    #[Prototype]
+    protected function field($class = "", $misc = []) {
         return $this->inputSwitch($class, $misc);
     }
 

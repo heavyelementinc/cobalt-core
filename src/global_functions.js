@@ -1,21 +1,12 @@
-window.Cobalt = {
-    announce: (announcement) => {
-        const div = document.createElement("div");
-        div.innerText = announcement;
-        const screenReaderAnnounceArea = document.querySelector("#sr-announce");
-        screenReaderAnnounceArea.appendChild(div);
-        setTimeout(() => {
-            div.parentNode.removeChild(div);
-        }, 1000);
-    }
-};
+
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), select[name], textarea[name], markdown-area[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], image-result[name]";
 
 function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());
 }
 
+/** @return mixed|array{Cobalt\Settings\Settings::DEFAULT_DEFINITIONS} */
 function app(setting = null) {
     if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
     if (setting === null) return document.GLOBAL_SETTINGS;
@@ -33,8 +24,31 @@ function random_string(length = 8, validChars = null) {
     return string;
 }
 
+window.viewport_lock_level = 0;
+
+function lock_viewport() {
+    window.viewport_lock_level += 1;
+    let width = get_offset(document.body).w;
+    document.body.style.overflow = "hidden";
+    document.body.style.width = `${width}px`;
+}
+
+function unlock_viewport(ignore_lock_level = false) {
+    if(ignore_lock_level == false) {
+        window.viewport_lock_level -= 1;
+        if(window.viewport_lock_level > 0) return;
+    }
+    window.viewport_lock_level = 0; // Just in case we've somehow unlocked more times than locked
+    document.body.style.overflow = "unset";
+    document.body.style.width = "unset";
+}
+
 function random_number(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function indirectEval(str) {
+    return eval?.(`"use strict";(${str})`);
 }
 
 function flyoutHandler(button, menu, callback = null) {
@@ -148,6 +162,11 @@ async function lightbox(origin, animate = true) {
 }
 
 function shadowbox(element, group = false) {
+    if(group === false) {
+        if(element.hasAttribute("data-group")) {
+            group = element.hasAttribute("data-group");
+        }
+    }
     const box = new Shadowbox(group, element);
     box.initUI();
     return box;
@@ -224,8 +243,8 @@ async function modalInput(message, { okay = "Okay", cancel = "Cancel", pattern =
     })
 }
 
-async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true, event = null }) {
-    return new Promise((resolve, reject) => {
+async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_callback = async (result) => true, event = null, form_selector = "form-request", before_callback = async (form, resolve, reject) => {return true}, initialize_callback = async () => {}}) {
+    return new Promise(async (resolve, reject) => {
         const modal = new Modal({
             url: url,
             event: event,
@@ -240,7 +259,9 @@ async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_c
                 okay: {
                     label: okay,
                     callback: async (event) => {
-                        const form = modal.dialog.querySelector("form-request");
+                        const form = modal.dialog.querySelector(form_selector);
+                        const callbackValue = await before_callback(form, resolve, reject, modal);
+                        if(callbackValue === false) return false;
                         let result = null;
                         try {
                             result = await form.send(event);
@@ -257,7 +278,8 @@ async function modalForm(url, { okay = "Submit", cancel = "Cancel", additional_c
                 }
             }
         })
-        modal.draw();
+        await modal.draw();
+        initialize_callback(modal.container, modal)
     });
 }
 
@@ -661,7 +683,7 @@ function set_cookie(name, value, days = "") {
 }
 
 function get_cookie(name) {
-    var nameEQ = name + "=";
+    var nameEQ = `${name}=`;
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
         var c = ca[i];
@@ -844,7 +866,7 @@ function getBlobWithLoadingBar(url, throbber, progressBar) {
     })
 }
 
-function copyToClipboard(valueToCopy) {
+function copyToClipboard(valueToCopy, msg = "Copied text to clipboard") {
     const element = document.createElement("input");
     document.body.appendChild(element);
     element.value = valueToCopy;
@@ -856,8 +878,8 @@ function copyToClipboard(valueToCopy) {
     document.body.removeChild(element);
 
     const message = new StatusMessage({
-        message: "Copied text to clipboard",
-        duration: 4000
+        message: msg,
+        duration: 10 * 1000
     })
 
     // setTimeout(() => message.close(), 4000);
@@ -869,7 +891,7 @@ function removeNearest(element, ancestorSelector) {
 }
 
 function promiseTimeout(callback, value) {
-    return Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         setTimeout(() => {
             resolve(callback());
         }, value);
@@ -914,4 +936,4 @@ function upload_field_update(element) {
 
 function dateFromObjectId(objectId) {
 	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
-};
+}

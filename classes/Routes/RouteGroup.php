@@ -98,7 +98,8 @@ class RouteGroup {
             [
                 'real_path' => $link['href'] ?? "Unknown",
                 'anchor'    => [
-                    'label' => $link['label'] ?? "Unknown"
+                    'label' => $link['label'] ?? "Unknown",
+                    'order' => $link['order'] ?? 999,
                 ]
             ],[
                 'externalLink' => true
@@ -153,9 +154,9 @@ class RouteGroup {
         $submenu = $this->getSubmenu($entry);
         $classes = $this->getClasses($entry);
         $unread = $this->getUnread($entry);
-        if($link === $this->currentRt) $classes[] = "navigation--current";
-        if(isset($entry['externalLink'])) $classes[] = "external-link";
-        return "{$this->listItemTags[0]}<a href=\"$link\" class=\"".implode(" ", $classes)."\">{$icon}{$label}{$unread}</a>{$submenu}{$this->listItemTags[1]}\n";
+        if($link === $this->currentRt) $classes .= "navigation--current";
+        if(isset($entry['externalLink'])) $classes .= "external-link";
+        return "{$this->listItemTags[0]}<a href=\"$link\" class=\"$classes\">{$icon}{$label}{$unread}</a>{$submenu}{$this->listItemTags[1]}\n";
     }
 
     /**
@@ -209,8 +210,8 @@ class RouteGroup {
         return " ".$menu->render();
     }
 
-    private function getClasses($entry):array {
-        return $entry['navigation'][$this->groupName]['classes'] ?? $entry['anchor']['classes'] ?? [];
+    private function getClasses($entry):string {
+        return $entry['navigation'][$this->groupName]['classes'] ?? $entry['navigation'][$this->groupName]['classes']['attrs'] ?? $entry['anchor']['classes'] ?? "";
     }
 
     private function getUnread($entry):string {

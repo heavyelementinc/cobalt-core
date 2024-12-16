@@ -216,9 +216,9 @@ class NotifyButton extends CustomButton {
             if(new Date().getTime() - await this.cache("lastPoll") < this.notificationsFetchInterval) return console.warn("Another instance of this app is listening");
         }
 
-        this.interval = setInterval(() => {
-            this.fetchUnreadCount();
-        }, this.cache("notificationFetchInterval"));
+        // this.interval = setInterval(() => {
+        //     this.fetchUnreadCount();
+        // }, this.cache("notificationFetchInterval"));
     }
 
     modifyUpdateInterval(value) {

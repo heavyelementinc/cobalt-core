@@ -1,7 +1,7 @@
 <div id='user-panel-header'>
-    {{!session.nametag}}
+    {{session.name.tag()}}
     <action-menu title="User">
-        <option icon="account" onclick="router.location = '/admin/me'; return true">Edit Profile</option>
+        <option icon="account" href="/admin/me">Edit Profile</option>
         <option icon="logout" method="GET" action="/api/v1/logout">Logout</option>
     </action-menu>
 </div>

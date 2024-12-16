@@ -2,15 +2,43 @@
 /**
  * @global int COBALT_BOOTSTRAP_AS_NEEDED - 0
  */
+
+use MongoDB\Client;
+
 define("COBALT_BOOSTRAP_AS_NEEDED", 0);
 // define("COBALT_BOOTSTRAP_");
 define("COBALT_BOOSTRAP_ALWAYS",  999);
+define("COBALT_MODE_DEVELOPMENT", 0);
+define("COBALT_MODE_PRODUCTION",  1);
 
 $db_config = __APP_ROOT__ . "/config/config.php";
 if(file_exists(__APP_ROOT__ . "/ignored/DEVELOPMENT") || file_exists(__APP_ROOT__ . "/ignored/DEV")) {
     $db_config = __APP_ROOT__ . "/config/config.development.php";
 }
 
+/**
+ * {boostrap_mode: int, safe_mode: int, mode: int, timezone: int|false, enable_debug_routes: bool, db_driver: string, db_addr: string, db_port: string, database: string, db_usr: string|false, db_pwd: string|false, db_ssl: string|false, db_sslFile: string|false, db_invalidCerts: bool, smtp_username:string, smtp_password: string,smtp_host: string,smtp_port: string,smtp_auth: string}
+ * @return array{boostrap_mode: int,
+ * safe_mode: int,
+ * mode: int,
+ * timezone: int|false,
+ * enable_debug_routes: bool,
+ * db_driver: string,
+ * db_addr: string,
+ * db_port: string,
+ * database: string,
+ * db_usr: string|false,
+ * db_pwd: string|false,
+ * db_ssl: string|false,
+ * db_sslFile: string|false,
+ * db_invalidCerts: bool,
+ * smtp_username:string,
+ * smtp_password: string,
+ * smtp_host: string,
+ * smtp_port: string,
+ * smtp_auth: string
+ * }
+ */
 function config() {
     global $CONFIG;
     return $CONFIG;
@@ -20,8 +48,8 @@ if(file_exists($db_config)) {
     // Load the settings file
     require_once $db_config;
     global $CONFIG;
-    if(!$CONFIG) die("Cobalt requires your config.php file to declare \$CONFIG");
-    if(config() !== $CONFIG) die("Something went wrong with the bootstrap process");
+    if(!$CONFIG) kill("Cobalt requires your config.php file to declare \$CONFIG");
+    if(config() !== $CONFIG) kill("Something went wrong with the bootstrap process");
 
     // Sanity check functions must return TRUE if valid and FALSE if invalid
     $sanity_check = [
@@ -38,7 +66,8 @@ if(file_exists($db_config)) {
         'safe_mode'       => fn ($val) => is_bool($val),
         'timezone'        => function ($value) {
             return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
-        }
+        },
+        'mode'            => fn ($val) => in_array($val, [COBALT_MODE_DEVELOPMENT, COBALT_MODE_PRODUCTION]),
     ];
 
     // Default values allow the config file to omit any value with the following
@@ -52,21 +81,27 @@ if(file_exists($db_config)) {
         'db_invalidCerts' => false,
         'bootstrap_mode'  => COBALT_BOOSTRAP_AS_NEEDED,
         'safe_mode'       => false,
-        'timezone'        => 'America/New_York'
+        'timezone'        => 'America/New_York',
+        'log_level'       => COBALT_LOG_ERROR,
+        'mode'            => COBALT_MODE_PRODUCTION,
     ];
 
     foreach($sanity_check as $key => $value) {
         // If the sanity check key is not in config
         if(!key_exists($key, $CONFIG)) {
             // Check if 
-            if(!key_exists($key, $default_values)) die("Your config.php file is missing a required key.");
+            if(!key_exists($key, $default_values)) kill("Your config.php file is missing a required key.");
             $CONFIG[$key] = $default_values[$key];
         }
-        if($value !== false && is_callable($value) && !$value($CONFIG[$key])) die("config.php validation failed. Key `$key` contains invalid data.");
+        if($value !== false && is_callable($value) && !$value($CONFIG[$key])) kill("config.php validation failed. Key `$key` contains invalid data.");
         // if($CONFIG[$key] == false) unset($CONFIG[$key]);
     }
-
-    date_default_timezone_set($CONFIG['timezone']);
+    
+    $tz_set_result = date_default_timezone_set($CONFIG['timezone']);
+    // $tz_set_result = date_default_timezone_set($CONFIG['timezone']);
+    if(!$tz_set_result) {
+        throw new Exception("Failed to set timezone");
+    }
 }
 
 /**
@@ -94,11 +129,11 @@ function db_cursor($collection, $database = null, $returnClient = false, $return
         if(!$CONFIG['db_ssl']) unset($authentication['ssl']);
         if(!$CONFIG['db_sslFile']) unset($authentication['sslCAFile']);
         if(!$CONFIG['db_invalidCerts']) unset($authentication['sslAllowInvalidCertificates']);
-        $client = new MongoDB\Client("mongodb://{$CONFIG['db_addr']}:{$CONFIG['db_port']}",$authentication);
+        $client = new Client("mongodb://{$CONFIG['db_addr']}:{$CONFIG['db_port']}",$authentication);
         if($returnDatabase) return $client->{$database};
         if($returnClient) return $client;
     } catch (Exception $e) {
-        die("Cannot connect to database");
+        kill("Cannot connect to database");
     }
     $database = $client->{$database};
     return $database->{$collection};

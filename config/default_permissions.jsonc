@@ -5,6 +5,7 @@
         "label": "Able to modify basic info for their own account.<help-span value='This includes first/last, username, email address, and other info.'></help-span>",
         "dangerous": true,
         "default": true,
+        "display": false,
         "ring": 3
     },
     "Admin_panel_access": {
@@ -28,7 +29,7 @@
         "default": false,
         "ring": 3
     },
-    "Contact_form_submissions_modify": {
+    "Contact_form_submissions_delete": {
         "group": "Admin",
         "label": "Allows the user to delete submissions to the contact form",
         "dangerous": true,
@@ -41,6 +42,48 @@
         "dangerous": true,
         "default": false,
         "ring": 1
+    },
+    "Post_allowed_author": {
+        "group": "Posts",
+        "label": "Allows user to be credited a Post an author",
+        "dangerous": false,
+        "default": false,
+        "ring": 3
+    },
+    "Post_index": {
+        "group": "Posts",
+        "label": "Access to the Posts index page <help-span value='This is a fairly useless permission without the ability to edit'></help-span>",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_create": {
+        "group": "Posts",
+        "label": "Create new posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_update": {
+        "group": "Posts",
+        "label": "Update existing posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_destroy": {
+        "group": "Posts",
+        "label": "Delete Posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Post_read": {
+        "group": "Posts",
+        "label": "Read Posts",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
     },
     "Posts_manage_posts": {
         "group": "Posts",
@@ -55,6 +98,62 @@
         "dangerous": true,
         "default": false,
         "ring": 3
+    },
+    "Posts_enable_privileged_fields": {
+        "group": "Posts",
+        "label": "Allows the user to access privileged Page/Post fields.",
+        "dangerous": false,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_allowed_author": {
+        "group": "Pages",
+        "label": "Allows user to appear as an author of pages.",
+        "dangerous": true,
+        "default": false,
+        "ring": 1
+    },
+    "Pages_create": {
+        "group": "Pages",
+        "label": "Create Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_read": {
+        "group": "Pages",
+        "label": "Read Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_index": {
+        "group": "Pages",
+        "label": "View Page Index",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_update": {
+        "group": "Pages",
+        "label": "Update Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_destroy": {
+        "group": "Pages",
+        "label": "Delete Pages",
+        "dangerous": true,
+        "default": false,
+        "ring": 2
+    },
+    "Pages_enable_privileged_fields": {
+        "group": "Posts",
+        "label": "Allows the user to access privileged Page/Post fields.",
+        "dangerous": false,
+        "default": false,
+        "ring": 2
     },
     "Auth_allow_creating_users": {
         "group": "Users",
@@ -163,14 +262,14 @@
     },
     "Database_database_export": {
         "group": "Admin",
-        "label:": "Allow the user to export database files",
+        "label": "Allow the user to export database files",
         "dangerous": true,
         "default": false,
         "ring": 1
     },
     "Database_database_import": {
         "group": "Admin",
-        "label:": "Allow the user to import database files",
+        "label": "Allow the user to import database files",
         "dangerous": true,
         "default": false,
         "ring": 1

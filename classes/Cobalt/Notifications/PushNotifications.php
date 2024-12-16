@@ -9,6 +9,7 @@ use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\VAPID;
 use Minishlink\WebPush\WebPush;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONDocument;
 
 class PushNotifications {
     var $app;
@@ -74,7 +75,7 @@ class PushNotifications {
     function dispatch($subject, $message, $recipients, $data = []) {
         $auth = [
             "VAPID" => [
-                'subject'    => $_SERVER['SERVER_NAME'],// ?? app("domain_name"),
+                'subject'    => server_name(),// ?? app("domain_name"),
                 'publicKey'  => $this->vapid_keys->keyset->publicKey,
                 'privateKey' => $this->vapid_keys->keyset->privateKey
             ]
@@ -140,7 +141,8 @@ class PushNotifications {
 
     function render_push_opt_in_form_values($user) {
         $form_items = "";
-        $push_settings = $user->{$this->ua_push_types} ?? [];
+        $push_settings = $user->notifications->push->types ?? [];
+        if($push_settings instanceof BSONDocument) $push_settings = $push_settings->getArrayCopy();
         foreach($this->valid as $type => $meta) {
             if(!$this->is_elligible($user, $type)) continue;
             $value = "false";

@@ -124,7 +124,7 @@ header nav a.navigation--current {
     gap: 0.4rem;
 }
 
-.cobalt-user--profile-display img.cobalt-user--avatar {
+.cobalt-user--profile-display img {
     display: inline-block;
     height: 2rem;
     width: 2rem;

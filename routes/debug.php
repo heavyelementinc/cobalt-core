@@ -226,6 +226,13 @@ if (app("enable_debug_routes")) {
         ],
         'anchor' => ['name' => 'Array Prototype']
     ]);
+
+    Route::get("/proto/array_each", "SchemaDebug@arrayeach",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Array Each']
+    ]);
     
     Route::get("/proto/binary", "SchemaDebug@binaryresult",[
         'navigation' => [
@@ -251,5 +258,32 @@ if (app("enable_debug_routes")) {
             'debug_prototypes'
         ],
         'anchor' => ['name' => 'SubMap Prototype']
+    ]);
+    Route::get("/proto/uploadimageresult", "SchemaDebug@imageresult",[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Images Prototype']
+    ]);
+
+    Route::get("/model-test", '\Cobalt\Model\Controllers\Debug@test',[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Modal Test']
+    ]);
+
+    Route::get("/compiler", '\Cobalt\Templates\Tests\Controllers\TemplateTest@compiler_output',[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'Compiler']
+    ]);
+    
+    Route::get("/compiler/render", '\Cobalt\Templates\Tests\Controllers\TemplateTest@compiler_render',[
+        'navigation' => [
+            'debug_prototypes'
+        ],
+        'anchor' => ['name' => 'compiler_render']
     ]);
 }

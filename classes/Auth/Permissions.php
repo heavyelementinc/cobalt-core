@@ -7,8 +7,10 @@
 namespace Auth;
 
 use Drivers\Database;
+use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Unauthorized;
+use MongoDB\BSON\ObjectId;
 use Render\CLITable;
 
 class Permissions extends Database {
@@ -25,6 +27,11 @@ class Permissions extends Database {
     public $valid = [];
     public $groups = [];
     public $group_rings = [];
+    const ENUM_VALUE_DIFF = [
+        "IS_DIFFERENT" => 0,
+        "IS_SAME" => 1,
+        "WRONG_VALUE" => 2
+    ];
 
     function __construct() {
         parent::__construct();
@@ -62,17 +69,26 @@ class Permissions extends Database {
         $table = [];
         $groups = "";
         $valid = $this->valid;
-        $root_group = "";
+
+        $root_group = "<fieldset><legend>Basic Permissions</legend><ul class='list-panel'>";
+        $self_group_checked = json_encode(has_permission("self", null, $user));
+        $root_group .= "<li>
+            <input-switch name=\"permissions.self\"></input-switch> Able to modify basic info for their own account<small>This includes their name, email, TOTP enrollment status, notification subscriptions and more.</small>";
         /** If the app has enabled the `root` user group, add it to the root user */
-        if (app("Auth_enable_root_group")) {
+        if (app("Auth_enable_root_group") && session()->is_root->getValue()) {
             $checked = "false";
-            if (in_array("root", (array)$user->groups)) $checked = "true";
-            $root_group =  "<li><input-switch name='groups.root' checked='$checked'></input-switch> Root <help-span
-            value=\"WARNING: Root membership gives this user TOTAL CONTROL over this application.\"></help-span></li>";
+            if ($user->is_root->getValue()) $checked = "true";
+            $root_group .=  "
+            <li>
+                <input-switch name='is_root' checked='$checked'></input-switch> <span>Root Privilege <help-span value=\"Override *all permissions checks* for this user.\"></help-span></span>
+                <small>WARNING: Enabling this permission is extremely dangerous. Root privileges give a user TOTAL CONTROL over this application.</small>
+            </li>";
         }
+        $root_group .= "</ul></fieldset>";
+
         /** Loop through the list of valid permissions */
         foreach ($valid as $name => $item) {
-
+            if(isset($item['display']) && $item['display'] === false) continue;
             $dangerous = "";
 
             /** Check the user's permission status for this permission */
@@ -85,14 +101,14 @@ class Permissions extends Database {
             if (in_array($group, (array)$user->groups)) $groupCheck = "true";
             /** Establish our group heading/container if it doesn't already exist */
             if (!key_exists($group, $table)) {
-                $table[$group] = "<fieldset><legend>$group</legend>\n<ul class='list-panel'>";
+                $table[$group] = "<details><summary>$group</summary>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
             /** Concat our current permission into the group */
             $table[$group] .= "<li><input-switch checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
-        return ['permissions' => implode("</ul></fieldset>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$root_group $groups</ul>"];
+        return ['permissions' => "$root_group" . implode("</ul></details>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$groups</ul>"];
     }
 
     function validate($id, $request) {
@@ -131,13 +147,14 @@ class Permissions extends Database {
         if (isset($perms['permissions'])) $result[0] = $this->update_permissions($perms['permissions'], $include);
         if (isset($perms['groups'])) $result[1] = $this->update_groups($perms['groups'], $include);
         return array_merge($result[0], $result[1]);
+        // return $result;
     }
 
-    /** @todo Migrate this over to \Auth\UserAccountValidation->validate_permissions */
     function update_permissions($permissions, $user_id) {
         $valid = [];
 
         foreach ($permissions as $name => $permission) {
+            // if(!is_array($permission)) throw new BadRequest("Permissions are formatted incorrectly");
             if (preg_match("/^permissions\./",$name)) $name = preg_replace("/^permissions\./","",$name);
             if (!key_exists($name, $this->valid)) throw new BadRequest("Authenticated account is missing the '$name' permission","Your request contained unexpected data.");
             if (!is_bool($permission[1])) throw new BadRequest("'$name' must be a boolean value", "Your request contained unexpected data.");
@@ -163,7 +180,34 @@ class Permissions extends Database {
         return $valid;
     }
 
-    /** @todo Migrate this over to \Auth\UserAccountValidation->validate_groups */
+    // function update_permissions($validated_permissions, $user_id) {
+    //     $modifiable = [
+    //         '$set' => [],
+    //         '$unset' => [],
+    //     ];
+
+    //     foreach($validated_permissions as $key => $permissions) {
+    //         $updateKey = '$set';
+    //         if($this->is_default_value($key, $permissions[1]) == self::ENUM_VALUE_DIFF['IS_SAME']) {
+    //             $updateKey = '$unset';
+    //         }
+            
+    //         $modifiable[$updateKey][$permissions[0]] = $permissions[1];
+    //     }
+
+    //     try {
+    //         $result = $this->updateOne([
+    //             '_id' => new ObjectId($user_id),
+    //         ],[
+    //             '$set' => $validated_permissions
+    //         ]);
+    //     } catch(Exception $e) {
+
+    //     }
+
+    //     return $result->getModifiedCount();
+    // }
+
     function update_groups($groups, $user_id) {
         $user = $this->findOne(['_id' => $this->__id($user_id)]);
 
@@ -238,5 +282,11 @@ class Permissions extends Database {
             $index += 1;
         }
         return $table;
+    }
+
+    function is_default_value(string $key, bool $value):int {
+        if(key_exists($key, $this->valid)) return self::ENUM_VALUE_DIFF['WRONG_VALUE'];
+        if($this->valid[$key]['default'] === $value) return self::ENUM_VALUE_DIFF['IS_SAME'];
+        else return self::ENUM_VALUE_DIFF['IS_DIFFERENT'];
     }
 }

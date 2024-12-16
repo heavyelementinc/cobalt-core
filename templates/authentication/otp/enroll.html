@@ -1,34 +1,40 @@
-<fieldset id="enrollment-pane" class="cobalt-two-factor--enrollment">
-    <legend>Enroll in Two-Factor Authentication</legend>
-    <div class="hbox">
-        <div class="vbox">
-            <p>Step 1: Scan the QR code with your TOTP App<help-span value="FreeOTP+, Google Authenticator, etc"></help-span> to get started.</p>
-            {{!qr}}
-            <copy-span value="{{secret}}"></copy-span>
-        </div>
-        <!-- <hr> -->
-        <form-request method="PUT" action="/api/v1/me/totp/enroll">
-            <p>Step 2: Use your TOTP app to generate a one-time password and submit it using field below.</p>
-            <label>One-time Password</label>
-            <input name="verification" placeholder="e.g 012345">
-            <button type="submit" native>Submit</button>
-        </form-request>
-    </div>
-</fieldset>
+<form-request method="PUT" action="/api/v1/me/totp/enroll">
+    <fieldset id="enrollment-pane" class="cobalt-two-factor--enrollment">
+        <legend>Enroll in Two-Factor Authentication</legend>
+        <small>Scan the QR code with your TOTP App. Then generate a one-time code.</small>
+        <ul class="list-panel">
+            <li class="hbox">
+                <div style="align-self: flex-start;">
+                    <label>Step 1</label>
+                    <small>Scan the QR code with your TOTP App<help-span value="FreeOTP+, Google Authenticator, etc"></help-span> to get started.</small>
+                    <copy-span value="{{secret}}"></copy-span>
+                </div>
+                {{!qr}}
+            </li>
+            <li>
+                <label>Step 2</label>
+                <small>Use your TOTP app to generate a one-time password and submit it using the field below.</small>
+                <input name="verification" placeholder="e.g 012345">
+                <button type="submit" native>Activate 2FA</button>
+            </li>
+        </ul>
+    </fieldset>
 
-<style>
-    .cobalt-two-factor--enrollment .hbox{
-        flex-wrap: nowrap;
-        gap: 1em;
-    }
-    .cobalt-two-factor--enrollment .hbox :is(.vbox, form-request) {
-        display: flex;
-        height: 100%;
-        width: 50%;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        text-align: center;
-        flex-grow: 1;
-    }
-</style>
+    <style>
+        .cobalt-two-factor--enrollment > .vbox{
+            flex-wrap: nowrap;
+            gap: 1em;
+        }
+        /* .cobalt-two-factor--enrollment  {
+            display: flex;
+            height: 100%;
+            width: 50%;
+            margin: 0 auto;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            flex-grow: 1;
+        } */
+    </style>
+</form-request>

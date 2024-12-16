@@ -32,7 +32,11 @@
     }
 
     connectedCallback() {
-        this.innerHTML = "<input type='password'><button></button>";
+        let autocomplete = this.getAttribute("autocomplete")
+        if(autocomplete) autocomplete = ` autocomplete="${autocomplete}"`
+        let placeholder = this.getAttribute("placeholder");
+        if(placeholder) placeholder = ` placeholder="${placeholder}"`
+        this.innerHTML = `<input type='password'${placeholder}${autocomplete}><button></button>`;
         this.input = this.querySelector("input");
         this.input.addEventListener("change", (e) => {
             e.stopPropagation();

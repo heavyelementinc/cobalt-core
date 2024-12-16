@@ -100,16 +100,18 @@ class InputArray extends AutoCompleteInterface {
         if(!Array.isArray(val)) throw new TypeError("Invalid assignment to input-array element");
         this.updateTags(val);
         this.values = val;
-        console.log(compare_arrays(this.was, this.values))
+        // console.log(compare_arrays(this.was, this.values))
         if(!compare_arrays(this.was,this.values)) {
-            console.log("input-array is firing a change event",{was: this.was, is: this.values});
+            // console.log("input-array is firing a change event",{was: this.was, is: this.values});
             this.dispatchEvent(new Event("input"));
             // this.dispatchEvent(new Event("change"));
         }
         this.was = [ ...this.values ?? []];
     }
 
-    
+    get name() {
+        return this.getAttribute("name");
+    }
 
     updateTags(val = null) {
         // Get the value of the element
@@ -137,6 +139,8 @@ class InputArray extends AutoCompleteInterface {
         for(const i of this.querySelectorAll("option[selected='selected']")) {
             value.push(i.value);
         }
+        // console.log(value);
+
         return value;
     }
 
@@ -175,7 +179,14 @@ class InputArray extends AutoCompleteInterface {
         if(!el) return;
         el.removeAttribute("selected");
         this.removeTag(el);
-        this.dispatchEvent(new Event("change", {target: this}));
+        setTimeout(() => {
+            // Why are we setting a timeout before dispatching this event? 
+            // Well, it's because if we send the change event synchronously
+            // `el` will still register as `selected` and therefore it will be
+            // included in this.value output. So we wait 20ms before dispatching
+            // the change event. This sucks. TODO fix this hacky bullshit.
+            this.dispatchEvent(new Event("change", {target: this}));
+        }, 20)
     }
 
 
@@ -309,6 +320,10 @@ class InputBinary extends HTMLElement {
 
         this.setAttribute("readonly", JSON.stringify(bool));
     }
+
+    get name() {
+        return this.getAttribute("name");
+    }
 }
 
 customElements.define("input-binary", InputBinary);
@@ -394,6 +409,9 @@ class InputUserArray extends InputArray {
         this.tags.appendChild(tag);
     }
 
+    get name() {
+        return this.getAttribute("name");
+    }
 }
 
 customElements.define("input-user-array", InputUserArray);
@@ -412,6 +430,8 @@ class InputUser extends AutoCompleteInterface {
         this.addEventListener("autocompleteselect", e => {
             this.setValue(e.detail);
         });
+        const val = this.getAttribute("value");
+        if(val) this.value = val;
     }
 
     get value() {
@@ -419,40 +439,54 @@ class InputUser extends AutoCompleteInterface {
         return "";
     }
 
-    renderOptions(opts) {
-        let finalOptions = [];
-        for(const el in opts) {
-            const label = this.drawLabel(opts[el],opts);
-            finalOptions[el] = {
-                search: label.outerHTML,
-                label: label.outerHTML,
-                value: opts[el]._id.$oid
-            }
-        }
-        // this.options = finalOptions;
-        return finalOptions;
+    set value(val) {
+        const option = this.querySelector(`option[value="${val}"]`);
+        if(!option) throw new TypeError("Must be a valid user ID!");
+        this.setValue({value: option.value, label: option.innerHTML});
     }
 
-    drawLabel(values) {
-        let user = document.createElement("div");
-        user.classList.add("cobalt-user--profile-display");
-        user.setAttribute("value", values.value);
+    get options() {
+        const opts = this.querySelectorAll("option");
+        return opts;
+    }
 
-        user.innerHTML = `
-            <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
-            <div class='vbox'>
-                <span>${values.fname} ${values.lname}</span>
-                <span class='username'>@${values.uname}</span>
-            </div>
-        `;
+    get name() {
+        return this.getAttribute("name");
+    }
+
+    // renderOptions(opts) {
+    //     let finalOptions = [];
+    //     for(const el in opts) {
+    //         const label = this.drawLabel(opts[el],opts);
+    //         finalOptions[el] = {
+    //             search: label.outerHTML,
+    //             label: label.outerHTML,
+    //             value: opts[el]._id.$oid
+    //         }
+    //     }
+    //     // this.options = finalOptions;
+    //     return finalOptions;
+    // }
+
+    // drawLabel(values) {
+    //     let user = document.createElement("div");
+    //     user.classList.add("cobalt-user--profile-display");
+    //     user.setAttribute("value", values.value);
+
+    //     user.innerHTML = `
+    //         <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
+    //         <div class='vbox'>
+    //             <span>${values.fname} ${values.lname}</span>
+    //             <span class='username'>@${values.uname}</span>
+    //         </div>
+    //     `;
         
-        return user;
-    }
+    //     return user;
+    // }
 
     setValue(values) {
         this.user = document.createElement("div");
         this.user.innerHTML = values.label;
-        this.user.style.flexGrow = "1";
         this.user.setAttribute("value", values.value);
         this.appendChild(this.user);
         this.classList.add("value");
@@ -461,10 +495,13 @@ class InputUser extends AutoCompleteInterface {
         this.clearButton.innerHTML = "<i name='backspace'></i>";
         this.clearButton.addEventListener("click", e => {
             this.removeChild(this.user);
+            delete this.user;
             this.removeChild(this.clearButton);
             this.classList.remove("value");
+            this.dispatchEvent(new Event("change"));
         });
         this.appendChild(this.clearButton);
+        this.dispatchEvent(new Event("change"));
     }
 
 }

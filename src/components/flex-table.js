@@ -147,6 +147,7 @@ class FlexTable extends HTMLElement {
                 checks.forEach(element => {
                     if(event.ctrlKey) return element.checked = !element.checked;
                     element.checked = selectAll.checked;
+                    element.dispatchEvent(new Event("change"))
                 })
             });
         }
@@ -172,6 +173,17 @@ class FlexTable extends HTMLElement {
                 else {
                     selectAll.checked = false;
                     selectAll.indeterminate = true;
+                }
+            });
+            element.addEventListener("change", event => {
+                const button = document.querySelectorAll("async-button[type='multidelete']");
+                if(!button) return;
+                for(const check of checks) {
+                    if(check.checked === true) {
+                        button.disabled = false
+                        return;
+                    }
+                    button.disabled = true
                 }
             });
         });

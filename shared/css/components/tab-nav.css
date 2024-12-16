@@ -4,6 +4,7 @@
     width: 100%;
     border: var(--project-color-table-border);
     background: var(--project-color-table-bg-odd);
+    box-sizing: border-box;
 }
 
 :is(tab-nav):not([type='row']) {
@@ -11,7 +12,7 @@
 }
 
 :is(tab-nav,chip-nav) nav {
-    display:flex !important;
+    display:flex;
     justify-content: center;
     gap: .5em;
     background: var(--project-color-table-bg-even);
@@ -37,6 +38,7 @@
     border-right: var(--project-color-table-border);
     box-sizing: border-box;
 }
+
 
 :is(tab-nav):not([type='row']) nav a {
     border-left: unset;
@@ -90,8 +92,30 @@
 :is(tab-nav,chip-nav) .tab-nav--current-content {
     display: flex !important;
     visibility: visible;
+    box-sizing: border-box;
 }
 
 chip-nav {
     
+}
+
+:is(tab-nav, chip-nav) nav a.tab-nav--validation-issue {
+    text-decoration-line: spelling-error;
+}
+
+@media only screen and (max-width: 35em) {
+    :is(chip-nav, tab-nav[type="row"]) nav {
+        display: block;
+        overflow-x: scroll;
+        white-space: nowrap;
+        scrollbar-width: none;
+    }
+
+    :is(chip-nav, tab-nav[type="row"]) nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    :is(chip-nav, tab-nav[type="row"]) nav > * {
+        display: inline-block;
+    }
 }

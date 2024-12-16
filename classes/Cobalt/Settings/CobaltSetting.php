@@ -142,4 +142,5 @@ class CobaltSetting {
         if (!isset($GLOBALS['CONFIG'][$data])) return $value;
         return $GLOBALS['CONFIG'][$data];
     }
+
 }

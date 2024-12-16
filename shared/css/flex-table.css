@@ -25,7 +25,11 @@ flex-table{
     flex-wrap: wrap;
     border: var(--project-color-table-border);
 }
-  
+    flex-table .doc_id_mark {
+        padding: 0 1ch;
+        justify-content: center;
+    }
+
     flex-table[scroll-x]{
         display:table;
         overflow-x: scroll;
@@ -57,6 +61,23 @@ flex-table{
         flex-header + flex-header{
             border-left: var(--project-color-table-border);
         }
+
+        flex-header.sort-asc:after, flex-header.sort-desc:after {
+            content: "\F035D";
+            font-family: "Material Design Icons";
+        }
+
+        flex-header.sort-desc:after {
+            content: "\F0360";
+        }
+
+        flex-cell a {
+            text-decoration: none;
+        }
+
+        flex-row:hover flex-cell  a {
+            text-decoration: underline;
+        }
     
         flex-cell,flex-header,flex-sticky{
             display: flex;
@@ -65,6 +86,10 @@ flex-table{
             width: 80px;
         }
 
+        /* .hydrated flex-row {
+            display: grid;
+            grid-template-columns: var(--col);
+        } */
         .hydrated flex-cell, .hydrated flex-header, .hydrated flex-sticky {
             flex-grow: var(--flex-column-grow);
             width: var(--col-width);
@@ -138,9 +163,8 @@ flex-table{
     }
 
         flex-row {
-            display: grid;
-            grid-template-columns: repeat(var(--column-count), 140px);
-            width: max-content;
+            /* width: max-content; */
+            display: table-row;
         }
 
             flex-cell,
@@ -149,13 +173,14 @@ flex-table{
                 grid-column: auto;
                 width: 100%;
                 box-sizing: border-box;
+                display: table-cell;
             }
 
             flex-sticky {
                 position: sticky;
                 left: 0;
                 font-weight: bold;
-                background: inherit
+                background: inherit;
             }
 }
 

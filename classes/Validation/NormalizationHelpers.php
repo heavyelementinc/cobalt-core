@@ -181,6 +181,8 @@ abstract class NormalizationHelpers {
     final function convert_date($value, $format = "input") {
         if(!$value) return "";
         $shorthands = [
+            'iso' => 'c',
+            'input-datetime' => 'c',
             'input' => "Y-m-d",
             'default' => 'm/d/Y',
             "verbose" => "l, F jS Y g:i A",
@@ -405,7 +407,8 @@ abstract class NormalizationHelpers {
         $crud = new UserCRUD();
         
         $valid = [];
-        foreach($crud->{$options[$type]['method']}(...$options[$type]['query']) as $doc) {
+        $results = $crud->{$options[$type]['method']}(...$options[$type]['query']);
+        foreach($results as $doc) {
             $valid[(string)$doc->_id] = $value($doc);
         }
 

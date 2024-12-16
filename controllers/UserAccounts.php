@@ -1,8 +1,10 @@
 <?php
 
+use Auth\AdditionalUserFields;
 use Auth\MultiFactorManager;
 use Auth\SessionManager;
 use \Auth\UserCRUD;
+use Auth\UserPersistance;
 use Auth\UserSchema;
 use \Auth\UserValidate;
 use Cobalt\Notifications\PushNotifications;
@@ -10,11 +12,13 @@ use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Exception\BadMethodCallException;
 use Validation\Exceptions\ValidationFailed;
+use Validation\Exceptions\ValidationIssue;
 
 class UserAccounts extends \Controllers\Pages {
 
-    /* Working Jun 10 2021 */
+    /** @deprecated */
     function update_permissions($id) {
         $permissions = $_POST;
         $validated = $GLOBALS['auth']->permissions->validate($id, $permissions);
@@ -25,8 +29,8 @@ class UserAccounts extends \Controllers\Pages {
     function update_push($id) {
         $_id = new ObjectId($id);
         $ua = new UserCRUD();
-        $user = $ua->findOneAsSchema(['_id' => $_id]);
-        if(!$user) throw new NotFound("Resource does not exist");
+        $user = $ua->findOne(['_id' => $_id]);
+        if(!$user) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         $push = new PushNotifications();
         $updateable = [];
         foreach($_POST as $type => $value) {
@@ -97,7 +101,7 @@ class UserAccounts extends \Controllers\Pages {
         $update = $_POST;
         $ua = new UserCRUD();
         if(key_exists('avatar', $update)) {
-            $schema = $ua->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $schema = $ua->findOne(['_id' => new ObjectId($id)]);
             try {
                 $schema->deleteAvatar();
             } catch(NotFound $e) {
@@ -106,7 +110,7 @@ class UserAccounts extends \Controllers\Pages {
             }
         }
         if(key_exists("flags.locked", $update)) {
-            $schema = $ua->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $schema = $ua->findOne(['_id' => new ObjectId($id)]);
             if(confirm("Are you sure you want to lock $schema->name's account? Doing so will log $schema->them out from all devices and $this->they will not be able to log back in until $schema->their account is unlocked!", $_POST)) {
                 $session = new SessionManager();
                 $result = $session->destroy_session_by_user_id($id);
@@ -153,10 +157,14 @@ class UserAccounts extends \Controllers\Pages {
     }
 
     function change_my_password() {
+        // if (!password_verify($_POST['current'], session("pword"))) throw new Unauthorized("You must enter your current password", true); 
+        if (!reauthorize("You must confirm your password", $_POST)) return;
         if (!isset($_POST['password']) || !isset($_POST['pword'])) throw new  ValidationFailed("Failed to update your password", ['pword' => "You need to specify both password fields."]);
         if ($_POST['password'] !== $_POST['pword']) throw new ValidationFailed("Failed to update your password", ['pword' => "Both password fields must match."]);
+        $_POST = ['pword' => $_POST['pword']];
         $value = $this->update_basics(session("_id"));
-
+        header("X-Status: @info Your password was updated successfully");
+        // update("");
         return "Success";
     }
 
@@ -182,7 +190,7 @@ class UserAccounts extends \Controllers\Pages {
             'main' => str_replace("</ul>", "", $html) . "</ul>"
         ]);
 
-        set_template("parts/main.html");
+        return view("parts/main.html");
     }
 
     function onboarding() {
@@ -190,21 +198,56 @@ class UserAccounts extends \Controllers\Pages {
             'title' => "Make an account"
         ]);
 
-        set_template("authentication/account-creation/onboarding.html");
+        return view("authentication/account-creation/onboarding.html");
     }
 
     function me() {
         $session = session();
         $push = new PushNotifications();
         $multifactor = new \Auth\MultiFactorManager($session);
+
+        $method = "POST";
+        $action = "/api/v1/user/me/";
+
+        $addtl = new AdditionalUserFields();
+        $fields = $addtl->__get_additional_user_tabs();
+        $links = "";
+        $extensions = "";
+        foreach($fields as $field => $data) {
+            if(!$data['self_service']) continue;
+            $view = $data['self_service'];
+            if($view === true) $view = $data['view'];
+            $icon = $data['icon'] ?? 'card-bulleted-outline';
+            $data['name'] = "<i name='$icon'></i> $data[name]";
+            $links .= "<a href='#$field'>$data[name]</a>";
+            $extensions .= "<div id='$field'>".view($view, [
+                'user_account' => $session,
+                'doc' => $session,
+                'method' => $method,
+                'action' => $action,
+                'endpoint' => $action,
+                ]
+            )."</div>";
+        }
+
+        $sessionMan = new SessionManager();
+        $sessions = $sessionMan->session_manager_ui_by_user_id(session('_id'));
+
         add_vars([
             'title' => "$session->fname $session->lname",
             'doc' => $session,
             'notifications' => $push->render_push_opt_in_form_values($session),
             '2fa' => $multifactor->get_multifactor_enrollment($session),
+            'integrate' => (new IntegrationsController())->getOauthIntegrations(),
+            'links' => $links,
+            'extensions' => $extensions,
+            'sessions' => "<div id='sessions'>$sessions</div>",
+            'method' => $method,
+            'endpoint' => $action,
+            'action' => $action,
         ]);
 
-        set_template("/authentication/user-self-service-panel.html");
+        return view("/authentication/user-self-service-panel.html");
     }
 
     function update_me() {
@@ -212,14 +255,24 @@ class UserAccounts extends \Controllers\Pages {
         if(!$session) throw new Unauthorized("You're not logged in");
         
         // Only allow these fields to be updated through this method
-        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar'];
+        $filter = ['fname', 'lname', 'uname', 'email', 'pword', 'avatar', 'fediverse_profile', 'youtube_profile', 'instagram_profile', 'facebook_profile', 'twitter_profile', 'default_bio_blurb'];
+
+        // Let's build a list of allowable fields based on AdditionalUserFields
+        $addtl = new AdditionalUserFields();
+        foreach($addtl->__get_additional_schema() as $field => $directives) {
+            if(key_exists('self_service', $directives)) $filter[] = $field;
+        }
+
         $update = [];
         foreach($filter as $key){
             if(key_exists($key, $_POST)) $update[$key] = $_POST[$key];
         }
 
-        $schema = new UserSchema();
-        $validated = $schema->validate($update);
+        if(empty($update)) throw new BadRequest("There are no fields to update","Your request could not be processed");
+
+        $schema = new UserPersistance();
+        
+        $validated = $schema->__validate($update)->__validatedFields;
 
         if(key_exists('avatar', $_POST)) {
             $avatar = $session['avatar'] ?? [];
@@ -248,7 +301,7 @@ class UserAccounts extends \Controllers\Pages {
         } else {
             if(!has_permission("Auth_allow_editing_users")) throw new Unauthorized("You are not authorized to modify this resource.");
             $man = new UserCRUD();
-            $user = $man->findOneAsSchema(['_id' => new ObjectId($id)]);
+            $user = $man->findOne(['_id' => new ObjectId($id)]);
             $message = "this user's";
         }
         confirm("This action will <strong>permanently delete</strong> $message avatar. Are you sure you want to continue?", $_POST);

@@ -3,6 +3,7 @@
         "common": [
             "Preferences.js",
             "global_functions.js",
+            "Cobalt.js",
             "Modal.js",
             "Cobalt/CobaltModal.js",
             "StatusMessage.js",
@@ -33,6 +34,11 @@
             "components/NotificationsPanel.js",
             "components/input-text.js",
             "components/markdown-area.js",
+            "components/CountdownTimer.js",
+            "components/horizontal-scroll.js",
+            "components/block-editor.js",
+            "components/image-result.js",
+            "components/NumberReveal.js",
             "Cobalt/Shadowbox.js",
             "DateConverter.js",
             "TabbedUI.js",
@@ -55,15 +61,22 @@
             "protected/Posts.js",
             "protected/UserPanel.js",
             "protected/UserManager.js",
-            "protected/EventManager.js"
+            "protected/EventManager.js",
+            "protected/FSManager.js",
+            "protected/PageEditor.js"
         ],
         "append": [
             "components/FormRequest.js",
             "main.js",
             "app.js",
             "Cobalt/MobileNavMenu.js",
-            "Router.js",
             "ClientRouter.js"
+        ],
+        "modules": [ // Modules have not yet been implemented
+            {
+                "href": "/editorjs/editorjs.mjs",
+                "package": false
+            }
         ]
     },
     "css": {
@@ -79,6 +92,9 @@
             "components/input-text.css",
             "components/markdown-area.css",
             "components/shadowbox.css",
+            "components/countdown-timer.css",
+            "components/horizontal-scroll.css",
+            "components/block-editor.css",
             "normalize.css",
             "slideshow.css",
             "simplemde.min.css",
@@ -87,6 +103,7 @@
             "loading-spinner.css",
             "notification.css",
             "action-menu.css",
+            "action-menu-refactor.css",
             "status-message.css",
             "form-request.css",
             "login-form.css",
@@ -100,7 +117,9 @@
             "audio-player.css",
             "paginated-container.css",
             "parallax.css",
-            "header.css"
+            "landing-pages.css",
+            "header.css",
+            "template.css"
         ],
         "web": [
             "main.css"
@@ -149,6 +168,7 @@
             "calendar-header-color": "var(--project-color-button-init)",
             "calendar-header-text": "var(--project-color-button-text)",
             "action-menu-background": "var(--project-color-input-disabled)",
+            "action-menu-color": "var(--project-color-input-text-color)",
             "action-menu-border": "var(--project-color-table-border)",
             "action-menu-hover": "var(--project-color-inactive)",
             "events-banner-background": "#efefef",
@@ -157,7 +177,8 @@
             "events-button-color-hover": "var(--project-color-button-hover)",
             "events-button-text": "var(--project-color-button-text)",
             "events-button-text-hover": "var(--project-color-button-hover-text)",
-            "events-font-family": "var(--project-body-family)"
+            "events-font-family": "var(--project-body-family)",
+            "landing-page-content-width": "80ch"
         },
         "web": {
             

@@ -2,7 +2,7 @@
 
 /** CHECK PHP VERSION */
 
-if( version_compare(phpversion(), '8.1.0', '<=') ) die("Your version of PHP must be version 8.1 or above. Your version: " . phpversion());
+if( version_compare(phpversion(), '8.1.0', '<=') ) kill("Your version of PHP must be version 8.1 or above. Your version: " . phpversion());
 
 define('__CLI_ROOT__', __DIR__);
 

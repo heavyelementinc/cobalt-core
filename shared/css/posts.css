@@ -1,10 +1,19 @@
+.cobalt-posts--header-group {
+    border-bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
 .cobalt-posts--public-index {
     display: flex;
     flex-wrap: wrap;
     gap: 1em;
     width: 80vw;
     margin: 2em auto;
+    justify-content: center;
 }
+
 
 #main-posts .cobalt-query-controls {
     margin-bottom: 2em;
@@ -35,6 +44,10 @@
             box-sizing: border-box;
             position: relative;
             font-size: .8em;
+        }
+
+        .cobalt-post--blurb content  {
+            white-space: pre-wrap;
         }
 
             .cobalt-posts--public-index .cobalt-post--blurb content p {

@@ -28,128 +28,140 @@ class CobaltListing extends HTMLElement {
     }
 
     listItemElement(el) {
-        el.addEventListener("contextmenu",event => {
-            const menu = new ActionMenu({
-                title: `Edit file`,
-                event: event,
-                mode: "modal",
+        let button = el.querySelector("button");
+        let target = el.querySelector("[full-resolution]");
+        if(!target) target = el;
+        target.addEventListener("contextmenu",event => {
+            this.actionMenu(event, target)
+        })
+        if(button) {
+            button.addEventListener("mouseup", event => {
+                this.actionMenu(event, explicitTarget)
+            })
+        }
+    }
+
+    actionMenu(event, target) {
+        const menu = new ActionMenu({
+            title: `Edit file`,
+            event: event,
+            mode: "modal",
+        });
+
+        if(this.editAction) {
+            menu.registerAction({
+                label: "Edit",
+                request: {
+                    method: "PUT",
+                    action: this.actionUrl(this.editAction, el.dataset.id)
+                },
+                callback: () => {
+                    return true;
+                }
             });
+        }
 
-            if(this.editAction) {
-                menu.registerAction({
-                    label: "Edit",
-                    request: {
-                        method: "PUT",
-                        action: this.actionUrl(this.editAction, el.dataset.id)
-                    },
-                    callback: () => {
-                        return true;
-                    }
-                });
-            }
-
-            if(this.renameAction) {
-                menu.registerAction({
-                    label: 'Rename',
-                    callback: () => {
-                        let host = `${location.protocol}//${location.host}`
-                        let filename =  event.target.getAttribute("full-resolution") || event.target.getAttribute("src") || event.target.getAttribute("href");
-                        let url = new URL(host + filename.replace(host, ""));
-                        const charlen = url.pathname.lastIndexOf("/") + 1;
-                        const modal = new Modal({
-                            body: `
-                            <form-request method="${this.getAttribute('rename-method') ?? "PUT"}" action="${this.actionUrl(this.renameAction, el.dataset.id)}">
-                                <fieldset>
-                                    <legend>Rename file <help-span value="This will rename the file and, if the file is an image with a thumbnail, the thumbnail as well."></help-span></legend>
-                                    <input name="rename" style="width: 100%; min-width: ${charlen + 10}ch; max-width: 80vw" value="${decodeURIComponent(url.pathname.substring(charlen))}">
-                                    <ul>
-                                        <li>Replace spaces with hyphens (-) where possible.</li>
-                                        <li>The current file extension will be appended to any name lacking an extension.</li>
-                                    </ul>
-                                </fieldset>
-                            </form-request>
-                            `,
-                            chrome: {
-                                cancel: {
-                                    label: "Cancel",
-                                    dangerous: false,
-                                    callback: async () => true
-                                },
-                                okay: {
-                                    label: "Rename",
-                                    dangerous: false,
-                                    callback: async (event) => {
-                                        return new Promise((resolve, reject) => {
-                                            const form = modal.dialog.querySelector("form-request");
-                                            form.addEventListener("formRequestSuccess", (event) => {
-                                                if("code" in event.detail && event.detail.code === 300) resolve(true);
-                                                this.updateFilename(el, event.detail, event);
-                                                resolve(event.detail);
-                                            })
-                                            form.addEventListener("formRequestFail", (event) => {
-                                                console.log(event);
-                                                if(event.detail.code === 300) resolve(true);
-                                                resolve(false);
-                                            });
-                                            form.send();
+        if(this.renameAction) {
+            menu.registerAction({
+                label: 'Rename',
+                callback: () => {
+                    let host = `${location.protocol}//${location.host}`
+                    let filename =  event.target.getAttribute("full-resolution") || event.target.getAttribute("src") || event.target.getAttribute("href");
+                    let url = new URL(host + filename.replace(host, ""));
+                    const charlen = url.pathname.lastIndexOf("/") + 1;
+                    const modal = new Modal({
+                        body: `
+                        <form-request method="${this.getAttribute('rename-method') ?? "PUT"}" action="${this.actionUrl(this.renameAction, el.dataset.id)}">
+                            <fieldset>
+                                <legend>Rename file <help-span value="This will rename the file and, if the file is an image with a thumbnail, the thumbnail as well."></help-span></legend>
+                                <input name="rename" style="width: 100%; min-width: ${charlen + 10}ch; max-width: 80vw" value="${decodeURIComponent(url.pathname.substring(charlen))}">
+                                <ul>
+                                    <li>Replace spaces with hyphens (-) where possible.</li>
+                                    <li>The current file extension will be appended to any name lacking an extension.</li>
+                                </ul>
+                            </fieldset>
+                        </form-request>
+                        `,
+                        chrome: {
+                            cancel: {
+                                label: "Cancel",
+                                dangerous: false,
+                                callback: async () => true
+                            },
+                            okay: {
+                                label: "Rename",
+                                dangerous: false,
+                                callback: async (event) => {
+                                    return new Promise((resolve, reject) => {
+                                        const form = modal.dialog.querySelector("form-request");
+                                        form.addEventListener("formRequestSuccess", (event) => {
+                                            if("code" in event.detail && event.detail.code === 300) resolve(true);
+                                            this.updateFilename(el, event.detail, event);
+                                            resolve(event.detail);
                                         })
-                                    }
+                                        form.addEventListener("formRequestFail", (event) => {
+                                            console.log(event);
+                                            if(event.detail.code === 300) resolve(true);
+                                            resolve(false);
+                                        });
+                                        form.send();
+                                    })
                                 }
                             }
-                        });
-                        modal.draw();
-                        return true;
-                    }
-                });
-            }
-
-            for(const i in this.customMenuOptions) {
-                const element = this.customMenuOptions[i];
-                const test = ('label' in element && 'action' in element);
-                if(!test) {
-                    console.warn("Missing a required attribute for a custom cobalt-listing action.");
-                    continue;
+                        }
+                    });
+                    modal.draw();
+                    return true;
                 }
-                menu.registerAction({
-                    label: element.label,
-                    request: {
-                        method: element.method ?? "PUT",
-                        action: this.actionUrl(element.action, el.dataset.id)
-                    },
-                    callback: (action, event, requestData) => {
-                        return true;
-                    }
-                });
-            }
+            });
+        }
 
-            if(this.deleteAction) {
-                menu.registerAction({
-                    label: "Delete",
-                    request: {
-                        method: "DELETE",
-                        action: this.actionUrl(this.deleteAction, el.dataset.id),
-                    },
-                    callback: (event,other,result) => {
-                        const url = el.href ?? el.src ?? el.srcset ?? null;
-                        if(url === null) return false;
-                        const items = document.querySelectorAll(`[data-id="${result}"]`);
-                        items.forEach(e => {
-                            let parent = e.parentNode
-                            let child = e;
-                            if(parent.tagName === "PICTURE") {
-                                child = parent;
-                                parent = parent.parentNode;
-                            }
-                            parent.removeChild(child);
-                        });
-                        return true;
-                    },
-                    dangerous: true
-                });
+        for(const i in this.customMenuOptions) {
+            const element = this.customMenuOptions[i];
+            const test = ('label' in element && 'action' in element);
+            if(!test) {
+                console.warn("Missing a required attribute for a custom cobalt-listing action.");
+                continue;
             }
+            menu.registerAction({
+                label: element.label,
+                request: {
+                    method: element.method ?? "PUT",
+                    action: this.actionUrl(element.action, el.dataset.id)
+                },
+                callback: (action, event, requestData) => {
+                    return true;
+                }
+            });
+        }
 
-            menu.draw();
-        })
+        if(this.deleteAction) {
+            menu.registerAction({
+                label: "Delete",
+                request: {
+                    method: "DELETE",
+                    action: this.actionUrl(this.deleteAction, el.dataset.id),
+                },
+                callback: (event,other,result) => {
+                    const url = el.href ?? el.src ?? el.srcset ?? null;
+                    if(url === null) return false;
+                    const items = document.querySelectorAll(`[data-id="${result}"]`);
+                    items.forEach(e => {
+                        let parent = e.parentNode
+                        let child = e;
+                        if(parent.tagName === "PICTURE") {
+                            child = parent;
+                            parent = parent.parentNode;
+                        }
+                        parent.removeChild(child);
+                    });
+                    return true;
+                },
+                dangerous: true
+            });
+        }
+
+        menu.draw();
     }
 
     actionUrl(action, id) {

@@ -6,12 +6,22 @@ use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\BinaryResult;
 use Cobalt\SchemaPrototypes\Basic\BooleanResult;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
+use Cobalt\SchemaPrototypes\Basic\EnumResult;
 use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Cobalt\SchemaPrototypes\Basic\UploadResult2;
+use Cobalt\SchemaPrototypes\Compound\ImageResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
-use Cobalt\SchemaPrototypes\SubMapResult;
+use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
+use Cobalt\SchemaPrototypes\MapResult;
+use Drivers\Database;
+use Validation\Exceptions\ValidationIssue;
 
 class PersistanceMapTest extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+    }
     function __get_schema():array {
         return [
             'array' => [
@@ -28,6 +38,35 @@ class PersistanceMapTest extends PersistanceMap {
                     'value1' => 'Value 1',
                     'super2' => 'Super 2',
                 ],
+                "custom" => true,
+            ],
+            'array_each' => [
+                new ArrayResult,
+                'template' => "<fieldset><label>First Name</label><input name='name.first'></fieldset>
+                        <fieldset><label>Last Name</label><input name='name.last'></fieldset>
+                        <fieldset><label>Position</label><select name='position'>{{field.position.options()}}</select>
+                    </fieldset>",
+                'each' => [
+                    'name' => [
+                        new MapResult,
+                        'schema' => [
+                            'first' => new StringResult,
+                            'last' => new StringResult
+                        ],
+                        'full_name' => function ($ref) {
+                            return $ref->first . " " . $ref->last;
+                        }
+                    ],
+                    'position' => [
+                        new EnumResult,
+                        'valid' => [
+                            'cap' => 'Captain',
+                            'xo' => 'First Officer',
+                            'comm' => 'Communications',
+                            'helm' => 'Helmsman'
+                        ]
+                    ]
+                ]
             ],
             'binary' => [
                 new BinaryResult,
@@ -47,15 +86,13 @@ class PersistanceMapTest extends PersistanceMap {
             ],
             'bool' => [
                 new BooleanResult,
-                'default' => true,
+                'default' => true
             ],
             'date' => [
                 new DateResult,
-                'from' => 'milliseconds',
-                'to' => 'milliseconds'
             ],
             'submap' => [
-                new SubMapResult,
+                new MapResult,
                 'schema' => [
                     'headline' => new StringResult,
                     'subheadline' => new StringResult,
@@ -69,13 +106,48 @@ class PersistanceMapTest extends PersistanceMap {
                         ]
                     ],
                     'nested' => [
-                        new SubMapResult,
+                        new MapResult,
                         'schema' => [
-                            'data1' => new NumberResult,
-                            'data2' => new MarkdownResult,
-                        ]
+                            'data1' => [
+                                new NumberResult,
+                                // 'default' => 1
+                            ],
+                            'data2' => [
+                                new BinaryResult,
+                                'valid' => [
+                                    1 => 'Result 0b0001',
+                                    2 => 'Result 0b0010',
+                                    4 => 'Result 0b0100',
+                                    8 => 'Result 0b1000',
+                                ]
+                            ],
+                            'nested2' => [
+                                new MapResult,
+                                'schema' => [
+                                    'markdown' => [
+                                        new MarkdownResult,
+                                        // 'set' => function ($val, $ref) {
+                                        //     update("[name='$ref->name']", ['value' => "dogbone"]);
+                                        // },
+                                        'filter' => function ($val) {
+                                            $this->__modify("other.unspecified", "test", false);
+                                            return "Trigger ". $val;
+                                        },
+                                        'operator' => '$push'
+                                    ],
+                                    'bool' => new BooleanResult,
+                                ]
+                            ]
+                        ],
                     ],
                 ]
+            ],
+            // 'image1' => [
+            //     new UploadImageResult(),
+            // ],
+            'image2' => [
+                new ImageResult(),
+                'alt' => 'Alt text'
             ]
         ];
     }

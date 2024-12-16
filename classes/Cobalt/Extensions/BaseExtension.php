@@ -90,6 +90,12 @@ abstract class BaseExtension {
         $manifest[] = $m;
     }
 
+    function register_customizations(&$files) {
+        $path = $this->path . "/config/customizations.php";
+        if(!file_exists($path)) return;
+        $files[] = $path;
+    }
+
     // function register_settings(&$settings) {
     //     $set = $this->manifest->settings;
     //     if($set instanceof \MongoDB\Model\BSONArray) $set->getArrayCopy();
@@ -102,5 +108,13 @@ abstract class BaseExtension {
      */
     function session_creation(&$session) {}
 
+    /**
+     * Add additional fields to user accounts
+     * @param array &$session 
+     * @return void
+     */
+    function register_user_fields(array &$fields) {}
 
+    
+    function register_user_editor_tabs(array &$tabs) {}
 }

@@ -75,10 +75,10 @@ nav#admin-panel {
 }
 
 #admin-panel .settings-panel--footer {
-    position: absolute;
+    /* position: absolute; */
     bottom: 0;
     left: 0;
-    color: inherit;
+    color: var(--project-color-user-panel-button-text);
     display: flex;
     flex-direction: row;
     justify-content: center;

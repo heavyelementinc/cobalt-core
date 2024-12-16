@@ -3,7 +3,7 @@ use Cobalt\Extensions\Extensions;
 try {
     define("EXTENSION_MANAGER", new Extensions());
 } catch (\MongoDB\Driver\Exception\ConnectionTimeoutException $e) {
-    die("No database connection available. Check your config.php file.");
+    kill("No database connection available. Check your config.php file.");
 }
 try {
     EXTENSION_MANAGER->initialize_active_extensions();
@@ -19,8 +19,10 @@ try {
     Extensions::invoke("register_permissions", $PERMISSIONS);
 
     Extensions::invoke("register_shared_dir", $SHARED_CONTENT);
+
+    Extensions::invoke("register_user_fields", $ADDITIONAL_USER_FIELDS);
 } catch (Exception $e) {
-    die("EXTENSION ERROR: " . $e->getMessage());
+    kill("EXTENSION ERROR: " . $e->getMessage());
 }
 
 /**

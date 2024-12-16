@@ -23,7 +23,7 @@ class Render {
     ];
 
     function __construct() {
-        $http = (\is_secure()) ? "https" : "http";
+        // $http = (\is_secure()) ? "https" : "http";
 
         // Check if we need to parse for multiline function calls in scripts.
         // $this->function = (app("Renderer_parse_for_multiline_functions")) ? $this->multiline_function : $this->function;
@@ -31,12 +31,13 @@ class Render {
         $query_string = ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
         $this->stock_vars = [
             'app'  => __APP_SETTINGS__,
+            'versionHash' => VERSION_HASH,
             'get'  => $_GET,
             'post' => $_POST,
             // '$main_id' => 'main-content',
             'session' => session(),
             'request' => [
-                'url' => "$http://$_SERVER[SERVER_NAME]" . "$_SERVER[REQUEST_URI]$query_string",
+                'url' => server_name() . "$_SERVER[REQUEST_URI]$query_string",
                 'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
             ],
             'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],

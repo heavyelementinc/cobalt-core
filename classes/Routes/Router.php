@@ -22,11 +22,15 @@
 namespace Routes;
 
 use Cobalt\Extensions\Extensions;
+use Cobalt\Pages\Classes\PageManager;
+use Controllers\Attributes\Attribute;
 use Exception;
 use Exceptions\HTTP\MethodNotAllowed;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\NotImplemented;
 use Exceptions\HTTP\Unauthorized;
+use MongoDB\BSON\UTCDateTime;
+use ReflectionObject;
 
 class Router {
 
@@ -39,6 +43,7 @@ class Router {
     private $router_table_loaded = false;
     public $routes = null;
     public $method = null;
+    public bool $headRequest = false;
     public $uri = null;
     public $context_prefix = null;
     public $cache_resource = null;
@@ -94,6 +99,31 @@ class Router {
                 if(file_exists($table)) require_once $table;
             }
         }
+
+        // Specify any follow-up router table options here
+        if(__APP_SETTINGS__['LandingPages_enabled']) {
+            $ROUTE_TABLE_ADDRESS = "web";
+            Route::get(__APP_SETTINGS__['LandingPage_route_prefix']."...", "\\Cobalt\\Pages\\Controllers\\LandingPages@page", [
+                'sitemap' => [
+                    'ignore' => true,
+                    'children' => function () {
+                        return register_individual_post_routes(COBALT_PAGES_DEFAULT_COLLECTION);
+                        // $pages = $manager->find($manager->public_query());
+                        // $html = "";
+                        // foreach($pages as $page) {
+                        //     if($page->flags->and($page::FLAGS_EXCLUDE_FROM_SITEMAP)) continue;
+                        //     $html .= view("sitemap/url.xml", [
+                        //         'location' => "/".$page->url_slug->get_path(),
+                        //         'lastModified' => $page->live_date->format("Y-m-d")
+                        //     ]);
+                        // }
+                        // return $html;
+                    },
+                    'lastmod' => fn()=> null
+                ]
+            ]);
+        }
+
         $this->routes = $ROUTE_TABLE;
         $this->router_table_loaded = true;
     }
@@ -111,6 +141,12 @@ class Router {
         if ($query   === null) $query   = $_SERVER['QUERY_STRING'];
         if ($method  === null) $method  = $this->method;
         if ($context === null) $context = $this->route_context;
+
+        if (strtolower($method) === "head") {
+            $this->headRequest = true;
+            $method = "get";
+        }
+
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
          */
@@ -123,11 +159,10 @@ class Router {
         // $route = null;
         /** Search through our current routes and look for a match */
         foreach ($this->routes[$context][$method] as $preg_pattern => $directives) {
-            $match = [];
+            $directives['matches'] = [];
             /** Regular Expression against our uri, store any matches in $match */
-            if (preg_match($preg_pattern, $this->uri, $match) === 1) {
-                if ($match !== null) $this->set_uri_vars($directives, $match, $preg_pattern, $context);
-
+            if (preg_match($preg_pattern, $this->uri, $directives['matches']) === 1) {
+                if ($directives['matches'] !== null) $this->set_uri_vars($directives, $directives['matches'], $preg_pattern, $context);
                 $this->current_route = $preg_pattern;
                 if ($route[strlen($route) - 1] === "/") {
                     $GLOBALS['PATH'] = "../";
@@ -135,7 +170,7 @@ class Router {
                 return [$preg_pattern, $directives];
             }
         }
-        if ($this->current_route === null) throw new NotFound("No route discovered.");
+        if ($this->current_route === null) throw new NotFound("No route discovered for $route");
     }
 
     function set_uri_vars($directives, $match, $route, $context) {
@@ -159,6 +194,10 @@ class Router {
         if($route   === null) $route   = $this->current_route;
         if($method  === null) $method  = $this->method;
         if($context === null) $context = $this->route_context;
+
+        if($method === "head") {
+            $method = "get";
+        }
 
         /** Store our route data for easy access */
         $exe = $this->routes[$context][$method][$route];
@@ -199,7 +238,41 @@ class Router {
         $controller_name = $explode[0];
         $controller_method = $explode[1];
 
+        $controller_file = $this->find_controller($controller_name);
+
+        // We need to require this because the controllers folder is outside of our 
+        // classes path and the developer is going to be able to create new controllers
+        require_once $controller_file;
+
+        // Instantiate our controller and then execute it
+        $ctrl = new $controller_name();
+
+        // Execute any attributes that have been assigned to this controller
+        $this->execute_route_attributes($ctrl, $controller_method, $exe, $exe['matches']);
+        if($this->headRequest === true) return;
+
+        // Make sure that we're actually calling this method with 
+        if (!method_exists($ctrl, $controller_method)) throw new \Exceptions\HTTP\MethodNotAllowed("Specified method was not found.");
+        $test = new \ReflectionMethod($controller_name, $controller_method);
+        /** We check to make sure that we're not going to have callable exception 
+         * where we aren't supplying the correct number of arguments to a callable. 
+         * So we check how many arguments are required for the callable and then 
+         * count the number of matches we found to ensure that there will always be 
+         * enough matches.
+         * 
+         * Otherwise, we'll throw a 400 Bad Request.
+         */
+        if ($test->getNumberOfRequiredParameters() > count($exe['matches'] ?? [])) throw new \Exceptions\HTTP\BadRequest("Method supplied too few arguments.");
+        if (gettype($exe['matches']) !== "array") $exe['matches'] = [$exe['matches']];
+
+        /** Execute our method */
+        return $ctrl->{$controller_method}(...$exe['matches']);
+    }
+
+    function find_controller(string $controller_name):string {
         $controller_search = [
+            __APP_ROOT__, // Let's support the new namespace-to-app-path syntaxt we're using
+            __ENV_ROOT__, // Let's support the new namespace-to-app-path syntaxt we're using
             __APP_ROOT__ . "/controllers",
             __APP_ROOT__ . "/private/controllers",
             // ...array_values($this->registered_plugin_controllers),
@@ -211,36 +284,31 @@ class Router {
         try {
             // We are doing these in reverse order because we want our app's 
             // controllers to override the core's controllers.
-            $controller_file = find_one_file($controller_search, "$controller_name.php");
-            if(!$controller_file) die("Controller not found");
+            $controller_file = find_one_file($controller_search, str_replace("\\","/",$controller_name.".php"));
+            if(!$controller_file) kill("Controller not found");
         } catch (\Exception $e) {
             // throw new NotImplemented("Controller $controller_name not found.");
             // header("HTTP/")
-            die("Controller $controller_name not found.");
+            kill("Controller $controller_name not found.");
         }
+        return $controller_file;
+    }
 
-        // We need to require this because the controllers folder is outside of our 
-        // classes path and the developer is going to be able to create new controllers
-        require_once $controller_file;
-
-        // Instantiate our controller and then execute it
-        $ctrl = new $controller_name();
-        if (!method_exists($ctrl, $controller_method)) throw new \Exceptions\HTTP\MethodNotAllowed("Specified method was not found.");
-        $test = new \ReflectionMethod($controller_name, $controller_method);
-        /** We check to make sure that we're not going to have callable exception 
-         * where we aren't supplying the correct number of arguments to a callable. 
-         * So we check how many arguments are required for the callable and then 
-         * count the number of matches we found to ensure that there will always be 
-         * enough matches.
-         * 
-         * Otherwise, we'll throw a 400 Bad Request.
-         */
-        if ($test->getNumberOfRequiredParameters() > count($exe['matches'])) throw new \Exceptions\HTTP\BadRequest("Method supplied too few arguments.");
-        if (gettype($exe['matches']) !== "array") $exe['matches'] = [$exe['matches']];
-        
-        /** Execute our method */
-        return $ctrl->{$controller_method}(...$exe['matches']);
-        
+    function execute_route_attributes($controller, $method, $details, $arguments):void {
+        if(!$controller) return;
+        $classReflection = new ReflectionObject($controller);
+        $methodReflection = $classReflection->getMethod($method);
+        $attributes = $methodReflection->getAttributes();
+        foreach($attributes as $attr) {
+            // $attr->execute($arguments);
+            $name = $attr->getName();
+            $args = $attr->getArguments();
+            /** @var Attribute $attribute */
+            $attribute = new $name(...$args);
+            if($details instanceof Options === false) $details = new Options($details['original_path'], $details['controller'], $details);
+            $attribute->set_route_details($details);
+            $attribute->execute($arguments);
+        }
     }
 
     public $router_js_table = [

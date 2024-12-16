@@ -1,0 +1,19 @@
+<section class="landing-main--splash{{class}}
+ direction--{{page.splash_reverse}}"
+ {{page.splash_image_alignment.display()}}
+>
+    {{page.splash_image.embed()}}
+    <div class="landing-main--title-container">
+        <h1>{{page.title}}</h1>
+        {{page.subtitle.md()}}
+        <div class="byline">
+            <img src="{{page.author.get_avatar()}}" height="200" width="200" class="byline-avatar">
+            <div class="author">
+                <span class="author-name">{{page.author.get_name("full")}}
+                    {{!follow_link}}
+                </span>
+                {{!views}}
+            </div>
+        </div>
+    </div>
+</section>

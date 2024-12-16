@@ -13,7 +13,7 @@ class AsyncFetch extends EventTarget {
         cache = "default",
         headers = {},
         form = null,
-    }) {
+    } = {}) {
         super();
         this.action = action;
         this.method = method;
@@ -25,20 +25,24 @@ class AsyncFetch extends EventTarget {
         this.abortController = null;
         this.reject = null;
         this.totalUploadSize = 0;
-        this.form = null;
+        this.form = form;
+        this.errorHandled = false;
         
         this.data = "";
         this.response = null; // The raw response from the fetch request
         this.resolved = null; // The resolved data from the request
         this.headerDirectiveMap = {
+            'location': XRedirect,
+            'x-redirect': XRedirect,
             'x-status': XStatus,
             'x-modal': XModal,
-            'x-redirect': XRedirect,
             'x-refresh': XRefresh,
             'x-confirm': XConfirm,
             'x-reauthorization': XReauth,
+            // 'x-mitigation-update': 
         }
         this.headerReactions = {};
+        this.requestHeaders['X-Mitigation'] = document.querySelector("meta[name='mitigation']").content;
     }
 
     submit(data = {}) {
@@ -64,6 +68,8 @@ class AsyncFetch extends EventTarget {
 
             this.client = client;
 
+            if(!this.method) throw new TypeError(`this.method must not be an empty string`);
+            if(!this.string) console.warn("this.action is an empty string. This probably isn't right.");
             client.open(this.method, this.action);
 
             for(const h in this.requestHeaders) {
@@ -71,6 +77,8 @@ class AsyncFetch extends EventTarget {
             }
 
             client.setRequestHeader('X-Include', "fulfillment,update,events");
+            client.setRequestHeader('X-Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+            client.setRequestHeader('X-Request-Source', "AsyncFetch");
             const submission = this.encodeFormData(this.data)
             if(this.format) client.setRequestHeader('Content-Type', this.format);
             try{
@@ -114,7 +122,7 @@ class AsyncFetch extends EventTarget {
         this.response = client.response;
         this.setResponseHeaders(client.getAllResponseHeaders());
         this.dispatchHeaderDirectives();
-        if(client.status !== 200) {
+        if(client.status !== 200 && this.errorHandled === false) {
             const nonOkResponse = this.handleNonOkResponse(event, client, resolve);
             if(nonOkResponse === true) return true;
         }
@@ -122,13 +130,13 @@ class AsyncFetch extends EventTarget {
         if(this.getHeader('Content-Type')?.match(/json/i)) this.resolved = JSON.parse(client.response);
         else {
             try {
-                JSON.parse(client.response);
+                this.resolved = JSON.parse(client.response);
             } catch (e) {
                 this.resolved = client.response;
             }
         }
 
-        if(client.status >= 300) {
+        if(client.status >= 300 && this.errorHandled === false) {
             return this._communicatedError(event);
         }
 
@@ -283,9 +291,23 @@ class AsyncUpdate {
     }
     
     exec() {
-        const list = this.request.resolved.update;
+        const list = this.request.resolved?.update ?? [];
         for(const instruction of list) {
-            this.updateElement(this.getElement(instruction.target), instruction);
+            switch(instruction.target) {
+                case "sessionStorage":
+                case "localStorage":
+                    this.updateStorage(instruction);
+                    break;
+                case "@form":
+                    this.updateForm(instruction);
+                    break;
+                case "@cookie":
+                    this.updateCookie(instruction);
+                    break;
+                default:
+                    this.updateElement(this.getElement(instruction.target), instruction);
+                    break;
+            }
         }
     }
 
@@ -305,6 +327,65 @@ class AsyncUpdate {
         return document.querySelectorAll(query);
     }
 
+    updateCookie(instructions) {
+        for(const i in instructions) {
+            switch(i) {
+                case "set":
+                    for(const c in instructions[i]) set_cookie(c, instructions[i][c]);
+                    break;
+                case "remove":
+                    for(const c in instructions[i]) delete_cookie(c, instructions[i][c]);
+                    break;
+                default:
+                    console.warn(`"${i}" is not a recognized updateCookie instruction`);
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param  instructions 
+     */
+    updateStorage(instructions) {
+        const target = instructions.target;
+        for(const i in instructions) {
+            const directive = `storage_${i}`;
+            if(directive === "storage_target") continue;
+            if(directive in this === false) {
+                console.warn(`Unsupported storage directive: ${directive}`)
+                continue;
+            }
+            
+            this[directive](window[target], instructions[i]);
+        }
+    }
+
+    storage_set(target, values) {
+        for(const i in values) {
+            target.setItem(i, values[i]);
+        }
+    }
+
+    storage_remove(target, values) {
+        for(const i of values) {
+            target.removeItem(i);
+        }
+    }
+
+    updateForm(instructions) {
+        if(!this.request.form) {
+            console.warn("The form is not specified for this request type");
+            return;
+        }
+        if("clear" in instructions) {
+            if(instructions.clear === true) {
+                this.request.form.dispatchEvent(new CustomEvent("clearall"))
+            }
+            delete instructions.clear
+        }
+        this.updateElement(this.request.form, instructions)
+    }
+
     updateElement(elements, instructions) {
         for(const i in instructions) {
             const directive = `fn_${i}`;
@@ -318,6 +399,23 @@ class AsyncUpdate {
                 this[directive](el, instructions[i], instructions);
             }
         }
+    }
+
+    fn_dispatchEvent(el, value, instructions) {
+        let event
+        switch(value) {
+            case "click":
+            case "mousedown":
+            case "keydown":
+            case "load":
+            case "change":
+                event = new Event(value, {detail: instructions});
+                break;
+            default:
+                event = new CustomEvent(value, {detail: instructions});
+                break;
+        }
+        el.dispatchEvent(event);
     }
 
     fn_value(el, value, instructions) {
@@ -346,7 +444,7 @@ class AsyncUpdate {
     }
 
     fn_disabled(el, value, instructions) {
-        if(value) {
+        if(!value) {
             el.ariaDisabled = false;
             return el.disabled = false;
         }
@@ -354,10 +452,17 @@ class AsyncUpdate {
         return el.disabled = true;
     }
 
+    fn_delete(el, value, instructions) {
+        if(value !== true) return;
+        el.parentNode.removeChild(el)
+    }
+
     fn_remove(el, value, instructions) {
-        if(typeof value === "string") el = this.getElement(value);
-
-
+        try {
+            if(typeof value === "string") el = el.querySelectorAll(value);
+        } catch (Error) {
+            console.warn("Malformed selector")
+        }
 
         if(el instanceof NodeList || Array.isArray(el)) el.forEach(e => e.parentNode.removeChild(e));
         
@@ -368,17 +473,22 @@ class AsyncUpdate {
 
     fn_message(el, value, instructions) {
         const messageElement = appendElementInformation(el, value, instructions);
+        el.dispatchEvent(new CustomEvent("validationissue", {bubbles: true}));
         el.addEventListener("focusin", e => messageElement.dispatchEvent(new Event("click", e)), {once: true});
     }
 
     fn_img(el, value, instructions){
-        this.fn_src(el, value.filename)
+        this.fn_src(el, value.filename, instructions);
         el.height = value.meta.height;
         el.width = value.meta.width;
     }
 
     fn_src(el, value, instructions) {
-        el.src = value;
+        el.setAttribute("src", value);
+    }
+
+    fn_href(el, value, instructions) {
+        el.setAttribute("href", value);
     }
 
     fn_attribute(el, value, instructions) {
@@ -393,15 +503,21 @@ class AsyncUpdate {
 
     fn_style(el, value, instructions) {
         for(const v in value) {
+            if(v.indexOf("-") >= 0) {
+                el.style.setProperty(v, value[v]);
+                continue;
+            }
             el.style[v] = value[v];
         }
     }
+
 }
 
 function appendElementInformation(element, value, instructions) {
     let el = document.createElement("validation-issue");
     const spawnIndex = spawn_priority(element);
     if (spawnIndex) el.style.zIndex = spawnIndex + 1;
+
     el.addEventListener('click', () => {
         if (el) {
             el.parentNode.removeChild(el);
@@ -554,13 +670,15 @@ class XRedirect extends HeaderDirective {
     }
 
     redirect() {
-        Cobalt.router.location = this.content;
+        // Cobalt.router.addEventListener("navigateend",() => {
+            Cobalt.router.replaceState(this.content);
+        // }, {once: true});
     }
 }
 
 class XReplace extends XRedirect {
     redirect() {
-        Cobalt.router.replaceState({}, )
+        Cobalt.router.replaceState(this.content)
     }
 }
 
@@ -571,19 +689,21 @@ class XReplace extends XRedirect {
 */
 class XRefresh extends HeaderDirective {
     execute() {
+        // let location = String(location)
         switch(this.tag) {
-            case "now":
-            case this.content === "now":
-                Cobalt.router.location = location.pathname;
-                break;
             case "wait":
                 new StatusMessage({message: `Refreshing in ${wait} seconds`});
-            case "silent": 
-            default:
+            case "silent":
                 let wait = this.tagArgs[0] || Number(this.content);
                 setTimeout( () => {
-                    Cobalt.router.location = location.pathname;
+                    Cobalt.router.location = String(window.location);
                 }, wait * 1000);
+            case "now":
+            case "true":
+            default:
+                Cobalt.router.location = String(window.location);
+                break; 
+                
         }
     }
 }
@@ -593,6 +713,7 @@ class XConfirm extends HeaderDirective {
         const xhr = this.props.xhrRequest;
         const responseBody = JSON.parse(xhr.response);
         const fulfillment = responseBody.fulfillment;
+        this.props.xhrRequest.errorHandled = true;
         let confirm = await modalConfirm(fulfillment.error, fulfillment.data.okay, "Cancel", fulfillment.data.dangerous);
         if(confirm === false) return xhr.dispatchEvent(new CustomEvent("resubmission", {detail: false}));
         xhr.dispatchEvent(new CustomEvent("resubmission", {detail: true}));
@@ -607,6 +728,7 @@ class XReauth extends HeaderDirective {
         const xhr = this.props.xhrRequest;
         const responseBody = JSON.parse(xhr.response);
         const fulfillment = responseBody.fulfillment;
+        this.props.xhrRequest.errorHandled = true;
         let password = await modalInput("Please supply your password to verify your identity", {okay: fulfillment.data.okay, cancel: "cancel"});
         xhr.setRequestHeader("X-Reauthorization", btoa(password));
         const result = await xhr.submit(fulfillment.data.return);

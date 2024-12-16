@@ -24,9 +24,12 @@ use \Cache\Manager as CacheManager;
 use Cobalt\Notifications\PushNotifications;
 use Cobalt\Renderer\Debugger;
 use Cobalt\Renderer\Exceptions\TemplateException;
+use Cobalt\SchemaPrototypes\Basic\HexColorResult;
+use Cobalt\ThemeManager;
 use Controllers\Controller;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
+use MikeAlmond\Color\Color;
 use Render\Render;
 
 class WebHandler implements RequestHandler {
@@ -34,6 +37,7 @@ class WebHandler implements RequestHandler {
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
     var $encoding_mode;
+    /** @var Render */
     var $renderer;
     var $_stage_bootstrap;
     protected string $mainTemplateFilename;
@@ -84,7 +88,8 @@ class WebHandler implements RequestHandler {
         $this->encoding_mode = __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['mode'];
         if ($this->encoding_mode === "text/html") {
             $this->context_mode = $GLOBALS['route_context'];
-            $this->template_body = $this->load_template("parts/body.html"); // Load the main HTML template
+            $this->template_body = $this->load_template("parts/body.php"); // Load the main HTML template
+            // $this->template_vars['webmention'] = (__APP_SETTINGS__['Webmentions_enable_recieving']) ? "<link rel=\"webmention\" href=\"".server_name() . "/webhooks/linkback/\">" : "";
         } else {
             $this->template_body = $this->main_content_replacement;
         }
@@ -93,25 +98,27 @@ class WebHandler implements RequestHandler {
     }
 
     /** INTERFACE REQUIREMENTS */
-    public function _stage_init($context_meta) {
-        $this->prepare_html_framework();
+    public function _stage_init($context_meta):void {
         return;
     }
 
-    public function _stage_route_discovered($route, $directives) {
+    public function _stage_route_discovered($route, $directives):bool {
         $this->renderer->stock_vars['route'] = $directives;
         $this->renderer->stock_vars['PATH'] = $GLOBALS['PATH'];
+
         return true;
     }
 
-    public function _stage_execute($router_result = "") {
+    public function _stage_execute($router_result = ""):void {
         $this->template_main_content = $router_result;
         // if($router_result)
         // if (!isset($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("No template specified by controller");
         // if (!\template_exists($GLOBALS['WEB_PROCESSOR_TEMPLATE'])) throw new NotFound("That template doesn't exist!");
     }
 
-    public function _stage_output($context_result) {
+    public function _stage_output($context_result):mixed {
+        $this->prepare_html_framework();
+
         if ($this->encoding_mode === "text/html") {
             $GLOBALS['allowed_to_exit_on_exception'] = false;
             // Let's make sure that we aren't double-sending the final document.
@@ -119,10 +126,10 @@ class WebHandler implements RequestHandler {
 
             $this->results_sent_to_client = true;
         }
-        return;
+        return null;
     }
 
-    public function _public_exception_handler($e) {
+    public function _public_exception_handler($e):mixed {
         // Prevent trying to load a template that might not exist already.
         unset($GLOBALS['WEB_PROCESSOR_TEMPLATE']);
 
@@ -145,15 +152,26 @@ class WebHandler implements RequestHandler {
 
         // If we're in debug mode, let's embed the actual error message
         $embed = "$message";
-        if(__APP_SETTINGS__['debug_exceptions_publicly']) $embed .= "<pre class=\"error--message\">" . base64_encode($e->getMessage()) . "</pre>";
+        if(config()["mode"] === COBALT_MODE_DEVELOPMENT) {
+            $embed .= "<pre class=\"error--message\">";
+            if(__APP_SETTINGS__['debug_exceptions_publicly']) {
+                $embed .= $e->getMessage();
+            } else {
+                $embed .= base64_encode($e->getMessage());
+            }
+            $embed .= "</pre>";
+        }
 
-        $this->add_vars([
+
+        add_vars([
+            'versionHash' => VERSION_HASH,
             'title' => $e->status_code,
             'message' => $message,
             'embed' => $embed,
             'status_code' => $e->status_code,
             'data' => $data,
             'body_id' => app("HTTP_error_body_id"),
+            'keywords' => __APP_SETTINGS__['keywords'],
         ]);
 
         // Check if the template exists
@@ -202,8 +220,8 @@ class WebHandler implements RequestHandler {
     }
 
     function app_meta() {
-        $template = $this->load_template("parts/meta.html");
-        return $template;
+        // $template = $this->load_template("parts/meta.html");
+        return view("parts/meta.html");
     }
 
 
@@ -211,17 +229,19 @@ class WebHandler implements RequestHandler {
         $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
         $settings .= $this->getRouteBoundaries();
-        $vars = "";
+        $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
+        $vars = $theme->getPrimaryColor() . $theme->getBackgroundColor() . $theme->getMixedColor();
         foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
             $vars .= "--project-$var: $value;\n";
         }
-        foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
-            $vars .= "--project-$name-family: $family[family];\n";
-        }
+        // foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
+        //     $vars .= "--project-$name-family: $family[family];\n";
+        // }
         
         $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;
     }
+
 
     function getRouteBoundaries() {
         $boundaries = [];
@@ -238,25 +258,29 @@ class WebHandler implements RequestHandler {
     function header_content() {
         $masthead = "";
         
-        $logo = app("logo.thumb");
-        $meta = $logo['meta'];
-        $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+        if(__APP_SETTINGS__['Web_include_app_branding']) {
+            $logo = app("logo.thumb");
+            $meta = $logo['meta'];
+            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+        }
         
-        $header = $this->load_template($this->header_template);
-        $this->add_vars([
+        add_vars([
+            'versionHash' => VERSION_HASH,
             'header_nav' => $this->header_nav(),
             'masthead' => (app("display_masthead")) ? $masthead : "",
             'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
         ]);
+        // $header = $this->load_template($this->header_template);
+
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
-        return $header;
+        return view($this->header_template);
     }
 
     function header_nav() {
         return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
         // $links = "";
         // global $ROUTER:
-        // foreach ($router->routes['get'] as $regex => $route) {
+        // foreach ($router->routes['get'] a Saturday, April 27th 2024 9:29 PM s $regex => $route) {
         //     if (!isset($route['header_nav'])) continue;
         //     $href  = $route['header_nav']['href'] ?? $route['original_path'];
         //     $label = $route['header_nav']['label'];
@@ -272,19 +296,19 @@ class WebHandler implements RequestHandler {
     }
 
     function post_header() {
-        return $this->load_template("/parts/post-header.html");
+        return view("/parts/post-header.html");
     }
 
     function cookie_consent() {
         if (!app("Cookie_consent_prompt")) return "";
         if (isset($_COOKIE['cookie_consent'])) return "";
-        return $this->load_template("/parts/cookie-consent.html");
+        return view("/parts/cookie-consent.html");
     }
 
     var $footer_template = "parts/footer.html";
 
     function footer_content() {
-        return $this->load_template($this->footer_template);
+        return view($this->footer_template);
     }
 
     function footer_credits() {
@@ -368,12 +392,13 @@ class WebHandler implements RequestHandler {
     function generate_script_content($script_name) {
         $script_tags = "";
         $compiled = "";
-        $debug = app("debug");
+        $generate_script_content = app("Package_JS_script_content");
 
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
-            if ($debug) {
-                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{app.version}}\"></script>";
+            if ($generate_script_content === false) {
+                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{versionHash}}\"></script>";
             } else {
                 $files = files_exist([
                     __APP_ROOT__ . "/src/$package",
@@ -386,14 +411,14 @@ class WebHandler implements RequestHandler {
         // Load JS packages from plugins.
         foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
             if (!file_exists($private)) continue;
-            if ($debug) {
-                $script_tags .= "<script src='$public?{{app.version}}'></script>";
+            if ($generate_script_content) {
+                $script_tags .= "<script src='$public?{{versionHash}}'></script>";
             } else {
                 $compiled .= "\n\n" . file_get_contents($private);
             }
         }
 
-        if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
+        if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
 
         if ($compiled !== "") {
             $minifier = new \MatthiasMullie\Minify\JS();
@@ -428,7 +453,7 @@ class WebHandler implements RequestHandler {
     //     $compiled = "";
     //     foreach (app('packages') as $package) {
     //         if ($debug) {
-    //             $script_tags .= "<script src=\"/core-content/js/$package?{{app.version}}\"></script>";
+    //             $script_tags .= "<script src=\"/core-content/js/$package?{{versionHash}}\"></script>";
     //         } else {
     //             $files = files_exist([
     //                 __APP_ROOT__ . "/src/$package",
@@ -441,13 +466,13 @@ class WebHandler implements RequestHandler {
     //     foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
     //         if (!file_exists($private)) continue;
     //         if ($debug) {
-    //             $script_tags .= "<script src='$public?{{app.version}}'></script>";
+    //             $script_tags .= "<script src='$public?{{versionHash}}'></script>";
     //         } else {
     //             $compiled .= "\n\n" . file_get_contents($private);
     //         }
     //     }
 
-    //     if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{app.version}}\"></script>";
+    //     if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
 
     //     if ($compiled !== "") {
     //         $minifier = new \MatthiasMullie\Minify\JS();
@@ -463,38 +488,45 @@ class WebHandler implements RequestHandler {
     function generate_style_meta() {
         $link_tags = "";
         $compiled = "";
-        $debug = app("debug");
-        foreach (__APP_SETTINGS__["css"][$this->meta_selector] as $package) {
+        $package_style_content = app("Package_style_content");
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $package_style_content = false;
+        $toPackage = __APP_SETTINGS__["css"][$this->meta_selector];
+        foreach ($toPackage as $package) {
             $files = files_exist([
                 __APP_ROOT__ . "/shared/css/$package",
                 __APP_ROOT__ . "/public/res/css/$package",
                 __ENV_ROOT__ . "/shared/css/$package"
             ], false);
-            if ($debug === true) {
+            if ($package_style_content === false) {
                 $path = "/res/css/";
                 if (strpos($files[0], "/shared/css/")) $path = "/core-content/css/";
                 else if(empty($files)) throw new NotFound("That file does not exist");
-                $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{app.version}}\">";
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$path$package?{{versionHash}}\">";
             } else {
-                $compiled .= "\n\n" . file_get_contents($files[0]);
+                $compiled .= "\n\n/* $package */";
+                $compiled .= file_get_contents($files[0]);
             }
         }
 
         foreach ($GLOBALS['PACKAGES']['css'] as $public => $private) {
             $file = file_exists($private);
             if (!$file) continue;
-            if ($debug === true) {
-                $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{app.version}}\">";
+            if ($package_style_content === true) {
+                $link_tags .= "<link rel=\"stylesheet\" href=\"$public?{{versionHash}}\">";
             } else {
                 $compiled .= "\n\n" . file_get_contents($file);
             }
         }
-        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{app.version}}\">";
+        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{versionHash}}\">";
 
+        $minify = __APP_SETTINGS__['Package_style_minify'];
+        if(config()['bootstrap_mode'] === COBALT_BOOSTRAP_ALWAYS) $minify = false;
         if ($compiled !== "") {
-            $minifier = new \MatthiasMullie\Minify\CSS();
-            $minifier->add($compiled);
-            $compiled = $minifier->minify();
+            if($minify) {
+                $minifier = new \MatthiasMullie\Minify\CSS();
+                $minifier->add($compiled);
+                $compiled = $minifier->minify();
+            }
 
             $cache = new CacheManager("css-precomp/package.css");
             $cache->set($compiled, false);
@@ -507,13 +539,13 @@ class WebHandler implements RequestHandler {
         $template = "";
         if (app("Auth_account_creation_enabled")) $template = "user_panel.html";
         else $template = "user_panel_login_only.html";
-        return $this->load_template("authentication/user-panel/" . $template);
+        return view("authentication/user-panel/" . $template);
     }
 
     function main_content_from_template($template) {
 
         /** Load the template in question */
-        $this->template_main_content = $this->load_template($template);
+        $this->template_main_content = view($template);
 
         /** If the template body is empty, let's just set the template body equal
          * to the template we just loaded.*/
@@ -526,6 +558,7 @@ class WebHandler implements RequestHandler {
 
     /** @todo restore .session.html functionality */
     function load_template($template_name) {
+        // return view($template_name);
         $ext = pathinfo($template_name, PATHINFO_EXTENSION);
         $session_template_name = str_replace($ext, "session.$ext", $template_name);
         global $TEMPLATE_PATHS;
@@ -559,9 +592,12 @@ class WebHandler implements RequestHandler {
     }
 
     function add_vars($vars) {
+        // add_vars($vars);
+        // return;
         $always_export_these_keys = ['body_id','body_class','main_id','main_class'];
 
-        $exportable = [];
+        // Let's reset these every time vars are added
+        $exportable = ['body_id' => '','body_class' => '','main_id' => '','main_class' => ''];
 
         foreach(array_merge($vars) as $var => $val) {
             if(in_array($var, $always_export_these_keys)) $exportable += correct_exported_values($vars, $var, $val);
@@ -585,7 +621,8 @@ class WebHandler implements RequestHandler {
             $this->renderer->set_body($this->template_body);
             if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
             $this->renderer->set_vars($this->template_vars);
-            return $this->renderer->execute();
+            $buffer = $this->renderer->execute();
+            return $buffer;
         } catch (TemplateException $e) {
             $debug = new Debugger($e);
             return $debug->render();

@@ -25,6 +25,35 @@ body {
     color: var(--project-body-color);
 }
 
+a, button[link] {
+    color: var(--project-href-color-normal);
+}
+
+button[link], button[link]:hover {
+    font-size: 1em;
+    border: 0;
+    background: none;
+    color: inherit;
+    padding: 0;
+    margin: 0;
+    text-align: inherit;
+    cursor: pointer;
+    width: fit-content;
+}
+
+a:visited {
+    color: var(--project-href-color-normal);
+}
+
+a:hover {
+    color: var(--project-href-color-hover);
+}
+
+a:disabled, a[disabled="disabled"] {
+    pointer-events: none;
+    opacity: .3;
+}
+
 main {
     display: block;
 }
@@ -381,6 +410,17 @@ footer .social-media a:hover{
     z-index: 1;
 }
 
+ul.columnated {
+    --columns: 2;
+    --gap: 1em;
+    -moz-column-count: var(--columns,2);
+    -moz-column-gap: var(--gap,1em);
+    -webkit-column-count: var(--columns,2);
+    -webkit-column-gap: var(--gap,1em);
+    column-count: var(--columns,2);
+    column-gap: var(--gap,1em);
+}
+
 
 /** LIST PANEL **/
 
@@ -445,6 +485,12 @@ ul.list-panel {
     width: 100%;
     color: var(--project-color-user-panel-button);
     font-size: 0.9rem;
+}
+
+.cobalt-var-debug {
+    color: darkred;
+    display: block;
+    font-family: monospace;
 }
 
 @media only screen and (max-width: 35em) {

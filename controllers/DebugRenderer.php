@@ -1,8 +1,9 @@
 <?php
 
 use Cobalt\Maps\PersistanceMap;
-use Cobalt\SchemaPrototypes\NumberResult;
-use Cobalt\SchemaPrototypes\StringResult;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
+use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 class DebugRenderer {
     function render($userInput = "Test") {
@@ -16,18 +17,23 @@ class DebugRenderer {
             'doc' => $schema
         ]);
 
-        return set_template("/debug/schema-debug.html");
+        return view("/debug/schema-debug.html");
     }
 }
 
 class TestSchema extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+    }
+    
     public function __get_schema(): array {
         return [
             'html' => [
                 'type' => new StringResult,
             ],
             'number' => [
-                'type' => new NumberResult
+                'type' => new NumberResult,
             ],
             'selectArr' => [
                 'type' => new StringResult,

@@ -6,9 +6,14 @@ use ArrayAccess;
 use ArrayObject;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Traits\Validatable;
+use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
+use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
+use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Countable;
+use Drivers\Database;
 use Iterator;
 use JsonSerializable;
 use MongoDB\BSON\ObjectId;
@@ -26,21 +31,34 @@ use TypeError;
 class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable, Countable {
     use ResultTranslator, Validatable;
     public array $__dataset = [];
-    protected int $__current_index = 0;
+    public string $namePrefix = "";
+    public array $__hydrated = [];
 
+    protected ?ObjectId $id = null;
+    protected int $__current_index = 0;
     protected array $__schema = [];
     protected bool $__schemaHasBeenInitialized = false;
     protected array $__schemaFromConstructorArg = [];
-
-    public array $__hydrated = [];
     protected bool $__hasBeenRehydrated = false;
+    
 
-    protected ?ObjectId $id = null;
+    private ?Database $manager = null;
 
-    function __construct($document = null, array $schema = []) {
+    function __construct($document = null, array $schema = [], string $namePrefix = "") {
+        $this->__namePrefix = $namePrefix;
         $this->__schemaFromConstructorArg = $schema ?? [];
         $this->__initialize_schema();
         if($document) $this->ingest($document);
+    }
+
+    protected bool $index_add_id_checkbox = false;
+    
+    function __set_index_checkbox_state(bool $state) {
+        $this->index_add_id_checkbox = $state;
+    }
+
+    function __get_index_checkbox_state(): bool {
+        return $this->index_add_id_checkbox;
     }
 
     public function __initialize_schema($schema = null): void {
@@ -81,7 +99,10 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         return null;
     }
 
-    public function ingest(array|BSONDocument|BSONArray $values): GenericMap {
+    public function ingest($values): GenericMap {
+        if($values instanceof UploadImageResult) {
+            $values = $values->get_image_result_format();
+        }
         if($values instanceof GenericMap) {
             $this->__schema = array_merge($this->__schema, $values->readSchema());
             // if($this->__schema) $this->__schemaHasBeenInitialized = true;
@@ -103,28 +124,41 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
         return $this;
     }
 
-    private function __rehydrate($field, $value, &$target) {
+    public function set_manager(Database $manager):void {
+        $this->manager = $manager;
+    }
+
+    public function get_manager():Database {
+        return $this->manager;
+    }
+
+    private function __rehydrate(string $field, mixed $value, array|BSONDocument|BSONArray &$target, ?array &$schema = null): void {
         if(!$this->__schemaHasBeenInitialized) throw new LookupFailure("Schema has not been initialized!");
-        // $target[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
-        // return;
+        
+        if(is_null($schema)) $schema = $this->__schema;
+        
+        // Set no schemaDirectives as default behavior
         $schemaDirectives = null;
-        if(key_exists($field, $this->__schema)) {
-            $schemaDirectives = $this->__schema[$field];
-            if(key_exists('each', $schemaDirectives)) {
-                $mutant = $value;
-                foreach($mutant as $i => $v) {
-                    $mutant[$i] = $this->__toResult($field.".$i", $v, $schemaDirectives['each'], $this);
-                }
-                $value = $mutant;
-            }
+        // Check if the field we're working on is explicity defined in our schema
+        if(key_exists($field, $schema)) {
+            // If it is, we need to read our schemaDirectives
+            $schemaDirectives = $schema[$field];
         } else if(is_array($value) || $value instanceof ArrayObject) {
+            // If it's an array or array object
             foreach($value as $i => $v) {
-                if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
+                if($v instanceof MapResult) {
+                    $target[$field] = $v;
+                    continue;
+                }
+                // Loop through them and rehydrate them
+                // if(is_iterable($v)) $this->__rehydrate($field.".$i", $v, $value[$i]);
             }
         }
         
-        $target[$field] = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
-        // $this->__hydrated[$field] = $this->__toResult($field, $value, $this->__schema[$field] ?? [], $this);
+        // Reference our target so we can recursively set values
+        $hydrated_result = $this->__toResult($field, $value, $schemaDirectives ?? [], $this);
+        $target[$field] = $hydrated_result;
+        return;
     }
 
     ##### GETTERS & SETTERS #####
@@ -143,6 +177,7 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
     public function __set($name, $value) {
         $this->__dataset[$name] = $value;
         $this->__rehydrate($name, $value, $this->__hydrated);
+        $this->__validatedFields[$name] = $value;
     }
 
     public function __isset($name) {

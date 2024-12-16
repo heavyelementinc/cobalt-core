@@ -13,10 +13,15 @@ use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Wrapper\IdResult;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONArray;
 
 trait ResultTranslator {
-    function __toResult(string $name, mixed $value, ?array $schema, ?GenericMap $ref = null):SchemaResult|ObjectId {
+    public string $__namePrefix = "";
+
+    function __toResult(string $name, mixed $value, null|array $schema, ?GenericMap $ref = null):SchemaResult|ObjectId {
+        
         $type = gettype($value);
+        // if($schema === null) $schema = $this->__schema[$name];
 
         switch($type) {
             case $value instanceof GenericMap:
@@ -59,7 +64,7 @@ trait ResultTranslator {
                 break;
         }
 
-        $result->setName($name);
+        $result->setName($this->__namePrefix.$name);
         $result->setSchema($schema);
         
         if(!$ref) $ref = $this;
@@ -70,19 +75,47 @@ trait ResultTranslator {
         return $result;
     }
 
-    private function __each(?Iterable $elements, GenericMap $ref, $startingIndex = 0) {
-        if(!$elements) return [];
-        if(!isset($this->schema['each'])) return $elements;
-        if($this->schema['each'] instanceof SchemaResult) {
-            $schema = $this->schema;
-            $schema['type'] = $schema['each'];
-            unset($schema['each']);
+    private function __each(?Iterable $elements, array $schemaDirectives, $startingIndex = 0) {
+        // Check if our schema includes an 'each' field
+        if(key_exists('each', $schemaDirectives)) {
+            // If it does, let's check if it's a BSONArray and convert it to something usable
+            if($elements instanceof BSONArray) $elements = $elements->getArrayCopy();
+            // Loop through through the array
             $mutant = [];
-            foreach($elements as $i => $v) {
-                $mutant[$i] = $this->__toResult($this->name.'['.$startingIndex + $i."]", $v, $schema, $ref);
+            foreach($elements as $index => $arrayItem) {
+                // Upconvert it to a result
+                $mutant[$index] = $this->__toResult($this->name.".$index", $arrayItem, $schemaDirectives['each'], $this->__reference);
             }
             return $mutant;
         }
-        return $elements;
+        if(key_exists('hydrate',$schemaDirectives) && $schemaDirectives['hydrate'] == false) return $elements;
+        // If we don't have an 'each' directive set, let's just translate each
+        // element of this array into a <Type>Result
+        $mutant = [];
+        foreach($elements as $index => $arrayItem) {
+            $mutant[$index] = $this->__toResult($index, $arrayItem, [], $this->__reference);
+        }
+        return $mutant;
+        // if(!$elements) return [];
+        // if(!isset($this->schema['each'])) return $elements;
+        // if($this->schema['each'] instanceof GenericMap) {
+        //     $schema = $this->schema;
+        //     $schema['type'] = $schema['each'];
+        //     unset($schema['each']);
+        //     $mutant = [];
+        //     foreach($elements as $i => $v) {
+        //         $mutant[$i] = $this->__toResult($this->name.'['.$startingIndex + $i."]", $v, $schema, $ref);
+        //     }
+        //     return $mutant;
+        // }
+        // if(isset($this->schema['each'])) {
+        //     $e = [];
+        //     foreach($elements as $key => $value) {
+        //         // $map = new GenericMap($value->getValue(), $this->schema['each'], $this->name);
+        //         $e[$key] = $this->__toResult($key, $value->getValue(), ['type' => new MapResult, 'schema' => $this->schema['each']], $ref);
+        //     }
+        //     return $e;
+        // }
+        // return $elements;
     }
 }

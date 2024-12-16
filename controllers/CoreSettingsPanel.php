@@ -75,6 +75,10 @@ class CoreSettingsPanel extends Controller {
                 $template = "/admin/settings/inputs/input.html";
                 $type = "text";
                 break;
+            case "url":
+                $template = "/admin/settings/inputs/input.html";
+                $type = "url";
+                break;
             case "number": 
                 $template = "/admin/settings/inputs/number.html";
                 $type = "number";
@@ -87,6 +91,8 @@ class CoreSettingsPanel extends Controller {
                 $template = "/admin/settings/inputs/password.html";
                 break;
             case "input-switch":
+            case "boolean":
+            case "bool":
                 $template = "/admin/settings/inputs/bool.html";
                 break;
             case "input-array":
@@ -206,7 +212,7 @@ class CoreSettingsPanel extends Controller {
         $page -= 1;
         $limit = 50;
 
-        $result = $man->find([], ['sort' => ['_id' => 1], 'skip' => $limit * $page, 'limit' => $limit]);
+        $result = $man->find([], ['sort' => ['_id' => -1], 'skip' => $limit * $page, 'limit' => $limit]);
 
         $html = "";
         foreach($result as $data) {

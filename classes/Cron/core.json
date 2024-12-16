@@ -16,5 +16,14 @@
         "method": "destroy_expired_tokens",
         "method_args": [],
         "interval": 3600
+    },
+    {
+        "type": "DefaultType",
+        "name": "Process Tasks",
+        "class": "\\Cobalt\\Tasks\\TaskManager",
+        "class_args": [],
+        "method": "process_queue",
+        "method_args": [],
+        "interval": 60
     }
 ]

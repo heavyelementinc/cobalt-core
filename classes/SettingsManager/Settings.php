@@ -18,7 +18,7 @@ class Settings implements \Iterator {
     }
 
     public function current() {
-        if (!isset($this->{$this->index[$this->pointer]})) die("Setting `" . $this->index[$this->pointer] . "` is not defined");
+        if (!isset($this->{$this->index[$this->pointer]})) kill("Setting `" . $this->index[$this->pointer] . "` is not defined");
         return $this->{$this->index[$this->pointer]};
     }
 

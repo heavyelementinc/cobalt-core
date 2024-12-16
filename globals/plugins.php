@@ -36,6 +36,6 @@ try {
 
     array_push($TEMPLATE_PATHS, __ENV_ROOT__ . "/templates/");
 } catch (Exception $e) {
-    die("Plugin error: " . $e->getMessage());
+    kill("Plugin error: " . $e->getMessage());
     exit;
 }

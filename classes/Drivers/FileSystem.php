@@ -5,6 +5,7 @@ namespace Drivers;
 use Exception;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\RangeNotSatisfiable;
+use MongoDB\GridFS\Bucket;
 
 class FileSystem {
     // public $db = __APP_SETTINGS__['database'];
@@ -37,8 +38,9 @@ class FileSystem {
      * @param array $options 
      * @return never Creating a download for the client will exit this application!
      */
-    final public function download(string $filename, $options = ['revision' => -1]): never {
+    final public function download(string $filename, $options = []): never {
         ob_clean();
+        // $options = ['revision' => -1];
         try{
             $stream = $this->getStream("/".$filename, $options);
         } catch(Exception $e) {
@@ -63,6 +65,10 @@ class FileSystem {
         fpassthru($stream);
 
         exit;
+    }
+
+    final public function getBucket(): Bucket {
+        return $this->bucket;
     }
 
     final public function count(array $filter) {
@@ -97,13 +103,23 @@ class FileSystem {
         $type = gettype($file_data);
         if($type === "string") $file_array = $this->path_or_key($file_data, $key);
         else $file_array = $file_data;
-
         $farray = $this->validate_file_array($file_array);
+        // Let's prevent duplication
+        $md5 = md5_file($file_data['tmp_name']);
+        $deduplication_search_result = $this->findOne(['md5' => $md5]);
+        if($deduplication_search_result !== null) {
+            $id = $deduplication_search_result->_id;
+            // $setQuery = ['$addToSet' => ['filename' => $farray['name']]];
+            // if(is_string($deduplication_search_result->filename)) $setQuery = ['$set' => ['filename' => array_unique([$deduplication_search_result->filename, $farray['name']])]];
+            // $this->updateOne(['_id' => $id], $setQuery);
+            return $id;
+        }
+        // else {
+            $resource = fopen($farray['tmp_name'], 'r');
+            if($resource === false) throw new \Exceptions\HTTP\ServiceUnavailable("The upload returned an unexpected error");
+            $id = $this->bucket->uploadFromStream($farray['name'], $resource);
+        // }
 
-        $resource = fopen($farray['tmp_name'], 'r');
-        if($resource === false) throw new \Exceptions\HTTP\ServiceUnavailable("The upload returned an unexpected error");
-        $id = $this->bucket->uploadFromStream($farray['name'], $resource);
-        
         if(is_array($arbitrary_data)) {
             $collection = $this->bucket->getFilesCollection();
             $result = $collection->updateOne(
@@ -119,7 +135,8 @@ class FileSystem {
     /** Will return a stream. To send the file to the client
      * @return resource File stream
      */
-    final public function getStream(string $filename, $options = ['revision' => -1]) {
+    final public function getStream(string $filename, $options = []) {
+        //$options = ['revision' => -1];
         return $this->bucket->openDownloadStreamByName($filename, $options);
     }
 
@@ -145,7 +162,7 @@ class FileSystem {
     }
 
     final public function findMany($filter = [], array $options = []) {
-        return $this->bucket->findMany($filter, $options);
+        return $this->bucket->find($filter, $options);
     }
 
     final public function updateOne($filter, array $options = []) {

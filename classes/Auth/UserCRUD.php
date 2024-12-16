@@ -34,11 +34,11 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function getUserById($id) {
-        return $this->findOneAsSchema(['_id' => $this->__id($id)]);
+        return $this->findOne(['_id' => $this->__id($id)]);
     }
 
     final function getUserByUnameOrEmail($uname_or_email) {
-        return $this->findOneAsSchema(
+        return $this->findOne(
             [
                 '$or' => [
                     ['uname' => $uname_or_email],
@@ -48,20 +48,28 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
+    final function getUserByUsername($username) {
+        return $this->findOne([
+            'uname' => $username,
+        ]);
+    }
+
     final function getUsersByPermission($permissions, $status = true, $options = null) {
         if(!$options) $options = [
             'limit' => 50
         ];
         if (gettype($permissions) === "string") $permissions = [$permissions];
-        $perms = array_fill_keys($permissions, $status);
+        $perms = [
+            '$or' => [
+                ['is_root' => true]
+            ]
+        ];
+        foreach($permissions as $permission) {
+            $perms['$or'][count($perms['$or'])] = ["permissions.$permission" => $status];
+        }
         
-        return $this->findAllAsSchema(
-            [
-                '$or' => [
-                    ['permissions' => $perms],
-                    ['groups' => 'root']
-                ]
-            ],
+        return $this->find(
+            $perms,
             $options
         );
     }
@@ -71,17 +79,17 @@ class UserCRUD extends \Drivers\Database {
             'limit' => 50
         ];
         if (gettype($groups) === "string") $groups = [$groups];
-        return $this->findAllAsSchema([
+        return $this->find([
             'group' => $groups
         ], $options);
     }
 
     final function getRootUsers() {
-        return iterator_to_array($this->find(['groups' => 'root']));
+        return iterator_to_array($this->find(['is_root' => true]));
     }
 
     final function findUserByToken(string $name, string $token):?UserSchema {
-        $result = $this->findOneAsSchema([
+        $result = $this->findOne([
             'token.name' => $name,
             'token.value' => $token,
         ]);
@@ -161,7 +169,7 @@ class UserCRUD extends \Drivers\Database {
                 "permissions.$permission" => $value
             ]
         ]);
-        return $this->findOneAsSchema($query)->permissions;
+        return $this->findOne($query)->permissions;
     }
 
     final function set_token($id, $type, $expires_in = "+15 minutes"): Token {
@@ -208,6 +216,21 @@ class UserCRUD extends \Drivers\Database {
         );
 
         return $result;
+    }
+
+    final function store_integration_credentials(ObjectId $user, $type, $details, $expiration) {
+        $result = $this->updateOne(
+            ['_id' => $user],
+            [
+                '$push' => [
+                    "integrations.$type" => [
+                        'details' => $details,
+                        'expiration' => $expiration
+                    ]
+                ]
+            ]
+        );
+        return $result->getModifiedCount();
     }
 
 

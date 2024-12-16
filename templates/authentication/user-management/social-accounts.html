@@ -1,0 +1,24 @@
+<form-request id="socials" method="{{method}}" action="{{endpoint}}" autosave="autosave">
+    <ul class="list-panel">
+        <li>
+            <label><i name="fediverse"></i> Fediverse Profile</label>
+            {{doc.fediverse_profile.field()}}
+        </li>
+        <li>
+            <label><i name="youtube"></i> YouTube Profile</label>
+            {{doc.youtube_profile.field()}}
+        </li>
+        <li>
+            <label><i name="instagram"></i> Instagram Profile</label>
+            {{doc.instagram_profile.field()}}
+        </li>
+        <li>
+            <label><i name="facebook"></i> Facebook Profile</label>
+            {{doc.facebook_profile.field()}}
+        </li>
+        <li>
+            <label><i name="twitter"></i> Twitter Profile</label>
+            {{doc.twitter_profile.field()}}
+        </li>
+    </ul>
+</form-request>

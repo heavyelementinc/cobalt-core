@@ -24,11 +24,16 @@ class DatePicker extends HTMLElement {
         ];
         this.daysTag = document.createElement("div")
         this.daysTag.classList.add("days");
+
+        this.timeContainer = document.createElement("div");
+        this.timeContainer.classList.add("hbox");
+
         this.timeInput = document.createElement("input");
         this.timeInput.type = "time";
         this.timeInput.addEventListener('input', () => {
             this.timeValue = this.timeInput.value;
-        })
+        });
+        this.timeContainer.appendChild(this.timeInput);
 
         this.hgroup = document.createElement("hgroup");
         this.monthContainer = document.createElement("select");
@@ -68,9 +73,11 @@ class DatePicker extends HTMLElement {
         this.setButton.addEventListener("click", e => {
             if(!this.dateValue) new StatusMessage({message:"Select a date", id: "invaliddate"});
             if(!this.timeValue) new StatusMessage({message:"Select a time", id: "invalidtime"});
+            console.log(this.value);
             if(this.dateValue && this.timeValue) this.dispatchEvent(new CustomEvent("dateselect", {detail: this.value}))
         })
 
+        this.timeContainer.appendChild(this.setButton);
     }
 
     get value() {
@@ -137,8 +144,8 @@ class DatePicker extends HTMLElement {
         this.prevButton.addEventListener("click", nextPrevCallback);
         this.appendChild(this.daysTag);
         this.appendChild(document.createElement("hr"));        
-        this.appendChild(this.timeInput);
-        this.appendChild(this.setButton);
+        this.appendChild(this.timeContainer);
+        // this.appendChild(this.setButton);
 
         this.render();
         this.hide()
@@ -210,7 +217,7 @@ class DatePicker extends HTMLElement {
     }
 
     makeTimeString(date) {
-        return `${this.formatNumber(date.getHours())}:${this.formatNumber(date.getMinutes)}`;
+        return `${this.formatNumber(date.getHours())}:${this.formatNumber(date.getMinutes())}`;
     }
 
     formatNumber(num) {

@@ -1,6 +1,7 @@
 class AsyncButton extends CustomButton{
     constructor() {
         super();
+        this.checkmarkQuery = ".doc_id_mark input[name='_id'][type='checkbox']";
         this.setAttribute("__custom-input", "true");
     }
 
@@ -8,6 +9,14 @@ class AsyncButton extends CustomButton{
         this.addEventListener("click", e => {
             this.submit();
         })
+        if(this.type !== "multidelete") return;
+        this.setDisabledState();
+        const checkboxes = document.querySelectorAll(this.checkmarkQuery);
+        for(const check of checkboxes) {
+            check.addEventListener("change", () => {
+                this.setDisabledState(checkboxes);
+            });
+        }
     }
 
     submit() {
@@ -17,25 +26,42 @@ class AsyncButton extends CustomButton{
         }
         this.ariaInvalid = false;
         const api = new AsyncFetch(this.getAttribute("action") || this.getAttribute("href"), this.getAttribute("method") ?? "POST", {});
-        api.addEventListener("submit", e => this.startSpinner.bind(this));
-        api.addEventListener("aborted",  e => this.endSpinner.bind(this));
-        api.addEventListener("error",  e => this.error.bind(this));
-        api.addEventListener("done",   e => this.done.bind(this));
+        api.addEventListener("submit",  e => this.startSpinner.bind(this));
+        api.addEventListener("aborted", e => this.endSpinner.bind(this));
+        api.addEventListener("error",   e => this.error.bind(this));
+        api.addEventListener("done",    e => this.done.bind(this));
         api.submit(this.value, {});
     }
 
     get value() {
-        let val = this.getAttribute("value");
-        if(val) {
-            try {
-                val = JSON.parse(val);
-            } catch (error) {}
+        let val = {};
+        switch(this.type) {
+            case "multidelete":
+                const id_boxes = document.querySelectorAll(this.checkmarkQuery);
+                val._ids = [];
+                for(const box of id_boxes) {
+                    if(!box.checked) continue;
+                    val._ids.push(box.value);
+                }
+                break;
+            default:
+                val = this.getAttribute("value");
+                if(val) {
+                    try {
+                        val = JSON.parse(val);
+                    } catch (error) {}
+                }
+                break
         }
         return val;
     }
 
     set value(val) {
         this.setAttribute("value", JSON.stringify(val));
+    }
+
+    get type() {
+        return this.getAttribute("type");
     }
 
     spinner() {
@@ -63,6 +89,16 @@ class AsyncButton extends CustomButton{
     done(event) {
         this.ariaInvalid = false;
         this.dispatchEvent(new CustomEvent("done", event));
+    }
+
+    setDisabledState() {
+        let val = this.value._ids
+        if(val.length === 0) {
+            this.disabled = true;
+            return;
+        }
+        
+        this.disabled = false;
     }
 }
 

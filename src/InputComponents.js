@@ -245,10 +245,10 @@ class DisplayDate extends HTMLElement {
             default: "m/d/Y",
             verbose: "l, F jS Y g:i A",
             long: "l, F jS Y",
+            datetime: "F jS Y g:i A",
             "12-hour": "g:i a",
             "24-hour": "H:i",
             "seconds": "g:i:s A"
-
         };
     }
 
@@ -272,6 +272,7 @@ class DisplayDate extends HTMLElement {
         if (this.relative === "true" || this.getAttribute("format") === "relative") {
             return this.startRelativeTime();
         }
+        if(!this.date) return;
         let date = new DateConverter(this.date, this.format);
         this.innerText = date.format();
     }
@@ -279,6 +280,7 @@ class DisplayDate extends HTMLElement {
     startRelativeTime() {
         // clearTimeout(this.timeout);
         // this.relative = "false";
+        if(!this.date) return;
         if (/[\d]+/.test(this.date) === false) this.date = JSON.parse(this.date);
         else this.date = Number(this.date);
         let result = relativeTime(new Date(this.date), null, "object");
@@ -507,12 +509,23 @@ class HelpSpan extends HTMLElement {
 
     constructor() {
         super();
+        this.setId();
+        this.setAttribute("popovertarget", this.targetId);
         this.message = document.createElement("article");
+        this.id = this.targetId;
         this.message.classList.add("help-span-article");
+        this.message.setAttribute("popover", "auto");
+        this.message.setAttribute("anchor", this.targetId);
         this.trunkatingContainer = document.body;
         this.justifyRightClass = "help-span-article--right-justified";
         this.warning = this.hasAttribute("warning");
         if (this.warning) this.message.setAttribute("warning", "");
+    }
+
+    setId() {
+        this.targetId = random_string(10,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        // Recurse if this ID already exists.
+        if(document.querySelector(`#${this.targetId}`)) return this.setId();
     }
 
     connectedCallback() {
@@ -520,27 +533,32 @@ class HelpSpan extends HTMLElement {
 
         this.message.innerText = this.value || this.getAttribute("value");
 
+        this.attach();
         this.message.classList.remove(this.articleShown);
-        this.addEventListener("mouseover", e => {
-            this.attach();
+        this.addEventListener("click", e => {
+            this.message.showPopover();
+            const offsets = this.getOffsets(this);
+            this.message.style.top = `${offsets.y + offsets.h + 2}px`;
+            this.message.style.left = `${offsets.x + (offsets.w / 2) - (this.getOffsets(this.message).w / 2)}px`
+            // this.message.style.zIndex = `${offsets.zIndex + 100}`;
+            this.justify(offsets);
         })
 
-        this.addEventListener("mouseout", e => {
-            this.detatch();
-        });
+        // this.addEventListener("mouseout", e => {
+        //     this.detatch();
+        // });
 
         this.dispatchEvent(new CustomEvent("componentready"));
+    }
+
+    disconnectedCallback() {
+        this.detatch();
     }
 
     attach() {
         document.body.appendChild(this.message);
         this.message.classList.add(this.articleShown);
-        const offsets = this.getOffsets(this);
-        this.message.style.top = `${offsets.y + offsets.h + 2}px`;
-        this.message.style.left = `${offsets.x + (offsets.w / 2) - (this.getOffsets(this.message).w / 2)}px`
-        this.message.style.zIndex = offsets.zIndex + 100;
         // this.message.style.top = this.top();
-        this.justify(offsets);
     }
 
     justify(offsets) {

@@ -46,7 +46,7 @@ class Patreon extends API {
             
         }
         printf("\n");
-        say(" done", 'i');
+        if($cli) say(" done", 'i');
         return $result;
     }
 

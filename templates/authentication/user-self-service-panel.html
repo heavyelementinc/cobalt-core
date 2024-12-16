@@ -9,22 +9,16 @@
 <tab-nav>
     <nav>
         <a href="#basic"><i name="card-account-details-outline"></i> Basic Info</a>
-        <a href="#password"><i name="shield-lock-open"></i> Password</a>
+        <a href="#social"><i name="share-variant"></i> Social Accounts</a>
+        <a href="#security"><i name="shield-lock-open"></i> Security</a>
         <a href="#preferences"><i name="tune"></i> Preferences</a>
+        {{!links}}
+        <a href="#extensions"><i name="puzzle-outline"></i> Extensions</a>
+        <a href="#sessions"><i name="list-status"></i> Sessions</a>
     </nav>
     <form-request id="basic" method="POST" action="/api/v1/user/me/" autosave="autosave">
         <hgroup><h2><i name="card-account-details-outline"></i> Your {{app.app_name}} Profile</h2></hgroup>
-        <div class="hbox" style="align-items:start">
-            <fieldset>
-                <legend>Avatar</legend>
-                <ul class="list-panel">
-                    <li>
-                        <label>Avatar</label>
-                        {{!doc.avatar.display}}
-                        <input type="file" accept="image/svg+xml,image/*" name="avatar">
-                    </li>
-                </ul>
-            </fieldset>
+        <div class="vbox" style="align-items:start">
             <fieldset>
                 <legend>Details</legend>
                 <ul class="list-panel">
@@ -38,42 +32,83 @@
                     </li>
                     <li>
                         <label>Username</label>
-                        <input type="text" name="uname" value="{{doc.uname}}" placeholder="Username">
+                        {{doc.uname.field()}}
                     </li>
                     <li>
                         <label>Email Address</label>
-                        <input type="email" name="email" value="{{doc.email}}" placeholder="Email address">
+                        {{doc.email.field()}}
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset>
+                <ul class="list-panel">
+                    <li>
+                        <label>Default Author Bio</label>
+                        {{doc.default_bio_blurb.field()}}
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset>
+                <legend>Avatar</legend>
+                <ul class="list-panel">
+                    <li>
+                        <label>Avatar</label>
+                        {{doc.avatar.field()}}
                     </li>
                 </ul>
             </fieldset>
         </div>
     </form-request>
-    <form-request id="password" method="POST" action="/api/v1/user/me/">
+    <div id="social">
+        @view("/authentication/user-management/social-accounts.html");
+    </div>
+    <div id="security" class="vbox">
         <hgroup><h2><i name="shield-lock-open"></i> Account Security</h2></hgroup>
-        {{!2fa}}
-        <fieldset>
-            <legend>Password Update</legend>
-            <ul class="list-panel">
-                <li>
-                    <label>Password</label>
-                    <input-password type="password" name="password"></input-password>
-                </li>
-            </ul>
-        </fieldset>
-    </form-request>
-    <form-request id="preferences" method="PUT" action="/api/v1/user/me/push" autosave="autosave">
+        <div class="vbox">
+            <form-request method="PUT" action="/api/v1/user/password/" autosave="false">
+                <fieldset>
+                    <legend>Password Update</legend>
+                    <small>Update your current password</small>
+                    <ul class="list-panel">
+                        <li class="vbox">
+                            <label>Password</label>
+                            <input-password placeholder="Your new password" name="password" autocomplete="new-password"></input-password>
+                            <input-password placeholder="Confirm your password" name="pword" autocomplete="new-password"></input-password>
+                            <button type="submit" native>Submit</button>
+                        </li>
+                    </ul>
+                </fieldset>
+            </form-request>
+            {{!2fa}}
+        </div>
+    </div>
+    <form-request id="preferences" method="PUT" action="/api/v1/user/me/push" autosave="autosave" class="vbox">
         <hgroup><h2><i name="tune"></i> Preferences</h2></hgroup>
-        <fieldset>
-            <legend>Notifications</legend>
-            <ul class="list-panel">
-                <li>
-                    <label>Enroll in Push Notifications</label>
-                    <push-enrollment-button><loading-spinner></loading-spinner> Loading...</push-enrollment-button>
-                </li>
-                {{!notifications}}
-            </ul>
-        </fieldset>
+        <div class="vbox">
+            <fieldset>
+                <legend>Notifications</legend>
+                <ul class="list-panel">
+                    <li>
+                        <label>Enroll in Push Notifications</label>
+                        <push-enrollment-button><loading-spinner></loading-spinner> Loading...</push-enrollment-button>
+                    </li>
+                    {{!notifications}}
+                </ul>
+            </fieldset>
+        </div>
     </form-request>
+    {{!extensions}}
+    <div id="extensions" class="vbox">
+        <form-request method="POST" action="/api/v1/user/me/">
+            <fieldset>
+                <legend>Integrations</legend>
+                <ul class="ingetration-buttons">
+                    {{!integrate}}
+                </ul>
+            </fieldset>
+        </form-request>
+    </div>
+    {{!sessions}}
 </tab-nav>
 
 <style>
@@ -82,5 +117,13 @@
         height: 100px;
         width: 100px;
         object-fit: contain;
+    }
+    form-request div.vbox fieldset {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    form-request fieldset :is([__custom-input="true"], textarea, input, select) {
+        width: 100%;
+        box-sizing: border-box;
     }
 </style>

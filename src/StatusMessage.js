@@ -20,7 +20,7 @@ class StatusMessage {
 
     /** @todo add action event updating */
     async update(message, icon = this.icon, action = this.action, type = this.type) {
-        const section = this.element.querySelector("section");
+        const section = this.element.querySelector(".message-container");
         const ionIcon = this.element.querySelector("i");
         this.element.setAttribute("name", type);
 
@@ -38,38 +38,66 @@ class StatusMessage {
 
     decideIcon(icon, type) {
         // if(icon) return icon;
-        let icons = {
-            "default": "information-slab-circle-outline",
-            "success":   "check-circle-outline",
-            400:       "cancel",
-            "warning": "alert-outline",
-            "error":   "alert-octagon-outline",
-            "auth":           "fingerprint",
-            "authentication": "fingerprint",
-            "user":           "fingerprint",
-            401:              "fingerprint",
-            "heartbeat": "pulse",
-            "money":  "cash",
-            402:      "cash",
-            "bookmark": "bookmark-outline",
-            "pizza":  "pizza",
-            "teapot": "kettle",
-            418:      "kettle",
-            "fire": "fire-alert",
-            451:    "fire-alert",
-            "update": "refresh-circle",
-            "email":  "email-fast",
-            "notification":   "bell-outline",
-            "notify":         "bell-outline",
-            "chat":           "forum-outline",
-            "text":           "forum-outline",
-            "message":        "forum-outline",
-            "fail":    "missing",
+        // let icons = {
+            
+        // }
+        switch(icon || type) {
+            case "success":
+                return "check-circle-outline";
+            case 400:
+                return "cancel";
+            case "warning":
+                return "alert-outline";
+            case "error":
+                return "alert-octagon-outline";
+            case "auth":
+            case "authentication":
+            case "user":
+            case 401:
+                return "fingerprint";
+            case "heartbeat":
+                return "pulse";
+            case "money":
+            case 402:
+                return "cash";
+            case "bookmark":
+                return "bookmark-outline";
+            case "pizza":
+                return "pizza";
+            case "teapot":
+            case 418:
+                return "kettle";
+            case "fire":
+            case 451:
+                return "fire-alert";
+            case "update":
+                return "refresh-circle";
+            case "email":
+                return "email-fast";
+            case "notification":
+            case "notify":
+                return "bell-outline";
+            case "chat":
+            case "text":
+            case "message":
+                return "forum-outline";
+            case "fail":
+                return "missing";
+            case "":
+            case 0:
+            case true:
+            case false:
+            case null:
+            case undefined:
+            case "status":
+                return "information-outline";
+            default:
+                return type;
         }
 
-        if(icon in icons) return icons[icon];
-        if(type in icons) return icons[type];
-        return icons.default;
+        // if(icon in icons) return icons[icon];
+        // if(type in icons) return icons[type];
+        // return icons.default;
     }
 
     oldSwitch() {
@@ -151,7 +179,7 @@ class MessageHandler {
         message.setAttribute("name",details.type);
         message.classList.add(`status-message`);
         message.setAttribute("data-id",details.id);
-        message.innerHTML = `<i name='${details.icon}'></i><section>${details.message}</section>`;
+        message.innerHTML = `<i name='${details.icon}'></i><div class="message-container">${details.message}</div>`;
         let close_btn = document.createElement("button");
         close_btn.innerHTML = window.closeGlyph;
         // close_btn.addEventListener()

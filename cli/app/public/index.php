@@ -3,7 +3,7 @@
 /**
  * index.php - The Public Cobalt Entrypoint
  * 
- * Copyright 2023 - Heavy Element, Inc.
+ * Copyright 2024 - Heavy Element, Inc.
  * 
  * This file kicks off the entire bootstrapping process for Cobalt Engine. This
  * is the file that should be pointed to as the single entrypoint for all 
@@ -14,7 +14,7 @@
  */
 
 // The default environment should be found in __APP_ROOT__/core/
-$environment = __DIR__ . "/../core/env.php";
+$environment = __DIR__ . "/../cobalt/env.php";
 if (!file_exists($environment)) {
     // If the file does not exist, then we look for a sibling directory.
     $environment = __DIR__ . "/../../cobalt-core/env.php";

@@ -4,8 +4,13 @@ namespace Cobalt\Remote;
 
 use Cobalt\Maps\PersistanceMap;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use Drivers\Database;
 
 abstract class AuthSchema extends PersistanceMap {
+
+    public function __set_manager(?Database $manager = null): ?Database {
+        return null;
+    }
 
     public function __get_schema(): array {
         $this->__strictDataSubmissionPolicy = false;

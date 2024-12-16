@@ -73,4 +73,13 @@
     .admin-dashboard--widget label {
         font-size: 1rem;
     }
+    @media only screen and (max-width: 35em) {
+        #grid {
+            flex-wrap: nowrap;
+            flex-direction: column;
+        }
+        .admin-dashboard--widget {
+            width: unset;
+        }
+    }
 </style>

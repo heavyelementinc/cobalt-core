@@ -452,3 +452,24 @@ class CobaltCarousel extends HTMLElement {
 }
 
 customElements.define("cobalt-carousel", CobaltCarousel);
+
+class IgEmbed extends HTMLElement {
+    constructor() {
+        super();
+        this.initIGScript();
+        
+    }
+
+    initIGScript() {
+        let script = document.querySelector("#ig-script");
+        if(script) return;
+        script = document.createElement("script");
+        script.src = "//www.instagram.com/embed.js";
+    }
+    
+    create() {
+
+    }
+}
+
+customElements.define("ig-embed", IgEmbed);

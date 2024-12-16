@@ -1,0 +1,12 @@
+<section class="landing-bio--container">
+    <div class="landing-bio--content">
+        <h2>{{headline}}</h2>
+        <div class="hbox">
+            <img src="{{page.author.get_avatar()}}"
+                class="bio-avatar {{avatar_classes}}"
+                alt='{{page.author.get_name("full")}}&#39;s Profile Picture'>
+            <article class="landing-bio--copy">{{page.bio}}</article>
+        </div>
+        <div class="hbox"><a href="{{page.cta_href}}" class="button">{{!cta}}</a></div>
+    </div>
+</section>

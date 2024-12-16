@@ -17,7 +17,7 @@
  * 
  * 
  * LAZY REVEAL
- * <img src="..." lazy-reveal lazy-class="revealed">
+ * <img src="..." lazy-reveal lazy-class="revealed" lazy-offset="-10px">
  * <img src="..." lazy-reveal="revert">
  */
 

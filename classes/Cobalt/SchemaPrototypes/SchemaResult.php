@@ -21,20 +21,22 @@
 
 namespace Cobalt\SchemaPrototypes;
 
-use BadFunctionCallException;
-use Cobalt\Maps\Exceptions\DirectiveException;
-use Cobalt\Maps\GenericMap;
-use Cobalt\Maps\PersistanceMap;
+use ArrayAccess;
+use Auth\UserPersistance;
 use Exception;
-use MongoDB\BSON\Document;
-use MongoDB\BSON\Persistable;
-use stdClass;
 use TypeError;
-use Cobalt\SchemaPrototypes\Traits\Prototype;
 use JsonSerializable;
-use MongoDB\Model\BSONArray;
-use ReflectionException;
+use BadFunctionCallException;
 use ReflectionObject;
+use ReflectionException;
+use MongoDB\Model\BSONArray;
+use MongoDB\BSON\Persistable;
+use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\Traits\Prototype;
+use Cobalt\Maps\Exceptions\DirectiveException;
+use Cobalt\Model\Traits\HtmlSafeable;
+use Cobalt\Renderer\Exceptions\TemplateException;
+use MongoDB\Model\BSONDocument;
 
 /** ## `SchemaResult` schema directives
  *  * `default` => [null], the default value of the an element
@@ -43,17 +45,17 @@ use ReflectionObject;
  *  * `private` => `bool` prevents a field from being serialized to JSON and prevents typecasting to string (returns ""),
  *  * `pattern` => `string` a regex-like pattern used to filter inputs BEFORE the native filter callback and included as an attribute in the field() callback
  *  * `pattern_flags` => 'string' flags
+ *  * `input_tag` => specify any input HTML tag and the field prototype will return that tag (for most SchemaResult children)
  * @package Cobalt\SchemaPrototypes 
  * */
-class SchemaResult implements \Stringable, JsonSerializable
-{
+class SchemaResult implements \Stringable, JsonSerializable {
+    use HtmlSafeable;
     protected $value;
     protected $originalValue;
     protected $type = "mixed";
     protected string $name;
     protected $schema;
     protected GenericMap $__reference;
-    protected bool $asHTML = false;
 
     public function jsonSerialize(): mixed {
         return $this->originalValue;
@@ -73,7 +75,12 @@ class SchemaResult implements \Stringable, JsonSerializable
      */
     public function getValue(): mixed {
         $result = $this->value;
-        if ($result === null && $this->schema['default']) $result = $this->schema['default'];
+        if ($result === null) {
+            if($this->schema['default']) $result = $this->getDirective('default');
+            // if($this->schema['fallback']) $result = $this->getDirective('fallback');
+            // $result = $this->schema['default'];
+            // if(is_callable($result)) $result = $result();
+        }
         if (key_exists('get', $this->schema ?? []) && is_callable($this->schema['get'])) $result = $this->schema['get']($result, $this);
         else $result = $this->getRaw();
         if ($this->asHTML === false && gettype($this->value) === "string") $result = htmlspecialchars($result);
@@ -93,16 +100,6 @@ class SchemaResult implements \Stringable, JsonSerializable
     }
 
     /**
-     * When $enableAsHTML is `false`, htmlspecialchars will be applied
-     * to this variable.
-     * @param bool $enableAsHTML 
-     * @return void 
-     */
-    public function htmlSafe(bool $enableAsHTML) {
-        $this->asHTML = $enableAsHTML;
-    }
-
-    /**
      * GetRaw will return the raw value with no processing whatsoever.
      * If no value is stored, hydration is turned off, or if the value
      * is dynamically derived from the `get` directive, this will be nullish.
@@ -114,6 +111,12 @@ class SchemaResult implements \Stringable, JsonSerializable
 
     public function readSchema():array {
         return $this->schema;
+    }
+
+    public function getLabel() {
+        $this->name;
+        $name = preg_replace("/[-_]/", " ", $this->name);
+        return ucwords($name);
     }
 
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -152,9 +155,10 @@ class SchemaResult implements \Stringable, JsonSerializable
         // if ($field === "pronoun_set") return $this->valid_pronouns();
         if (isset($this->schema['valid'])) {
             if (is_callable($this->schema['valid'])) {
-                $val = $this->valid([], $this);
+                $val = $this->getDirective('valid');
                 if (is_array($val)) return $val;
                 if ($val instanceof BSONArray) return $val->getArrayCopy();
+                if ($val instanceof BSONDocument) return (array)$val;
                 if (is_iterable($val)) return iterator_to_array($val);
                 throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
             }
@@ -173,10 +177,25 @@ class SchemaResult implements \Stringable, JsonSerializable
      * @return string
      */
     #[Prototype]
-    protected function options(): string {
+    protected function options($selected = null): string {
         $valid = $this->getValid();
-        $val = $this->getValue() ?? $this->value;
+        
+        if($selected) {
+            if($this->getDirective("allow_custom")) $val = $selected;
+            else if (key_exists($selected, $valid)) $val = $selected;
+            else $val = $this->getValue() ?? $this->value;
+        } else $val = $this->getValue() ?? $this->value;
+
+        // if(!is_string($val) && is_numeric($val)) $val = "$val";
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
+        
+        // If custom is allowed
+        $allow_custom = $this->getDirective("strict") === false;
+        if(!$allow_custom) $allow_custom = $this->getDirective("allow_custom");
+
+        // If the current value is not a key in the current valid options AND
+        // we're allowed to have custom options, add the current val to the options
+        if($allow_custom && $val && !key_exists($val, $valid)) $valid += [$val => $val];
 
         $type = gettype($val);
 
@@ -203,6 +222,7 @@ class SchemaResult implements \Stringable, JsonSerializable
                     $data .= " data-$attr=\"$val\"";
                 }
             }
+
             $selected = "";
             switch ($type) {
                 case "string":
@@ -336,7 +356,7 @@ class SchemaResult implements \Stringable, JsonSerializable
      * @param null|array $schema 
      * @return void 
      */
-    function setSchema(?array $schema): void {
+    function setSchema(null|array $schema): void {
         $this->schema = array_merge(
             self::universalSchemaDirectives,
             $this->defaultSchemaValues(),
@@ -368,9 +388,20 @@ class SchemaResult implements \Stringable, JsonSerializable
         $this->__reference = $schema;
     }
 
+    function __defaultIndexPresentation(): string {
+        return $this->__toString();
+    }
+
     function __toString(): string {
         if($this->__isPrivate()) return "";
-        return $this->getValue() ?? "";
+        $read = $this->getValue();
+        // $type = gettype($read);
+        // switch($type) {
+        //     case $read instanceof BSONDocument:
+        //         return json_encode($type);
+        // }
+        if($read && gettype($read) !== "string") return json_encode($read);
+        return $read ?? "";
     }
 
     #[Prototype]
@@ -456,16 +487,16 @@ class SchemaResult implements \Stringable, JsonSerializable
      * Directive methods will always be called with the following arguments:
      *  [$this->getValue(), $this, ...[other_args]]
      * @param mixed $directiveName - The name of the directive to fetch
-     * @param bool $throwOnFail - If the directive does not exist, return `null` if `false` or throw a `DirectiveException` if `true`
+     * @param bool $throwOnFail - If the directive does not exist, return `null` if throwOnFail is `false`, otherwise will throw a `DirectiveException`
      * @return mixed returns the value of the directive callable *or* the directive literal value
      * @throws DirectiveException 
      */
     public function getDirective($directiveName, $throwOnFail = false) {
-        if(!key_exists($directiveName, $this->schema)) {
+        if(!key_exists($directiveName, $this->schema ?? [])) {
             if($throwOnFail) throw new DirectiveException("Undefined value");
             return null;
         }
-        if(is_callable($this->schema[$directiveName])) {
+        if(is_callable($this->schema[$directiveName]) && gettype($this->schema[$directiveName]) !== "string") {
             $args = func_get_args();
             return $this->schema[$directiveName]($this->getValue(), $this, ...array_slice($args, 2));
         }
@@ -483,12 +514,17 @@ class SchemaResult implements \Stringable, JsonSerializable
      */
     function __isset($path) {
         try {
-            $result = lookup_js_notation($path, $this->value, true);
+            $result = lookup_js_notation($path, $this->getValue(), true);
         } catch (Exception $e) {
             return false;
         }
         return true;
     }
+
+    // function __set($name, $value) {
+    //     if($name !== "name") return;
+    //     $this->name = $value;
+    // }
 
     function __isRequired(): bool {
         return $this->coalece_directive('required');
@@ -518,4 +554,49 @@ class SchemaResult implements \Stringable, JsonSerializable
     protected function queriableName($name) {
         return str_replace(".", "__", $name);
     }
+
+    protected function isStrict(): bool {
+        $valid_key_exists = key_exists('valid', $this->schema);
+        if($valid_key_exists === false) return false;
+
+        $strict_directive = $this->getDirective('strict');
+        $allow_custom = $this->getDirective('allow_custom');
+        // If `strict_directive` is false
+        if(!$strict_directive) {
+            // And `allow_custom` is false
+            if(!$allow_custom) return false;
+            
+        }
+
+        // If we're here, that means that strict_directive is true
+        // So let's check if allow_custom is `true`.
+        if($allow_custom === true) return false;
+
+        return true;
+    }
+
+    /**
+     * Each child of SchemaResult should return an appropriately typecast
+     * version of the $value parameter
+     * @param mixed $value 
+     * @return mixed 
+     */
+    public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
+        if($this->type === "mixed") return $value;
+        return compare_and_juggle($this->type, $value);
+    }
+
+    #[Prototype]
+    protected function get_filter_field($current_value, $operation = QUERY_TYPE_CAST_LOOKUP) {
+        $v = $this->typecast($current_value, $operation);
+        return view("/admin/crudable/filterable-item.html", [
+            'schema' => $this,
+            'value' => $v,
+            'name' => $this->name,
+            'options' => $this->options($v),
+            'QUERY_PARAM_FILTER_NAME' => QUERY_PARAM_FILTER_NAME,
+            'QUERY_PARAM_FILTER_VALUE' => QUERY_PARAM_FILTER_VALUE
+        ]);
+    }
+
 }

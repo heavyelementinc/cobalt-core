@@ -24,7 +24,7 @@ function journal(string $string, int $level = CL_DEBUG, string $EOL = "\n") {
     if($level < CL_MINIMUM_LOG_LEVEL) return;
     $journal = __APP_ROOT__ . "/logs/app.log";
     journal_rotate($journal);
-    $resource = fopen($journal, 'w') or die("Cannot lock journal for writing.");
+    $resource = fopen($journal, 'w') or kill("Cannot lock journal for writing.");
     try {
         if(!function_exists("say")) $id = session('_id');
         else {

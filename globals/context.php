@@ -18,14 +18,33 @@ ob_start();
  * @global $route_context Stores the value of the route context
  */
 $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
+if(getenv('HTTP2')) require_once __ENV_ROOT__ . "/globals/http2.php";
 try {
     /** @global $auth Access the Authentication class */
     $auth = new Auth\Authentication();
 } catch (Exception $e) {
-    die($e->getMessage());
+    kill($e->getMessage());
 }
-$WEB_PROCESSOR_VARS['custom'] = new Cobalt\Customization\CustomizationManager();
 
+$_REQUEST['url'] = server_name() . $_SERVER['REQUEST_URI'];
+$_REQUEST['url'] .= ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
+
+$WEB_PROCESSOR_VARS = array_merge($WEB_PROCESSOR_VARS, [
+    'app'  => __APP_SETTINGS__,
+    'get'  => $_GET,
+    'post' => $_POST,
+    'session' => session(),
+    'request' => [
+        'url' => $_REQUEST['url'],
+        'referrer' => $_SERVER['HTTP_REFERRER'] ?? "",
+    ],
+    'context' => __APP_SETTINGS__['context_prefixes'][$GLOBALS['route_context']]['vars'] ?? [],
+    // '$main_id' => 'main-content',
+    'og_template' => "/parts/opengraph/default.html",
+    // 'extensions' => extensions(),
+    // 'custom' => new CustomizationManager(),
+    'custom' => new Cobalt\Customization\CustomizationManager()
+]);
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
 $processor = "Handlers\WebHandler";
 $permission_needed = false;
@@ -43,8 +62,8 @@ if ($route_context !== "web") {
 $context_processor = new $processor();
 
 if (!is_a($context_processor, "Handlers\RequestHandler")) {
-    if (app("debug_exceptions_publicly")) die("Context processor must be an instance of Handlers\RequestHandler");
-    else die("Error");
+    if (app("debug_exceptions_publicly")) kill("Context processor must be an instance of Handlers\RequestHandler");
+    else kill("Error");
 }
 
 define("__APP_CONTEXT__", __APP_ROOT__ . "/app_context.php");
@@ -69,7 +88,6 @@ try {
     if ($route_context === "web" && app("Auth_user_accounts_enabled") && !file_exists($init_file)) {
         require_once __ENV_ROOT__ . "/globals/init.php";
     }
-
 
     // The router takes care of much of the rest of this process.
     $ROUTER = new Routes\Router($route_context);
@@ -126,8 +144,8 @@ ob_clean();
 // Let's finally output the result:
 if($context_result !== null) {
     echo $context_result;
-    $BENCHMARK_RESULTS['env_invoke']['end'] = microtime(true) * 1000;
-    $BENCHMARK_RESULTS['env_invoke']['delta'] = $BENCHMARK_RESULTS['env_invoke']['end'] - $BENCHMARK_RESULTS['env_invoke']['start'];
+    $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_END] = microtime(true) * 1000;
+    $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_DELTA] = $BENCHMARK_RESULTS['env_invoke']['end'] - $BENCHMARK_RESULTS['env_invoke']['start'];
 
     $global_benchmarks = "";
     if(app('debug') && isset($context_processor->encoding_mode) && $context_processor->encoding_mode === "text/html") {
@@ -138,5 +156,5 @@ if($context_result !== null) {
     ob_flush();
     exit;
 } else {
-    die("No content in buffer");
+    kill("No content in buffer");
 }

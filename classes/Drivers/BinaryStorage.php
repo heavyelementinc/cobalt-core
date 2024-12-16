@@ -21,6 +21,13 @@ trait BinaryStorage {
     final public function __store(string $pathToFile, string $filenameForStorage, $data = [], $storageOptions = []) {
         $this->__initFS();
         if(!file_exists($pathToFile)) throw new NotFound("File does not exist");
+
+        $md5_sum = md5_file($pathToFile);
+        $deduplication_search_result = $this->__collection->findOne(['md5' => $md5_sum]);
+        if($deduplication_search_result !== null) {
+            return $deduplication_search_result['_id'];
+        }
+
         $resource = fopen($pathToFile, 'r');
         if($resource === false) throw new ServiceUnavailable("Could not open file");
 

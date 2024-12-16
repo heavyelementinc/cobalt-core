@@ -4,11 +4,13 @@ namespace Cobalt\SchemaPrototypes\Compound;
 
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
+use Cobalt\SchemaPrototypes\Traits\Fieldable;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 
 use Validation\Exceptions\ValidationIssue;
 
 class MarkdownResult extends StringResult {
+    use Fieldable;
     protected $type = "string";
 
     /**+++++++++++++++++++++++++++++++++++++++++++++**/
@@ -40,8 +42,10 @@ class MarkdownResult extends StringResult {
     }
 
     #[Prototype]
-    protected function field(string $class = "", array $misc = [], string $tag = ""):string {
-        // return $this->markdownarea($class, $misc);
-        return "<markdown-area name=\"$this->name\">" . $this->getValue() . "</markdown-area>";
+    protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
+        return $this->markdownarea($class, $misc);
+        // $isHtml = $this->asHTML;
+        // $html = "<markdown-area name=\"$this->name\">" . $this->value . "</markdown-area>";
+        // return $html;
     }
 }

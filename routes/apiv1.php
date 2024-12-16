@@ -1,5 +1,6 @@
 <?php
 
+use Routes\Options;
 use Routes\Route;
 
 if(app("UGC_enable_user_generated_content")) {
@@ -31,15 +32,17 @@ if (app('Auth_logins_enabled')) {
         Route::s_put("/me/totp/enroll",    "UserAccounts@totp_enroll");
         Route::s_delete("/me/totp/unenroll", "UserAccounts@totp_unenroll");
     }
-    Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
-    Route::s_put("/user/{id}/permissions", "UserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
-    Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
+    Route::s_put("/core-user-accounts/{id}/permissions", "CoreUserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
+    // Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
     Route::s_put("/user/{id}/push",        "UserAccounts@update_push",        ['permission' => 'Auth_allow_editing_users']);
     // Route::s_put("/user/{id}/push/enrollment", "UserAccounts@update_push_enrollment", ['permission' => 'Auth_allow_editing_users']);
-    Route::s_put("/user/{id}/password",    "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
-    Route::s_post("/user/{id}/avatar",     "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_put("/core-user-accounts/{id}/password",    "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
+    // Route::s_post("/user/{id}/avatar",     "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
     Route::s_put("/user/password",         "UserAccounts@change_my_password", ['permission' => 'self']);
-    Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
+    // Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
+
+    CoreUserAccounts::apiv1();
 
     Route::s_put("/settings/update/", "CoreSettingsPanel@update", [
         'permission' => 'Auth_modify_cobalt_settings'
@@ -54,7 +57,6 @@ if (app('Auth_logins_enabled')) {
     ]);
 
     Route::s_delete("/sessions/{id}", "UserAccounts@log_out_session_by_id");
-    
 }
 
 if (app('Web_main_content_via_api')) {
@@ -65,6 +67,7 @@ if (app('API_contact_form_enabled')) {
     Route::post("/contact", "ContactForm@contact_submit");
     Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
     Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
+    get_controller("ContactForm")::apiv1();
 }
 
 if (app("CobaltEvents_enabled")) {
@@ -81,6 +84,9 @@ if (app("CobaltEvents_enabled")) {
 Route::s_post("/extensions/{uuid}/info",    "ExtensionsController@modify_extension_state",   ['permission' => 'Extensions_allow_management']);
 Route::s_post("/extensions/{uuid}/options", "ExtensionsController@modify_extension_options", ['permission' => 'Extensions_allow_management']);
 Route::s_post("/extensions/rebuild", "ExtensionsController@rebuild_database", ['permission' => 'Extensions_allow_management']);
+
+Route::s_post("/integrations/{id}/update", "IntegrationsController@update");
+Route::s_delete("/integrations/{id}/reset", "IntegrationsController@delete");
 
 if (app('debug')) {
     Route::get("/hello_world/{something}/{machina}?", "HelloWorld@do_it", [ // Hello World test route
@@ -116,21 +122,21 @@ if(app("enable_debug_routes")) {
     Route::post("/proto/", "SchemaDebug@filter_test");
 }
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
-    Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
-    Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
-    Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);
-    Route::s_delete("/posts/attachment/{id}",         "Posts@delete", ['permission' => 'Posts_manage_posts']);
-    Route::s_put(   "/posts/attachment/{id}/default", "Posts@defaultImage", ['permission' => 'Posts_manage_posts']);
-    Route::s_put(   "/posts/attachment/{id}/sort",    "Posts@updateSortOrder", ['permission' => 'Posts_manage_posts']);
-}
+// if(__APP_SETTINGS__['Posts']['default_enabled']) {
+//     Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
+//     Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
+//     Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);
+//     Route::s_delete("/posts/attachment/{id}",         "Posts@delete", ['permission' => 'Posts_manage_posts']);
+//     Route::s_put(   "/posts/attachment/{id}/default", "Posts@defaultImage", ['permission' => 'Posts_manage_posts']);
+//     Route::s_put(   "/posts/attachment/{id}/sort",    "Posts@updateSortOrder", ['permission' => 'Posts_manage_posts']);
+// }
 
 if(__APP_SETTINGS__['PaymentGateways_enabled']) {
     Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);
 }
 
-if(app("Mailchimp_api_signup_route")) {
-    Route::post("/mailchimp/onboard", "Mailchimp@onboard");
+if(app("Mailchimp_default_list_id")) {
+    Route::post("/newsletter/onboard", "Mailchimp@onboarding");
 }
 
 
@@ -140,6 +146,8 @@ Route::s_post("/remote/{service}/update", "RemoteServices@update",  ['permission
 if(app("Customizations_enabled")) {
     Route::s_post("/customizations/update/{id}?", "Customizations@update", ['permission' => 'Customizations_modify']);
     Route::s_post("/customizations/upload/{id}?", "Customizations@uploadFile", ['permission' => 'Customizations_modify']);
+    Route::s_put("/customizations/reset/all", "Customizations@resetAll", ['permission' => 'Customizations_modify']);
+    Route::s_put("/customizations/reset/{id}", "Customizations@resetItem", ['permission' => 'Customizations_modify']);
     Route::s_delete("/customizations/{id}", "Customizations@deleteItem", ['permission' => 'Customizations_delete']);
     Route::s_delete("/customizations/attachment/{id}", "Customizations@delete", ['permission' => 'Customizations_delete']);
 }
@@ -149,3 +157,41 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
         'permission' => 'Database_database_export',
     ]);
 }
+
+Route::s_delete((new Options("/image-editor/{id}/{name}?","ImageEditor@delete"))
+    ->set_permission("Customizations_delete")
+);
+
+Route::delete("/crudable-files/{id}", "CrudableFiles@delete_file_by_id", [
+    'permission' => "Customizations_delete"
+]);
+Route::post("/crudable-files/{id}/rename", "CrudableFiles@renameFile", [
+    'permission' => 'Customizations_modify'
+]);
+Route::get("/crudable-files/{id}/reset", "CrudableFiles@reset_metadata", [
+    'permission' => 'Customizations_modify'
+]);
+
+Cobalt\Pages\Controllers\Posts::apiv1();
+Route::s_post('/posts/{id}/preview-key/', '\\Cobalt\\Pages\\Controllers\\Posts@preview_key');
+if(__APP_SETTINGS__['LandingPages_enabled']) {
+    Cobalt\Pages\Controllers\LandingPages::apiv1();
+    Route::s_post('/landing-pages/{id}/preview-key/', '\\Cobalt\\Pages\\Controllers\\LandingPages@preview_key');
+}
+
+if(__APP_SETTINGS__['Block_Editor_endpoints']) {
+    
+    Route::s_post('/block-editor/upload/url/', "BlockEditor@fileByURL", [
+        'csrf_required' => false
+    ]);
+    
+    Route::s_post('/block-editor/upload/', "BlockEditor@fileUpload", [
+        'csrf_required' => false
+    ]);
+    
+    Route::s_get('/block-editor/link-fetch/', "BlockEditor@linkFetcher", [
+        'csrf_required' => false
+    ]);
+}
+
+CrudableFiles::apiv1();
