@@ -39,8 +39,9 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
     
     const VISIBILITY_PRIVATE = 1;
     const VISIBILITY_DRAFT   = 2;
-    const VISIBILITY_UNLISTED = 128;
-    const VISIBILITY_PUBLIC  = 256;
+    const VISIBILITY_HIDDEN  = 64; // Hidden is publicly accessible for anyone who has the link, but it's not listed on the sitemap, ineligible to be displayed as related content
+    const VISIBILITY_UNLISTED = 128; // Unlisted is publicly accessible and is displayed on the site map but not the index
+    const VISIBILITY_PUBLIC  = 256; // Public is on the site map, the index
 
     const SPLASH_POSITION_SPLIT  = 0b000001;
     const SPLASH_POSITION_FADE   = 0b000010;
@@ -126,6 +127,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                 'valid' => [
                     self::VISIBILITY_PRIVATE => "Private",
                     self::VISIBILITY_DRAFT  => "Draft",
+                    self::VISIBILITY_HIDDEN => "Hidden",
                     self::VISIBILITY_UNLISTED => "Unlisted",
                     self::VISIBILITY_PUBLIC => "Public",
                 ],

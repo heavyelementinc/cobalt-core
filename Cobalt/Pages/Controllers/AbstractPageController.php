@@ -92,7 +92,7 @@ abstract class AbstractPageController extends Crudable {
         // Check the page's visibility criteria
         $visibility = $page->visibility->getValue();
         
-        if($visibility < $page::VISIBILITY_UNLISTED) {
+        if($visibility < $page::VISIBILITY_HIDDEN) {
             $pkey = (string)$page->preview_key;
             switch($visibility) {
                 case(isset($_GET['pkey']) && $pkey && $_GET['pkey'] === $pkey):
