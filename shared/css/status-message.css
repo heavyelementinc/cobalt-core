@@ -31,13 +31,18 @@ message-item {
     background: white;
     border-radius: 4px;
     box-shadow: 5px 0px 20px rgba(0,0,0,.3);
-    --height: 100px;
-    --min-height: 100px;
-    /* height: var(--height); */
+    /* --height: 100px; */
+    /* --min-height: 100px; */
+    height: auto;
+    max-height: calc(100vh - calc(var(--margins) * 4));
     --margins: 15px;
     margin: var(--margins);
     /* padding: 15px; */
     position: relative;
+    interpolate-size: allow-keywords;
+    @starting-style {
+        height: 0;
+    }
 }
 
     message-item i{
@@ -59,9 +64,13 @@ message-item {
         padding: calc(var(--margins) / 2) 0;
         /* height: var(--height); */
         box-sizing: border-box;
-        display: inline-flex;
+        display: inline-block;
         align-items: center;
-        padding-right:1em;
+        padding-right: 1em;
+        max-height: 100%;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        box-sizing: border-box;
     }
 
     message-item button{

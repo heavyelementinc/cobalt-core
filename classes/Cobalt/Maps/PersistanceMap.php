@@ -4,6 +4,7 @@ namespace Cobalt\Maps;
 
 use ArrayAccess;
 use Cobalt\Maps\PersistanceException\DirectiveException;
+use Cobalt\Model\Exceptions\OutOfDateVersion;
 use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
@@ -79,6 +80,10 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
      */
     abstract function __get_schema():array;
 
+    static function __get_version(): string {
+        return "";
+    }
+
     public function __get_manager():?Database {
         return $this->__manager;
     }
@@ -111,6 +116,9 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
     }
 
     function bsonUnserialize(array $data): void {
+        // $version = $this->__get_version();
+        // if($version && !$data['__version']) throw new OutOfDateVersion("This document is out of date! The __version field is not set.");
+        // if($version && $version !== $data['__version']) throw new OutOfDateVersion("This document's version is `$data[__version]`, but the latest version is `$version`. Please run migrations!");
         $this->ingest($data);
     }
 }

@@ -8,7 +8,7 @@ use Cobalt\SchemaPrototypes\MapResult;
 use Controllers\ClientFSManager;
 use MongoDB\BSON\ObjectId;
 
-class upgradeposts extends Migration {
+class markdown_posts_to_modern_posts extends Migration {
     use ClientFSManager;
     function config():void {
         $this->__run_one = true;

@@ -36,6 +36,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         'default' => '/Cobalt/Pages/templates/views/default.html',
         'landing' => '/Cobalt/Pages/templates/views/landing.html',
     ];
+    
     const VISIBILITY_PRIVATE = 1;
     const VISIBILITY_DRAFT   = 2;
     const VISIBILITY_UNLISTED = 128;
@@ -452,7 +453,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                 'default' => false,
             ],
             'route_group' => [
-                new EnumResult,
+                new ArrayResult,
                 'allow_custom' => true,
                 'valid' => function () {
                     $arr = [];
@@ -503,6 +504,10 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
             return $schema;
         }
         return $schema;
+    }
+
+    static function __get_version(): string {
+        return "1.1";
     }
 
     function get_tags() {

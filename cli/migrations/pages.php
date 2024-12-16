@@ -29,9 +29,14 @@ class pages extends Migration {
         $id = $document['_id'];
         unset($document['_id']);
         $persistance = $this->get_persistance();
-        $result = $this->updateOne(['_id' => $id], ['$set' => [
-            '__pclass' => new \MongoDB\BSON\Binary($persistance::class, \MongoDB\BSON\Binary::TYPE_USER_DEFINED)
-        ]]);
+        $doc = [
+            '__pclass' => new \MongoDB\BSON\Binary($persistance::class, \MongoDB\BSON\Binary::TYPE_USER_DEFINED),
+            '__version' => PageMap::__get_version()
+        ];
+        if(is_string($document->route_group)) {
+            $doc['route_group'] = [$document->route_group];
+        }
+        $result = $this->updateOne(['_id' => $id], ['$set' => $doc]);
         return $result;
     }
 }

@@ -41,6 +41,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
         $array = $value;
         if($value instanceof BSONArray) $array = $value->getArrayCopy();
         if(empty($value)) $array = $this->schema['default'];
+        if(key_exists('upgrade',$this->schema)) $array = $this->getDirective("upgrade", false, $array);
         $array = $this->__each($array, $this->schema['each'] ?? []);
         $this->value = $array;
     }
