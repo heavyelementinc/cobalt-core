@@ -530,6 +530,18 @@ const DEFAULT_DEFINITIONS = [
             
         ]
     ],
+    "PublicContact_city" => [
+        "default" => "",
+        "meta" => [
+            "group" => "Contact Form",
+            "subgroup" => "Public Contact Info",
+            "name" => "Publicly displayed contact <b>City</b>",
+            "type" => "input"
+        ],
+        "validate" => [
+            
+        ]
+    ],
     "PublicContact_state" => [
         "default" => "",
         "meta" => [
@@ -570,6 +582,9 @@ const DEFAULT_DEFINITIONS = [
     /* The id attribute of the body tag when errors happen in a web context. */
     "HTTP_error_body_id" => [
         "default" => "cobalt_http_error"
+    ],
+    "html_tag_classes" => [
+        "default" => "",
     ],
     "opengraph" => [
         "directives" => [
@@ -1008,10 +1023,12 @@ const DEFAULT_DEFINITIONS = [
         ]
     ],
 
-
     /*******************************************/
     /* ============= LOOK & FEEL ============= */
     /*******************************************/
+    "manifest_engine" => [
+        "default" => 2
+    ],
     "default_color_scheme" => [
         "default" => true
     ],

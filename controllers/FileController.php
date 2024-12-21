@@ -92,14 +92,36 @@ class FileController extends \Controllers\FileController {
         if ($cache->exists) {
             $file = $cache->file_path;
         } else {
-            $file = __ENV_ROOT__ . "/shared/css/$match";
-            $file_exists = file_exists($file);
-            if (!$file_exists)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
+            // $file = __ENV_ROOT__ . "/shared/css/$match";
+            $file = find_one_file([
+                __APP_ROOT__."/shared/css/",
+                __ENV_ROOT__."/shared/css/",
+            ],$match);
+            if (!$file)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
         }
 
         header("Content-Type: text/css;charset=UTF-8");
         $this->get_etag($file);
         readfile($file);
+        exit;
+    }
+
+    function css_versioned($version, $match) {
+        $cache = new \Cache\Manager("css-precomp/v$version/$match");
+        if ($cache->exists) {
+            $file = $cache->file_path;
+        } else {
+            // $file = __ENV_ROOT__ . "/shared/css/v2/$match";
+            // $file = find_one_file([
+            //     __APP_ROOT__."/shared/css_v$version/",
+            //     __ENV_ROOT__."/shared/css_v$version/",
+            // ],$match);
+            $file = "/shared/css_v$version/$match";
+        }
+
+        header("Content-Type: text/css;charset=UTF-8");
+        $this->get_etag($file);
+        echo view($file);
         exit;
     }
 

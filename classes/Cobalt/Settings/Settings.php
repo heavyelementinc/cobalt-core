@@ -28,6 +28,7 @@
 namespace Cobalt\Settings;
 
 use Cobalt\Extensions\Extensions;
+use Cobalt\Manifests\Classes\Item;
 use Exception;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
 use MongoDB\Model\BSONArray;
@@ -49,6 +50,12 @@ class Settings extends \Drivers\Database {
         __ENV_ROOT__ . "/manifest.jsonc",
         __APP_ROOT__ . "/manifest.jsonc",
         __APP_ROOT__ . "/manifest.json",
+    ];
+
+    const __MANIFESTS_V2__ = [
+        __ENV_ROOT__ . "/config/manifest.v2.jsonc",
+        __APP_ROOT__ . "/config/manifest.v2.jsonc",
+        __APP_ROOT__ . "/config/manifest.v2.json",
     ];
 
     var $mtime_candidates = [
@@ -155,7 +162,7 @@ class Settings extends \Drivers\Database {
             }
         }
 
-        $details = $this->bootstrapManifestData();
+        $details = $this->bootstrapManifestData($toCache);
 
         $toCache = array_merge($toCache, $details);
         
@@ -321,7 +328,43 @@ class Settings extends \Drivers\Database {
         ]);
     }
 
-    public function bootstrapManifestData() {
+    public function bootstrapManifestData($latestSettings) {
+        switch($latestSettings['manifest_engine']) {
+            case 1:
+                return $this->bootstrapManifestData_v1();
+                break;
+            case 2:
+            default:
+                return $this->bootstrapManifestData_v2();
+                break;
+        }
+    }
+
+    private function bootstrapManifestData_v2() {
+        $GLOBALS['TIME_TO_UPDATE'] = true;
+        
+        // Load our manifests
+        foreach($this::__MANIFESTS_V2__ as $file) {
+            $this->manifest_raw_decode[] = get_json($file);
+        }
+
+        $data = [
+            'app_packages' => []
+        ];
+
+        foreach($this->manifest_raw_decode as $manifest) {
+            foreach($manifest as $entry) {
+                $hydrated = new Item();
+                $hydrated->ingest($entry);
+                $data['app_packages'][] = $hydrated;
+                // $hydrated->inflate($data);
+            }
+        }
+
+        return $data;
+    }
+    
+    private function bootstrapManifestData_v1() {
         $GLOBALS['TIME_TO_UPDATE'] = true;
         
         // Load our manifests
@@ -344,24 +387,6 @@ class Settings extends \Drivers\Database {
         //     (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
         // }
         return $data;
-    }
-    
-    public function oldbootstrapManifestData() {
-        // TODO: remove TIME_TO_UPDATE global
-        $GLOBALS['TIME_TO_UPDATE'] = true;
-        $final = [];
-
-        foreach($this::__MANIFESTS__ as $file) {
-            $this->manifest_raw_decode[] = get_json($file);
-            foreach($this->manifest_raw_decode[count($this->manifest_raw_decode) - 1] as $type => $data) {
-                $this->manifest_combine($type, $data, $final);
-            }
-        }
-
-        foreach($final as $type => $data) {
-            (!is_associative_array($data)) ? array_push($final[$type], ...$this->appendable[$type] ?? []) : $final[$type] = array_merge($final[$type], $this->appendable[$type]);
-        }
-        return $final;
     }
 
     protected $appendable = [];

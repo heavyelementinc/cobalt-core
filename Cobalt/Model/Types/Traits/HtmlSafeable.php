@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Model\Traits;
+namespace Cobalt\Model\Types\Traits;
 
 trait HtmlSafeable {
     protected bool $asHTML = false;

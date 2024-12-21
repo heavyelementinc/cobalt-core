@@ -421,6 +421,13 @@ ul.columnated {
     column-gap: var(--gap,1em);
 }
 
+@media only screen and (max-width: 35em) {
+    ul.columnated {
+        column-count: unset;
+        column-gap: unset;
+    }
+}
+
 
 /** LIST PANEL **/
 

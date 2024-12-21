@@ -1,8 +1,8 @@
 <?php
 
-namespace Cobalt\Model\Traits;
+namespace Cobalt\Model\Types\Traits;
 
-trait Filterable {
+trait ClientUpdateFilter {
     public array $updateParameters = [];
 
     public function __filter($value) {

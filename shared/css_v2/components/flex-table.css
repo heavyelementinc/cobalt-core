@@ -1,0 +1,197 @@
+:root {
+    --project-color-table-bg-odd: var(--input-element-background);
+    --project-color-table-border: var(--input-element-border-width) solid var(--input-element-border);
+    --project-color-table-bg-even: var(--input-element-tray);
+}
+
+flex-table{
+    display: table;
+    width: 100%;
+    background: var(--project-color-table-bg-odd);
+    flex-wrap: wrap;
+    border: var(--project-color-table-border);
+    & .doc_id_mark {
+        padding: 0 1ch;
+        justify-content: center;
+    }
+    &[scroll-x]{
+        display:table;
+        overflow-x: scroll;
+        & flex-row{
+            display: table-row;
+            flex-wrap: nowrap;
+        }
+        & flex-cell, 
+        & flex-header,
+        & flex-sticky{
+            display: table-cell;
+            width: auto;
+        }
+    }
+    & flex-row{
+        display: flex;
+        box-sizing: border-box;
+        width: 100%;
+        flex-grow: 0;
+        flex-wrap: wrap;
+        background: var(--project-color-table-bg-odd);
+        &:nth-of-type(even){
+            background: var(--project-color-table-bg-even);
+        }
+        &.flex-table--no-results {
+            justify-self: center;
+            font-style: italic;
+            text-align: center;
+            & flex-cell {
+                color: var(--project-color-input-border-nofocus);
+            }
+        }
+        &:hover flex-cell  a {
+            text-decoration: underline;
+        }
+    }
+    & flex-cell,
+    & flex-header,
+    & flex-sticky {
+        display: flex;
+        flex-grow: 1;
+        padding: .3rem;
+        width: 80px;
+    }
+    & flex-sticky + flex-sticky,
+    & flex-sticky + flex-cell,
+    & flex-sticky + flex-header,
+    & flex-cell + flex-cell,
+    & flex-header + flex-cell,
+    & flex-header + flex-header{
+        border-left: var(--project-color-table-border);
+    }
+    & flex-header {
+        &.sort-asc:after,
+        &.sort-desc:after {
+            content: "\F035D";
+            font-family: "Material Design Icons";
+        }
+
+        &.sort-desc:after {
+            content: "\F0360";
+        }
+    }
+
+    flex-cell {
+        & a {
+            text-decoration: none;
+        }
+    }
+    &.hydrated {
+        & flex-cell,
+        & flex-header,
+        & flex-sticky{
+            flex-grow: var(--flex-column-grow);
+            width: var(--col-width);
+            &:not([col-span]) {
+                max-width: var(--max-column-width);
+            }
+        }
+    }
+}
+    
+flex-header, flex-row:first-of-type flex-sticky{
+    font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    align-items:
+    center;
+    border-bottom: var(--project-color-table-border);
+    position: sticky;
+    background: inherit;
+}
+
+flex-header [flex-table-current]:after{
+    content: "";
+    display: inline-block;
+    border-width: 0 3px 3px 0;
+    padding: 3px;
+    margin: 4px;
+    transform: rotate(45deg);
+    border-color: black;
+    border-style: solid;
+}
+
+flex-header [flex-table-current="-1"]:after{
+    margin: 0 4px;
+    transform: rotate(-135deg);
+}
+
+flex-header i.sort-icon {
+    font-size: 1.3em;
+}
+
+/** flex-sticky items should only be the left-most column OR the first row*/
+flex-sticky{
+    position:sticky;
+/* left: 0; */
+}
+
+flex-header:only-of-type, flex-sticky:only-of-type{
+    border: none;
+    left: 0;
+}
+
+flex-header:only-of-type:only-child,flex-sticky:only-of-type:only-child{
+    border-top: var(--project-color-table-border);
+    border-bottom: var(--project-color-table-border);
+    width:100%;
+    grid-column: 1 / span all;
+}
+
+@media only screen and (max-width:900px) {
+    flex-table {
+        width: 100%;
+        overflow-x: scroll;
+        display: block;
+    }
+
+        flex-row {
+            /* width: max-content; */
+            display: table-row;
+        }
+
+            flex-cell,
+            flex-header,
+            flex-sticky {
+                grid-column: auto;
+                width: 100%;
+                box-sizing: border-box;
+                display: table-cell;
+            }
+
+            flex-sticky {
+                position: sticky;
+                left: 0;
+                font-weight: bold;
+                background: inherit;
+            }
+}
+
+table, tr, td, th {
+    border: var(--project-color-table-border);
+}
+
+td, th{
+    padding: .2rem;
+}
+
+table{
+    background: var(--project-color-table-bg-odd);
+}
+
+tr:nth-of-type(even) {
+    background: var(--project-color-table-bg-even);
+}
+
+flex-table async-button {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}

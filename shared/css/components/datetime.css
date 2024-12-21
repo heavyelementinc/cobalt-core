@@ -13,6 +13,7 @@ input-datetime {
     justify-content: space-between;
     width: 23ch;
     cursor: default;
+    align-items: center;
 }
 
 input-datetime time {
@@ -26,6 +27,7 @@ input-datetime > button {
     display: inline-block;
     height: 100%;
     color: var(--project-color-input-border-nofocus);
+    margin: 0;
 }
 
 input-datetime:hover > button {
@@ -77,7 +79,9 @@ date-picker :is(hgroup button) {
     height: 30px;
     margin: 0 auto 0 0;
     background: transparent;
-    color: var(--project-color-input-border-nofocus)
+    color: var(--project-color-input-border-nofocus);
+    font-size: 1rem;
+    margin: 0;
 }
 
 date-picker:hover :is(hgroup button, button.set) {
@@ -134,6 +138,9 @@ date-picker .calendar button {
     font-weight: normal;
     font-family: var(--project-body-family);
     color: inherit;
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
 }
 
 date-picker .calendar .header button {
@@ -146,4 +153,5 @@ date-picker .hbox {
 
 date-picker button.set {
     padding: 0.45rem 1rem;
+    margin: 0;
 }

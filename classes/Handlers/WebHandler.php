@@ -21,16 +21,21 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Cobalt\Manifests\Classes\Item;
+use Cobalt\Manifests\Classes\ManifestManager;
+use Cobalt\Manifests\Enums\ValidTypes;
 use Cobalt\Notifications\PushNotifications;
 use Cobalt\Renderer\Debugger;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;
 use Cobalt\ThemeManager;
 use Controllers\Controller;
+use Exceptions\HTTP\Error;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
 use MikeAlmond\Color\Color;
 use Render\Render;
+use TypeError;
 
 class WebHandler implements RequestHandler {
     public $template_cache_dir = "templates";
@@ -229,16 +234,17 @@ class WebHandler implements RequestHandler {
         $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
         $settings .= $this->getRouteBoundaries();
-        $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
-        $vars = $theme->getPrimaryColor() . $theme->getBackgroundColor() . $theme->getMixedColor();
-        foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
-            $vars .= "--project-$var: $value;\n";
+        if(__APP_SETTINGS__['manifest_engine'] === 1) {
+            $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
+            $vars = $theme->getPrimaryColor() . $theme->getBackgroundColor() . $theme->getMixedColor();
+            foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
+                $vars .= "--project-$var: $value;\n";
+            }
+            $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
+        } else {
+            $settings .= "<style>".view("/shared/css_v2/color-theme.css")."</style>";
+            // $settings .= "\n<link rel=\"stylesheet\" href=\"/core-content/css/v2/color-theme.css\">";
         }
-        // foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
-        //     $vars .= "--project-$name-family: $family[family];\n";
-        // }
-        
-        $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;
     }
 
@@ -390,11 +396,25 @@ class WebHandler implements RequestHandler {
 
 
     function generate_script_content($script_name) {
+
+        switch(__APP_SETTINGS__['manifest_engine']) {
+            case 1:
+                return $this->scripts_v1();
+            case 2:
+                return $this->scripts_v2();
+            default:
+                throw new Error("Failed to configure scripts for unknown manifest_engine version: `" . __APP_SETTINGS__['manifest_engine']."`");
+        }
+
+    }
+
+    function scripts_v1() {
         $script_tags = "";
         $compiled = "";
         $generate_script_content = app("Package_JS_script_content");
 
         if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
+        
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
             if ($generate_script_content === false) {
@@ -417,7 +437,7 @@ class WebHandler implements RequestHandler {
                 $compiled .= "\n\n" . file_get_contents($private);
             }
         }
-
+        
         if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
 
         if ($compiled !== "") {
@@ -429,6 +449,14 @@ class WebHandler implements RequestHandler {
             $cache->set($compiled, false);
         }
         return $script_tags;
+    }
+
+    function scripts_v2() {
+        $generate_script_content = __APP_SETTINGS__["Package_JS_script_content"];
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
+
+        $man = new ManifestManager();
+        return $man->get_tags(ValidTypes::js, $this->meta_selector, $generate_script_content);
     }
 
     function get_script_pathname_from_manifest_entry($entry) {
@@ -486,6 +514,17 @@ class WebHandler implements RequestHandler {
     // }
 
     function generate_style_meta() {
+        switch(__APP_SETTINGS__['manifest_engine']) {
+            case 1:
+                return $this->style_v1();
+            case 2:
+                return $this->style_v2();
+            default:
+                throw new TypeError("Cannot generate style meta for unknown manifest_engine: `".__APP_SETTINGS__['manifest_engine']."`");
+        }
+    }
+
+    function style_v1() {
         $link_tags = "";
         $compiled = "";
         $package_style_content = app("Package_style_content");
@@ -517,7 +556,7 @@ class WebHandler implements RequestHandler {
                 $compiled .= "\n\n" . file_get_contents($file);
             }
         }
-        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{versionHash}}\">";
+        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package$this->meta_selector.css?{{versionHash}}\">";
 
         $minify = __APP_SETTINGS__['Package_style_minify'];
         if(config()['bootstrap_mode'] === COBALT_BOOSTRAP_ALWAYS) $minify = false;
@@ -528,10 +567,17 @@ class WebHandler implements RequestHandler {
                 $compiled = $minifier->minify();
             }
 
-            $cache = new CacheManager("css-precomp/package.css");
+            $cache = new CacheManager("css-precomp/package.$this->meta_selector.css");
             $cache->set($compiled, false);
         }
         return $link_tags;
+    }
+
+    function style_v2() {
+        $package_style_content = __APP_SETTINGS__["Package_style_content"];
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $package_style_content = false;
+        $man = new ManifestManager();
+        return $man->get_tags(ValidTypes::css, $this->meta_selector, $package_style_content);
     }
 
     function session_panel() {

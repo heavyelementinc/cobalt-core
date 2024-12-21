@@ -12,7 +12,8 @@ class ModelType extends MixedType implements ArrayAccess {
     public function setValue($value):void {
         // Let's check if the value is already a Model (this could be because 
         // we) persisted some data from the DB, etc.
-        if($value instanceof Model) {
+        if($value instanceof Model || $value instanceof GenericModel) {
+            $value->name_prefix = $this->name;
             $this->value = $value;
             $this->isSet = true;
             return;
@@ -38,12 +39,13 @@ class ModelType extends MixedType implements ArrayAccess {
         return isset($this->value->{$property});
     }
 
-    public function __getStorable() {
-        return $this->value->getData();
+    public function serialize() {
+        if(is_null($this->value)) return [];
+        return $this->value->serialize();
     }
 
     public function offsetExists(mixed $offset): bool {
-        return $this->value->offsetExists($offset);
+        return $this->value?->offsetExists($offset) ?? false;
     }
 
     public function offsetGet(mixed $offset): mixed {

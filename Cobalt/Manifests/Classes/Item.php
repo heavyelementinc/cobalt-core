@@ -1,0 +1,210 @@
+<?php
+declare(strict_types=1);
+
+namespace Cobalt\Manifests\Classes;
+
+use Cobalt\Manifests\Enums\ValidTypes;
+use Error;
+use MongoDB\BSON\Document;
+use MongoDB\BSON\Persistable;
+use MongoDB\Model\BSONArray;
+use stdClass;
+use TypeError;
+
+
+
+class Item implements Persistable{
+    private string $href = "";
+    private string $known_file = "";
+    private array $contexts = [];
+    private bool $module = false;
+    private bool $registered = false;
+    private bool $append = false;
+    private int $version = 1;
+
+    private ValidTypes $type;
+
+    const FILE_LOCATIONS = [
+        'js' => [
+            __APP_ROOT__."/src/",
+            __ENV_ROOT__."/src/",
+        ],
+        'css' => [
+            __APP_ROOT__."/shared/css_v2/",
+            __ENV_ROOT__."/shared/css_v2/",
+            __APP_ROOT__."/shared/css/",
+            __ENV_ROOT__."/shared/css/",
+        ]
+    ];
+
+    const COMMON_SHORTHAND_REFERENCE = ["web", "admin", "debug"];
+
+    function __construct() {
+    }
+
+    public function bsonSerialize(): array|stdClass|Document {
+        return [
+            'href' => $this->href,
+            // 'known_file' => $this->known_file,
+            'contexts' => $this->contexts,
+            'module' => $this->module,
+            'registered' => $this->registered,
+            'append' => $this->append,
+            'version' => $this->version,
+        ];
+    }
+
+    public function bsonUnserialize(array $data): void {
+        $this->ingest($data);
+    }
+
+    function ingest(array $data) {
+        $this->set_href($data['href'], $data['path'] ?? null);
+        $this->set_contexts($data['contexts'] ?? []);
+        $this->set_module($data['module'] ?? false);
+        $this->set_append($data['append'] ?? false);
+        $this->set_version($data['version'] ?? 1);
+    }
+
+    public function set_href(string $value, ?string $path = null) {
+        $type = null;
+        switch (strtolower(pathinfo($value, PATHINFO_EXTENSION))) {
+            case "js":
+            case "mjs":
+                $type = ValidTypes::js;
+                break;
+            case "css":
+                $type = ValidTypes::css;
+                break;
+        }
+        $this->set_type($type);
+
+        if($path) {
+            if(!file_exists($path)) throw new Error("set_href was passed a path, but it does not exist!");
+            $this->known_file = $path;
+        } else {
+            $existing_file = find_one_file(self::FILE_LOCATIONS[$this->type->name], $value);
+            if(!$existing_file) throw new Error("Manifest file description could not be found: $value");
+            $this->known_file = $existing_file;
+        }
+        $this->href = $value;
+
+    }
+    public function set_contexts(array|BSONArray $value) {
+        if($value instanceof BSONArray) $value = $value->getArrayCopy();
+        // if(in_array("common", $value)) {
+        //     unset($value[array_search("commomn", $value)]);
+        //     $value = self::COMMON_SHORTHAND_REFERENCE;
+        // }
+        $this->contexts = $value;
+    }
+
+    public function set_module(bool $value) {
+        $this->module = $value;
+    }
+
+    public function set_type(ValidTypes $value) {
+        $this->type = $value;
+    }
+
+    public function set_append(bool $value) {
+        $this->append = $value;
+    }
+
+    public function set_version(int $version) {
+        $this->version = $version;
+    }
+
+    public function get_href():string {
+        return $this->href;
+    }
+
+    public function get_contexts():array {
+        return $this->contexts;
+    }
+
+    public function get_module():bool {
+        return $this->module;
+    }
+
+    public function get_type():ValidTypes {
+        return $this->type;
+    }
+
+    public function get_append():bool {
+        return $this->append;
+    }
+
+    public function get_version():int {
+        return $this->version;
+    }
+
+
+    public function belongs_to_context($context):bool {
+        if(in_array($context, $this->contexts)) return true;
+        if(in_array("common", $this->contexts)) return true;
+        return false;
+    }
+
+    public function inflate(&$data) {
+        $type = $this->type->name;
+        if(!key_exists($type, $data)) $data[$type] = [];
+        foreach($this->contexts as $ctx) {
+            if(!key_exists($ctx, $data[$type])) $data[$type][$ctx] = [];
+            $data[$type][$ctx][] = $this;
+        }
+    }
+
+    public function get_html_tag() {
+        switch($this->type) {
+            case ValidTypes::js:
+                return $this->get_script_tag();
+                break;
+            case ValidTypes::css:
+                return $this->get_css_tag();
+            default:
+                throw new TypeError("Unknown type. Cannot generate HTML for manifest entry");
+        }
+    }
+
+    public function get_script_tag() {
+        $module = "";
+        if($this->module) $module = " type=\"module\"";
+        $registered = "";
+        if($this->registered) $registered = " onload=\"window.asyncScripts.push(new Promise(resolve=>resolve(this)))\"";
+
+        $version = "";
+        if($this->version > 1) $version = "v$this->version/";
+        return "<script src=\"/core-content/js/$version"."$this->href?{{versionHash}}\"$module"."$registered></script>";
+    }
+
+    public function get_css_tag() {
+        $version = "";
+        if($this->version > 1) $version = "v$this->version/";
+        return "<link rel=\"stylesheet\" href=\"/core-content/css/$version"."$this->href?{{versionHash}}\">";
+    }
+
+    public function read_content() {
+        switch($this->type) {
+            case ValidTypes::js:
+                return $this->read_script();
+                break;
+            case ValidTypes::css:
+                return $this->read_css();
+        }
+    }
+
+    public function read_script() {
+        // $handle = find_one_file(self::FILE_LOCATIONS['js'],$this->href);
+        $handle = $this->known_file;
+        $details = view($handle);
+        return (config()['mode']) ? "// $this->href\n\n$details" : $details;
+    }
+
+    public function read_css() {
+        // $handle = find_one_file(self::FILE_LOCATIONS['css'],$this->href);
+        $handle = $this->known_file;
+        $details = view($handle);
+        return (config()['mode']) ? "/** $this->href */\n\n$details" : "$details";
+    }
+}

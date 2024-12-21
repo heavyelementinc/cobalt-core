@@ -1,6 +1,7 @@
 <?php
 namespace Cobalt\Model\Traits;
 
+use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\MixedType;
@@ -14,32 +15,30 @@ use MongoDB\Model\BSONDocument;
 
 trait Hydrateable {
     /**
-     * 
+     * This function acts as a means of consistently populating a MixedType
      * @param array &$target This is usually $this->__dataset
      * @param string|int $field_name The name of the field we're calling
      * @param mixed $value The value that field should be set to
-     * @param MixedType|null $instance The given instance
      * @param null|GenericModel $model The model to which this field belongs
      * @param mixed $name 
      * @return void 
      */
-    protected function hydrate(array &$target, string|int $field_name, $value, MixedType $instance = null, ?GenericModel $model = null, $name = null, ?array $directives = null):void {
-        if($instance == null) $instance = $target[$field_name];
-        if($model == null && $instance->model) $model = $instance->model;
-
-        // $instance = $target[$field_name];
-        // Let's check to see if our schema has defined a 
-        // if(key_exists($field_name, $this->__schema) && $this->__schema[$field_name]['type']){
-        //     if($this->__schema[$field_name]['type'] instanceof MixedType) $instance = $this->__schema[$field_name]['type'];
-        // }
-        
+    protected function hydrate(array &$target, string|int $field_name, $value, ?GenericModel $model = null, $name = null, ?array $directives = [], ?MixedType $instance = null):void {
+        // Let's find our instance and get ready to modify it
         if($instance === null) {
-            $this->implicit_cast($field_name, $value, $target);
-            $target[$field_name]->setName($name ?? $field_name);
-            $target[$field_name]->setModel($model);
+            /** @var MixedType $instance */
+            if(isset($directives['type'])) $instance = $directives['type'];
+            else $instance = $this->implicit_cast($field_name, $value, $target);
         }
-        $target[$field_name]->setValue($value);
-        //  = $instance;
+        
+        // Now that we have our instance, let's configure it
+        $instance->setName($name); // We set up our name first since that's critical
+        $instance->setModel($model); // Then, we point to the instancing model
+        $instance->setDirectives($directives); // Finally, we set the directives
+
+        // If we can, we'll set our value right now.
+        if($value instanceof DoNotSet === false) $instance->setValue($value);
+        $target[$field_name] = $instance;
     }
 
     function normalizeMongoDocuments(&$value, $instance = null) {
@@ -60,7 +59,7 @@ trait Hydrateable {
         return $instance;
     }
 
-    function implicit_cast(string $field, mixed $value, array &$target):void {
+    function implicit_cast(string $field, mixed $value): MixedType {
         $type = gettype($value);
         switch($type) {
             case "string":
@@ -84,6 +83,6 @@ trait Hydrateable {
                 $instance = new MixedType();
         }
 
-        $target[$field] = $instance;
+        return $instance;
     }
 }

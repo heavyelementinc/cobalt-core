@@ -2,6 +2,7 @@
 
 namespace Cobalt\Model\Traits;
 
+use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
@@ -9,6 +10,7 @@ use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\StringType;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use stdClass;
 
@@ -21,7 +23,9 @@ trait Schemable {
     protected array $__dataset = [];
     protected array $__schema = [];
 
-    abstract function implicit_cast(string $field, mixed $value, array &$target):void;
+    protected bool $__index_checkbox_state = false;
+
+    abstract function implicit_cast(string $field, mixed $value): MixedType;
 
     protected function __defineSchema(array $schema):void {
         // We don't need this because the Model class will execute defineSchema 
@@ -45,30 +49,53 @@ trait Schemable {
             // Define the schema directives
             $this->__schema[$field] = $directives;
             if(!key_exists($field, $this->__dataset)) {
-                $this->__dataset[$field] = $directives['type'] ?? new MixedType();
-                $this->__dataset[$field]->setName($field);
-                $this->__dataset[$field]->setModel($this);
-                $this->__dataset[$field]->setDirectives($directives);
+                $instance = $directives['type'] ?? new MixedType();
+                // $this->__dataset[$field]->setName($field);
+                // $instance->setModel($this);
+                // $instance->setDirectives($directives);
+                // $this->__dataset[$field]->setName(($this->name_prefix) ? $this->name_prefix . ".$field" : $field);
+                $this->hydrate(
+                    target: $this->__dataset,
+                    field_name: $field,
+                    value: new DoNotSet(),
+                    model: $this,
+                    name: ($this->name_prefix) ? $this->name_prefix . ".$field" : $field,
+                    directives: $directives
+                );
             }
         }
         $this->__has_schema_set = true;
     }
 
+    public function __get_index_checkbox_state():bool {
+        return $this->__index_checkbox_state;
+    }
+
+    public function __set_index_checkbox_state($value) {
+        $this->__index_checkbox_state = $value;
+    }
+
+    public function readSchema() {
+        return $this->__schema;
+    }
+
     public function getData(): array|stdClass|Document {
         $data = [];
         if($this->__include_id) $data['_id'] = $this->_id;
-        foreach($this->__dataset as $field => $v) {
-            $data[$field] = $v->serialize();
-        }
-        return $data;
+        // // foreach($this->__dataset as $field => $v) {
+        // //     $data[$field] = $v->serialize();
+        // // }
+        // return $data;
+        return array_merge($data, $this->serialize());
     }
 
-    public function setData(array|BSONDocument $data): void {
+    public function setData(array|BSONDocument|BSONArray $data): void {
         $this->_id = $data['_id'];
         foreach($data as $index => $value) {
             if($index === "_id") continue;
             $this->__set($index, $value);
         }
+        // $this->__set('__version', $this::__getVersion());
         $this->__has_been_unserialized = true;
     }
 

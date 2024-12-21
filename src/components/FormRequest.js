@@ -215,7 +215,7 @@ class NewFormRequest extends HTMLElement {
                     );
             }
         }
-        const fullUrl = `${this.getAttribute("action")}?${encodedPairs.join("&")}`;
+        const fullUrl = `${this.getAttribute("action")??""}?${encodedPairs.join("&")}`;
         const method = this.getAttribute("method");
         switch(method.toLocaleUpperCase()) {
             case "NAVIGATE":

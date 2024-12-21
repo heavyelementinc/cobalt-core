@@ -18,9 +18,9 @@ use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
-use Cobalt\Pages\PageMap;
-use Cobalt\Pages\PostMap;
-use Cobalt\Renderer\Render;
+use Cobalt\Model\Types\MixedType;
+use Cobalt\Pages\Models\PageMap;
+use Cobalt\Pages\Models\PostMap;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\Error;
@@ -151,7 +151,7 @@ function cobalt_autoload($class) {
 
 function class_loader($path, $originalName, $stage) {
     try {
-        require_once $path;
+;        require_once $path;
     } catch (ParseError $e) {
         print("<pre>");
         $file = $e->getFile() . ': ' . $e->getLine();
@@ -436,9 +436,16 @@ function recursive_lookup(array $split_path, mixed $mutant):mixed {
         if($split_count === 0) return $mutant->{$key};
         return recursive_lookup($split_path, $mutant->{$key});
     }
-    if(isset($mutant[(string)$key])) {
+    if(isset($mutant[$key])) {
         if($split_count === 0) return $mutant[$key];
-        return recursive_lookup($split_path, $mutant[$key]);
+        $result = recursive_lookup($split_path, $mutant[$key]);
+        if($result instanceof Undefined === false) return $result;
+    } else if ($mutant) {
+        
+    }
+
+    if($mutant instanceof MixedType) {
+        return $mutant;
     }
 
     return new Undefined($key, "Value $split_path is undefined");
@@ -471,116 +478,6 @@ function jsonc_decode($json, $assoc = false, $depth = 512, $flags = 0) {
     return json_decode($json, $assoc, $depth, $flags);
 }
 
-
-/**
- * A shorthand way of rendering a template and getting the results. This is
- * included so you can include a template inside another template. This has the
- * potential to cause some recursive crap... so use caution!
- *
- * @param  string $template The name of the template
- * @param  mixed  $vars     Variables to include
- * @return string Processed template
- * @deprecated Use view() instead
- */
-function with(string $template, $vars = []) {
-    return view($template, $vars);
-}
-
-/** An error-tolerant template inclusion routine. Wraps the `with` function in a
- * try/catch block
- * 
- * @param string  $template The name of the template
- * @param mixed   $vars     Variables to include
- * @return string The processed template OR an empty string on error
- * @deprecated use maybe_view()
- */
-function maybe_with($template, $vars = []) {
-    return maybe_view($template, $vars);
-}
-
-/**
- * A shorthand way of rendering a template and getting the results. This is
- * included so you can include a template inside another template. This has the
- * potential to cause some recursive crap... so use caution!
- *
- * @param  string $template The name of the template
- * @param  mixed  $vars     Variables to include
- * @return string Processed template
- */
-function view(string $template, array $vars = []):string {
-    if(__APP_SETTINGS__['Render_use_v2_engine']) {
-        $render = new Render();
-        $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
-        $render->getBodyFromTemplate($template);
-    } else {
-        $render = new \Render\Render();
-        $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
-        $render->set_vars($vars);
-        $render->from_template($template);
-    }
-    return $render->execute();
-}
-
-function view_from_string(string $view, array $vars = []):string {
-    $render = new \Render\Render();
-    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
-    $render->set_vars($vars);
-    $render->set_body($view, 'string');
-    return $render->execute();
-}
-
-/** An error-tolerant template inclusion routine. Wraps the `with` function in a
- * try/catch block
- * 
- * @param string  $template The name of the template
- * @param mixed   $vars     Variables to include
- * @return string The processed template OR an empty string on error
- */
-function maybe_view(string $template, array $vars = []):string {
-    if (!$template) return "";
-    if (!is_string($template)) return "";
-    try {
-        return view($template, $vars);
-    } catch (Exception $e) {
-        return "";
-    }
-}
-
-
-function conditional_addition(string $template, bool $is_shown, $vars = []) {
-    if (!$is_shown) return "";
-    return view($template, $vars);
-}
-
-function with_each(string $template, $docs, $var_name = 'doc') {
-    $rendered = "";
-    foreach ($docs as $doc) {
-        $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
-    }
-    return $rendered;
-}
-
-function view_each(string $template, Iterator|array $docs, string $var_name = 'doc', string|false $separator = "") {
-    return implode($separator, view_array($template, $docs, $var_name));
-}
-
-function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
-    if(!is_array($docs) && is_iterable($docs)) $docs = iterator_to_array_recursive($docs);
-    $array = [];
-    $d = $docs;
-    if(gettype($docs) === "array") {
-        if(key_exists($var_name, $docs)) $d = $docs[$var_name];
-    } else {
-        $d = iterator_to_array($d);
-    }
-    foreach($d as $index => $doc){
-        $array[$index] = view($template, array_merge(
-            $d,
-            [$var_name => $doc]
-        ));
-    }
-    return $array;
-}
 
 function credit_card_form(array|object $data = [],$shipping = false):string {
     $currentYear = (int)date("Y");

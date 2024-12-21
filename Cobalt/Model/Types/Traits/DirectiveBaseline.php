@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Cobalt\Model\Traits;
+namespace Cobalt\Model\Types\Traits;
 
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
@@ -18,7 +18,7 @@ enum Operators {
     
 }
 
-trait Directives {
+trait DirectiveBaseline {
     public function setDirectives(array $directives) {
         $d = [];
         if(method_exists($this,"initDirectives")) $d = $this->initDirectives();
@@ -35,21 +35,25 @@ trait Directives {
                 foreach($attributes as $attr) {
                     if(in_array($attr->getName(), $validPrototypes)) $found = true;
                 }
-                if($found === false) throw new DirectiveDefinitionFailure("Failed to define $directive");
-                $this->{$directive_name}($value);
+                if($found === false) throw new DirectiveDefinitionFailure("Failed to define $directive. Defining method must have #[Directive] attribute.");
+                $this->{$directive_name}($value, $directive);
             }
             else $this->__defineDirective($directive, $value);
         }
         unset($this->directives['type']);
     }
     
+    public function initDirectives(): array {
+        return [];
+    }
+
     /**
      * @param string $directive - The name of the directive you want 
      */
     public function getDirective() {
         $args = func_get_args();
         $name = array_shift($args);
-        if(!key_exists($name,$this->directives)) throw new Error("No directive exists by the name `$name`");
+        if(!key_exists($name, $this->directives)) throw new Error("Error on `$this->name`: Directive `$name` does not exist.");
         // Let's check if the directive is a function or not
         if(is_function($this->directives[$name])) {
             return $this->directives[$name](...$args);
@@ -59,6 +63,11 @@ trait Directives {
 
     public function hasDirective($name) {
         return key_exists($name, $this->directives);
+    }
+
+    public function directiveOrNull($name) {
+        if($this->hasDirective($name)) return $this->getDirective($name);
+        return null;
     }
     
     // Here we provide some sane defaults
@@ -148,4 +157,5 @@ trait Directives {
         $this->__defineDirective('filter', $function);
         return $this;
     }
+
 }

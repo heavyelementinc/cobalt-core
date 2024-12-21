@@ -4,6 +4,7 @@ use Routes\Route;
 
 /** Protected JavaScript content. TODO: Ensure this content is only accessible during debug */
 Route::get("/js/...", "FileController@javascript");
+Route::get("/css/v{version}/...", "FileController@css_versioned");
 Route::get("/css/...", "FileController@css");
 Route::get("/plugins/{plugin}/...", "FileController@plugin_resources");
 Route::get("/site.webmanifest", "FileController@manifest");

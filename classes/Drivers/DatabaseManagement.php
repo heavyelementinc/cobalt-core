@@ -6,6 +6,7 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
+use Error;
 use Exception;
 
 class DatabaseManagement {
@@ -41,29 +42,43 @@ class DatabaseManagement {
         }
 
         foreach($collections as $collection) {
+            $error_count = 0;
+            $error_log = "";
             $whole_collection = [];
             $name = $collection->getName();
             if($ignored === true && in_array($name, $extraIgnored)) continue;
             $count = $this->db->{$name}->count([]);
             $result = $this->db->{$name}->find([],['limit' => $count + 1]);
-            if($talk) printf($name . " contains $count document(s)");
+            if($talk) printf(fmt($name, "i") . " contains $count document(s)");
 
             $entries = [];
-            foreach($result as $row) {
+            foreach($result as $i => $row) {
+                $output_type = "normal";
                 if($row instanceof GenericMap) {
-                    $row_to_array = $this->preserveMap($row);
+                    try{
+                        $row_to_array = $this->preserveMap($row);
+                    } catch (Exception $e) {
+                        $error_log .= "EX: $row->_id: " . $e->getMessage() . "\n";
+                    } catch (Error $e) {
+                        $error_log .= "ER: $row->_id: " . $e->getMessage() . "\n";
+                    } finally {
+                        $output_type = "e";
+                        $error_count += 1;
+                    }
                 } else {
                     $row_to_array = iterator_to_array($row);
                 }
                 array_push($entries, $row_to_array);
-                if($talk) printf(".");
+                if($talk) printf(fmt(".", $output_type));
             }
 
             array_push($db_backup, [
                 'collection' => $name,
                 'data' => $entries
             ]);
-            if($talk) say(" done", "i");
+            $export_summary = fmt(" done", "i");
+            if($error_count >= 1) $export_summary .= " (with ".fmt("$error_count", "e") . " error" .plural($error_count)."!)\n" . fmt($error_log, "i");
+            if($talk) print($export_summary."\n");
         }
         $filepath = $file . $this->get_backup_file_name();
         if($talk) printf("Writing file... ");

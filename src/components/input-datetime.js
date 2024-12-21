@@ -125,6 +125,7 @@ class InputDateTime extends HTMLElement {
         // });
         this.props.dateInput = document.createElement("time")
         this.props.dateInput.innerHTML = "No date selected";
+        if(this.props.dateInput.innerHTML === "No date selected") this.props.dateInput.classList.add("placeholder");
 
         // if(!this.props.dateInput) this.props.dateInput = document.createElement("input");
         // this.props.dateInput.type = "date";
@@ -153,6 +154,7 @@ class InputDateTime extends HTMLElement {
         if(!this.props.dateInput) this.initUI();
         const date = `${value.getFullYear()}-${this.prefixSingleDigits(value.getMonth() + 1)}-${this.prefixSingleDigits(value.getDate())}`;
         this.props.dateInput.innerHTML = value.toLocaleString(this.locale, {timeZone: this.tz});
+        this.props.dateInput.classList.remove("placeholder");
         // const time = `${this.prefixSingleDigits(value.getHours())}:${this.prefixSingleDigits(value.getMinutes())}`;
         // this.props.timeInput.value = time;
     }

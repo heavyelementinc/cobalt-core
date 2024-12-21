@@ -3,15 +3,19 @@
 namespace Cobalt\Model;
 
 use ArrayAccess;
+use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
+use Cobalt\Model\Types\Traits\Prototypable;
 use Iterator;
 use JsonSerializable;
+use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
 use Traversable;
+use TypeError;
 
 /**
  * GenericModels may be accessed using the -> syntax *or* accessed as an array.
@@ -20,11 +24,12 @@ use Traversable;
  * @package Cobalt\Model
  */
 class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable, Stringable {
-    use Schemable, Viewable, Hydrateable;
+    use Schemable, Viewable, Hydrateable, Prototypable;
     public ?string $name_prefix = null;
+    private bool $__schema_allow_undefined_fields = false;
 
     /*************** INITIALIZATION ***************/
-    function __construct(?array $schema = [], null|array|BSONDocument $dataset = null, ?string $name_prefix = null) {
+    function __construct(?array $schema = [], null|array|BSONDocument|BSONArray $dataset = null, ?string $name_prefix = null) {
         $this->name_prefix = $name_prefix;
         $this->__defineSchema($schema);
         if(!$dataset || !empty($dataset)) $this->setData($dataset ?? []);
@@ -37,13 +42,34 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         if($property === "_id") return $this->_id; 
         // Let's check to ensure that the property exists.
         if(key_exists($property, $this->__dataset)) return $this->__dataset[$property];
-        throw new Undefined($property, "The property $property does not exist!");
+        throw new Undefined($property, "The property `$property` does not exist on `$this->name`!");
     }
 
     public function __set($property, $value) {
         $reserved = [];
         if(in_array($property, $reserved)) throw new \TypeError("Cannot set $property as the name is reserved!");
-        $this->hydrate($this->__dataset, $property, $value, null, $this, (($this->name_prefix) ? "$this->name_prefix"."$property" : null));
+        $ignored = ['__pclass'];
+        if(in_array($property, $ignored)) return;
+        
+        // If we've already hydrated our property, we set the value and we're done
+        if(key_exists($property, $this->__dataset)) {
+            $this->__dataset[$property]->setValue($value);
+            return;
+        }
+        
+        // If we don't allow undefined schema fields
+        if(!key_exists($property, $this->__schema) && !$this->__schema_allow_undefined_fields) {
+            throw new TypeError("ERROR: `$property` is not a defined field");
+        }
+
+        $this->hydrate(
+            target: $this->__dataset,
+            field_name: $property,
+            value: $value,
+            model: $this,
+            name: (($this->name_prefix) ? "$this->name_prefix"."$property" : $property),
+            directives: $this->__schema[$property] ?? []
+        );
     }
 
     public function __isset($name) {
@@ -68,7 +94,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     }
 
     public function offsetGet(mixed $offset): mixed {
-        return $this->__dataset[$offset]->value;
+        return $this->__dataset[$offset];
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {
@@ -103,10 +129,29 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
 
     /*************** JSON SERIALIZATION ***************/
     public function jsonSerialize(): mixed {
+        // $data = [];
+        // foreach($this->__dataset as $field => $prop) {
+        //     $data[$field] = $prop->value;
+        // }
+        // return $data;
+        return $this->serialize();
+    }
+
+    public function serialize():mixed {
         $data = [];
-        foreach($this->__dataset as $field => $prop) {
-            $data[$field] = $prop->value;
+        /** 
+         * @var string $field
+         * @var MixedType $value
+         */
+        foreach($this->__dataset as $field => $value) {
+            // if(!isset($value)) continue;
+            $data[$field] = $value->serialize();
         }
         return $data;
+    }
+
+    #[Prototype]
+    protected function getName() {
+        return substr($this->name_prefix,0,-1);
     }
 }

@@ -2,6 +2,8 @@
 namespace Cobalt\Tasks;
 
 use DateTime;
+use Iterator;
+use JsonSerializable;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
@@ -10,7 +12,7 @@ use ReflectionObject;
 use stdClass;
 use TypeError;
 
-class Task implements Persistable {
+class Task implements Persistable, JsonSerializable, Iterator {
     const TASK_FINISHED = 0;
     const ERROR_METHOD_DOES_NOT_EXIST = 2;
     const GENERAL_TASK_ERROR = 1;
@@ -27,6 +29,34 @@ class Task implements Persistable {
     private ?DateTime $date = null;
     private ?DateTime $completed = null;
     private int $failureCount = 0;
+
+    private array $keys = ['className', 'method', 'args', 'date', 'additional_data', 'for', 'failureCount'];
+    private int $index = 0;
+    public function current(): mixed {
+        return $this->{$this->key()};
+    }
+
+    public function next(): void {
+        $this->index += 1;
+    }
+
+    public function key(): mixed {
+        return $this->keys[$this->index];
+    }
+
+    public function valid(): bool {
+        if($this->index < 0) return false;
+        if($this->index >= count($this->keys)) return false;
+        return true;
+    }
+
+    public function rewind(): void {
+        $this->index = 0;
+    }
+
+    public function jsonSerialize(): mixed {
+        return $this->bsonSerialize();
+    }
 
     public function bsonSerialize(): array|stdClass|Document {
         return [

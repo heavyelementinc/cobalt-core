@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-US" class="{{context.html_class}}">
+<html lang="en-US" class="{{context.html_class}} {{app.html_tag_classes}}">
 <script>
     // Some user agents don't support (or don't enable) JavaScript. Therefore we
     // should keep track of any content that would be hidden because of JS and
@@ -12,18 +12,20 @@
     <meta name="description" content="{{app.opengraph.description}}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="version" content='{{versionHash}}'>
-    <meta name="theme-color" content="#fafafa">
+    <meta name="theme-color" content="{{app.color_primary}}">
     <meta name="mitigation" content="@csrf_get_token();">
     <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
+
     @maybe_with("$og_template");
     {{!webmention}}
     @fonts_tag();
     <link href="/core-content/css/material-design/css/material.min.css?{{app.verion}}" rel="stylesheet">
     <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
+    @style_meta@
+
     @app_settings@
 
     @app_meta@
-    @style_meta@
     {{!html_head_binding}}
     @router_table@
     <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{versionHash}}">

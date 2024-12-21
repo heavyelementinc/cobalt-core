@@ -1,0 +1,71 @@
+@property --accent-color {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{app.color_primary}};
+}
+
+@property --background-color {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{app.color_background}};
+}
+
+:root {
+    --project-modal-z-index: 2000;
+    
+    /** DERIVED VALUES */
+    --main-content-color: oklch(from var(--project-body-background) calc(l - .60) c h);
+
+    --input-element-border: hsl(from var(--accent-color) h 15% 80%);
+    --input-element-tray: hsl(from var(--accent-color) h 10% 94%);
+    --input-element-background: hsl(from var(--accent-color) h 15% 99%);
+    --input-element-color: oklch(from var(--input-element-background) calc(1 - 0.8) c h);
+    
+    /** LEGACY STYLING */
+    --project-body-background: var(--background-color);
+    --project-body-color: var(--main-content-color);
+
+    --project-box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+    --project-color-header-branding: #004BA8;
+    --project-color-user-panel-button: #342A21;
+    --project-color-acknowledge: #598B2C;
+    --project-color-active: #598B2C;
+    --project-color-inactive: #B1C1C0;
+    --project-color-input-border-nofocus: #b1c3c3;
+    --project-color-input-border-focus: #000;
+    --project-color-input-background: #fff;
+    --project-color-input-text-color: #000;
+    --project-color-input-background-focus: #FFF;
+    --project-color-input-invalid-border: #BB4430;
+    --project-color-input-invalid-bg: #F7E2DE;
+    --project-color-input-invalid-label-text: #FFF;
+    --project-color-input-disabled: #F4F6F6;
+    --project-color-disabled: rgba(0,0,0,.2);
+    --project-color-table-border: 1px solid var(--project-color-input-border-nofocus);
+    --project-color-table-bg-odd: var(--project-color-input-background);
+    --project-color-table-bg-even: var(--project-color-input-disabled);
+    --project-color-problem: #FE5F55;
+    --project-color-button-init: #004BA8;
+    --project-color-button-hover: #9DD1F1;
+    --project-color-button-text: #FFF;
+    --project-color-button-hover-text: #000;
+    --project-color-button-pressed: #00377A;
+    --project-calendar-borders: 1px solid var(--project-color-button-init);
+    --project-calendar-cell-bg: #FFF;
+    --project-calendar-cell-other-bg: #EFEFEF;
+    --project-calendar-cell-txt: #000;
+    --project-calendar-header-color: var(--project-color-button-init);
+    --project-calendar-header-text: var(--project-color-button-text);
+    --project-action-menu-background: var(--project-color-input-disabled);
+    --project-action-menu-color: var(--project-color-input-text-color);
+    --project-action-menu-border: var(--project-color-table-border);
+    --project-action-menu-hover: var(--project-color-inactive);
+    --project-events-banner-background: #efefef;
+    --project-events-banner-text: #000000;
+    --project-events-button-color: var(--project-color-button-init);
+    --project-events-button-color-hover: var(--project-color-button-hover);
+    --project-events-button-text: var(--project-color-button-text);
+    --project-events-button-text-hover: var(--project-color-button-hover-text);
+    --project-events-font-family: var(--project-body-family);
+    --project-landing-page-content-width: 80ch;
+}

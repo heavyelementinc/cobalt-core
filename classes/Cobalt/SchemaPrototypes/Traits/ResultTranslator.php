@@ -92,6 +92,7 @@ trait ResultTranslator {
         // If we don't have an 'each' directive set, let's just translate each
         // element of this array into a <Type>Result
         $mutant = [];
+        if(is_null($elements)) return $mutant;
         foreach($elements as $index => $arrayItem) {
             $mutant[$index] = $this->__toResult($index, $arrayItem, [], $this->__reference);
         }

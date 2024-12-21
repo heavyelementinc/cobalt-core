@@ -73,7 +73,7 @@ class Compiler {
         if(!$args) $args = "null";
         else $args = "[".substr($args, 1, -1)."]";
         $string = <<<HTML
-        <?= render("$name", $posStart, $posEnd, \$this->vars, $args) ?>
+        <?= render('$name', $posStart, $posEnd, \$this->vars, $args) ?>
         HTML;
         $mutant = str_replace($fullMatch, $string, $mutant);
     }

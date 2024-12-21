@@ -459,3 +459,23 @@ function add_target_blank_to_external_links(string $html, string $t = "p"):strin
     }
     return $html ?? ""; 
 }
+
+function social_media_links(array $included = []):string {
+    $socials = $included;
+    if(empty($socials)) $socials = [
+        'SocialMedia_email' => __APP_SETTINGS__['SocialMedia_email'],
+        'SocialMedia_fediverse' => __APP_SETTINGS__['SocialMedia_fediverse'],
+        'SocialMedia_facebook' => __APP_SETTINGS__['SocialMedia_facebook'],
+        'SocialMedia_instagram' => __APP_SETTINGS__['SocialMedia_instagram'],
+        'SocialMedia_twitter' => __APP_SETTINGS__['SocialMedia_twitter'],
+        'SocialMedia_mastodon' => __APP_SETTINGS__['SocialMedia_mastodon'],
+    ];
+    $social_links = "";
+    foreach($socials as $setting => $value) {
+        if(!$value) continue;
+        $icon = str_replace('SocialMedia_', "", $setting);
+        $name = ucwords($icon);
+        $social_links .= "<a href=\"$value\" target=\"_blank\" title=\"$name\"><i name=\"$icon\"></i><a>";
+    }
+    return $social_links;
+}

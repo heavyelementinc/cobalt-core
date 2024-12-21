@@ -71,6 +71,16 @@ flex-table{
             content: "\F0360";
         }
 
+        flex-row.flex-table--no-results {
+            justify-self: center;
+            font-style: italic;
+            text-align: center;
+        }
+
+        flex-row.flex-table--no-results flex-cell {
+            color: var(--project-color-input-border-nofocus);
+        }
+
         flex-cell a {
             text-decoration: none;
         }

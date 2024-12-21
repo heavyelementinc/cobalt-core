@@ -46,6 +46,16 @@
     background-color: transparent;
 }
 
+.quote-blurb {
+    width: 100%;
+}
+
+.quote-blurb p {
+    max-width: 60ch;
+    text-align: center;
+    margin: 0 auto;
+}
+
 .customer-quote {
     background: var(--project-callout-customer-quote, var(--project-body-background, #ffffff));
     padding: 2em;
@@ -75,7 +85,7 @@
 
     .customer-quote h1 {
         text-align: left;
-        font-size: 1.2rem;
+        font-size: 1.2em;
         margin: 0;
         grid-row: 1 / span 1;
         grid-column: 2 / span 1;
@@ -83,16 +93,17 @@
 
     star-rating {
         display: flex;
-        font-size: 1.2rem;
+        font-size: 1.2em;
         margin: 0;
         grid-row: 2 / span 1;
         grid-column: 2 / span 1;
         width: fit-content;
+        color: var(--review-star-color, #feb95f);
     }
 
     star-rating li {
         font-family: "Material Design Icons", sans-serif;
-        opacity: .5;
+        /* opacity: .5; */
     }
 
     star-rating li::marker{
@@ -112,6 +123,14 @@
     }
     
 
+.list-panel.contact-panel :is(h1, h2, h3, h4, h5) {
+    width: 100%;
+    font-family: var(--project-body-family);
+    font-size: 1em;
+    margin: 0;
+    font-weight: bold;
+}
+
 .template-landing-user-reviews {
     display: flex;
     flex-direction: row;
@@ -120,7 +139,7 @@
 }
 
 .template-landing-user-reviews h2 {
-    font-size: 1rem;
+    font-size: 1em;
     font-family: var(--project-body-family);
     font-weight: normal;
     color: rgba(0,0,0,.5);
@@ -167,7 +186,7 @@
     vertical-align: top;
     width: 50px;
     height: 50px;
-    font-size: calc(1.2rem);
+    font-size: calc(1.2em);
     margin-inline-end: 0px;
     border-radius: 50%;
     overflow-wrap: break-word;
@@ -184,11 +203,55 @@
     color: var(--project-template-footer-color, #fff);
     margin: 0;
     padding: 3em;
+    gap: 1em;
+    justify-content: center;
 }
 
+    .template-site footer .blurb {
+        width: 40ch;
+    }
+
+    .template-site footer :is(h2, h3, h4, h5) {
+        font-size: 1em;
+        text-transform: uppercase;
+    }
+
 @media only screen and (max-width: 35em) {
+    html, body {
+        font-size: 4.5vw;
+    }
     .template-splash {
+        display: flex;
         --image-width: 100%;
         flex-direction: column;
+    }
+
+    
+    .template-callout {
+        flex-direction: column;
+    }
+
+    .customer-quote {
+        width: calc(100% - 3em);
+    }
+
+    .customer-quote article {
+        width: unset;
+    }
+
+    .template-site footer {
+        flex-direction: column-reverse;
+    }
+
+    .template-site footer .footer-credits {
+        order: -10;
+    }
+
+    .template-site footer a.footer-credits {
+        order: -20;
+    }
+
+    .template-site footer .blurb {
+        width: 100%;
     }
 }

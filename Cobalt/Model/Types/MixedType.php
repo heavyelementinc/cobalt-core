@@ -6,13 +6,19 @@ use ArrayAccess;
 use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
-use Cobalt\Model\Traits\Directives;
-use Cobalt\Model\Traits\Filterable;
-use Cobalt\Model\Traits\Prototypable;
+use Cobalt\Model\Types\Traits\DirectiveBaseline;
+use Cobalt\Model\Types\Traits\ClientUpdateFilter;
+use Cobalt\Model\Types\Traits\MixedTypeToField;
+use Cobalt\Model\Types\Traits\Prototypable;
 use Stringable;
 
+const DIRECTIVE_KEY_DEFAULT = "default";
+const DIRECTIVE_KEY_IMMUTABLE = "immutable";
+const DIRECTIVE_KEY_VALID = "valid";
+const DIRECTIVE_KEY_FILTER = "filter";
+
 class MixedType implements Stringable, ArrayAccess {
-    use Prototypable, Filterable, Directives;
+    use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField;
     protected bool $isSet = false;
     protected $value;
     protected string $name;
@@ -26,13 +32,13 @@ class MixedType implements Stringable, ArrayAccess {
      * @return void|mixed 
      */
     public function getValue() {
-        if(!$this->isSet) return ($this->hasDirective('default')) ? $this->getDirective("default") : null;
-        if(!$this->value) return ($this->hasDirective('default')) ? $this->getDirective("default") : null;
+        if(!$this->isSet) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
+        if(!$this->value) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
         return $this->value;
     }
 
     public function setValue($value):void {
-        if($this->isSet && $this->getDirective('immutable')) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
         $this->value = $value;
         $this->isSet = true;
     }
@@ -51,14 +57,13 @@ class MixedType implements Stringable, ArrayAccess {
      * @return mixed Returns the value to the be stored, may be transformed 
      */
     public function filter($value) {
-        if($this->isSet && $this->getDirective('immutable')) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
-        if($this->hasDirective('valid')) {
-            $this->getDirective('valid');
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
+            $this->getDirective(DIRECTIVE_KEY_VALID);
         }
-        if($this->hasDirective('filter')) $value = $this->getDirective('filter', $value);
+        if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
         return $value;
     }
-    
 
     /*************** OVERLOADING  ***************/
     public function __get($property) {
@@ -82,7 +87,7 @@ class MixedType implements Stringable, ArrayAccess {
     public function __isset($property) {
         switch($property) {
             case "value":
-                return $this->hasDirective('defaultValue') || $this->isSet;
+                return $this->hasDirective('default') || $this->isSet;
             case "raw":
             case "original":
                 return $this->isSet;
@@ -127,7 +132,11 @@ class MixedType implements Stringable, ArrayAccess {
         return (string)$this->getValue();
     }
 
-    public function __getStorable() {
+    /**
+     * Returns a storable value in a string, number, or an array.
+     * @return mixed 
+     */
+    public function serialize() {
         return $this->value;
     }
 
