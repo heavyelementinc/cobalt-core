@@ -52,7 +52,7 @@ if (app('Auth_logins_enabled')) {
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 
-    Route::s_put("/settings/default/{name}", "CoreSettingsPanel@reset_to_default", [
+    Route::s_put("/settings/{name}/default/", "CoreSettingsPanel@reset_to_default", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 

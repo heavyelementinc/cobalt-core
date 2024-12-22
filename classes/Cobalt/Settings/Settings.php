@@ -469,6 +469,7 @@ class Settings extends \Drivers\Database {
         $id = $this->__user_modified_settings['_id'];
 
         $result = $this->updateOne(['_id' => $id], $query);
+        update("[name='$name']", ['value' => $this->update_settings[$name]->defaultValue]);
         return [$name => $this->update_settings[$name]->defaultValue];
     }
 

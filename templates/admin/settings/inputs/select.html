@@ -1,5 +1,5 @@
 <li>
     <label>{{!name}}</label>
     <select name='{{setting}}' value='{{value}}' {{disabled}}>{{!options}}</select>
-    @view("/admin/settings/inputs/reset.html");
+    @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
 </li>

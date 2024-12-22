@@ -3,8 +3,10 @@
         Enable Blog Post system
     </label>
     <input-switch name="Posts.default_enabled" checked="{{value.default_enabled}}"></input-switch>
+    @view("/admin/settings/inputs/reset.html", ['setting' => 'Posts.default_enabled', 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
 </li>
 <li>
     <label>Post link name</label>
     <input name="Posts.default_name" value="{{value.default_name}}">
+    @view("/admin/settings/inputs/reset.html", ['setting' => 'Posts.default_name', 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
 </li>

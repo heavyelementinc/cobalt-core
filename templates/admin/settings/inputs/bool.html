@@ -1,7 +1,7 @@
 <li>
     <switch-container>
-        <input-switch name='{{setting}}' checked='{{value}}' {{disabled}}></input-switch>
+        <input-switch name='{{setting}}' checked='{{$value}}' {{disabled}}></input-switch>
         <label>{{!name}}</label>
     </switch-container>
-    @view("/admin/settings/inputs/reset.html");
+    @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
 </li>

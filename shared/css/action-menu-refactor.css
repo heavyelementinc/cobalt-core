@@ -75,13 +75,14 @@ action-menu {
 }
 
     .action-menu-wrapper .action-menu-header button {
-        position: absolute;
+        /* position: absolute;
         top: .5em;
-        right: .5em;
+        right: .5em; */
         background: transparent;
         padding: unset;
         border: unset;
         color: inherit;
+        float: right;
     }
 
     .action-menu-wrapper .action-menu-header button:hover {

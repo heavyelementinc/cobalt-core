@@ -194,6 +194,7 @@ class CoreSettingsPanel extends Controller {
     }
 
     public function reset_to_default($name) {
+        /** @var SettingsManager $GLOBALS['app'] */
         return $GLOBALS['app']->reset_to_default($name);
     }
 
