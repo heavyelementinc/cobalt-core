@@ -191,11 +191,13 @@ function class_loader($path, $originalName, $stage) {
  */
 function get_controller(string $controllerName, bool $instanced = false, bool $path = false) {
     $locations = [
+        __APP_ROOT__,
+        __ENV_ROOT__,
         __APP_ROOT__ . "/controllers",
         __ENV_ROOT__ . "/controllers",
     ];
 
-    $found = find_one_file($locations,"$controllerName.php");
+    $found = find_one_file($locations,str_replace("\\","/",$controllerName).".php");
     if($found === false) throw new HTTPException("Could not locate requested controller");
     if($path) return $found;
     require_once $found;
@@ -558,9 +560,9 @@ function plugin($name) {
     throw new Exception('Plugin is not active!');
 }
 
-function get_posts_from_tags(array $tags, string $controller = "Posts", int $limit = 3):string {
+function get_posts_from_tags(array $tags, string $controller = "\\Cobalt\\Pages\\Controllers\\Posts", int $limit = 3):string {
     $html = "";
-    /** @var \Controllers\Landing\Page */
+    /** @var \Cobalt\Pages\Controllers\Posts */
     $postController = get_controller($controller, true);
     $posts = $postController->manager;
     

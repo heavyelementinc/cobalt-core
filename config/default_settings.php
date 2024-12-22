@@ -1027,7 +1027,7 @@ const DEFAULT_DEFINITIONS = [
     /* ============= LOOK & FEEL ============= */
     /*******************************************/
     "manifest_engine" => [
-        "default" => 2
+        "default" => 1
     ],
     "default_color_scheme" => [
         "default" => true
