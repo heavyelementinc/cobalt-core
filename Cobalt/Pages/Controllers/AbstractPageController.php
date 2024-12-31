@@ -196,6 +196,7 @@ abstract class AbstractPageController extends Crudable {
                 break;
             case $page::SPLASH_POSITION_CENTER:
                 $classes .= " landing-splash--type-centered";
+                break;
             case $page::SPLASH_IMAGE_ONLY:
                 $classes = " landing-splash--type-image-only";
                 break;

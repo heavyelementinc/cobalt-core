@@ -197,14 +197,14 @@ class Item implements Persistable{
     public function read_script() {
         // $handle = find_one_file(self::FILE_LOCATIONS['js'],$this->href);
         $handle = $this->known_file;
-        $details = view($handle);
-        return (config()['mode']) ? "// $this->href\n\n$details" : $details;
+        $details = view($handle, [], true);
+        return (__APP_SETTINGS__['manifest_v2_include_filenames']) ? "\n\n// $this->href\n$details" : $details;
     }
 
     public function read_css() {
         // $handle = find_one_file(self::FILE_LOCATIONS['css'],$this->href);
         $handle = $this->known_file;
-        $details = view($handle);
-        return (config()['mode']) ? "/** $this->href */\n\n$details" : "$details";
+        $details = view($handle, [], true);
+        return (__APP_SETTINGS__['manifest_v2_include_filenames']) ? "\n\n/** $this->href */\n$details" : $details;
     }
 }

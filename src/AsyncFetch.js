@@ -651,8 +651,8 @@ class XModal extends HeaderDirective {
 
 /**
  * Supported tags:
- * @wait({int})
- * @delay({int}) alias of @wait
+ * @wait {int}
+ * @delay {int} alias of @wait
  */
 class XRedirect extends HeaderDirective {
     execute() {
@@ -684,8 +684,8 @@ class XReplace extends XRedirect {
 
 /** Supported tags
  * @now           - no parameters, executes refresh now. (deprecated "now" as the header content)
- * @wait({num})   - a number (in seconds) to wait before refreshing the page. A status message is displayed
- * @silent({num}) - exactly the same as @wait, except it does not display a status message
+ * @wait {num}   - a number (in seconds) to wait before refreshing the page. A status message is displayed
+ * @silent {num} - exactly the same as @wait, except it does not display a status message
 */
 class XRefresh extends HeaderDirective {
     execute() {

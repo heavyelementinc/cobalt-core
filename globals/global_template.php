@@ -42,7 +42,7 @@ function maybe_with($template, $vars = []) {
  * @param  mixed  $vars     Variables to include
  * @return string Processed template
  */
-function view(string $template, array $vars = []):string {
+function view(string $template, array $vars = [], bool $absolute_path = false):string {
     if(__APP_SETTINGS__['Render_use_v2_engine']) {
         $render = new Render();
         $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
@@ -51,7 +51,7 @@ function view(string $template, array $vars = []):string {
         $render = new \Render\Render();
         $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
         $render->set_vars($vars);
-        $render->from_template($template);
+        $render->from_template($template, $absolute_path);
     }
     return $render->execute();
 }

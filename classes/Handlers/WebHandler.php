@@ -242,7 +242,7 @@ class WebHandler implements RequestHandler {
             }
             $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         } else {
-            $settings .= "<style>".view("/shared/css_v2/color-theme.css")."</style>";
+            $settings .= "<style id=\"theme-variables\">".view("/shared/css_v2/color-theme.css")."</style>";
             // $settings .= "\n<link rel=\"stylesheet\" href=\"/core-content/css/v2/color-theme.css\">";
         }
         return $settings;
@@ -452,7 +452,7 @@ class WebHandler implements RequestHandler {
     }
 
     function scripts_v2() {
-        $generate_script_content = __APP_SETTINGS__["Package_JS_script_content"];
+        $generate_script_content = __APP_SETTINGS__["manifest_v2_package_js_files"];
         if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
 
         $man = new ManifestManager();
@@ -556,7 +556,7 @@ class WebHandler implements RequestHandler {
                 $compiled .= "\n\n" . file_get_contents($file);
             }
         }
-        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package$this->meta_selector.css?{{versionHash}}\">";
+        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.$this->meta_selector.css?{{versionHash}}\">";
 
         $minify = __APP_SETTINGS__['Package_style_minify'];
         if(config()['bootstrap_mode'] === COBALT_BOOSTRAP_ALWAYS) $minify = false;
@@ -574,7 +574,7 @@ class WebHandler implements RequestHandler {
     }
 
     function style_v2() {
-        $package_style_content = __APP_SETTINGS__["Package_style_content"];
+        $package_style_content = __APP_SETTINGS__["manifest_v2_package_css_files"];
         if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $package_style_content = false;
         $man = new ManifestManager();
         return $man->get_tags(ValidTypes::css, $this->meta_selector, $package_style_content);

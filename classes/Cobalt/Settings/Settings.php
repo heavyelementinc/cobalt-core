@@ -370,6 +370,7 @@ class Settings extends \Drivers\Database {
         // Load our manifests
         foreach($this::__MANIFESTS__ as $file) {
             // $index = count($this->manifest_raw_decode);
+            // if()
             $this->manifest_raw_decode[] = get_json($file);
         }
 
@@ -378,6 +379,9 @@ class Settings extends \Drivers\Database {
 
         $final = new ManifestEntry();
         foreach($this->manifest_raw_decode as $data) {
+            // if(is_null($data)) {
+            //     continue;
+            // }
             $final->addManifest(($data instanceof BSONDocument) ? doc_to_array($data) : $data);
         }
         $data = $final->getFinalizedData();

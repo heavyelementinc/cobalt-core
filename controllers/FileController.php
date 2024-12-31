@@ -12,9 +12,9 @@ class FileController extends \Controllers\FileController {
         $cacheControl = 'Cache-Control: private, ';
         $cacheControl .= "immutable, ";
         $cacheControl .= "max-age=31536000";
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $cacheControl = "Cache-Control: no-cache";
         header($cacheControl);
         header('Pragma: private');
-        header('Last-Modified: Sat, 26 Oct 1985 08:15:00 GMT');
         $expires = gmdate("D, d M Y H:i:s", strtotime("+30 days"));
         header("Expires: $expires");
     }
@@ -112,16 +112,17 @@ class FileController extends \Controllers\FileController {
             $file = $cache->file_path;
         } else {
             // $file = __ENV_ROOT__ . "/shared/css/v2/$match";
-            // $file = find_one_file([
-            //     __APP_ROOT__."/shared/css_v$version/",
-            //     __ENV_ROOT__."/shared/css_v$version/",
-            // ],$match);
-            $file = "/shared/css_v$version/$match";
+            $file = find_one_file([
+                __APP_ROOT__."/shared/css_v$version/",
+                __ENV_ROOT__."/shared/css_v$version/",
+            ],$match);
+            // $file = "/shared/css_v$version/$match";
         }
 
         header("Content-Type: text/css;charset=UTF-8");
         $this->get_etag($file);
-        echo view($file);
+        // echo view($file);
+        readfile($file);
         exit;
     }
 
@@ -166,6 +167,7 @@ class FileController extends \Controllers\FileController {
     }
 
     function get_etag($path) {
+        header('Last-Modified: '. date("r",filemtime($path)));
         $mbThreshold = 25600;
         $filesize = filesize($path);
         $header = "ETag: \"";
@@ -173,6 +175,7 @@ class FileController extends \Controllers\FileController {
         $header .= app('version') . "\"";
         header($header);
         header('Content-Length: ' . $filesize);
+
         // exit;
     }
 

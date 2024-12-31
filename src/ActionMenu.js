@@ -28,7 +28,7 @@ class ActionMenu extends EventTarget {
         this.headlineTitle = document.createElement("h1");
         this.actionMenuItems = document.createElement("menu");
         this.closeGlyph = document.createElement("button");
-        this.closeGlyph.innerHTML =  `<span class='close-glyph'></span>`;
+        this.closeGlyph.innerHTML = `<span class='close-glyph'></span>`;
         this.initWrapper();
         
         this.type = mode;
@@ -53,7 +53,7 @@ class ActionMenu extends EventTarget {
         headline.classList.add("action-menu-header");
         this.wrapper.appendChild(headline);
         headline.appendChild(this.headlineTitle);
-        headline.appendChild(this.closeGlyph);
+        this.headlineTitle.appendChild(this.closeGlyph);
         this.wrapper.appendChild(this.actionMenuItems);
         // If this element lives in main, we want to place its wrapper in main,
         // otherwise, we want it in the body tag.

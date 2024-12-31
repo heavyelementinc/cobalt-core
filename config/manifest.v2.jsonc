@@ -169,14 +169,6 @@
         "contexts": ["common"]
     },
     {
-        "href":"Slideshow.js",
-        "contexts": ["common"]
-    },
-    {
-        "href":"Slideshow2.js",
-        "contexts": ["common"]
-    },
-    {
         "href":"InputClasses.js",
         "contexts": ["common"]
     },
@@ -261,6 +253,12 @@
         "contexts": ["common"], 
         "append": true
     },
+    /* CSS */
+    {
+        "href": "reset.css",
+        "contexts": ["common"],
+        "version": 2
+    },
     {
         "href": "basic-buttons.css",
         "contexts": ["common"],
@@ -304,7 +302,8 @@
     },
     {
         "href": "components/tab-nav.css",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "version": 2
     },
     {
         "href": "components/cobalt-carousel.css",
@@ -336,14 +335,6 @@
     },
     {
         "href": "components/block-editor.css",
-        "contexts": ["common"]
-    },
-    {
-        "href": "normalize.css",
-        "contexts": ["common"]
-    },
-    {
-        "href": "slideshow.css",
         "contexts": ["common"]
     },
     {
@@ -411,23 +402,27 @@
         "contexts": ["common"]
     },
     {
-        "href": "landing-pages.css",
-        "contexts": ["common"]
+        "href": "pages.css",
+        "contexts": ["common"],
+        "version": 2
     },
     {
         "href": "header.css",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "version": 2
     },
     {
         "href": "template.css",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "version": 2
     },
     {
         "href": "main.css",
         "contexts": ["web"]
     },
     {
-        "href": "protected/admin.css",
-        "contexts": ["admin"]
+        "href": "admin.css",
+        "contexts": ["admin"],
+        "version": 2
     }
 ]

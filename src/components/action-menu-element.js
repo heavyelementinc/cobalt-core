@@ -61,6 +61,10 @@ class ActionMenuElement extends CustomButton {
         if(typeof value !== "boolean") throw new TypeError("Must be a boolean value");
         this.setAttribute("stop-propagation", JSON.parse(value));
     }
+
+    get title() {
+        return this.dataset.title ?? this.getAttribute("title");
+    }
     // toggleButton(event) {
 
     // }

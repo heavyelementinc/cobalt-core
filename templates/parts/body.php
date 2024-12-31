@@ -12,7 +12,7 @@
     <meta name="description" content="{{app.opengraph.description}}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="version" content='{{versionHash}}'>
-    <meta name="theme-color" content="{{app.color_primary}}">
+    <meta name="theme-color" content="{{app.color_branding}}">
     <meta name="mitigation" content="@csrf_get_token();">
     <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
 

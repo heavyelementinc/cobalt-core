@@ -12,6 +12,9 @@
 
 .template-splash--content {
     max-width: 60ch;
+    a.button {
+        margin-top: 1em;
+    }
 }
 
 .template-splash--content h1 {
@@ -92,30 +95,28 @@
     }
 
     star-rating {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(5, 2ch);
         font-size: 1.2em;
         margin: 0;
         grid-row: 2 / span 1;
         grid-column: 2 / span 1;
         width: fit-content;
         color: var(--review-star-color, #feb95f);
-    }
-
-    star-rating li {
-        font-family: "Material Design Icons", sans-serif;
-        /* opacity: .5; */
-    }
-
-    star-rating li::marker{
-        content: "\F04D2";
-    }
-
-    star-rating li.half::marker{
-        content: "\F04D0";
-    }
-
-    star-rating li.full::marker {
-        content: "\F04CE"
+        li {
+            font-family: "Material Design Icons", sans-serif;
+            /* opacity: .5; */
+            width: 1.6ch;
+            &::marker{
+                content: "\F04D2";
+            }
+            &.half::marker{
+                content: "\F04D0";
+            }
+            &.full::marker {
+                content: "\F04CE"
+            }
+        }
     }
 
     .customer-quote article {
@@ -217,13 +218,20 @@
     }
 
 @media only screen and (max-width: 35em) {
+    
     html, body {
         font-size: 4.5vw;
+        --header-offset: 0px;
     }
     .template-splash {
         display: flex;
         --image-width: 100%;
-        flex-direction: column;
+        flex-direction: column-reverse;
+    }
+    img.template-splash--image {
+        display: block;
+        height: 60vh;
+        width: 100%;
     }
 
     

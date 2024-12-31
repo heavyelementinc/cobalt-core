@@ -2,20 +2,21 @@
     --input-element-padding: 0.4em;
     --input-element-radius: .3em;
     --input-element-border-width: 1.5px;
-    
-    --input-focused-highlight: 0 0 0 calc(var(--input-element-border-width) * 1.5) var(--accent-color);
+    --input-element-border-value: var(--input-element-border-width) solid var(--input-element-border);
 
-    --input-element-placeholder: hsl(from var(--accent-color) h 15% 70% / 100%);
+    --input-focused-highlight: 0 0 0 calc(var(--input-element-border-width) * 1.5) var(--primary-color-1);
 
-    --input-hover-border: hsl(from var(--accent-color) h 40% 50%);
+    --input-element-placeholder: hsl(from var(--primary-color-1) h 15% 70% / 100%);
+
+    --input-hover-border: hsl(from var(--primary-color-1) h 40% 50%);
     --input-hover-background: hsl(from var(--input-element-background) h 20% 100%);
 
-    --input-disabled-color: hsl(from var(--accent-color) h 14% 50%);
-    --input-disabled-placeholder: hsl(from var(--accent-color) h 14% 70%);
+    --input-disabled-color: hsl(from var(--primary-color-1) h 14% 50%);
+    --input-disabled-placeholder: hsl(from var(--primary-color-1) h 14% 70%);
     --input-disabled-border: hsl(from var(--input-element-background) h 5% 75%);
     --input-disabled-background: hsl(from var(--input-element-background) h 5% 80%);
 
-    --input-invalid-color:  rgb(from var(--accent-color) 255 g b / .8);
+    --input-invalid-color:  rgb(from var(--primary-color-1) 255 g b / .8);
     --input-invalid-background: hsl(from var(--input-element-invalid) h 70% l / .4);
 }
 
@@ -45,7 +46,7 @@ a.button[native],
 [__custom-input])
 {
     display: inline-block;
-    border: var(--input-element-border-width) solid var(--input-element-border);
+    border: ;
     background: var(--input-element-background);
     padding: var(--input-element-padding);
     border-radius: var(--input-element-radius);
@@ -110,7 +111,7 @@ input[type="checkbox"],
 input[type="check"],
 input[type="radio"]
 {
-    accent-color: var(--accent-color);
+    accent-color: var(--primary-color-1);
     /* -webkit-appearance: none;
     -moz-appearance: none;
     display: inline-block;

@@ -66,7 +66,7 @@ input-switch {
     }
 
     & input:checked+span {
-        background: var(--accent-color);
+        background: var(--primary-color-1);
     }
 
     & input:checked+span:after {
@@ -309,7 +309,7 @@ copy-span[mini] button {
 :is(.help-span-article, .help-span-article[popover]) {
     /* visibility: hidden; */
     inset: unset;
-    width: max-content;
+    width: 40ch;
     max-width: 270px;
     font-size: 1rem;
     font-weight: normal;

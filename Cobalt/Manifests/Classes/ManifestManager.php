@@ -33,7 +33,7 @@ class ManifestManager {
 
         $cache_details = $this->get_cache_details($type, $context);
 
-        if($tags['tag' === ""]) {
+        if($tags['tag'] === "") {
             $tags['end'] = $cache_details['tag'];
         }
         if ($shouldCache === true) {
@@ -55,33 +55,45 @@ class ManifestManager {
         switch($type) {
             case ValidTypes::js:
                 return [
-                    'tag' => "<script src=\"/core-content/js/v2/package.$context.js?{{versionHash}}\"></script>",
-                    'file' => "js-precomp/v2/package.$context.js"
+                    'tag' => "<script src=\"/core-content/js/package.$context.js?{{versionHash}}\"></script>",
+                    'file' => "js-precomp/package.$context.js"
                 ];
             case ValidTypes::css:
             default:
                 return [
-                    'tag' => "<link rel=\"stylesheet\" href=\"/core-content/css/v2/package.$context.js?{{versionHash}}\">",
-                    'file' => "css-precomp/v2/package.$context.js"
+                    'tag' => "<link rel=\"stylesheet\" href=\"/core-content/css/package.$context.css?{{versionHash}}\">",
+                    'file' => "css-precomp/package.$context.css"
                 ];
         }
     }
 
     function handle_js_cache($details, $context) {
-        $minifier = new \MatthiasMullie\Minify\JS();
-        $minifier->add(implode("\n", $details));
-        $compiled = $minifier->minify();
+        if( __APP_SETTINGS__['manifest_v2_minify_script']) {
+            $minifier = new \MatthiasMullie\Minify\JS();
+            $minifier->add(implode("\n", $details));
+            $compiled = $minifier->minify();
+        } else {
+            $compiled = implode("\n", $details);
+        }
 
         $cache = new CacheManager($context);
         $cache->set($compiled, false);
     }
 
     function handle_css_cache($details, $context) {
-        $minifier = new \MatthiasMullie\Minify\CSS();
-        $minifier->add(implode("\n",$details));
-        $compiled = $minifier->minify();
+        if(__APP_SETTINGS__['manifest_v2_minify_css']) {
+            $minifier = new \MatthiasMullie\Minify\CSS();
+            $minifier->add(implode("\n",$details));
+            $compiled = $minifier->minify();
+        } else {
+            $compiled = implode("\n", $details);
+        }
 
         $cache = new CacheManager($context);
         $cache->set($compiled, false);
+    }
+
+    function process_filenames($minified_string, string $comment_start, string $comment_end) {
+        return preg_replace("/[%]{3}(.*)[%]{3}/", $comment_start." $1".$comment_end, $minified_string);
     }
 }

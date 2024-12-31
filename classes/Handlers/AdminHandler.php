@@ -32,7 +32,8 @@ class AdminHandler extends WebHandler {
         //     'settings' => ($settings) ? "<option icon='cog' onclick=\"Cobalt.router.location = ''; return true;\">Settings</option>" : ""
         // ]
 
-        $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{versionHash}}'>";
+        $panel = "";
+        if(__APP_SETTINGS__['manifest_engine'] === 1) $panel .= "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{versionHash}}'>";
 
         $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='admin-panel--nav-group directory--group'>";
     

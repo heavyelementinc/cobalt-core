@@ -48,6 +48,10 @@ if (app('Auth_logins_enabled')) {
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 
+    Route::s_put("/settings/theme/update", "CoreSettingsPanel@theme_update",[
+        'permission' => 'Auth_modify_cobalt_settings'
+    ]);
+
     Route::s_post("/settings/update/", "CoreSettingsPanel@updateLogo", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);

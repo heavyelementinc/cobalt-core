@@ -1,7 +1,45 @@
-:root {
-    --project-color-table-bg-odd: var(--input-element-background);
-    --project-color-table-border: var(--input-element-border-width) solid var(--input-element-border);
-    --project-color-table-bg-even: var(--input-element-tray);
+.list-panel ul,
+ul.list-panel {
+    list-style: none;
+    padding: 0;
+    margin-top: .5rem;
+    border: var(--project-color-table-border);
+    border-radius: 4px;
+    /* background: var(--project-calendar-cell-other-bg) */
+    li {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 1rem;
+        background: var(--project-color-table-bg-odd);
+        &:nth-of-type(odd) {
+            background: var(--project-color-table-bg-even);
+        }
+        &:first-of-type{
+            border-radius: 4px 4px 0 0;
+        }
+        &:last-of-type{
+            border-radius: 0 0 4px 4px;
+        }
+        &:only-child{
+            border-radius: 4px;
+        }
+        label {
+            width:100%;
+            /* font-weight: bold;
+            text-transform: uppercase;
+            font-size: .8em; */
+        }
+        input-switch {
+            margin: 0 1rem 0 0;
+        }
+        small {
+            display: block;
+            width: 100%;
+            color: rgb(from currentColor r g b / .8);
+            font-size: 0.9rem;
+        }
+    }
 }
 
 flex-table{

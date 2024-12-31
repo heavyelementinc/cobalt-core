@@ -1029,15 +1029,115 @@ const DEFAULT_DEFINITIONS = [
     "manifest_engine" => [
         "default" => 1
     ],
+    "manifest_v2_package_js_files" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Debug",
+            "subgroup" => "Packages",
+            "name" => "Enable JS packaging <help-span value=\"This will enable bundling/packaging JavaScript files into a single package.context.js\"></help-span>",
+            "type" => "input-switch"   
+        ]
+    ],
+    "manifest_v2_package_css_files" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Debug",
+            "subgroup" => "Packages",
+            "name" => "Enable CSS packaging <help-span value=\"This will enable bundling/packaging Cascading Style Sheets files into a single package.context.css\"></help-span>",
+            "type" => "input-switch"   
+        ]
+    ],
+    "manifest_v2_include_filenames" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Debug",
+            "subgroup" => "Packages",
+            "name" => "Include Filenames in Packages <help-span value=\"This will include sanitized filenames as comments in compiled packages.\"></help-span>",
+            "type" => "input-switch"
+        ],
+    ],
+    "manifest_v2_minify_css" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Debug",
+            "subgroup" => "Packages",
+            "name" => "Minify CSS Package <help-span value=\"This will strip all unnecessary content from your CSS package.\"></help-span>",
+            "type" => "input-switch"
+        ],
+    ],
+    "manifest_v2_minify_script" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Debug",
+            "subgroup" => "Packages",
+            "name" => "Minify JS Package <help-span value=\"This will strip all unnecessary content from your JS package.\"></help-span>",
+            "type" => "input-switch"
+        ],
+    ],
     "default_color_scheme" => [
         "default" => true
     ],
+
+    // Used for the header navigation and admin panel
+    "branding_increment" => [
+        "default" => "0.05",
+    ],
+    "branding_rotation" => [
+        "default" => "10"
+    ],
+    "color_branding" => [
+        "default" => "#2F4858"
+    ],
+
+
+    // Used as an accent color for inputs and primary action buttons
+    "primary_increment" => [
+        "default" => "0.1",
+    ],
+    "primary_rotation" => [
+        "default" => "-10"
+    ],
     "color_primary" => [
-        "default" => "#004BA8"
+        "default" => "#009DDC"
+    ],
+
+    // Used for input trey areas, neutral buttons, etc
+    "neutral_increment" => [
+        "default" => "0.1",
+    ],
+    "neutral_rotation" => [
+        "default" => "0"
+    ],
+    "color_neutral" => [
+        "default" => "#D2D6DA"//"#D3D7D9"
+    ],
+    
+    // Used for the background color of the page
+    "background_increment" => [
+        "default" => "0.1",
+    ],
+    "background_rotation" => [
+        "default" => "0"
     ],
     "color_background" => [
-        "default" => "#efefef"
+        "default" => "#F4F5F6"
     ],
+
+    "issue_increment" => [
+        "default" => "0.1",
+    ],
+    "issue_rotation" => [
+        "default" => "-10"
+    ],
+    "color_issue" => [
+        "default" => "#F96F5D"
+    ],
+    
+    // Used as the font family
+    "color_font_body" => [
+        "default" => "#02040F"
+    ],
+    
     "color_mixed_percentage" => [
         "default" => 75
     ],

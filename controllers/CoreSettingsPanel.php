@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Settings\Settings;
 use Controllers\ClientFSManager;
 use Controllers\Controller;
 use Drivers\FSManager;
@@ -153,6 +154,15 @@ class CoreSettingsPanel extends Controller {
         return $GLOBALS['app']->update_setting($name, $value);
     }
 
+    public function theme_update() {
+        $this->update();
+        $settings = new Settings(true);
+        add_vars(['app' => $settings->get_settings()]);
+        update('style#theme-variables', [
+            'innerHTML' => view('/shared/css_v2/color-theme.css')
+        ]);
+    }
+
     public function updateLogo() {
         $name  = array_keys($_POST)[0];
         if(empty($_FILES)) throw new BadRequest("Must specify a file");
@@ -194,8 +204,13 @@ class CoreSettingsPanel extends Controller {
     }
 
     public function reset_to_default($name) {
+        $split = explode(",",$name);
+        $updated = [];
         /** @var SettingsManager $GLOBALS['app'] */
-        return $GLOBALS['app']->reset_to_default($name);
+        foreach($split as $name) {
+            $updated[] = $GLOBALS['app']->reset_to_default($name);
+        }
+        return $updated;
     }
 
     public function presentation() {
