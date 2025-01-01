@@ -676,6 +676,7 @@ class HorizontalScroll extends HTMLElement {
         viewport: this,
         content: this.scrollableTrack,
         direction: "horizontal",
+        lockScrollOnDragDirection: "horizontal",
         scrollMode: "transform",
         bounce: true,
         onPointerDown: (e) => {
