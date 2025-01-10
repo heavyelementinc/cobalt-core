@@ -395,6 +395,19 @@ li ul.blockeditor--nestedlist {
     }
 } */
 
+
+.cobalt-posts--public-controls {
+    display: flex;
+    justify-content: center;
+    margin: 2em 0;
+    gap: 2em;
+    a[disabled] {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+
 @media only screen and (max-width: 1280px) {
     .landing-primary-section {
         flex-direction: column;

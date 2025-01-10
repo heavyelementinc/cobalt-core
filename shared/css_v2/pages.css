@@ -336,6 +336,17 @@ block-editor, .landing-primary-section {
     }
 
 
+.cobalt-posts--public-controls {
+    display: flex;
+    justify-content: center;
+    margin: 2em 0;
+    gap: 2em;
+    a[disabled] {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
 li ul.blockeditor--nestedlist {
     margin: 0;
 }

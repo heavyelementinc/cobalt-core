@@ -6,3 +6,8 @@
     {{!posts}}
 </div>
 {{!controls}}
+<div class="cobalt-posts--public-controls">
+    {{!prev_page}}
+    <span>Page {{page}} of {{count}}</span>
+    {{!next_page}}
+</div>

@@ -229,10 +229,19 @@ function individual_var($name, $vars, $arguments, $posStart, $posEnd) {
 
     if ($is_inline_json) $literal_value = json_encode($literal_value, $is_pretty_print); // Convert to JSON
     
+    switch(gettype($literal_value)) {
+        case "boolean":
+            $literal_value = ($literal_value) ? "true" : "false";
+            break;
+        case "null":
+            $literal_value = "null";
+            break;
+    }
+
     if($literal_value instanceof SchemaResult) $literal_value->htmlSafe($is_inline_html);
     // if(gettype($literal_value) === "object" && method_exists($literal_value, '__toString')) $literal_value = $literal_value->__toString();
     else if (!$is_inline_html) $literal_value = htmlspecialchars((string)$literal_value ?? '', $options); // < = &lt;
-    
+
     return $final_value . $literal_value . $closing_tag;
 }
 
@@ -276,16 +285,22 @@ function fonts_tag() {
         case 2:
             return font_tag_v2();
         default:
-            $head = __APP_SETTINGS__['fonts']['head']['import'];
-            $body = __APP_SETTINGS__['fonts']['body']['import'];
-            $headFam = __APP_SETTINGS__['fonts']['head']['family'];
-            $bodyFam = __APP_SETTINGS__['fonts']['body']['family'];
+            // $head = __APP_SETTINGS__['fonts']['head']['import'];
+            // $body = __APP_SETTINGS__['fonts']['body']['import'];
+            // $headFam = __APP_SETTINGS__['fonts']['head']['family'];
+            // $bodyFam = __APP_SETTINGS__['fonts']['body']['family'];
+            $links = [];
+            $root = "";
+            foreach(__APP_SETTINGS__['fonts'] as $link => $details) {
+                $links[] = $details['import'];
+                $root .= "--project-$link-family: $details[family];\n";
+            }
+            $links = implode("|", $links);
             return <<<HTML
-            <link href="https://fonts.googleapis.com/css?family=$head|$body&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css?family=$links&display=swap" rel="stylesheet">
             <style>
                 :root{
-                    --project-head-family: $headFam;
-                    --project-body-family: $bodyFam;
+                    $root
                 }
             </style>
             HTML;

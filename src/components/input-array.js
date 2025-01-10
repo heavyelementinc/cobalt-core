@@ -11,6 +11,7 @@ class InputArray extends AutoCompleteInterface {
 
     constructor() {
         super();
+        this.TAG_CLASS = "input-array--tag";
         this.readonly = false;
         this.tags = null;
         this.action = this.getAttribute("action");
@@ -21,7 +22,8 @@ class InputArray extends AutoCompleteInterface {
 
     connectedCallback() {
         this.change_handler_value(this.getAttribute("value"));
-        this.tags = document.createElement("fieldset");
+        this.tags = document.createElement("ol");
+        this.tags.classList.add("input-array--tag-container");
         this.prepend(this.tags);
         for(const i of this.value) {
             const el = this.querySelector(`option[value='${i}']`);
@@ -194,7 +196,8 @@ class InputArray extends AutoCompleteInterface {
     drawTag(i) {
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
         if(this.tags === null) return;
-        let tag = document.createElement("input-array-tag");
+        let tag = document.createElement("li");
+        tag.classList.add(this.TAG_CLASS);
         tag.setAttribute("value", i.value);
         tag.innerHTML = `<label>${i.innerText}</label>`;
         this.initTagButton(tag);
@@ -215,7 +218,7 @@ class InputArray extends AutoCompleteInterface {
     }
 
     getSelectedByRemainingTags() {
-        const tags = this.querySelectorAll("input-array-tag");
+        const tags = this.querySelectorAll(`.${this.TAG_CLASS}`);
         let values = [];
 
         for(const i of tags) {
@@ -240,7 +243,7 @@ class InputArray extends AutoCompleteInterface {
 
     removeTag(i) {
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
-        const tag = this.querySelector(`input-array-tag[value='${i.value}']`);
+        const tag = this.querySelector(`.${this.TAG_CLASS}[value='${i.value}']`);
         if(tag) tag.parentNode.removeChild(tag);
     }
 
@@ -402,7 +405,8 @@ class InputUserArray extends InputArray {
     drawTag(i){
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
         if(this.tags === null) return;
-        let tag = document.createElement("input-array-tag");
+        let tag = document.createElement("li");
+        tag.classList.add(this.TAG_CLASS);
         tag.setAttribute("value", i.value);
         tag.innerHTML = `<label>${this.drawLabel(i)}</label>`;
         this.initTagButton(tag);

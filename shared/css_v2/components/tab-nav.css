@@ -32,7 +32,7 @@ chip-nav {
                 padding: 0.68em;
                 min-width: 18ch;
                 &.tab-nav--current-tab {
-                    box-shadow: 2px 0 0 var(--tab-nav--active-tab), -3px 0;
+                    box-shadow: 2px 0 0 var(--tab-nav--background), -3px 0;
                 }
             }
 

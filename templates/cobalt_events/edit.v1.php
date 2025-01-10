@@ -63,6 +63,12 @@
                             <input type="date" name="end_date" value="{{event.end_date}}">
                             <input type="time" name="end_time" value="{{event.end_time}}">
                         </li>
+                        <li>
+                            <switch-container>
+                                <label>Display Forever <help-span value="Toggling this box on will ignore the end date for this event and it will always be displayed when other criteria matches."></label>
+                                <input-switch name="forever" checked="{{event.forever}}"></input-switch>
+                            </switch-container>
+                        </li>
                     </ul>
                 </fieldset>
             </div>
@@ -99,7 +105,7 @@
                                 </help-span></label>
                             <div class="hbox">
                                 <input type="color" name="btnColor" value="{{event.btnColor.display}}"
-                                    default='@normalize_color("$app.vars-web.events-button-color");'>
+                                    default='<?= normalize_color(__APP_SETTINGS__['vars-web']['events-button-color']) ?>'>
                                 <button class="reset" title="Reset to default color" onclick="window.router_entities.eventEditor.resetToDefault('btnColor')" native>
                                     <i name='refresh'></i>
                                 </button>
@@ -116,7 +122,7 @@
                             </label>
                             <div class="hbox">
                                 <input type="color" name="bgColor" value="{{event.bgColor.display}}"
-                                    default='@normalize_color("$app.vars-web.events-banner-background")'>
+                                    default='<?= normalize_color(__APP_SETTINGS__['vars-web']['events-banner-background']) ?>'>
                                 <button class="reset" title="Reset to default color" onclick="window.router_entities.eventEditor.resetToDefault('bgColor')" native>
                                     <i name='refresh'></i>
                                 </button>
@@ -127,7 +133,7 @@
                                 </help-span></label>
                             <div class="hbox">
                                 <input type="color" name="txtColor" value="{{event.txtColor.display}}"
-                                    default='@normalize_color("$app.vars-web.events-banner-text")'>
+                                    default='<?= normalize_color(__APP_SETTINGS__['vars-web']['events-banner-text']) ?>'>
                                 <button class="reset" title="Reset to default color" onclick="window.router_entities.eventEditor.resetToDefault('txtColor')" native>
                                     <i name='refresh'></i>
                                 </button>
@@ -158,9 +164,16 @@
                     <legend>Display Control</legend>
                     <ul class="list-panel">
                         <li>
-                            <label style="width: auto">Public Index Status<help-span value="Determines if this event is elligible for display on the optional Public Event Index"></help-span></label>
+                            <label style="width: auto">Public Index Status <help-span value="Determines if this event is elligible for display on the optional Public Event Index"></help-span></label>
                             <select name="advanced.public_index" style="margin-left: auto; width: auto">{{!event.advanced.public_index.options}}</select>
                             <small>The Public Event Index is an optional listing of upcoming events marked as "Displayed."</small>
+                        </li>
+                        <li>
+                            <label>UTM Greeting <help-span value=""></help-span></label>
+                            <input-array name="utm_greeting" value="{{event.utm_greeting}}" allow-custom="true">
+                            {{!event.utm_greeting.options}}
+                            </input-array>
+                            <small>Specify which utm_source or utm_campaign to match. When someone visits the site via a UTM link, they'll see this message.</small>
                         </li>
                         <li>
                             <label>Included paths <help-span
@@ -170,6 +183,7 @@
                             <input-array name="advanced.included_paths" value="{{@event.advanced.included_paths}}" allow-custom="true">
                                 {{!event.advanced.included_paths.options}}
                             </input-array>
+                            <small>You must specify at least <em>one</em> included path. When in doubt, use "/".</small>
                         </li>
                         <li>
                             <label>Excluded paths <help-span

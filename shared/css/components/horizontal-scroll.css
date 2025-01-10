@@ -15,6 +15,10 @@ horizontal-scroll .scrollable-track {
     scrollbar-width: none;
     position: relative;
     margin-bottom: 2em;
+    > * {
+            display: inline-grid;
+            place-items: center;
+    }
 }
 
 horizontal-scroll .scrollable-track {

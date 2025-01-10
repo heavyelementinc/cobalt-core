@@ -6,7 +6,7 @@ ul.list-panel {
     border: var(--project-color-table-border);
     border-radius: 4px;
     /* background: var(--project-calendar-cell-other-bg) */
-    li {
+    > li {
         display: flex;
         align-items: center;
         flex-wrap: wrap;

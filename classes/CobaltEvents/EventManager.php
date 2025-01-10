@@ -2,6 +2,8 @@
 
 namespace CobaltEvents;
 
+use Cobalt\UTMTracker\UTMHandler;
+
 class EventManager extends \Drivers\Database {
 
     private $sort = [
@@ -40,12 +42,11 @@ class EventManager extends \Drivers\Database {
 
     public function getCurrent() {
         $pq = $this->public_query();
-        $result = $this->find(
+        $result = iterator_to_array($this->find(
             $pq,
-            [],
             ['sort' => $this->sort]
-        );
-        return iterator_to_array($result);
+        ));
+        return $result;
     }
 
     public function getEventById($id) {
@@ -57,14 +58,23 @@ class EventManager extends \Drivers\Database {
     }
 
     private function public_query() {
-        return [
+        $query = [
             'published' => true,
             'start_time' => ['$lte' => $this->__date()],
-            'end_time' => ['$gte' => $this->__date()],
-            // '$or' => [
-            //     ['end_time' => null],
-            // ]
+            '$or' => [
+                ['forever'  => true],
+                ['end_time' => ['$gte' => $this->__date()]],
+            ],
         ];
+
+        $details = UTMHandler::read();
+        if(!$details) return $query;
+        if($details->source() !== null) {
+            $query['$or'][] = ['utm_greeting' => $details->source()];
+        } else if($details->campaign() !== null) {
+            $query['$or'][] = ['utm_greeting' => $details->campaign()];
+        }
+        return $query;
     }
 
     public function getAdminWidget() {

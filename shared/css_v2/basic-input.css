@@ -39,6 +39,7 @@
 :where(input, 
 textarea,
 markdown-area,
+select,
 button,
 async-button[native],
 a.button[native],
@@ -46,7 +47,7 @@ a.button[native],
 [__custom-input])
 {
     display: inline-block;
-    border: ;
+    border: var(--input-element-border-value);
     background: var(--input-element-background);
     padding: var(--input-element-padding);
     border-radius: var(--input-element-radius);
@@ -101,6 +102,10 @@ a.button[native],
             box-shadow: unset;
         }
     }
+}
+
+textarea {
+    min-height: 6lh;
 }
 
 input[type='color'] {

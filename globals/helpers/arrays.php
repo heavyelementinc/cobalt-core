@@ -54,6 +54,25 @@ function associative_to_path(array $arr) {
 }
 
 /**
+ * This function accepts an associative array and returns a string of HTML
+ * attributes from that array.
+ * @throws TypeError If we're passed a non-associative array, get a TypeError
+ * @param array $attributes Follow the format ['attribute' => 'value]
+ * @return string string of HTML attributes
+ */
+function associative_array_to_html_attributes(array $attributes):string {
+    if(empty($attributes)) return "";
+    if(!is_associative_array($attributes)) throw new TypeError("Array must be associative!");
+    
+    $attrs = join(' ', array_map(function($key) use ($attributes){
+        if(is_bool($attributes[$key])) return $attributes[$key]?$key:'';
+        return $key.'="'.$attributes[$key].'"';
+    }, array_keys($attributes)));
+
+    return $attrs;
+}
+
+/**
  * Will determine if an array has string keys
  * Will provide a false positive if indexes are non-linear
  * @param mixed $array 

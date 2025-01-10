@@ -153,6 +153,12 @@ $cobalt_session_started = session_start([
     // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
     // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
+$utm_manager = new UTMHandler();
+$utm_details = $utm_manager->parseUTM($_GET);
+if($utm_details) {
+    $utm_manager->storeUTM($utm_details, true);
+    exit;
+}
 // Let's check to see that we have a CSRF token created
 if($_SESSION[CSRF_TOKEN_KEY] === null) csrf_generate_token();
 // Ensure we have a fresh CSRF token for this session!

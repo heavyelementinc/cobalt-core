@@ -857,6 +857,9 @@ const DEFAULT_DEFINITIONS = [
     "Posts_date_time" => [
         "default" => "g:i a"
     ],
+    "Posts_index_post_count" => [
+        "default" => 9
+    ],
     "enable_default_parallax" => [
         "default" => true,
         "directives" =>[
@@ -1791,6 +1794,12 @@ const DEFAULT_DEFINITIONS = [
         'default' => true,
     ],
     'Webmentions_enable_sending' => [
+        'default' => true,
+    ],
+    'UTM_redirect_enabled' => [
+        'default' => true,
+    ],
+    'UTM_tracking_enabled' => [
         'default' => true,
     ]
 ];
