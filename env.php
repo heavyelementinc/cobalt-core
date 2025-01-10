@@ -19,6 +19,7 @@
  */
 
 use Cobalt\UTMTracker\UTMHandler;
+use Masterminds\HTML5;
 
 ob_start();
 const DB_BENCHMARK = 'db_requests';
@@ -134,6 +135,17 @@ if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->g
 /** @var array DEFAULT_DEFINTIONS */
 define("__APP_SETTINGS__", $application->get_settings());
 define("VERSION_HASH", substr(md5(__COBALT_VERSION . __APP_SETTINGS__['version']), 0, 12));
+
+if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
+    header("X-Robots-Tag: noimageai");
+    header("X-Robots-Tag: noai");
+    header("tdm-reservation: 1");
+    add_vars(['ai_scraping' => <<<HTML
+    <meta name="CCBot" content="nofollow">
+    <meta name="robots" content="noai, noimageai">
+    <meta name="tdm-reservation" content="1">
+    HTML]);
+}
 
 // if(__APP_SETTINGS__['Forbid_AI_webcrawler_access']) {
 //     $useragents = get_json(__ENV_ROOT__."/config/robots.json");

@@ -88,6 +88,9 @@ if (app("Database_fs_enabled")) {
 Route::get("/resource/vapid-key.json", "FileController@vapid_pub_key");
 
 Route::get("/robots.txt", "FileController@robots");
+if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
+    Route::get("/ai.txt", "FileController@ai");
+}
 Route::get("/sitemap.xml", "FileController@sitemap");
 
 Route::get("/auth/{id}/register", "IntegrationsController@oauth_receive");

@@ -198,6 +198,25 @@ class FileController extends \Controllers\FileController {
         exit;
     }
 
+    function ai() {
+        $file = find_one_file([
+            __APP_ROOT__ . "/templates/",
+            // ...$extensions ?? [],
+            __ENV_ROOT__ . "/templates/",
+            // ...$SHARED_CONTENT
+        ], "ai.txt");
+
+        if(!$file) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+
+        $ai_bots = "";
+        // if(__APP_SETTINGS__["Robots_txt_block_known_ai_crawlers"]) $ai_bots = view("known-ai-robots.txt");
+        $view = view("ai.txt", ['ai_bots' => $ai_bots]);
+        header('Content-Length: ' . strlen($view));
+        header('Content-Type: text');
+        echo $view;
+        exit;
+    }
+
     function sitemap() {
         global $ROUTER;
         $html = "";

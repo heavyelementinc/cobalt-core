@@ -1,3 +1,7 @@
+<?php
+
+use Masterminds\HTML5;
+?>
 <!doctype html>
 <html lang="en-US" class="{{context.html_class}} {{app.html_tag_classes}}">
 <script>
@@ -15,6 +19,7 @@
     <meta name="theme-color" content="{{app.color_branding}}">
     <meta name="mitigation" content="@csrf_get_token();">
     <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
+    {{!ai_scraping}}
 
     @maybe_with("$og_template");
     {{!webmention}}

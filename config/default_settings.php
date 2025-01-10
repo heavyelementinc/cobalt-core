@@ -1605,6 +1605,15 @@ const DEFAULT_DEFINITIONS = [
             "type" => "input-switch"
         ]
     ],
+    "AI_prohibit_scraping_notice" => [
+        "default" => false,
+        "meta" => [
+            "group" => "Configuration",
+            "subgroup" => "SEO",
+            "name" => "Ask AI Web Crawlers to Ignore This App <small>This will add &lt;meta&gt; tags to your page, include headers with every request, and create an <code>ai.txt</code> file in the root directory of your app. Some AI bots do not honor these requests.<help-span value=\"\"></help-span></small>",
+            "type" => "input-switch"
+        ]
+    ],
     "Forbid_AI_webcrawler_access" => [
         "default" => false,
         "meta" => [
