@@ -63,6 +63,15 @@ const DEFAULT_DEFINITIONS = [
             "alias" => "app_name"
         ]
     ],
+    "copyright_notice" => [
+        "default" => "All Rights Reserved",
+        "meta" => [
+            "group" => "Basic",
+            "subgroup" => "Details",
+            "name" => "Copyright Notice <help-span value=\"The copyright notice is parsed as markdown. Be cautious.\"></help-span>",
+            "type" => "textarea"
+        ],
+    ],
     "Timezone" => [
         "default" => "America/New_York"
     ],

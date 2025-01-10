@@ -361,6 +361,12 @@ footer .social-media a:hover{
     flex-grow: 1;
     font-size: .8rem;
     text-align: center;
+    .copyright-notice {
+        display: inline-flex;
+        * {
+            margin: 0;
+        }
+    }
 }
 
 .mobile-only {
