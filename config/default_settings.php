@@ -227,7 +227,7 @@ const DEFAULT_DEFINITIONS = [
             "prefix" => "Designed by",
             "name" =>   "Heavy Element, Inc.",
             "href" =>   "https://heavyelement.com/",
-            "title" =>  "Midcoast Maine's Premier Media Studio"
+            "title" =>  "Midcoast Maine's Premier Web & Media & Software Media Studio"
         ],
         "meta" => [
             "group" => "Basic",
