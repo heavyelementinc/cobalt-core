@@ -37,9 +37,9 @@ use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
 class Settings extends \Drivers\Database {
-
     const __DEFINITIONS__ = [
-        // __ENV_ROOT__ . "/config/default_settings.jsonc",
+        __APP_ROOT__ . "/config/settings.php",
+        __APP_ROOT__ . "/ignored/config/settings.php",
         __APP_ROOT__ . "/config/settings.jsonc",
         __APP_ROOT__ . "/ignored/config/settings.jsonc",
         __APP_ROOT__ . "/config/settings.json",
@@ -218,9 +218,24 @@ class Settings extends \Drivers\Database {
             $this->raw_decode = [
                 'Cobalt/Settings/Settings.php' => DEFAULT_DEFINITIONS
             ];
+            $to_be_read = $this::__DEFINITIONS__;
+
             foreach($this::__DEFINITIONS__ as $file) {
                 if(!file_exists($file)) continue;
-                $this->raw_decode[$file] = jsonc_decode(file_get_contents($file), true, 512, JSON_ERROR_SYNTAX);
+                $extension = pathinfo($file, PATHINFO_EXTENSION);
+                switch($extension) {
+                    case "php":
+                        $this->raw_decode[$file] = $this->get_php_settings($file);
+                        break;
+                    case "json":
+                    case "jsonc":
+                        // If we've already loaded a php file from this directory, let's skip loading
+                        if(key_exists(str_replace($extension, "php", $file), $this->raw_decode)) {
+                            continue 2;
+                        }
+                        $this->raw_decode[$file] = jsonc_decode(file_get_contents($file), true, 512, JSON_ERROR_SYNTAX);
+                        break;
+                }
             }
 
             Extensions::invoke("register_settings_definitions", $this->raw_decode, $this->manifest_raw_decode);
@@ -236,6 +251,11 @@ class Settings extends \Drivers\Database {
         } 
         $this->default_values = $values;
         $this->definitions    = $definitions;
+    }
+
+    private function get_php_settings($filename) {
+        require $filename;
+        return $settings;
     }
 
     private function parseSetting(&$values, &$def, $settings, $filename) {

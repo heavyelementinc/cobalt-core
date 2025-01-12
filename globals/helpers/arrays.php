@@ -149,3 +149,24 @@ function array_append(&$array) {
 function get_random_array_element(array $array):mixed {
     return $array[rand(0,count($array) - 1)];
 }
+
+function var_export_short(mixed $value, bool $return = true) {
+    $dump = var_export($value, true);
+
+    $dump = preg_replace('#(?:\A|\n)([ ]*)array \(#i', '[', $dump); // Starts
+    $dump = preg_replace('#\n([ ]*)\),#', "\n$1],", $dump); // Ends
+    $dump = preg_replace('#=> \[\n\s+\],\n#', "=> [],\n", $dump); // Empties
+
+    if (gettype($value) == 'object') { // Deal with object states
+        $dump = str_replace('__set_state(array(', '__set_state([', $dump);
+        $dump = preg_replace('#\)\)$#', "])", $dump);
+    } else { 
+        $dump = preg_replace('#\)$#', "]", $dump);
+    }
+
+    if ($return===true) {
+        return $dump;
+    } else {
+        echo $dump;
+    }
+}

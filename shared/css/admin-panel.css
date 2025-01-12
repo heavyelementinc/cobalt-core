@@ -156,6 +156,7 @@ main {
     color:white;
 }
 
+
 @media only screen and (max-width: 35em) {
     :root {
         --admin-panel-width: 0;

@@ -22,8 +22,42 @@
     }
     .list-panel :where(input, input-array, input-password) {
         flex-grow: 1;
-        margin-right: 1em;
+        /* margin-right: 1em; */
     }
+
+
+    .settings-panel--setting {
+        position: relative;
+        &:has(switch-container) {
+            flex-wrap: nowrap;
+        }
+        .settings-panel--description + :where(input, textarea, select, input-number){
+            width: 100%;
+        }
+        .settings-panel--description {
+            display:flex;
+            justify-content: space-between;
+            width: var(100% - 4ch);
+            min-height: 2lh;
+            action-menu {
+                margin-left: auto;
+                position: absolute;
+                top: 0;
+                right: 0;
+                cursor: pointer;
+                background: transparent;
+            }
+            flex-direction: column;
+        }
+        switch-container.settings-panel--switch {
+            /* width: calc(100% - 4ch); */
+            flex-grow: 1;
+        }
+        & input-switch + .settings-panel--description {
+            margin-right: auto;
+        }
+    }
+
 
     form-request {
         display:flex;

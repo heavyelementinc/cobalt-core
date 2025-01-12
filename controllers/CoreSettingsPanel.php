@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Settings\CobaltSetting;
 use Cobalt\Settings\Settings;
 use Controllers\ClientFSManager;
 use Controllers\Controller;
@@ -21,6 +22,10 @@ class CoreSettingsPanel extends Controller {
         $setting_groups = [];
         $setting_tables = [];
 
+        /**
+         * @var int $index
+         * @var CobaltSetting $setting
+         */
         foreach($this->settings as $index => $setting) {
             if(!isset($setting->meta)) continue;
             if(in_array($setting->meta['group'], $this->requiresRoot) && !is_root()) continue;
@@ -67,7 +72,7 @@ class CoreSettingsPanel extends Controller {
             $name));
     }
 
-    private function get_setting_table_entry($setting, $index, $url) {
+    private function get_setting_table_entry(CobaltSetting $setting, $index, $url) {
         $template = false;
         $type = "input";
         $options = "";
@@ -131,6 +136,8 @@ class CoreSettingsPanel extends Controller {
             'setting' => $index,
             'value' => __APP_SETTINGS__[$index],
             'default' => $setting->defaultValue,
+            'small' => ($setting->meta['description']) ? "<small>".$setting->meta['description']."</small>" : "",
+            'help' => ($setting->meta['help']) ? "<help-span value=\"".htmlentities($setting->meta['help'])."\"></help-span>" : "",
             'type' => $type,
             'disabled' => '',
             'options' => $options,

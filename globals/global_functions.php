@@ -618,7 +618,8 @@ function benchmark_writes($modified) {
 
 function set_up_db_config_file(string $database, string $user, string $password, string $addr = "localhost", string $port = "27017", string $ssl = "false", string $sslFile = "", string $invalidCerts = "false", ?string $path = null) {
     $path = $path ?? $GLOBALS['db_config'];
-    return file_put_contents($path,"<?php
+    return file_put_contents($path,<<<PHP
+    <?php
 /**
  * This is the bootstrap config file. We use this to
  * Set up our database access. This file is read every
@@ -627,15 +628,16 @@ function set_up_db_config_file(string $database, string $user, string $password,
 
 \$GLOBALS['CONFIG'] = [
     'db_driver'      => 'MongoDB', // The Cobalt Engine database driver to use to access the database (MongoDB is the only supported driver)
-    'db_addr'        => '$addr', // The database's address
-    'db_port'        => '$port', // The database port number
-    'database'       => '$database', // The name of your app's database
-    'db_usr'         => '$user', // The username for your database
-    'db_pwd'         => '$password', // The password for your database
-    'db_ssl'         => $ssl, // Enable SSL communication between the app and database
-    'db_sslFile'     => '$sslFile', // The SSL cert file for communicating with the database
-    'db_invalidCerts'=> $invalidCerts, // Allow self-signed certificates
-];"
+    'db_addr'        => '\$addr', // The database's address
+    'db_port'        => '\$port', // The database port number
+    'database'       => '\$database', // The name of your app's database
+    'db_usr'         => '\$user', // The username for your database
+    'db_pwd'         => '\$password', // The password for your database
+    'db_ssl'         => \$ssl, // Enable SSL communication between the app and database
+    'db_sslFile'     => '\$sslFile', // The SSL cert file for communicating with the database
+    'db_invalidCerts'=> \$invalidCerts, // Allow self-signed certificates
+];
+PHP
 );
 }
 

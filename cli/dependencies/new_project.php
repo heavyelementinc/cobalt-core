@@ -1,56 +1,57 @@
 <?php
 
 class NewProject{
-
+    const SETTINGS_FILE = "settings.php";
+    const CONFIG_FILE = "";
     var $app = [
         'root' => [
             'prompt' => "Project directory (name only, not path):",
             'confirm' => 'Directory     ',
             'validate' => '__np_validate_directory',
             'value' => null,
-            'key' => 'settings.json',
+            'key' => self::SETTINGS_FILE,
         ],
         'domain_name' => [
             'prompt' => "Domain name:",
             'confirm' => 'Domain name   ',
             'validate' => '__np_validate_cannot_be_blank',
             'value' => null,
-            'key' => 'settings.json',
+            'key' => self::SETTINGS_FILE,
         ],
         'app_name' => [
             'prompt' => "What's your app's name?",
             'confirm' => 'App name      ',
             'validate' => '__np_validate_cannot_be_blank',
             'value' => null,
-            'key' => 'settings.json',
+            'key' => self::SETTINGS_FILE,
         ],
         'addr' => [
             'prompt' => "Database address (default: 'localhost')",
             'confirm' => 'DB Address    ',
             'validate' => "__np_validate_may_be_blank",
             'value' => 'localhost',
-            'key' => 'config.php',
+            'key' => self::CONFIG_FILE,
         ],
         'port' => [
             'prompt' => "Database port (default: '27017')",
             'confirm' => 'DB Port       ',
             'validate' => "__np_validate_may_be_blank",
             'value' => '27017',
-            'key' => 'config.php',
+            'key' => self::CONFIG_FILE,
         ],
         'username' => [
             'prompt' => "Database username (leave blank if none)",
             'confirm' => 'DB Username   ',
             'validate' => "__np_validate_may_be_blank",
             'value' => null,
-            'key' => 'config.php',
+            'key' => self::CONFIG_FILE,
         ],
         'password' => [
             'prompt' => "Database password (leave blank if none)",
             'confirm' => 'DB Password   ',
             'validate' => "__np_validate_may_be_blank",
             'value' => null,
-            'key' => 'config.php',
+            'key' => self::CONFIG_FILE,
         ],
         'database' => [
             'prompt_base' => "Provide a unique name for your database",
@@ -58,7 +59,7 @@ class NewProject{
             'confirm' => 'DB Name       ',
             'validate' => "__np_validate_database_name",
             'value' => null,
-            'key' => 'config.php',
+            'key' => self::CONFIG_FILE,
         ],
         // 'Auth_enable_logins' => [
         //     'prompt' => "Enable user accounts? (Y/n)",
@@ -167,11 +168,11 @@ class NewProject{
         if(!$validate) {
             $validate = $this->app_root_directory;
         }
-        $this->new_app['config.php']['database'] = $validate;
+        $this->new_app[self::CONFIG_FILE]['database'] = $validate;
 
         $config = [
-            'username' => $this->new_app['config.php']['username'],
-            'password' => $this->new_app['config.php']['password'],
+            'username' => $this->new_app[self::CONFIG_FILE]['username'],
+            'password' => $this->new_app[self::CONFIG_FILE]['password'],
             'ssl'       => false,
             'sslCAFile' => "",
             'sslAllowInvalidCertificates' => false,
@@ -183,7 +184,7 @@ class NewProject{
 
         try{
             require_once __CLI_ROOT__ . "/../vendor/autoload.php";
-            $client = new MongoDB\Client("mongodb://".$this->new_app['config.php']['addr'].":".$this->new_app['config.php']['port'],$config);
+            $client = new MongoDB\Client("mongodb://".$this->new_app[self::CONFIG_FILE]['addr'].":".$this->new_app[self::CONFIG_FILE]['port'],$config);
             $db_names = iterator_to_array($client->listDatabaseNames());
         } catch (Exception $e) {
             $continue = confirm_message("   WARNING: Could not connect to database. Continue anyway?", true);
@@ -258,16 +259,17 @@ class NewProject{
         print(" -> Creating ignored files... ");
         file_put_contents($this->new_project_dir . "/.gitignore",".vscode/\ncache/\nignored/\nvendor/");
         @mkdir($this->new_project_dir . "/ignored");
-        touch($this->new_project_dir . "/ignored/settings.json");
+        touch($this->new_project_dir . "/ignored/".self::SETTINGS_FILE);
         return true;
     }
 
     function __np_write_app_settings(){
         print(" -> Writing settings file... ");
-        $settings = $this->new_app['settings.json'];
+        $settings = $this->new_app[self::SETTINGS_FILE];
         unset($settings['root']);
-        $conf = $this->new_project_dir . "/config/settings.json";
-        if(file_put_contents($conf,json_encode($settings, JSON_PRETTY_PRINT))) return true;
+        $conf = $this->new_project_dir . "/config/".self::SETTINGS_FILE;
+        $write_result = file_put_contents($conf,"<?php\n\$settings = ".var_export($settings, true).";");
+        if($write_result) return true;
         else return false;
     }
 
@@ -278,7 +280,7 @@ class NewProject{
 
     function __np_db_config_file(){
         print(" -> Writing config.php... ");
-        $conf = $this->new_app['config.php'];
+        $conf = $this->new_app[self::CONFIG_FILE];
         require_once __CLI_ROOT__ . "/../globals/global_functions.php";
         $config_file = set_up_db_config_file($conf['database'],$conf['username'],$conf['password'], $conf['addr'] ?? "localhost", $conf['port'] ?? "27017", "false", "", "false", $this->new_project_dir . "/config/config.php");
         if($config_file) say("ok!", "s");

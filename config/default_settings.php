@@ -14,6 +14,7 @@ const DEFAULT_DEFINITIONS = [
             "group" => "Basic",
             "subgroup" => "General",
             "name" => "Domain Name",
+            "description" =>  "The domain name you use to access your Cobalt application.",
             "type" => "input"
         ],
         "validate" => [
@@ -33,6 +34,7 @@ const DEFAULT_DEFINITIONS = [
             "group" => "Basic",
             "subgroup" => "General",
             "name" => "Application Name",
+            "description" => "The full name of your application. This is used in various places around your app.",
             "type" => "input"
         ]
     ],
@@ -47,18 +49,20 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Basic",
             "name" => "Short Name",
+            "description" => "This is a short name that is used in various space-limited places. It inherits from your App Name.",
             "type" => "input"
         ]
     ],
     /* A bespoke name to be listed in the copyright notice */
     "app_copyright_name" => [
         "default" => "",
-        "meta" => [
-            "group" => "Basic",
-            "subgroup" => "Details",
-            "name" => "Copyright Name",
-            "type" => "input"
-        ],
+        // "meta" => [
+        //     "group" => "Basic",
+        //     "subgroup" => "Details",
+        //     "name" => "Copyright Name",
+        //     "description" => "This is the name of your application",
+        //     "type" => "input"
+        // ],
         "directives" => [
             "alias" => "app_name"
         ]
@@ -68,7 +72,9 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Basic",
             "subgroup" => "Details",
-            "name" => "Copyright Notice <help-span value=\"The copyright notice is parsed as markdown. Be cautious.\"></help-span>",
+            "name" => "Copyright Notice",
+            "description" => "The copyright notice to used in the footer of your app.",
+            "help" => "The copyright notice is parsed as markdown. Be cautious.",
             "type" => "textarea"
         ],
     ],
@@ -289,7 +295,8 @@ const DEFAULT_DEFINITIONS = [
         "directives" => [],
         "meta" => [
             "group" => "Look &amp; Feel",
-            "name" => "Enable Customization Framework <help-span value='Enables customization'></help-span>",
+            "name" => "Enable Customization Framework",
+            "help" => "Enables customization",
             "subgroup" => "Customization"
         ],
         "validate" => [
@@ -301,7 +308,8 @@ const DEFAULT_DEFINITIONS = [
         "directives" => [],
         "meta" => [
             "group" => "Look &amp; Feel",
-            "name" => "Error on missing Customzations <help-span value='When enabled, the CustomizationManager will throw an Exception if a value is missing.'></help-span>",
+            "name" => "Error on missing Customzations",
+            "help" => "When enabled, the CustomizationManager will throw an Exception if a value is missing.",
             "subgroup" => "Customization"
         ],
         "validate" => [
@@ -319,7 +327,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Look &amp; Feel",
             "subgroup" =>"Events",
-            "name" => "Enable Event Banners <help-span value='Enables the Event Manager and allows you to schedule private & public pop-ups and banners.'></help-span>",
+            "name" => "Enable Event Banners",
+            "help" => "Enables the Event Manager and allows you to schedule private & public pop-ups and banners.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -343,7 +352,9 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Look &amp; Feel",
             "subgroup" =>"Events",
-            "name" => "Enable web-side index of specially-marked events <help-span value='To be elligible for display on the Events page, an event must have its `Display on web-side index` flag set to true.'></help-span>",
+            "name" => "Enable Public Event Index",
+            "description" => "Enable web-side index of specially-marked events",
+            "help" => "To be elligible for display on the Events page, an event must have its `Display on web-side index` flag set to true.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -410,7 +421,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Contact Form",
             "subgroup" =>"General",
-            "name" => "Contact form submission grace period <help-span value=\"How long should the grace period last. Will be converted to a negative number and subtracted from the current time of a given submission.\"></help-span>",
+            "name" => "Contact form submission grace period",
+            "help" => "How long should the grace period last. Will be converted to a negative number and subtracted from the current time of a given submission.",
             "type" => "input"
         ],
         "validate" => [
@@ -623,7 +635,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Keywords <help-span value=\"A comma-delimited list of keywords included in the head of your document. NOTE: This has little-to-no real-world SEO value.\"></help-span>",
+            "name" => "Keywords",
+            "help" => "A comma-delimited list of keywords included in the head of your document. NOTE: This has little-to-no real-world SEO value.",
             "type" => "textarea"
         ],
         "validate" => [
@@ -876,7 +889,8 @@ const DEFAULT_DEFINITIONS = [
         ],
         "meta" => [
             "group" => "Look &amp; Feel",
-            "name" => "Enable Parallax <help-span value='Allows you to specify [parallax-mode=\"\"] attributes on elements in your pages.'></help-span>",
+            "name" => "Enable Parallax",
+            "help" => "Allows you to specify [parallax-mode=\"\"] attributes on elements in your pages.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -916,7 +930,8 @@ const DEFAULT_DEFINITIONS = [
         ],
         "meta" => [
             "group" => "Look &amp; Feel",
-            "name" => "Enable Parallax Debug <help-span value='Allows the scroll manager to display debug output to help troubleshoot parallax issues.'></help-span>",
+            "name" => "Enable Parallax Debug",
+            "help" => "Allows the scroll manager to display debug output to help troubleshoot parallax issues.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -1046,7 +1061,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Debug",
             "subgroup" => "Packages",
-            "name" => "Enable JS packaging <help-span value=\"This will enable bundling/packaging JavaScript files into a single package.context.js\"></help-span>",
+            "name" => "Enable JS packaging",
+            "help" => "This will enable bundling/packaging JavaScript files into a single package.context.js",
             "type" => "input-switch"   
         ]
     ],
@@ -1055,7 +1071,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Debug",
             "subgroup" => "Packages",
-            "name" => "Enable CSS packaging <help-span value=\"This will enable bundling/packaging Cascading Style Sheets files into a single package.context.css\"></help-span>",
+            "name" => "Enable CSS packaging",
+            "help" => "This will enable bundling/packaging Cascading Style Sheets files into a single package.context.css",
             "type" => "input-switch"   
         ]
     ],
@@ -1064,7 +1081,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Debug",
             "subgroup" => "Packages",
-            "name" => "Include Filenames in Packages <help-span value=\"This will include sanitized filenames as comments in compiled packages.\"></help-span>",
+            "name" => "Include Filenames in Packages",
+            "help" => "This will include sanitized filenames as comments in compiled packages.",
             "type" => "input-switch"
         ],
     ],
@@ -1073,7 +1091,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Debug",
             "subgroup" => "Packages",
-            "name" => "Minify CSS Package <help-span value=\"This will strip all unnecessary content from your CSS package.\"></help-span>",
+            "name" => "Minify CSS Package",
+            "help" => "This will strip all unnecessary content from your CSS package.",
             "type" => "input-switch"
         ],
     ],
@@ -1082,7 +1101,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Debug",
             "subgroup" => "Packages",
-            "name" => "Minify JS Package <help-span value=\"This will strip all unnecessary content from your JS package.\"></help-span>",
+            "name" => "Minify JS Package",
+            "help" => "This will strip all unnecessary content from your JS package.",
             "type" => "input-switch"
         ],
     ],
@@ -1502,7 +1522,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Developer",
             "subgroup" => "Packaging",
-            "name" => "Bundle JavaScript Content <help-span value='Compiles all client-side JavaScript into one file. May moderately decrease load times.'></help-span>",
+            "name" => "Bundle JavaScript Content",
+            "help" => "Compiles all client-side JavaScript into one file. May moderately decrease load times.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -1514,7 +1535,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Developer",
             "subgroup" => "Packaging",
-            "name" => "Bundle CSS Content <help-span value='Compiles all CSS files into one. May significantly decrease load times.'></help-span>",
+            "name" => "Bundle CSS Content",
+            "help" => "Compiles all CSS files into one. May significantly decrease load times.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -1526,7 +1548,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Developer",
             "subgroup" => "Packaging",
-            "name" => "Minify Bundled CSS Content <help-span value='When `Package_style_content` is enabled, package.css is minified. May significantly decrease load times.'></help-span>",
+            "name" => "Minify Bundled CSS Content",
+            "help" => "When `Package_style_content` is enabled, package.css is minified. May significantly decrease load times.",
             "type" => "input-switch"
         ],
         "validate" => [
@@ -1589,7 +1612,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Robots.txt file <help-span value=\"Each User-agent rule must be followed by distinct 'Allow: /' or 'Disallow: /' rules. One Allow or Disallow rule per route.\"></help-span>",
+            "name" => "Robots.txt file",
+            "help" => "Each User-agent rule must be followed by distinct 'Allow: /' or 'Disallow: /' rules. One Allow or Disallow rule per route.",
             "type" => "textarea"
         ],
         "validate" => [
@@ -1601,7 +1625,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Request AI Web Crawlers Ignore Site <small>This will set up your robots.txt file to deny access to AI web crawlers. Note that this <strong>does not block facebookexternalhit</strong> since that would also break link previews.</small>",
+            "name" => "Request AI Web Crawlers Ignore Site",
+            "description" => "This will set up your robots.txt file to deny access to AI web crawlers. Note that this <strong>does not block facebookexternalhit</strong> since that would also break link previews.",
             "type" => "input-switch"
         ]
     ],
@@ -1610,7 +1635,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Ask AI Web Crawlers to Ignore This App <small>This will add &lt;meta&gt; tags to your page, include headers with every request, and create an <code>ai.txt</code> file in the root directory of your app. Some AI bots do not honor these requests.<help-span value=\"\"></help-span></small>",
+            "name" => "Ask AI Web Crawlers to Ignore This App",
+            "description" => "This will add &lt;meta&gt; tags to your page, include headers with every request, and create an <code>ai.txt</code> file in the root directory of your app. Some AI bots do not honor these requests.",
             "type" => "input-switch"
         ]
     ],
@@ -1619,7 +1645,9 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Configuration",
             "subgroup" => "SEO",
-            "name" => "Forbid Access for AI Web Crawlers <small>This will throw a 403 Forbidden when AI bots crawl your application.<help-span value=\"This is heavy-handed and may break things.\"></help-span></small>",
+            "name" => "Forbid Access for AI Web Crawlers",
+            "description" => "This will throw a 403 Forbidden when AI bots crawl your application.",
+            "help" => "This is heavy-handed and may break things.",
             "type" => "input-switch"
         ]
     ],
@@ -1638,7 +1666,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Landing Pages",
             "subgroup" => "General",
-            "name" => "Route Prefix <help-span value=\"Your pages will live at this location. It MUST start with a slash and may contain more.&#10;&#10;Changing this setting WILL break existing links to pages.\"></help-span>",
+            "name" => "Route Prefix",
+            "help" => "Your pages will live at this location. It MUST start with a slash and may contain more.&#10;&#10;Changing this setting WILL break existing links to pages.",
             "type" => "input"
         ],
         "validate" => [
@@ -1650,7 +1679,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Landing Pages",
             "subgroup" => "Presentation",
-            "name" => "Contents Label Headline <help-span value=\"The headline displayed over the Landing Page's Table of Contents\"></help-span>",
+            "name" => "Contents Label Headline",
+            "help" =>  "The headline displayed over the Landing Page's Table of Contents",
             "type" => "input"
         ],
         "validate" => [
@@ -1713,7 +1743,8 @@ const DEFAULT_DEFINITIONS = [
         "meta" => [
             "group" => "Landing Pages",
             "subgroup" => "Related Content",
-            "name" => "Related Content Default Headline <help-span value=\"The default headline for the 'Other Content' section.\"></help-span>",
+            "name" => "Related Content Default Headline",
+            "help" => "The default headline for the 'Other Content' section.",
             "type" => "input"
         ],
         "validate" => [
