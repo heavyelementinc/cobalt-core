@@ -115,7 +115,7 @@ function fetch_and_save($url) {
 }
 
 
-function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name']) {
+function register_individual_post_routes($collection = __APP_SETTINGS__['Posts_collection_name']) {
     $manager = new PageManager(null, $collection);
     $pages = $manager->find($manager->public_query(), ['limit' => 100]);
     $server_name = server_name();

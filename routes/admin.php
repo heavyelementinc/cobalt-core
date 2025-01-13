@@ -11,10 +11,10 @@ Route::get("/", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
+if(__APP_SETTINGS__['Posts_default_enabled']) {
     Cobalt\Pages\Controllers\Posts::admin();
     // Route::get("/posts/", "Posts@index",[
-    //     'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
+    //     'anchor' => ['name' => __APP_SETTINGS__['Posts_default_name']],
     //     'navigation' => ['admin_panel'],
     // ]);
     // Route::get("/posts/{id}?", "Posts@edit",[

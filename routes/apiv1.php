@@ -126,7 +126,7 @@ if(app("enable_debug_routes")) {
     Route::post("/proto/", "SchemaDebug@filter_test");
 }
 
-// if(__APP_SETTINGS__['Posts']['default_enabled']) {
+// if(__APP_SETTINGS__['Posts_default_enabled']) {
 //     Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
 //     Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
 //     Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);

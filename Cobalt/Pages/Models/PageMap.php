@@ -97,7 +97,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                 },
                 'get_path' => function ($val) {
                     $permalink = ($this->flags->getValue() & self::FLAGS_INCLUDE_PERMALINK) ? "/$this->_id" : "";
-                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts']['public_post'] . "$val" . $permalink;
+                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts_public_post'] . "$val" . $permalink;
                     return __APP_SETTINGS__['LandingPage_route_prefix'] . "$val" . $permalink;
 
                 }

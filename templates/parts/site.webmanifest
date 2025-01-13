@@ -4,7 +4,7 @@
     "start_url": "/",
     "display": "{{app.pwa.display}}",
     "background_color": "{{app.pwa.background_color}}",
-    "description": "{{app.opengraph.description}}",
+    "description": "{{app.opengraph_description}}",
     "icons": [
         {
             "src": "{{app.logo.thumb.filename}}",

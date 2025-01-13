@@ -13,7 +13,7 @@ use Masterminds\HTML5;
 <head>
     <meta charset="utf-8">
     <title data-suffix=" | {{app.app_name}}">{{title}} | {{app.app_name}}</title>
-    <meta name="description" content="{{app.opengraph.description}}">
+    <meta name="description" content="{{app.opengraph_description}}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="version" content='{{versionHash}}'>
     <meta name="theme-color" content="{{app.color_branding}}">

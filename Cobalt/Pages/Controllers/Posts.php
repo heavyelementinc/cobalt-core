@@ -16,7 +16,7 @@ use MongoDB\Model\BSONDocument;
 class Posts extends AbstractPageController {
     const BAD_REQUEST = 'Request contained invalid content';
     public function get_manager(): Database {
-        // return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
+        // return new PageManager(null, __APP_SETTINGS__['Posts_collection_name']);
         return new PostManager();
     }
 
@@ -47,7 +47,7 @@ class Posts extends AbstractPageController {
             'skip' => 0
         ];
         $misc = ['page' => 0, 'next_label' => 'Older Posts', 'prev_label' => 'Newer Posts'];
-        $title = __APP_SETTINGS__['Posts']['default_name'];
+        $title = __APP_SETTINGS__['Posts_default_name'];
         $filter = "";
         
         foreach($_GET as $key => $value) {
@@ -164,7 +164,7 @@ class Posts extends AbstractPageController {
         }
         $request = $_GET;
         unset($request['uri']);
-        $attrs['href'] = __APP_SETTINGS__['Posts']['public_index'] . "?" . http_build_query(array_merge($request, ['page' => $target_page]));
+        $attrs['href'] = __APP_SETTINGS__['Posts_public_index'] . "?" . http_build_query(array_merge($request, ['page' => $target_page]));
         return associative_array_to_html_attributes($attrs);
     }
     

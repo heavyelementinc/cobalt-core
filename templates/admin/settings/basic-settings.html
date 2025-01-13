@@ -28,6 +28,13 @@
 
     .settings-panel--setting {
         position: relative;
+        &.settings-panel--switch-container {
+            flex-direction: row;
+            flex-wrap: nowrap;
+            & input-switch {
+                margin-left: auto;
+            }
+        }
         &:has(switch-container) {
             flex-wrap: nowrap;
         }

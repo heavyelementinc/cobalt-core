@@ -13,21 +13,21 @@ Route::get(new Options("/res/fs/...","FileController@download"));
 
 Route::get(new Options("/ServiceWorker.js", "FileController@service_worker"));
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
+if(__APP_SETTINGS__['Posts_default_enabled']) {
     if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
-        $address = __APP_SETTINGS__['Posts']['public_index'];
+        $address = __APP_SETTINGS__['Posts_public_index'];
         $length = strlen($address) - 1;
         if($address[$length] === "/") $address = substr($address, 0, -1);
         Route::get("$address.xml", "Posts@rss_feed");
     }
-    Route::get(__APP_SETTINGS__['Posts']['public_index'], "\\Cobalt\\Pages\\Controllers\\Posts@posts_landing", __APP_SETTINGS__['Posts']['public_index_options']);
+    Route::get(__APP_SETTINGS__['Posts_public_index'], "\\Cobalt\\Pages\\Controllers\\Posts@posts_landing", __APP_SETTINGS__['Posts_public_index_options']);
     
     $posts = array_merge(
-        __APP_SETTINGS__['Posts']['public_post_options'] ?? [], [
+        __APP_SETTINGS__['Posts_public_post_options'] ?? [], [
             
     ]);
     
-    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "\\Cobalt\\Pages\\Controllers\\Posts@page", [
+    Route::get(__APP_SETTINGS__['Posts_public_post'] . "...",  "\\Cobalt\\Pages\\Controllers\\Posts@page", [
         'sitemap' => [
             'ignore' => true,
             'children' => function () {
@@ -36,7 +36,7 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
             'lastmod' => fn() => null
         ]
     ]
-        // (new Options(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page"))
+        // (new Options(__APP_SETTINGS__['Posts_public_post'] . "...",  "Posts@page"))
         // ->set_sitemap([
         //     'ignore' => true,
         //     'children' => function () {

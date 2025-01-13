@@ -308,7 +308,7 @@ abstract class AbstractPageController extends Crudable {
         foreach($page->tags as $tag) {
             $html_tag = htmlspecialchars((string)$tag);
             $url_tag = urlencode((string)$tag);
-            $nav .= "<a href=\"".__APP_SETTINGS__['Posts']['public_index']."?tag=$url_tag\">$html_tag</a>";
+            $nav .= "<a href=\"".__APP_SETTINGS__['Posts_public_index']."?tag=$url_tag\">$html_tag</a>";
         }
         if($nav) $nav = "<strong>Tags for this post</strong><nav>$nav</nav>";
         return "$footer$nav</footer>";
