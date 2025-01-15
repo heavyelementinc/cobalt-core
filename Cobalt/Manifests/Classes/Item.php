@@ -155,19 +155,19 @@ class Item implements Persistable{
         }
     }
 
-    public function get_html_tag() {
+    public function get_html_tag(array &$packages) {
         switch($this->type) {
             case ValidTypes::js:
-                return $this->get_script_tag();
+                return $this->get_script_tag($packages);
                 break;
             case ValidTypes::css:
-                return $this->get_css_tag();
+                return $this->get_css_tag($packages);
             default:
                 throw new TypeError("Unknown type. Cannot generate HTML for manifest entry");
         }
     }
 
-    public function get_script_tag() {
+    public function get_script_tag(&$packages) {
         $module = "";
         if($this->module) $module = " type=\"module\"";
         $registered = "";
@@ -175,13 +175,17 @@ class Item implements Persistable{
 
         $version = "";
         if($this->version > 1) $version = "v$this->version/";
-        return "<script src=\"/core-content/js/$version"."$this->href?{{versionHash}}\"$module"."$registered></script>";
+        $pkg = "/core-content/js/$version"."$this->href";
+        // header("Link: <$pkg?".__APP_SETTINGS__['version'].">; rel=preload; as=script", false);
+        return "<script src=\"$pkg?{{versionHash}}\"$module"."$registered></script>";
     }
 
-    public function get_css_tag() {
+    public function get_css_tag(&$packages) {
         $version = "";
         if($this->version > 1) $version = "v$this->version/";
-        return "<link rel=\"stylesheet\" href=\"/core-content/css/$version"."$this->href?{{versionHash}}\">";
+        $pkg = "/core-content/css/$version"."$this->href";
+        // header("Link: <$pkg?".__APP_SETTINGS__['version'].">; rel=style; as=script", false);
+        return "<link rel=\"stylesheet\" href=\"$pkg?{{versionHash}}\">";
     }
 
     public function read_content() {

@@ -8,6 +8,7 @@ use \Cache\Manager as CacheManager;
 class ManifestManager {
     protected array $css = [];
     protected array $js = [];
+    protected array $packages = [];
 
     function get_tags(ValidTypes $type, string $context, bool $shouldCache = false) {
         $tags = [
@@ -28,7 +29,7 @@ class ManifestManager {
             if($package->get_append()) $target = "end";
             
             if($shouldCache) $cache[$target] .= $package->read_content();
-            else $tags[$target] .= $package->get_html_tag();
+            else $tags[$target] .= $package->get_html_tag($this->packages);
         }
 
         $cache_details = $this->get_cache_details($type, $context);
