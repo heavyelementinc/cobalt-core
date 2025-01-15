@@ -18,7 +18,7 @@ if(__APP_SETTINGS__['Posts_default_enabled']) {
         $address = __APP_SETTINGS__['Posts_public_index'];
         $length = strlen($address) - 1;
         if($address[$length] === "/") $address = substr($address, 0, -1);
-        Route::get("$address.xml", "Posts@rss_feed");
+        Route::get("$address.xml", "\\Cobalt\\Pages\\Controllers\\Posts@rss_feed");
     }
     Route::get(__APP_SETTINGS__['Posts_public_index'], "\\Cobalt\\Pages\\Controllers\\Posts@posts_landing", __APP_SETTINGS__['Posts_public_index_options']);
     

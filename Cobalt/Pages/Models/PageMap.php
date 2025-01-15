@@ -531,7 +531,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
             $follow_link = " &middot; <action-menu class=\"rss-feed-link button\" title=\"Follow\" icon=\"rss\">";
             $follow_link.= "&nbsp;Follow";
-            $follow_link.= "<option onclick=\"copyToClipboard('".server_name().route("Posts@rss_feed")."', 'Copied the link to your clipboard. Now paste this into your favorite RSS reader!')\" target=\"_blank\" icon=\"rss\">RSS Feed<br><small style=\"font-weight: normal;display: block;white-space: pre-wrap;\">This will copy our RSS feed link to your clipboard. You can then paste the link into your favorite RSS reader!</small></option>";
+            $follow_link.= "<option onclick=\"copyToClipboard('".server_name().route("\\Cobalt\\Pages\\Controllers\\Posts@rss_feed")."', 'Copied the link to your clipboard. Now paste this into your favorite RSS reader!')\" target=\"_blank\" icon=\"rss\">RSS Feed<br><small style=\"font-weight: normal;display: block;white-space: pre-wrap;\">This will copy our RSS feed link to your clipboard. You can then paste the link into your favorite RSS reader!</small></option>";
 
             $socials = ["SocialMedia_email","SocialMedia_mastodon","SocialMedia_facebook","SocialMedia_instagram","SocialMedia_twitter"];
             foreach($socials as $platform) {

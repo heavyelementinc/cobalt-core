@@ -239,8 +239,7 @@ class Route {
         $nat_order = count($GLOBALS['ROUTE_TABLE'][$ROUTE_TABLE_ADDRESS][$method]);
         $controller = $route->get_controller();
         $real_path = $route->get_real_path();
-
-        $ROUTE_TABLE[$ROUTE_TABLE_ADDRESS][$method][$regex] = [
+        $details = [
             // Request
             'original_path' => $route->get_path(),
             'real_path' => $real_path,
@@ -270,6 +269,8 @@ class Route {
             'csrf_required' => $route->get_csrf_required(),
             'require_session' => $route->get_require_session(),
         ];
+        
+        $ROUTE_TABLE[$ROUTE_TABLE_ADDRESS][$method][$regex] = $details;
 
         if(!key_exists($controller, $GLOBALS['ROUTE_LOOKUP_CACHE'])) {
             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controller] = $real_path;

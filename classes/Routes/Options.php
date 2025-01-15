@@ -266,6 +266,22 @@ class Options implements Iterator, JsonSerializable {
             $array[$key] = $value;
         }
         return $array;
+        // return [
+        //     'original_path' =>   $this->get_path(),
+        //     'real_path' =>       $this->get_real_path(),
+        //     'real_regex' =>      $this->get_regex(),
+        //     'var_names' =>       $this->get_var_names(),
+        //     'controller' =>      $this->get_controller(),
+        //     'handler' =>         $this->get_handler(),
+        //     'navigation' =>      $this->get_navigation(),
+        //     'sitemap' =>         $this->get_sitemap(),
+        //     'cache_control' =>   $this->get_cache_control(),
+        //     'unread' =>          $this->get_unread(),
+        //     'permission' =>      $this->get_permission(),
+        //     'groups' =>          $this->get_groups(),
+        //     'csrf_required' =>   $this->get_csrf_required(),
+        //     'require_session' => $this->get_require_session(),
+        // ];
     }
 
     public function current(): mixed {
