@@ -23,6 +23,7 @@ chip-nav {
             border-right: var(--tab-nav--border);
             gap: 0;
             a {
+                --_anchor-visited-color: var(--anchor-element-color);
                 border-left: unset;
                 border-right: 1px solid transparent;
                 /* border-top: var(--project-color-table-border); */

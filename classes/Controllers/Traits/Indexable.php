@@ -383,7 +383,7 @@ trait Indexable {
     final protected function get_filterable(string $field, array $directives) {
         $index = $directives['index'] ?? [];
         $filterable = $index['filterable'] ?? false;
-        if(is_callable($filterable)) $filterable = $filterable($field, $directives);
+        if(is_callable($filterable)) $filterable = $filterable($field, $directives, $this->filterableFields);
 
         if($filterable === true) {
             $this->filterableFields[$field] = $this->schema->{$field}

@@ -2,6 +2,10 @@
     --admin-panel-width: 200px;
 }
 
+body > header {
+    display: none;
+}
+
 .admin-panel body {
     display: grid;
     grid-template-columns: 200px 1fr;
@@ -78,7 +82,7 @@
     }
 
     .settings-panel--footer {
-        /* position: absolute; */
+        position: fixed;
         bottom: 0;
         left: 0;
         color: var(--neutral-color-5-fg);
@@ -90,6 +94,9 @@
         width: var(--admin-panel-width);
         padding: 5px 5px 2px;
         box-sizing: border-box;
+        
+        
+        
         &:empty {
             display: none;
         }

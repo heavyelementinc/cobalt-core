@@ -12,6 +12,11 @@ ul.list-panel {
         flex-wrap: wrap;
         padding: 1rem;
         background: var(--project-color-table-bg-odd);
+        max-width: 100%;
+        
+        
+        
+        
         &:nth-of-type(odd) {
             background: var(--project-color-table-bg-even);
         }

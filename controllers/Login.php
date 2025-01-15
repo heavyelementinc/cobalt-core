@@ -27,17 +27,19 @@ class Login {
             return $result;
         }
         
-        // Now it's time to
-        // determine what we should be doing. If we're on the login page, 
-        // redirect the user to "/admin" otherwise refresh the page
+        // Now it's time to determine what we should be doing. If we're on the 
+        // login page, redirect the user to "/admin" otherwise refresh the page
         $redirect = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
         if (!$redirect) $redirect = "/";
         if ($redirect === app("Auth_login_page") && has_permission('Admin_panel_access')) {
             // If the user has admin panel privs, we redirect them there
             $redirect = app("Admin_panel_prefix") . "/";
+            http_response_code(200);
+            redirect("$redirect");
+            return;
         }
         http_response_code(200);
-        header("X-Redirect: $redirect");
+        header("X-Refresh: @now");
         return $result;
     }
 

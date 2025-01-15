@@ -36,7 +36,7 @@ button[link] {
     font-weight: bold;
     &:visited {
         color: var(--_anchor-visited-color, var(--font-body-color));
-        color: color-mix(in hsl, var(--_anchor-element-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
+        color: color-mix(in hsl, var(--_anchor-visited-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
     }
     &:hover {
         color: var(--_anchor-hover-color, var(--font-body-color));
@@ -94,7 +94,7 @@ article {
     container-type: inline-size;
 }
 
-ul[class]:not(.columnated) {
+ul[class]:not(.columnated, .blockeditor--nestedlist) {
     list-style: none;
     margin: 0;
     padding: 0;

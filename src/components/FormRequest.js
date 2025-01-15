@@ -14,7 +14,7 @@
 class NewFormRequest extends HTMLElement {
     constructor() {
         super();
-        this.validAutoSaveValues = ['false', 'none', 'element', 'field', 'autosave', 'fieldset', 'form'];
+        this.validAutoSaveValues = ['false', 'none', 'element', 'field', 'autosave', 'fieldset', 'form', 'enter'];
         
         this.abort = () => {}; // Call to abort request
         this.getMethods = ["GET", "NAVIGATE"];
@@ -26,6 +26,10 @@ class NewFormRequest extends HTMLElement {
         this.originalState = {};
         this.childrenReady = false;
         this.childWebComponentPromises = [];
+        this.enterButtonFunction = e => {
+            if(!['Enter', 'Return'].includes(e.key)) return;
+            this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element: e.target}}));
+        }
         this.addEventListener("clearall", () => {
             this.clearAll()
         });
@@ -33,19 +37,19 @@ class NewFormRequest extends HTMLElement {
 
     async unsavedChanges() {
         return false;
-        if(["true","confirm-unsaved",null].includes(this.getAttribute("confirm-unsaved")) == false) return false;
-        if(this.childrenReady === false) return false;
-        const currentValue = await this.getValue();
-        for(const i in currentValue) {
-            if(i in this.originalState === false) return true;
-            if(this.originalState[i] !== currentValue[i]) return true;
-        }
-        return false;
+        // if(["true","confirm-unsaved",null].includes(this.getAttribute("confirm-unsaved")) == false) return false;
+        // if(this.childrenReady === false) return false;
+        // const currentValue = await this.getValue();
+        // for(const i in currentValue) {
+        //     if(i in this.originalState === false) return true;
+        //     if(this.originalState[i] !== currentValue[i]) return true;
+        // }s
+        // return false;
     }
 
     connectedCallback() {
         this.initSubmissionListeners();
-        this.initSubmitButton();
+        // this.initSubmitButton();
         let defaultValue = "field";
         if(this.getMethods.includes(this.method)) defaultValue = "none";
         if(!this.submitButton && !this.validAutoSaveValues.includes(this.autoSave)) this.autoSave = defaultValue; // Default forms without a save button to autosave
@@ -227,8 +231,9 @@ class NewFormRequest extends HTMLElement {
     }    
 
     initSubmissionListeners() {
-        // this.initSubmitButton();
+        this.initEnterSaveListener();
         this.initAutoSaveListeners();
+        this.initSubmitButton();
     }
 
     initSubmitButton() {
@@ -255,6 +260,11 @@ class NewFormRequest extends HTMLElement {
         }
     }
 
+    initEnterSaveListener() {
+        if(this.autoSave !== "enter") return;
+        document.addEventListener("keypress", this.enterButtonFunction);
+    }
+
     async buildSubmission(event) {
         this.fieldsRequiringFeedback = [];
         let target = event.detail?.element || event.target || event.currentTarget || event.srcElement;
@@ -279,6 +289,7 @@ class NewFormRequest extends HTMLElement {
                 this.addElementToFeedbackList(fieldset);
                 break;
             case "form":
+            case "enter":
             default:
                 const val = await this.getValue();
                 submit = val;
@@ -404,6 +415,7 @@ class NewFormRequest extends HTMLElement {
         });
         this.feedbackTracker = [];
         this.fieldsRequiringFeedback = [];
+        document.removeEventListener("keypress", this.enterButtonFunction);
     }
 
     get autoSave() {

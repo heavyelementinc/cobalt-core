@@ -50,6 +50,10 @@
             & .author-name{
                 justify-content: center;
             }
+            @media only screen and (max-width: 35em) {
+                width:100%;
+                padding: 1em;
+            }
         }
     }
     &.direction--row-reverse {
@@ -188,7 +192,13 @@
     /* width: 100%; */
     .landing-main--content {
         width: var(--project-landing-page-content-width);
-        margin: 0 auto;
+        margin: 2em auto;
+        
+        
+        
+        
+        
+        
         @media only screen and (max-width: 885px) {
             width: 100%;
         }
@@ -431,9 +441,7 @@ li ul.blockeditor--nestedlist {
         justify-content: center;
     }
 
-    .landing-main--title-container {
-
-    }
+    .landing-main--title-container {width: 100%;}
 
     .landing-splash--type-float.landing-main--splash {
         flex-direction: column;
