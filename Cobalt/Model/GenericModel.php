@@ -8,9 +8,12 @@ use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
+use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\Traits\Prototypable;
+use DateTime;
 use Iterator;
 use JsonSerializable;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
@@ -153,5 +156,21 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     #[Prototype]
     protected function getName() {
         return substr($this->name_prefix,0,-1);
+    }
+
+    /************** ARCHIVAL STUFF **************/
+    public function __isArchived(UTCDateTime|null $date = null):bool {
+        $archived_time = $this->__archived;
+        if(!$archived_time) return false;
+        $archived_time = $archived_time->getValue();
+        if($archived_time instanceof DateType || $archived_time instanceof UTCDateTime) {
+            $archived_time = $archived_time->toDateTime()->format("u");
+        } else {
+            return false;
+        }
+        if($date === null) $date = (new DateTime())->format("u");
+        else if($date instanceof UTCDateTime) $date = $date->toDateTime()->format("u");
+
+        return $archived_time < $date;
     }
 }

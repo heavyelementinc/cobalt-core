@@ -9,7 +9,7 @@ class AsyncButton extends CustomButton{
         this.addEventListener("click", e => {
             this.submit();
         })
-        if(this.type !== "multidelete") return;
+        if(this.type !== "batch-action") return;
         this.setDisabledState();
         const checkboxes = document.querySelectorAll(this.checkmarkQuery);
         for(const check of checkboxes) {
@@ -36,7 +36,7 @@ class AsyncButton extends CustomButton{
     get value() {
         let val = {};
         switch(this.type) {
-            case "multidelete":
+            case "batch-action":
                 const id_boxes = document.querySelectorAll(this.checkmarkQuery);
                 val._ids = [];
                 for(const box of id_boxes) {

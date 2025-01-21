@@ -1,5 +1,13 @@
 :root {
     font-size: 14pt;
+    --margin-xxs: 0.1rem;
+    --margin-xs: 0.3rem;
+    --margin-s: 0.5rem;
+    --margin-m: 1rem;
+    --margin-l: 1.5rem;
+    --margin-x1: 2rem;
+    --margin-xx1: 4rem;
+    --margin-xxx1: 6rem;
 }
 
 *,

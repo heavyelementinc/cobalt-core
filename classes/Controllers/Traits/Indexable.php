@@ -4,9 +4,11 @@ namespace Controllers\Traits;
 
 use Cobalt\SchemaPrototypes\Basic\Anchor;
 use Cobalt\Maps\GenericMap;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
 use Exceptions\HTTP\Error;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 
@@ -64,7 +66,8 @@ trait Indexable {
         // if(!$this->queryParameters['sort']) return "";
         $arr = [
             QUERY_PARAM_SORT_NAME => $_GET[QUERY_PARAM_SORT_NAME],
-            QUERY_PARAM_SORT_DIR => $_GET[QUERY_PARAM_SORT_DIR]
+            QUERY_PARAM_SORT_DIR => $_GET[QUERY_PARAM_SORT_DIR],
+            QUERY_PARAM_ARCHIVED_DISPLAY => $_GET[QUERY_PARAM_ARCHIVED_DISPLAY],
         ];
         if(isset($_GET[QUERY_PARAM_SEARCH])) $arr[QUERY_PARAM_SEARCH] = $_GET[QUERY_PARAM_SEARCH];
         if($as_array == true) return $arr;
@@ -118,7 +121,7 @@ trait Indexable {
         // Let's check if the filter param is set
         $name = $_GET[QUERY_PARAM_FILTER_NAME];
         $search = $_GET[QUERY_PARAM_SEARCH];
-
+        $archived = $_GET[QUERY_PARAM_ARCHIVED_DISPLAY];
         // Return the 'default query' if it's not set
         if(isset($name)) {
             // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
@@ -160,6 +163,15 @@ trait Indexable {
                 ],
                 'sort' => [
                     'score' => ['$meta' => 'textScore']
+                ]
+            ]);
+        }
+
+        if(!filter_var($archived, FILTER_VALIDATE_BOOL)) {
+            $this->add_filter_params([
+                '$or' => [
+                    [CRUDABLE_ARCHIVED_FIELD => ['$exists' => false]],
+                    [CRUDABLE_ARCHIVED_FIELD => ['$exists' => true,'$gt' => new UTCDateTime]]
                 ]
             ]);
         }
@@ -212,6 +224,9 @@ trait Indexable {
     function get_table_row(GenericMap $doc, &$html) {
         $row_details = $this->getRowDetails($doc);
         $row_class = (isset($row_details['row_class'])) ? " class=\"$row_details[row_class]\"" : "";
+        if($doc->__isArchived()) {
+            $row_class .= " archived";
+        }
         $row_style = (isset($row_details['row_style'])) ? " style=\"$row_details[row_style]\"" : "";
         $html .= "<flex-row$row_class"."$row_style>";
 
@@ -300,8 +315,10 @@ trait Indexable {
         $prev->setText("<i name=\"chevron-left\"></i>");
 
         $multidelete_button = "";
+        $filterable_content = "";
         if($this->schema->__get_index_checkbox_state()) {
-            $multidelete_button = "<async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\" native><i name=\"delete\"></i></async-button>";
+            $multidelete_button = "<async-button type=\"batch-action\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\" native><i name=\"delete\"></i></async-button>";
+            $filterable_content = "<form><async-button type=\"batch-action\" method=\"DELETE\" action=\"".route(self::className()."@__archive_batch")."\" title=\"Archive\" native><i name=\"archive\"></i></async-button> <label><input type=\"checkbox\"".((filter_var($_GET[QUERY_PARAM_ARCHIVED_DISPLAY], FILTER_VALIDATE_BOOL)) ? "checked=\"checked\"" : "")." name=\"".QUERY_PARAM_ARCHIVED_DISPLAY."\" onchange='submit()'> Show Archived</label></form>";
         }
 
         return [
@@ -310,7 +327,7 @@ trait Indexable {
             'page' => $current_page,
             'search' => $this->get_search_field(),
             'multidelete_button' => $multidelete_button,
-            'filters' => "<inline-menu icon=\"filter-variant\">".implode(" ",$this->filterableFields) ."</inline-menu>",
+            'filters' => "<inline-menu icon=\"filter-variant\">$filterable_content<br>".implode(" ",$this->filterableFields) ."</inline-menu>",
         ];
     }
 

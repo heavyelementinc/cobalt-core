@@ -92,6 +92,9 @@ flex-table{
         &:hover flex-cell  a {
             text-decoration: underline;
         }
+        &[archived] {
+            text-decoration: line-through;
+        }
     }
     & flex-cell,
     & flex-header,

@@ -304,8 +304,11 @@ trait IndexableModel {
         $prev->setText("<i name=\"chevron-left\"></i>");
 
         $multidelete_button = "";
+        $filterable_content = "";
         if($this->schema->__get_index_checkbox_state()) {
-            $multidelete_button = "<async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\" native><i name=\"delete\"></i></async-button>";
+            $multidelete_button = "<async-button type=\"batch-action\" method=\"DELETE\" action=\"".route(self::className()."@__archive_batch")."\" title=\"Archive\" native><i name=\"archive\"></i></async-button> <async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\" native><i name=\"delete\"></i></async-button>";
+            $filterable_content = "<form><label><input type=\"checkbox\"".((filter_var($_GET[QUERY_PARAM_ARCHIVED_DISPLAY], FILTER_VALIDATE_BOOL)) ? "checked=\"checked\"" : "")." name=\"".QUERY_PARAM_ARCHIVED_DISPLAY."\" onchange='submit()'> Show Archived</label></form>";
+
         }
 
         return [
@@ -314,7 +317,7 @@ trait IndexableModel {
             'page' => $current_page,
             'search' => $this->get_search_field(),
             'multidelete_button' => $multidelete_button,
-            'filters' => "<inline-menu icon=\"filter-variant\">".implode(" ",$this->filterableFields) ."</inline-menu>",
+            'filters' => "<inline-menu icon=\"filter-variant\">$filterable_content".implode(" ",$this->filterableFields) ."</inline-menu>",
         ];
     }
 

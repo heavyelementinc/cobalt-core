@@ -84,6 +84,21 @@ abstract class ModelController {
                 $options['destroy'] ?? [],
                 "route_details_destroy")
             );
+            Route::delete("$mutant/archive/batch", "$class@__batch_archive", static::route_details(
+                [
+                    'permission' => "CRUDControllerPermission",
+                ],
+                $options['destroy'] ?? [],
+                "route_details_destroy")
+            );
+            Route::delete("$mutant/archive/{id}", "$class@__archive", static::route_details(
+                [
+                    'permission' => "CRUDControllerPermission",
+                ],
+                $options['destroy'] ?? [],
+                "route_details_destroy")
+            );
+            
             set_crudable_flag($class, CRUDABLE_CONFIG_APIV1);
         }
 

@@ -624,7 +624,21 @@ class WebHandler implements RequestHandler {
 
         $this->mainTemplateFilename = $candidates;
 
-        return file_get_contents($candidates);
+        $ext = strtolower(pathinfo($$candidates, PATHINFO_EXTENSION));
+        switch($ext) {
+            case "php":
+                // Capture the PHP file's output
+                ob_start(null);
+                include $candidates;
+                $template = ob_get_contents();
+                if(!$template) throw new HTTPException("Failed to load the specified PHP template");
+                ob_end_clean();
+                break;
+            default:
+               $template = file_get_contents($candidates);
+               break;
+        }
+        return $template;
     }
 
     function flush_body_template() {

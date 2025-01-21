@@ -1,7 +1,3 @@
-<?php
-
-use Masterminds\HTML5;
-?>
 <!doctype html>
 <html lang="en-US" class="{{context.html_class}} {{app.html_tag_classes}}">
 <script>

@@ -299,3 +299,7 @@ function is_bot(?string $useragent = null) {
     if(!isset($useragent)) return false;
     return (preg_match('/bot|crawl|curl|dataprovider|search|get|spider|find|java|majesticsEO|google|yahoo|teoma|contaxe|yandex|libwww-perl|facebookexternalhit|mediapartners/i', $useragent));
 }
+
+function is_cli() {
+    return http_response_code() === false;
+}

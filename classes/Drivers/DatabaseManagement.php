@@ -104,6 +104,7 @@ class DatabaseManagement {
     function preserveMap(GenericMap $map) {
         // Let's get the actual values from the database
         $__dataset = $map->jsonSerialize();
+        $__dataset['_id'] = $map->_id;
         foreach($map->readSchema() as $key => $value) {
             // And then lets overwrite them with the <Type>Result value
             $val = $map->{$key};
