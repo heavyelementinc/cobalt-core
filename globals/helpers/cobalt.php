@@ -76,6 +76,7 @@ function session_exists() {
  * @return bool true if the user has permission, false otherwise
  */
 function has_permission($perm_name, $group = null, ?UserPersistance $user = null, $throw_no_session = true):bool {
+    if(is_cli()) return true;
     return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 
