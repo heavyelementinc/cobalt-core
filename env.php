@@ -19,7 +19,6 @@
  */
 
 use Cobalt\UTMTracker\UTMHandler;
-use Masterminds\HTML5;
 
 ob_start();
 const DB_BENCHMARK = 'db_requests';
@@ -37,6 +36,8 @@ require_once __DIR__ . "/globals/global_exceptions.php";
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
 
+require_once __ENV_ROOT__ . "/globals/locales/en_us.php";
+
 // Establish our app root
 $app_root = "";
 // Go up one directory so we're not in the public space
@@ -50,6 +51,8 @@ else {
 }
 
 define("__APP_ROOT__", realpath($app_root));
+$app_locale = __APP_ROOT__ . "/locales/en_us.php";
+if(file_exists($app_locale)) require_once $app_locale;
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
 // Let's make sure our environment is configured properly.

@@ -14,7 +14,7 @@
     <meta name="version" content='{{versionHash}}'>
     <meta name="theme-color" content="{{app.color_branding}}">
     <meta name="mitigation" content="@csrf_get_token();">
-    <meta name="engine" content="Powered by Heavy Element's Cobalt Engine" href="https://heavyelement.io/">
+    <meta name="engine" content="<?= sprintf(BODY_CONTENT_ENGINE_CREDIT) ?>" href="https://heavyelement.com/">
     {{!ai_scraping}}
 
     @maybe_with("$og_template");
@@ -39,16 +39,11 @@
     <a id="sr-skip-to-content" href="#{{main_id}}" class="sr-only">Skip to content</a>
     <div id="sr-announce" class="sr-only" aria-live="assertive"></div>
     <noscript>
-        <div>
-            &quot;{{app.app_name}}&quot; <strong>requires</strong> JavaScript. Basic functionality <strong>will not work</strong>
-            without JavaScript enabled. Please enable JavaScript or upgrade your browser.
-        </div>
-        <div>JavaScript allows us to deliver a better, more performant user experience. Don't believe us? Check out
-        our <a href="https://heavyelement.io/news/cobalt-performance">blog post on Cobalt application performance.</a></div>
+        <?= sprintf(BODY_CONTENT_NO_SCRIPT_PROMPT) ?>
         {{!noscript_binding_after}}
     </noscript>
     <button id="nav-menu-spawn" aria-pressed="false"
-        aria-controls="app-header" aria-expanded="false" 
+        aria-controls="app-header" aria-expanded="false"
     >
         <span class="visually-hidden">Menu</span>
         <i name="menu"></i>

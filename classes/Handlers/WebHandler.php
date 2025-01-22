@@ -624,7 +624,7 @@ class WebHandler implements RequestHandler {
 
         $this->mainTemplateFilename = $candidates;
 
-        $ext = strtolower(pathinfo($$candidates, PATHINFO_EXTENSION));
+        $ext = strtolower(pathinfo($candidates, PATHINFO_EXTENSION));
         switch($ext) {
             case "php":
                 // Capture the PHP file's output
