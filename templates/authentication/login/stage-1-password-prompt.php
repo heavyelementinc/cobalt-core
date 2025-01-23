@@ -1,0 +1,19 @@
+<section id="login-form-container" class="login-form-container">
+    <section class="login-hero-sidebar" style="background-image: url('{{app.login-hero-sidebar}}')"></section>
+    <h1>Welcome</h1>
+    {{!user.name.tag()}}
+    <div class="hbox" style="justify-content: flex-end">
+        <a href="/login/?reset">Not you?</a>
+    </div>
+    <form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" @csrf_attribute();>
+        <fieldset>
+            <input type="password" name="password" placeholder="Password">
+
+            <input type="hidden" name="stay_logged_in" value="false">
+            <label><input-switch name="stay_logged_in" tiny></input-switch> Stay logged in</label>
+            <span class="error"></span>
+            <button type="submit">Sign In</button>
+            {{!create_account}}
+        </fieldset>
+    </form-request>
+</section>

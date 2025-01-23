@@ -125,6 +125,9 @@ header nav a.navigation--current {
 }
 
 .cobalt-user--profile-display img {
+    color: transparent;
+    background-image: url('/core-content/img/unknown-user.thumb.jpg');
+    background-size: cover;
     display: inline-block;
     height: 2rem;
     width: 2rem;

@@ -22,6 +22,9 @@ const SUBGROUP_DEV_JS_PACKAGE = "JavaScript Packaging";
 const SUBGROUP_DEV_CSS_PACKAGE = "CSS Packaging";
 
 
+const COBALT_LOGIN_TYPE_LEGACY = 0;
+const COBALT_LOGIN_TYPE_STAGES = 1;
+
 const DEFAULT_DEFINITIONS = [
     /** BASIC */
         /* Provide a doman name that we expect to be listening for. This will later 
@@ -1422,6 +1425,9 @@ const DEFAULT_DEFINITIONS = [
                     "Auth_user_accounts_enabled" => ["is" => true]
                 ]
             ]
+        ],
+        "Auth_login_mode" => [
+            "default" => COBALT_LOGIN_TYPE_STAGES,
         ],
         "Auth_enable_insecure_logins" => [
             "default" => true

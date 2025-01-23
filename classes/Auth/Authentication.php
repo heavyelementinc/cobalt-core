@@ -12,10 +12,20 @@ use Cobalt\Token;
 use DateTime;
 use Exception;
 use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Unauthorized;
 use Mail\SendMail;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use SensitiveParameter;
+const SESSION_STAGE_STATE = "__auth_stage";
+const SESSION_USER_ID = "__user_id";
+const SESSION_STAY_LOGGED_IN = "__stay_logged_in";
+const SESSION_TFA_STATE = "__tfa_state";
+const SESSION_RESUME_PARAM = "resume";
+const TFA_STATE_DISABLED = 0;
+const TFA_STATE_ENABLED = 1;
 
 class Authentication {
     public $permissions = null;
@@ -57,24 +67,29 @@ class Authentication {
         }
 
         $login_state = 10;
-        if($user->tfa?->enabled) $login_state = 0;
+        if($user->tfa?->enabled === TFA_STATE_ENABLED) $login_state = 0;
 
+        return $this->store_user_session($user['_id'], $stay_logged_in, $login_state);
+    }
+
+    private function store_user_session(ObjectId $user_id, bool $stay_logged_in, $tfa_state) {
         /** Update the user's session information */
-        $result = $this->session->login_session($user['_id'], $stay_logged_in, $login_state);
+        $result = $this->session->login_session($user_id, $stay_logged_in, $tfa_state);
 
         /** If the session couldn't be updated, we throw an error */
-        if (!$result) throw new \Exceptions\HTTP\BadRequest("The session could not be updated", $stock_message);
+        if (!$result) throw new \Exceptions\HTTP\BadRequest("The session could not be updated", "Invalid credentials");
 
         // If $loginState === 0, send an update() for TFA login
 
         return [
-            'login' => $login_state
+            'login' => $tfa_state
         ];
     }
 
     /** Our user logout routine */
     function logout_user() {
         // $this->send_session_delete();
+        unset($_SESSION[SESSION_USER_ID], $_SESSION[SESSION_STAGE_STATE], $_SESSION[SESSION_STAY_LOGGED_IN], $_SESSION[SESSION_TFA_STATE]);
         return $this->session->logout_session();
     }
 
@@ -149,30 +164,6 @@ class Authentication {
         
     }
 
-    static function handle_login() {
-        $auth = null;
-        $stock_message = "Request is missing valid credentials";
-        // Check if the authentication values exist
-        if (app('API_authentication_mode') === "headers") {
-            try{
-                $auth = getHeader("Authentication");
-            } catch (Exception $e) {
-                throw new BadRequest("No 'Authentication' header found.", $stock_message);
-            }
-            // Decode and split the credentials
-            $credentials = explode(":", base64_decode($auth));
-        } else {
-            // if (!key_exists('Authentication', $_POST)) throw new BadRequest("The POST body is missing the 'Authentication' field", $stock_message);
-            // $auth = $_POST['Authentication'];
-            $credentials = [$_POST['username'], $_POST['password']];
-        }
-
-        // Log in the user using the credentials provided. If invalid credentials
-        // then login_user will throw an exception.
-        $result = $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
-        return $result;
-    }
-
     static function handle_email_login($email) {
         $uname = $email;
         if(!$uname) throw new BadRequest("Username field was not specified","Username is missing");
@@ -205,7 +196,26 @@ class Authentication {
         $email->send($user['email'],"Login to " . app("app_short_name"));
     }
 
-    static function generate_login_form():array {
+    function generate_login_form():array {
+        if(__APP_SETTINGS__['Auth_login_mode'] === COBALT_LOGIN_TYPE_STAGES) {
+            if(isset($_GET['reset'])) {
+                $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY;
+                $_SESSION[SESSION_USER_ID] = null;
+            }
+            switch($_SESSION[SESSION_STAGE_STATE] ?? AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY) {
+                case AUTH_STAGE_0_USER_ACCOUNT_VERIFIED:
+                    $this->header_reload_command($this->auth_stage_login_check());
+                    exit;
+                case AUTH_STAGE_1_USER_AUTHENTICATION:
+                    return $this->login_stage_1_authenticate();
+                case AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY:
+                    return $this->login_stage_2_tfa();
+                case AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY:
+                default:
+                    return $this->login_stage_0_discover_user();
+            }
+            return [];
+        }
         add_vars(['title' => 'Login']);
         $login = "/authentication/login.html";
         if (!key_exists('HTTPS', $_SERVER) && !app("Auth_enable_insecure_logins")) {
@@ -226,6 +236,138 @@ class Authentication {
 
         return [$vars ?? [], $login];
     }
+
+    private function login_stage_0_discover_user():array {
+        if(!is_secure() && !__APP_SETTINGS__['Auth_enable_insecure_logins']) {
+            throw new BadRequest(AUTH_PROCESS_ERROR__INSECURE_LOGIN_DISALLOWED, true);
+        }
+
+        $view = "/authentication/login/stage-0-discover-user.php";
+        $vars = [];
+        return [$vars, $view];
+    }
+    private function login_stage_1_authenticate():array {
+        $view = "/authentication/login/stage-1-password-prompt.php";
+        if(__APP_SETTINGS__['Auth_login_via_email_token']) {
+            if(app("Mail_username") && app("Mail_password") && app("Mail_smtp_host")) {
+                $view = "/authentication/login/stage-1-password-or-email.php";
+            }
+        }
+        $vars = ['user' => (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]))];
+        return [$vars, $view];
+    }
+    private function login_stage_2_tfa():array {
+        $view = "/authentication/login/stage-2-tfa.php";
+        $vars = [];
+        return [$vars, $view];
+    }
+
+    function handle_login() {
+        if(__APP_SETTINGS__['Auth_login_mode'] === COBALT_LOGIN_TYPE_STAGES) {
+            switch($_SESSION[SESSION_STAGE_STATE] ?? AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY) {
+                case AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY:
+                    return $this->auth_stage_0_discover_user($_POST["username"]);
+                case AUTH_STAGE_1_USER_AUTHENTICATION:
+                    return $this->auth_stage_1_authenticate($_POST["password"]);
+                case AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY:
+                    return $this->auth_stage_2_tfa($_POST["2fa"]);
+                default:
+                    header("X-Redirect: /login/?referer=".urlencode($_SERVER['HTTP_REFERER']));
+            }
+            return;
+        }
+        $auth = null;
+        $stock_message = "Request is missing valid credentials";
+        // Check if the authentication values exist
+        if (app('API_authentication_mode') === "headers") {
+            try{
+                $auth = getHeader("Authentication");
+            } catch (Exception $e) {
+                throw new BadRequest("No 'Authentication' header found.", $stock_message);
+            }
+            // Decode and split the credentials
+            $credentials = explode(":", base64_decode($auth));
+        } else {
+            // if (!key_exists('Authentication', $_POST)) throw new BadRequest("The POST body is missing the 'Authentication' field", $stock_message);
+            // $auth = $_POST['Authentication'];
+            $credentials = [$_POST['username'], $_POST['password']];
+        }
+
+        // Log in the user using the credentials provided. If invalid credentials
+        // then login_user will throw an exception.
+        $result = $GLOBALS['auth']->login_user($credentials[0], $credentials[1], $_POST['stay_logged_in']);
+        return $result;
+    }
+
+    private function auth_stage_0_discover_user(string $username_or_email_address) {
+        $ua = new UserCRUD();
+        $result = $ua->getUserByUnameOrEmail($username_or_email_address);
+        if(!$result) throw new NotFound(AUTH_PROCESS_ERROR__USER_NOT_FOUND, true);
+        http_response_code(200);
+        $_SESSION[SESSION_USER_ID] = (string)$result->_id;
+        $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_1_USER_AUTHENTICATION;
+        $this->header_reload_command();
+    }
+
+    private function auth_stage_1_authenticate(string $password) {
+        if(!$password) {
+            update(".error", ['innerText' => AUTH_PROCESS_ERROR__PASSWORD_CANT_BE_BLANK]);
+            return;
+        }
+        // Let's load our user account again
+        $ua = new UserCRUD();
+        $result = $ua->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]));
+        if(!$result) throw new NotFound("User no longer exists", AUTH_PROCESS_ERROR__USER_NOT_FOUND);
+
+        // Let's verify our password
+        $check = password_verify($password, (string)$result->pword);
+        if(!$check) {
+            // If the password is wrong, let's tell the user by updating the client
+            update(".error", ['innerText' => AUTH_PROCESS_ERROR__PASSWORD_HASH_FAIL]);
+            return;
+        }
+
+        // If we're here, we know we've verified our password.
+
+        // Let's store if we want to keep our user account logged in or not
+        $_SESSION[SESSION_STAY_LOGGED_IN] = $_POST['stay_logged_in'];
+
+        // Now, let's check if TFA is enabled and check if the user has it enabled
+        if(__APP_SETTINGS__['TwoFactorAuthentication_enabled'] && $result->tfa?->enabled === true) {
+            $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY;
+        } else {
+            // Otherwise, we're logged in.
+            $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_0_USER_ACCOUNT_VERIFIED;
+
+        }
+        $this->header_reload_command($this->auth_stage_login_check());
+    }
+
+    private function auth_stage_2_tfa(string $tfa) {
+
+    }
+
+    function header_reload_command($target = null) {
+        if($target === false || $target === null) {
+            $resume = urldecode($_GET[SESSION_RESUME_PARAM]?? "") ?? $_SERVER['HTTP_REFERER'];
+            $target = "/login/?".SESSION_RESUME_PARAM."=".urlencode($resume);
+        }
+        redirect($target);
+    }
+
+    function auth_stage_login_check() {
+        // Let's check if the session is logged in
+        if($_SESSION[SESSION_STAGE_STATE] === AUTH_STAGE_0_USER_ACCOUNT_VERIFIED) {
+            // If we're logged in, we'll store the session
+            $this->store_user_session(new ObjectId($_SESSION[SESSION_USER_ID]), $_SESSION[SESSION_STAY_LOGGED_IN], $_SESSION[SESSION_TFA_STATE]);
+            $resume = ($_GET[SESSION_RESUME_PARAM]) ? $_GET[SESSION_RESUME_PARAM] : "";
+            // And lets set our target to be the resume property
+            return ($resume) ? urldecode($resume) : "/admin/";
+        }
+        return false;
+    }
+
+
 
     static function generate_onboarding_form(): array {
         return [];

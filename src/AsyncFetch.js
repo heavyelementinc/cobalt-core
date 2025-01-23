@@ -691,6 +691,9 @@ class XRefresh extends HeaderDirective {
     execute() {
         // let location = String(location)
         switch(this.tag) {
+            case "reload":
+                Location.reload();
+                break;
             case "wait":
                 new StatusMessage({message: `Refreshing in ${wait} seconds`});
             case "silent":
@@ -700,6 +703,7 @@ class XRefresh extends HeaderDirective {
                 }, wait * 1000);
             case "now":
             case "true":
+            case "async":
             default:
                 Cobalt.router.location = String(window.location);
                 break; 

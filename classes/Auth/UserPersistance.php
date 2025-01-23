@@ -54,7 +54,11 @@ class UserPersistance extends PersistanceMap {
             'name' => [
                 new FakeResult,
                 'get' => function () {
-                    if($this->fname && $this->lname) return "<span title='Username: $this->uname'>$this->fname " . $this->lname[0] . ".</span>";
+                    if($this->fname) {
+                        $lname = $this->lname[0];
+                        if($lname) $lname = " $lname.";
+                        return "<span title='Username: $this->uname'>$this->fname $lname</span>";
+                    }
                     return $this->uname;
                 },
                 'tag' => function () {
@@ -101,7 +105,14 @@ class UserPersistance extends PersistanceMap {
                     'title' => 'Email Address',
                 ]
             ],
-            'avatar' => new ImageResult,
+            'avatar' => [
+                new ImageResult,
+                'default' => [
+                    'url' => '/core-content/img/unknown-user.thumb.jpg',
+                    'height' => 250,
+                    'width' => 226
+                ]
+            ],
             'flags' => [
                 new ArrayResult,
                 // 'schema' => [

@@ -10,16 +10,21 @@ use Exceptions\HTTP\Unauthorized;
 use Exceptions\HTTP\UnknownError;
 use Mail\SendMail;
 
+
+
 class Login {
     function login_form() {
-        $vars = Authentication::generate_login_form();
+        $vars = (new Authentication)->generate_login_form();
         add_vars(['title' => "Log in", ...$vars[0]]);
-        set_template($vars[1]);
+        return view($vars[1]);
     }
 
     function handle_login() {
-        $result = Authentication::handle_login();
-
+        $result = (new Authentication)->handle_login();
+        if(__APP_SETTINGS__['Auth_login_mode'] === COBALT_LOGIN_TYPE_STAGES) {
+            // exit;
+            return;
+        }
         // If we're here, we've been logged in successfully, but we may need to
         // perform an additional level of authentcation.
         if($result['login'] === 0) {
@@ -91,7 +96,7 @@ class Login {
         add_vars([
             'title' => "Email sent"
         ]);
-        set_template("/authentication/email-sent.html");
+        return view("/authentication/email-sent.html");
     }
 
     function handle_logout() {
@@ -108,7 +113,7 @@ class Login {
         add_vars([
             'title' => 'Password Reset'
         ]);
-        set_template('/authentication/password-reset/reset-form.html');
+        return view('/authentication/password-reset/reset-form.html');
     }
 
     function api_password_reset_username_endpoint() {
@@ -156,7 +161,7 @@ class Login {
         // Present the user with a form to create a new password
         add_vars(['title' => 'Password Reset', 'token' => $check->token]);
 
-        return set_template("/authentication/password-reset/new-password-form.html");
+        return view("/authentication/password-reset/new-password-form.html");
     }
 
     function api_password_reset_password_validation($token) {

@@ -124,7 +124,11 @@ class ApiHandler implements RequestHandler {
         return $ntfy->getUnreadNotificationCountForUser();
     }
 
+    /**
+     * @param HTTPException||Error $e
+     */
     public function _public_exception_handler($e):mixed {
+        
         // $errorMessage = $e->clientMessage;
         $errorMessage = "Unknown Error";
         if(method_exists($e, "publicMessage")) $errorMessage = $e->publicMessage();
@@ -133,7 +137,7 @@ class ApiHandler implements RequestHandler {
             'error' => $errorMessage,
             'data' => $e->data,
         ];
-        if(__APP_SETTINGS__['debug_exceptions_publicly']) $this->router_result['exception'] = $e->getMessage();
+        if(__APP_SETTINGS__['debug_exceptions_publicly']) $this->router_result['exception'] = $e->getFile() . " on line ". $e->getLine() . ": " . $e->getMessage() . "\n\n". $e->getTrace();
         if($this->router_result['error'] === "Unknown Error") $this->router_result['error'] = $this->router_result['exception'];
         if (!$this->_stage_bootstrap['_stage_output']) return $this->_stage_output();
     }
