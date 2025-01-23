@@ -133,10 +133,10 @@ try {
     $context_result = $context_processor->_public_exception_handler($e);
 } catch (Exception $e) {
     ob_clean();
-    $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+    $context_result = $context_processor->_public_exception_handler($e);
 } catch (Error $e) {
     ob_clean();
-    $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+    $context_result = $context_processor->_public_exception_handler($e);
 }
 
 benchmark_end("controller_execution");
