@@ -160,7 +160,7 @@ class WebHandler implements RequestHandler {
         if(config()["mode"] === COBALT_MODE_DEVELOPMENT) {
             $embed .= "<pre class=\"error--message\">";
             if(__APP_SETTINGS__['debug_exceptions_publicly']) {
-                $embed .= $e->getMessage();
+                $embed = $e->getFile() . " on line ". $e->getLine() . ": " . $e->getMessage() . "\n\n". $e->getTraceAsString();
             } else {
                 $embed .= base64_encode($e->getMessage());
             }
