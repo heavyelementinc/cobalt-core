@@ -53,6 +53,7 @@ a.button[native],
     border-radius: var(--input-element-radius);
     font-size: 1.1rem;
     color: var(--input-element-color);
+    margin: 0 0 var(--margin-xs);
     &:hover,
     &:focus-visible,
     &:focus-within {
@@ -288,6 +289,9 @@ input-user {
         width: 100%;
     } 
     & .cobalt-user--profile-display {
+        color: transparent;
+        background-image: url('/core-content/img/unknown-user.thumb.jpg');
+        background-size: cover;
         margin-left: .5em;
         font-size: .95rem;
         & .username {

@@ -1,19 +1,19 @@
 <form-request method="PUT" action="/api/v1/me/totp/enroll">
     <fieldset id="enrollment-pane" class="cobalt-two-factor--enrollment">
-        <legend>Enroll in Two-Factor Authentication</legend>
-        <small>Scan the QR code with your TOTP App. Then generate a one-time code.</small>
+        <legend>Enroll in Two-Factor Authentication (2FA)</legend>
+        <small>Scan the QR code below with your 2FA App.</small>
         <ul class="list-panel">
             <li class="hbox">
                 <div style="align-self: flex-start;">
                     <label>Step 1</label>
-                    <small>Scan the QR code with your TOTP App<help-span value="FreeOTP+, Google Authenticator, etc"></help-span> to get started.</small>
+                    <small>Scan the QR code with your 2FA App<help-span value="Sometimes called TOTP, a 2FA app is usually installed on your phone. Options include FreeOTP and Google Authenticator"></help-span> to get started.</small>
                     <copy-span value="{{secret}}"></copy-span>
                 </div>
                 {{!qr}}
             </li>
             <li>
                 <label>Step 2</label>
-                <small>Use your TOTP app to generate a one-time password and submit it using the field below.</small>
+                <small>Use your 2FA app to generate a one-time password and submit it using the field below.</small>
                 <input name="verification" placeholder="e.g 012345">
                 <button type="submit" native>Activate 2FA</button>
             </li>

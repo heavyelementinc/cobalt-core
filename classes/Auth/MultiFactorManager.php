@@ -9,7 +9,7 @@ use RobThree\Auth\TwoFactorAuth;
 use SensitiveParameter;
 
 class MultiFactorManager {
-
+    const TOTP_MIN_BACKUPS = 4;
     function get_multifactor_enrollment(UserPersistance $user) {
 
         if(!app("TwoFactorAuthentication_enabled")) return $this->get_not_supported_stub();
@@ -42,7 +42,13 @@ class MultiFactorManager {
     }
 
     function get_already_enrolled_stub() {
-        return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>You're already enrolled in TOTP 2FA!</p><async-button link method='DELETE' action='/api/v1/me/totp/unenroll'>Remove TOTP</async-button></fieldset>";
+        $backup_warning = "";
+        $backup_count = count(session()->__dataset['tfa']['backups']);
+        $diff = self::TOTP_MIN_BACKUPS - $backup_count;
+        if($backup_count < self::TOTP_MIN_BACKUPS) {
+            $backup_warning = "<p style='background: var(--issue-color-1);color:var(--issue-color-1-fg);max-width:45ch;display: block; margin-bottom: var(--margin-m);padding: var(--margin-m);font-size: small'>".sprintf(AUTH_TOTP_CODE_CONSUMED_WARNING, $diff, plural($diff))."</p>";
+        }
+        return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>You're enrolled in TOTP 2FA!</p><async-button link method='DELETE' action='/api/v1/me/totp/unenroll'>Remove TOTP</async-button>$backup_warning</fieldset>";
     }
 
     function get_not_supported_stub() {
@@ -73,6 +79,22 @@ class MultiFactorManager {
         return $tfa->verifyCode($user->__dataset['tfa']['secret'], $passwd);
     }
 
+    function verify_backup_code(UserPersistance $user, string $backup) {
+        foreach($user->__dataset['tfa']['backups'] as $index => $hash) {
+            if(password_verify($backup, $hash)) {
+                $crud = new UserCRUD();
+                $crud->updateOne(['_id' => $user->_id], ['$pull' => ['tfa.backups' => $hash]]);
+                if(count($user->__dataset['tfa']['backups']) === 1) {
+                    $this->unenroll_user($user);
+                    redirect("/login/?reset&message=backups_exhausted");
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     function unenroll_user(UserPersistance $user) {
         $crud = new UserCRUD();
 
@@ -87,11 +109,14 @@ class MultiFactorManager {
     }
 
     function generate_backup_codes() {
-        return [
-            random_string(8, "1234567890ABCDEF-"),
-            random_string(8, "1234567890ABCDEF-"),
-            random_string(8, "1234567890ABCDEF-"),
-            random_string(8, "1234567890ABCDEF-"),
-        ];
+        $codes = [];
+        for($i = 1; $i <= self::TOTP_MIN_BACKUPS; $i++) {
+            $codes[] = $this->generate_backup_code();
+        }
+        return $codes;
+    }
+    
+    function generate_backup_code() {
+        return random_string(8, "0123456789ABCDEFGHJKLMNPRSTUVWXYZ");
     }
 }

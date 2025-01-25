@@ -1,13 +1,14 @@
 :root {
+    --media-mobile-width: 35em;
     font-size: 14pt;
     --margin-xxs: 0.1rem;
     --margin-xs: 0.3rem;
     --margin-s: 0.5rem;
     --margin-m: 1rem;
     --margin-l: 1.5rem;
-    --margin-x1: 2rem;
-    --margin-xx1: 4rem;
-    --margin-xxx1: 6rem;
+    --margin-xl: 2rem;
+    --margin-xxl: 4rem;
+    --margin-xxxl: 6rem;
 }
 
 *,
@@ -29,10 +30,14 @@ body {
     &.scroll-locked {
         overflow: hidden;
     }
+    @media only screen and (max-width: 35em) {
+        font-size: 3.5vw;
+    }
 }
 
 a,
-button[link] {
+button[link],
+help-span:where(:not(:empty)) {
     --_anchor-element-color: var(--primary-color-1);
     --_anchor-hover-color: var(--primary-color-0);
     --_anchor-active-color: var(--primary-color-2);
@@ -42,6 +47,7 @@ button[link] {
     color: color-mix(in hsl, var(--_anchor-element-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
     background-color: transparent;
     font-weight: bold;
+    cursor: pointer;
     &:visited {
         color: var(--_anchor-visited-color, var(--font-body-color));
         color: color-mix(in hsl, var(--_anchor-visited-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
@@ -355,6 +361,20 @@ td {
     .cookie-consent-true {
         cursor: pointer;
     }
+
+    @media only screen and (min-width: 35em) {
+        #cookie-consent {
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        #cookie-consent > .hbox {
+            flex-direction: column;
+        }
+    
+        #cookie-consent .cookie-consent-false {
+            padding: 0 0 2em;
+        }
+    }
 }
 
 footer {
@@ -393,6 +413,11 @@ footer {
 
 .mobile-only {
     display: none;
+    @media only screen and (max-width: 35em) {
+        .mobile-only {
+            display: inherit;
+        }
+    }
 }
 
 ul.columnated {
@@ -404,12 +429,17 @@ ul.columnated {
     -webkit-column-gap: var(--gap,1em);
     column-count: var(--columns,2);
     column-gap: var(--gap,1em);
-}
-
-@media only screen and (max-width: 35em) {
-    ul.columnated {
+    @media only screen and (max-width: 35em) {
         column-count: unset;
         column-gap: unset;
+    }
+}
+
+.error_page {
+    .error_code {
+        width: 100%;
+        overflow-x: scroll;
+        text-align: left;
     }
 }
 
@@ -417,25 +447,4 @@ ul.columnated {
     color: darkred;
     display: block;
     font-family: monospace;
-}
-
-@media only screen and (max-width: 35em) {
-    html, body {
-        font-size: 3.5vw;
-    }
-    #cookie-consent {
-        max-width: 100vw;
-        max-height: 100vh;
-    }
-    #cookie-consent > .hbox {
-        flex-direction: column;
-    }
-
-    #cookie-consent .cookie-consent-false {
-        padding: 0 0 2em;
-    }
-
-    .mobile-only {
-        display: inherit;
-    }
 }

@@ -18,7 +18,7 @@ if (app('Auth_logins_enabled')) {
 
     if(app("Auth_allow_password_reset")) {
         Route::put("/password-reset/request", "Login@api_password_reset_username_endpoint");
-        Route::put("/password-reset/{token}", "Login@api_password_reset_username_endpoint");
+        Route::put("/password-reset/{token}", "Login@api_password_reset_password_validation");
     }
     
     if(app("Auth_account_creation_enabled")){

@@ -119,6 +119,9 @@ header nav a.navigation--current {
 }
 
 .cobalt-user--profile-display img {
+    color: transparent;
+    background-image: url('/core-content/img/unknown-user.thumb.jpg');
+    background-size: cover;
     display: inline-block;
     height: 2rem;
     width: 2rem;
@@ -239,8 +242,7 @@ header nav a.navigation--current {
 }
 
 :is(hgroup, header-group, headline-group) action-menu {
-    margin-left: auto;
-    margin-bottom: auto;
+    margin: auto 0 auto auto;
 }
 
 @media only screen and (max-width:35em) {

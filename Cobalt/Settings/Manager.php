@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Settings;
+namespace Cobalt\Options;
 
 use ArrayAccess;
 use Exception;

@@ -36,7 +36,7 @@ use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
-class Settings extends \Drivers\Database {
+abstract class SettingsAbstract extends \Drivers\Database {
     const __DEFINITIONS__ = [
         __APP_ROOT__ . "/config/settings.php",
         __APP_ROOT__ . "/ignored/config/settings.php",
@@ -58,9 +58,7 @@ class Settings extends \Drivers\Database {
         __APP_ROOT__ . "/config/manifest.v2.json",
     ];
 
-    var $mtime_candidates = [
-        
-    ];
+    var $mtime_candidates = [];
 
     public $waitingForDependencies;
     public $max_m_time;
@@ -74,12 +72,11 @@ class Settings extends \Drivers\Database {
     public $update_settings;
     public $manifest_build_cache;
 
-    // const __SETTINGS__ = [
-    //     __ENV_ROOT__ . "/config/flags.jsonc",
-    //     __APP_ROOT__ . "/ignored/config/custom_settings.json",
-    //     __APP_ROOT__ . "/ignored/config/custom_settings.jsonc",
-    // ];
-
+    abstract function default_definition_path():string;
+    abstract function definitions():array;
+    abstract function manifests_v1():array;
+    abstract function manifests_v2():array;
+    
     function __construct($bootstrap = false) {
         // Instance our parent class
         parent::__construct();
@@ -204,7 +201,7 @@ class Settings extends \Drivers\Database {
     private function getMaxMTime() {
         $max_m_time = 0;
         // $this->mtime_candidates = scandir(__ENV_ROOT__ . "/routes/");
-        foreach ($this::__DEFINITIONS__ as $file) {
+        foreach ($this->definitions() as $file) {
             if(!file_exists($file)) continue;
             $mtime = filemtime($file);
             if ($mtime === false) continue;
@@ -215,12 +212,14 @@ class Settings extends \Drivers\Database {
 
     public function getSettingDefinitions(){
         try {
+            $default_defs = $this->default_definition_path();
             $this->raw_decode = [
-                'Cobalt/Settings/Settings.php' => DEFAULT_DEFINITIONS
+                $default_defs => $this->get_php_settings($default_defs),
             ];
-            $to_be_read = $this::__DEFINITIONS__;
 
-            foreach($this::__DEFINITIONS__ as $file) {
+            $to_be_read = $this->definitions();
+
+            foreach($to_be_read as $file) {
                 if(!file_exists($file)) continue;
                 $extension = pathinfo($file, PATHINFO_EXTENSION);
                 switch($extension) {
@@ -245,7 +244,7 @@ class Settings extends \Drivers\Database {
             foreach($this->raw_decode as $filename => $settings) {
                 $this->parseSetting($values, $definitions, $settings, $filename);
             }
-            // $json = get_all_where_available($this::__DEFINITIONS__, true, true);
+            // $json = get_all_where_available($this->definitions(), true, true);
         } catch (\Exception $e) {
             kill($e->getMessage());
         } 

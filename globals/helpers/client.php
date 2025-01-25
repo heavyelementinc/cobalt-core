@@ -38,17 +38,18 @@ function update(string $query, array $value) {
  * Redirect will set a response header of either "X-Location" if "X-Request-Source"
  * is among request headers or "Location" if it's not.
  * @param string $path - The path to redirect to
- * @return void 
+ * @return bool - Returns `true` for 'X-Redirect' or false for 'Location'
  */
 function redirect(string $path) {
     $headers = getHeader("X-Request-Source", null, true, false);
     // If the request was sent via AsyncFetch, return `X-Location` header
     if($headers) {
         header("X-Redirect: $path");
-        return;
+        return true;
     }
     // Otherwise, return `Location` header
     header("Location: $path");
+    return false;
 }
 
 /**

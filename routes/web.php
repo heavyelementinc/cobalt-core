@@ -67,10 +67,10 @@ if (app("Auth_logins_enabled")) {
 
     // Route::get("/user/menu", "UserAccounts@get_user_menu");
     Route::get("/admin", "CoreController@admin_redirect");
-    Route::get("/password-reset", "Login@password_reset_initial_form", [
+    Route::get("/login/password-reset", "Login@password_reset_initial_form", [
         'sitemap' => ['ignore' => true]
     ]);
-    Route::get("/password-reset/{token}", "Login@password_reset_token_form");
+    Route::get("/login/password-reset/{token}", "Login@password_reset_token_form");
 }
 
 if(__APP_SETTINGS__['Mailchimp_default_list_id']) {

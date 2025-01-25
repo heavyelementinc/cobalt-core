@@ -60,8 +60,8 @@ modal-box {
     flex-direction: column;
     background: var(--project-body-background);
     position: relative;
-    min-height: 20%;
-    min-width: 20%;
+    min-height: 30%;
+    min-width: 40%;
     max-width:  calc(100vw - 2em);
     max-height: calc(100vh - 2em);
     opacity: 0;

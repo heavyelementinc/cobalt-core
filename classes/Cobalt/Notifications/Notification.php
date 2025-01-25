@@ -12,8 +12,13 @@ use Cobalt\SchemaPrototypes\Compound\IpResult;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 use Cobalt\SchemaPrototypes\MapResult;
+use Drivers\Database;
 
 class Notification extends PersistanceMap {
+
+    function __set_manager(?Database $manager = null): ?Database {
+        return new NotificationManager();
+    }
 
     public function __get_schema(): array {
         $addressee = new NotificationAddresseeSchema();

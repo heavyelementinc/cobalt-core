@@ -264,34 +264,36 @@ copy-span {
 
 help-span,
 copy-span[mini] button {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    height: 1em;
-    width: 1em;
-    color: var(--input-element-border, currentColor);
-    border-radius: 50%;
-    margin: 0 .5ch;
-    font-family: sans-serif;
     position: relative;
-    vertical-align: top;
-
+    font-weight: normal;
+    --_anchor-element-color: rgb(from var(--_anchor-element-color) r g b / .5);
+    &:empty {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 1em;
+        width: 1em;
+        color: var(--input-element-border, currentColor);
+        border-radius: 50%;
+        margin: 0 .5ch;
+        font-family: sans-serif;   
+    }
     &[warning] {
         color: var(--project-color-problem);
 
-        &:before {
+        &:after {
             content: "\F0028";
             justify-self: center;
             align-self: center;
         }
 
-        :hover:before {
+        :hover:after {
             content: "\F05D6";
         }
     }
 
-    &:before {
+    &:empty:after {
         content: "\F02FC";
         font-family: "Material Design Icons";
         /* font-weight: bold; */
@@ -300,7 +302,7 @@ copy-span[mini] button {
         align-self: flex-start;
     }
 
-    &:hover:before {
+    &:empty:hover:after {
         content: "\F02FD"
     }
 }

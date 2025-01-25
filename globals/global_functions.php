@@ -413,7 +413,7 @@ function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed 
         $first = array_shift($exploded);
         if($type === true && isset($subject[$first])) return lookup(implode(".", $exploded), $subject[$first]);
         if($type === "SchemaResult" && isset($subject->{$first})) return lookup(implode(".", $exploded), $subject->{$first});
-        if($throwOnFail) throw new LookupFailure("Failed to find `$first` on " . gettype($subject));
+    if($throwOnFail) throw new LookupFailure("Failed to find `$first` on " . gettype($subject));
         // return "";
     }
     if($subject instanceof GenericMap) {

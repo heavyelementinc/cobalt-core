@@ -344,6 +344,7 @@ class InputUserArray extends InputArray {
     // }
 
     renderOptions(opts) {
+        // return opts;
         let finalOptions = [];
         for(const el in opts) {
             const label = this.drawLabel(opts[el],opts);
@@ -458,35 +459,35 @@ class InputUser extends AutoCompleteInterface {
         return this.getAttribute("name");
     }
 
-    // renderOptions(opts) {
-    //     let finalOptions = [];
-    //     for(const el in opts) {
-    //         const label = this.drawLabel(opts[el],opts);
-    //         finalOptions[el] = {
-    //             search: label.outerHTML,
-    //             label: label.outerHTML,
-    //             value: opts[el]._id.$oid
-    //         }
-    //     }
-    //     // this.options = finalOptions;
-    //     return finalOptions;
-    // }
+    renderOptions(opts) {
+        let finalOptions = [];
+        for(const el in opts) {
+            const label = this.drawLabel(opts[el],opts);
+            finalOptions[el] = {
+                search: label.outerHTML,
+                label: label.outerHTML,
+                value: opts[el]._id.$oid
+            }
+        }
+        // this.options = finalOptions;
+        return finalOptions;
+    }
 
-    // drawLabel(values) {
-    //     let user = document.createElement("div");
-    //     user.classList.add("cobalt-user--profile-display");
-    //     user.setAttribute("value", values.value);
+    drawLabel(values) {
+        let user = document.createElement("div");
+        user.classList.add("cobalt-user--profile-display");
+        user.setAttribute("value", values.value);
 
-    //     user.innerHTML = `
-    //         <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
-    //         <div class='vbox'>
-    //             <span>${values.fname} ${values.lname}</span>
-    //             <span class='username'>@${values.uname}</span>
-    //         </div>
-    //     `;
+        user.innerHTML = `
+            <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
+            <div class='vbox'>
+                <span>${values.fname} ${values.lname}</span>
+                <span class='username'>@${values.uname}</span>
+            </div>
+        `;
         
-    //     return user;
-    // }
+        return user;
+    }
 
     setValue(values) {
         this.user = document.createElement("div");

@@ -11,8 +11,10 @@ class Unauthorized extends HTTPException{
         if($realm === null && app("Auth_logins_enabled")) $realm = app("Auth_login_page");
         $auth_realm = "Basic realm=\"$realm\", charset=\"UTF-8\"";
         header($auth_realm);
-        $vars = (new Authentication)->generate_login_form();
-        $merge = array_merge($vars[0], $data, ['template' => $vars[1]]);
-        parent::__construct($message, $publicMessage, $merge);
+        $result = redirect("/login/?".SESSION_RESUME_PARAM."=".urlencode($_REQUEST['url'])."&message=unauthorized");
+        if($result === false) exit;
+        // $vars = (new Authentication)->generate_login_form();
+        // $merge = array_merge($vars[0], $data, ['template' => $vars[1]]);
+        parent::__construct($message, $publicMessage, []);
     }
 }

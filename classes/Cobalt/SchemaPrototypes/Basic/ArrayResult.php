@@ -238,6 +238,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     protected function join($delimiter) {
         $array = $this->getValue();
         if($array instanceof BSONDocument) $array = $array->getArrayCopy();
+        $array = iterator_to_array_recursive($delimiter);
         $val = implode($delimiter, $array ?? []);
         return $val;
     }

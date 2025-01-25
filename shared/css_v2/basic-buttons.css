@@ -33,6 +33,7 @@ a.floater--new-item {
     border: 0;
     text-decoration: none;
     font-weight: bolder;
+    margin-bottom: var(--margin-xs);
     &:not(button) {
         /* border-radius: 0; */
         /* border: 1px solid var(--project-color-input-border-nofocus); */

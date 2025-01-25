@@ -72,7 +72,7 @@ class Notifications extends Controller {
         $users = $submission['users'];
         $submission['users'] = [];
 
-        foreach($submission as $users => $id) {
+        foreach($submission['for'] as $id) {
             $schema = new NotificationAddresseeSchema();
             array_push($submission['users'], $schema->__validate(['user' => $id]));
         }
@@ -181,24 +181,25 @@ class Notifications extends Controller {
                 ['fname' => $regex],
                 ['lname' => $regex],
             ]
-        ], [
-            'projection' => [
-                'uname'  => 1,
-                'fname'  => 1,
-                'lname'  => 1,
-                'avatar' => 1,
-            ]
+        // ], 
+        // [
+        //     'projection' => [
+        //         'uname'  => 1,
+        //         'fname'  => 1,
+        //         'lname'  => 1,
+        //         'avatar' => 1,
+        //     ]
         ]);
 
         $r = [];
 
         foreach($results as $user) {
             $r[] = [
-                '_id'   => $user->_id,
-                'uname' => $user->uname,
-                'fname' => $user->fname,
-                'lname' => $user->lname,
-                'avatar' => $user->avatar,
+                '_id'   => (string)$user->_id,
+                'uname' => (string)$user->uname,
+                'fname' => (string)$user->fname,
+                'lname' => (string)$user->lname,
+                'avatar' => (string)$user->avatar,
                 'value' => (string)$user->_id
             ];
         }

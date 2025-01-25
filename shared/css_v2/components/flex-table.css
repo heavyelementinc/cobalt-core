@@ -34,6 +34,7 @@ ul.list-panel {
             /* font-weight: bold;
             text-transform: uppercase;
             font-size: .8em; */
+            margin: 0 0 var(--margin-xxs);
         }
         input-switch {
             margin: 0 1rem 0 0;

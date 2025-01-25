@@ -1,4 +1,7 @@
 <?php
+
+use PHPMailer\PHPMailer\PHPMailer;
+
 const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
 const TEMPLATE_DEBUG_RENDER_TYPES = 0b0010;
 const GROUP_BASIC = "Basic";
@@ -25,7 +28,7 @@ const SUBGROUP_DEV_CSS_PACKAGE = "CSS Packaging";
 const COBALT_LOGIN_TYPE_LEGACY = 0;
 const COBALT_LOGIN_TYPE_STAGES = 1;
 
-const DEFAULT_DEFINITIONS = [
+$settings = [
     /** BASIC */
         /* Provide a doman name that we expect to be listening for. This will later 
         be used to add CORS headers. */
@@ -663,7 +666,7 @@ const DEFAULT_DEFINITIONS = [
         ],
 
         "Mail_port" => [
-            "default" => 587,
+            "default" => 587, // Verified this works with mailgun and PHPMailer::ENCRYPTION_STARTTLS
             "directives" =>[
                 "config" => "smtp_port",
                 "env" => "MAIL_PORT"
@@ -676,6 +679,22 @@ const DEFAULT_DEFINITIONS = [
             ],
             "validate" => [
                 "type" => "int"
+            ]
+        ],
+        "Mail_connection_security" => [
+            "default" => PHPMailer::ENCRYPTION_STARTTLS,
+            "meta" => [
+                "group" => GROUP_SMTP,
+                "subgroup" => SUBGROUP_SMTP_BASIC,
+                "name" => "SMTP Connection Type",
+                "number" => "select"
+            ],
+            "valid" => [
+                "options" => [
+                    PHPMailer::ENCRYPTION_SMTPS => "SSL",
+                    PHPMailer::ENCRYPTION_STARTTLS => "TLS",
+                    "none" => "None"
+                ]
             ]
         ],
         
@@ -1402,7 +1421,7 @@ const DEFAULT_DEFINITIONS = [
             // Allows public password resets
         ],
         "Auth_login_via_email_token" => [
-            "default" => true
+            "default" => false
         ],
         "Admin_panel_prefix" => [
             "default" => "/admin"
@@ -1482,6 +1501,9 @@ const DEFAULT_DEFINITIONS = [
         ],
         "TwoFactorAuthentication_enabled" => [
             "default" => true
+        ],
+        'TwoFactorAuthentication_nag_unenrolled_users' => [
+            'default' => true
         ],
 
     /** PUBLIC */

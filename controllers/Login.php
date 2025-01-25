@@ -118,33 +118,35 @@ class Login {
 
     function api_password_reset_username_endpoint() {
         // Accept the username
-        $query = [
-            '$or' => [
-                ['uname' => $_POST['username'],],
-                ['email' => $_POST['username'],]
-            ]
-        ];
+        $query = ['email' => $_POST['email']];
         
         // Check that the username exists
         $crud = new \Auth\UserCRUD();
-        $user = $crud->findOneAsSchema($query);
-        $message = "X-Modal: @success We will send you an email if your information is in our database.";
+        /** @var UserPersistance */
+        $user = $crud->findOne($query);
+        $message = "X-Status: @success We will send you an email if your information is in our database.";
         // If it doesn't, send a failure status
         if(!$user) {
             header($message);
             return 1;
         }
         
+        $user->expire_token_type("password-reset");
+
         // Check that sending mail is supported
-        
         // Generate a token
         $token = $user->generate_token('password-reset');
 
         // Fire off an email with a password reset token
         $mail = new SendMail();
         $mail->set_vars(['token' => $token]);
-        $mail->set_body_template("/authentication/password-reset/reset-email.html");
-        $mail->send($user->email, "Password Reset");
+        $mail->set_body_template("/authentication/password-reset/reset-email.php");
+        try {
+            $mail->send($user->email->getValue(), "Password Reset");
+        } catch (Exception $e) {
+            header("X-Status: @error An error occurred. Please try again later.");
+            return;
+        }
 
         // Send a successful message
         header($message);
@@ -155,21 +157,38 @@ class Login {
     function password_reset_token_form($token) {
         $crud = new \Auth\UserCRUD();
         // Check that the token is valid
-        $check = $crud->findUserByToken('password-reset', $token);
+        $user = $crud->findUserByToken('password-reset', $token);
         // Otherwise, throw a 404
-        if(!$check) throw new NotFound("That token either does not exist or has expired.");
+        if(!$user) throw new NotFound("That token either does not exist or has expired.", true);
         // Present the user with a form to create a new password
-        add_vars(['title' => 'Password Reset', 'token' => $check->token]);
+        add_vars([
+            'title' => 'Password Reset',
+            // 'token' => $check->token
+            'user' => $user,
+        ]);
 
-        return view("/authentication/password-reset/new-password-form.html");
+        return view("/authentication/password-reset/new-password-form.php");
     }
 
     function api_password_reset_password_validation($token) {
         // Check that $token is valid
-            // If not, throw 404
+        $crud = new UserCRUD();
+        $user = $crud->findUserByToken('password-reset', $token);
+        // If not, throw 404
+        if(!$user) throw new NotFound("That token either does not exist or has expired.", true);
         // Validate the new password
+        $user->pword = $_POST['password'];
+        $hash = $user->pword->getDirective("filter");
+        
         // Update the password
+        $crud->updateOne(['_id' => $user->_id], [
+            '$set' => [
+                'pword' => $hash
+            ]
+        ]);
         // Invalidate token
+        $user->expire_token_type('password-reset');
         // Redirect user to login page
+        redirect("/login/?message=password_reset");
     }
 }

@@ -20,6 +20,22 @@ body > header {
     footer {
         display: none;
     }
+    @media only screen and (max-width: 35em) {
+        grid-template-columns: 1fr;
+        grid-template-rows: 5em 1fr;
+/*         display: flex;
+        flex-direction: column; */
+        #admin-panel {
+            position: absolute;
+            grid-column: 1 / span 1;
+            grid-row: 1 / span 1;
+        }
+        main {
+            grid-column: 1 / span 1;
+            grid-row: 2;
+            margin-top: var(--margin-xl);
+        }
+    }
 }
 
 #admin-panel {

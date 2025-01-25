@@ -5,8 +5,8 @@
         <option method="DELETE" action="/api/v1/sessions/{{doc._id}}/" dangerous>Log out this session</option>
     </action-menu></div>
     <div class="platform-icon">
-        <i class="client" name="{{!doc.details.client.build.display}}"></i>
-        <i class="platform" name="{{!doc.details.platform.build.display}}"></i>
+        <i class="client" name="<?= \Auth\SessionSchema::browser_lookup($this->vars['doc']['details']['client']['build']) ?>"></i>
+        <i class="platform" name="<?= \Auth\SessionSchema::platform_lookup($this->vars['doc']['details']['platform']['build']) ?>"></i>
     </div>
     <ul class="list-panel">
         <li>

@@ -32,11 +32,10 @@
     }
 
     connectedCallback() {
-        let autocomplete = this.getAttribute("autocomplete")
-        if(autocomplete) autocomplete = ` autocomplete="${autocomplete}"`
-        let placeholder = this.getAttribute("placeholder");
-        if(placeholder) placeholder = ` placeholder="${placeholder}"`
-        this.innerHTML = `<input type='password'${placeholder}${autocomplete}><button></button>`;
+        let autocomplete = (this.hasAttribute("autocomplete")) ? ` autocomplete="${this.getAttribute('autocomplete')}"`:"";
+        let placeholder = (this.hasAttribute("placeholder")) ? ` placeholder="${this.getAttribute("placeholder")}"` : "";
+        let autofocus = (this.hasAttribute("autofocus")) ? ` autofocus="autofocus"` : "";
+        this.innerHTML = `<input type='password'${placeholder}${autocomplete}${autofocus}><button></button>`;
         this.input = this.querySelector("input");
         this.input.addEventListener("change", (e) => {
             e.stopPropagation();
@@ -51,6 +50,7 @@
         this.updateValue();
         this.button = this.querySelector("button");
         this.initButton();
+        this.input.focus();
     }
 
     updateValue(value = null) {

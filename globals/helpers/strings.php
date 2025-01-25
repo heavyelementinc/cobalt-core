@@ -329,7 +329,7 @@ function random_string($length, $fromChars = null) {
     $max = strlen($validChars) - 1;
     $random = "";
     for ($i = 0; $i <= $length; $i++) {
-        $random .= $validChars[rand($min, $max)];
+        $random .= $validChars[random_int($min, $max)];
     }
     return $random;
 }

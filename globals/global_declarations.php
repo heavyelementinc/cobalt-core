@@ -1,5 +1,5 @@
 <?php
-require_once __ENV_ROOT__ . "/config/default_settings.php";
+// require_once __ENV_ROOT__ . "/config/default_settings.php";
 global $TEMPLATE_PATHS;
 $TEMPLATE_PATHS = [
     __APP_ROOT__,
@@ -144,7 +144,15 @@ $DECLARED_CUSTOMIZATIONS = [];
 
 const COBALT_PAGES_DEFAULT_COLLECTION = "CobaltPages";
 
-// Login
+// Authentication and Login Stuff
+const SESSION_STAGE_STATE = "__auth_stage";
+const SESSION_USER_ID = "__user_id";
+const SESSION_STAY_LOGGED_IN = "__stay_logged_in";
+const SESSION_TFA_STATE = "__tfa_state";
+const SESSION_RESUME_PARAM = "resume";
+const TFA_STATE_DISABLED = 0;
+const TFA_STATE_ENABLED = 1;
+
 const AUTH_STAGE_0_USER_ACCOUNT_VERIFIED = 99;
 const AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY = 0;
 const AUTH_STAGE_1_USER_AUTHENTICATION = 1;

@@ -19,18 +19,17 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use SensitiveParameter;
-const SESSION_STAGE_STATE = "__auth_stage";
-const SESSION_USER_ID = "__user_id";
-const SESSION_STAY_LOGGED_IN = "__stay_logged_in";
-const SESSION_TFA_STATE = "__tfa_state";
-const SESSION_RESUME_PARAM = "resume";
-const TFA_STATE_DISABLED = 0;
-const TFA_STATE_ENABLED = 1;
+
 
 class Authentication {
     public $permissions = null;
     public $session;
     public $user = null;
+    public $messages = [
+        'backups_exhausted' => "You just used your last backup key. We've disabled TOTP on your account. You'll need to manually re-enable it.",
+        'unauthorized' => "You need to log in before you can access this content.",
+        'password_reset' => "Your password has been reset. Please sign in.",
+    ];
 
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
@@ -243,7 +242,7 @@ class Authentication {
         }
 
         $view = "/authentication/login/stage-0-discover-user.php";
-        $vars = [];
+        $vars = ['message' => $this->messages[$_GET['message'] ?? '']];
         return [$vars, $view];
     }
     private function login_stage_1_authenticate():array {
@@ -253,12 +252,31 @@ class Authentication {
                 $view = "/authentication/login/stage-1-password-or-email.php";
             }
         }
-        $vars = ['user' => (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]))];
+        $vars = [
+            'user' => (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID])),
+            'message' => $this->messages[$_GET['message'] ?? '']
+        ];
         return [$vars, $view];
     }
     private function login_stage_2_tfa():array {
         $view = "/authentication/login/stage-2-tfa.php";
-        $vars = [];
+        $user = (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]));
+        if(!$user) throw new NotFound(AUTH_PROCESS_ERROR__USER_NOT_FOUND);
+
+        $resume = urldecode($_GET[SESSION_RESUME_PARAM] ?? "");
+
+        // If 2FA is not enabled, then the user should be logged in at this point
+        // so let's do that.
+        if(!$user->tfa?->enabled) {
+            $view = "/authentication/login/stage-2-tfa-not-enabled.php";
+            $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_0_USER_ACCOUNT_VERIFIED;
+            $resume = $this->auth_stage_login_check();
+        }
+        $vars = [
+            'user' => $user, 
+            'resume' => $resume ? $resume : "/admin/",
+            'message' => $this->messages[$_GET['message'] ?? '']
+        ];
         return [$vars, $view];
     }
 
@@ -270,7 +288,7 @@ class Authentication {
                 case AUTH_STAGE_1_USER_AUTHENTICATION:
                     return $this->auth_stage_1_authenticate($_POST["password"]);
                 case AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY:
-                    return $this->auth_stage_2_tfa($_POST["2fa"]);
+                    return $this->auth_stage_2_tfa($_POST["totp"]);
                 default:
                     header("X-Redirect: /login/?referer=".urlencode($_SERVER['HTTP_REFERER']));
             }
@@ -309,7 +327,7 @@ class Authentication {
         $this->header_reload_command();
     }
 
-    private function auth_stage_1_authenticate(string $password) {
+    private function auth_stage_1_authenticate(?string $password) {
         if(!$password) {
             update(".error", ['innerText' => AUTH_PROCESS_ERROR__PASSWORD_CANT_BE_BLANK]);
             return;
@@ -333,7 +351,9 @@ class Authentication {
         $_SESSION[SESSION_STAY_LOGGED_IN] = $_POST['stay_logged_in'];
 
         // Now, let's check if TFA is enabled and check if the user has it enabled
-        if(__APP_SETTINGS__['TwoFactorAuthentication_enabled'] && $result->tfa?->enabled === true) {
+        if(__APP_SETTINGS__['TwoFactorAuthentication_enabled'] 
+            && ($result->tfa?->enabled === true || __APP_SETTINGS__['TwoFactorAuthentication_nag_unenrolled_users'])
+        ) {
             $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY;
         } else {
             // Otherwise, we're logged in.
@@ -343,8 +363,37 @@ class Authentication {
         $this->header_reload_command($this->auth_stage_login_check());
     }
 
-    private function auth_stage_2_tfa(string $tfa) {
+    private function auth_stage_2_tfa(?string $tfa) {
+        if(!$tfa) {
+            update(".error", ["innerText" => AUTH_PROCESS_ERROR__TFA_CANNOT_BE_BLANK]);
+            return;
+        }
+        // Look up our user
+        $ua = new UserCRUD();
+        $result = $ua->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]));
+        
+        // Check that the user exists
+        if(!$result) throw new NotFound("User no longer exists", AUTH_PROCESS_ERROR__USER_NOT_FOUND);
+        
+        // Verify the supplied OTP
+        $mfa = new MultiFactorManager();
 
+        if(strlen($tfa) === 6) {
+            $verify_opt = $mfa->verify_otp($result, $tfa);
+        } else {
+            $verify_opt = $mfa->verify_backup_code($result, $tfa);
+        }
+
+        if(!$verify_opt) {
+            // If the OTP is invalid, notify the end user
+            update(".error", ["innerText" => AUTH_PROCESS_ERROR__TFA_VERIFY_FAILURE]);
+            return;
+        }
+
+        // If we're here, OTP verification has succeeded!
+        // Let's update the session state
+        $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_0_USER_ACCOUNT_VERIFIED;
+        $this->header_reload_command($this->auth_stage_login_check());
     }
 
     function header_reload_command($target = null) {

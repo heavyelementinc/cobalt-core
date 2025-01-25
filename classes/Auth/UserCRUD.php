@@ -19,6 +19,7 @@ use DateTime;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use PhpParser\Node\Expr\Cast\Object_;
@@ -30,7 +31,7 @@ class UserCRUD extends \Drivers\Database {
     }
 
     function get_schema_name($doc = []) {
-        return "\\Auth\\UserSchema";
+        return "\\Auth\\UserPersistance";
     }
 
     final function getUserById($id) {
@@ -88,14 +89,15 @@ class UserCRUD extends \Drivers\Database {
         return iterator_to_array($this->find(['is_root' => true]));
     }
 
-    final function findUserByToken(string $name, string $token):?UserSchema {
+    final function findUserByToken(string $name, string $token):?UserPersistance {
         $result = $this->findOne([
             'token.name' => $name,
             'token.value' => $token,
         ]);
         if(!$result) return null;
         $tkn = $result->get_token($name);
-        $expires = $tkn->getExpires();
+        if($tkn === null) throw new NotFound("Bad token", true);
+        $expires = $tkn->get_expires();
         // Expire token if its invalid
         if($expires && $expires > new DateTime()) {
             $modified = $result->expire_token($tkn);
@@ -105,18 +107,18 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function updateUser($id, $request) {
-        $val = new UserSchema();
+        $val = new UserPersistance();
         $mutant = $val->__validate($request);
         $result = $this->updateOne(
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
         if ($result->getModifiedCount() !== 1) throw new HTTPException("Failed to update fields", true);
-        return new UserSchema($mutant);
+        return new UserPersistance($mutant);
     }
 
     final function createUser($request, $mode = "require") {
-        $val = new UserValidate();
+        $val = new UserPersistance();
 
         $val->setMode($mode);
         $mutant = $val->validate($request);
