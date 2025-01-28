@@ -157,7 +157,7 @@ input-switch {
 } */
 
 copy-span {
-    display: inline-block;
+    display: inline-flex;
     position: relative;
     box-sizing: border-box;
     &[mini] {

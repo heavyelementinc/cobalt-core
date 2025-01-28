@@ -41,6 +41,13 @@
             background-image: radial-gradient(black, transparent 75%);
         }
         & .landing-main--title-container {
+            h1 {
+                @media only screen and (max-width: 35em){
+                    width: 100%;
+                    hyphens: auto;
+                    word-break: break-word;
+                }
+            }
             & .byline {
                 gap: .2em;
                 margin-top: .7em;
@@ -117,6 +124,9 @@
             height: 100%;
             object-fit: cover;
         }
+    }
+    @media only screen and (max-width: 35em) {
+        height: auto;
     }
 }
 

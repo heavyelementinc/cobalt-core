@@ -36,15 +36,18 @@
     }
 }
 
-:where(input, 
-textarea,
-markdown-area,
-select,
-button,
-async-button[native],
-a.button[native],
-[role='button'],
-[__custom-input])
+:where(
+    input, 
+    textarea,
+    markdown-area,
+    select,
+    button,
+    input-wrapper,
+    async-button[native],
+    a.button[native],
+    [role='button'],
+    [__custom-input]
+)
 {
     display: inline-block;
     border: var(--input-element-border-value);
@@ -87,7 +90,7 @@ a.button[native],
             color: var(--input-disabled-placeholder);
         }
     }   
-    &:has(input) {
+    &:has(&) {
         padding: 0;
     }
     & input,
@@ -101,6 +104,46 @@ a.button[native],
             border: var(--input-element-border-width) solid transparent;
             outline: 0;
             box-shadow: unset;
+        }
+    }
+}
+
+input-wrapper, copy-span {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    width: 100%;
+    & button {
+        --_btn_bg: var(--neutral-color-0);
+        --_btn_fg: var(--neutral-color-0-fg);
+        --_hvr_bg: var(--neutral-color-1);
+        --_hvr_fg: var(--neutral-color-1-fg);
+        border-radius: 0;
+        font-size: small;
+        white-space: nowrap;
+        font-weight: bold;
+        border-top: 0;
+        border-bottom: 0;
+        &:first-child {
+            border-right: inherit;
+        }
+        &:last-child {
+            border-left: inherit;
+        }
+        background-color: var(--_btn_bg);
+        color: var(--_btn_fg);
+        &:hover {
+            border-top: 0;
+            border-bottom: 0;
+            background-color: var(--_hvr_bg);
+            color: var(--_hvr_fg);
+        }
+        &:where(.primary,[primary]) {
+            --_btn_bg: var(--primary-color-1);
+            --_btn_fg: var(--primary-color-1-fg);
+            --_hvr_bg: var(--primary-color-0);
+            --_hvr_fg: var(--primary-color-0-fg);
+            /* border: none; */
         }
     }
 }

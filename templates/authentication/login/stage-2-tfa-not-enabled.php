@@ -10,6 +10,8 @@
     <p>It appears you haven't enabled Two-factor Authentication (2FA) for your 
         account. Enabling 2FA will make your account far more secure.</p>
     <p>Use the button below to enable 2FA.</p>
-    <a href="/admin/me#security" class="button" primary>Enable 2FA</a>
-    <a href="{{resume}}" style="padding: var(--margin-l); --_anchor-element-color: rgba(0 0 0 / .5); font-size: medium;">No, thanks.</a>
+    <a href="/me#security" class="button" primary style="margin-top: var(--margin-m);">Enable 2FA</a>
+    <a href="{{resume}}" style="margin: var(--margin-m) 0 var(--margin-xl);
+    --_anchor-element-color: rgba(0 0 0 / .5);
+    font-size: small;">No, thanks.</a>
 </section>

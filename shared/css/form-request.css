@@ -29,6 +29,16 @@ form-header :is(h1, h2, h3, h4, h5) {
   background: white;
 }
 
+:is(form-request) fieldset > small {
+  display: block;
+  margin-bottom: var(--margin-m);
+}
+
+form-request + form-request,
+:is(form-request) fieldset + fieldset {
+  margin-top: var(--margin-l);
+}
+
 :is(form-request) fieldset > label {
   margin-top: .5rem;
 }

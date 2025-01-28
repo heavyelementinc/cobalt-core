@@ -44,6 +44,7 @@ ul.list-panel {
             width: 100%;
             color: rgb(from currentColor r g b / .8);
             font-size: 0.9rem;
+            margin-bottom: var(--margin-m);
         }
     }
 }

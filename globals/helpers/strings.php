@@ -71,6 +71,13 @@ function sanitize_path_name($path) {
     return str_replace(["../"], "", $path);
 }
 
+function path_exists_in_base(string $base_path, $untrusted_path): bool {
+    $path_to_test = realpath($untrusted_path);
+    $base_ln = strlen($base_path);
+    if(substr($path_to_test,0, $base_ln) === $base_path) return true;
+    return false;
+}
+
 function relative_time($time = false, $now = null, $limit = 86400, $format = "M jS g:i A") {
     if($time instanceof UTCDateTime || $time instanceof DriversUTCDateTime) $time = $time->toDateTime();
     if($time instanceof DateTime) $time = $time->getTimestamp();
