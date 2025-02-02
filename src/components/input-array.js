@@ -273,17 +273,17 @@ class InputArray extends AutoCompleteInterface {
         if(tag) tag.parentNode.removeChild(tag);
     }
 
-    checkValidity() {
-        this.validationMessage = "";
-        this.valid.required();
-        this.valid.valueMissing();
-        if(this.validationMessage) {
-            this.dispatchEvent(new Event("invalid"), {detail: {message: this.validationMessage}});
+    // checkValidity() {
+    //     this.validationMessage = "";
+    //     this.valid.required();
+    //     this.valid.valueMissing();
+    //     if(this.validationMessage) {
+    //         this.dispatchEvent(new Event("invalid"), {detail: {message: this.validationMessage}});
             
-            return false;
-        }
-        return true;
-    }
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
 }
 
