@@ -288,7 +288,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
                 $arraylike = $arraylike->getArrayCopy();
             }
             if(gettype($arraylike) !== "array") {
-                throw new TypeError("\$arraylike must be an array but we found '" . gettype($arraylike) ."'");
+                throw new TypeError("\$arraylike '$this->name' must be an array but found '" . gettype($arraylike) ."'");
             }
         }
         return $arraylike;
