@@ -278,6 +278,8 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     }
 
     private function arraylike_to_array($arraylike):array {
+        // If we're passed a null value, let's create an empty array
+        if(!$arraylike) $arraylike = [];
         if(gettype($arraylike) !== "array") {
             if($arraylike instanceof ArrayResult) {
                 $arraylike = $arraylike->getRaw();
