@@ -44,7 +44,7 @@ class CoblatLazyReveal {
     }
 
     lazyReveal(element, data) {
-        let y = element.getBoundingClientRect().top + (element.getAttribute("lazy-offset") ?? 0)
+        let y = element.getBoundingClientRect().top + (cssUnitToNumber(element.getAttribute("lazy-offset")) ?? 0)
         if(this.visibleScrollPosition >= data.offset) {
             element.classList.remove("lazy-reveal--reverted");
             

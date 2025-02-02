@@ -318,7 +318,7 @@ copy-span[mini] button {
     background: var(--project-body-background);
     border:var(--input-element-border-width) solid var(--project-color-input-border-nofocus);
     box-shadow: var(--project-box-shadow);
-    color: black;
+    color: inherit;
     /* top: 50%; */
     left: 100%;
     left: anchor(middle);

@@ -319,7 +319,7 @@ class WebHandler implements RequestHandler {
 
     function footer_credits() {
         $credits  = '<section class="footer-credits">';
-        $credits .= '<span>&copy;@date("Y"); {{app.app_copyright_name}}</span> &mdash; <span class="copyright-notice">'.from_markdown(__APP_SETTINGS__['copyright_notice']).'</span>';
+        $credits .= '<span>&copy;@date("Y"); {{!app.app_copyright_name}}</span> &mdash; <span class="copyright-notice">'.from_markdown(__APP_SETTINGS__['copyright_notice']).'</span>';
         if (app('Web_display_designer_credit')) $credits .= ' &mdash; <span>{{!app.designer.prefix}} <a href="{{app.designer.href}}" title="{{app.designer.title}}">{{app.designer.name}}</a></span>';
         if (__APP_SETTINGS__['Web_privacy_policy']) $credits .= " &mdash; <a href='" . __APP_SETTINGS__['Web_privacy_policy'] . "'>Privacy Policy</a>";
         if (__APP_SETTINGS__['Web_terms_of_service']) $credits .= " &mdash; <a href='" . __APP_SETTINGS__['Web_terms_of_service'] . "'>Terms of Service</a>";

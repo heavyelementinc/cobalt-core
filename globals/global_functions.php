@@ -560,13 +560,13 @@ function plugin($name) {
     throw new Exception('Plugin is not active!');
 }
 
-function get_posts_from_tags(array $tags, string $controller = "\\Cobalt\\Pages\\Controllers\\Posts", int $limit = 3):string {
+function get_posts_from_tags(array $tags, string $controller = "\\Cobalt\\Pages\\Controllers\\Posts", int $limit = 3, array $sort = []):string {
     $html = "";
     /** @var \Cobalt\Pages\Controllers\Posts */
     $postController = get_controller($controller, true);
     $posts = $postController->manager;
     
-    $result = $posts->getPagesFromTags($tags, $limit);
+    $result = $posts->getPagesFromTags($tags, $limit, $sort);
 
     foreach($result as $post) {
         $html .= $postController->renderPreview($post);

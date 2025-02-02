@@ -24,9 +24,7 @@ html {
 
 body {
     margin: 0;
-    font-family: var(--project-body-family);
-    background: var(--background-color-1);
-    color: var(--background-color-1-fg);
+    text-wrap: pretty;
     &.scroll-locked {
         overflow: hidden;
     }
@@ -79,21 +77,13 @@ button[link]:hover {
     width: fit-content;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-    font-family: var(--project-head-family);
-    text-wrap: balance;
-}
 
-p,
+
+/* p, */
 li,
 article figure,
 figcaption {
     max-width: 68ch;
-    text-wrap: pretty;
 }
 
 article figure {
@@ -108,10 +98,17 @@ article {
     container-type: inline-size;
 }
 
-ul[class]:not(.columnated, .blockeditor--nestedlist) {
+ul[class]:not(.columnated, .blockeditor--nestedlist, .checklist) {
     list-style: none;
     margin: 0;
     padding: 0;
+}
+
+ul.checklist {
+    li::marker {
+        content: "\F0E1E";
+        font-family: "Material Design Icons", sans-serif;
+    }
 }
 
 
@@ -325,6 +322,9 @@ td {
     &.reverse{
         flex-direction: row-reverse;
     }
+    @media only screen and (max-width: 35em) {
+        flex-direction: column;
+    }
 }
 
 .vbox {
@@ -416,9 +416,14 @@ footer {
 .mobile-only {
     display: none;
     @media only screen and (max-width: 35em) {
-        .mobile-only {
-            display: inherit;
-        }
+        display: inherit;
+    }
+}
+
+.desktop-only {
+    display: inherit;
+    @media only screen and (max-width: 35em) {
+        display: none;
     }
 }
 

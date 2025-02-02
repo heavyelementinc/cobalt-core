@@ -75,7 +75,7 @@ class NewFormRequest extends HTMLElement {
 
     async initOriginalState() {
         await Promise.all(this.childWebComponentPromises);
-        this.originalState = await this.getValue();
+        // this.originalState = await this.getValue();
         this.childrenReady = true;
     }
 
@@ -88,6 +88,7 @@ class NewFormRequest extends HTMLElement {
         if(this.childrenReady !== true) console.warn("This element has children that are not ready!", this);
         const elements = this.querySelectorAll(universal_input_element_query);
         let value = {};
+        let errors = 0;
         for(const input of elements) {
             let name = input.name ?? input.getAttribute("name");
             let length = name.length;
@@ -99,16 +100,22 @@ class NewFormRequest extends HTMLElement {
                 if(Array.isArray(value[name]) === false) value[name] = [value[name]];
                 if(input.type === "checkbox" && !input.checked) continue;
             }
-            if(appendToArray) value[name].push(this.getFieldValue(input));
-            else value[name] = this.getFieldValue(input)//.value;
+            try {
+                if(appendToArray) value[name].push(this.getFieldValue(input));
+                else value[name] = this.getFieldValue(input)//.value;
+            } catch (Error) {
+                errors += 1;
+            }
         }
+        if(errors) throw Error("Multiple errors were found. Aborting.");
         return value;
     }
 
-    async getValue() {
+    async getValue(allowErrors = false) {
         if(this.childrenReady !== true) console.warn("This element has children that are not ready!", this);
         const elements = this.querySelectorAll(universal_input_element_query);
         let value = {};
+        let errors = 0;
         for(const input of elements) {
             let name = input.name ?? input.getAttribute("name");
             let length = name.length;
@@ -120,9 +127,14 @@ class NewFormRequest extends HTMLElement {
                 if(Array.isArray(value[name]) === false) value[name] = [value[name]];
                 if(input.type === "checkbox" && !input.checked) continue;
             }
-            if(appendToArray) value[name].push(await this.getFieldValue(input));
-            else value[name] = await this.getFieldValue(input)//.value;
+            try {
+                if(appendToArray) value[name].push(await this.getFieldValue(input));
+                else value[name] = await this.getFieldValue(input)//.value;
+            } catch (Error) {
+                errors += 1;
+            }
         }
+        if(errors) throw new Error("Multiple errors found. Aborting.");
         return value;
     }
 
@@ -275,6 +287,8 @@ class NewFormRequest extends HTMLElement {
             case "none":
             case "false":
                 return;
+            case "enter":
+                return this.getValue();
             case "element":
             case "field":
             case "autosave":
@@ -289,7 +303,6 @@ class NewFormRequest extends HTMLElement {
                 this.addElementToFeedbackList(fieldset);
                 break;
             case "form":
-            case "enter":
             default:
                 const val = await this.getValue();
                 submit = val;
@@ -464,6 +477,10 @@ class NewFormRequest extends HTMLElement {
     }
 
     async getFieldValue(field) {
+        if(this.isValid(field) === false) {
+            appendElementInformation(field, field.validationMessage ?? "Validation failed");
+            throw new Error("Validity failed");
+        }
         if(field.tagName === "INPUT") {
             switch(field.type) {
                 case "number":
@@ -475,6 +492,11 @@ class NewFormRequest extends HTMLElement {
             return await field.value;
         }
         return field.value;
+    }
+
+    isValid(field) {
+        if("checkValidity" in field === false) return true;
+        return field.checkValidity();
     }
 }
 

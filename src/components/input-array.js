@@ -18,6 +18,32 @@ class InputArray extends AutoCompleteInterface {
         this.allowCustom = string_to_bool(this.getAttribute("allow-custom")) ?? false;
         this.excludeCurrent = string_to_bool(this.getAttribute("exclude-current")) ?? true;
         this.setAttribute("__custom-input", "true");
+
+        this.validationMessage = "";
+
+        // Validity should always return TRUE if
+        this.validity = {
+            required: () => {
+                const required = this.hasAttribute("required");
+                if(!required) return false;
+                if(this.value.length < 1) {
+                    this.validationMessage += `This field is required\n`;
+                    return true;
+                }
+                return false;
+            },
+            valueMissing: () => {
+                const length = this.getAttribute("min");
+                if(length === null) return false;
+                const val = this.value.length < length;
+                if(val) this.validationMessage += `Must have at least one ${length} item${plurality(length)} selected.\n`;
+                return val;
+            },
+            // patternMismatch: () => {
+            //     if(this.getAttribute("pattern"))
+            // }
+
+        }
     }
 
     connectedCallback() {
@@ -245,6 +271,18 @@ class InputArray extends AutoCompleteInterface {
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
         const tag = this.querySelector(`.${this.TAG_CLASS}[value='${i.value}']`);
         if(tag) tag.parentNode.removeChild(tag);
+    }
+
+    checkValidity() {
+        this.validationMessage = "";
+        this.valid.required();
+        this.valid.valueMissing();
+        if(this.validationMessage) {
+            this.dispatchEvent(new Event("invalid"), {detail: {message: this.validationMessage}});
+            
+            return false;
+        }
+        return true;
     }
 
 }

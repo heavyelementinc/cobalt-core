@@ -120,8 +120,8 @@ class UserCRUD extends \Drivers\Database {
     final function createUser($request, $mode = "require") {
         $val = new UserPersistance();
 
-        $val->setMode($mode);
-        $mutant = $val->validate($request);
+        // $val->setMode($mode);
+        $mutant = $val->__validate($request);
         $flags = [];
         $flag = "flags.";
         $len = strlen($flag);
@@ -146,8 +146,8 @@ class UserCRUD extends \Drivers\Database {
         ];
         $request = array_merge(
             $default,
-            $mutant,
-            ['_id' => $this->__id()]
+            $mutant->__dataset,
+            // ['_id' => $mutant->_id]
         );
         $result = $this->insertOne($request);
 

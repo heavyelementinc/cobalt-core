@@ -2,7 +2,7 @@
     <section class="login-hero-sidebar" style="background-image: url('{{app.login-hero-sidebar}}')"></section>
     <h1>Authenticate</h1>
     <span class="error">{{!message}}</span>
-    <form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" @csrf_attribute();>
+    <form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" autosave="enter" @csrf_attribute();>
         <div class="username" __custom-input="true">
             {{!user.name.tag()}}
         </div>

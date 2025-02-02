@@ -27,6 +27,198 @@ class CobaltScrollManager {
 
         this.allowUpdate = false; // The bool that controls the animation loop
         this.simultaneousDelayValue = 50;
+        this.PARALLAX_SELECTOR = querySelector ?? "[parallax-mode],[parallax-speed]";
+        this.LAZY_SELECTOR = "[lazy-reveal]";
+        this.OBSERVER = null;
+        
+        this.parallaxElements = []; // The elements to be updated
+        this.lazyElements = [];
+        this.modifier = modifier;
+
+        if(this.useiOSWorkaround) {
+            // Let's warn to the console that we've detected iOS
+            console.warn("Warning: you're using a browser that does not properly support parallax scrolling. Workaround may cause undocumented behavior");
+            this.modifier = 4;
+            // console.log({scrollModifier: this.modifier});
+            this.iOSWorkaroundViewportHeight = cssToPixel("30vh");
+        }
+
+        this.debug = app("Parallax_enable_debug") ?? false;
+
+        document.addEventListener("navigationEvent", this.selectElements.bind(this));
+        document.addEventListener("scrollManagerUpdate", this.selectElements.bind(this));
+
+        if(app("enable_default_parallax")) window.addEventListener("resize", () => {
+            this.selectElements();
+        });
+
+        // this.initDebug();
+
+        if(app("enable_default_parallax")) this.selectElements();
+    }
+
+    async selectElements() {
+        // Stop the frame animation while we update our selected elements
+        this.allowUpdate = false;
+        // this.cleanUpDebug();
+
+        this.innerScrollOffset = window.innerHeight * .33;
+
+        // Create our list of parallax elements
+        this.parallaxElements = [];
+
+        let nodes = document.querySelectorAll(this.PARALLAX_SELECTOR);
+        let index = 0;
+        for(const e of nodes) {
+            e.parallax = new ParallaxElement(e, index);
+            this.parallaxElements[index] = e;
+            index += 1;
+        }
+
+        this.allowUpdate = true;
+        if(this.parallaxElements.length) requestAnimationFrame(this.animLoop.bind(this));
+
+        // Create our list of lazy elements
+        this.lazyElements = [];
+
+        let lazy = document.querySelectorAll(this.LAZY_SELECTOR);
+        index = 0;
+        this.OBSERVER = new IntersectionObserver(this.observeCallback.bind(this), {
+            // root: document.body,
+            rootMargin: "-20% 0px"
+            // threshold: []
+        })
+
+        for(const e of lazy){
+            e.lazy = new LazyElement(e, index, null);
+            this.lazyElements[index] = e;
+            this.OBSERVER.observe(e);
+            index += 1;
+        }
+    }
+
+    observeCallback(entries) {
+        /** @const {IntersectionObserverEntry} entry */
+        for(const entry of entries) {
+            if(entry.isIntersecting){ // && entry.intersectionRatio >= entry.target.lazy.ratio
+                entry.target.lazy.intersectionStart();
+            } else entry.target.lazy.intersectionEnd();
+        }
+    }
+}
+
+class LazyElement {
+    /** @param {HTMLElement} element */
+    constructor(element, index, delayOffset) {
+        /** @property {HTMLElement} this.ELEMENT */
+        this.ELEMENT = element;
+        this.INDEX = index;
+        this.REVEAL_OFFSET = delayOffset;
+        this.QUERY_LAZY_CHILDREN = '[lazy-child]';
+
+        // this.THRESHOLD_VALUE = this.ELEMENT.getAttribute("lazy-threshold") ?? "0.2 0 0 0";
+        this.INTERSECTION_RATIO = this.ELEMENT.getAttribute("lazy-ratio") ?? "0.2"
+        this.VISIBLE_CLASS = this.ELEMENT.getAttribute("lazy-class") ?? "lazy-reveal--revealed";
+        this.RESET = string_to_bool(this.ELEMENT.getAttribute("lazy-reset") ?? "false");
+        this.init();
+    }
+    
+    init() {
+        this.ELEMENT.style.setProperty("--lazy-delay", `${this.delay}ms`);
+        this.LAZY_CHILDREN = this.ELEMENT.querySelectorAll(this.QUERY_LAZY_CHILDREN);
+        let i = 0;
+        for(const el of this.LAZY_CHILDREN) {
+            el.lazy = new LazyElement(el, i, this.delay);
+            i += 1;
+        }
+    }
+
+    /** @property {Number} delay - milliseconds */
+    get delay() {
+        const getDelay = (unit) => {
+            if(this.ELEMENT.hasAttribute("lazy-child")) {
+                // if(!unit) return this.REVEAL_OFFSET;
+                return ((unit ?? 100) * this.INDEX) + this.REVEAL_OFFSET
+            }
+            return 0;
+        }
+        let delay = this.ELEMENT.getAttribute("lazy-delay");
+        // let parent = this.ELEMENT.closest("[lazy-reveal]");
+        // let parentDelay = parent.lazy.delay;
+        if(!delay) return getDelay(null);// + parentDelay;
+        const last = delay[delay.length - 2] + delay[delay.length - 1] ?? "";
+        const unit = cssUnitToNumber(delay);
+        
+        switch(last) {
+            case "ms":
+                return unit + this.REVEAL_OFFSET;
+            case (delay[1] === "s"):
+                return (unit * 1000) + this.REVEAL_OFFSET;
+            default:
+                return getDelay(unit) + this.REVEAL_OFFSET;
+        }
+    }
+
+    get offset() {
+        let topOffset = element.getBoundingClientRect().top;
+        let value = element.getAttribute("lazy-offset");
+        let operator = value[0];
+        switch(operator) {
+            case "+":
+            case "-":
+                value = value.substring(1);
+        }
+        if(operator === "-") offset *= -1;
+        const offset = cssUnitToNumber(value);
+        if(String(offset) !== "NaN") topOffset += offset;
+        // topOffset += offset;
+        while(element !== document.documentElement) {
+            element = element.parentNode;
+            topOffset += element.scrollTop;
+        }
+        return topOffset;
+    }
+
+    get ratio() {
+        if(this.INTERSECTION_RATIO > 1) return this.INTERSECTION_RATIO * .01;
+        return Number(this.INTERSECTION_RATIO);
+    }
+
+    // /** @property {array} threshold - an array of floats from 0 to 1 passed to the IntersectionObserver */
+    // get threshold() {
+    //     let threshold = this.THRESHOLD_VALUE;
+    //     threshold = threshold.split(" ");
+    //     const minThresholdLength = 4;
+    //     if(threshold.length < minThresholdLength) {
+    //         for(const i = threshold.length; i >= minThresholdLength; i++) {
+    //             threshold.push(0);
+    //         }
+    //     }
+    //     return threshold;
+    // }
+
+    intersectionStart() {
+        this.ELEMENT.classList.add(this.VISIBLE_CLASS);
+    }
+
+    intersectionEnd() {
+        if(this.RESET) this.ELEMENT.classList.remove(this.VISIBLE_CLASS);
+    }
+}
+
+class ParallaxElement {
+    constructor(element) {
+        /** @property {HTMLElement} ELEMENT */
+        this.ELEMENT = element;
+    }
+}
+
+class CobaltScrollManagerOld {
+    constructor(querySelector = null, modifier = 2) {
+        this.useiOSWorkaround = iOS();
+
+        this.allowUpdate = false; // The bool that controls the animation loop
+        this.simultaneousDelayValue = 50;
         this.querySelector = querySelector ?? "[parallax-mode],[parallax-speed]";
         this.lazyRevealQuery = "[lazy-reveal]";
         
@@ -106,13 +298,29 @@ class CobaltScrollManager {
             let lazyChildren = e.querySelectorAll(`:is(${this.lazyRevealQuery}) [lazy-child]`);
 
             lazyChildren.forEach((el,i) => {
-                const delay = el.getAttribute('lazy-child');
-                el.style.setProperty('--lazy-delay', delay || `${100 * i}ms`);
+                const delay = this.delayParse(el.getAttribute('lazy-delay'), i, cssUnitToNumber(e.getAttribute("lazy-delay")) ?? 0);
+                const len = delay.length;
+                el.style.setProperty('--lazy-delay', `${delay}ms` || `${100 * i}ms`);
             });
         }
 
         this.allowUpdate = true;
         if(this.parallaxElements.length) requestAnimationFrame(this.animLoop.bind(this));
+    }
+
+    delayParse(delay, iteration, parentDelay = 0) {
+        if(!delay) return 100 * iteration + (parentDelay ?? 0);
+        const last = delay[delay.length - 2] + delay[delay.length - 1] ?? "";
+        const unit = cssUnitToNumber(delay);
+        
+        switch(last) {
+            case "ms":
+                return unit + parentDelay;
+            case (delay[1] === "s"):
+                return (unit * 1000) + parentDelay;
+            default:
+                return (unit ?? 100) * iteration + (parentDelay ?? 0);
+        }
     }
 
     getMode(mode) {
@@ -124,7 +332,7 @@ class CobaltScrollManager {
 
     getPageOffset(element) {
         let topOffset = element.getBoundingClientRect().top;
-        const offset = parseInt(element.getAttribute("lazy-offset"));
+        const offset = parseInt(cssUnitToNumber(element.getAttribute("lazy-offset")));
         if(String(offset) !== "NaN") topOffset += offset;
         // topOffset += offset;
         while(element !== document.documentElement) {

@@ -4,7 +4,10 @@
     // Some user agents don't support (or don't enable) JavaScript. Therefore we
     // should keep track of any content that would be hidden because of JS and
     // style around that issue.
-    document.getElementsByTagName("html")[0].classList.add("js")
+    document.getElementsByTagName("html")[0].classList.add("js");
+    if(matchMedia("prefers-reduced-motion").matches == false) {
+        document.getElementsByTagName("html")[0].classList.add("_parallax");
+    }
 </script>
 <head>
     <meta charset="utf-8">

@@ -11,7 +11,8 @@
 .button,
 a.button,
 [role='button'],
-a.floater--new-item {
+a.floater--new-item
+{
     --_anchor-element-color: var(--primary-color-1-fg);
     --_anchor-element-background: var(--primary-color-1);
     --_anchor-hover-color: var(--primary-color-0-fg);
@@ -30,10 +31,14 @@ a.floater--new-item {
     font-size: 1.1rem;
     white-space: nowrap;
     box-sizing: border-box;
-    border: 0;
+    border: var(--input-element-border-width) solid transparent;
     text-decoration: none;
     font-weight: bolder;
     margin-bottom: var(--margin-xs);
+    
+    
+    
+    
     &:not(button) {
         /* border-radius: 0; */
         /* border: 1px solid var(--project-color-input-border-nofocus); */
@@ -43,14 +48,16 @@ a.floater--new-item {
         cursor: normal;
         user-select: none;
     }
-    &.light-alt {
+    &.light-alt,
+    &.light {
         --_anchor-element-color: var(--neutral-color-1-fg);
         --_anchor-element-background: var(--neutral-color-1);
         --_anchor-hover-color: var(--neutral-color-0-fg);
         --_anchor-hover-background: var(--neutral-color-0);
         /* border: 1px solid; */
     }
-    &.dark-alt {
+    &.dark-alt,
+    &.dark {
         --_anchor-element-color: var(--neutral-color-4-fg);
         --_anchor-element-background: var(--neutral-color-4);
         --_anchor-hover-color: var(--neutral-color-3-fg);
@@ -84,6 +91,19 @@ a.floater--new-item {
             --_anchor-active-color: var(--primary-color-5-fg);
             --_anchor-active-background: var(--primary-color-5);
             /* border: 1px solid; */
+        }
+    }
+    &.tertiary {
+        --_anchor-element-color: inherit;
+        --_anchor-element-background: transparent;
+        --_anchor-hover-color: inherit;
+        --_anchor-hover-background: transparent;
+        --_anchor-active-color: inherit;
+        --_anchor-active-background: transparent;
+        padding-left: 0;
+        padding-right: 0;
+        &:hover {
+            text-decoration: underline;
         }
     }
     &.dangerous,

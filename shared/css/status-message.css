@@ -29,6 +29,7 @@ message-item {
     animation-duration: 800ms;
     overflow: hidden;
     background: white;
+    color: black;
     border-radius: 4px;
     box-shadow: 5px 0px 20px rgba(0,0,0,.3);
     /* --height: 100px; */

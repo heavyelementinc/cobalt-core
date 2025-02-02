@@ -7,7 +7,7 @@
             <a href="#login-form">Password</a>
             <a href="#email">Email</a>
         </nav>
-        <form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" @csrf_attribute();>
+        <form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" autosave="enter" @csrf_attribute();>
             <div __custom-input="true">
                 {{!user.name.tag()}}
             </div>

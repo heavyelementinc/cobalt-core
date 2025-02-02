@@ -260,6 +260,11 @@
         "version": 2
     },
     {
+        "href": "web.css",
+        "contexts": ["web"],
+        "version": 2
+    },
+    {
         "href": "basic-buttons.css",
         "contexts": ["common"],
         "version": 2

@@ -735,8 +735,16 @@ function reflow() {
 
 /**
  * Will convert units to pixels or return the same string
+ * @param {String} ccsValue - A CSS value formatted as a string
+ * @param {?HTMLElement} target - The element to derive relative values like `em` from
+ * @param {Bool} error - Determines if this function can throw an error
+ * @returns {?Number}
  */
  function cssToPixel( cssValue, target = null, error = true ) {
+    if(cssValue === null) {
+        if(error) throw new Error("CSS value not supplied");
+        return null;
+    }
 
     target = target || document.body;
 
@@ -785,7 +793,18 @@ function reflow() {
         } else if (error) throw Error("The value supplied cannot be converted");
     }
 
-    return cssValue;
+    // return cssValue;
+    return null;
+}
+
+/**
+ * Will convert units to pixels or return the same string
+ * @param {String} ccsValue - A CSS value formatted as a string
+ * @param {?HTMLElement} target - The element to derive relative values like `em` from
+ * @returns {?Number}
+ */
+function cssUnitToNumber(cssValue, target = null) {
+    return cssToPixel(cssValue, target, false)
 }
 
 function iOS() {

@@ -1,33 +1,32 @@
 .list-panel ul,
 ul.list-panel {
+    --_border-radius: 4px;
+    --_item-padding: 1rem;
     list-style: none;
     padding: 0;
     margin-top: .5rem;
     border: var(--project-color-table-border);
-    border-radius: 4px;
+    border-radius: var(--_border-radius);
     /* background: var(--project-calendar-cell-other-bg) */
     > li {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        padding: 1rem;
+        padding: var(--_item-padding);
         background: var(--project-color-table-bg-odd);
         max-width: 100%;
-        
-        
-        
         
         &:nth-of-type(odd) {
             background: var(--project-color-table-bg-even);
         }
         &:first-of-type{
-            border-radius: 4px 4px 0 0;
+            border-radius: var(--_border-radius) var(--_border-radius) 0 0;
         }
         &:last-of-type{
-            border-radius: 0 0 4px 4px;
+            border-radius: 0 0 var(--_border-radius) var(--_border-radius);
         }
         &:only-child{
-            border-radius: 4px;
+            border-radius: var(--_border-radius);
         }
         label {
             width:100%;
@@ -37,7 +36,7 @@ ul.list-panel {
             margin: 0 0 var(--margin-xxs);
         }
         input-switch {
-            margin: 0 1rem 0 0;
+            margin: 0 var(--_item-padding) 0 0;
         }
         small {
             display: block;
