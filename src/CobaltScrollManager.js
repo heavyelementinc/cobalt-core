@@ -105,6 +105,30 @@ class CobaltScrollManager {
             } else entry.target.lazy.intersectionEnd();
         }
     }
+
+    animLoop() {
+        if(this.allowUpdate === false) {
+            console.warn("The animLoop function returned because allowUpdate was `false`");
+            return;
+        }
+        const scrollHeight = (window.scrollY + window.innerHeight);
+        this.visibleScrollPosition =  scrollHeight - this.innerScrollOffset;
+        if(document.body.scrollHeight - scrollHeight < (this.innerScrollOffset > .5)) this.visibleScrollPosition = document.body.scrollHeight;
+        this.simultaneousTickRevealDelay = 0;
+
+        for(const e of this.parallaxElements) {
+            e.parallax[e.parallax.mode](e, e);
+        }
+
+        this.updateDebug();
+        
+        requestAnimationFrame(this.animLoop.bind(this));
+    }
+
+    updateDebug() {
+        if(!this.debug) return;
+        this.scrollPositionDebug.style.top = this.visibleScrollPosition + 'px';
+    }
 }
 
 class LazyElement {
@@ -211,18 +235,26 @@ class ParallaxElement {
         /** @property {HTMLElement} ELEMENT */
         this.ELEMENT = element;
         this.SETTINGS = settings;
+        this.mode = null;
+        this.speed = null;
+        this.offset = null;
+        this.initialize();
+    }
+
+    dimensions() {
+        return get_offset(e);
     }
 
     initialize() {
         const e = this.ELEMENT;
-        e._parallax = {
-            mode: this.getMode(e.getAttribute("parallax-mode")),
-            speed: Math.abs(e.getAttribute("parallax-speed") ?? this.SETTINGS.modifier),
-            offset: e.getAttribute("parallax-offset") ?? (this.getPageOffset(e)) * -1,
-            dimensions: () => get_offset(e),
-        }
+        
+        this.mode = this.getMode(e.getAttribute("parallax-mode"));
+        this.speed = Math.abs(e.getAttribute("parallax-speed") ?? this.SETTINGS.modifier);
+        this.offset = e.getAttribute("parallax-offset") ?? (this.getPageOffset(e)) * -1;
+        // this.dimensions = () => get_offset(e),
+        
 
-        switch(e._parallax.mode) {
+        switch(e.mode) {
             case "parallaxPosition":
                 this.parallaxBackgroundInit(e, this.SETTINGS);
                 break;
@@ -322,6 +354,18 @@ class ParallaxElement {
             if(image.error) reject({height: 0, width: 0});
             if(image.complete) resolve({height: image.naturalHeight, width: image.naturalWidth});
         });
+    }
+
+    getPageOffset(element) {
+        let topOffset = element.getBoundingClientRect().top;
+        const offset = parseInt(cssUnitToNumber(element.getAttribute("lazy-offset")));
+        if(String(offset) !== "NaN") topOffset += offset;
+        // topOffset += offset;
+        while(element !== document.documentElement) {
+            element = element.parentNode;
+            topOffset += element.scrollTop;
+        }
+        return topOffset;
     }
 }
 

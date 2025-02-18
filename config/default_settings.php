@@ -1254,6 +1254,17 @@ $settings = [
                 "type" => "input-switch"
             ],
         ],
+        "universal_theme" => [
+            "default" => false,
+            "meta" => [
+                "group" => GROUP_LOOK_FEEL,
+                "subgroup" => SUBGROUP_BASIC_GENERAL,
+                "name" => "Universal Theme",
+                "description" => "When on, themes will apply to the entire app (including the admin panel).",
+                "help" => "By default, themes do not apply to the admin panel.",
+                "type" => "input-switch"
+            ],
+        ],
         "default_color_scheme" => [
             "default" => true
         ],

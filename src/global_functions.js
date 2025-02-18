@@ -917,6 +917,19 @@ function promiseTimeout(callback, value) {
     })
 }
 
+function encodeClickModifiers(event) {
+    const SHIFT_KEY = 0b0000001;
+    const CTRL_KEY  = 0b0000010;
+    const ALT_KEY   = 0b0000100;
+    const META_KEY  = 0b0001000;
+    let mod = 0;
+    mod += (event.shiftKey) ? SHIFT_KEY : 0;
+    mod += (event.ctrlKey) ? CTRL_KEY : 0;
+    mod += (event.altKey) ? ALT_KEY : 0;
+    mod += (event.metaKey) ? META_KEY : 0;
+    return mod;
+}
+
 function getTabId() {
     if (window.sessionStorage.tabId) {
         return window.sessionStorage.tabId;
@@ -927,6 +940,57 @@ function getTabId() {
 }
 
 getTabId();
+
+
+
+function upload_field_update(element) {
+    const name = element.name;
+    const container = element.closest(`.upload-field`);
+    const previewTarget = container.querySelector("img");
+    // previewTarget.src = 
+}
+
+function dateFromObjectId(objectId) {
+	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+}
+
+class Deferred {
+    _props = {
+        promise: null, 
+        resolve: (value) => {},
+        reject: (message) => {}
+    }
+    constructor(callback) {
+        this._props.promise = new Promise(async (resolve, reject) => {
+            this._props.resolve = resolve;
+            this._props.reject = reject;
+            await callback(resolve, reject);
+        });
+    }
+
+    get promise() {
+        return this._props.promise;
+    }
+
+    get resolve() {
+        return this._props.resolve;
+    }
+
+    get reject() {
+        return this._props.reject;
+    }
+
+    async await() {
+        return this.promise;
+    }
+}
+
+
+
+
+
+
+
 
 class Rt {
     get location() {
@@ -943,16 +1007,4 @@ class Rt {
         console.warn("Your app is using a deprecated Cobalt API! Please change any reference to `router.location` to utilize `Cobalt.router.location`");
     }
 }
-
 window.router = new Rt();
-
-function upload_field_update(element) {
-    const name = element.name;
-    const container = element.closest(`.upload-field`);
-    const previewTarget = container.querySelector("img");
-    // previewTarget.src = 
-}
-
-function dateFromObjectId(objectId) {
-	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
-}

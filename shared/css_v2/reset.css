@@ -160,6 +160,15 @@ code, kbd, samp {
     font-size: 1em;
 }
 
+kbd:not(:has(kbd)) {
+    background: aliceblue;
+    color: midnightblue;
+    border-radius: 4px;
+    padding-inline: 4px;
+    box-shadow: 2px 2px 0 3px lightsteelblue;
+    margin-inline-end: .25ch;
+}
+
 small {
     font-size: 80%;
 }

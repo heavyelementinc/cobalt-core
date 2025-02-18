@@ -1,98 +1,98 @@
 @property --branding-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.branding_increment}};
+    initial-value: {{theme.branding_increment}};
 }
 
 @property --branding-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.branding_rotation}};
+    initial-value: {{theme.branding_rotation}};
 }
 
 @property --branding-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{app.color_branding}};
+    initial-value: {{theme.color_branding}};
 }
 
 @property --primary-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.primary_increment}};
+    initial-value: {{theme.primary_increment}};
 }
 
 @property --primary-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.primary_rotation}};
+    initial-value: {{theme.primary_rotation}};
 }
 
 @property --primary-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{app.color_primary}};
+    initial-value: {{theme.color_primary}};
 }
 
 
 @property --issue-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.issue_increment}};
+    initial-value: {{theme.issue_increment}};
 }
 
 @property --issue-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.issue_rotation}};
+    initial-value: {{theme.issue_rotation}};
 }
 
 @property --issue-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{app.color_issue}};
+    initial-value: {{theme.color_issue}};
 }
 
 @property --neutral-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.neutral_increment}};
+    initial-value: {{theme.neutral_increment}};
 }
 
 @property --neutral-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.neutral_rotation}};
+    initial-value: {{theme.neutral_rotation}};
 }
 
 @property --neutral-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{app.color_neutral}};
+    initial-value: {{theme.color_neutral}};
 }
 
 @property --background-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.background_increment}};
+    initial-value: {{theme.background_increment}};
 }
 
 @property --background-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{app.background_rotation}};
+    initial-value: {{theme.background_rotation}};
 }
 
 @property --background-color {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{app.color_background}};
+    initial-value: {{theme.color_background}};
 }
 
 @property --font-body-color {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{app.color_font_body}};
+    initial-value: {{theme.color_font_body}};
 }
 
 :root {

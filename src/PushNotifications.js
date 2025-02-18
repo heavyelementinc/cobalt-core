@@ -91,7 +91,7 @@ class PushNotifications {
 
     async enroll() {
         try {
-            const api = new ApiFetch(this.vapid_key_endpoint, "GET", {});
+            const api = new AsyncFetch(this.vapid_key_endpoint, "GET", {});
             this.applicationServerPublicKey = await api.get();
         } catch (error) {
             console.error("Failed to fetch this application's public key");
@@ -103,7 +103,7 @@ class PushNotifications {
             userVisibleOnly: true,
             applicationServerKey: applicationServerKey
         });
-
+        
         try{
             await this.updateSubscriptionOnServer(subscription, "subscribed");
             this.subscription = true;

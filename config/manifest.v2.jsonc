@@ -157,6 +157,10 @@
         "contexts": ["common"]
     },
     {
+        "href":"components/type-writer.js",
+        "contexts": ["common"]
+    },
+    {
         "href":"Cobalt/Shadowbox.js",
         "contexts": ["common"]
     },
@@ -340,6 +344,10 @@
     },
     {
         "href": "components/block-editor.css",
+        "contexts": ["common"]
+    },
+    {
+        "href":"components/type-writer.css",
         "contexts": ["common"]
     },
     {

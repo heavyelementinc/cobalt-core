@@ -190,7 +190,9 @@ class ActionMenu extends EventTarget {
     }
 
     async handleRequest(action, event) {
-        const api = new AsyncFetch(action.requestAction, action.requestMethod);
+        const api = new AsyncFetch(action.requestAction, action.requestMethod, {
+            headers: {'X-Keyboard-Modifiers': encodeClickModifiers(event)}
+        });
         action.throbberStart();
         let result
         try {

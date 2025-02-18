@@ -242,10 +242,32 @@ class WebHandler implements RequestHandler {
             }
             $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         } else {
-            $settings .= "<style id=\"theme-variables\">".view("/shared/css_v2/color-theme.css")."</style>";
+            $settings .= "<style id=\"theme-variables\">".view("/shared/css_v2/color-theme.css", ['theme' => $this->getTheme()])."</style>";
             // $settings .= "\n<link rel=\"stylesheet\" href=\"/core-content/css/v2/color-theme.css\">";
         }
         return $settings;
+    }
+
+    function getTheme() {
+        return [
+            "branding_increment"     => __APP_SETTINGS__["branding_increment"],
+            "branding_rotation"      => __APP_SETTINGS__["branding_rotation"],
+            "color_branding"         => __APP_SETTINGS__["color_branding"],
+            "primary_increment"      => __APP_SETTINGS__["primary_increment"],
+            "primary_rotation"       => __APP_SETTINGS__["primary_rotation"],
+            "color_primary"          => __APP_SETTINGS__["color_primary"],
+            "neutral_increment"      => __APP_SETTINGS__["neutral_increment"],
+            "neutral_rotation"       => __APP_SETTINGS__["neutral_rotation"],
+            "color_neutral"          => __APP_SETTINGS__["color_neutral"],
+            "background_increment"   => __APP_SETTINGS__["background_increment"],
+            "background_rotation"    => __APP_SETTINGS__["background_rotation"],
+            "color_background"       => __APP_SETTINGS__["color_background"],
+            "issue_increment"        => __APP_SETTINGS__["issue_increment"],
+            "issue_rotation"         => __APP_SETTINGS__["issue_rotation"],
+            "color_issue"            => __APP_SETTINGS__["color_issue"],
+            "color_font_body"        => __APP_SETTINGS__["color_font_body"],
+            "color_mixed_percentage" => __APP_SETTINGS__["color_mixed_percentage"],
+        ];
     }
 
 

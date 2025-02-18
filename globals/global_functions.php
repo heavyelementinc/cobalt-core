@@ -802,3 +802,19 @@ function get_usable_mime_array(){
     return $s;
     // return @sort($s)?'$mime_types = array(<br />'.implode($s,',<br />').'<br />);':false;
 }
+
+
+
+const SHIFT_KEY = 0b0000001;
+const CTRL_KEY  = 0b0000010;
+const ALT_KEY   = 0b0000100;
+const META_KEY  = 0b0001000;
+
+/** Returns boolean value for a keyboard modifier
+ * @param int $header The incoming keyboard modifier (usually X-Keyboard-Modifier header)
+ * @param int $constantValue {SHIFT_KEY, CTRL_KEY, ALT_KEY, META_KEY}
+ */
+function isKeyboardModifierSet($header, $constantValue) {
+    if($header === null) return false;
+    return ($header & $constantValue >= 0);
+}

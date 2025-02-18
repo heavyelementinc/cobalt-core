@@ -98,5 +98,26 @@ class AdminHandler extends WebHandler {
     //     }
     //     return $link_tags;
     // }
-
+    function getTheme() {
+        if(__APP_SETTINGS__['universal_theme']) return parent::getTheme();
+        return [
+            "branding_increment"     => "0.05",
+            "branding_rotation"      => "10",
+            "color_branding"         => "#2F4858",
+            "primary_increment"      => "0.1",
+            "primary_rotation"       => "-10",
+            "color_primary"          => "#009DDC",
+            "neutral_increment"      => "0.1",
+            "neutral_rotation"       => "0",
+            "color_neutral"          => "#D2D6DA",
+            "background_increment"   => "0.1",
+            "background_rotation"    => "0",
+            "color_background"       => "#F4F5F6",
+            "issue_increment"        => "0.1",
+            "issue_rotation"         => "-10",
+            "color_issue"            => "#F96F5D",
+            "color_font_body"        => "#02040F",
+            "color_mixed_percentage" => 75,
+        ];
+    }
 }

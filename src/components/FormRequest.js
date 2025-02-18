@@ -177,7 +177,7 @@ class NewFormRequest extends HTMLElement {
             return this.submitGetRequest(data, event);
         }
 
-        const api = new AsyncFetch(action, method, {format: enctype, form: this, headers: this.getHeadersFromAttribute()});
+        const api = new AsyncFetch(action, method, {format: enctype, form: this, headers: {'X-Keyboard-Modifiers': encodeClickModifiers(event), ...this.getHeadersFromAttribute()}});
         api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
         api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
         api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));
