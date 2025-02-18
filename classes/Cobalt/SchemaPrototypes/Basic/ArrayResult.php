@@ -23,6 +23,7 @@ use MongoDB\BSON\Persistable;
 use MongoDB\Model\BSONDocument;
 use TypeError;
 
+
 /**
  *  * hydrate - <bool> if false, arrays won't be hydrated
  * @package Cobalt\SchemaPrototypes\Basic
@@ -287,6 +288,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
             if($arraylike instanceof BSONArray) {
                 $arraylike = $arraylike->getArrayCopy();
             }
+            if(is_null($arraylike)) return [];
             if(gettype($arraylike) !== "array") {
                 throw new TypeError("\$arraylike '$this->name' must be an array but found '" . gettype($arraylike) ."'");
             }
