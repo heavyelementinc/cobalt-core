@@ -25,7 +25,7 @@ class ManifestManager {
                 break;
         }
         $cacheMan = new CacheManager($file);
-        if($shouldUpdate === false && config()['boostrap_mode'] !== COBALT_BOOSTRAP_ALWAYS) {
+        if($shouldUpdate === false && config()['boostrap_mode'] !== COBALT_BOOSTRAP_ALWAYS && config('mode') === COBALT_MODE_PRODUCTION) {
             if($cacheMan->cache_exists() === true) return $cacheMan->get();
         }
         

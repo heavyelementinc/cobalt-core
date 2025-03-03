@@ -146,17 +146,17 @@ star-rating {
     grid-column: 2 / span 1;
     width: fit-content;
     color: var(--review-star-color, #feb95f);
-    li {
+    :where(star) {
         font-family: "Material Design Icons", sans-serif;
         /* opacity: .5; */
         width: 1.6ch;
-        &::marker{
+        &::before{
             content: "\F04D2";
         }
-        &.half::marker{
+        &.half::before{
             content: "\F04D0";
         }
-        &.full::marker {
+        &.full::before {
             content: "\F04CE"
         }
     }
