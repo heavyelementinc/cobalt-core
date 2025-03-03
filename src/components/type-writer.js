@@ -179,7 +179,7 @@ class TypeWriter extends HTMLElement {
     revealElement(line) {
         return new Promise((resolve, reject) => {
             this._revealPromise = resolve;
-            // this._revealIndex = 0;
+            this._revealIndex = 0;
             this._revealInterval = setInterval(() => {
                 if(!line.children[this._revealIndex]) {
                     this.dispatchEvent(new CustomEvent("typewriterlinerevealed"));

@@ -17,10 +17,16 @@ class Item implements Persistable{
     private string $href = "";
     private string $known_file = "";
     private array $contexts = [];
-    private bool $module = false;
-    private bool $registered = false;
-    private bool $append = false;
+    private bool $append = false; // Appends this item to the end of the final list of items
     private int $version = 1;
+
+    private bool $module = false;
+    private bool $registered = false; 
+    private bool $deferred = false;
+    private bool $inline = false;
+    
+    private string $package = "package"; // Defines which package this item belongs to when cached
+    // private array $package_attrs = []; // Defines what attributes should be applied to the tag
 
     private ValidTypes $type;
 
@@ -45,12 +51,15 @@ class Item implements Persistable{
     public function bsonSerialize(): array|stdClass|Document {
         return [
             'href' => $this->href,
+            'package' => $this->package,
             // 'known_file' => $this->known_file,
             'contexts' => $this->contexts,
             'module' => $this->module,
             'registered' => $this->registered,
             'append' => $this->append,
             'version' => $this->version,
+            'inline' => $this->inline,
+            'deferred' => $this->deferred,
         ];
     }
 
@@ -60,10 +69,14 @@ class Item implements Persistable{
 
     function ingest(array $data) {
         $this->set_href($data['href'], $data['path'] ?? null);
+        $this->set_package($data['package'] ?? 'package');
         $this->set_contexts($data['contexts'] ?? []);
         $this->set_module($data['module'] ?? false);
+        $this->set_registered($data['registered'] ?? false);
         $this->set_append($data['append'] ?? false);
         $this->set_version($data['version'] ?? 1);
+        $this->set_inline($data['inline'] ?? false);
+        $this->set_deferred($data['deferred'] ?? false);
     }
 
     public function set_href(string $value, ?string $path = null) {
@@ -115,8 +128,27 @@ class Item implements Persistable{
         $this->version = $version;
     }
 
+    public function set_package(string $package) {
+        $this->package = $package;
+    }
+
+    public function set_registered(bool $value) {
+        $this->registered = $value;
+    }
+
+    public function set_deferred(bool $value) {
+        $this->deferred = $value;
+    }
+    public function set_inline(bool $value) {
+        $this->inline = $value;
+    }
+
     public function get_href():string {
         return $this->href;
+    }
+
+    public function get_package():string {
+        return $this->package;
     }
 
     public function get_contexts():array {
@@ -139,6 +171,12 @@ class Item implements Persistable{
         return $this->version;
     }
 
+    public function is_inline_content():bool {
+        return $this->inline;
+    }
+    public function is_deferred_content():bool {
+        return $this->deferred;
+    }
 
     public function belongs_to_context($context):bool {
         if(in_array($context, $this->contexts)) return true;
@@ -165,6 +203,14 @@ class Item implements Persistable{
             default:
                 throw new TypeError("Unknown type. Cannot generate HTML for manifest entry");
         }
+    }
+
+    public function get_package_meta() {
+        $meta = [];
+        if($this->module) $meta[] = "type=\"module\"";
+        if($this->registered) $meta[] = "onload=\"window.asyncScripts.push(new Promise(resolve=>resolve(this)))\"";
+        if($this->deferred) $meta[] = "deferred=\"deferred\"";
+        return $meta;
     }
 
     public function get_script_tag(&$packages) {

@@ -71,6 +71,9 @@ body > header {
         justify-content: center;
         align-items: center;
         font-family: var(--project-body-family);
+        &:empty {
+            display: none;
+        }
     }
     &.directory--icon-group {
         li {

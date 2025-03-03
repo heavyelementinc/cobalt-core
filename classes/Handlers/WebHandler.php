@@ -289,7 +289,7 @@ class WebHandler implements RequestHandler {
         if(__APP_SETTINGS__['Web_include_app_branding']) {
             $logo = app("logo.thumb");
             $meta = $logo['meta'];
-            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
+            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]' alt=\"".htmlspecialchars(__APP_SETTINGS__['app_name'])." Homepage\"></a>";
         }
         
         add_vars([
@@ -478,7 +478,7 @@ class WebHandler implements RequestHandler {
         if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
 
         $man = new ManifestManager();
-        return $man->get_tags(ValidTypes::js, $this->meta_selector, $generate_script_content);
+        return $man->get_tags(ValidTypes::js, $this->meta_selector, $generate_script_content, $generate_script_content);
     }
 
     function get_script_pathname_from_manifest_entry($entry) {
@@ -599,7 +599,7 @@ class WebHandler implements RequestHandler {
         $package_style_content = __APP_SETTINGS__["manifest_v2_package_css_files"];
         if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $package_style_content = false;
         $man = new ManifestManager();
-        return $man->get_tags(ValidTypes::css, $this->meta_selector, $package_style_content);
+        return $man->get_tags(ValidTypes::css, $this->meta_selector, $package_style_content, $package_style_content);
     }
 
     function session_panel() {

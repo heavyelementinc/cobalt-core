@@ -393,7 +393,8 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                     self::FLAGS_READ_TIME_MANUALLY_SET => "Read Time Manually Set",
                     self::FLAGS_INCLUDE_PERMALINK => "Include Permalink in URL",
                     self::FLAGS_HIDE_WEBMENTIONS => "Hide Webmention Interactions",
-                ]
+                ],
+                'default' => (__APP_SETTINGS__['LandingPages_show_related']) ? self::FLAGS_EXCLUDE_RELATED_PAGES : 0
             ],
             'preview_key' => [
                 new StringResult,

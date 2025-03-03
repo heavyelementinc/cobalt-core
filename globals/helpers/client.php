@@ -77,5 +77,5 @@ function edit_link($group) {
     } catch (\Exceptions\HTTP\Unauthorized $e) {
         return "";
     }
-    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span style='display: none'>Edit This Customization</span></a>";
+    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span class='sr-only'>Edit $group customization</span><span style='display: none'>Edit This Customization</span></a>";
 }

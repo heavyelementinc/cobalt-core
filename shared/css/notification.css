@@ -60,6 +60,10 @@ notify-button .unseen-indicator:empty {
 
 .notifications--notifications-panel[aria-hidden="true"] {
     right: -150%;
+    button, input {
+        user-select: none;
+        
+    }
 }
 
 .notifications--notifications-panel hgroup {

@@ -32,6 +32,7 @@ function is_secure():bool {
  * @throws Confirm if headers are not detected throw Confirm
  */
 function confirm($message, $data, $okay = "Continue", $dangerous = true) {
+    if(isKeyboardModifierSet(getHeader("X-Keyboard-Modifiers"), ALT_KEY)) return true;
     try {
         $header = getHeader("X-Confirm-Dangerous");
         if($header) return true;

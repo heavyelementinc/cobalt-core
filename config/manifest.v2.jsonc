@@ -18,19 +18,23 @@
     },
     {
         "href":"Modal.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"Cobalt/CobaltModal.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"StatusMessage.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"AsyncMessageHandler.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"sortable.js",
@@ -46,159 +50,197 @@
     },
     {
         "href":"ActionMenu.js",
-        "contexts": ["common"]
-    },
-    {
-        "href":"components/simplemde.min.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/custom-button.js",
         "contexts": ["common"]
     },
     {
+        "href":"components/simplemde.min.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
         "href":"components/autocomplete-interface.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/radio-buttons.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/split-button.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/button-toggle.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/input-array.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/datepicker.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/input-datetime.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/autocomplete.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/input-password.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/cobalt-carousel.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/tag-select.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/fs-listing.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/fold-out.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/tab-nav.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/credit-card.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/flex-table.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/action-menu-element.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/NotificationsPanel.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/input-text.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/markdown-area.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/CountdownTimer.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/horizontal-scroll.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/block-editor.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/image-result.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/NumberReveal.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"components/type-writer.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"Cobalt/Shadowbox.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"DateConverter.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"TabbedUI.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"InputClasses.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"InputComponents.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"AsyncButton.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"UserMenu.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"Events.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"PaginatedContainer.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"AudioPlayer.js",
-        "contexts": ["common"]
+        "contexts": ["common"],
+        "package": "deferred"
     },
     {
         "href":"CobaltScrollManager.js",
@@ -258,6 +300,12 @@
         "append": true
     },
     /* CSS */
+    // {
+    //     "href": "material-design/css/material.min.css",
+    //     "contexts": ["common"],
+    //     "package": "inline",
+    //     "inline": true
+    // },
     {
         "href": "reset.css",
         "contexts": ["common"],

@@ -78,19 +78,19 @@
     <script>
         window.asyncScripts = [];
     </script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.2/dist/editorjs.umd.min.js"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src="/core-content/js/editorjs/simpleimage.js"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.2/dist/editorjs.umd.min.js"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="/core-content/js/editorjs/simpleimage.js"></script>
     <!-- <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src=""></script> -->
 
     @script_content@

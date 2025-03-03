@@ -297,6 +297,7 @@ function fonts_tag() {
             }
             $links = implode("|", $links);
             return <<<HTML
+            <link href="https://fonts.googleapis.com/" rel="preconnect">
             <link href="https://fonts.googleapis.com/css?family=$links&display=swap" rel="stylesheet">
             <style>
                 :root{

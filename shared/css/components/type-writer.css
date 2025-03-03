@@ -1,8 +1,10 @@
 ._parallax type-writer {
     --translate-out: translateY(1em);
     position: relative;
-    min-width: var(--char-count);
     display: inline-block;
+    &[one-line="true"] {
+        min-width: var(--char-count);
+    }
     &[overlap] > * {
         position: absolute;
         top: 0;

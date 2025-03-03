@@ -885,6 +885,20 @@ $settings = [
                 "confirm" => "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
             ]
         ],
+        "LandingPages_show_related" => [
+            "default" => true,
+            "meta" => [
+                "group" => GROUP_PAGES,
+                "subgroup" => "Related Content",
+                "name" => "Show related content",
+                "help" => "Include links to related pages by default.",
+                "type" => "input"
+            ],
+            "validate" => [
+                "type" => "string",
+                "confirm" => "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
+            ]
+        ],
     
     /** POSTS */
         "Posts_default_enabled" => [
@@ -1670,6 +1684,36 @@ $settings = [
             ],
             "validate" => [
                 "type" => "boolean"
+            ]
+        ],
+        "apply_header_class_after_scroll" => [
+            "default" => 0,
+            "directives" =>[
+                "public" => true
+            ],
+            "meta" => [
+                "group" => GROUP_LOOK_FEEL,
+                "name" => "Threshold to apply `scrolled` class to body",
+                "description" => "After the scrollbar leaves scrolls beyond this value, the scroll manager will apply the class .scroll-manager--scroll-constraint-satisfied",
+                "type" => "input-number"
+            ],
+            "validate" => [
+                "type" => "number"
+            ]
+        ],
+        "apply_header_class_scroll_upwards_multiplier"  => [
+            "default" => 1,
+            "directives" =>[
+                "public" => true
+            ],
+            "meta" => [
+                "group" => GROUP_LOOK_FEEL,
+                "name" => "`Scrolled` class upwards multiplier",
+                "description" => "When scrolling upwards, the \"Threshold to apply `scrolled` class to body\" is multiplied by this value to find the upwards movement threshold",
+                "type" => "input-number"
+            ],
+            "validate" => [
+                "type" => "number"
             ]
         ],
     /** PACKAGING */

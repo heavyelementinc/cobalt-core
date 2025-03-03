@@ -31,7 +31,7 @@ class CobaltScrollManager {
         this.LAZY_SELECTOR = "[lazy-reveal]";
         this.OBSERVER = null;
         
-        this.parallaxElements = []; // The elements to be updated
+        this.scrollAnimatedElements = []; // The elements to be updated
         this.lazyElements = [];
         this.modifier = modifier;
 
@@ -65,24 +65,57 @@ class CobaltScrollManager {
         this.innerScrollOffset = window.innerHeight * .33;
 
         // Create our list of parallax elements
-        this.parallaxElements = [];
+        this.scrollAnimatedElements = [];
 
         let nodes = document.querySelectorAll(this.PARALLAX_SELECTOR);
-        let index = 0;
+        const settings = {
+            useiOSWorkaround: this.useiOSWorkaround,
+            modifier: this.modifier,
+            debug: this.debug,
+        }
+        let promises = [];
         for(const e of nodes) {
-            e.parallax = new ParallaxElement(e, index);
-            this.parallaxElements[index] = e;
-            index += 1;
+            let index = this.scrollAnimatedElements.length;
+            const attr = e.getAttribute("parallax-mode")?.toLowerCase();
+            let parallaxElement = null;
+            switch(attr) {
+                case "translate-x":
+                case "translatex":
+                case "x":
+                    parallaxElement = new ParallaxPositionXElement(e,settings);
+                    break;
+                case "translate-y":
+                case "translatey":
+                case "position":
+                case "y": 
+                    parallaxElement = new ParallaxPositionYElement(e,settings);
+                    break;
+                case "background":
+                case "bg":
+                default:
+                    parallaxElement = new ParallaxBackgroundElement(e,settings);
+                    break;
+            }
+            this.scrollAnimatedElements.push(parallaxElement);
+            promises.push(parallaxElement.initialize(index));
+        }
+
+        await Promise.all(promises); // Wait for all the image loading to complete
+
+        if(app("apply_header_class_after_scroll") >= 1) {
+            const scrolledClass = new ScrollConstraintElement(document.body, this.scrollAnimatedElements.length);
+            scrolledClass.initialize(this.scrollAnimatedElements.length);
+            this.scrollAnimatedElements.push(scrolledClass);
         }
 
         this.allowUpdate = true;
-        if(this.parallaxElements.length) requestAnimationFrame(this.animLoop.bind(this));
+        if(this.scrollAnimatedElements.length) requestAnimationFrame(this.animationLoop.bind(this));
 
         // Create our list of lazy elements
         this.lazyElements = [];
 
         let lazy = document.querySelectorAll(this.LAZY_SELECTOR);
-        index = 0;
+        let index = 0;
         this.OBSERVER = new IntersectionObserver(this.observeCallback.bind(this), {
             // root: document.body,
             rootMargin: "-20% 0px"
@@ -95,43 +128,56 @@ class CobaltScrollManager {
             this.OBSERVER.observe(e);
             index += 1;
         }
+
     }
 
     observeCallback(entries) {
+        const revealableEntities = [];
+        let index = 0;
         /** @const {IntersectionObserverEntry} entry */
         for(const entry of entries) {
             if(entry.isIntersecting){ // && entry.intersectionRatio >= entry.target.lazy.ratio
-                entry.target.lazy.intersectionStart();
+                revealableEntities.push({entry, index})
+                index += 1;
             } else entry.target.lazy.intersectionEnd();
+        }
+
+        for(const entity of revealableEntities) {
+            entity.entry.target.lazy.intersectionStart(entity.index);
         }
     }
 
-    animLoop() {
+    animationLoop() {
         if(this.allowUpdate === false) {
-            console.warn("The animLoop function returned because allowUpdate was `false`");
+            console.warn("The animationLoop function returned because allowUpdate was `false`");
             return;
         }
+        // Determine our actual scroll height
         const scrollHeight = (window.scrollY + window.innerHeight);
         this.visibleScrollPosition =  scrollHeight - this.innerScrollOffset;
         if(document.body.scrollHeight - scrollHeight < (this.innerScrollOffset > .5)) this.visibleScrollPosition = document.body.scrollHeight;
         this.simultaneousTickRevealDelay = 0;
 
-        for(const e of this.parallaxElements) {
-            e.parallax[e.parallax.mode](e, e);
+        for(const element of this.scrollAnimatedElements) {
+            element.animate(scrollHeight);
         }
 
         this.updateDebug();
         
-        requestAnimationFrame(this.animLoop.bind(this));
+        requestAnimationFrame(this.animationLoop.bind(this));
     }
 
     updateDebug() {
         if(!this.debug) return;
         this.scrollPositionDebug.style.top = this.visibleScrollPosition + 'px';
     }
+
 }
 
 class LazyElement {
+    MODE_STAGGER = "stagger";
+    MODE_REVERT = "revert";
+
     /** @param {HTMLElement} element */
     constructor(element, index, delayOffset) {
         /** @property {HTMLElement} this.ELEMENT */
@@ -221,71 +267,85 @@ class LazyElement {
     //     return threshold;
     // }
 
-    intersectionStart() {
+    intersectionStart(index) {
+        if(this.ELEMENT.getAttribute("lazy-reveal") === this.MODE_STAGGER) {
+            const delay = (this.ELEMENT.getAttribute("lazy-offset") ?? 100) * index
+            this.ELEMENT.style.transitionDelay = `${delay}ms`;
+            this.ELEMENT.style.animationDelay = `${delay}ms`;
+        }
         this.ELEMENT.classList.add(this.VISIBLE_CLASS);
     }
 
     intersectionEnd() {
         if(this.RESET) this.ELEMENT.classList.remove(this.VISIBLE_CLASS);
+        // if(this.ELEMENT.getAttribute("lazy-reveal") === this.MODE_REVERT) this.ELEMENT.classList.remove(this.VISIBLE_CLASS);
     }
 }
 
-class ParallaxElement {
+class AnimatedElement {
+    get speed() {
+        return Math.abs(this.ELEMENT.getAttribute("parallax-speed") ?? this.SETTINGS.modifier);
+    }
+
+    get modifier() {
+        return this.SETTINGS.modifier ?? 2;
+    }
+
+    initialize(index) {
+        // Called on page change, on window resize, etc.
+    }
+
+    animate(scrollHeight) {
+        // Called on every requestAnimationFrame
+    }
+}
+
+class ParallaxCommon extends AnimatedElement {
+    // get speed() {
+    //     return this.ELEMENT.getAttribute("parallax-speed") ?? 2;
+    // }
     constructor(element, settings = {}) {
+        super();
         /** @property {HTMLElement} ELEMENT */
         this.ELEMENT = element;
         this.SETTINGS = settings;
-        this.mode = null;
-        this.speed = null;
+        this.INDEX = null;
+        // this.speed = null;
         this.offset = null;
-        this.initialize();
     }
 
+    getPageOffset(element) {
+        let topOffset = element.getBoundingClientRect().top;
+        const offset = parseInt(cssUnitToNumber(element.getAttribute("lazy-offset")));
+        if(String(offset) !== "NaN") topOffset += offset;
+        // topOffset += offset;
+        while(element !== document.documentElement) {
+            element = element.parentNode;
+            topOffset += element.scrollTop;
+        }
+        return topOffset;
+    }
+}
+
+class ParallaxBackgroundElement extends ParallaxCommon {
     dimensions() {
-        return get_offset(e);
+        return get_offset(this.ELEMENT);
     }
 
-    initialize() {
+    get allowNativeCover() {
+        return (this.ELEMENT.getAttribute("native-cover") === "true");
+    }
+
+    async initialize(index) {
         const e = this.ELEMENT;
-        
-        this.mode = this.getMode(e.getAttribute("parallax-mode"));
-        this.speed = Math.abs(e.getAttribute("parallax-speed") ?? this.SETTINGS.modifier);
+
+        this.INDEX = index;
+        // this.speed = Math.abs(e.getAttribute("parallax-speed") ?? this.SETTINGS.modifier ?? 2);
         this.offset = e.getAttribute("parallax-offset") ?? (this.getPageOffset(e)) * -1;
-        // this.dimensions = () => get_offset(e),
-        
 
-        switch(e.mode) {
-            case "parallaxPosition":
-                this.parallaxBackgroundInit(e, this.SETTINGS);
-                break;
-            case "parallaxBackground":
-                this.parallaxPositionXInit(e, this.SETTINGS);
-                break;
-            case "parallaxPositionX":
-                this.parallaxPositionInit(e, this.SETTINGS);
-                break;
-        }
-    }
-
-    getMode(mode) {
-        switch(mode) {
-            case "x":
-                return "parallaxPositionX";
-            case "background":
-            case "bg":
-                return "parallaxBackground";
-            case "position":
-            case "y":
-            default: 
-                return "parallaxPosition";
-        }
-    }
-
-    async parallaxBackgroundInit(element, data) {
-        if(this.allowNativeCover === false) {
-            console.warn("Parallax Background Init");
+        if(!this.allowNativeCover) {
             // Height and width of image
-            const {height, width} = await this.loadImage(element, data); // height: 2788, width: 4190
+            const {height, width} = await this.loadImage(e); // height: 2788, width: 4190
 
             const containerHeight = window.innerHeight, // 977
             containerWidth = window.innerWidth; // 1258
@@ -293,7 +353,7 @@ class ParallaxElement {
             // Determine the smallest and largest dimensions
             const smallestImageDimension = Math.min(height, width);
     
-            // Determine which height is smaller so we can constrain our image dimensions        
+            // Determine which height is smaller so we can constrain our image dimensions
             let divisor = containerHeight;
             if (containerHeight > containerWidth) divisor = containerWidth;
             
@@ -301,45 +361,30 @@ class ParallaxElement {
             if(divisor > smallestImageDimension) scaleFactor = divisor / smallestImageDimension;
             else divisor = smallestImageDimension / divisor;
     
-            element.style.backgroundSize = `${width * scaleFactor}px ${height * scaleFactor}px`;
+            e.style.backgroundSize = `${width * scaleFactor}px ${height * scaleFactor}px`;
         }
 
-        element.classList.add("cobalt-parallax--bg-parallax");
+        e.classList.add("cobalt-parallax--bg-parallax");
 
-        const position = element.getAttribute("parallax-start-position") ?? "top";
-        element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${position}`;
+        const position = e.getAttribute("parallax-start-position") ?? "top";
+        e.style.backgroundPosition = `${e.getAttribute('parallax-justification') || "center"} ${position}`;
 
     }
 
-    parallaxBackground(element, data) {
+    animate() {
+        const element = this.ELEMENT;
+        // const data = this.offset;
         let x = element.getBoundingClientRect().top / (element.getAttribute("parallax-speed") ?? this.modifier);
         let y = Math.round(x * 100) / 100;
-        if(this.useiOSWorkaround) {
+        if(this.SETTINGS.useiOSWorkaround) {
             y += element.scrollTop;
             y -= this.iOSWorkaroundViewportHeight;
         }
-        (data.offset ?? 0)
+        // (data.offset ?? 0)
         element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${y}px`;
     }
 
-    parallaxPosition(element, data) {
-        let x = element.getBoundingClientRect().top / (data.speed ?? this.modifier);
-        let y = Math.round(x * 100) / 100;
-        element.style.transform = this.transformStyle(element, {translateY: y + 'px'});
-    }
-
-    parallaxPositionXInit(element, data) {
-        element.style.position = "absolute";
-        element.style.left = element.getAttribute("parallax-start-top") ?? 0;
-    }
-
-    parallaxPositionX(element, data){
-        let y = element.getBoundingClientRect().left / (data.speed ?? this.modifier);
-        let x = Math.round(x * 100) / 100;
-        element.style.left = x + 'px';
-    }
-
-    loadImage(element, data) {
+    loadImage(element) {
         return new Promise((resolve, reject) => {
             const src = element.style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
 
@@ -355,17 +400,95 @@ class ParallaxElement {
             if(image.complete) resolve({height: image.naturalHeight, width: image.naturalWidth});
         });
     }
+}
 
-    getPageOffset(element) {
-        let topOffset = element.getBoundingClientRect().top;
-        const offset = parseInt(cssUnitToNumber(element.getAttribute("lazy-offset")));
-        if(String(offset) !== "NaN") topOffset += offset;
-        // topOffset += offset;
-        while(element !== document.documentElement) {
-            element = element.parentNode;
-            topOffset += element.scrollTop;
+class ParallaxPositionXElement extends ParallaxCommon {
+    animate(scrollHeight) {
+        let x = this.ELEMENT.getBoundingClientRect().top / (data.speed ?? this.modifier);
+        let y = Math.round(x * 100) / 100;
+        this.ELEMENT.style.transform = this.transformStyle(this.ELEMENT, {translateY: y + 'px'});
+    }
+}
+
+class ParallaxPositionYElement extends ParallaxCommon {
+    get startTop() {
+        return this.ELEMENT.getAttribute("parallax-start-top") ?? 0;
+    }
+    initialize(index) {
+        this.index = index;
+    }
+
+    animate(scrollHeight){
+        const element = this.ELEMENT;
+        // const data = this.offset;
+        let x = element.getBoundingClientRect().top / this.speed;
+        let y = Math.round(x * 100) / 100;
+        // if(this.SETTINGS.useiOSWorkaround) {
+        //     y += element.scrollTop;
+        //     y -= this.iOSWorkaroundViewportHeight;
+        // }
+        element.style.translate = `0 ${y}px`;
+    }
+}
+
+class ScrollConstraintElement extends AnimatedElement {
+    CLASS = "scroll-manager--scroll-constraint-satisfied";
+
+    lastValue = 0;
+
+    allow_animation = true;
+    last_scrolled_upwards = false;
+    applied_class = false;
+
+    initialize() {
+        // Let's listen to the router and control our animation state based on
+        // the events its giving us.
+        document.addEventListener("navigationstart", () => {
+            // this.allowAnimation = false;
+            this.allow_animation = false;
+            document.body.classList.remove(this.CLASS);
+            this.lastValue = 0;
+        });
+        document.addEventListener("load", () => {
+            this.allow_animation = true;
+        });
+        document.addEventListener("navigateerror", () => {
+            this.allow_animation = true;
+        })
+
+    }
+
+    animate(scrollHeight) {
+        if(this.allow_animation == false) return;
+        let threshold = app("apply_header_class_after_scroll");
+        
+        if(this.lastValue < window.scrollY) {
+            this.last_scrolled_upwards = false;
+            if(this.debug) console.log("Last scrolled upwards: false")
+        } else if (this.lastValue === window.scrollY) {
+            // Do nothing
+        } else {
+            this.last_scrolled_upwards = true;
+            if(this.debug) console.log("Last scrolled upwards: true")
         }
-        return topOffset;
+
+        if(this.last_scrolled_upwards) {
+            threshold *= app("apply_header_class_scroll_upwards_multiplier");
+        }
+        
+        if(window.scrollY < threshold) {
+            this.applied_class = true;
+        } else {
+            this.applied_class = false;
+        }
+
+        if(this.applied_class) {
+            document.body.classList.remove(this.CLASS);
+        } else {
+            document.body.classList.add(this.CLASS)
+        }
+
+        this.lastValue = window.scrollY;
     }
 }
 

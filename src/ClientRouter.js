@@ -270,14 +270,15 @@ class ClientRouter extends EventTarget{
             this.lastPageRequestResult = result;
         } catch(error) {
             this.progressBar.classList.remove("navigation-start");
-            this.dispatchEvent(new CustomEvent("navigateerror", {detail: {error, route: this.route}}));
+            const errorEvent = new CustomEvent("navigateerror", {detail: {error, route: this.route}});
+            this.dispatchEvent(errorEvent);
+            document.dispatchEvent(errorEvent);
             this.lastPageRequestResult = {};
             return;
         }
-        
 
         this.updateContent(result);
-        this.updateScroll();
+        const scrollState = this.updateScroll();
         if(!this.allowStateChange) {
             this.setPushStateMode();
             return;
@@ -292,7 +293,7 @@ class ClientRouter extends EventTarget{
         );
 
         this.setPushStateMode();
-        
+        // await scrollState;
         this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
     }
 

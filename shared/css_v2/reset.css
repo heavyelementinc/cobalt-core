@@ -111,6 +111,48 @@ ul.checklist {
     }
 }
 
+.pros-cons {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: var(--neutral-color-0);
+    --border: 1px solid var(--neutral-color-2);
+    border: var(--border);
+    > div {
+        width: 50%;
+        padding: 0 var(--margin-l) var(--margin-l);
+        &:last-of-type {
+            border-left: var(--border);
+        }
+        h3 {
+            margin-bottom: var(--margin-s);
+        }
+    }
+	& ul:is(.pros, .cons) {
+		list-style: unset;
+		margin-left: var(--margin-l);
+		li {
+            max-width: unset;
+            padding-left: var(--margin-xs);
+		}
+        li::marker {
+            font-family: "Material Design Icons";
+        }
+		&.pros li::marker {
+		    content: "\F0E1E";
+		}
+		&.verified li::marker {
+			content: "\F0791";
+            color: lightblue;
+		}
+		&.cons li::marker {
+			content: "\F1398";
+		}
+        &.issue li::marker {
+            color: var(--issue-color-1);
+        }
+	}
+}
 
 hr {
     box-sizing: content-box;

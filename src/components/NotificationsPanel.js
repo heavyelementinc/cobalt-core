@@ -23,6 +23,7 @@ class NotificationsPanel {
         this.closeButton.classList.add("close-button");
         this.closeButton.addEventListener("click", e => this.close());
         this.closeButton.innerHTML = window.closeGlyph;
+        this.closeButton.disabled = !this.ariaHidden;
     }
 
     initUserDuplicate() {
@@ -42,6 +43,9 @@ class NotificationsPanel {
         this.ariaHidden = s;
 
         this.panel.setAttribute("aria-hidden", s);
+        this.panel.querySelector("button,input,textarea").forEach(e => {
+            e.disabled = state;
+        });
 
         if(s === false) this.updatePanelContent();
     }
