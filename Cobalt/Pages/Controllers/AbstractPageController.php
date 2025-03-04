@@ -31,9 +31,10 @@ abstract class AbstractPageController extends Crudable {
         $query = null;
         if(strpos($queryPath, "/")) {
             $exploded = explode("/", $queryPath);
-            $query = $exploded[0];
+            $length = count($exploded);
+            $query = $exploded[$length - 2];
             try{
-                $_id = new ObjectId($exploded[1]);
+                $_id = new ObjectId($exploded[$length - 1]);
             } catch (Exception $e) {
                 $_id = null;
             }

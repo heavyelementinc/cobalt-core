@@ -69,10 +69,25 @@
         background-image: linear-gradient(var(--gradient-direction), black, transparent 75%);
     }
 
+    .landing-splash--type-centered {
+        img {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            isolation: isolate;
+        }
+        .landing-main--title-container {
+            position: absolute;
+            inset: 0;
+        }
+    }
+
     .landing-splash--type-fade.landing-splash--type-centered {
         justify-content: center;
         align-items: center;
         text-align: center;
+        overflow: hidden;
+        position: relative;
     }
 
         .landing-splash--type-fade.landing-splash--type-centered:before {

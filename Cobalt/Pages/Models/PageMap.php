@@ -550,7 +550,11 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if($this instanceof PostMap == false) return '';
         $mentionCount = 0;
         if($mentions) {
-            $mentionCount = $this->get_webmention_details()['repostCount'];
+            try {
+                $mentionCount = $this->get_webmention_details()['repostCount'];
+            } catch (Exception $e) {
+                $mentionCount = "";
+            }
         }
 
         $html = "<div class=\"post-details\">";
@@ -590,6 +594,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if($this->mentions !== null) return $this->mentions;
         $mentionManger = new WebmentionHandler();
         $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);
+        
         $mentions = $mentionManger->findBySlug($path, ['limit' => 100]);
         $this->mentions = $empty;
         foreach($mentions as $mention) {

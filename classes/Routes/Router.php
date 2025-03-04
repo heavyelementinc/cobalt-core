@@ -326,7 +326,7 @@ class Router {
 
         extensions()::invoke("register_client_controllers",$this->router_js_table);
 
-        foreach($this->routes as $context => $methods) {
+        foreach ($this->routes as $context => $methods) {
             foreach ($methods as $method => $routes) {
                 foreach ($routes as $path => $route) {
                     $handler = $route['handler'];
@@ -350,7 +350,7 @@ class Router {
                         if ($real_regex[0] === "%") $index1 = 1;
                         if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
                         $real_regex = substr($real_regex, $index1, $index2);
-                        array_push($table, "\n'$real_regex': " . file_get_contents($file));
+                        $table[] = "\n'$real_regex': " . file_get_contents($file);
                         continue;
                     }
                 }
