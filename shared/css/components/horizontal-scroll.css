@@ -65,12 +65,12 @@ horizontal-scroll ul.pagination-controls {
     bottom: 0;
     left: 50%;
     translate: -50%;
-    gap: .25em;
+    gap: .5em;
 }
 
 horizontal-scroll ul.pagination-controls li button {
-    width: 0.5em;
-    height: 0.5em;
+    width: .8em;
+    height: .8em;
     border-radius: 0.5em;
     cursor: pointer;
     padding: 0;

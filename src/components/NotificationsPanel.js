@@ -7,6 +7,7 @@ class NotificationsPanel {
         this.initUserDuplicate();
 
         this.panel.querySelector("hgroup:first-of-type").appendChild(this.closeButton);
+        this.panel.inert = true;
         this.list = this.panel.querySelector(".notifications--list");
         this.send = this.panel.querySelector("form-request.notifications--send");
         this.send.addEventListener("requestSuccess", e => {    
@@ -41,7 +42,8 @@ class NotificationsPanel {
     state(state) {
         const s = !state;
         this.ariaHidden = s;
-
+        this.panel.inert = s;
+        
         this.panel.setAttribute("aria-hidden", s);
         this.panel.querySelector("button,input,textarea").forEach(e => {
             e.disabled = state;

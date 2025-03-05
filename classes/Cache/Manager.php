@@ -92,7 +92,7 @@ class Manager {
 
     private function cache_name($reference) {
         $info = pathinfo($reference);
-        $version = (isset($GLOBALS['app']) && property_exists($GLOBALS['app'], 'version')) ? $GLOBALS['app']->version : "000";
+        $version = VERSION_HASH;
         $path = $this->cache_dir . "/$info[dirname]/$info[filename].$version.$info[extension]";
         return $path;
     }
