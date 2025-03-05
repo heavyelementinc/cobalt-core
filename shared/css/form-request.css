@@ -223,3 +223,23 @@ form-next-item.displayed {
 .form-request--excluded-element {
   display: none;
 }
+
+form-request:has(.form-request--next-frame,.form-request--previous-frame) {
+  overflow-x: clip;
+}
+
+form-request .form-request--frame {
+  position: absolute;
+  inset: 0;
+  --end-translation: 0 0;
+  translate: var(--end-translation);
+  transition: translate 300ms;
+}
+
+form-request .form-request--next-frame {
+  --end-translation: 100% 0;
+}
+
+form-request .form-request--previous-frame {
+  --end-translation: -100% 0;
+}

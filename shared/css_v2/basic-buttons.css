@@ -311,3 +311,62 @@ button-toggle[aria-pressed="true"] {
 button-toggle[aria-pressed="false"] {
 
 }
+
+
+captcha-button {
+    display: flex;
+    width: 100%;
+    padding: var(--margin-s);
+    gap: var(--margin-s);
+    h1 {
+        margin: 0;
+        font-size: large;
+    }
+    p {
+        font-size: small;
+        margin: var(--margin-xs) 0 0;
+    }
+    /* max-width: 30ch; */
+    /* height: 10ch; */
+    .status {
+        border: var(--input-element-border-value);
+        background: var(--input-element-background);
+        /* padding: var(--input-element-padding); */
+        border-radius: var(--input-element-radius);
+        font-size: 1.1rem;
+        color: var(--input-element-color);
+        height: 2rem;
+        width: 2rem;
+        display: grid;
+        place-content: center;
+    }
+    .checking .status {
+        color: black;
+    }
+    loading-spinner {
+        height: 2rem;
+        width: 2rem;
+        display: grid;
+        place-content: center;
+    }
+    & .status:before {
+        content: "";
+        /* margin-right: var(--margin-s); */
+        font-size: 1em;
+        font-family: 'Material Design Icons';
+        color: var(--input-element-background);
+        display: grid;
+        place-items: center;
+    }
+    &:not(.checking,.activated):hover .status:before {
+        content: "\F0E1E";
+        color: rgb(from var(--input-element-color) r g b / .3);
+    }
+    &.activated .status:before {
+        content: "\F0E1E";
+        color: var(--input-element-color);
+    }
+    &.activated .status loading-spinner {
+        display: none;
+    }
+}

@@ -383,6 +383,9 @@ class AsyncUpdate {
             }
             delete instructions.clear
         }
+        if("next" in instructions) {
+            this.request.form.next(instructions.next);
+        }
         this.updateElement(this.request.form, instructions)
     }
 

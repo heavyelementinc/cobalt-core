@@ -886,3 +886,4 @@ class InputNumber extends HTMLElement {
 }
 
 customElements.define("input-number", InputNumber);
+

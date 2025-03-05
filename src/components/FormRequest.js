@@ -9,6 +9,7 @@
  * @emits aborted      - Fires when AsyncFetch submit is cancelled or abort is called
  * @emits error        - Fires when AsyncFetch results in an error
  * @emits done         - Fires when AsyncFetch finishes successfully
+ * @emits next         - Fires when the 'next' step in a form is finished
  */
 
 class NewFormRequest extends HTMLElement {
@@ -165,8 +166,9 @@ class NewFormRequest extends HTMLElement {
 
     async submit(data = null, event = {}) {
         if(data == null) {
-            console.warn("`data` must not be null. Aborting.")
-            return
+            // console.warn("`data` must not be null. Aborting.")
+            // return
+            data = await this.buildSubmission(event);
         }
         console.log(data)
         const method  = this.getAttribute('method');
@@ -242,18 +244,18 @@ class NewFormRequest extends HTMLElement {
         }
     }    
 
-    initSubmissionListeners() {
-        this.initEnterSaveListener();
-        this.initAutoSaveListeners();
-        this.initSubmitButton();
+    initSubmissionListeners(queryTarget = this) {
+        this.initEnterSaveListener(queryTarget);
+        this.initAutoSaveListeners(queryTarget);
+        this.initSubmitButton(queryTarget);
     }
 
-    initSubmitButton() {
-        this.submitButton = this.querySelector("button[type='submit'],input[type='submit'],split-button option[type='submit'],split-button[type='submit']");
+    initSubmitButton(queryTarget) {
+        this.submitButton = queryTarget.querySelector("button[type='submit'],input[type='submit'],split-button option[type='submit'],split-button[type='submit']");
         if(this.submitButton) this.submitButton.addEventListener("click", e => this.dispatchEvent(new CustomEvent("submission", e)));
     }
 
-    initAutoSaveListeners() {
+    initAutoSaveListeners(queryTarget) {
         function autoSaveListener(event) {
             if(!this.autoSave) return;
             const element = event.target || event.currentTarget || event.srcElement;
@@ -263,7 +265,7 @@ class NewFormRequest extends HTMLElement {
 
             this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element}}));
         }
-        const elements = this.querySelectorAll(universal_input_element_query);
+        const elements = queryTarget.querySelectorAll(universal_input_element_query);
         for(const el of elements) {
             if(["file", "files"].includes(el.type)) this.fileUploadFields.push(el);
             if(el.tagName === "IMAGE-RESULT") this.fileUploadFields.push(el);
@@ -274,6 +276,7 @@ class NewFormRequest extends HTMLElement {
 
     initEnterSaveListener() {
         if(this.autoSave !== "enter") return;
+        document.removeEventListener("keypress", this.enterButtonFunction);
         document.addEventListener("keypress", this.enterButtonFunction);
     }
 
@@ -497,6 +500,62 @@ class NewFormRequest extends HTMLElement {
     isValid(field) {
         if("checkValidity" in field === false) return true;
         return field.checkValidity();
+    }
+
+    /** This function will append the next step in the form fields,
+     * send an update('@form', ['next' => '<input name="somedetail">'])
+     * from the action controller
+     * @param {string} html 
+     * @param {boolean} allowFormRegression
+     */
+    async next(html, callback = () => {}) {
+        const FRAME_COMMON = "form-request--frame";
+        const CURRENT_FRAME = "form-request--current-frame";
+        const PREVIOUS_FRAME = "form-request--previous-frame";
+        const NEXT_FRAME = "form-request--next-frame";
+        let frame1 = this.querySelector(CURRENT_FRAME);
+        // If we don't have a current frame, let's collect all the form children
+        // and move them to a frame
+        if(!frame1) {
+            frame1 = document.createElement("div");
+            for(const element of Array.from(this.children)) {
+                frame1.appendChild(element)
+            }
+            this.appendChild(frame1);
+        }
+        // Let's handle the classes for our current (now previous) frame
+        frame1.classList.add(FRAME_COMMON);
+
+        // frame2 is the next item
+        const frame2 = document.createElement("div");
+        frame2.classList.add(FRAME_COMMON,NEXT_FRAME);
+        frame2.innerHTML = html;
+        this.appendChild(frame2);
+        this.initSubmissionListeners(frame2);
+        
+        // Let's listen for our transition for finish
+        const waitForTransition = new Deferred(() => {});
+        frame2.addEventListener("transitionend", () => {
+            waitForTransition.resolve();
+        }, {once: true});
+
+        // Let's wait just a little bit before we trigger all our
+        // transitions happening
+        setTimeout(() => {
+            frame1.classList.remove(CURRENT_FRAME);
+            frame1.classList.add(PREVIOUS_FRAME);
+            frame2.classList.remove(NEXT_FRAME);
+        }, 50);
+
+        // Let's wait for our transition to fulfill before we continue
+        await waitForTransition.promise;
+        
+        // Now that we've finished, let's run any callback we've been handed
+        callback();
+        // Let's dispatch an event to anyone who might be listening
+        this.dispatchEvent(new CustomEvent('next', {detail: {target: this}}));
+        // Finally, let's remove the previous frame
+        frame1.parentNode.removeChild(frame1);
     }
 }
 

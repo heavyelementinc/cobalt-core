@@ -7,6 +7,7 @@ use Contact\Persistance;
 use Controllers\Controller;
 use Controllers\Crudable;
 use Drivers\Database;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\ServiceUnavailable;
@@ -91,30 +92,64 @@ class ContactForm extends Crudable {
     // }
 
     function contact_submit() {
+        $mode = (isset($_POST['is_human'])) ? "stage2" : "stage1";
+
+        switch($mode) {
+            case "stage1":
+                return $this->stage1($_POST);
+            case "stage2":
+                return $this->stage2($_POST);
+        }
+        
+        throw new BadRequest("Bad request");
+    }
+
+    private function stage1($data) {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
+        /** @var Persistance */
         $persistance = new $className();
-        $mutant = $persistance->__validate($_POST);
+        $mutant = $persistance->__validate($data);
         $mutant->ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
         $mutant->token = $_SERVER["HTTP_X_CSRF_MITIGATION"];
         $mutant->date  = new \MongoDB\BSON\UTCDateTime();
 
-        // $persistance->ingest($mutant);
+        $_SESSION['__contact_form_submission'] = $mutant->jsonSerialize();
+        update("@form", [
+            'next' => view("/parts/contact-form/verify.php")
+        ]);
+    }
+
+    private function stage2($data) {
+        /** @var Persistance */
+        $className = __APP_SETTINGS__['Contact_form_validation_classname'];
+        $persistance = new $className($_SESSION['__contact_form_submission']);
+        $error = 0;
+        // $mutant = $persistance->__validate($_SESSION['__contact_form_submission']);
+        if($data['email']) $error += 0b001;
+        if($data['details']) $error += 0b010;
+        if($data['is_human'] !== "false") $error += 0b100;
+
+        if($error > 0) {
+            // header("X-Message: @error Something went wrong. Please try again later");
+            update("@form", [
+                'next' => view("/parts/contact-form/stage2-error.php", ['error_code' => $error])
+            ]);
+            return 0;
+        }
+        
         switch(app("Contact_form_interface")) {
             case "SMTP":
                 $result = $this->contactSMTP($persistance);
-                header("X-Status: @info " . app("Contact_form_success_message"));
-                update("@form", ['clear' => true]);
                 break;
             case "panel":
             default:
                 $id = $this->contactPanel($persistance);
-                header("X-Status: @info " . app("Contact_form_success_message"));
-                update("@form", ['clear' => true]);
-                return $id;
                 break;
         }
-
-        return "error";
+        update("@form", [
+            'clear' => true,
+            'next' => view("/parts/contact-form/contact-complete.php")
+        ]);
     }
 
     private function contactSMTP($mutant) {
