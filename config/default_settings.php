@@ -1214,57 +1214,57 @@ $settings = [
             "default" => 1
         ],
         "manifest_v2_package_js_files" => [
-            "default" => false,
+            "default" => true,
             "meta" => [
                 "group" => GROUP_DEV,
                 "subgroup" => SUBGROUP_DEV_JS_PACKAGE,
                 "name" => "Enable JS packaging",
                 "description" => "Manifest v2 settings",
-                "help" => "This will enable bundling/packaging JavaScript files into a single package.context.js",
+                "help" => "This will enable bundling/packaging JavaScript files into a single `package.[context].js`. Applies only in PRODUCTION mode.",
                 "type" => "input-switch"   
             ]
         ],
         "manifest_v2_package_css_files" => [
-            "default" => false,
+            "default" => true,
             "meta" => [
                 "group" => GROUP_DEV,
                 "subgroup" => SUBGROUP_DEV_CSS_PACKAGE,
                 "name" => "Enable CSS packaging",
                 "description" => "Manifest v2 settings",
-                "help" => "This will enable bundling/packaging Cascading Style Sheets files into a single package.context.css",
+                "help" => "This will enable bundling/packaging Cascading Style Sheets files into a single `package.[context].css`. Applies only in PRODUCTION mode.",
                 "type" => "input-switch"   
             ]
         ],
         "manifest_v2_include_filenames" => [
-            "default" => false,
+            "default" => true,
             "meta" => [
                 "group" => GROUP_DEV,
                 "subgroup" => "General",
                 "name" => "Include Filenames in Packages",
                 "description" => "Manifest v2 settings",
-                "help" => "This will include sanitized filenames as comments in compiled packages.",
+                "help" => "This will include sanitized filenames as comments in compiled packages. Applies only in PRODUCTION mode.",
                 "type" => "input-switch"
             ],
         ],
         "manifest_v2_minify_css" => [
-            "default" => false,
+            "default" => true,
             "meta" => [
                 "group" => GROUP_DEV,
                 "subgroup" => SUBGROUP_DEV_CSS_PACKAGE,
                 "name" => "Minify CSS Package",
                 "description" => "Manifest v2 settings",
-                "help" => "This will strip all unnecessary content from your CSS package.",
+                "help" => "This will strip all unnecessary content from your CSS package. Applies only in PRODUCTION mode.",
                 "type" => "input-switch"
             ],
         ],
         "manifest_v2_minify_script" => [
-            "default" => false,
+            "default" => true,
             "meta" => [
                 "group" => GROUP_DEV,
                 "subgroup" => SUBGROUP_DEV_JS_PACKAGE,
                 "name" => "Minify JS Package",
                 "description" => "Manifest v2 settings",
-                "help" => "This will strip all unnecessary content from your JS package.",
+                "help" => "This will strip all unnecessary content from your JS package. Applies only in PRODUCTION mode.",
                 "type" => "input-switch"
             ],
         ],
