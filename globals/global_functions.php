@@ -811,10 +811,11 @@ const ALT_KEY   = 0b0000100;
 const META_KEY  = 0b0001000;
 
 /** Returns boolean value for a keyboard modifier
- * @param int $header The incoming keyboard modifier (usually X-Keyboard-Modifier header)
  * @param int $constantValue {SHIFT_KEY, CTRL_KEY, ALT_KEY, META_KEY}
+ * @param int $header The incoming keyboard modifier (usually X-Keyboard-Modifier header)
  */
-function isKeyboardModifierSet($header, $constantValue) {
+function isKeyboardModifierSet($constantValue, $header = null):bool {
+    if($header === null) $header = (int)getHeader('X-Keyboard-Modifiers', null, true, false);
     if($header === null) return false;
-    return ($header & $constantValue >= 0);
+    return ($header & $constantValue) === $constantValue;
 }

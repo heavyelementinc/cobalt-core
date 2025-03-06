@@ -453,7 +453,7 @@ abstract class AbstractPageController extends Crudable {
             $confirm_message = ['message' => "This will undelete this post and restore it to its current visibility status. Are you sure you want to continue?", 'post' => $confirm_message['post']];
             $action = "undelete";
         }
-        if(isKeyboardModifierSet(getHeader('X-Keyboard-Modifiers'), CTRL_KEY)) {
+        if(isKeyboardModifierSet(CTRL_KEY)) {
             $action = "permanent";
         }
         confirm($confirm_message['message'] ?? $confirm_message[0] ?? $default_confirm_message, $confirm_message['post'] ?? $_POST, $confirm_message['okay'] ?? "Yes", $confirm_message['dangerous'] ?? true);
@@ -485,7 +485,7 @@ abstract class AbstractPageController extends Crudable {
         $results = $this->manager->count($query);
         confirm("This will delete $results document".plural($results).". Do you want to continue?", $_POST);
 
-        if(isKeyboardModifierSet(getHeader('X-Keyboard-Modifiers'), CTRL_KEY)) {
+        if(isKeyboardModifierSet(CTRL_KEY)) {
             $result = $this->manager->deleteMany($query);
             header("X-Refresh: @now");
             return $result->getDeletedCount();

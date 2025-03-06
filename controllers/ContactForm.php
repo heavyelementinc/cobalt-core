@@ -117,6 +117,7 @@ class ContactForm extends Crudable {
         update("@form", [
             'next' => view("/parts/contact-form/verify.php")
         ]);
+
     }
 
     private function stage2($data) {
@@ -136,7 +137,7 @@ class ContactForm extends Crudable {
             ]);
             return 0;
         }
-        
+
         switch(app("Contact_form_interface")) {
             case "SMTP":
                 $result = $this->contactSMTP($persistance);
