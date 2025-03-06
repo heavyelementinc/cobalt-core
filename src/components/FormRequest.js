@@ -522,6 +522,7 @@ class NewFormRequest extends HTMLElement {
                 frame1.appendChild(element)
             }
             this.appendChild(frame1);
+            this.style.setProperty("--height", `${Math.ceil(frame1.getBoundingClientRect().height)}px`);
         }
         // Let's handle the classes for our current (now previous) frame
         frame1.classList.add(FRAME_COMMON);
@@ -530,6 +531,8 @@ class NewFormRequest extends HTMLElement {
         const frame2 = document.createElement("div");
         frame2.classList.add(FRAME_COMMON,NEXT_FRAME);
         frame2.innerHTML = html;
+        document.body.appendChild(frame2);
+        const height = Math.ceil(frame2.getBoundingClientRect().height);
         this.appendChild(frame2);
         this.initSubmissionListeners(frame2);
         
@@ -545,6 +548,8 @@ class NewFormRequest extends HTMLElement {
             frame1.classList.remove(CURRENT_FRAME);
             frame1.classList.add(PREVIOUS_FRAME);
             frame2.classList.remove(NEXT_FRAME);
+            // this.style.setProperty("height", Math.ceil(this.style.getProperty("--to-height")));
+            this.style.setProperty("--height", `${height}px`);
         }, 50);
 
         // Let's wait for our transition to fulfill before we continue

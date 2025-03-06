@@ -10,6 +10,10 @@ form-header :is(h1, h2, h3, h4, h5) {
   display:block;
   position:relative;
   /* overflow:hidden; */
+  transition: height 300ms;
+  height: var(--height, auto);
+  height: var(--height, calc-size(auto));
+  transition-behavior: allow-discrete;
 }
 
 :is(form-request,login-form-request) > section{
