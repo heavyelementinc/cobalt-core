@@ -247,3 +247,11 @@ form-request .form-request--next-frame {
 form-request .form-request--previous-frame {
   --end-translation: -100% 0;
 }
+
+form-request.form-request--backwards .form-request--next-frame {
+  --end-translation: -100% 0;
+}
+
+form-request.form-request--backwards .form-request--previous-frame {
+  --end-translation: 100% 0;
+}

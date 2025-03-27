@@ -37,7 +37,7 @@
 }
 
 :where(
-    input, 
+    input:not([type='radio']), 
     textarea,
     markdown-area,
     select,
@@ -57,6 +57,9 @@
     font-size: 1.1rem;
     color: var(--input-element-color);
     margin: 0 0 var(--margin-xs);
+    &[type="color"] {
+        width: 100%;
+    }
     &:hover,
     &:focus-visible,
     &:focus-within {
@@ -90,7 +93,7 @@
             color: var(--input-disabled-placeholder);
         }
     }   
-    &:has(&) {
+    &:not(input-datetime):has(&) {
         padding: 0;
     }
     & input,
@@ -624,6 +627,28 @@ input-password {
             & input[type='search'] {
                 flex-grow: 1;
             }
+        }
+    }
+}
+
+input-radio {
+    display: block;
+    option {
+        display: none;
+    }
+    label {
+        padding: var(--input-element-padding);
+        border-radius: var(--input-element-radius);
+        margin: var(--marginx-xxs) var(--margin-m);
+        display: flex;
+        font-size: .9em;
+        input[type='radio'] {
+            width: unset !important;
+            margin-right: var(--margin-s);
+        }
+        &:focus-within,
+        &:focus {
+            box-shadow: var(--input-focused-highlight);
         }
     }
 }

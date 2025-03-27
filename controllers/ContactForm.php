@@ -1,7 +1,11 @@
 <?php
 
+use Auth\UserCRUD;
 use Cobalt\Maps\GenericMap;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\NotificationManager;
+use Cobalt\Notifications\Classes\PushNotifications;
+use Cobalt\Notifications\Models\NotificationSchema;
+use Contact\AdditionalContactFields;
 use Contact\ContactManager;
 use Contact\Persistance;
 use Controllers\Controller;
@@ -151,6 +155,8 @@ class ContactForm extends Crudable {
             'clear' => true,
             'next' => view("/parts/contact-form/contact-complete.php")
         ]);
+        $fields = new AdditionalContactFields();
+        $fields->__on_submit();
     }
 
     private function contactSMTP($mutant) {
@@ -169,6 +175,31 @@ class ContactForm extends Crudable {
         return $mutant;
     }
 
+    private function contactNotify($mutant, $href) {
+        $ntfy = new NotificationManager();
+        $to = [];
+        $userCrud = new UserCRUD();
+        $users = $userCrud->getUsersByPermission("Contact_form_submissions_access");
+        foreach($users as $u) {
+            $to[] = [
+                'user' => $u->_id,
+                'state' => 0,
+                'modified' => new UTCDateTime()
+            ];
+        }
+        $notification = new NotificationSchema([
+            'from' => null,
+            'for' => $to,
+            'subject' => 'New Contact Form Submission',
+            'body' => "**$mutant->name** filled out your contact form:\n\n".trim(substr($mutant->additional,0, 100)),
+            'action' => [
+                'href' => route("ContactForm@__edit",[$href])
+            ],
+            'type' => 0,
+        ]);
+        $ntfy->sendNotification($notification);
+    }
+
     private function contactPanel($mutant) {
         $backend = new ContactManager();
         $two_min_ago = strtotime("-".__APP_SETTINGS__['Contact_form_submission_throttle_period'], time()) * 1000;
@@ -177,9 +208,12 @@ class ContactForm extends Crudable {
         // if($throttle >= __APP_SETTINGS__['Contact_form_submission_throttle_after_max_submissions']) {
         //     throw new TooManyRequests("Too many requests", __APP_SETTINGS__['Contact_form_fail_message']);
         // }
-
+        
         try {
             $result = $backend->insertOne($mutant);
+            $id = $result->getInsertedId();
+            $action = "/admin/contact-form/".(string)$id;
+            $method = "GET";
         } catch (\Exception $e) {
             throw new ServiceUnavailable("An unknown error occurred");
         }
@@ -189,12 +223,13 @@ class ContactForm extends Crudable {
                 'Contact Submission',
                 "Someone has filled out the {{app.app_name}} contact form!",
                 ['contact_form_new'],
-                ['path' => "/admin/contact-form/".(string)$result->getInsertedId()]
+                ['path' => $action]
             );
         } catch (\Exception $e) {
             
         }
-        
+        $this->contactNotify($mutant, $id);
+
         if(app("Contact_form_notify_on_new_submission")) {
             // $notify = new Notification1_0Schema([
             //     'subject' => 'New contact form submission',
@@ -202,7 +237,6 @@ class ContactForm extends Crudable {
             //     ''
             // ]);
         }
-        $id = $result->getInsertedId();
 
         return $id;
     }

@@ -24,6 +24,8 @@ const GROUP_DEV = "Developer";
 const SUBGROUP_DEV_JS_PACKAGE = "JavaScript Packaging";
 const SUBGROUP_DEV_CSS_PACKAGE = "CSS Packaging";
 
+const FONT_BACKEND_GOOGLE = 0;
+const FONT_BACKEND_FONTSOURCE = 1;
 
 const COBALT_LOGIN_TYPE_LEGACY = 0;
 const COBALT_LOGIN_TYPE_STAGES = 1;
@@ -222,7 +224,7 @@ $settings = [
             "default" => true
         ],
         "CobaltEvents_enabled" => [
-            "default" => true,
+            "default" => false,
             "directives" => [
                 "public" => true
             ],
@@ -302,6 +304,7 @@ $settings = [
         
         "Contact_form_interface" => [
             "default" => "panel",
+            // "default" => "notification",
             "meta" => [
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"General",
@@ -312,6 +315,7 @@ $settings = [
             "validate" => [
                 "type" => "string",
                 "options" => [
+                    // "notification" => "Notification",
                     "panel" => "Admin Panel",
                     "SMTP" => "Email"
                 ]
@@ -1139,12 +1143,18 @@ $settings = [
             "directives" => [
                 "merge" =>  [
                     "head" => [
-                        "family" => "'Assistant', sans-serif",
-                        "import" => "Assistant:500,800"
+                        "family" => "'Archivo Black', sans-serif",
+                        'style' => 'normal',
+                        'display' => 'swap',
+                        'weight' => [400],
+                        'src' => "url(https://cdn.jsdelivr.net/fontsource/fonts/archivo-black@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/archivo-black@latest/latin-400-normal.woff) format('woff')",
+                        'unicode-range' => 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD',
+                        // "import" => "Assistant:500,800"
                     ],
                     "body" => [
                         "family" => "'Open Sans', sans-serif",
-                        "import" => "Open+Sans:400,400i,800,800i"
+                        "import" => "Open+Sans:400,400i,800,800i",
+                        'weight' => [400]
                     ]
                 ],
                 "style" => true
@@ -1155,7 +1165,9 @@ $settings = [
             //     "view" => "/admin/settings/inputs/fonts.html"
             // ]
         ],
-                
+        "Font_backend" => [
+            'default' => FONT_BACKEND_FONTSOURCE
+        ],
         "css-vars" => [
             "default" => [],
             "directives" => [
@@ -1485,7 +1497,7 @@ $settings = [
             ]
         ],
         "Auth_user_menu_enabled" => [
-            "default" => false,
+            "default" => true,
             "directives" => [   
                 "required" => [
                     "Auth_user_accounts_enabled" => ["is" => true]
@@ -2010,5 +2022,7 @@ $settings = [
             // When true, the trailing semicolon is REQUIRED.
             "default" => false
         ],
-
+        "Prototypeable_required_field_label" => [
+            "default" => "*"
+        ]
 ];

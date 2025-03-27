@@ -5,6 +5,7 @@ namespace Cobalt\Controllers\Traits;
 use Cobalt\SchemaPrototypes\Basic\Anchor;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
+use Cobalt\Model\Types\MixedType;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
 use Exceptions\HTTP\Error;
@@ -335,7 +336,10 @@ trait IndexableModel {
     /** All you need in order to have a field be included in the index is to include
      * the 'index' key. Things will be inherited 
      */
-    final protected function getIndexDefinition(string $field, array $directives):?array {
+    final protected function getIndexDefinition(string $field, $directives):?array {
+        if($directives instanceof MixedType) {
+            return null;
+        }
         if(!key_exists('index', $directives)) return null;
         $array = [
             'name' => $field,

@@ -1,6 +1,6 @@
 
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], image-result[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], input-radio[name], image-result[name]";
 
 function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());
@@ -31,6 +31,9 @@ function lock_viewport() {
     let width = get_offset(document.body).w;
     document.body.style.overflow = "hidden";
     document.body.style.width = `${width}px`;
+    setTimeout(() => {
+        document.body.style.setProperty("--scrollbar-width", `${width - get_offset(document.body).w}px`);
+    },50);
 }
 
 function unlock_viewport(ignore_lock_level = false) {

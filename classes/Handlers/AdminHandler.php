@@ -21,13 +21,14 @@ class AdminHandler extends WebHandler {
     // function post_router_init(){
     //     $this->prepare_html_framework();
     // }
+    public string $userbar_admin_panel   = "<a href=\"/\">".__APP_SETTINGS__['app_short_name']."</a>";
+
     function auth_panel() {
         if (!session_exists()) return "";
         
         // $session = session();
-        $settings = route("CoreAdmin@settings_index");
-        $customize = route("Customizations@index");
-        $userPanel = view('/admin/users/session-panel.html',[]);
+
+        $userPanel = "";
         // [
         //     'settings' => ($settings) ? "<option icon='cog' onclick=\"Cobalt.router.location = ''; return true;\">Settings</option>" : ""
         // ]
@@ -35,7 +36,7 @@ class AdminHandler extends WebHandler {
         $panel = "";
         if(__APP_SETTINGS__['manifest_engine'] === 1) $panel .= "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{versionHash}}'>";
 
-        $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='admin-panel--nav-group directory--group'>";
+        $panel .= "<nav id='admin-panel'>$userPanel<ul class='admin-panel--nav-group directory--group'>";
     
     
         $panel .= get_route_group("admin_panel", [
@@ -45,11 +46,6 @@ class AdminHandler extends WebHandler {
         ]);
         // $settings = route("CoreAdmin@settings_index");
         // $panel .= ;
-        $panel .= "</ul>";
-        $panel .= "<ul class='settings-panel--footer'>";
-        $panel .= (__APP_SETTINGS__['Notifications_system_enabled']) ? "<notify-button></notify-button>" : "";
-        $panel .= ($customize) ? "<a class='admin-panel--customize-link' href='$customize' rel='Customize Panel' title='Customize Panel'><i name='application-edit-outline'></i><span class='contextual contextual--hover'>Customize</span></a>" : "";
-        $panel .= ($settings) ? "<a class='admin-panel--settings-link' href='$settings' rel='Settings Panel' title='Settings Panel'><i name='cog'></i><span class='contextual contextual--hover'>Settings</span></a>" : "";
         $panel .= "</ul>";
         $panel .= "</nav>";
         return $panel;

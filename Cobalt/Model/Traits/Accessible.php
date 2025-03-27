@@ -1,6 +1,7 @@
 <?php
 namespace Cobalt\Model\Traits;
 
+use Error;
 use Exception;
 use MongoDB\Client;
 use MongoDB\Collection;
@@ -60,6 +61,10 @@ trait Accessible {
         $this->__initAccessible();
         benchmark_reads();
         return $this->collection->find($filter, $options);
+    }
+
+    final function findAndModify($filter = [], array $options = []) {
+        throw new Error("You're probably looking for findOneAndUpdate");
     }
 
     /**

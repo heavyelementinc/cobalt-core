@@ -35,6 +35,11 @@ trait MixedTypeToField {
             $value) . "\"$pattern>$closingTag";
     }
 
+    protected function inputColor($classes = "", $misc = [], $tag = "input"): string {
+        $misc = array_merge($misc, ['type' => 'color']);
+        return $this->input($classes, $misc, $tag);
+    }
+
     protected function inputDate($classes = "", $misc = []) {
         $misc = array_merge([
             'from' => $this->schema['from'] ?? "ISO 8601",
@@ -61,7 +66,7 @@ trait MixedTypeToField {
 
         $value = $this->getValue();
         $formatted = "";
-        if($value) $formatted = $value->format($fmt);
+        if($value) $formatted = $this->format($fmt);
 
         if($misc['from'] === "milliseconds") $formatted * 1000;
 
@@ -120,6 +125,16 @@ trait MixedTypeToField {
         $value = json_encode($this->getValue());
 
         return "<input-switch class=\"$classes\" $attrs checked=\"$value\"></input-switch>";
+    }
+
+    protected function inputBlock(string $class = "", array $misc = [], string $tag = "block-editor"):string {
+        if($this->getDirective("private")) return "";
+        if($this->getDirective("immutable")) $misc['readonly'] = 'readonly';
+        [$misc, $attrs] = $this->defaultFieldData($misc);
+        $html = "<$tag class=\"$class\" $attrs>";
+        $html .= "<script type=\"application/json\">".json_encode($this->getRaw())."</script>";
+        $html .= "</$tag>";
+        return $html;
     }
 
     function defaultFieldData($misc):array {

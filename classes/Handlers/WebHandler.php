@@ -21,6 +21,7 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Cobalt\Extensions\Extensions;
 use Cobalt\Manifests\Classes\Item;
 use Cobalt\Manifests\Classes\ManifestManager;
 use Cobalt\Manifests\Enums\ValidTypes;
@@ -33,11 +34,13 @@ use Controllers\Controller;
 use Exceptions\HTTP\Error;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
+use Handlers\Traits\UserBar;
 use MikeAlmond\Color\Color;
 use Render\Render;
 use TypeError;
 
 class WebHandler implements RequestHandler {
+    use UserBar;
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
@@ -167,13 +170,13 @@ class WebHandler implements RequestHandler {
             $embed .= "</pre>";
         }
 
-
         add_vars([
             'versionHash' => VERSION_HASH,
             'title' => $e->status_code,
             'message' => $message,
             'embed' => $embed,
             'status_code' => $e->status_code,
+            'code' => $e->status_code,
             'data' => $data,
             'body_id' => app("HTTP_error_body_id"),
             'keywords' => __APP_SETTINGS__['keywords'],
@@ -284,19 +287,9 @@ class WebHandler implements RequestHandler {
 
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
-        $masthead = "";
-        
-        if(__APP_SETTINGS__['Web_include_app_branding']) {
-            $logo = app("logo.thumb");
-            $meta = $logo['meta'];
-            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]' alt=\"".htmlspecialchars(__APP_SETTINGS__['app_name'])." Homepage\"></a>";
-        }
-        
         add_vars([
             'versionHash' => VERSION_HASH,
             'header_nav' => $this->header_nav(),
-            'masthead' => (app("display_masthead")) ? $masthead : "",
-            'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
         ]);
         // $header = $this->load_template($this->header_template);
 
@@ -352,17 +345,6 @@ class WebHandler implements RequestHandler {
         return $credits;
     }
 
-    function user_menu() {
-        if (!app("Auth_user_menu_enabled")) return "";
-        $list = (session_exists()) ? "session" : "no-session";
-        $files = files_exist([
-            __APP_ROOT__ . "/private/config/user_menu.json",
-            __ENV_ROOT__ . "/config/user_menu.json"
-        ]);
-        $user_menu = new \Auth\UserMenu(get_json($files[0])[$list]);
-        $menu = $user_menu->create_menu();
-        return $menu;
-    }
 
     var $script_cache_name = "template-precomp/script.html";
 
@@ -372,7 +354,7 @@ class WebHandler implements RequestHandler {
 
     function notify_panel() {
         if(!__APP_SETTINGS__['Notifications_system_enabled']) return "";
-        return view('/cobalt/notifications/panel.html');
+        return view('/Cobalt/Notifications/templates/panel.php');
     }
 
     var $style_cache_name = "template-precomp/style.html";
@@ -709,5 +691,18 @@ class WebHandler implements RequestHandler {
             $debug = new Debugger($e);
             return $debug->render();
         }
+    }
+
+    function userbar_start():array {
+        return [];
+    }
+    function userbar_before_extensions(array &$buttons):void {
+        return;
+    }
+    function userbar_after_extensions(array &$buttons):void {
+        return;
+    }
+    function userbar_end():string {
+        return "";
     }
 }

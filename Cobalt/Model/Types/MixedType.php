@@ -51,6 +51,10 @@ class MixedType implements Stringable, ArrayAccess {
         $this->model = $model;
     }
 
+    public function finalInitialization():void {
+
+    }
+
     /**
      * Filters input from the client before the input is stored in the database
      * @param mixed $value the user input

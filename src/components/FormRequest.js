@@ -1,4 +1,10 @@
 /**
+ * Use a <button type="submit" [name="somename" value="somevalue"]>Submit</button>
+ * to submit your form.
+ * 
+ * For stepped forms, you can use <button type="back" name="step" value="1">Back</button>
+ * to step backwards (or to arbitrary steps in the process).
+ * 
  * @attribute method   - The method to use when submitting data, use the special "NAVIGATE" to submit a traditional GET request
  * @attribute action   - The endpoint to submit data to
  * @attribute autosave - [false, element, autosave, fieldset, form] If no submit button is found, then defaults to "element"
@@ -27,9 +33,15 @@ class NewFormRequest extends HTMLElement {
         this.originalState = {};
         this.childrenReady = false;
         this.childWebComponentPromises = [];
+        this.PROGRESS_BACK_CLASS = "form-request--backwards";
         this.enterButtonFunction = e => {
             if(!['Enter', 'Return'].includes(e.key)) return;
-            this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element: e.target}}));
+            this.dispatchEvent(new CustomEvent("submission", {
+                ...event,
+                detail: {
+                    target: e.currentTarget || e.target
+                }
+            }));
         }
         this.addEventListener("clearall", () => {
             this.clearAll()
@@ -183,6 +195,8 @@ class NewFormRequest extends HTMLElement {
         api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
         api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
         api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));
+        api.addEventListener('abort',   e => this.handleAsyncDoneEvent(e, event));
+        api.addEventListener('asyncfinished', e => this.removeFeedback());
 
         this.abort = api.abort;
         let result = {};
@@ -251,19 +265,44 @@ class NewFormRequest extends HTMLElement {
     }
 
     initSubmitButton(queryTarget) {
-        this.submitButton = queryTarget.querySelector("button[type='submit'],input[type='submit'],split-button option[type='submit'],split-button[type='submit']");
-        if(this.submitButton) this.submitButton.addEventListener("click", e => this.dispatchEvent(new CustomEvent("submission", e)));
+        this.submitButton = queryTarget.querySelectorAll("button[type='submit'],input[type='submit'],split-button option[type='submit'],split-button[type='submit']");
+        if(this.submitButton.length) {
+            this.submitButton.forEach(e => 
+                e.addEventListener("click", e => {
+                    this.dispatchEvent(new CustomEvent("submission", {
+                        detail: {
+                            target:e.currentTarget || e.target
+                        }
+                    }))
+                })
+            );
+        }
+        this.backButton = queryTarget.querySelectorAll("button[type='back'],input[type='back'],split-button option[type='back'],split-button[type='back']");
+        if(this.backButton.length) {
+            this.backButton.forEach(e => {
+                if(!e.name && !e.value) {
+                    e.disabled = true;
+                    e.setAttribute("ariaDisabled", "true");
+                }
+                e.addEventListener("click", evt => {
+                    this.classList.add(this.PROGRESS_BACK_CLASS);
+                    let submission = {};
+                    submission[e.name] = e.value
+                    this.submit(submission);
+                })
+            });
+        }
     }
 
     initAutoSaveListeners(queryTarget) {
         function autoSaveListener(event) {
             if(!this.autoSave) return;
-            const element = event.target || event.currentTarget || event.srcElement;
+            const element = event.currentTarget || event.target || event.srcElement;
             if(!element) return;
             if(!element.name && element.getAttribute("name") === null) return;
             if(["true", "ignore"].includes(element.getAttribute("autosave-ignore"))) return;
 
-            this.dispatchEvent(new CustomEvent("submission", {...event, detail: {element}}));
+            this.dispatchEvent(new CustomEvent("submission", {...event, detail: {target: element}}));
         }
         const elements = queryTarget.querySelectorAll(universal_input_element_query);
         for(const el of elements) {
@@ -282,7 +321,7 @@ class NewFormRequest extends HTMLElement {
 
     async buildSubmission(event) {
         this.fieldsRequiringFeedback = [];
-        let target = event.detail?.element || event.target || event.currentTarget || event.srcElement;
+        let target = event.detail?.element || event.detail?.target || event.currentTarget || event.target || event.srcElement;
         if(target === null) return await this.getValue();
         if(target === this.submitButton) return await this.getValue();
         let submit = {};
@@ -311,6 +350,11 @@ class NewFormRequest extends HTMLElement {
                 submit = val;
                 this.addElementToFeedbackList(this);
                 break;
+        }
+        if(target) {
+            const name = target.getAttribute('name');
+            const value = target.value;
+            if(name && value) submit[name] = value;
         }
         return (this.fileUploadFields.length === 0) ? submit : this.encodeFormData(submit);
     }
@@ -505,6 +549,8 @@ class NewFormRequest extends HTMLElement {
     /** This function will append the next step in the form fields,
      * send an update('@form', ['next' => '<input name="somedetail">'])
      * from the action controller
+     * Use <button type="submit" name="someName" value="2">Submit</button>
+     * Use <button type="back" name="someName" value="1">Back</button>
      * @param {string} html 
      * @param {boolean} allowFormRegression
      */
@@ -529,13 +575,22 @@ class NewFormRequest extends HTMLElement {
 
         // frame2 is the next item
         const frame2 = document.createElement("div");
+        frame2.style.position = "relative";
         frame2.classList.add(FRAME_COMMON,NEXT_FRAME);
         frame2.innerHTML = html;
-        document.body.appendChild(frame2);
-        const height = Math.ceil(frame2.getBoundingClientRect().height);
-        this.appendChild(frame2);
-        this.initSubmissionListeners(frame2);
+        // document.body.appendChild(frame2);
         
+        
+        this.appendChild(frame2);
+        let height = Math.ceil(frame2.getBoundingClientRect().height);
+        // for(const e of frame2.children) {
+        //     height += Math.ceil(e.getBoundingClientRect().height)
+        // }
+
+        console.log(height);
+        frame2.style.position = "";
+        this.initSubmissionListeners(frame2);
+
         // Let's listen for our transition for finish
         const waitForTransition = new Deferred(() => {});
         frame2.addEventListener("transitionend", () => {
@@ -551,7 +606,7 @@ class NewFormRequest extends HTMLElement {
             // this.style.setProperty("height", Math.ceil(this.style.getProperty("--to-height")));
             this.style.setProperty("--height", `${height}px`);
         }, 50);
-
+        
         // Let's wait for our transition to fulfill before we continue
         await waitForTransition.promise;
         
@@ -561,6 +616,7 @@ class NewFormRequest extends HTMLElement {
         this.dispatchEvent(new CustomEvent('next', {detail: {target: this}}));
         // Finally, let's remove the previous frame
         frame1.parentNode.removeChild(frame1);
+        this.classList.remove(this.PROGRESS_BACK_CLASS);
     }
 }
 

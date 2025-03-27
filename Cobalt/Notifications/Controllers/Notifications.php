@@ -1,10 +1,11 @@
 <?php
+namespace Cobalt\Notifications\Controllers;
 
 use Auth\UserCRUD;
-use Cobalt\Notifications\Notification;
-use Cobalt\Notifications\NotificationAddresseeSchema;
-use Cobalt\Notifications\NotificationManager;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\NotificationManager;
+use Cobalt\Notifications\Classes\PushNotifications;
+use Cobalt\Notifications\Models\NotificationAddresseeSchema;
+use Cobalt\Notifications\Models\NotificationSchema;
 use Controllers\Controller;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
@@ -20,7 +21,15 @@ class Notifications extends Controller {
     function getUserNotifications() {
         header("Content-Type: text/html");
         $notes = "";
-        foreach($this->ntfy->getNotificationsForUser(null, false) as $note) {
+        // $state = match($_GET['state']) {
+        //     "all" => false,
+        //     "unread" => true,
+        //     default => false
+        // };
+        $filter = [
+            'sort' => ['sent' => (int)$_GET['sort']]
+        ];
+        foreach($this->ntfy->getNotificationsForUser(null, (int)$_GET['state'], $filter) as $note) {
             $notes .= view($note->getTemplate(), ['ntfy'=> $note]);
         }
 
@@ -55,7 +64,7 @@ class Notifications extends Controller {
     private function getOneNoteById($id) {
         header("Content-Type: text/html");
 
-        $note = $this->ntfy->findOneAsSchema(['_id' => new ObjectId($id)]);
+        $note = $this->ntfy->findOne(['_id' => new ObjectId($id)]);
 
         if(!$note) throw new NotFound("The specified resource was not found");
 
@@ -67,7 +76,7 @@ class Notifications extends Controller {
     }
 
     function sendNotification() {
-        $note = new Notification();
+        $note = new NotificationSchema();
         $submission = $_POST;        
         $users = $submission['users'];
         $submission['users'] = [];
@@ -106,20 +115,25 @@ class Notifications extends Controller {
         return $result->getDeletedCount();
     }
 
-    function status($id, $status) {
+    function state($id) {
+        $key = array_keys($_POST)[0];
+        $value = $_POST[$key];
         $_id = new ObjectId($id);
         $note = $this->ntfy->findOne(['_id' => $_id]);
         if(!$note) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
-        $this->ntfy->setReadState($_id, session('_id'), $status);
-        header("Content-Type: text\html");
-        $note = $this->ntfy->findOneAsSchema(['_id' => $_id]);
-
-        return view($note->getTemplate(), ['ntfy'=> $note]);
+        $modified = $this->ntfy->setReadState($_id, session('_id'), $value, $key);
+        update("[data-id='$id']", [
+            'setAttribute' => [
+                'seen' => $value,
+                'read' => $value,
+            ]
+        ]);
+        return $modified;
     }
 
     function debug() {
-        $note = new Notification();
+        $note = new NotificationSchema();
         $note->subject = "Hello, World";
         $note->body = "Here's some **markdown** to use for a test";
         $note->from = null;
@@ -207,6 +221,12 @@ class Notifications extends Controller {
         return $r;
     }
 
+    function addresseeList($id) {
+        $_id = new ObjectId($id);
+        $nt = $this->ntfy->findOne(["_id" => $_id]);
+        
+    }
+
     function edit_notification($id) {
         // header("Content-Type: text/html");
         $note = $this->ntfy->findOneAsSchema([
@@ -222,7 +242,7 @@ class Notifications extends Controller {
             'title' => "Editing notification: ".(string)$note->_id,
         ]);
 
-        return view("/cobalt/notifications/edit.html", [
+        return view("/Cobalt/Notifications/templates/edit.html", [
             'ntfy' => $note,
             'json' => syntax_highlighter($note, "")
         ]);

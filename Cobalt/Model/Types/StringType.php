@@ -23,11 +23,12 @@ class StringType extends MixedType {
     function character_limit($value) {
         // Get our subject's length
         $length = strlen($value);
-        $min = $this->getDirective("min");
+        $min = null;
+        if($this->hasDirective('min')) $min = $this->getDirective("min");
         if(is_null($min)) $min = 0;
         if($length < $min) throw new ValidationIssue("This value must be at least $min characters");
-        
-        $max = $this->getDirective("max");
+        $max = null;
+        if($this->hasDirective("max")) $max = $this->getDirective("max");
         if(is_null($max)) return $value;
         if($length <= $max) return $value;
         throw new ValidationIssue("This value may not be greater than $max characters");

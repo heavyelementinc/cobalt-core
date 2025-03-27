@@ -48,6 +48,9 @@ trait DirectiveBaseline {
     }
 
     /**
+     * Gets the directive or throws an exception if it's not available
+     * 
+     * **You can use `directiveOrNull()` if you don't care if the directive exists** 
      * @param string $directive - The name of the directive you want 
      */
     public function getDirective() {
@@ -61,6 +64,13 @@ trait DirectiveBaseline {
         return $this->directives[$name];
     }
 
+    /**
+     * Tests to see if the directive exists
+     * 
+     * **You can use `directiveOrNull()` if you don't care if the directive exists** 
+     * @param mixed $name 
+     * @return bool 
+     */
     public function hasDirective($name) {
         return key_exists($name, $this->directives);
     }

@@ -1,5 +1,7 @@
 <?php
 
+use Cobalt\Captcha\Classes\Captcha;
+use Cobalt\Captcha\Exceptions\HumanTest;
 use Cobalt\Pages\Classes\PageManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
@@ -76,6 +78,15 @@ function reauthorize($message = "You must re-authroize your account", $resubmit)
 
     // If everything checks out, return true;
     return true;
+}
+
+function captcha_check($message = "Please confirm you're human", $resubmit) {
+    $captcha = new Captcha();
+    $header = getHeader($captcha::HEADER_FIELD_NAME,null,true, false);
+    if($header) {
+        if($captcha->validate($header)) return true;
+    }
+    throw new HumanTest($message, $resubmit);
 }
 
 /**

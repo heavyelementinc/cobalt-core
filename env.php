@@ -181,8 +181,8 @@ csrf_get_token();
 
 // $_SESSION['timezone'] = apache_request_headers()['X-Timezone'];
 
-@$tz= @timezone_open($_SESSION['timezone'] ?? __APP_SETTINGS__['timezone']);
-if($tz) $tz_set_result = date_default_timezone_set($_SESSION['timezone']);
+@$tz= @timezone_open($_SESSION['timezone'] ?? config()['timezone']);
+if($tz) $tz_set_result = date_default_timezone_set($_SESSION['timezone'] ?? config()['timezone']);
 
 if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) kill("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
 

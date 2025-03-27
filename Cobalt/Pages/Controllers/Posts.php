@@ -72,7 +72,7 @@ class Posts extends AbstractPageController {
             $posts .= $this->renderPreview($post);
         }
         // if(!$index) throw new NotFound("There are no posts to display");
-        if(!$posts) $posts = "<p style='text-align:center'>There are no posts to show</p>";
+    if(!$posts) $posts = "<p style='text-align:center'>There are no posts to show</p>";
         $next_attrs = $this->pagination_link_attrs($misc['page'] ?? 0, 1, $count, $options, $misc);
         $prev_attrs = $this->pagination_link_attrs($misc['page'] ?? 0, -1, $count, $options, $misc);
         add_vars([
@@ -85,7 +85,7 @@ class Posts extends AbstractPageController {
             'prev_page' => "<a $prev_attrs><i name='chevron-left'></i> $misc[prev_label]</a>",
         ]);
 
-        return view('/posts/pages/index.php');
+        return view('/Cobalt/Pages/templates/web/post-index.php');
     }
 
     private function query_for_author(array &$query, array &$options, array &$misc, string &$filter) {
@@ -175,9 +175,9 @@ class Posts extends AbstractPageController {
 
         $items = "";//$this->docsToViews($docs, "/RSS/item.xml");
         foreach($docs as $doc) {
-            $items .= view("/RSS/item.xml", ['doc' => $doc]);
+            $items .= view("/Cobalt/Pages/templates/RSS/item.xml", ['doc' => $doc]);
         }
-        echo view("/RSS/feed.xml", ['posts' => $items]);
+        echo view("/Cobalt/Pages/templates/RSS/feed.xml", ['posts' => $items]);
         exit;
     }
 }

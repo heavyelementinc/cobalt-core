@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\EventListings\Controllers\Events;
 use Contact\ContactManager;
 use Routes\Route;
 
@@ -90,20 +91,21 @@ Route::get("/me/", "UserAccounts@me",
     }
 
     if (app("CobaltEvents_enabled")) {
-        Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
-            'handler' => 'core/events.js',
-            'permission' => "CobaltEvents_crud_events"
-        ]);
-        Route::get("/cobalt-events/?...?", "EventsController@list_events", [
-            'permission' => "CobaltEvents_crud_events",
-            'anchor' => [
-                'name' => 'Event Manager',
-                'href' => '/cobalt-events/',
-                'icon' => 'information-outline',
-                'icon_color' => 'linear-gradient(0.5turn, #14BDEB, #9d3cf6 80%)',
-            ],
-            'navigation' => ['admin_panel', 'presentation_settings']
-        ]);
+        Events::admin();
+        // Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
+        //     'handler' => 'core/events.js',
+        //     'permission' => "CobaltEvents_crud_events"
+        // ]);
+        // Route::get("/cobalt-events/?...?", "EventsController@list_events", [
+        //     'permission' => "CobaltEvents_crud_events",
+        //     'anchor' => [
+        //         'name' => 'Event Manager',
+        //         'href' => '/cobalt-events/',
+        //         'icon' => 'information-outline',
+        //         'icon_color' => 'linear-gradient(0.5turn, #14BDEB, #9d3cf6 80%)',
+        //     ],
+        //     'navigation' => ['admin_panel', 'presentation_settings']
+        // ]);
     }
     
 /** 

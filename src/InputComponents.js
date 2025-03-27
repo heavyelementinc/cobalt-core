@@ -153,6 +153,7 @@ customElements.define("input-switch", InputSwitch);
 class RadioGroup extends HTMLElement {
     constructor() {
         super();
+        console.warn("<radio-group> elements have been deprecated in favor of the <input-radio> element");
         this.selected = this.getAttribute("selected") ?? this.getAttribute("value") ?? this.getAttribute("checked");
         this.default = this.getAttribute("default");
 
@@ -202,6 +203,46 @@ class RadioGroup extends HTMLElement {
 }
 
 customElements.define("radio-group", RadioGroup)
+
+class InputRadio extends HTMLElement {
+    get value() {
+        return this.querySelector("[checked='checked']")?.value ?? null;
+    }
+
+    set value(val) {
+        const candidate = this.querySelector(`input[value="${val}"]`);
+        if(!candidate) throw new Error("Invalid selection");
+        candidate.checked = true;
+    }
+
+    get name() {
+        return this.getAttribute("name");
+    }
+
+    connectedCallback() {
+        this.options = this.querySelectorAll("option");
+        this.createRadioButtons()
+    }
+
+    createRadioButtons() {
+        for(const opt of this.options) {
+            this.appendChild(this.radioElement(opt));
+        }
+    }
+
+    /** @param {HTMLOption} element */
+    radioElement(element) {
+        const label = document.createElement("label");
+        let checked = "";
+        if(element.selected == true) {
+            checked = " checked='checked'";
+        }
+        label.innerHTML = `<input type="radio" name="${this.name}" value="${element.value}"${checked}> ${element.innerHTML}`;
+        return label;
+    }
+}
+
+customElements.define("input-radio", InputRadio)
 
 class LoadingSpinner extends HTMLElement {
     constructor() {
@@ -813,7 +854,7 @@ class ProgressBar extends HTMLElement {
         this.isComplete = newValue;
         const truthy = ["complete", "true", true, "done"];
         if (truthy.indexOf(newValue) === -1) this.show();
-        else this.hide()
+        else this.hide();
     }
 }
 

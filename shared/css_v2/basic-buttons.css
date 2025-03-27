@@ -187,6 +187,13 @@ async-button{
     &.link,
     &[link] {
         cursor: pointer;
+        background: transparent;
+        font-size: 1em;
+        border: 0;
+        padding: 0;
+        &:hover {
+            text-decoration: underline;
+        }
     }
     &.working {
         padding: .2em .4em .2em .6em;

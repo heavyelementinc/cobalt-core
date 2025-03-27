@@ -20,7 +20,7 @@
 
 namespace Handlers;
 
-use Cobalt\Notifications\NotificationManager;
+use Cobalt\Notifications\Classes\NotificationManager;
 use Exceptions\HTTP\BadRequest;
 
 class ApiHandler implements RequestHandler {
@@ -139,6 +139,7 @@ class ApiHandler implements RequestHandler {
         ];
         if(__APP_SETTINGS__['debug_exceptions_publicly']) $this->router_result['exception'] = $e->getFile() . " on line ". $e->getLine() . ": " . $e->getMessage() . "\n\n". $e->getTraceAsString();
         if($this->router_result['error'] === "Unknown Error") $this->router_result['error'] = $this->router_result['exception'];
+        
         if (!$this->_stage_bootstrap['_stage_output']) return $this->_stage_output();
     }
 
@@ -184,6 +185,10 @@ class ApiHandler implements RequestHandler {
                 $this->handle_xml_post_data($directives, $incoming_content_type);
                 break;
             default:
+                if(getHeader("x-client-ident-set")) {
+                    $this->handle_json_post_data($directives, "application/json");
+                    break;
+                }
                 throw new BadRequest("Unknown Content-Type");
         }
     }

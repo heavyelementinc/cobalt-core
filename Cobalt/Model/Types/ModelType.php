@@ -4,6 +4,8 @@ namespace Cobalt\Model\Types;
 
 use ArrayAccess;
 use Cobalt\Model\Attributes\Directive;
+use Cobalt\Model\Classes\ValidationResults\MergeResult;
+use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
 
@@ -21,9 +23,15 @@ class ModelType extends MixedType implements ArrayAccess {
         // Otherwise, we'll grab the schema for this value and we'll instance
         // a GenericModel
         $schema = ($this->hasDirective('schema')) ? $this->getDirective('schema') : [];
-        $this->value = new GenericModel($schema, $value, $this->name.".");
+        // if($realKey && key_exists($realKey, $value)) $value = $value[$realKey];
+        $this->value = new GenericModel($schema, $value, $this->name);
         // $this->value->name_prefix = $this->name;
         $this->isSet = true;
+    }
+
+    public function finalInitialization():void {
+        if(isset($this->value)) return;
+        $this->setValue([]);
     }
 
     public function __get($name) {
@@ -58,6 +66,21 @@ class ModelType extends MixedType implements ArrayAccess {
 
     public function offsetUnset(mixed $offset): void {
         $this->value->offsetUnset($offset);
+    }
+
+    /**
+     * Filters input from the client before the input is stored in the database
+     * @param mixed $value the user input
+     * @return mixed Returns the value to the be stored, may be transformed 
+     */
+    public function filter($value) {
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
+            $this->getDirective(DIRECTIVE_KEY_VALID);
+        }
+        if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
+        $this->value->__filter($value);
+        return new MergeResult(array_dot($this->value->getData(), (($this->value->name_prefix) ? $this->value->name_prefix."." : ""), false));
     }
 
     #[Directive()]

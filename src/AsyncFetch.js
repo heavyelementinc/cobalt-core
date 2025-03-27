@@ -39,6 +39,7 @@ class AsyncFetch extends EventTarget {
             'x-refresh': XRefresh,
             'x-confirm': XConfirm,
             'x-reauthorization': XReauth,
+            'x-captcha': XCaptcha,
             // 'x-mitigation-update': 
         }
         this.headerReactions = {};
@@ -59,9 +60,9 @@ class AsyncFetch extends EventTarget {
             
             const client = new XMLHttpRequest();
 
-            client.onload = event => this._onload(event, client, resolve);
             client.onprogress = progress =>  this._onprogress(progress, client);
             client.onreadystatechange = statechange => this._onreadystatechange(statechange, client);
+            client.onload = event => this._onload(event, client, resolve);
             client.onerror = error => this._onerror(error, client);
             client.onabort = abort => this._onabort(abort, client);
             client.ontimeout = (timeout) => this._ontimeout(timeout, client);
@@ -75,8 +76,9 @@ class AsyncFetch extends EventTarget {
             for(const h in this.requestHeaders) {
                 client.setRequestHeader(h, this.requestHeaders[h]);
             }
-
-            client.setRequestHeader('X-Include', "fulfillment,update,events");
+            let include_header = "fulfillment,update";
+            if(document.querySelector("#user-menu-bar")) include_header += ",notification";
+            client.setRequestHeader('X-Include', include_header);
             client.setRequestHeader('X-Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
             client.setRequestHeader('X-Request-Source', "AsyncFetch");
             const submission = this.encodeFormData(this.data)
@@ -142,6 +144,7 @@ class AsyncFetch extends EventTarget {
 
         // new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
 
         this.dispatchEvent(new CustomEvent("done", {
             detail: {
@@ -170,11 +173,22 @@ class AsyncFetch extends EventTarget {
     }
 
     _onreadystatechange(statechange) {
+        /** @var {XMLHttpRequest} client */
         const client = this._getClient(statechange);
         switch(client.readyState) {
+            case client.UNSENT:
+                break;
+            case client.OPENED:
+                break;
             case client.HEADERS_RECEIVED:
                 this.setResponseHeaders(client.getAllResponseHeaders());
                 break;
+            case client.LOADING:
+                break;
+            case client.DONE:
+                this.dispatchEvent(new CustomEvent("asyncfinished"));
+                break;
+
         }
     }
 
@@ -188,6 +202,7 @@ class AsyncFetch extends EventTarget {
         console.warn("There was an error with the XHR request");
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
         this.reject(error);
     }
 
@@ -201,6 +216,7 @@ class AsyncFetch extends EventTarget {
         const client = this._getClient(abort);
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
         this.dispatchEvent(new CustomEvent("aborted", {detail: this}));
     }
 
@@ -213,6 +229,7 @@ class AsyncFetch extends EventTarget {
         // this.
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
         this.reject(client);
     }
 
@@ -516,6 +533,21 @@ class AsyncUpdate {
 
 }
 
+class AsyncNotification {
+    constructor(request) {
+        if(!request?.resolved) return this;
+        if("notification" in request.resolved == false) return this;
+        this.request = request;
+        this.exec();
+    }
+
+    exec() {
+        const ntfyBtn = document.querySelector("notify-button");
+        if(!ntfyBtn) return;
+        ntfyBtn.unread = this.request.resolved.notification?.unseen ?? 0;
+    }
+}
+
 function appendElementInformation(element, value, instructions) {
     let el = document.createElement("validation-issue");
     const spawnIndex = spawn_priority(element);
@@ -583,6 +615,10 @@ class HeaderDirective {
 
     get action() {
         return this.props.action;
+    }
+
+    get data() {
+        return this.props.xhrRequest.data;
     }
 
     get identifier() {
@@ -727,6 +763,39 @@ class XConfirm extends HeaderDirective {
 
         xhr.setRequestHeader('X-Confirm-Dangerous', 'true');
         return await xhr.submit(fulfillment.data.return);
+    }
+}
+
+class XCaptcha extends HeaderDirective {
+    async execute() {
+        const xhr = this.props.xhrRequest;
+        const responseBody = JSON.parse(xhr.response);
+        const fulfillment = responseBody.fulfillment;
+        this.props.xhrRequest.errorHandled = true;
+        const deferred = new Deferred(() => {});
+        let confirm = modalInput(`
+            <p>${fulfillment.error}</p>
+            <img id="__captcha_image" src=\"/core-content/captcha/\">
+            <button id="__captcha_refresh_button" disabled='disabled'>
+                <i name="refresh"></i>
+            </button>
+            <p><small>Type the characters in the image into the field below.</small></p>
+            `, {okay: "Submit", cancel: "Cancel"}
+        ).then(cfm => {
+            if(cfm === false) return;
+            xhr.dispatchEvent(new CustomEvent("resubmission", {detail: true}));
+
+            xhr.setRequestHeader('X-Captcha', cfm);
+            deferred.resolve(cfm);
+        });
+        const button = document.querySelector("#__captcha_refresh_button");
+        if(!button) return;
+        button.addEventListener("click", () => {
+            document.querySelector("#__captcha_image").src = `/core-content/captcha/?${random_string()}`;
+        });
+        button.disabled = false;
+        await deferred.promise;
+        return await xhr.submit(fulfillment.data);
     }
 }
 

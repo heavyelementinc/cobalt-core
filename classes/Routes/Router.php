@@ -22,6 +22,7 @@
 namespace Routes;
 
 use Cobalt\Extensions\Extensions;
+use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Pages\Classes\PageManager;
 use Controllers\Attributes\Attribute;
 use Exception;
@@ -225,7 +226,12 @@ class Router {
         /** Check if we're a callable or a string and execute as necessary */
         if (is_callable($exe['controller'])) throw new \Exception("Anonymous functions are no longer supported as controllers."); //return $this->controller_callable($exe);
 
-        if (is_string($exe['controller'])) return $this->controller_string($exe);
+        if (is_string($exe['controller'])) $results = $this->controller_string($exe);
+        if(session_exists()) {
+            $notifications = new NotificationManager();
+            $notifications->readNotificationByRouteLiteral($_REQUEST['route'], session()['_id']);
+        }
+        return $results;
     }
 
     function controller_callable($exe) {

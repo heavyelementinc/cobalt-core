@@ -161,7 +161,8 @@ abstract class AbstractPageController extends Crudable {
             'comments' => $this->getComments($page),
             'likes' => $this->getLikes($page),
         ]);
-
+        $route = route($this::class."@__edit", [(string)$page->_id]);
+        register_user_bar_items(['_page_post_edit' => "<a href='$route'><i name='pencil'></i> Edit</a>"]);
         // Get our view and check if it's in the view types
         $v = (string)$page->view;
         return view($page::VIEW_TYPE[$v]);

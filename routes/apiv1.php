@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\EventListings\Controllers\Events;
 use Routes\Options;
 use Routes\Route;
 
@@ -75,13 +76,14 @@ if (app('API_contact_form_enabled')) {
 }
 
 if (app("CobaltEvents_enabled")) {
-    Route::get("/cobalt-events/current", "EventsController@current");
-    Route::s_put("/cobalt-events/update/{id}?", "EventsController@update_event", [
-        'permission' => 'CobaltEvents_crud_events'
-    ]);
-    Route::s_delete("/cobalt-events/{id}", "EventsController@delete_event", [
-        'permission' => 'CobaltEvents_crud_events'
-    ]);
+    // Route::get("/cobalt-events/current", "EventsController@current");
+    // Route::s_put("/cobalt-events/update/{id}?", "EventsController@update_event", [
+    //     'permission' => 'CobaltEvents_crud_events'
+    // ]);
+    // Route::s_delete("/cobalt-events/{id}", "EventsController@delete_event", [
+    //     'permission' => 'CobaltEvents_crud_events'
+    // ]);
+    Events::apiv1();
 }
 
 

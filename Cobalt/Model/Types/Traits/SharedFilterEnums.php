@@ -5,6 +5,7 @@ namespace Cobalt\Model\Types\Traits;
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Types\MixedType;
+use Error;
 use Exception;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
@@ -18,7 +19,7 @@ trait SharedFilterEnums {
      * @return Cobalt\Model\Traits\MixedType
      */
     #[Directive]
-    public function define_valid(array $value, string $name):MixedType {
+    public function define_valid($value, string $name):MixedType {
         $this->__defineDirective($name, $value);
         return $this;
     }
@@ -43,16 +44,13 @@ trait SharedFilterEnums {
     #[Prototype]
     protected function getValid(): array {
         // if ($field === "pronoun_set") return $this->valid_pronouns();
-        if (isset($this->schema['valid'])) {
-            if (is_callable($this->schema['valid'])) {
-                $val = $this->getDirective('valid');
-                if (is_array($val)) return $val;
-                if ($val instanceof BSONArray) return $val->getArrayCopy();
-                if ($val instanceof BSONDocument) return (array)$val;
-                if (is_iterable($val)) return iterator_to_array($val);
-                throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
-            }
-            return $this->schema['valid'];
+        if ($this->hasDirective('valid')) {
+            $val = $this->getDirective('valid');
+            if (is_array($val)) return $val;
+            if ($val instanceof BSONArray) return $val->getArrayCopy();
+            if ($val instanceof BSONDocument) return (array)$val;
+            if (is_iterable($val)) return iterator_to_array($val);
+            throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
         }
         return [];
     }
@@ -71,7 +69,7 @@ trait SharedFilterEnums {
         $valid = $this->getValid();
         
         if($selected) {
-            if($this->getDirective("allow_custom")) $val = $selected;
+            if($this->hasDirective('allow_custom') && $this->getDirective("allow_custom")) $val = $selected;
             else if (key_exists($selected, $valid)) $val = $selected;
             else $val = $this->getValue() ?? $this->value;
         } else $val = $this->getValue() ?? $this->value;
@@ -80,8 +78,11 @@ trait SharedFilterEnums {
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
         
         // If custom is allowed
-        $allow_custom = $this->getDirective("strict") === false;
-        if(!$allow_custom) $allow_custom = $this->getDirective("allow_custom");
+        $allow_custom = false;
+        
+        if($this->hasDirective('strict')) $allow_custom = $this->getDirective("strict") === false;
+        
+        if(!$allow_custom && $this->hasDirective('allow_custom')) $allow_custom = $this->getDirective("allow_custom");
 
         // If the current value is not a key in the current valid options AND
         // we're allowed to have custom options, add the current val to the options

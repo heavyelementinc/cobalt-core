@@ -24,6 +24,17 @@ abstract class ModelController {
     public Model $model;
     public int $index_limit = 50;
 
+    static $api_read_permission = "CRUDControllerPermission";
+    static $api_create_permission = "CRUDControllerPermission";
+    static $api_update_permission = "CRUDControllerPermission";
+    static $api_destroy_permission = "CRUDControllerPermission";
+    static $api_multidestroy_permission = "CRUDControllerPermission";
+    static $api_batch_archive_permission = "CRUDControllerPermission";
+    static $api_archive_permission = "CRUDControllerPermission";
+    static $admin_index = "CRUDControllerPermission";
+    static $admin_new_document = "CRUDControllerPermission";
+    static $admin_edit = "CRUDControllerPermission";
+
     protected int $index_display_action_menu = 0;
 
     function __construct(?string $name = null) {
@@ -51,49 +62,49 @@ abstract class ModelController {
 
             Route::get("$mutant/{id}", "$class@__read", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_read_permission,
                 ],
                 $options['read'] ?? [],
                 "route_details_read")
             );
             Route::post("$mutant/create", "$class@__create", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_create_permission,
                 ],
                 $options['create'] ?? [],
                 "route_details_create")
             );
             Route::post("$mutant/update/{id}", "$class@__update", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_update_permission,
                 ],
                 $options['update'] ?? [],
                 "route_details_update")
             );
             Route::delete("$mutant/delete/{id}", "$class@__destroy", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_destroy_permission,
                 ],
                 $options['destroy'] ?? [],
                 "route_details_destroy")
             );
             Route::delete("$mutant/multi-delete/", "$class@__multidestroy", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_multidestroy_permission,
                 ],
                 $options['destroy'] ?? [],
                 "route_details_destroy")
             );
             Route::delete("$mutant/archive/batch", "$class@__batch_archive", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_batch_archive_permission,
                 ],
                 $options['destroy'] ?? [],
                 "route_details_destroy")
             );
             Route::delete("$mutant/archive/{id}", "$class@__archive", static::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$api_archive_permission,
                 ],
                 $options['destroy'] ?? [],
                 "route_details_destroy")
@@ -118,21 +129,21 @@ abstract class ModelController {
                         'name' => $options['anchor'] ?? self::generate_friendly_name()
                     ],
                     'navigation' => [$options['navigation'] ?? 'admin_panel'],
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$admin_index,
                 ],
                 $options['index'] ?? [],
                 "route_details_index"
             ));
             Route::get("$mutant/new", "$class@__new_document", self::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$admin_new_document,
                 ],
                 $options['new_document'] ?? [],
                 "route_details_create"
             ));
             Route::get("$mutant/edit/{id}", "$class@__edit", self::route_details(
                 [
-                    'permission' => "CRUDControllerPermission",
+                    'permission' => static::$admin_edit,
                 ],
                 $options['edit'] ?? [],
                 "route_details_update"

@@ -1,3 +1,82 @@
+#user-menu-bar {
+    --user-menu-bg-color: var(--branding-color-1);
+    --user-menu-fg-color: var(--branding-color-1-fg);
+    display: flex;
+    background-color: var(--user-menu-bg-color);
+    color: var(--user-menu-fg-color);
+    width: 100%;
+    height: 2em;
+    box-sizing: border-box;
+    grid-column: 1 / span 2;
+    grid-row: 1 / span 1;
+    isolation: isolate;
+    z-index: calc(var(--project-modal-z-index) - 1);
+    position: relative;
+    
+    a {
+        --_anchor-element-color: var(--branding-color-1-fg);
+        --_anchor-hover-color: var(--branding-color-0-fg);
+    }
+    nav ul.userbar--navigation-options {
+        display: flex;
+        height: 100%;
+        align-items: center;
+        gap: .25em;
+        margin-left: 0.25em;
+        li {
+            display: flex;
+        }
+    }
+    .cobalt-masthead {
+        height: 2em;
+        width: 2em;
+        object-fit: contain;
+    }
+    .userbar--user-container {
+        margin-left: auto;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+    .cobalt-user--profile-display img {
+        height: 1em;
+        width: 1em;
+    }
+
+    action-menu[role="button"] {
+        height: 1em;
+        width: 1em;
+        &:before {
+            content: "\F035D";
+        }
+    }
+}
+
+.contextual {
+    display: none;
+    &:focus {
+        display: block;
+    }
+}
+
+#user-panel-header {
+    color: var(--neutral-color-5-fg);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 0.5em;
+    align-items: center;
+    background: var(--neutral-color-5);
+    height: 100%;
+    gap: .5em;
+}
+
+
+#user-panel-header a {
+    color:white;
+}
+
+
 body > header {
     display: flex;
     background: var(--branding-color-1);

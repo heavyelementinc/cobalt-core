@@ -5,6 +5,7 @@ namespace Cobalt\Model;
 use ArrayAccess;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Exceptions\Undefined;
+use Cobalt\Model\Traits\Filterable;
 use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
@@ -27,7 +28,7 @@ use TypeError;
  * @package Cobalt\Model
  */
 class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable, Stringable {
-    use Schemable, Viewable, Hydrateable, Prototypable;
+    use Schemable, Viewable, Hydrateable, Prototypable, Filterable;
     public ?string $name_prefix = null;
     private bool $__schema_allow_undefined_fields = false;
 

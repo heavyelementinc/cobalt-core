@@ -24,6 +24,18 @@
     {{!webmention}}
     @fonts_tag();
     <link href="/core-content/css/material-design/css/material.min.css?{{app.verion}}" rel="stylesheet">
+    <?php
+        use Cobalt\EventListings\Models\Event;
+
+        if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
+            $server_name = server_name();
+            // This is a bit of a hack so that we can include the link to our rss feed
+            // We need wait for the environment to fully load before we call nullable_route
+            // That's why we're embedding the call in the template.
+            $rt = "@nullable_route(\"\\\Cobalt\\\Pages\\\Controllers\\\Posts@rss_feed\");";
+            echo ($rt) ? "<link href=\"$server_name$rt\" type=\"application/atom+xml\" rel=\"alternate\" title=\"{{app.Posts_rss_feed_name}}\" />" : '';
+        }
+    ?>
     <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
     @style_meta@
 
@@ -36,6 +48,7 @@
     <script>
         window.__ = JSON.parse(atob('@get_exportables_as_json(true);'));
     </script>
+    <?= (__APP_SETTINGS__['CobaltEvents_enabled']) ? "<script id=\"cobalt-events\" type=\"application/json\">" . json_encode((new Event())->getPublicListing()) . "</script>" : "<script id=\"cobalt-events\" type=\"application/json\">null</script>" ?>
 </head>
 
 <body id="{{body_id}}" class="{{body_class}}">
@@ -51,12 +64,12 @@
         <span class="visually-hidden">Menu</span>
         <i name="menu"></i>
     </button>
+    @user_menu@
     <header id="app-header">
         {{!header_binding_before}}
         @header_content@
         {{!header_binding_middle}}
         @session_panel@
-        @user_menu@
         {{!header_binding_after}}
     </header>
     @post_header@

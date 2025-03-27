@@ -230,6 +230,11 @@ function set_template($path, $vars = []) {
     return view($path, $vars);
 }
 
+function register_user_bar_items(array $user_bar):void {
+    global $USER_BAR_DETAILS;
+    $USER_BAR_DETAILS += $user_bar;
+}
+
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
  * 
  * A few template vars for quick reference:

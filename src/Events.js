@@ -24,7 +24,10 @@ class CobaltEvents {
     }
 
     async getCurrentEvents() {
-        this.currentEvents = await this.api.get();
+        const inlineEvents = document.querySelector("#cobalt-events");
+        if(!inlineEvents) return {};
+        const json = JSON.parse(inlineEvents.innerText);
+        this.currentEvents = (json) ? json : {};
     }
 
     async initializeEvent(evt, preview = false) {

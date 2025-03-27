@@ -1,4 +1,17 @@
-notify-button[role='button'] {
+:root {
+    --notification-panel-width: 30vw;
+    @media only screen and (max-width: 35em) {
+        --notification-panel-width: 100%;
+    }
+}
+body.notification-panel--open {
+    #user-menu-bar {
+        padding-right: calc(var(--notification-panel-width) - var(--scrollbar-width));
+        transition: padding-right 500ms;
+    }
+}
+
+:is(notify-button, notify-button[role="button"]) {
     font-family: "Material Design Icons";
     border: unset;
     font-size: inherit;
@@ -9,38 +22,42 @@ notify-button[role='button'] {
     display: flex;
     align-items: center;
     position: relative;
-}
-
-notify-button:before {
-    content: "\F009C";
-}
-
-notify-button.notification-indicator--unread:before {
-    content: "\F009A";
-}
-
-notify-button.notification-indicator--muted:before {
-    content: "\F009B";
-}
-
-notify-button .unseen-indicator {
-    border-radius: 50%;
-    height: 2ch;
-    width:  2ch;
-    background: var(--project-color-problem);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .5em;
-    font-family: sans-serif;
-    position: absolute;
-    top: 0;
-    right: -0.3em;
-}
-
-notify-button .unseen-indicator:empty {
-    display: none;
+    --icon: "\F009C";
+    &:before {
+        content: var(--icon);
+    }
+    &.notification-indicator--read {
+        .unseen-indicator {
+            display: none;
+        }
+    }
+    &.notification-indicator--unread{
+        --icon: "\F009A";
+    }
+    &.notification-indicator--mute{
+        --icon: "\F0A91";
+        .unseen-indicator {
+            display: none;
+        }
+    }
+    .unseen-indicator {
+        --size: 1.3em;
+        border-radius: 50%;
+        height: var(--size);
+        width: var(--size);
+        background: var(--issue-color-1);
+        color: var(--issue-color-1-fg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .75em;
+        font-weight: bold;
+        font-family: sans-serif;
+        position: absolute;
+        top: -0.25em;
+        right: 0.75em;
+        border: 2px solid var(--user-menu-bg-color);
+    }
 }
 
 .notifications--notifications-panel {
@@ -49,68 +66,110 @@ notify-button .unseen-indicator:empty {
     top:0;
     background: var(--project-body-background);
     box-shadow: 0 0 10px rgb(0 0 0 / .4);
-    padding:1em;
     height: 100vh;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    width: 40ch;
+    width: var(--notification-panel-width);
     z-index: calc(var(--project-modal-z-index) + 1);
-}
-
-.notifications--notifications-panel[aria-hidden="true"] {
-    right: -150%;
-    button, input {
-        user-select: none;
-        
+    --inner-content-padding: var(--margin-m);
+    transition: right 500ms;
+    &[aria-hidden="true"] {
+        right: calc(-100% + -10px);
+        button, input {
+            user-select: none;
+        }
+    }
+    hgroup {
+        display: flex;
+        align-items: center;
+        padding: 0 var(--inner-content-padding);
+        margin: 0;
+        border: none;
+    }
+    h1 {
+        font-size: 1rem;
+        margin: var(--margin-s) 0;
+    }
+    .filter-container {
+        padding: var(--margin-xs) var(--inner-content-padding);
+        background: var(--background-color-2);
+        border-top: var(--input-element-border-value);
+        border-bottom: var(--input-element-border-value);
+        margin-bottom: var(--margin-s);
+        select, action-menu {
+            padding: var(--margin-xxs);
+            font-size: 0.8em;
+        }
+    }
+    button {
+        border: none;
+        background: none;
+        color: inherit;
+        padding: 0;
+        margin: 0 0 0 auto;
+    }
+    form-request button {
+        font-size: 1.2em;
+        padding: 0 var(--margin-xs);
+    }
+    ul.notifications--list {
+        list-style: none;
+        margin: 0;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        flex-grow: 1;
+        overflow-y: scroll;
+        scrollbar-width: thin;
+        padding: 0 var(--inner-content-padding);
+    }
+    .notifications--send {
+        background: 0;
+        fieldset {
+            border: none;
+            margin: 0;
+            border-top: var(--input-element-border-value);
+            background-color: var(--project-body-background);
+        }
     }
 }
 
-.notifications--notifications-panel hgroup {
-    display:flex;
-    align-items: center;
-}
-
-.notifications--notifications-panel h1 {
-    font-size: 1.2rem;
-}
-
-.notifications--notifications-panel button {
-    border: none;
-    background: none;
-    color: inherit;
-    padding: 0;
-    margin: 0 0 0 auto;
-}
-
-
-.notifications--notifications-panel ul.notifications--list {
-    list-style: none;
-    margin:0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    flex-grow: 1;
-    overflow-y: scroll;
-    scrollbar-width: thin;
-}
-
-
-
-
-notification-item.notifications--notification-container {
-    display: flex;
-    text-decoration: none;
-    flex-direction: column;
-    border: 1px solid var(--project-color-input-border-nofocus);
-    background: var(--project-color-input-background);
-    padding: .4rem;
-    color: inherit;
-}
-
-notification-item.notifications--notification-container:visited {
-    color: inherit;
+notification-item {
+    --read-status-icon: "\F05EF"; /** READ icon */
+    &.notifications--notification-container {
+        display: flex;
+        text-decoration: none;
+        flex-direction: column;
+        border: 1px solid var(--project-color-input-border-nofocus);
+        background: var(--project-color-input-background);
+        padding: var(--margin-xxs) var(--margin-m, .4em) var(--margin-xs);
+        color: inherit;
+        border-radius: var(--input-element-radius, .3em);
+        &:visited {
+            color: inherit;
+        }
+    }
+    &[seen="false"][read="false"]{
+        --read-status-icon: "\F09EB"; /** NEW & UNREAD icon */
+    }
+    &[read="false"] {
+        --read-status-icon: "\F01EE"; /** UNREAD icon */
+    }
+    date-span {
+        cursor: pointer;
+        &:hover {
+            text-decoration: underline;
+        }
+        &:after {
+            font-family: 'Material Design Icons';
+            content: " \F0059";
+        }
+        &:hover:after {
+            text-decoration: none;
+        }
+    }
 }
 
 /* notification-item.notifications--notification-container:hover {
@@ -141,6 +200,11 @@ notification-item.notifications--notification-container:visited {
 }
 
 .notification--foot {
+    &:before {
+        font-family: 'Material Design Icons';
+        content: var(--read-status-icon);
+    }
+    
     font-size: .8rem;
     display: flex;
     justify-content: space-between;
@@ -152,7 +216,7 @@ form-request.notifications--send {
     /* flex-grow: 1; */
 }
 
-split-field {
+/* split-field {
     display: flex;
     align-items: center;
     padding: 0;
@@ -175,4 +239,4 @@ split-field > *:last-child {
     margin: 0;
     border-radius: 0;
     height: 100%;
-}
+} */

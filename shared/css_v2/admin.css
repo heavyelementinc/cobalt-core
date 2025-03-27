@@ -13,6 +13,7 @@ body > header {
 .admin-panel body {
     display: grid;
     grid-template-columns: 200px 1fr;
+    grid-template-rows: 2em;
     min-height: 100vh;
     gap: 0 1em;
     #admin-panel {
@@ -140,14 +141,6 @@ body > header {
 
 }
 
-
-.contextual {
-    display: none;
-    &:focus {
-        display: block;
-    }
-}
-
 #admin-panel + main {
     display: block;
     min-height: 80vh;
@@ -167,20 +160,6 @@ body > header {
 #admin-panel form-request {
     background: var(--project-calendar-cell-bg);
     border: var(--project-action-menu-border);
-}
-
-#user-panel-header {
-    color: var(--neutral-color-5-fg);
-    display: flex;
-    justify-content: space-between;
-    padding: .8em;
-    align-items: center;
-    background: var(--neutral-color-5);
-}
-
-
-#user-panel-header a {
-    color:white;
 }
 
 

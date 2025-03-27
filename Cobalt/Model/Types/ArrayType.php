@@ -4,13 +4,16 @@ namespace Cobalt\Model\Types;
 
 use ArrayAccess;
 use Cobalt\Model\Attributes\Directive;
+use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
+use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\Traits\Hydrateable;
+use Cobalt\Model\Types\Traits\SharedFilterEnums;
 use Error;
 use Stringable;
 
 class ArrayType extends MixedType implements ArrayAccess, Stringable {
-    use Hydrateable;
+    use Hydrateable, SharedFilterEnums;
 
     public function setValue($array):void {
         $this->value = [];
@@ -81,6 +84,30 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
 
     public function offsetUnset(mixed $offset): void {
         unset($this->value[$offset]);
+    }
+
+    #[Prototype]
+    protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
+        if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
+        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-array";
+        if($tag === null) $tag = "input-array";
+        if($this->hasDirective("allow_custom")) $misc['allow-custom'] = ($this->getDirective('allow_custom')) ? 'true' : "false";
+        return $this->inputArray($class, $misc, $tag);
+    }
+
+    
+    /**
+     * Filters input from the client before the input is stored in the database
+     * @param mixed $value the user input
+     * @return mixed Returns the value to the be stored, may be transformed 
+     */
+    public function filter($value) {
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
+            $this->getDirective(DIRECTIVE_KEY_VALID);
+        }
+        if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
+        return $value;
     }
 
 }

@@ -81,10 +81,25 @@ trait Prototypable {
     }
 
     #[Prototype]
-    protected function getLabel(): string {
+    protected function getLabel($includeHtml = true): string {
+        $labelStart = "<label>";
+        $is_required = ($this->directiveOrNull("required")) ? " <span class=\"form-prototype--required-field\">" . __APP_SETTINGS__['Prototypeable_required_field_label'] . "</span>" : "";
+        $labelEnd = "$is_required</label>";
+        if($includeHtml === false) {
+            $labelStart = "";
+            $labelEnd = "";
+        }
         $hasLabel = $this->hasDirective("label");
-        if($hasLabel) return $this->getDirective("label");
+        if($hasLabel) return $labelStart.$this->getDirective("label") . $labelEnd;
         $split = str_replace([".","_"], " ", $this->name);
-        return ucwords($split);
+        return $labelStart . ucwords($split) . $labelEnd;
     }
+
+    #[Prototype]
+    protected function isRequired(): bool {
+        if($this->hasDirective("required")) return $this->getDirective('required');
+        return false;
+    }
+
+    
 }

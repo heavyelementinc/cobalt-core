@@ -83,6 +83,9 @@ $TEMPLATE_BINDINGS = [
     "main_content_binding_after", "footer_binding_before", "footer_binding_after"
 ];
 
+global $USER_BAR_DETAILS;
+$USER_BAR_DETAILS = [];
+
 /**
  * Append a value to a particular template binding
  * 

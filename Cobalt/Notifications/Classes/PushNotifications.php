@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Notifications;
+namespace Cobalt\Notifications\Classes;
 
 use Auth\UserCRUD;
 use Exceptions\HTTP\BadRequest;
