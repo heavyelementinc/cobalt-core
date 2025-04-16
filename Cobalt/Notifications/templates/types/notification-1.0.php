@@ -3,7 +3,7 @@
         {{ntfy.for.attributes()}}
         {{ntfy.action.attributes()}}>
         <div class="notification--from">
-            {{!ntfy.from.uname}}
+            <strong><?= $vars['ntfy']->from->uname ?? "Web Admin" ?></strong>
             <action-menu stop-propagation="true" type="options" title="Notification">
                 <option icon="email" name="state" method="PUT" action="/api/notifications/{{ntfy._id}}/state/" value="">Mark as "{{ntfy.myReadState}}"</option>
                 <option icon="pencil" name="edit" onclick="modalView('/api/notifications/{{ntfy._id}}/update')">Edit</option>

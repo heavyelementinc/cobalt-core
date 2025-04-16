@@ -387,31 +387,6 @@ input-binary {
             text-align: left;
             flex-grow: 1;
             gap: inherit;
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             &:hover {
                 --input-element-tray: hsl(from var(--input-hover-background) h s 100%);
                 border: var(--input-element-border-width) solid var(--input-element-background);
@@ -651,6 +626,39 @@ input-password {
         font-weight: bold;
         font-size: 1.6em;
     }
+}
+
+select {
+    appearance: base-select;
+    &::picker-icon {
+        content: "\F0140";
+        color: var(--input-element-border);
+        font-family: "Material Design Icons";
+    }
+    &:hover::picker-icon {
+        color: black;
+    }
+}
+
+::picker(select) {
+    border: var(--input-element-border-value);
+    background: var(--input-element-background);
+    padding: var(--input-element-padding);
+    border-radius: var(--input-element-radius);
+    font-size: 1.1rem;
+    color: var(--input-element-color);
+    margin: 0 0 var(--margin-xs);
+}
+
+option:hover {
+    border: var(--input-element-border-width) solid var(--input-hover-border);
+    background: var(--input-hover-background);
+}
+
+option:disabled {
+    background: var(--input-disabled-background);
+    border: var(--input-element-border-width) solid var(--input-disabled-border);
+    color: var(--input-disabled-color);
 }
 
 @media only screen and (max-width: 35em) {

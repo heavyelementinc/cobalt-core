@@ -2,10 +2,15 @@
 
 namespace Cobalt\Notifications\Classes;
 
+use Auth\UserCRUD;
+use Auth\UserPersistance;
 use Cobalt\Notifications\Models\NotificationSchema;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\Driver\Cursor;
+use MongoDB\Model\BSONDocument;
+use TypeError;
 
 class NotificationManager extends \Drivers\Database {
 
@@ -134,6 +139,17 @@ class NotificationManager extends \Drivers\Database {
         $note->ip   = $_SERVER['X-FORWARDED-FOR'] ?? $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['REMOTE_ADDR'];
         $note->sent = new UTCDateTime();
         
+        if(count($note['for']) < 1) {
+            throw new TypeError("At least one recipient must be specified");
+        }
+
+        foreach($note['for'] as $u){ 
+            if(!is_array($u)) throw new TypeError("Recipient must conform to the correct datastructure!");
+            if(!key_exists('user', $u) || !key_exists('seen',$u) || !key_exists('read', $u) || !key_exists('modified', $u)) {
+                throw new TypeError("Recipient datastructure is missing required fields");
+            }
+        }
+
         // $addToSet['for'] = ['$each' => $note->for];
         // unset($validated['for']);
 
@@ -154,6 +170,35 @@ class NotificationManager extends \Drivers\Database {
         }
         
         return $upserted_id || $id;
+    }
+
+    static function getAddresseesByPermission(string|array $permissions, bool $state = true, ?array $options = null) {
+        $crud = new UserCRUD();
+        $users = $crud->getUsersByPermission($permissions, $state, array_merge([
+            'limit' => 50,
+            'projection' => ['_id' => 1]
+        ],$options ?? []));
+        return static::convertUserResultsToRecipientUserStructure($users);
+    }
+
+    static function convertUserResultsToRecipientUserStructure(array|Cursor $users) {
+        $result = [];
+        foreach($users as $u) {
+            $id = null;
+            if($u instanceof UserPersistance || $u instanceof BSONDocument) {
+                $id = $u->_id;
+            } else if ($u instanceof ObjectId) {
+                $id = $u;
+            }
+            if($id === null) continue;
+            $result[] = [
+                'user' => $id,
+                "seen" => false,
+                "read" => false,
+                'modified' => new UTCDateTime()
+            ];
+        }
+        return $result;
     }
 
     public function addresseeDataStructure(&$content) {        

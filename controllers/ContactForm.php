@@ -257,16 +257,7 @@ class ContactForm extends Crudable {
 
     private function contactNotify($mutant, $href) {
         $ntfy = new NotificationManager();
-        $to = [];
-        $userCrud = new UserCRUD();
-        $users = $userCrud->getUsersByPermission("Contact_form_submissions_access");
-        foreach($users as $u) {
-            $to[] = [
-                'user' => $u->_id,
-                'state' => 0,
-                'modified' => new UTCDateTime()
-            ];
-        }
+        $to = NotificationManager::getAddresseesByPermission("Contact_form_submissions_access");
         $notification = new NotificationSchema([
             'from' => null,
             'for' => $to,

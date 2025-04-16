@@ -123,7 +123,7 @@ class NotificationSchema extends PersistanceMap {
             ],
             'template' => [
                 new StringResult,
-                'default' => "/Cobalt/Notifications/templates/types/notification-1.0.html"
+                'default' => "/Cobalt/Notifications/templates/types/notification-1.0.php"
             ],
             // 'token' => new StringResult,
             'version' => [

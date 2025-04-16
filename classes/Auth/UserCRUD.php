@@ -22,6 +22,7 @@ use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\Driver\Cursor;
 use PhpParser\Node\Expr\Cast\Object_;
 use Validation\Exceptions\ValidationFailed;
 
@@ -55,7 +56,14 @@ class UserCRUD extends \Drivers\Database {
         ]);
     }
 
-    final function getUsersByPermission($permissions, $status = true, $options = null) {
+    /**
+     * 
+     * @param string|array<string> $permissions 
+     * @param bool $status 
+     * @param mixed $options 
+     * @return Cursor 
+     */
+    final function getUsersByPermission(string|array $permissions, bool $status = true, ?array $options = null) {
         if(!$options) $options = [
             'limit' => 50
         ];
@@ -73,6 +81,18 @@ class UserCRUD extends \Drivers\Database {
             $perms,
             $options
         );
+    }
+
+    final function getUserIdArrayByPermission(string|array $permissions, bool $status = true, ?array $options = null):array {
+        $options = array_merge([
+            'limit' => 50,
+            'projection' => ['_id' => 1]
+        ], $options ?? []);
+        $map = [];
+        foreach($this->getUsersByPermission($permissions, $status, $options) as $user) {
+            $map[] = $user->_id;
+        }
+        return $map;
     }
 
     final function getUsersByGroup($groups, $options = null) {

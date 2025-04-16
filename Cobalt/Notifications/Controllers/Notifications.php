@@ -29,7 +29,8 @@ class Notifications extends Controller {
         $filter = [
             'sort' => ['sent' => (int)$_GET['sort']]
         ];
-        foreach($this->ntfy->getNotificationsForUser(null, (int)$_GET['state'], $filter) as $note) {
+        $notifications = $this->ntfy->getNotificationsForUser(null, (int)$_GET['state'], $filter);
+        foreach($notifications as $note) {
             $notes .= view($note->getTemplate(), ['ntfy'=> $note]);
         }
 
