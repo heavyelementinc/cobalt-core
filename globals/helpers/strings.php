@@ -3,6 +3,8 @@
 use Demyanovs\PHPHighlight\Highlighter;
 use Drivers\UTCDateTime as DriversUTCDateTime;
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationIssue;
 
 function fediverse_href_to_user_tag(string $href) {
@@ -485,4 +487,17 @@ function social_media_links(array $included = []):string {
         $social_links .= "<a href=\"$value\" target=\"_blank\" title=\"$name\"><i name=\"$icon\"></i><a>";
     }
     return $social_links;
+}
+
+function snake_case_fixer(string $str):string {
+    return str_replace("_", " ", $str);
+}
+
+function embed_image(array|BSONArray|BSONDocument $doc):string {
+    $filename = $doc['filename'];
+    $height   = $doc['meta']['height'];
+    $width    = $doc['meta']['width'];
+    $accent   = $doc['meta']['accent_color'];
+    $contrast = $doc['meta']['contrast_color'];
+    return "<img src=\"/res/fs/$filename\" alt=\"$doc[alt]\" height=\"$height\" width=\"$width\" accent-color=\"$accent\" contrast-color=\"$contrast\">";
 }

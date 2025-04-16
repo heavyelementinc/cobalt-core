@@ -85,6 +85,8 @@ $TEMPLATE_BINDINGS = [
 
 global $USER_BAR_DETAILS;
 $USER_BAR_DETAILS = [];
+global $USER_BAR_CUSTOMS;
+$USER_BAR_CUSTOMS = [];
 
 /**
  * Append a value to a particular template binding

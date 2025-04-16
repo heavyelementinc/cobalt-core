@@ -4,7 +4,7 @@
  * @emits actionmenuselect
  */
 class ActionMenu extends EventTarget {
-    constructor(button = null, mode = null) {
+    constructor(button = null, type = null) {
         super();
         // Constants
         this.ACTION_MENU_CLASS = "action-menu-wrapper";
@@ -31,7 +31,7 @@ class ActionMenu extends EventTarget {
         this.closeGlyph.innerHTML = `<span class='close-glyph'></span>`;
         this.initWrapper();
         
-        this.type = mode;
+        this.type = type;
         // if(window.menu_instance) window.menu_instance.closeMenu()
     }
 
@@ -85,7 +85,7 @@ class ActionMenu extends EventTarget {
         else mode = this.ACTION_MENU_TYPES[0]
 
         // Check if we're in mobile mode
-        if(window.matchMedia("only screen and (max-width: 35em)")) {
+        if(isMobile()) {
             mode = this.ACTION_MENU_TYPES[1];
         }
         // There can only be one type set

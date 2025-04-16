@@ -38,6 +38,32 @@
         &:has(switch-container) {
             flex-wrap: nowrap;
         }
+        &.settings-panel--radio-group {
+            flex-direction: column;
+            align-items: flex-start;
+            radio-group {
+                width: 100%;
+                display: flex;
+                gap: var(--margin-m);
+                input[type='radio'] {
+                    display: none;
+                }
+                label {
+                    display: block;
+                    padding: var(--margin-m);
+                    border-radius: var(--margin-s);
+                }
+                label:has(:checked) {
+                    outline: var(--input-element-border-value);
+                    border: var(--input-element-border-width) solid var(--input-hover-background);
+                    background: var(--primary-color-1);
+                    color: var(--primary-color-1-fg);
+                }
+                label:hover {
+                    outline: var(--input-element-border-value);
+                }
+            }
+        }
         .settings-panel--description + :where(input, textarea, select, input-number){
             width: 100%;
         }
@@ -63,6 +89,12 @@
         & input-switch + .settings-panel--description {
             margin-right: auto;
         }
+
+        input-binary {
+            button {
+                text-align: left;
+            }
+        }
     }
 
 
@@ -75,5 +107,4 @@
         font-size: 14pt;
         margin-bottom: 0;
     }
-
 </style>

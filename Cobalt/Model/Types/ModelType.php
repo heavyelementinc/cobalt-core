@@ -10,12 +10,14 @@ use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
 
 class ModelType extends MixedType implements ArrayAccess {
+    protected bool $__allow_undefined_fields = true;
 
     public function setValue($value):void {
         // Let's check if the value is already a Model (this could be because 
         // we) persisted some data from the DB, etc.
         if($value instanceof Model || $value instanceof GenericModel) {
             $value->name_prefix = $this->name;
+            $value->set_allow_undefined_fields($this->__allow_undefined_fields);
             $this->value = $value;
             $this->isSet = true;
             return;
@@ -24,7 +26,7 @@ class ModelType extends MixedType implements ArrayAccess {
         // a GenericModel
         $schema = ($this->hasDirective('schema')) ? $this->getDirective('schema') : [];
         // if($realKey && key_exists($realKey, $value)) $value = $value[$realKey];
-        $this->value = new GenericModel($schema, $value, $this->name);
+        $this->value = new GenericModel($schema, $value, $this->name, true);
         // $this->value->name_prefix = $this->name;
         $this->isSet = true;
     }
@@ -66,6 +68,10 @@ class ModelType extends MixedType implements ArrayAccess {
 
     public function offsetUnset(mixed $offset): void {
         $this->value->offsetUnset($offset);
+    }
+
+    public function allow_undefined_fields(bool $value) {
+        $this->__allow_undefined_fields = $value;
     }
 
     /**

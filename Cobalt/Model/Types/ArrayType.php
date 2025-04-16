@@ -20,6 +20,7 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
         $each = null;
         
         if($this->hasDirective('each')) $each = $this->getDirective('each');
+        if(!$each && method_exists($this, 'each')) $each = $this->eachSchema();
         foreach($array as $index => $value) {
             if($each) {
                 if($each[0] instanceof MixedType) $each['type'] = $each[0];

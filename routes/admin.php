@@ -256,7 +256,7 @@ Route::get("/integrations/{class}", "IntegrationsController@token_editor");
 *  ========================================================
 */
 
-if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
+if(app("API_contact_form_enabled") && __APP_SETTINGS__["Contact_form_on_success_modes"] & CONTACT_SUCCESS_SYSTEM) {
     ContactForm::admin(null, [
         'index' => [
             'anchor' => [

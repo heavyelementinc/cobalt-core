@@ -1,7 +1,7 @@
 <?php
 
 use Cobalt\Extensions\Extensions;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Controllers\ClientFSManager;
 use Exceptions\HTTP\NotFound;
 
@@ -78,12 +78,6 @@ class FileController extends \Controllers\FileController {
         header("Content-Type: application/javascript;charset=UTF-8");
         $this->get_etag($file);
         readfile($file);
-        exit;
-    }
-
-    function vapid_pub_key(){
-        header("Content-Type: application/json;charset=UTF-8");
-        echo json_encode((new PushNotifications())->vapid_keys->keyset->publicKey);
         exit;
     }
 

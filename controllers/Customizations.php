@@ -21,7 +21,7 @@ class Customizations extends \Controllers\Controller {
     function index($groupName = null) {
         if($groupName === "edit") header("Location: /admin/customizations/");
         $query = [];
-        if($groupName !== null) $query['group'] = $groupName;
+        if($groupName !== null) $query['group'] = ['$in' => explode(";",$groupName)];
         $regex = new \MongoDB\BSON\Regex($_GET['search']);
         $this->enableSearchField('search', [
             '$or' => [

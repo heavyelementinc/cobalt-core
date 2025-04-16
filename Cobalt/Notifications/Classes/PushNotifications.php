@@ -67,7 +67,7 @@ class PushNotifications {
         return $this->vapid_keys;
     }
 
-    function push($subject, $message, $recipient_classes = [], $data = []) {
+    function push($subject, $message, array $recipient_classes = [], $data = []) {
         $recipients = $this->fetch_recipients($recipient_classes);
         $this->dispatch($subject, $message, $recipients, $data);
     }
@@ -88,7 +88,7 @@ class PushNotifications {
                 $json = json_encode([
                     'subject' => view_from_string($subject, ['user' => $user]),
                     'message' => view_from_string($message, ['user' => $user]),
-                    'origin'  => app("domain_name"),
+                    'origin'  => server_name(),
                     'badge'   => '/favicon.ico',
                     'icon'    => app("logo.thumb.filename"),
                     'data'    => $data
@@ -118,23 +118,39 @@ class PushNotifications {
         }
     }
 
-    function fetch_recipients($classes) {
+    function fetch_recipients(array $permissions) {
         $crud = new UserCRUD();
-        if ($classes === "root") $query = ['groups' => 'root'];
-        else if ($classes instanceof ObjectId) {
-            $query = ['_id' => $classes];
-        } else if(is_array($classes)) {
-            // $arr = array_fill_keys($classes,true);
-            $query = [];
-            foreach($classes as $name){
-                $query[] = ["$this->ua_push_types.$name" => true];
+        $query = [
+            ['_id' => []],
+        ];
+        $include_root_users = false;
+        foreach($permissions as $index => $detail) {
+            if($detail instanceof ObjectId) {
+                $query[0]['_id'][] = $detail;
+                continue;
             }
-            // $query = [$this->ua_push_types => $arr];
-        } else {
-            throw new BadRequest("Failed to find valid recipients");
+            if($detail === "root") {
+                $include_root_users = true;
+                continue;
+            }
+            $query[] = ["permissions.$detail" => true];
         }
+        if($include_root_users) $query[] = ['is_root' => true];
+        // if ($classes === "root") $query = ['groups' => 'root'];
+        // else if ($classes instanceof ObjectId) {
+        //     $query = ['_id' => $classes];
+        // } else if(is_array($classes)) {
+        //     // $arr = array_fill_keys($classes,true);
+        //     $query = [];
+        //     foreach($classes as $name){
+        //         $query[] = ["$this->ua_push_types.$name" => true];
+        //     }
+        //     // $query = [$this->ua_push_types => $arr];
+        // } else {
+        //     throw new BadRequest("Failed to find valid recipients");
+        // }
         
-        $users = $crud->findAllAsSchema(['$or' => $query]);
+        $users = $crud->find(['$or' => $query]);
 
         return $users;
     }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@0,87.5,100..900;1,87.5,100..900&display=swap');
+
 @property --branding-increment {
     syntax: "<number>";
     inherits: true;
@@ -167,9 +169,14 @@
     --main-content-color: oklch(from var(--background-color) calc(l - .60) c h);
 
     --input-element-border: hsl(from var(--primary-color-1) h 15% 80%);
+    --input-element-border-fg: rgb(from var(--input-element-border) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
     --input-element-tray: hsl(from var(--primary-color-1) h 10% 94%);
+    --input-element-tray-fg: rgb(from var(--input-element-tray) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
     --input-element-background: hsl(from var(--primary-color-1) h 15% 99%);
     --input-element-color: oklch(from var(--input-element-background) calc(1 - 0.8) c h);
+    --input-element-active: var(--primary-color-1);
+    --input-element-active-fg: rgb(from var(--input-element-active) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    
     
 
     
@@ -225,4 +232,6 @@
     --project-events-button-text-hover: var(--project-color-button-hover-text);
     --project-events-font-family: var(--project-body-family);
     --project-landing-page-content-width: 80ch;
+
+    --admin-font: 'Roboto', 'Arial', sans-serif;
 }

@@ -1,6 +1,27 @@
+:root {
+    --user-menu-bg-color: var(--neutral-color-3);
+    --user-menu-fg-color: var(--neutral-color-3-fg);
+}
+label[for='user-menu-bar-controller'] {
+    display: none;
+    &:before {
+        content: "\F035F";
+        font-family: "Material Design Icons";
+    }
+    @media only screen and (max-width: 35em) {
+        display: block;position: absolute;top:  0;left: 0;background: var(--primary-color-1);color: var(--primary-color-1-fg);font-size: var(--margin-xl);z-index: var(--project-modal-z-index);
+    }
+}
+#user-menu-bar-controller {
+    display: none;
+}
+
+#user-menu-bar-controller:checked + #user-menu-bar {
+    display: flex;
+}
+
 #user-menu-bar {
-    --user-menu-bg-color: var(--branding-color-1);
-    --user-menu-fg-color: var(--branding-color-1-fg);
+    --user-menu-bar-height: 2em;
     display: flex;
     background-color: var(--user-menu-bg-color);
     color: var(--user-menu-fg-color);
@@ -12,25 +33,48 @@
     isolation: isolate;
     z-index: calc(var(--project-modal-z-index) - 1);
     position: relative;
-    
+    font-family: 'Helvetica', 'Arial', sans-serif;
     a {
-        --_anchor-element-color: var(--branding-color-1-fg);
-        --_anchor-hover-color: var(--branding-color-0-fg);
+        --_anchor-element-color: var(--user-menu-fg-color);
+        --_anchor-hover-color: var(--user-menu-fg-color);
+    }
+    nav {
+        overflow-x: scroll;
+        overflow-y: hidden;
+        scrollbar-width: none;
     }
     nav ul.userbar--navigation-options {
         display: flex;
         height: 100%;
         align-items: center;
-        gap: .25em;
+        /* gap: .75em; */
         margin-left: 0.25em;
         li {
             display: flex;
+            &:hover {
+                background: var(--neutral-color-3);
+            }
+            a {
+                padding: 0 .5em;
+                display: block;
+                height: 100%;
+                &[title="Home"] {
+                    padding: 0;
+                    height: var(--user-menu-bar-height);
+                }
+            }
         }
     }
+    notify-button {
+        color: var(--user-menu-fg-color);
+    }
     .cobalt-masthead {
-        height: 2em;
+        height: var(--user-menu-bar-height);
         width: 2em;
         object-fit: contain;
+        box-sizing: border-box;
+        padding: 0;
+        
     }
     .userbar--user-container {
         margin-left: auto;
@@ -49,6 +93,18 @@
         width: 1em;
         &:before {
             content: "\F035D";
+        }
+    }
+    
+    @media only screen and (max-width: 35em) {
+        display: none;
+        flex-direction: column;
+        height: auto;
+        align-items: center;
+        justify-content: center;
+        nav {
+            align-items: center;
+            justify-content: center;
         }
     }
 }

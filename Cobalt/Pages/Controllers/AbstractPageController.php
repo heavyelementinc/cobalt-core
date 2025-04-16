@@ -83,7 +83,7 @@ abstract class AbstractPageController extends Crudable {
         return null;
     }
 
-    function page($query = null) {        
+    function page($query = null) {
         // Let's get our page data
         $page = $this->get_page_data($query);
         $does_not_exist = "That page does not exist.";

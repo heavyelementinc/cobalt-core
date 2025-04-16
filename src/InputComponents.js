@@ -868,10 +868,11 @@ class InputNumber extends HTMLElement {
 
     connectedCallback() {
         this.realField = document.createElement("input");
-        this.realField.type = "number";
+        this.realField.type = "text";
         this.realField.min = this.getAttribute("min");
         this.realField.max = this.getAttribute("max");
-        this.realField.pattern = this.getAttribute("pattern");
+        this.realField.pattern = this.getAttribute("pattern") ?? "[0-9]+";
+        this.realField.inputMode = this.getAttribute("input-mode") ?? "numeric";
         this.realField.addEventListener("change", e => {
             e.stopPropagation();
             this.dispatchEvent(new Event("change"));

@@ -85,8 +85,6 @@ if (app("Database_fs_enabled")) {
     Route::get(trim_trailing_slash(app("Database_fs_public_endpoint")) . "/...", "FileController@download");
 }
 
-Route::get("/resource/vapid-key.json", "FileController@vapid_pub_key");
-
 Route::get("/robots.txt", "FileController@robots");
 if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
     Route::get("/ai.txt", "FileController@ai");

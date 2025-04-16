@@ -293,6 +293,12 @@ class ClientRouter extends EventTarget{
         );
 
         this.setPushStateMode();
+        if(window.location.hash) {
+            const scrollTo = document.querySelector(window.location.hash);
+            if(scrollTo) {
+                scrollTo.scrollIntoView();
+            }
+        }
         // await scrollState;
         this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
     }

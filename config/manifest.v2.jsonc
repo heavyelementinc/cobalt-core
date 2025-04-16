@@ -158,6 +158,11 @@
         "package": "deferred"
     },
     {
+        "href":"components/file-gallery.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
         "href":"components/markdown-area.js",
         "contexts": ["common"],
         "package": "deferred"
@@ -328,6 +333,11 @@
     },
     {
         "href": "components/input-array.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/file-gallery.css",
         "contexts": ["common"],
         "version": 2
     },

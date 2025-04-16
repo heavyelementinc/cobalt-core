@@ -77,5 +77,12 @@ function edit_link($group) {
     } catch (\Exceptions\HTTP\Unauthorized $e) {
         return "";
     }
+    template_customs_hint($group);
     return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span class='sr-only'>Edit $group customization</span><span style='display: none'>Edit This Customization</span></a>";
+}
+
+function template_customs_hint(string $group):void {
+    global $USER_BAR_CUSTOMS;
+    if(in_array($group, $USER_BAR_CUSTOMS)) return;
+    array_push($USER_BAR_CUSTOMS, $group);
 }

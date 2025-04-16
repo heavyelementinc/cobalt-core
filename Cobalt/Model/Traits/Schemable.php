@@ -4,9 +4,7 @@ namespace Cobalt\Model\Traits;
 
 use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
-use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
-use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\StringType;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
@@ -32,7 +30,7 @@ trait Schemable {
         // and pass the value to the constructor
         // if(method_exists($this, "defineSchema")) {
         // }
-        $schema = array_merge($this->__schema, $schema);
+        $schema = array_merge($this->__defaultSchema(), $this->__schema, $schema);
 
         foreach($schema as $field => $directives) {
             // Let's check if we need to reformat this directive into an array
@@ -65,6 +63,12 @@ trait Schemable {
             }
         }
         $this->__has_schema_set = true;
+    }
+
+    public function __defaultSchema():array {
+        return [
+            '__version' => new StringType,
+        ];
     }
 
     public function __get_index_checkbox_state():bool {

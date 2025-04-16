@@ -775,18 +775,19 @@ class XCaptcha extends HeaderDirective {
         const deferred = new Deferred(() => {});
         let confirm = modalInput(`
             <p>${fulfillment.error}</p>
-            <img id="__captcha_image" src=\"/core-content/captcha/\">
+            <img id="__captcha_image" src=\"/core-content/captcha/\" height="60" width="140" style="height: 60px; width: 140px;" alt="Please solve the captcha image.">
             <button id="__captcha_refresh_button" disabled='disabled'>
                 <i name="refresh"></i>
             </button>
             <p><small>Type the characters in the image into the field below.</small></p>
             `, {okay: "Submit", cancel: "Cancel"}
-        ).then(cfm => {
-            if(cfm === false) return;
+        ).then(async captchaSolution => {
+            if(captchaSolution === false) return;
             xhr.dispatchEvent(new CustomEvent("resubmission", {detail: true}));
 
-            xhr.setRequestHeader('X-Captcha', cfm);
-            deferred.resolve(cfm);
+            xhr.setRequestHeader('X-Captcha', captchaSolution);
+            deferred.resolve(captchaSolution);
+            await xhr.submit(fulfillment.data);
         });
         const button = document.querySelector("#__captcha_refresh_button");
         if(!button) return;
@@ -794,8 +795,6 @@ class XCaptcha extends HeaderDirective {
             document.querySelector("#__captcha_image").src = `/core-content/captcha/?${random_string()}`;
         });
         button.disabled = false;
-        await deferred.promise;
-        return await xhr.submit(fulfillment.data);
     }
 }
 

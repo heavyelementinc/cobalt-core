@@ -5,7 +5,7 @@ use Auth\UserCRUD;
 use Auth\UserPersistance;
 use Cobalt\Extensions\Extensions;
 use Cobalt\Maps\GenericMap;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Controllers\Crudable;
 use Drivers\Database;
 use MongoDB\Model\BSONDocument;
@@ -28,7 +28,12 @@ class CoreUserAccounts extends Crudable {
         $extension_tabs = [];
         Extensions::invoke('register_user_editor_tabs', $tabs);
 
-        $push = new PushNotifications();
+        try{
+            $push = new PushNotifications();
+            $push_notifications = $push->render_push_opt_in_form_values($document);
+        } catch (Error|Exception $e) {
+            $push_notifications = "<p>Could not render push notification details</p>";
+        }
 
         try {
             $auth = new \Auth\AdditionalUserFields();
@@ -60,7 +65,7 @@ class CoreUserAccounts extends Crudable {
             'notifications' => view("/authentication/user-management/push-notifications.html", [
                 'doc' => $document,
                 'endpoint' => '/api/v1/user/{{doc._id}}/push',
-                'push_options' => $push->render_push_opt_in_form_values($document),
+                'push_options' => $push_notifications,
             ]),
             'sessions' => (new SessionManager())->session_manager_ui_by_user_id($document->_id)
         ]);

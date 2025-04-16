@@ -365,37 +365,82 @@ input-user {
 
 input-binary {
     display: inline-flex;
+    padding: var(--input-element-padding);
     & option {
       display: none;
     }
     & tag-container {
-        &button {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--input-element-padding);
+        & button {
             display: grid;
-            place-items: center;
+            grid-template-columns: 1em auto;
+            /* place-items: center; */
             pointer-events: auto;
             border: var(--input-element-border-width) solid var(--input-disabled-border);
+            --input-element-border: var(--input-element-tray);
+            outline: var(--input-element-border-value);
+            border: var(--input-element-border-width) solid var(--input-element-background);
             background: var(--input-element-tray);
+            color: var(--input-element-tray-fg);
+            text-align: left;
+            flex-grow: 1;
+            gap: inherit;
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            &:hover {
+                --input-element-tray: hsl(from var(--input-hover-background) h s 100%);
+                border: var(--input-element-border-width) solid var(--input-element-background);
+                background: var(--input-element-tray);
+                color: var(--input-element-tray-fg);
+                outline: var(--input-element-border-value);
+            }
             &:before{
-                content: "";
+                content: "\F0131";
+                font-family: "Material Design Icons";
                 display: inline-block;
-                height: .6em;
-                width: .6em;
+                height: 100%;
+                width: 100%;
                 margin-right: .3em;
-                border: var(--input-element-border-width) solid currentColor;
-                border-radius: 50%;
-                background-color: transparent;
             }
             &[aria-pressed='true'] {
-                border: var(--input-element-border-width) solid var(--input-element-border);
-                background: #FFF;
-                color: black;
+                --input-element-tray: var(--input-element-active);
+                border: var(--input-element-border-width) solid var(--input-element-background);
+                background: var(--input-element-tray);
+                color: var(--input-element-active-fg);
+                outline: var(--input-element-border-value);
+                
                 &:before {
-                    background-color: currentcolor;
+                    content: "\F0135";
                 }
             }
         }
     }
-    & input-binary[readonly] {
+    &[readonly] {
         background: var(--input-element-tray);
         & button {
             pointer-events: none;

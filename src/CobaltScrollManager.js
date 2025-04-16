@@ -25,7 +25,7 @@ class CobaltScrollManager {
     constructor(querySelector = null, modifier = 2) {
         this.useiOSWorkaround = iOS();
 
-        this.allowUpdate = false; // The bool that controls the animation loop
+        this.props = {allowUpdate: false}; // The bool that controls the animation loop
         this.simultaneousDelayValue = 50;
         this.PARALLAX_SELECTOR = querySelector ?? "[parallax-mode],[parallax-speed]";
         this.LAZY_SELECTOR = "[lazy-reveal]";
@@ -57,9 +57,28 @@ class CobaltScrollManager {
         if(app("enable_default_parallax")) this.selectElements();
     }
 
+    get allowUpdate() {
+        return this.props.allowUpdate || true;
+    }
+
+    set allowUpdate(value) {
+        if(value !== true && value !== false) return;
+        const prevState = this.props.allowUpdate;
+        this.props.allowUpdate = value;
+        if(value && value !== prevState) {
+            console.warn("Selecting elements...")
+            this.selectElements();
+        }
+        if(!value) {
+            for(const el of this.scrollAnimatedElements) {
+                el.cleanUp();
+            }
+        }
+    }
+
     async selectElements() {
         // Stop the frame animation while we update our selected elements
-        this.allowUpdate = false;
+        this.props.allowUpdate = false;
         // this.cleanUpDebug();
 
         this.innerScrollOffset = window.innerHeight * .33;
@@ -90,10 +109,16 @@ class CobaltScrollManager {
                 case "y": 
                     parallaxElement = new ParallaxPositionYElement(e,settings);
                     break;
+                case "background-x":
+                case "bg-x":
+                    parallaxElement = new ParallaxBackgroundXElement(e, settings);
+                    if(!parallaxElement.enabled) continue;
+                    break;
                 case "background":
                 case "bg":
                 default:
                     parallaxElement = new ParallaxBackgroundElement(e,settings);
+                    if(!parallaxElement.enabled) continue;
                     break;
             }
             this.scrollAnimatedElements.push(parallaxElement);
@@ -108,7 +133,7 @@ class CobaltScrollManager {
             this.scrollAnimatedElements.push(scrolledClass);
         }
 
-        this.allowUpdate = true;
+        this.props.allowUpdate = true;
         if(this.scrollAnimatedElements.length) requestAnimationFrame(this.animationLoop.bind(this));
 
         // Create our list of lazy elements
@@ -172,6 +197,9 @@ class CobaltScrollManager {
         this.scrollPositionDebug.style.top = this.visibleScrollPosition + 'px';
     }
 
+    cleanUp() {
+
+    }
 }
 
 class LazyElement {
@@ -280,6 +308,10 @@ class LazyElement {
         if(this.RESET) this.ELEMENT.classList.remove(this.VISIBLE_CLASS);
         // if(this.ELEMENT.getAttribute("lazy-reveal") === this.MODE_REVERT) this.ELEMENT.classList.remove(this.VISIBLE_CLASS);
     }
+
+    cleanUp() {
+
+    }
 }
 
 class AnimatedElement {
@@ -298,6 +330,10 @@ class AnimatedElement {
     animate(scrollHeight) {
         // Called on every requestAnimationFrame
     }
+
+    cleanUp() {
+
+    }
 }
 
 class ParallaxCommon extends AnimatedElement {
@@ -311,7 +347,11 @@ class ParallaxCommon extends AnimatedElement {
         this.SETTINGS = settings;
         this.INDEX = null;
         // this.speed = null;
-        this.offset = null;
+        // this.offset = null;
+    }
+
+    get offset() {
+        return 0;
     }
 
     getPageOffset(element) {
@@ -325,9 +365,16 @@ class ParallaxCommon extends AnimatedElement {
         }
         return topOffset;
     }
+
+    cleanUp() {
+
+    }
 }
 
 class ParallaxBackgroundElement extends ParallaxCommon {
+    PARALLAX_CLASS = "cobalt-parallax--bg-parallax";
+    scaleFactor = 1;
+
     dimensions() {
         return get_offset(this.ELEMENT);
     }
@@ -336,39 +383,74 @@ class ParallaxBackgroundElement extends ParallaxCommon {
         return (this.ELEMENT.getAttribute("native-cover") === "true");
     }
 
+    get scaleFactorAdjustment() {
+        return Number(this.ELEMENT.getAttribute("scale-factor") ?? 1.1);
+    }
+
+    get offset() {
+        return Number(this.ELEMENT.getAttribute("parallax-offset") ?? 0);
+    }
+
+    get enabled() {
+        /** On a PC, we'll always enable parallax */
+        if(!isMobile()) return true;
+        // If we're here, then we need to determine if parallax is enabled
+        let enabled = this.ELEMENT.getAttribute("parallax-mobile-enabled")
+        switch(enabled) {
+            case true:
+            case "true":
+            case "parallax-mobile-enabled":
+            case "": // If the attribute exists but has no value, we assume parallax is enabled
+                return true;
+        }
+        return false; // If we've made it this far, we know that parallax is not enabled!
+    }
+
     async initialize(index) {
         const e = this.ELEMENT;
 
         this.INDEX = index;
-        // this.speed = Math.abs(e.getAttribute("parallax-speed") ?? this.SETTINGS.modifier ?? 2);
-        this.offset = e.getAttribute("parallax-offset") ?? (this.getPageOffset(e)) * -1;
 
         if(!this.allowNativeCover) {
             // Height and width of image
             const {height, width} = await this.loadImage(e); // height: 2788, width: 4190
 
-            const containerHeight = window.innerHeight, // 977
-            containerWidth = window.innerWidth; // 1258
-    
-            // Determine the smallest and largest dimensions
-            const smallestImageDimension = Math.min(height, width);
-    
-            // Determine which height is smaller so we can constrain our image dimensions
-            let divisor = containerHeight;
-            if (containerHeight > containerWidth) divisor = containerWidth;
+
+            const rect = this.ELEMENT.getBoundingClientRect();
+            const containerHeight = rect.height || window.innerHeight,
+            containerWidth = rect.width || window.innerWidth;
+            const HEIGHT_CONSTRAINT = 0;
+            const WIDTH_CONSTRAINT = 1;
+
+            let constrait = HEIGHT_CONSTRAINT;
+            if(containerHeight < containerWidth) constrait = WIDTH_CONSTRAINT;
             
-            let scaleFactor;
-            if(divisor > smallestImageDimension) scaleFactor = divisor / smallestImageDimension;
-            else divisor = smallestImageDimension / divisor;
-    
-            e.style.backgroundSize = `${width * scaleFactor}px ${height * scaleFactor}px`;
+            // Check which dimension needs to grow the most
+            if(constrait === HEIGHT_CONSTRAINT) {
+                if(height > containerHeight) {
+                    // If the image is larger than the container, scale down
+                    this.scaleFactor = containerHeight / height;
+                } else {
+                    // If the image is smaller than the container, scale up
+                    this.scaleFactor = height / containerHeight;
+                }
+            } else {
+                if(width > containerWidth) {
+                    this.scaleFactor = containerWidth / width;
+                } else {
+                    this.scaleFactor = width / containerWidth;
+                }
+            }
+
+            this.scaleFactor *= this.scaleFactorAdjustment;
+
+            e.style.backgroundSize = `${width * this.scaleFactor}px ${height * this.scaleFactor}px`;
         }
 
-        e.classList.add("cobalt-parallax--bg-parallax");
+        e.classList.add(this.PARALLAX_CLASS);
 
         const position = e.getAttribute("parallax-start-position") ?? "top";
         e.style.backgroundPosition = `${e.getAttribute('parallax-justification') || "center"} ${position}`;
-
     }
 
     animate() {
@@ -381,24 +463,37 @@ class ParallaxBackgroundElement extends ParallaxCommon {
             y -= this.iOSWorkaroundViewportHeight;
         }
         // (data.offset ?? 0)
-        element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${y}px`;
+        element.style.backgroundPosition = `${element.getAttribute('parallax-justification') || "center"} ${y + (this.offset * this.scaleFactor)}px`;
     }
 
     loadImage(element) {
         return new Promise((resolve, reject) => {
-            const src = element.style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
+            const bgValue = getComputedStyle(element).backgroundImage;
+            const src = bgValue.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
 
             const image = new Image();
             image.onload = () => {
                 resolve({height: image.naturalHeight, width: image.naturalWidth});
             }
-            image.onerror = () => {
+            image.onerror = (e) => {
+                console.warn(`Failed to load image`, element, e);
                 reject({height: 0, width: 0});
             }
             image.src = src;
             if(image.error) reject({height: 0, width: 0});
             if(image.complete) resolve({height: image.naturalHeight, width: image.naturalWidth});
         });
+    }
+
+    cleanUp() {
+        this.ELEMENT.classList.remove(this.PARALLAX_CLASS);
+        this.ELEMENT.style.backgroundPosition = ``;
+    }
+}
+
+class ParallaxBackgroundXElement extends ParallaxBackgroundElement {
+    initialize(index) {
+
     }
 }
 
@@ -494,3 +589,8 @@ class ScrollConstraintElement extends AnimatedElement {
 
 if(app("enable_default_parallax")) window.parallax = new CobaltScrollManager();
 else document.body.classList.add("parallax-disabled");
+
+function parallaxState(value) {
+    if(!window.parallax) throw new Error("CobaltScrollManager is not initialized.");
+    window.parallax.allowUpdate = value
+}

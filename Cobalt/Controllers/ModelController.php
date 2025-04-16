@@ -38,8 +38,8 @@ abstract class ModelController {
     protected int $index_display_action_menu = 0;
 
     function __construct(?string $name = null) {
-        $this->name = self::className();
-        $this->friendly_name = self::generate_friendly_name($name);
+        $this->name = static::className();
+        $this->friendly_name = static::generate_friendly_name($name);
         $this->model = $this->defineModel();
     }
 
@@ -57,8 +57,8 @@ abstract class ModelController {
          *  * destroy
          */
         static function apiv1(?string $prefix = null, array $options = []) {
-            $class   = self::className();
-            $mutant  = self::generate_prefix($prefix);
+            $class   = static::className();
+            $mutant  = static::generate_prefix($prefix);
 
             Route::get("$mutant/{id}", "$class@__read", static::route_details(
                 [
@@ -120,13 +120,13 @@ abstract class ModelController {
          *  * edit
          */
         static function admin(?string $prefix = null, array $options = []) {
-            $class   = self::className();
-            $mutant  = self::generate_prefix($prefix);
+            $class   = static::className();
+            $mutant  = static::generate_prefix($prefix);
 
-            Route::get("$mutant/", "$class@__index", self::route_details(
+            Route::get("$mutant/", "$class@__index", static::route_details(
                     [
                     'anchor' => [
-                        'name' => $options['anchor'] ?? self::generate_friendly_name()
+                        'name' => $options['anchor'] ?? static::generate_friendly_name()
                     ],
                     'navigation' => [$options['navigation'] ?? 'admin_panel'],
                     'permission' => static::$admin_index,
@@ -134,14 +134,14 @@ abstract class ModelController {
                 $options['index'] ?? [],
                 "route_details_index"
             ));
-            Route::get("$mutant/new", "$class@__new_document", self::route_details(
+            Route::get("$mutant/new", "$class@__new_document", static::route_details(
                 [
                     'permission' => static::$admin_new_document,
                 ],
                 $options['new_document'] ?? [],
                 "route_details_create"
             ));
-            Route::get("$mutant/edit/{id}", "$class@__edit", self::route_details(
+            Route::get("$mutant/edit/{id}", "$class@__edit", static::route_details(
                 [
                     'permission' => static::$admin_edit,
                 ],
@@ -161,7 +161,7 @@ abstract class ModelController {
                 if($supplied[0] !== "/") $supplied = "/$supplied";
                 return $supplied;
             }
-            $supplied = (new \ReflectionClass(self::className()))->getShortName();
+            $supplied = (new \ReflectionClass(static::className()))->getShortName();
             $prefix = preg_replace('/([A-Z])/', '-$1',$supplied);
             if($prefix[0] == "-") $prefix = substr($prefix, 1);
             return "/" . strtolower($prefix);
@@ -179,7 +179,7 @@ abstract class ModelController {
 
     static function generate_friendly_name(?string $supplied = null):string {
         if($supplied) return $supplied;
-        $supplied = (new \ReflectionClass(self::className()))->getShortName();
+        $supplied = (new \ReflectionClass(static::className()))->getShortName();
         $prefix = preg_replace('/([A-Z])/', ' $1',$supplied);
         if($prefix[0] == "-") $prefix = substr($prefix, 1);
         return trim($prefix);
@@ -195,7 +195,7 @@ abstract class ModelController {
 
     /** $type - can be blank or "options" */
     function __get_action_menu(string $type = "", Model|BSONDocument|null $document = null):string {
-        $class = self::className();
+        $class = static::className();
         $html = "";
         if($this->index_display_action_menu | CRUDABLE_DELETEABLE) {
             $html .= "<option method=\"DELETE\" action=\"".route("$class@__destroy", [(string)$document->_id])."\">Delete</option>";

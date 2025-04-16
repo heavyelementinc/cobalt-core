@@ -1,5 +1,9 @@
+
 :root {
-    --notification-panel-width: 30vw;
+    --notification-unseen-indicator-size: 1.3em;
+    --unseen-indicator-top: -0.25em;
+    --unseen-indicator-right: 0.75em;
+    --notification-panel-width: max(30vw, 20rem);
     @media only screen and (max-width: 35em) {
         --notification-panel-width: 100%;
     }
@@ -8,6 +12,20 @@ body.notification-panel--open {
     #user-menu-bar {
         padding-right: calc(var(--notification-panel-width) - var(--scrollbar-width));
         transition: padding-right 500ms;
+    }
+}
+.admin-panel--customize-link:not([href="/admin/customizations/"]) {
+    position: relative;
+    &:before {
+        content: "";
+        background: var(--issue-color-1);
+        height: 0.7em;
+        width: 0.7em;
+        top: -0.1em;
+        left: -0.25em;
+        position: absolute;
+        border-radius: 50%;
+        border: 2px solid var(--user-menu-bg-color);
     }
 }
 
@@ -41,10 +59,9 @@ body.notification-panel--open {
         }
     }
     .unseen-indicator {
-        --size: 1.3em;
         border-radius: 50%;
-        height: var(--size);
-        width: var(--size);
+        height: var(--notification-unseen-indicator-size);
+        width: var(--notification-unseen-indicator-size);
         background: var(--issue-color-1);
         color: var(--issue-color-1-fg);
         display: flex;
@@ -54,8 +71,8 @@ body.notification-panel--open {
         font-weight: bold;
         font-family: sans-serif;
         position: absolute;
-        top: -0.25em;
-        right: 0.75em;
+        top: var(--unseen-indicator-top);
+        right: var(--unseen-indicator-right);
         border: 2px solid var(--user-menu-bg-color);
     }
 }
@@ -74,6 +91,7 @@ body.notification-panel--open {
     z-index: calc(var(--project-modal-z-index) + 1);
     --inner-content-padding: var(--margin-m);
     transition: right 500ms;
+    font-family: var(--admin-font);
     &[aria-hidden="true"] {
         right: calc(-100% + -10px);
         button, input {

@@ -29,7 +29,7 @@ trait UserBar {
         if (!session_exists()) return "";
         if (__APP_SETTINGS__["manifest_engine"] < 2) return "<!-- user_menu unsupported manifest engine -->";
         if ($this instanceof AdminHandler === false && !__APP_SETTINGS__["Auth_user_menu_enabled"]) return "<!-- user_menu disabled -->";
-        $menu = "<div id='user-menu-bar'><nav><ul class=\"userbar--navigation-options\">";
+        $menu = "<label for='user-menu-bar-controller'></label><input id='user-menu-bar-controller' type='checkbox'><div id='user-menu-bar'><nav><ul class=\"userbar--navigation-options\">";
         
         $buttons = ['masthead' => $admin_masthead];
         $buttons += $this->userbar_start();
@@ -47,7 +47,8 @@ trait UserBar {
         }
 
         $settings = route("CoreAdmin@settings_index");
-        $customize = route("Customizations@index");
+        global $USER_BAR_CUSTOMS;
+        $customize = route("Customizations@index") . urlencode(implode(";",$USER_BAR_CUSTOMS));
         $panel = "";
         if(__APP_SETTINGS__['Notifications_system_enabled']) {
             $count = (new NotificationManager())->getUnreadNotificationCountForUser();

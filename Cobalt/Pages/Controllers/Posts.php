@@ -15,6 +15,12 @@ use MongoDB\Model\BSONDocument;
 
 class Posts extends AbstractPageController {
     const BAD_REQUEST = 'Request contained invalid content';
+    const INDEX_MODE_CLASSES = [
+        POSTS_INDEX_MODE_GRID => 'index-mode--grid',
+        POSTS_INDEX_MODE_FEED => 'index-mode--feed',
+        POSTS_INDEX_MODE_BODY => 'index-mode--feed index-mode--body',
+        POSTS_INDEX_MODE_LATEST => 'index-mode--redirect'
+    ];
     public function get_manager(): Database {
         // return new PageManager(null, __APP_SETTINGS__['Posts_collection_name']);
         return new PostManager();
@@ -40,6 +46,7 @@ class Posts extends AbstractPageController {
     ];
 
     public function posts_landing() {
+        if(__APP_SETTINGS__['Posts_index_mode'] === POSTS_INDEX_MODE_LATEST) return $this->redirect_to_latest();
         $query = [];
         $options = [
             'sort' => ['live_date' => -1],
@@ -67,12 +74,20 @@ class Posts extends AbstractPageController {
         $result = $this->manager->find($query, $options);
 
         $posts = "";
-        foreach($result as $post) {
-            if($post instanceof PostMap === false) $post = (new PostMap())->ingest($post);
-            $posts .= $this->renderPreview($post);
+        $index_class = $this::INDEX_MODE_CLASSES[__APP_SETTINGS__['Posts_index_mode']];
+        switch(__APP_SETTINGS__['Posts_index_mode']) {
+            case POSTS_INDEX_MODE_FEED:
+            case POSTS_INDEX_MODE_BODY:
+                $this->render_feed($posts, $result);
+                break;
+            case POSTS_INDEX_MODE_GRID:
+            default:
+                $this->render_grid($posts, $result);
+                break;
         }
+
         // if(!$index) throw new NotFound("There are no posts to display");
-    if(!$posts) $posts = "<p style='text-align:center'>There are no posts to show</p>";
+        if(!$posts) $posts = "<p style='text-align:center'>There are no posts to show</p>";
         $next_attrs = $this->pagination_link_attrs($misc['page'] ?? 0, 1, $count, $options, $misc);
         $prev_attrs = $this->pagination_link_attrs($misc['page'] ?? 0, -1, $count, $options, $misc);
         add_vars([
@@ -81,11 +96,37 @@ class Posts extends AbstractPageController {
             'filter' => $filter,
             'count' => ceil($count / $options['limit']),
             'page' => $misc['page'] + 1,
+            'index_class' => $index_class,
             'next_page' => "<a $next_attrs>$misc[next_label] <i name='chevron-right'></i></a>",
             'prev_page' => "<a $prev_attrs><i name='chevron-left'></i> $misc[prev_label]</a>",
         ]);
 
         return view('/Cobalt/Pages/templates/web/post-index.php');
+    }
+
+    private function redirect_to_latest() {
+        $query = $this->manager->public_query();
+        $result = $this->manager->find($query, ['sort' => ['live_date' => -1],'limit' => 1]);
+        if($result) {
+            $result = iterator_to_array($result)[0];
+            redirect_and_exit($result->url_slug->get_path());
+            return;
+        }
+        throw new NotFound("That page does not exist", true);
+    }
+
+    private function render_grid(&$posts, $result) {
+        foreach($result as $post) {
+            if($post instanceof PostMap === false) $post = (new PostMap())->ingest($post);
+            $posts .= $this->renderPreview($post);
+        }
+    }
+
+    private function render_feed(&$posts, $result) {
+        foreach($result as $post) {
+            if($post instanceof PostMap === false) $post = (new PostMap())->ingest($post);
+            $posts .= view("/Cobalt/Pages/templates/parts/index-feed-preview.php", ['page' => $post]);
+        }
     }
 
     private function query_for_author(array &$query, array &$options, array &$misc, string &$filter) {

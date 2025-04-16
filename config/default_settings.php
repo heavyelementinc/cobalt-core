@@ -1,5 +1,6 @@
 <?php
 
+use Auth\UserCRUD;
 use PHPMailer\PHPMailer\PHPMailer;
 
 const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
@@ -29,6 +30,21 @@ const FONT_BACKEND_FONTSOURCE = 1;
 
 const COBALT_LOGIN_TYPE_LEGACY = 0;
 const COBALT_LOGIN_TYPE_STAGES = 1;
+
+const POSTS_INDEX_MODE_GRID = "0";
+const POSTS_INDEX_MODE_FEED = "1";
+const POSTS_INDEX_MODE_BODY = "2";
+const POSTS_INDEX_MODE_LATEST = "3";
+
+const CONTACT_SUCCESS_SYSTEM  = 0b000001;
+const CONTACT_SUCCESS_NOTIFY  = 0b000010;
+const CONTACT_SUCCESS_PUSH    = 0b000100;
+const CONTACT_SUCCESS_EMAIL   = 0b001000;
+// const CONTACT_SUCCESS_MESSAGE = 0b010000;
+
+const CONTACT_CLIENT_SUCCESS_REDIRECT = 0b0001;
+const CONTACT_CLIENT_SUCCESS_STATUS   = 0b0010;
+const CONTACT_CLIENT_SUCCESS_STAGE    = 0b0100;
 
 $settings = [
     /** BASIC */
@@ -139,6 +155,7 @@ $settings = [
                 "group" => "Configuration",
                 "subgroup" =>"Advanced",
                 "name" => "Enabled APIs",
+                "description" => "Use the field to control which remote APIs are enabled or disabled.",
                 "type" => "input-array"
                 // "view" => "/admin/settings/inputs/default-h1-alignment.html"
             ],
@@ -185,19 +202,8 @@ $settings = [
             "meta" => [
                 "group" => GROUP_FEATURES,
                 "subgroup" => "Notifications",
-                "name" => "Enable the notification system",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
-            ]
-        ],
-        "Notifications_enable_push_notifications" => [
-            "default" => true,
-            "meta" => [
-                "group" => GROUP_FEATURES,
-                "subgroup" => "Notifications",
-                "name" => "Enable push notifications to be dispatched",
+                "name" => "Enable Cobalt Notifications",
+                "description" => "This allows users to send and receive notifications within Cobalt Engine.",
                 "type" => "input-switch"
             ],
             "validate" => [
@@ -210,6 +216,20 @@ $settings = [
                 "group" => GROUP_FEATURES,
                 "subgroup" => "Notifications",
                 "name" => "Show notifications in the user's session panel",
+                "description" => "Display a notification button and the notification panel when a user exists.",
+                "type" => "input-switch"
+            ],
+            "validate" => [
+                "type" => "boolean"
+            ]
+        ],
+        "Notifications_enable_push_notifications" => [
+            "default" => true,
+            "meta" => [
+                "group" => GROUP_FEATURES,
+                "subgroup" => "Notifications",
+                "name" => "Enable push notifications",
+                "description" => "This allows registered users to enroll their devices or browsers in push notifications.",
                 "type" => "input-switch"
             ],
             "validate" => [
@@ -232,7 +252,7 @@ $settings = [
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
                 "name" => "Enable Event Banners",
-                "help" => "Enables the Event Manager and allows you to schedule private & public pop-ups and banners.",
+                "description" => "Enables the Event Manager and allows you to schedule private & public pop-ups and banners.",
                 "type" => "input-switch"
             ],
             "validate" => [
@@ -274,16 +294,17 @@ $settings = [
             "meta" => [
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
-                "name" => "Select default text alignment",
+                "name" => "Default text alignment",
+                "description" => "Cobalt Events will default to the selected text alignment.",
                 "type" => "radio-group"
                 // "view" => "/admin/settings/inputs/default-h1-alignment.html"
             ],
             "validate" => [
                 "type" => "string",
                 "options" => [
-                    "space-between" => "<i name='format-align-left'></i>",
-                    "center" => "<i name='format-align-center'></i>",
-                    "flex-end" => "<i name='format-align-right'></i>"
+                    "space-between" => "<i name='format-align-left'></i> Left Justified<br><small>Text content will be justified to the left of the banner/modal</small>",
+                    "center" => "<i name='format-align-center'></i> Center Justified<br><small>Text content will be justified to the center of the banner/modal</small>",
+                    "flex-end" => "<i name='format-align-right'></i> Right Justified<br><small>Text content will be justified to the right of the banner/modal</small>"
                 ]
             ]
         ],
@@ -295,13 +316,52 @@ $settings = [
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"General",
                 "name" => "Enable Contact Form",
+                "description" => "Enable the public-facing contact form.",
                 "type" => "input-switch"
             ],
             "validate" => [
                 "type" => "boolean"
             ]
         ],
-        
+        "Contact_form_on_success_modes" => [
+            "default" => CONTACT_SUCCESS_SYSTEM + CONTACT_SUCCESS_NOTIFY + CONTACT_SUCCESS_PUSH,
+            "directives" => [
+                "public" => true
+            ],
+            "meta" => [
+                "group" => GROUP_CONTACT,
+                "subgroup" =>"General",
+                "name" => "Contact Form Success Behavior",
+                "description" => "Cobalt Events will default to the selected text alignment.",
+                "type" => "input-binary"
+                // "view" => "/admin/settings/inputs/default-h1-alignment.html"
+            ],
+            "validate" => [
+                "type" => "int",
+                "options" => [
+                    CONTACT_SUCCESS_SYSTEM => "<i name='book-open-blank-variant'></i> System<br><small>Store the details in the built-in contact system.</small>",
+                    CONTACT_SUCCESS_EMAIL  => "<i name='email-fast'></i> Email<br><small>Send the details of the submission to an email address (specified below).</small>",
+                    CONTACT_SUCCESS_NOTIFY => "<i name='bell-badge'></i> Cobalt Notification<br><small>Admins get a notification in the Cobalt Notification system.</small>",
+                    CONTACT_SUCCESS_PUSH   => "<i name='tablet-cellphone'></i> Device/Browser Notification<br><small>Admins get notified via a push notification.</small>",
+                ]
+            ]
+        ],
+        "API_contact_form_recipients" => [
+            "default" => ["Contact_form_submissions_access"],
+            "meta" => [
+                "group" => GROUP_CONTACT,
+                "subgroup" => "Confirmation",
+                "name" => "Contact Form Recipients",
+                "description" => "Specify a permission level that will receive a message when the contact form is submitted.",
+                "type" => "input-array"
+            ],
+            'validate' => [
+                'options' => function () {
+                    global $auth;
+                    return $auth->permissions->get_valid_permissions();
+                }
+            ]
+        ],
         "Contact_form_interface" => [
             "default" => "panel",
             // "default" => "notification",
@@ -321,23 +381,32 @@ $settings = [
                 ]
             ]
         ],
-        "API_contact_form_recipient" => [
-            "default" => "",
-            "meta" => [
-                "group" => GROUP_CONTACT,
-                "subgroup" => "General",
-                "name" => "Contact Form Recipient",
-                "type" => "input"
-            ]
-        ],
         "Contact_form_validation_classname" => [
             "default" => "\\Contact\\Persistance"
+        ],
+        "Contact_form_anti_spam_technique" => [
+            "default" => "captcha",
+            "meta" => [
+                "group" => GROUP_CONTACT,
+                "subgroup" =>"Anti-spam",
+                "name" => "Anti-Spam Technique",
+                "description" => "Specify a technique that will be used to mitigate spam submissions.",
+                "type" => "radio-group",
+            ],
+            "validate" => [
+                "type" => "string",
+                "options" => [
+                    "none" => "<i name='border-none-variant'></i> None (not recommended)<br><small>Do not enforce a spam mitigation technique.</small>",
+                    "stepped-click" => "<i name='check-outline'></i> Status Message<br><small>A simple check to ensure that the user sees and clicks the extra step required to submit their request.</small>",
+                    "captcha" => "<i name='alpha-c-box'></i> Captcha<br><small>A deeper check that requires the user to read and submit a traditional captcha.</small>",
+                ]
+            ]
         ],
         "Contact_form_submission_throttle_period" => [
             "default" => "2 minutes",
             "meta" => [
                 "group" => GROUP_CONTACT,
-                "subgroup" =>"General",
+                "subgroup" =>"Anti-spam",
                 "name" => "Submission Throttling",
                 "description" => "Contact form submissions will be rate limited over the specified window.",
                 "help" => "How long should the grace period last. Will be converted to a negative number and subtracted from the current time of a given submission.",
@@ -348,10 +417,10 @@ $settings = [
             ]
         ],
         "Contact_form_submission_throttle_after_max_submissions" => [
-            "default" => 2,
+            "default" => 900,
             "meta" => [
                 "group" => GROUP_CONTACT,
-                "subgroup" =>"General",
+                "subgroup" =>"Anti-spam",
                 "name" => "Max Limit",
                 "description" => "Maximum number of submissions during the throttle period.",
                 "type" => "input",
@@ -360,11 +429,34 @@ $settings = [
                 "type" => "string"
             ]
         ],
+
+        "Contact_form_client_success" => [
+            "default" => CONTACT_CLIENT_SUCCESS_REDIRECT,
+            "directives" => [
+                "public" => true
+            ],
+            "meta" => [
+                "group" => GROUP_CONTACT,
+                "subgroup" =>"Confirmation",
+                "name" => "Contact Client Success",
+                "description" => "When the client submits a contact form, what should happen?",
+                "type" => "radio-group"
+            ],
+            "validate" => [
+                "type" => "string",
+                "options" => [
+                    CONTACT_CLIENT_SUCCESS_REDIRECT => "<i name='arrow-right-bold'></i> Redirect<br><small>The client is navigated to a new page (specified below).</small>",
+                    CONTACT_CLIENT_SUCCESS_STATUS   => "<i name='message-alert'></i> Status Message<br><small>The client receives a status message.</small>",
+                    CONTACT_CLIENT_SUCCESS_STAGE    => "<i name='page-next-outline'></i> Step<br><small></small>",
+                ]
+            ]
+        ],
+        
         "Contact_form_success_message" => [
             "default" => "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
             "meta" => [
                 "group" => GROUP_CONTACT,
-                "subgroup" =>"General",
+                "subgroup" =>"Confirmation",
                 "name" => "Contact Form Success Message",
                 "type" => "input"
             ],
@@ -376,8 +468,21 @@ $settings = [
             "default" => "It looks like you'll need to try again later.",
             "meta" => [
                 "group" => GROUP_CONTACT,
-                "subgroup" =>"General",
+                "subgroup" =>"Confirmation",
                 "name" => "Contact Form Failure Message",
+                "type" => "input"
+            ],
+            "validate" => [
+                "type" => "string"
+            ]
+        ],
+        "Contact_form_redirect" => [
+            "default" => "/contact/success",
+            "meta" => [
+                "group" => GROUP_CONTACT,
+                "subgroup" =>"Confirmation",
+                "name" => "Contact Form Redirect Location",
+                "description" => "When a user submits the public contact form, specify a location they will be redirected to upon success.",
                 "type" => "input"
             ],
             "validate" => [
@@ -927,6 +1032,26 @@ $settings = [
             ]
         ],
 
+        "Posts_index_mode" => [
+            "default" => POSTS_INDEX_MODE_GRID,
+            "meta" => [
+                "group" => GROUP_POSTS,
+                "subgroup" => "General",
+                "name" => "Post Index Mode",
+                "description" => "How should your posts index be displaying your posts?",
+                "type" => "radio-group",
+            ],
+            "validate" => [
+                "type" => "string",
+                "options" => [
+                    // "notification" => "Notification",
+                    POSTS_INDEX_MODE_GRID => "<i name='dots-grid'></i> Display as a \"Grid\"<br><small>Posts appear as a grid of posts displayed as the 'related content' preview.</small>",
+                    POSTS_INDEX_MODE_FEED => "<i name='post-outline'></i> Display as a \"Feed\"<br><small>Posts will appear as a linear feed featuring the summary of each post.</small>",
+                    POSTS_INDEX_MODE_LATEST => "<i name='format-float-left'></i> Latest Post<br><small>The index will automatically redirect to the most recent post.</small>",
+                ]
+            ]
+        ],
+
         // "Posts_date_format" => [
         //     "default" => "l, F jS Y g:i a",
         //     "meta" => [
@@ -1201,12 +1326,12 @@ $settings = [
                 "href" =>   "https://heavyelement.com/",
                 "title" =>  "Midcoast Maine's Premier Web & Media & Software Media Studio"
             ],
-            "meta" => [
-                "group" => GROUP_BASIC,
-                "subgroup" => SUBGROUP_BASIC_DETAILS,
-                "name" => "Designer Credit",
-                "view" => "/admin/settings/inputs/designer.html"
-            ]
+            // "meta" => [
+            //     "group" => GROUP_BASIC,
+            //     "subgroup" => SUBGROUP_BASIC_DETAILS,
+            //     "name" => "Designer Credit",
+            //     "view" => "/admin/settings/inputs/designer.html"
+            // ]
         ],
         
         /* The image displayed when loading a page. */
@@ -1797,7 +1922,7 @@ $settings = [
                 'group' => 'Basic',
                 'subgroup' => 'Social',
                 'name' => "<i name=\"email\"></i> Email Newsletter",
-                // "description" =>  "Social media is used ",
+                "description" =>  "Used in combination with the Social Media functionality.",
                 "type" => "input"
             ],
             'validate' => [
@@ -1810,6 +1935,7 @@ $settings = [
                 'group' => 'Basic',
                 'subgroup' => 'Social',
                 'name' => "<i name=\"fediverse\"></i> Fediverse",
+                "description" =>  "Used in combination with the Social Media functionality.",
                 "type" => "url"
             ],
             'validate' => [
@@ -1822,6 +1948,7 @@ $settings = [
                 'group' => 'Basic',
                 'subgroup' => 'Social',
                 'name' => "<i name=\"facebook\"></i> Facebook",
+                "description" =>  "Used in combination with the Social Media functionality.",
                 "type" => "url"
             ],
             'validate' => [
@@ -1834,6 +1961,7 @@ $settings = [
                 'group' => 'Basic',
                 'subgroup' => 'Social',
                 'name' => "<i name=\"instagram\"></i> Instagram",
+                "description" =>  "Used in combination with the Social Media functionality.",
                 "type" => "url"
             ],
             'validate' => [
@@ -1846,6 +1974,7 @@ $settings = [
                 'group' => 'Basic',
                 'subgroup' => 'Social',
                 'name' => "<i name=\"twitter\"></i> Twitter",
+                "description" =>  "Used in combination with the Social Media functionality.",
                 "type" => "url"
             ],
             'validate' => [
@@ -1858,24 +1987,26 @@ $settings = [
                 'group' => 'Basic',
                 'subgroup' => 'Social',
                 'name' => "<i name=\"mastodon\"></i> Mastodon",
+                "description" =>  "This should be the URL for your Mastodon account, not the @account@mastodon.social format.",
                 "type" => "url"
             ],
             'validate' => [
                 'type' => 'string'
             ]
         ],
-        // 'SocialMedia_' => [
-        //     'default' => '',
-        //     'meta' => [
-        //         'group' => 'Basic',
-        //         'subgroup' => 'Social',
-        //         'name' => "<i name=\"mastodon\"></i> Mastodon",
-                // "type" => "url"
-        //     ],
-        //     'validate' => [
-        //         'type' => 'string'
-        //     ]
-        // ],
+        'SocialMedia_pixelfed' => [
+            'default' => '',
+            'meta' => [
+                'group' => 'Basic',
+                'subgroup' => 'Social',
+                'name' => "<i name=\"pixelfed\"></i> Pixelfed",
+                "description" =>  "This should be the URL for your PixelFed account, not the @account@pixelfed.social format.",
+                "type" => "url"
+            ],
+            'validate' => [
+                'type' => 'string'
+            ]
+        ],
         'SocialMedia_shown' => [
             'default' => [],
         ],

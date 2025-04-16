@@ -25,7 +25,7 @@ use Cobalt\Extensions\Extensions;
 use Cobalt\Manifests\Classes\Item;
 use Cobalt\Manifests\Classes\ManifestManager;
 use Cobalt\Manifests\Enums\ValidTypes;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Cobalt\Renderer\Debugger;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;

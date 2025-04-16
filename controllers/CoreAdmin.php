@@ -8,7 +8,7 @@ use Cobalt\Payments\PaymentGatewaySchema;
 use CobaltEvents\EventManager;
 use Contact\ContactManager;
 use Cobalt\Extensions\Extensions;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 
 class CoreAdmin {
     function index() {

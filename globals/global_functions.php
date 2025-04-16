@@ -151,7 +151,7 @@ function cobalt_autoload($class) {
 
 function class_loader($path, $originalName, $stage) {
     try {
-;        require_once $path;
+        require_once $path;
     } catch (ParseError $e) {
         print("<pre>");
         $file = $e->getFile() . ': ' . $e->getLine();

@@ -1,3 +1,8 @@
+:root {
+    --_landing-main-content-bg: var(--background-color-0);
+    --_landing-main-content-fg: var(--background-color-0-fg);
+}
+
 .landing-main--splash {
     display: flex;
     height: 75vh;
@@ -203,15 +208,23 @@
     justify-content: center;
     gap: 1em;
     /* width: 100%; */
-    .landing-main--content {
+    &.landing-main--index-feed-entry {
+        flex-direction: column;
+        background-color: var(--_landing-main-content-bg);
+        color: var(--_landing-main-content-fg);
+        img.landing-main--splash-thumb {
+            height: auto;
+        }
+        h1, h2, h3, h4, h5, p, blockquote, article {
+            padding: 0 var(--margin-l);
+        }
+        .button {
+            margin-bottom: var(--margin-l);
+        }
+    }
+    .landing-main--content, &.landing-main--index-feed-entry {
         width: var(--project-landing-page-content-width);
         margin: 2em auto;
-        
-        
-        
-        
-        
-        
         @media only screen and (max-width: 885px) {
             width: 100%;
         }
@@ -243,7 +256,8 @@ block-editor, .landing-primary-section {
     --content-margins: 1.1em;
     position: relative;
     z-index: 100;
-    background-color: white;
+    background-color: var(--_landing-main-content-bg);
+    color: var(--_landing-main-content-fg);
     box-sizing: border-box;
 }
 

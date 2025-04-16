@@ -105,7 +105,7 @@ class CoreSettingsPanel extends Controller {
                 $template = "/admin/settings/inputs/array.html";
                 $options = "";
                 $current = array_combine(__APP_SETTINGS__[$index], __APP_SETTINGS__[$index]);
-                $opts = array_merge($current, $setting->validate['options']);
+                $opts = array_merge($current, $this->get_options($setting));
                 foreach($opts as $key => $option) {
                     $selected = "";
                     if(in_array($key, $current)) $selected = " selected='selected'";
@@ -115,17 +115,27 @@ class CoreSettingsPanel extends Controller {
             case "radio-group":
                 $template = "/admin/settings/inputs/radio-group.html";
                 $options = "";
-                foreach($setting->validate['options'] as $name => $display) {
+                foreach($this->get_options($setting) as $name => $display) {
                     $options .= "<label>
                         <span class='cobalt-radio-group--select-target'>$display</span>
                         <input type='radio' name='$index' value='$name'>
                     </label>";
                 }
                 break;
+            case "input-binary":
+                $template = "/admin/settings/inputs/input-binary.html";
+                $options = "";
+                $opts = $this->get_options($setting);
+                foreach($opts as $key => $option) {
+                    $selected = "";
+                    if($key & __APP_SETTINGS__[$index]) $selected = " selected='selected'";
+                    $options .= "<option value='$key'$selected><span>$option</span></option>";
+                }
+                break;
             case "select":
                 $template = "/admin/settings/inputs/select.html";
                 $options = "";
-                foreach($setting->validate['options'] as $valid => $label) {
+                foreach($this->get_options($setting) as $valid => $label) {
                     $checked = "";
                     if($valid === __APP_SETTINGS__[$index]) $checked = " selected='selected'";
                     $options .= "<option value='$valid'$checked>$label</option>\n";
@@ -143,6 +153,13 @@ class CoreSettingsPanel extends Controller {
             'options' => $options,
         ]);
         return "<li>Can't render \"$index\"</li>";
+    }
+
+    private function get_options($setting):array {
+        $option = $setting->validate['options'];
+        if(is_array($option)) return $option;
+        if(is_callable($option)) return $option($setting);
+        return [];
     }
 
     private function get_input_from_view($setting, $name) {

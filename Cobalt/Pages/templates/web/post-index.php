@@ -2,7 +2,7 @@
     <h1 class='title'>{{!title}}</h1>
     {{!filter}}
 </hgroup>
-<div class="cobalt-posts--public-index">
+<div class="cobalt-posts--public-index {{index_class}}">
     {{!posts}}
 </div>
 {{!controls}}

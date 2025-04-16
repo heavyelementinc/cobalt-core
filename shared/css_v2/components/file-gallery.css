@@ -1,0 +1,77 @@
+file-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    --gap: var(--margin-s);
+    gap: var(--gap);
+    padding: var(--gap);
+    --dimensions: 13em;
+    --drop-shadow-size: calc(var(--gap) / 2);
+    --drop-target-shadow: calc(var(--drop-shadow-size) * -1) 0 0 var(--primary-color-1);
+    gallery-item {
+        display: block;
+        position: relative;
+        height: var(--dimensions);
+        width: var(--dimensions);
+        border: 1px solid var(--neutral-color-1);
+        padding: var(--margin-xs);
+        img, video {
+            display: block;
+            object-fit: cover;
+            object-position: center;
+            height: 100%;
+            width: 100%;
+            user-select: none;
+        }
+        action-menu {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: unset;
+            font-size: .5em;
+        }
+    }
+    input[type='file'] {
+        display: block;
+        height: var(--dimensions);
+        width: var(--dimensions);
+        color: transparent;
+        &::file-selector-button {
+            height: 100%;
+            width: 100%;
+        }
+    }
+    drop-indicator {
+        display: none;
+        height: var(--dimensions);
+        width: 0;
+        margin: calc((var(--gap) * 0.4) * -1);
+        box-shadow: 1px 1px 1px 1px var(--primary-color-1);
+        [orientation="list"] {
+            height: 0;
+            width: var(--dimensions);
+        }
+    }
+    &[drag-in-progress="true"] {
+        cursor: grab;
+        img, video {
+            
+        }
+        drop-indicator {
+            display: block;
+        }
+        &[orientation="list"] {
+            --drop-target-shadow: 0 calc(var(--drop-shadow-size) * -1) 0 var(--primary-color-1);
+            .drop-target--class {
+                &.drop-target--next {
+                    /* --drop-target-shadow: 0 var(--drop-shadow-size) 0 var(--primary-color-1); */
+                }
+            }
+        }
+        .drop-target--class {
+            box-shadow: var(--drop-target-shadow);
+            &.drop-target--next {
+                /* --drop-target-shadow: var(--drop-shadow-size) 0 0 var(--primary-color-1); */
+            }
+        }
+    }
+}

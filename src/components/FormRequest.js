@@ -370,7 +370,7 @@ class NewFormRequest extends HTMLElement {
         if(typeof data !== "object") return form;
         
         for( const field in data ) {
-            const fields = this.querySelectorAll(`[name='${field}'][type='files'],[name='${field}'][type='file'],image-result[name="${field}"] [type="file"]`);
+            const fields = this.querySelectorAll(`[name='${field}'][type='files'],[name='${field}'][type='file'],image-result[name="${field}"] [type="file"],file-gallery[name="${field}] [type="file"]`);
             if(!fields) continue;
             for( const el of fields ) {
 

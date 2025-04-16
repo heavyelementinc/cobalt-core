@@ -7,7 +7,7 @@ use \Auth\UserCRUD;
 use Auth\UserPersistance;
 use Auth\UserSchema;
 use \Auth\UserValidate;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;

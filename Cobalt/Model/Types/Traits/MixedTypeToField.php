@@ -140,6 +140,7 @@ trait MixedTypeToField {
     function defaultFieldData($misc):array {
         $data = $this->getDefaultFieldAttributes($misc);
         $attributes = [];
+        
         foreach($data as $attr => $value) {
             if($attr === "data") {
                 $attributes[] = $this->getDataAttributes($value);
@@ -156,10 +157,13 @@ trait MixedTypeToField {
             'name' => $this->name ?? "",
             'type' => $this->type ?? "",
             'data' => $misc['data'] ?? [],
+            'placeholder' => $misc['placeholder'] ?? $this->directiveOrNull("placeholder") ?? ""
         ], $misc);
     }
 
     function getAttribute($attr, $value) {
+        $allowedEmptyAttrs = ['open', 'controls', 'disabled'];
+        if(!$value && !in_array($attr, $allowedEmptyAttrs)) return "";
         return "$attr=\"".htmlspecialchars($value)."\"";
     }
 

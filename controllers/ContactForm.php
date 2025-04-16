@@ -108,6 +108,37 @@ class ContactForm extends Crudable {
         throw new BadRequest("Bad request");
     }
 
+    const SESSION_THROTTLE = "__contact-form--throttle-catch-count";
+
+    private function throttleCatch() {
+        $now = time();
+        $two_min_ago = strtotime("-".__APP_SETTINGS__['Contact_form_submission_throttle_period'], $now);
+        if(!key_exists(self::SESSION_THROTTLE, $_SESSION)) $_SESSION[self::SESSION_THROTTLE] = [];
+        $cleanup = [];
+        // Check if the current count of sessions 
+        if(count($_SESSION[self::SESSION_THROTTLE]) > __APP_SETTINGS__['Contact_form_submission_throttle_after_max_submissions']) {
+            // Run through the current items
+            foreach($_SESSION[self::SESSION_THROTTLE] as $key => $item) {
+                // Check if the time from this index is greater than $two_min_ago
+                if($item['time'] >= $two_min_ago) {
+                    // If it's greater than $two_min_ago, throw an error
+                    throw new TooManyRequests("Too many requests", __APP_SETTINGS__['Contact_form_fail_message']);
+                }
+                $cleanup[] = $key;
+            }
+        }
+
+        // Remove items from the throttle catch queue
+        foreach($cleanup as $index) {
+            unset($_SESSION[self::SESSION_THROTTLE][$index]);
+        }
+
+
+        $_SESSION[self::SESSION_THROTTLE][] = [
+            'time' => $now,
+        ];
+    }
+
     private function stage1($data) {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
         /** @var Persistance */
@@ -118,21 +149,35 @@ class ContactForm extends Crudable {
         $mutant->date  = new \MongoDB\BSON\UTCDateTime();
 
         $_SESSION['__contact_form_submission'] = $mutant->jsonSerialize();
-        update("@form", [
-            'next' => view("/parts/contact-form/verify.php")
-        ]);
 
+        if(__APP_SETTINGS__['Contact_form_anti_spam_technique'] == "stepped-click") {
+            update("@form", [
+                'next' => view("/parts/contact-form/verify.php")
+            ]);
+        }
+        if(__APP_SETTINGS__['Contact_form_anti_spam_technique'] == "captcha") {
+            captcha_check("Please confirm you're human", array_merge($_POST, ['is_human' => 'false']));
+        }
     }
 
+    const ERROR_EMAIL         = 0b001;
+    const ERROR_DETAILS       = 0b010;
+    const ERROR_IS_HUMAN      = 0b100;
+    const ERROR_EMAIL_FAILED  = 0b1000;
+    const ERROR_SYSTEM_FAILED = 0b10000;
+    const ERROR_PUSH_FAILED   = 0b100000;
+
     private function stage2($data) {
+        $this->throttleCatch();
+
         /** @var Persistance */
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
         $persistance = new $className($_SESSION['__contact_form_submission']);
         $error = 0;
         // $mutant = $persistance->__validate($_SESSION['__contact_form_submission']);
-        if($data['email']) $error += 0b001;
-        if($data['details']) $error += 0b010;
-        if($data['is_human'] !== "false") $error += 0b100;
+        // if($data['email']) $error += self::ERROR_EMAIL;
+        // if($data['details']) $error += self::ERROR_DETAILS;
+        if($data['is_human'] !== "false") $error += self::ERROR_IS_HUMAN;
 
         if($error > 0) {
             // header("X-Message: @error Something went wrong. Please try again later");
@@ -141,15 +186,39 @@ class ContactForm extends Crudable {
             ]);
             return 0;
         }
+        $error = 0;
+        $modes = __APP_SETTINGS__["Contact_form_on_success_modes"];
 
-        switch(app("Contact_form_interface")) {
-            case "SMTP":
-                $result = $this->contactSMTP($persistance);
-                break;
-            case "panel":
-            default:
-                $id = $this->contactPanel($persistance);
-                break;
+        $recipients = $this->getRecipients();
+
+        switch(true) {
+            // Contact form details via email
+            case ($modes & CONTACT_SUCCESS_EMAIL) == CONTACT_SUCCESS_EMAIL:
+                try {
+                    $result = $this->contactSMTP($persistance);
+                } catch (Error|Exception $e) {
+                    $error += self::ERROR_EMAIL_FAILED;
+                }
+            // Contact form details via admin panel route
+            case ($modes & CONTACT_SUCCESS_SYSTEM) == CONTACT_SUCCESS_SYSTEM:
+                try {
+                    $id = $this->contactPanel($persistance);
+                } catch (Error|Exception $e) {
+                    $error += self::ERROR_SYSTEM_FAILED;
+                }
+            // Contact form details via Push notification
+            // case ($modes & CONTACT_SUCCESS_PUSH) == CONTACT_SUCCESS_PUSH:
+                // try {
+                //     $this->contactNotify($persistance, (string)$persistance->_id);
+                // } catch (Error|Exception $e) {
+                //     $error += self::ERROR_PUSH_FAILED;
+                // }
+        }
+        if($error > 0) {
+            update("@form", [
+                'next' => view("/parts/contact-form/stage2-error.php", ['error_code' => $error])
+            ]);
+            return 0;
         }
         update("@form", [
             'clear' => true,
@@ -157,6 +226,11 @@ class ContactForm extends Crudable {
         ]);
         $fields = new AdditionalContactFields();
         $fields->__on_submit();
+    }
+
+    private function getRecipients() {
+        $crud = new UserCRUD();
+        $users = $crud->getUsersByPermission(__APP_SETTINGS__['']);
     }
 
     private function contactSMTP($mutant) {
@@ -168,7 +242,13 @@ class ContactForm extends Crudable {
         try {
             $subject = "New contact form submission";
             if (key_exists("subject", $_POST)) $subject = "Webform: \"" . strip_tags($_POST['subject'] . "\"");
-            $email->send(app("API_contact_form_recipient"), $subject);
+            $crud = new UserCRUD();
+            $users = $crud->getUsersByPermission(app("API_contact_form_recipients"));
+            $addresses = [];
+            foreach($users as $user) {
+                $addresses[] = $user->email->getRaw();
+            }
+            $email->send($addresses, $subject);
         } catch (Exception $e) {
             throw new ServiceUnavailable("There was an error on our end.");
         }
@@ -202,13 +282,7 @@ class ContactForm extends Crudable {
 
     private function contactPanel($mutant) {
         $backend = new ContactManager();
-        $two_min_ago = strtotime("-".__APP_SETTINGS__['Contact_form_submission_throttle_period'], time()) * 1000;
-        $now = new UTCDateTime($two_min_ago);
-        $throttle = $backend->count(['ip' => (string)$mutant->ip, 'date' => ['$gte' => $now]]);
-        // if($throttle >= __APP_SETTINGS__['Contact_form_submission_throttle_after_max_submissions']) {
-        //     throw new TooManyRequests("Too many requests", __APP_SETTINGS__['Contact_form_fail_message']);
-        // }
-        
+
         try {
             $result = $backend->insertOne($mutant);
             $id = $result->getInsertedId();
@@ -217,25 +291,21 @@ class ContactForm extends Crudable {
         } catch (\Exception $e) {
             throw new ServiceUnavailable("An unknown error occurred");
         }
+
         try{
             $push = new PushNotifications();
             $push->push(
                 'Contact Submission',
                 "Someone has filled out the {{app.app_name}} contact form!",
-                ['contact_form_new'],
+                __APP_SETTINGS__['API_contact_form_recipients'],
                 ['path' => $action]
             );
         } catch (\Exception $e) {
             
         }
-        $this->contactNotify($mutant, $id);
-
-        if(app("Contact_form_notify_on_new_submission")) {
-            // $notify = new Notification1_0Schema([
-            //     'subject' => 'New contact form submission',
-            //     'body' => "Name: *$mutant[name]*\n$mutant[additional]",
-            //     ''
-            // ]);
+        
+        if((__APP_SETTINGS__["Contact_form_on_success_modes"] & CONTACT_SUCCESS_NOTIFY) == CONTACT_SUCCESS_NOTIFY) {
+            $this->contactNotify($mutant, $id);
         }
 
         return $id;

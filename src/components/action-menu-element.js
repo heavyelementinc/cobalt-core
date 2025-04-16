@@ -5,16 +5,16 @@ class ActionMenuElement extends CustomButton {
         this.options = this.querySelectorAll("option");
         this.type = this.getAttribute("type");
         
-        this.menu = new ActionMenu(this);
-
         this.stopPropagation = this.hasAttribute("stop-propagation");
-        this.setAttribute("aria-pressed", "false");
+        this.state = false;
         this.setAttribute("aria-role", "button");
         this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
         super.connectedCallback();
+        this.menu = new ActionMenu(this, this.type);
+
         this.menu.title = this.title ?? "Edit";
         this.menu.mode = this.mode;
         this.getOptions();
@@ -24,15 +24,18 @@ class ActionMenuElement extends CustomButton {
                 event.stopPropagation();
                 event.stopImmediatePropagation();
             }
-            const currentState = this.menu.isOpen;
-            if(currentState) return;
-            this.menu.toggle();
+            // else this.menu.open();
+            // const currentState = this.menu.isOpen;
+            // if(currentState) return;
+            if(this.state) this.close();
+            else this.open();
+            return true;
         });
 
         this.menu.addEventListener("actionmenustate", event => {
             this.dispatchEvent(new CustomEvent("actionmenustate", {detail: event.detail}));
-            if(event.detail.open) this.setAttribute("aria-pressed", "true");
-            if(!event.detail.open) this.setAttribute("aria-pressed", "false");
+            if(event.detail.open) this.state = true;
+            if(!event.detail.open) this.state = false;
         });
 
         this.menu.addEventListener("actionmenurequest", event => {
@@ -42,6 +45,23 @@ class ActionMenuElement extends CustomButton {
         this.menu.addEventListener("actionmenuselect", event => {
             this.dispatchEvent(new CustomEvent("actionmenuselect", {detail: event.detail}));
         });
+    }
+
+    disconnectedCallback() {
+        this.menu.close();
+        if("parentNode" in this.menu.wrapper 
+        && "deleteChild" in this.menu.wrapper.parentNode) {
+            this.menu.wrapper.parentNode.deleteChild(this.menu.wrapper);
+        }
+        delete this.menu;
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        switch(name) {
+            case "type":
+                this.menu.type = newValue;
+                break;
+        }
     }
 
     get mode() {
@@ -65,9 +85,24 @@ class ActionMenuElement extends CustomButton {
     get title() {
         return this.dataset.title ?? this.getAttribute("title");
     }
-    // toggleButton(event) {
 
-    // }
+    get state() {
+        return (this.ariaPressed === "true") ? true : false;
+    }
+
+    set state(value) {
+        this.setAttribute("aria-pressed", (value) ? "true" : "false");
+    }
+    
+    open() {
+        this.state = "true";
+        this.menu.open();
+    }
+
+    close() {
+        this.state = "false";
+        this.menu.close();
+    }
 
     getOptions() {
         this.menu.actions = [];

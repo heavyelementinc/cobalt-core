@@ -9,9 +9,11 @@ use Cobalt\Model\Types\MixedType;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exception;
 use Exceptions\HTTP\Error;
+use MongoDB\BSON\Persistable;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use \MongoDB\Driver\Exception\CommandException;
+use TypeError;
 
 /** An "index" is the landing page that shows a table of available database entries.
  * To define what fields of a DB entry are shown in the index, provide an 'index'
@@ -51,7 +53,7 @@ trait IndexableModel {
         }
 
         // Sanity check to ensure we're not moving forward with an empty table
-        if(empty($table)) throw new Error("Map is missing indexable directives");
+        if(empty($table)) throw new Error("Model is missing indexable directives",true);
 
         // Sort our table
         usort($table, function ($a, $b) {
@@ -191,7 +193,7 @@ trait IndexableModel {
         $result = $this->schema->find($this->__index_query(), array_merge($this->index_options(), $this->queryParameters));
         $html = "";
         foreach($result as $doc) {
-            if($doc instanceof BSONDocument) $doc = $this->get_schema($doc);
+            if($doc instanceof $this->model === false) throw new TypeError("Document must be of type `".$this->model::class."`, found `".$doc::class."` instead.");//$doc = $this->get_schema($doc);
             $this->get_table_row($doc, $html);
         }
 

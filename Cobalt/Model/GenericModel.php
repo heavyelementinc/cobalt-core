@@ -30,11 +30,12 @@ use TypeError;
 class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable, Stringable {
     use Schemable, Viewable, Hydrateable, Prototypable, Filterable;
     public ?string $name_prefix = null;
-    private bool $__schema_allow_undefined_fields = false;
+    protected bool $__schema_allow_undefined_fields = false;
 
     /*************** INITIALIZATION ***************/
-    function __construct(?array $schema = [], null|array|BSONDocument|BSONArray $dataset = null, ?string $name_prefix = null) {
+    function __construct(?array $schema = [], null|array|BSONDocument|BSONArray $dataset = null, ?string $name_prefix = null, bool $allow_undefined_fields = false) {
         $this->name_prefix = $name_prefix;
+        $this->set_allow_undefined_fields($allow_undefined_fields);
         $this->__defineSchema($schema);
         if(!$dataset || !empty($dataset)) $this->setData($dataset ?? []);
     }
@@ -63,7 +64,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         
         // If we don't allow undefined schema fields
         if(!key_exists($property, $this->__schema) && !$this->__schema_allow_undefined_fields) {
-            throw new TypeError("ERROR: `$property` is not a defined field");
+            throw new TypeError("ERROR: `$property` is not a defined field. Type: " . gettype($value));
         }
 
         $this->hydrate(
@@ -173,5 +174,13 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         else if($date instanceof UTCDateTime) $date = $date->toDateTime()->format("u");
 
         return $archived_time < $date;
+    }
+
+    public function get_allow_undefined_fields() {
+        return $this->__schema_allow_undefined_fields;
+    }
+
+    public function set_allow_undefined_fields(bool $value) {
+        $this->__schema_allow_undefined_fields = $value;
     }
 }

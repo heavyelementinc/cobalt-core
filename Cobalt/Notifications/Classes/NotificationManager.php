@@ -124,7 +124,7 @@ class NotificationManager extends \Drivers\Database {
         return $this->setReadState($id, $user, $state, "seen");
     }
     
-    public function sendNotification(NotificationSchema $note) {
+    public function sendNotification(NotificationSchema $note, bool $push_notify = true) {
         $id = $note->_id ?? null;
 
         $allowUpsert = true;
@@ -149,9 +149,9 @@ class NotificationManager extends \Drivers\Database {
         $upserted_id = $result->getUpsertedId();
         // cobalt_log('sendNotification', 'Notification sent');
         
-        // if(app("Notifications_enable_push_notifications")) {
-        //     $this->dispatchPushNotifications($id);
-        // }
+        if(__APP_SETTINGS__["Notifications_enable_push_notifications"] && $push_notify) {
+            $this->dispatchPushNotifications($id);
+        }
         
         return $upserted_id || $id;
     }

@@ -101,7 +101,7 @@ trait ClientFSManager {
 
     public function deleteAllBelongingToId($parent_id, $key = "for") {
         $_id = new ObjectId($parent_id);
-        $result = $this->findMany([$key => $_id]);
+        $result = $this->fs->findMany([$key => $_id]);
         $this->last_modified_result = $result;
         $deleted = 0;
         foreach($result as $doc) {

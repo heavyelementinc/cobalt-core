@@ -100,9 +100,7 @@ class Notifications extends Controller {
         else $recipient = new ObjectId($recipient);
 
         $push = new PushNotifications();
-        $push->push('Test Subject', 'Hello {{user.fname}}, this is a test of your push notifications.', $recipient, ['details' => "Here's a secret message from uncharted space"]);
-        echo "\"Test\"";
-        exit;
+        $push->push('Test Subject', 'Hello {{user.fname}}, this is a test of your push notifications.', [$recipient], ['details' => "Here's a secret message from uncharted space"]);
     }
 
     function delete_one($id) {
@@ -246,5 +244,15 @@ class Notifications extends Controller {
             'ntfy' => $note,
             'json' => syntax_highlighter($note, "")
         ]);
+    }
+
+    function vapid_pub_key(){
+        // header("Content-Type: application/json;charset=UTF-8");
+        return (new PushNotifications())->vapid_keys->keyset->publicKey;
+        // exit;
+    }
+
+    function push_test() {
+        return $this->pushNotification(session()['_id']);
     }
 }
