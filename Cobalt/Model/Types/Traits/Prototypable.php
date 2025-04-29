@@ -81,6 +81,11 @@ trait Prototypable {
     }
 
     #[Prototype]
+    protected function display():mixed {
+        return $this->__toString();
+    }
+
+    #[Prototype]
     protected function getLabel($includeHtml = true): string {
         $labelStart = "<label>";
         $is_required = ($this->directiveOrNull("required")) ? " <span class=\"form-prototype--required-field\">" . __APP_SETTINGS__['Prototypeable_required_field_label'] . "</span>" : "";

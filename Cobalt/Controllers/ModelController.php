@@ -40,11 +40,11 @@ abstract class ModelController {
     function __construct(?string $name = null) {
         $this->name = static::className();
         $this->friendly_name = static::generate_friendly_name($name);
-        $this->model = $this->defineModel();
+        $this->model = static::defineModel();
     }
 
     /** @return Model */
-    abstract function defineModel(): Model;
+    abstract static function defineModel(): Model;
 
     // =========================================================================
     // ================================ ROUTING ================================
@@ -59,6 +59,7 @@ abstract class ModelController {
         static function apiv1(?string $prefix = null, array $options = []) {
             $class   = static::className();
             $mutant  = static::generate_prefix($prefix);
+            $modelClass = static::defineModel()::class;
 
             Route::get("$mutant/{id}", "$class@__read", static::route_details(
                 [
@@ -67,6 +68,13 @@ abstract class ModelController {
                 $options['read'] ?? [],
                 "route_details_read")
             );
+            Route::get("$mutant/{id}/model/{name}", "$modelClass@__model", static::route_details(
+                [
+                    'permission' => static::$api_read_permission
+                ],
+                $options['read'] ?? [],
+                "route_details_read"
+            ));
             Route::post("$mutant/create", "$class@__create", static::route_details(
                 [
                     'permission' => static::$api_create_permission,

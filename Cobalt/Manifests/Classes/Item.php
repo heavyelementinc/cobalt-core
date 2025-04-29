@@ -97,7 +97,9 @@ class Item implements Persistable{
             $this->known_file = $path;
         } else {
             $existing_file = find_one_file(self::FILE_LOCATIONS[$this->type->name], $value);
-            if(!$existing_file) throw new Error("Manifest file description could not be found: $value");
+            if(!$existing_file) {
+                throw new Error("Manifest file description could not be found: $value");
+            }
             $this->known_file = $existing_file;
         }
         $this->href = $value;

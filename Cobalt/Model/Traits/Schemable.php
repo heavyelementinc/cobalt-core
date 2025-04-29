@@ -36,10 +36,10 @@ trait Schemable {
             // Let's check if we need to reformat this directive into an array
             if ($directives[0] instanceof MixedType){
                 // If the first directive entry is an instance of Mixed Type
-                $directives['type'] = $directives[0];
+                $directives['type'] = new $directives[0]();
                 unset($directives[0]);
             } else if($directives instanceof MixedType) {
-                $directives = ['type' => $directives];
+                $directives = ['type' => new $directives()];
             }
 
             if(!isset($directives['type'])) throw new DirectiveDefinitionFailure("Field `$field` lacks a declared 'type' directive");

@@ -20,7 +20,7 @@ const DIRECTIVE_KEY_FILTER = "filter";
 class MixedType implements Stringable, ArrayAccess {
     use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField;
     protected bool $isSet = false;
-    protected $value;
+    protected $value = null;
     protected string $name;
     protected bool $hasModel = false;
     protected GenericModel $model;
@@ -33,7 +33,7 @@ class MixedType implements Stringable, ArrayAccess {
      */
     public function getValue() {
         if(!$this->isSet) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
-        if(!$this->value) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
+        if($this->value === null) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
         return $this->value;
     }
 

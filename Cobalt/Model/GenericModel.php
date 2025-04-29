@@ -12,14 +12,19 @@ use Cobalt\Model\Traits\Viewable;
 use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\Traits\Prototypable;
 use DateTime;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\NotFound;
 use Iterator;
 use JsonSerializable;
+use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
 use Traversable;
 use TypeError;
+
+use const Dom\NOT_FOUND_ERR;
 
 /**
  * GenericModels may be accessed using the -> syntax *or* accessed as an array.
@@ -183,4 +188,5 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     public function set_allow_undefined_fields(bool $value) {
         $this->__schema_allow_undefined_fields = $value;
     }
+
 }

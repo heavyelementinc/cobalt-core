@@ -30,7 +30,7 @@ class Debug extends ModelController {
         return [];
     }
 
-    public function defineModel(): Model {
+    public static function defineModel(): Model {
         return new TestModel();
     }
 

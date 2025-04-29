@@ -1,6 +1,6 @@
 
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], input-radio[name], image-result[name], file-gallery[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], input-radio[name], image-result[name], object-gallery[name]";
 
 function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());

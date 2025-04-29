@@ -129,4 +129,8 @@ class CoreApi extends \Controllers\Pages {
             'token' => ''
         ];
     }
+
+    function ping() {
+        return "pong";
+    }
 }

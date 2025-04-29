@@ -8,7 +8,7 @@ use Cobalt\Model\Model;
 use MongoDB\Model\BSONDocument;
 
 class Events extends ModelController {
-    public function defineModel(): Model {
+    public static function defineModel(): Model {
         return new Event();
     }
 

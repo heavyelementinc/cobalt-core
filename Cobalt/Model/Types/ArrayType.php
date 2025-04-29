@@ -7,9 +7,12 @@ use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\Exceptions\ImmutableTypeError;
+use Cobalt\Model\GenericModel;
 use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Types\Traits\SharedFilterEnums;
 use Error;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Stringable;
 
 class ArrayType extends MixedType implements ArrayAccess, Stringable {
@@ -17,28 +20,16 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
 
     public function setValue($array):void {
         $this->value = [];
-        $each = null;
+        $schema = null;
         
-        if($this->hasDirective('each')) $each = $this->getDirective('each');
-        if(!$each && method_exists($this, 'each')) $each = $this->eachSchema();
+        if($this->hasDirective('each')) $schema = $this->getDirective('each');
+        if(!$schema && method_exists($this, 'each')) $schema = $this->eachSchema();
+        if($array instanceof BSONArray) $array = $array->getArrayCopy();
         foreach($array as $index => $value) {
-            if($each) {
-                if($each[0] instanceof MixedType) $each['type'] = $each[0];
-                else if($each instanceof MixedType) $each = ['type' => $each];
-                else if($each['type'] instanceof MixedType) {/* no-op */}
-                else throw new DirectiveDefinitionFailure("Failed to find explicit 'type' declaration");
-                // $this->value[$index] = new $each[0]($each, $value);
-                // $this->value[$index]->setName($this->name.".$index");
-                $instance = new $each[0]($each, $value);
-                $this->hydrate(
-                    target: $this->value,
-                    field_name: $index,
-                    value: $value,
-                    model: $this->model,
-                    name: $this->name.".$index",
-                    directives: $each,
-                    instance: $instance,
-                );
+            if($schema) {
+                if($value instanceof BSONDocument) $value = $value->getArrayCopy();
+                // if(method_exists($value,"__clone")) $value = $value->__clone();
+                $this->value[$index] = new GenericModel($schema, $value, $this->name . ".$index");
             } else {
                 $this->hydrate(
                     target: $this->value,
@@ -50,6 +41,10 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
             }
         }
         $this->isSet = true;
+    }
+
+    public function getValue() {
+        return $this->value;
     }
 
     public function __toString(): string {

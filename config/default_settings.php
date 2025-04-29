@@ -1348,7 +1348,7 @@ $settings = [
             "default" => ""
         ],
         "manifest_engine" => [
-            "default" => 1
+            "default" => 2
         ],
         "manifest_v2_package_js_files" => [
             "default" => true,
@@ -2155,5 +2155,14 @@ $settings = [
         ],
         "Prototypeable_required_field_label" => [
             "default" => "*"
-        ]
+        ],
+        "Websocket_default_port" => [
+            "default" => 9640,
+        ],
+        "Websocket_default_message_handler" => [
+            "default" => "",
+        ],
+        "Websocket_heartbeat_tick_interval" => [
+            'default' => 100_000
+        ],
 ];

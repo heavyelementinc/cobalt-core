@@ -206,3 +206,14 @@ input-object-array {
       margin-left:auto;
     }
 }
+
+object-array-item {
+    display: block;
+}
+
+button.add-new-object-button {
+    &:before {
+        content: "\F0417";
+        font-family: 'Material Design Icons', sans-serif;
+    }
+}

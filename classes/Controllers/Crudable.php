@@ -98,7 +98,8 @@ abstract class Crudable {
                 'delete_option' => '',
                 'method'   => "POST",
                 'action'   => $action,
-                'endpoint' => $action, /** @deprecated */
+                /** @deprecated */
+                'endpoint' => $action,
                 'name'     => $this->name,
             ]);
             

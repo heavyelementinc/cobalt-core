@@ -25,10 +25,11 @@ class Dialog extends EventTarget {
         this.content.classList.add('modal-dialog--content');
         if(classes) this.content.classList.add(classes.split(" "));
         if(body) this.bodyCache = body;
-        this.chrome  = document.createElement("menu");
+        this.chrome = document.createElement("menu");
         this.cancelButton = false;
         this.confirmButton = false;
         if(!chrome) this.addCloseButton();
+        else this.createButtons(chrome);
 
         if(close_btn) this.addModalClose();
     }
@@ -53,6 +54,7 @@ class Dialog extends EventTarget {
         const opts = {
             label: "Cancel",
             dangerous: false,
+            classes: [],
             dispatch: "modalcancel",
             detail: {},
             callback: async (event) => true,
@@ -61,6 +63,8 @@ class Dialog extends EventTarget {
 
         const li = document.createElement("li");
         const btn = document.createElement("button");
+        const classList = (typeof options.classes === "string") ? [options.classes] : options.classes;
+        btn.classList.add(...classList);
         li.appendChild(btn);
         btn.innerHTML = opts.label;
         this.chrome.appendChild(li);
@@ -98,6 +102,23 @@ class Dialog extends EventTarget {
         });
 
         this.confirmButton = true;
+    }
+
+    createButtons(chrome) {
+        for(const key in chrome) {
+            switch(key) {
+                case "okay":
+                    this.addConfirmButton(chrome[key].label, chrome[key]);
+                    break;
+                case "close":
+                case "cancel":
+                    this.addCloseButton(chrome[key].label, chrome[key]);
+                    break;
+                default:
+                    this.addButton(chrome[key]);
+                    break;
+            }
+        }
     }
 
     async handleChromeClick(event, button, options) {

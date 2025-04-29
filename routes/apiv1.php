@@ -4,6 +4,8 @@ use Cobalt\EventListings\Controllers\Events;
 use Routes\Options;
 use Routes\Route;
 
+Route::get("/ping", "CoreApi@ping");
+
 if(app("UGC_enable_user_generated_content")) {
     Route::post(app("UGC_submit_endpoint"), "UGC@submit");
 }

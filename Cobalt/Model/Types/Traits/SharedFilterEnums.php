@@ -25,7 +25,7 @@ trait SharedFilterEnums {
     }
 
     #[Prototype]
-    public function display():mixed {
+    protected function display():mixed {
         $valid = [];
         if($this->hasDirective("valid")) $valid = $this->getDirective("valid");
         $result = "";

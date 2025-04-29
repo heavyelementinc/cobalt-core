@@ -1,4 +1,4 @@
-class FileGallery extends HTMLElement {
+class ObjectGallery extends HTMLElement {
     uploadField;
     ITEM_QUERY = "gallery-item";
     DRAG_IN_PROGRESS = "drag-in-progress";
@@ -11,23 +11,44 @@ class FileGallery extends HTMLElement {
     }
 
     connectedCallback() {
-        this.initUploadField();
+        this.initObjectPicker();
         this.initDragAndDrop();
     }
     
-    initUploadField() {
-        let field = this.querySelector("input[type='file']");
-        if(!field) {
-            field = document.createElement("input");
-            field.type = "file";
-            field.multiple = "multiple";
-            field.accept = this.getAttribute("accept") ?? "";
-        }
+    initObjectPicker() {
+        this.uploadField = document.createElement("div");
+        this.uploadField.classList.add("object-picker-container");
+        this.uploadField.method = this.getAttribute("method");
+        this.uploadField.action = this.getAttribute("action");
 
-        this.uploadField = field;
-        this.appendChild(field);
-        // this.dropIndicator = document.createElement("drop-indicator");
-        // this.appendChild(this.dropIndicator);
+        const picker = document.createElement("object-picker");
+        this.uploadField.appendChild(picker);
+        picker.addEventListener("selection", event => {
+            this.addObjectsToList(event.detail, true)
+        });
+        this.appendChild(this.uploadField);
+    }
+
+    addObjectsToList(elements, triggerChange) {
+        for(const element of elements) {
+            this.addObjectToList(element.id, element.html, false);
+        }
+        if(triggerChange) this.dispatchEvent(new Event("change"));
+    }
+
+    addObjectToList(id, html = "", triggerChange = false) {
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+
+        let obj = temp.querySelector(`.${this.ITEM_QUERY}`);
+        if(!obj) {
+            obj = document.createElement(this.ITEM_QUERY);
+            obj.dataset.id = id;
+            obj.innerHTML = html;
+        }
+        this.insertBefore(obj, this.uploadField);
+        
+        if(triggerChange) this.dispatchEvent(new Event("change"));
     }
 
     initDragAndDrop() {
@@ -129,7 +150,8 @@ class FileGallery extends HTMLElement {
     }
 
     get value() {
-        if(this.uploadField.files.length !== 0) {
+        const uploadButton = this.uploadField.querySelector("input[type='file']");
+        if(uploadButton && uploadButton.files.length !== 0) {
             return this.uploadField.files;
         }
         const items = this.querySelectorAll(this.ITEM_QUERY);
@@ -140,9 +162,25 @@ class FileGallery extends HTMLElement {
         return value;
     }
 
-    
+}
 
-    
+customElements.define("object-gallery", ObjectGallery);
+
+class FileGallery extends ObjectGallery {
+    initObjectPicker() {
+        super.initObjectPicker();
+        let field = this.querySelector("input[type='file']");
+        if(!field) {
+            field = document.createElement("input");
+            field.type = "file";
+            field.multiple = "multiple";
+            field.accept = this.getAttribute("accept") ?? "";
+        }
+
+        this.uploadField.appendChild(field);
+        // this.dropIndicator = document.createElement("drop-indicator");
+        // this.appendChild(this.dropIndicator);
+    }
 }
 
 customElements.define("file-gallery", FileGallery);

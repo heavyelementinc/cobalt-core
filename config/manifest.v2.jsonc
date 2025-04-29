@@ -88,6 +88,11 @@
         "package": "deferred"
     },
     {
+        "href":"components/InputObjectArray.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
         "href":"components/datepicker.js",
         "contexts": ["common"],
         "package": "deferred"
@@ -158,7 +163,12 @@
         "package": "deferred"
     },
     {
-        "href":"components/file-gallery.js",
+        "href":"components/object-gallery-picker.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/object-gallery.js",
         "contexts": ["common"],
         "package": "deferred"
     },
@@ -337,7 +347,7 @@
         "version": 2
     },
     {
-        "href": "components/file-gallery.css",
+        "href": "components/object-gallery.css",
         "contexts": ["common"],
         "version": 2
     },
