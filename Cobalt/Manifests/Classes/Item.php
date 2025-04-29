@@ -24,6 +24,7 @@ class Item implements Persistable{
     private bool $registered = false; 
     private bool $deferred = false;
     private bool $inline = false;
+    private bool $required = false;
     
     private string $package = "package"; // Defines which package this item belongs to when cached
     // private array $package_attrs = []; // Defines what attributes should be applied to the tag
@@ -97,7 +98,7 @@ class Item implements Persistable{
             $this->known_file = $path;
         } else {
             $existing_file = find_one_file(self::FILE_LOCATIONS[$this->type->name], $value);
-            if(!$existing_file) {
+            if(!$existing_file && $this->required == true) {
                 throw new Error("Manifest file description could not be found: $value");
             }
             $this->known_file = $existing_file;
