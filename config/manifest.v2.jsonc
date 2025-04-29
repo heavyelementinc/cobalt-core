@@ -9,6 +9,10 @@
         "contexts": ["common"]
     },
     {
+        "href":"Test.js",
+        "contexts": ["common"]
+    },
+    {
         "href":"global_functions.js",
         "contexts": ["common"]
     },
