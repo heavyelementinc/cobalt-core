@@ -455,11 +455,6 @@ class NewFormRequest extends HTMLElement {
                 this.addElementToFeedbackList(this);
                 break;
         }
-        if(target) {
-            const name = target.getAttribute('name');
-            const value = target.value;
-            if(name && value) submit[name] = value;
-        }
         
         return submit;
     }
