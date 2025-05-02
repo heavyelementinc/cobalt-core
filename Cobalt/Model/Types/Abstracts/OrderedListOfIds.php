@@ -158,4 +158,20 @@ abstract class OrderedListOfIds extends MixedType implements Iterator {
     public function rewind(): void {
         $this->index = 0;
     }
+
+    public function offsetExists(mixed $offset): bool {
+        return key_exists($offset, $this->value);
+    }
+
+    public function offsetGet(mixed $offset): mixed {
+        return $this->value[$offset];
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void {
+        $this->value[$offset] = $value;
+    }
+
+    public function offsetUnset(mixed $offset): void {
+        unset($this->value[$offset]);
+    }
 }
