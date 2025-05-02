@@ -1,4 +1,4 @@
-object-gallery {
+object-gallery,file-gallery {
     display: flex;
     flex-wrap: wrap;
     --gap: var(--margin-s);
@@ -21,6 +21,11 @@ object-gallery {
             &::file-selector-button {
                 height: 100%;
                 width: 100%;
+            }
+        }
+        &:has(object-picker, input[type='file']) {
+            object-picker, input[type='file'] {
+                height: 50%;
             }
         }
     }
@@ -81,6 +86,16 @@ gallery-item {
         width: 100%;
         user-select: none;
     }
+    > button {
+        float: right;
+        background: var(--input-element-background);
+        border: var(--input-element-border-value);
+        font-size: .6em;
+        margin: var(--margin-xs);
+        &:hover {
+            border-color: var(--primary-color-0);
+        }
+    }
     action-menu {
         position: absolute;
         top: 0;
@@ -90,20 +105,50 @@ gallery-item {
     }
 }
 
+file-gallery gallery-item {
+    > button {
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+        
+}
+
 .object-gallery--selection-window {
-    max-height: 80vh;
+    max-height: 60vh;
     overflow-y: scroll;
     scrollbar-width: small;
+    text-align: center;
+    /* width: fit-content; */
 }
 
 .object-gallery--item-selection {
     transition: background-color .3s, color .3s;
+    display: inline-block;
+    position: relative;
+    width: 12em;
+    height: 12em;
+    isolation: isolate;
+    margin: var(--margin-xs);
+    vertical-align: top;
     & > input[type="checkbox"] {
-        display: none;
+        position:absolute;
+        top: var(--margin-xs);
+        left: var(--margin-xs);
+        height: 1em;
+        width: 1em;
+        z-index: 100;
+        /* background: rgb(255 255 255 / .2); */
+    }
+    gallery-item {
+        display: inline-block;
+        height: 100%;
+        width: 100%;
     }
     &:has(:checked) {
-        background-color: var(--primary-color-1);
-        color: var(--primary-color-1-fg);
+        /* background-color: var(--primary-color-1);
+        color: var(--primary-color-1-fg); */
+        box-shadow: 0 0 0rem 4px var(--input-element-active);
     }
     a, action-menu, button {
         display: none;

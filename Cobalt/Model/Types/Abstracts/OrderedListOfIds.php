@@ -1,20 +1,23 @@
 <?php
 
 namespace Cobalt\Model\Types\Abstracts;
+
+use ArrayAccess;
 use Cobalt\Model\Model;
 use Exception;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Types\MixedType;
+use Iterator;
 use MongoDB\Driver\Cursor;
 
-abstract class OrderedListOfIds extends MixedType {
+abstract class OrderedListOfIds extends MixedType implements Iterator {
     public array $raw = [];
 
     abstract function getModel(): Model;
     /**
-     * Prepare an $id for storage. 
+     * Prepare an $id for storage.
      * @param mixed $id 
      * @return null|ObjectId Return an ObjectId or `null`, if null, the value will be ignored
      */
@@ -39,6 +42,29 @@ abstract class OrderedListOfIds extends MixedType {
     // If needed, you can override this functionality (as we do with the ImageArrayType)
     public function queryForValues(Model $model, array $ids): ?Cursor {
         return $model->find(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
+    }
+    
+    /**
+     * 
+     * @param int $limit 
+     * @param int $skip 
+     * @param string $sortField 
+     * @param int $sortDirection 
+     * @param string $search 
+     * @return array {cursor: ?Cursor, count: int}
+     */
+    public function queryForObjects(int $limit, int $skip, string $sortField = "_id", int $sortDirection = -1, string $search = "", bool $excludeCurrent = true): array {
+        // if($search)
+        $query = [];
+        if($excludeCurrent) {
+            $query['_id'] = ['$nin' => $this->raw];
+        }
+        $options = ['limit' => (int)$limit, 'skip' => (int)$skip, 'sort' => [$sortField => $sortDirection]];
+        $model = $this->getModel();
+        return [
+            'cursor' => $model->find($query, $options),
+            'count' => $model->count($query, $options)
+        ];
     }
 
     public function setValue($images):void {
@@ -72,9 +98,6 @@ abstract class OrderedListOfIds extends MixedType {
     }
 
     function filter($oids) {
-        if(!empty($_FILES)) {
-            // $this->readFile();
-        }
         $value = [];
         foreach($oids as $val) {
             if(!$val) throw new ValidationIssue("Contains invalid file IDs");
@@ -84,22 +107,55 @@ abstract class OrderedListOfIds extends MixedType {
                 throw new ValidationIssue("`$val` was not a valid ObjectId");
             }
         }
+        $this->setValue($oids);
+        
         return $value;
+    }
+
+    public function onUpdateConfirmed($value):void {
+        update("[name='$this->name']", ['outerHTML' => $this->field()]);
     }
 
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
-        // $gallery = $this->input($class, $misc); // "<input class='input-type--file' type='file' name='$this->name' multiple='multiple'>";
+        // Get any fallback data we need
         [$data, $attrs] = $this->defaultFieldData($misc);
+        // Check if the 'accept' field is set
         $accept = $this->directiveOrNull("accept") ?? "";
         if($accept) $accept = "accept=\"$accept\"";
+        // Check if the tag is not null
         $tag = $tag ?? "object-gallery";
+        // Get the route
         $route = route($this->model::class."@__model", [(string)$this->model->_id, $this->name]);
+        // Build our gallery tag
         $gallery = "<$tag $attrs $accept method=\"GET\" action=\"$route\">";
+        // Loop through all the objects that belong to this field
         foreach($this->getValue() as $item) {
             $gallery .= view($this->fieldItemTemplate(), ['item' => $item, 'ordered_list' => $this]);
         }
         $gallery .= "</$tag>";
         return $gallery;
+    }
+
+    private int $index = 0;
+    public function current(): mixed {
+        return $this->value[$this->index];
+    }
+
+    public function next(): void {
+        $this->index += 1;
+    }
+
+    public function key(): mixed {
+        return $this->index;
+    }
+
+    public function valid(): bool {
+        if($this->index < 0) return false;
+        return $this->index <= (count($this->value) - 1);
+    }
+
+    public function rewind(): void {
+        $this->index = 0;
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cobalt\Model\Types\Traits;
 
+use Closure;
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\Exceptions\InvalidUpdateOperator;
@@ -53,9 +54,8 @@ trait DirectiveBaseline {
      * **You can use `directiveOrNull()` if you don't care if the directive exists** 
      * @param string $directive - The name of the directive you want 
      */
-    public function getDirective() {
-        $args = func_get_args();
-        $name = array_shift($args);
+    public function getDirective($name, &...$args) {
+        // $name = array_shift($args);
         if(!key_exists($name, $this->directives)) throw new Error("Error on `$this->name`: Directive `$name` does not exist.");
         // Let's check if the directive is a function or not
         if(is_function($this->directives[$name])) {
@@ -96,7 +96,7 @@ trait DirectiveBaseline {
          * You may specify any other valid MongoDB update operator https://www.mongodb.com/docs/manual/reference/operator/update/
          */
         'operator' => '$set',
-
+        
         /** @var bool 'filter' */
         #'filter' => fn ($val) => $val,
     ];
@@ -123,8 +123,13 @@ trait DirectiveBaseline {
         return $this;
     }
 
+    protected string $operator = '$set';
     #[Directive]
-    public function define_operator(string $operator):MixedType {
+    public function define_operator(string|Closure $operator):MixedType {
+        if($operator instanceof Closure) {
+            $this->__defineDirective('operator', $operator);
+            return $this;
+        }
         $valid = [
             '$currentDate',
             '$inc',
@@ -158,7 +163,9 @@ trait DirectiveBaseline {
 
         if(!in_array($operator, $valid)) throw new InvalidUpdateOperator("Operator `$operator` is invalid for this field");
         
-        $this->__defineDirective('updateOperator', $operator);
+        $this->__defineDirective('operator', function (&$operators, &$field, &$details) {
+            $operators[$this->operator][$field] = $details;
+        });
         return $this;
     }
 

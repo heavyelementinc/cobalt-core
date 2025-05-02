@@ -12,9 +12,9 @@ use Validation\Exceptions\ValidationIssue;
 
 class ImageArrayType extends OrderedListOfIds {
     use ClientFSManager;
-
+    protected string $operator = '$set';
     public function queryForValues(Model $model, array $ids): ?Cursor {
-        return $model->findFiles(['_id' => ['$in' => $ids]],['limit' => count($ids)]);
+        return $this->findFiles(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
     }
 
     public function getModel(): Model {
@@ -23,11 +23,11 @@ class ImageArrayType extends OrderedListOfIds {
 
     public function restoreValue(&$value): ?ObjectId {
         // Supporting older formats
-        $id = $value['media']['ref'] ?? $value['media']['id'];
+        $id = $value['media']['ref'] ?? $value['media']['id'] ?? $value;
         if($id instanceof ObjectId) {
-            $ids[] = $id;
+            return $id;
         } else {
-            return null;
+            return new ObjectId($id);
         }
         return $id;
     }
@@ -42,5 +42,47 @@ class ImageArrayType extends OrderedListOfIds {
     
     public function eachSchema() {
         
+    }
+
+    public function queryForObjects(int $limit, int $skip, string $sortField = "_id", int $sortDirection = -1, string $search = "", bool $exclude = true): array {
+        $query = ['isThumbnail' => ['$exists' => false]];
+        if($exclude) {
+            $query['_id'] = ['$nin' => $this->raw];
+        }
+        $options = ['limit' => $limit, 'skip' => $skip * $limit, 'sort' => [$sortField => $sortDirection]];
+        return [
+            'cursor' => $this->findFiles($query, $options),
+            'count' => $this->fs->count($query, $options)
+        ];
+    }
+
+    function filter($oids) {
+        $filesKey = $this->name;
+        if(key_exists($filesKey, $_FILES)) {
+            $result = $this->uploadFilesAndGetArrayOfIds($filesKey, ['for' => $this->model->_id ?? null], $_FILES);
+            foreach($result as $arr) {
+                $oids[] = $arr['_id'];
+            }
+            $this->operator = '$addToSet';
+        }
+        return parent::filter($oids);
+    }
+
+    #[Prototype]
+    protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
+        return parent::field($class, $misc, $tag ?? "file-gallery");
+    }
+
+    
+    public function initDirectives(): array {
+        return [
+            'operator' => function (&$operators, &$field, &$details) {
+                if($this->operator === '$set') {
+                    $operators[$this->operator][$field] = $details;
+                    return;
+                }
+                $operators[$this->operator][$this->name] = ['$each' => $details];
+            }
+        ];
     }
 }

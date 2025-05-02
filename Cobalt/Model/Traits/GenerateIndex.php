@@ -32,7 +32,7 @@ use TypeError;
 trait IndexableModel {
     
     // public Database $manager;
-    protected Model $schema;
+    // protected Model $schema;
     protected array $indexableSchema;
     protected array $sortedTable;
     protected array $filterParameters = [];
@@ -40,10 +40,15 @@ trait IndexableModel {
 
     protected array $searchableFields = [];
     protected array $filterableFields = [];
+    protected int $index_limit = 50;
+    
+    public function setLimit(int $limit):void {
+        $this->index_limit = $limit;
+    }
 
-    public function init(Model $model, array $params) {
-        $this->schema = $model;
-        $this->indexableSchema = $model->defineSchema();
+    public function init(array $params) {
+        $this->controller = $this->defineController();
+        $this->indexableSchema = $this->defineSchema();
 
         $table = [];
 
@@ -88,7 +93,7 @@ trait IndexableModel {
         }
         // Establish our table header
         $html = "<flex-row>";
-        if($this->schema->__get_index_checkbox_state()) {
+        if($this->__get_index_checkbox_state()) {
             $html .= "<flex-header class=\"doc_id_mark\"><input type=\"checkbox\"></flex-header>";
         }
         foreach($this->sortedTable as $field) {
@@ -132,10 +137,10 @@ trait IndexableModel {
             // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
             // We also want to override the "default" query with filter field
             $this->add_filter_params([
-                $name => $this->schema->{$name}->typecast($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_LOOKUP)
+                $name => $this->{$name}->typecast($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_LOOKUP)
             ]);
         }
-        if(isset($search) && $search) {
+        if(isset($search)) {
             $searchOptions = [
                 // 'numericOrdering' => true,
             ];
@@ -154,16 +159,16 @@ trait IndexableModel {
             $this->getSearchQuery($search, $searchQuery, $searchOptions, $searchableFields, $searchableOptions);
             try {
                 if(key_exists('$text', $searchQuery)) {
-                    $this->schema->createIndex($searchableFields, []);
+                    $this->createIndex($searchableFields, []);
                 }
             } catch (CommandException $e) {
-                $indexes = $this->schema->collection->listIndexes();
+                $indexes = $this->collection->listIndexes();
                 foreach($indexes as $index) {
                     $name = $index->getName();
                     if($name === "_id_") continue;
-                    $this->schema->collection->dropIndex($name);
+                    $this->collection->dropIndex($name);
                 }
-                $this->schema->createIndex($searchableFields, []);
+                $this->createIndex($searchableFields, []);
             }
             $this->add_filter_params($searchQuery);
             $this->add_query_params($searchOptions);
@@ -294,11 +299,11 @@ trait IndexableModel {
     }
 
     public function get_table_body() {
-        $result = $this->schema->find($this->__index_query(), array_merge($this->index_options(), $this->queryParameters));
+        $result = $this->find($this->__index_query(), array_merge($this->index_options(), $this->queryParameters));
         $count = 0;
         $html = "";
         foreach($result as $doc) {
-            if($doc instanceof $this->model === false) throw new TypeError("Document must be of type `".$this->model::class."`, found `".$doc::class."` instead.");//$doc = $this->get_schema($doc);
+            if($doc instanceof $this === false) throw new TypeError("Document must be of type `".$this->model::class."`, found `".$doc::class."` instead.");//$doc = $this->get_schema($doc);
             $this->get_table_row($doc, $html);
             $count += 1;
         }
@@ -328,15 +333,14 @@ trait IndexableModel {
         $row_style = (isset($row_details['row_style'])) ? " style=\"$row_details[row_style]\"" : "";
         $html .= "<flex-row$row_class"."$row_style>";
 
-        if($this->schema->__get_index_checkbox_state()) {
+        if($this->__get_index_checkbox_state()) {
             $checked = ($row_details['checkbox_checked']) ? " checked=\"checked\"" : "";
             $disabled = ($row_details['checkbox_disabled']) ? " disabled=\"disabled\"" : "";
             $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\"$checked value=\"$doc->_id\"$disabled></flex-cell>";
         }
-        $route = route("$this->name@__edit", [$doc->_id]);
+        $route = route("$this->controller@__edit", [$doc->_id]);
         // Get each cell's contents
         foreach($this->sortedTable as $cell) {
-            $mutableRoute = $route;
             $html .= "<flex-cell>";
             
             // $view = $cell['view'];
@@ -350,7 +354,7 @@ trait IndexableModel {
             
             if(isset($schema[$cell['name']]['index']['view'])) {
                 $view = $schema[$cell['name']]['index']['view'];
-                if(!is_string($view) && is_callable($view)) $view = $view($mutableRoute, $doc[$cell['name']], $doc);
+                if(!is_string($view) && is_callable($view)) $view = $schema[$cell['name']]['index']['view']($doc[$cell['name']], $doc);
                 
                 if(!$view && method_exists($doc->{$cell['name']}, '__defaultIndexPresentation')) {
                     $view = $doc->{$cell['name']}->__defaultIndexPresentation();
@@ -365,7 +369,7 @@ trait IndexableModel {
             $open = "";
             $close = "";
             if($cell['link'] !== false) {
-                $open = "<a href=\"$mutableRoute\">";
+                $open = "<a href=\"$route\">";
                 $close = "</a>";
             }
             $html .= $open . $view . $close . "</flex-cell>";
@@ -375,7 +379,7 @@ trait IndexableModel {
 
     
     public function get_hypermedia():array {
-        $count = $this->schema->count($this->index_query(), $this->index_options());
+        $count = $this->count($this->index_query(), $this->index_options());
 
         $limit = $this->queryParameters['limit'];
         
@@ -415,7 +419,7 @@ trait IndexableModel {
 
         $multidelete_button = "";
         $filterable_content = "";
-        if($this->schema->__get_index_checkbox_state()) {
+        if($this->__get_index_checkbox_state()) {
             $multidelete_button = "<async-button type=\"batch-action\" method=\"DELETE\" action=\"".route(self::className()."@__archive_batch")."\" title=\"Archive\" native><i name=\"archive\"></i></async-button> <async-button type=\"multidelete\" method=\"DELETE\" action=\"".route(self::className()."@__multidestroy")."\" native><i name=\"delete\"></i></async-button>";
             $filterable_content = "<form><label><input type=\"checkbox\"".((filter_var($_GET[QUERY_PARAM_ARCHIVED_DISPLAY], FILTER_VALIDATE_BOOL)) ? "checked=\"checked\"" : "")." name=\"".QUERY_PARAM_ARCHIVED_DISPLAY."\" onchange='submit()'> Show Archived</label></form>";
 
@@ -508,7 +512,7 @@ trait IndexableModel {
         if(is_callable($filterable)) $filterable = $filterable($field, $directives);
 
         if($filterable === true) {
-            $this->filterableFields[$field] = $this->schema->{$field}
+            $this->filterableFields[$field] = $this->{$field}
                 ->get_filter_field($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_OPTION);
         }
         return $filterable;
@@ -543,4 +547,5 @@ trait IndexableModel {
         if(key_exists(QUERY_PARAM_PAGE_NUM, $params)) $options['skip'] = $options['limit'] * ((int)$params[QUERY_PARAM_PAGE_NUM] - 1);
         $this->queryParameters = $options;
     }
+
 }

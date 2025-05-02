@@ -209,6 +209,25 @@ input-object-array {
 
 object-array-item {
     display: block;
+    position: relative;
+    isolation: isolate;
+    > button.close {
+        float: right;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 100;
+        background: white;
+        border: var(--input-element-border-value);
+        font-size: 0.6em;
+        &:before {
+            content: "\F0156";
+            font-family: 'Material Design Icons';
+        }
+        &:hover {
+            border-color: var(--input-element-active);
+        }
+    }
 }
 
 button.add-new-object-button {

@@ -20,7 +20,7 @@ trait UpdateableModel {
      * 
      * To stub this, just return $post_data
      */
-    function update($post_data, $id): array {
+    function update($post_data, &$id, Model $model): array {
         return $post_data;
     }
 
@@ -29,8 +29,10 @@ trait UpdateableModel {
      * @param Model|BSONDocument|null $doc - The document that was updated
      * @return void 
      */
-    function after_update(Model|BSONDocument|null $doc):void {
-
+    function after_update(array $validatedFields, Model|BSONDocument|null $doc):void {
+        foreach($validatedFields as $field => $value) {
+            $doc->{$field}->onUpdateConfirmed($value);
+        }
     }
 
     /**
@@ -54,20 +56,26 @@ trait UpdateableModel {
     abstract function edit($document):string;
 
     final public function __update($id): Model|BSONDocument {
-        $data = $this->update($_POST, $id);
+        $query = ['_id' => new ObjectId($id)];
+        
         /** @var Model */
-        $schema = new $this->model([]);
+        $schema = $this->model->findOne($query);
+        if(!$schema) throw new NotFound("No documents matched request", "Not found");
+        $data = $this->update($_POST, $id, $schema);
+        
+        // $schema = new $this->model([]);
         
         // Validate the submitted data
         $schema->__filter($data);
         // Get our update operators
-        $update = $schema->__operators();
+        $update = [];
+        $schema->__operators(false, $update);
         
-        $query = ['_id' => new ObjectId($id)];
+        
         $result = $this->model->updateOne($query, $update, ['upsert' => false]);
-        if($result->getMatchedCount() === 0) throw new NotFound("No document matched request", "No found");
+        if($result->getMatchedCount() === 0) throw new NotFound("No document matched request", "Not found");
         $doc = $this->__read($id);
-        $this->after_update($doc);
+        $this->after_update($schema->getValidatedFields(), $doc);
         return $doc;
     }
 

@@ -48,54 +48,52 @@ class NewFormRequest extends HTMLElement {
         });
     }
 
-    async unsavedChanges() {
-        return false;
-        // if(["true","confirm-unsaved",null].includes(this.getAttribute("confirm-unsaved")) == false) return false;
-        // if(this.childrenReady === false) return false;
-        // const currentValue = await this.getValue();
-        // for(const i in currentValue) {
-        //     if(i in this.originalState === false) return true;
-        //     if(this.originalState[i] !== currentValue[i]) return true;
-        // }s
-        // return false;
+    get headers() {
+        return this.getHeadersFromAttribute();
     }
 
-    connectedCallback() {
-        this.initSubmissionListeners();
-        // this.initSubmitButton();
-        let defaultValue = "field";
-        if(this.getMethods.includes(this.method)) defaultValue = "none";
-        if(!this.submitButton && !this.validAutoSaveValues.includes(this.autoSave)) this.autoSave = defaultValue; // Default forms without a save button to autosave
-        this.addEventListener("submission", async event => {
-            const data = await this.buildSubmission(event);
-            this.submit(data, event);
-        });
-        
-        const elements = this.querySelectorAll(universal_input_element_query);
-        for(const node of elements) {
-            if(!isRegisteredWebComponent(node.tagName)) continue;
-            let resolver = null;
-            this.childWebComponentPromises.push(new Promise(resolve => {
-                resolver = resolve
-            }))
-            node.addEventListener("componentready", () => {
-                resolver(true);
-            }, {once: true})
+    get autoSave() {
+        let value = this.getAttribute("autosave") ?? "false";
+        if(value === "false" || value === "none" || !this.validAutoSaveValues.includes(value)) return false;
+        return value;
+    }
+
+    set autoSave(value) {
+        if(!this.validAutoSaveValues.includes(value)) throw new TypeError(`"${value}" is not a valid property`);
+        this.setAttribute("autosave", value);
+    }
+
+    get feedback() {
+        return JSON.parse(this.getAttribute("feedback") || "true");
+    }
+
+    set feedback(fdbk) {
+        this.setAttribute("feedback", (['true', 'false'].includes(fdbk)) ? fdbk : "true");
+    }
+
+    get disabled() {
+        const value = this.getAttribute("disabled");
+        switch(value) {
+            case "disabled":
+            case "true":
+                return true;
+            default:
+                return false;
         }
-        
-        this.initOriginalState();
     }
 
-    async initOriginalState() {
-        await Promise.all(this.childWebComponentPromises);
-        // this.originalState = await this.getValue();
-        this.childrenReady = true;
+    set disabled(value) {
+        switch(value) {
+            case "disabled":
+            case "true":
+                this.setAttribute("disabled", "disabled");
+                break;
+            default:
+                this.removeAttribute("disabled");
+        }
     }
 
-    disconnectedCallback() {
-        this.removeFeedback()
-    }
-
+    
     /** @return FormData */
     get value() {
         if(this.childrenReady !== true) console.warn("This element has children that are not ready!", this);
@@ -151,112 +149,62 @@ class NewFormRequest extends HTMLElement {
         return value;
     }
 
-    clearAll() {
-        const elements = this.querySelectorAll(universal_input_element_query)
-        for(const input of elements) {
-            switch(input.tagName) {
-                case "SELECT":
-                    break;
-                case "INPUT-AUTOCOMPLETE":
-                    input.dispatchEvent(new CustomEvent("clear"));
-                    break;
-                case "TEXTAREA":
-                case "INPUT":
-                default:
-                    switch(input.type) { 
-                        case "RADIO":
-                        case "CHECKBOX":
-                            input.checked = false
-                            break;
-                        default:
-                            input.value = ""
-                    }
-                    break;
-            }
-        }
+    attributeChangedCallback(attribute, old, newValue) {
+        console.log({attribute, old, newValue})
     }
 
-    async submit(data = null, event = {}) {
-        if(data == null) {
-            // console.warn("`data` must not be null. Aborting.")
-            // return
-            data = await this.buildSubmission(event);
-        }
-        console.log(data)
-        const method  = this.getAttribute('method');
-        const action  = this.getAttribute('action');
-        const enctype = this.getAttribute('enctype') ?? "application/json; charset=utf-8";
+    async unsavedChanges() {
+        return false;
+        // if(["true","confirm-unsaved",null].includes(this.getAttribute("confirm-unsaved")) == false) return false;
+        // if(this.childrenReady === false) return false;
+        // const currentValue = await this.getValue();
+        // for(const i in currentValue) {
+        //     if(i in this.originalState === false) return true;
+        //     if(this.originalState[i] !== currentValue[i]) return true;
+        // }s
+        // return false;
+    }
+
+    connectedCallback() {
+        this.initSubmissionListeners();
+        // this.initSubmitButton();
+        let defaultValue = "field";
+        if(this.getMethods.includes(this.method)) defaultValue = "none";
+        if(!this.submitButton && !this.validAutoSaveValues.includes(this.autoSave)) this.autoSave = defaultValue; // Default forms without a save button to autosave
+        this.addEventListener("submission", async event => {
+            const data = await this.buildSubmission(event);
+            this.submit(data, event);
+        });
         
-        if(this.getMethods.includes(method.toLocaleUpperCase())) {
-            return this.submitGetRequest(data, event);
+        const elements = this.querySelectorAll(universal_input_element_query);
+        for(const node of elements) {
+            if(!isRegisteredWebComponent(node.tagName)) continue;
+            let resolver = null;
+            this.childWebComponentPromises.push(new Promise(resolve => {
+                resolver = resolve
+            }))
+            node.addEventListener("componentready", () => {
+                resolver(true);
+            }, {once: true})
         }
-
-        const api = new AsyncFetch(action, method, {format: enctype, form: this, headers: {'X-Keyboard-Modifiers': encodeClickModifiers(event), ...this.getHeadersFromAttribute()}});
-        api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
-        api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
-        api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));
-        api.addEventListener('abort',   e => this.handleAsyncDoneEvent(e, event));
-        api.addEventListener('asyncfinished', e => this.removeFeedback());
-
-        this.abort = api.abort;
-        let result = {};
-        try{
-            result = await api.submit(data || await this.buildSubmission({target: null}));
-            this.originalState = await this.getValue();
-        } catch(error) {
-            this.handleAsyncErrorEvent(error, event);
-        }
-        this.abort = () => {};
+        
+        this.initOriginalState();
     }
 
-    getHeadersFromAttribute() {
-        if(this.hasAttribute('headers') === false) return {};
-        let headers = {};
-        for(const header of this.getAttribute("headers").split(";")) {
-            const split = header.split(":");
-            headers[split[0].trim()] = split[1].trim();
-        }
-        return headers;
+
+    async initOriginalState() {
+        await Promise.all(this.childWebComponentPromises);
+        // this.originalState = await this.getValue();
+        this.childrenReady = true;
     }
 
-    get headers() {
-        return this.getHeadersFromAttribute();
+    disconnectedCallback() {
+        this.removeFeedback()
     }
 
-    submitGetRequest(data, event) {
-        let encodedPairs = [];
-        for(const key in data) {
-            switch(typeof data[key]) {
-                case "object":
-                    if(Array.isArray(data[key])) {
-                        data[key].forEach(el => {
-                            encodedPairs.push(
-                                `${encodeURIComponent(key)}[]=${encodeURIComponent(el)}`
-                            );
-                        })
-                        break;
-                    }
-                    for(const d in data[key]) {
-                        encodedPairs.push(
-                            `${encodeURIComponent(key)}[${d}]=${encodeURIComponent(data[key][d])}`
-                        );
-                    }
-                default:
-                    encodedPairs.push(
-                        `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
-                    );
-            }
-        }
-        const fullUrl = `${this.getAttribute("action")??""}?${encodedPairs.join("&")}`;
-        const method = this.getAttribute("method");
-        switch(method.toLocaleUpperCase()) {
-            case "NAVIGATE":
-                return location = fullUrl;
-            case "GET":
-            default:
-                return Cobalt.router.location = fullUrl;
-        }
-    }    
+    /** ==============================================
+     *  =============== INITIALIZATION ===============
+     *  ============================================== */
 
     initSubmissionListeners(queryTarget = this) {
         this.initEnterSaveListener(queryTarget);
@@ -297,26 +245,182 @@ class NewFormRequest extends HTMLElement {
     initAutoSaveListeners(queryTarget) {
         function autoSaveListener(event) {
             if(!this.autoSave) return;
-            const element = event.currentTarget || event.target || event.srcElement;
+            let element = event.target || event.srcElement;
             if(!element) return;
-            if(!element.name && element.getAttribute("name") === null) return;
+            if(!element.name && element.getAttribute("name") === null) {
+                // If the element doesn't have a name specified, check if it has
+                // an ancestor that does have one specified.
+                element = element.closest("[name]");
+                if(!element) return;
+            }
             if(["true", "ignore"].includes(element.getAttribute("autosave-ignore"))) return;
 
             this.dispatchEvent(new CustomEvent("submission", {...event, detail: {target: element}}));
         }
-        const elements = queryTarget.querySelectorAll(universal_input_element_query);
-        for(const el of elements) {
-            if(["file", "files"].includes(el.type)) this.fileUploadFields.push(el);
-            if(el.tagName === "IMAGE-RESULT") this.fileUploadFields.push(el);
-            el.removeEventListener("change", autoSaveListener.bind(this));
-            el.addEventListener("change", autoSaveListener.bind(this));
-        }
+
+        this.removeEventListener("change", autoSaveListener.bind(this));
+        this.addEventListener("change", autoSaveListener.bind(this));
+
+        // const elements = queryTarget.querySelectorAll(universal_input_element_query);
+        // for(const el of elements) {
+        //     // if(["file", "files"].includes(el.type)) this.fileUploadFields.push(el);
+        //     if(el.tagName === "IMAGE-RESULT") this.fileUploadFields.push(el);
+        //     el.removeEventListener("change", autoSaveListener.bind(this));
+        //     el.addEventListener("change", autoSaveListener.bind(this));
+        // }
     }
 
     initEnterSaveListener() {
         if(this.autoSave !== "enter") return;
         document.removeEventListener("keypress", this.enterButtonFunction);
         document.addEventListener("keypress", this.enterButtonFunction);
+    }
+
+    /** ==============================================
+     *  ============= FIELD MANIPULATION =============
+     *  ============================================== */
+    clearAll() {
+        const elements = this.querySelectorAll(universal_input_element_query)
+        for(const input of elements) {
+            switch(input.tagName) {
+                case "SELECT":
+                    break;
+                case "INPUT-AUTOCOMPLETE":
+                    input.dispatchEvent(new CustomEvent("clear"));
+                    break;
+                case "TEXTAREA":
+                case "INPUT":
+                default:
+                    switch(input.type) { 
+                        case "RADIO":
+                        case "CHECKBOX":
+                            input.checked = false
+                            break;
+                        default:
+                            input.value = ""
+                    }
+                    break;
+            }
+        }
+    }
+
+    async getFieldValue(field) {
+        if(this.isValid(field) === false) {
+            appendElementInformation(field, field.validationMessage ?? "Validation failed");
+            throw new Error("Validity failed");
+        }
+        if(field.tagName === "INPUT") {
+            switch(field.type) {
+                case "number":
+                    return Number(field.value);
+                case "field":
+                    return field.files;
+                default:
+                    return field.value;
+            }
+        } else if (field.tagName === "BLOCK-EDITOR") {
+            return await field.value;
+        }
+        const val = field.value;
+        if(val instanceof FileList) {
+            this.fileUploadFields.push(field);
+            return null;
+        }
+        return val;
+    }
+
+
+
+    /** ==============================================
+     *  =============== BUILD & SUBMIT ===============
+     *  ============================================== */
+
+    async submit(data = null, event = {}) {
+        if(data == null) {
+            // console.warn("`data` must not be null. Aborting.")
+            // return
+            data = await this.buildSubmission(event);
+        }
+        console.log(data)
+        const method  = this.getAttribute('method');
+        const action  = this.getAttribute('action');
+        const enctype = this.getAttribute('enctype') ?? "application/json; charset=utf-8";
+        
+        if(this.getMethods.includes(method.toLocaleUpperCase())) {
+            return this.submitGetRequest(data, event);
+        }
+
+        const api = new AsyncFetch(action, method, {format: enctype, form: this, headers: {'X-Keyboard-Modifiers': encodeClickModifiers(event), ...this.getHeadersFromAttribute()}});
+        api.addEventListener('submit', e => this.handleAsyncSubmitEvent(e, event));
+        api.addEventListener('error',  e => this.handleAsyncErrorEvent(e, event));
+        api.addEventListener('done',   e => this.handleAsyncDoneEvent(e, event));
+        api.addEventListener('abort',   e => this.handleAsyncDoneEvent(e, event));
+        api.addEventListener('asyncfinished', e => this.removeFeedback());
+
+        let requiresFormData = false;
+        for(const field in data) {
+            if(data[field] instanceof FileList === false) continue;
+            requiresFormData = true;
+            break;
+        }
+        if(requiresFormData) {
+            data = this.encodeFormData(data);
+        }
+        this.abort = api.abort;
+        let result = {};
+
+        try{
+            result = await api.submit(data);
+            this.originalState = await this.getValue();
+        } catch(error) {
+            this.handleAsyncErrorEvent(error, event);
+        }
+        this.abort = () => {};
+    }
+
+    getHeadersFromAttribute() {
+        if(this.hasAttribute('headers') === false) return {};
+        let headers = {};
+        for(const header of this.getAttribute("headers").split(";")) {
+            const split = header.split(":");
+            headers[split[0].trim()] = split[1].trim();
+        }
+        return headers;
+    }
+
+    submitGetRequest(data, event) {
+        let encodedPairs = [];
+        for(const key in data) {
+            switch(typeof data[key]) {
+                case "object":
+                    if(Array.isArray(data[key])) {
+                        data[key].forEach(el => {
+                            encodedPairs.push(
+                                `${encodeURIComponent(key)}[]=${encodeURIComponent(el)}`
+                            );
+                        })
+                        break;
+                    }
+                    for(const d in data[key]) {
+                        encodedPairs.push(
+                            `${encodeURIComponent(key)}[${d}]=${encodeURIComponent(data[key][d])}`
+                        );
+                    }
+                default:
+                    encodedPairs.push(
+                        `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
+                    );
+            }
+        }
+        const fullUrl = `${this.getAttribute("action")??""}?${encodedPairs.join("&")}`;
+        const method = this.getAttribute("method");
+        switch(method.toLocaleUpperCase()) {
+            case "NAVIGATE":
+                return location = fullUrl;
+            case "GET":
+            default:
+                return Cobalt.router.location = fullUrl;
+        }
     }
 
     async buildSubmission(event) {
@@ -356,7 +460,8 @@ class NewFormRequest extends HTMLElement {
             const value = target.value;
             if(name && value) submit[name] = value;
         }
-        return (this.fileUploadFields.length === 0) ? submit : this.encodeFormData(submit);
+        
+        return submit;
     }
 
     addElementToFeedbackList(element) {
@@ -365,26 +470,31 @@ class NewFormRequest extends HTMLElement {
     }
 
     encodeFormData(data) {
-        const form = new FormData();
-        form.append("json_payload", JSON.stringify(data));
-        if(typeof data !== "object") return form;
-        
-        for( const field in data ) {
-            const fields = this.querySelectorAll(`[name='${field}'][type='files'],[name='${field}'][type='file'],image-result[name="${field}"] [type="file"]`);
-            if(!fields) continue;
-            for( const el of fields ) {
+        if(typeof data !== "object") return data;
+        this.totalUploadSize = 0;
 
-                for( const file of el.files){
-                    let fieldName = field;
-                    if(el.name) fieldName = el.name;
-                    form.append(`${fieldName}[]`, file);
-                    this.totalUploadSize += parseFloat(file.size);
-                }
+        const mutable = structuredClone(data);
+        const form = new FormData();
+        for( const field in data ) {
+            if( data[field] instanceof FileList !== true ) continue;
+            
+            // Let's filter out form fields
+            mutable[field] = [];
+            for( const file of data[field] ){
+                let fieldName = field;
+                form.append(`${fieldName}[]`, file);
+                this.totalUploadSize += parseFloat(file.size);
             }
         }
 
+        form.append("json_payload", JSON.stringify(mutable));
+
         return form;
     }
+
+    /** ==============================================
+     *  ============ VALIDATION & FEEDBACK ===========
+     *  ============================================== */
 
     handleAsyncSubmitEvent(e, submission = {}) {
         if(this.feedback) {
@@ -476,69 +586,6 @@ class NewFormRequest extends HTMLElement {
         this.feedbackTracker = [];
         this.fieldsRequiringFeedback = [];
         document.removeEventListener("keypress", this.enterButtonFunction);
-    }
-
-    get autoSave() {
-        let value = this.getAttribute("autosave") ?? "false";
-        if(value === "false" || value === "none" || !this.validAutoSaveValues.includes(value)) return false;
-        return value;
-    }
-
-    set autoSave(value) {
-        if(!this.validAutoSaveValues.includes(value)) throw new TypeError(`"${value}" is not a valid property`);
-        this.setAttribute("autosave", value);
-    }
-
-    get feedback() {
-        return JSON.parse(this.getAttribute("feedback") || "true");
-    }
-
-    set feedback(fdbk) {
-        this.setAttribute("feedback", (['true', 'false'].includes(fdbk)) ? fdbk : "true");
-    }
-
-    get disabled() {
-        const value = this.getAttribute("disabled");
-        switch(value) {
-            case "disabled":
-            case "true":
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    set disabled(value) {
-        switch(value) {
-            case "disabled":
-            case "true":
-                this.setAttribute("disabled", "disabled");
-                break;
-            default:
-                this.removeAttribute("disabled");
-        }
-    }
-
-    attributeChangedCallback(attribute, old, newValue) {
-        console.log({attribute, old, newValue})
-    }
-
-    async getFieldValue(field) {
-        if(this.isValid(field) === false) {
-            appendElementInformation(field, field.validationMessage ?? "Validation failed");
-            throw new Error("Validity failed");
-        }
-        if(field.tagName === "INPUT") {
-            switch(field.type) {
-                case "number":
-                    return Number(field.value);
-                default:
-                    return field.value;
-            }
-        } else if (field.tagName === "BLOCK-EDITOR") {
-            return await field.value;
-        }
-        return field.value;
     }
 
     isValid(field) {

@@ -25,7 +25,7 @@
 // customElements.define("login-form-request", LoginForm);
 
 
-class InputSwitch extends HTMLElement {
+class InputSwitchOld extends HTMLElement {
     /** InputSwitch gives us a handy way of assigning dynamic functionality to custom
      * HTML tags.
      */
@@ -47,13 +47,19 @@ class InputSwitch extends HTMLElement {
     }
 
     set value(val) {
-        this.checkbox.checked = val;
+        val = [true, "true", "on", "yes", "checked"].includes(val);
+        
+        if(this.checkbox) this.checkbox.checked = val;
         this.checked = val;
         this.setAttribute("checked", JSON.stringify(val));
     }
 
     // get checked() {
-    //     return this.checkbox.checked;
+    //     return this.value;
+    // }
+
+    // set checked(val) {
+    //     this.value = val;
     // }
 
     /** The CONNECTED CALLBACK is the function that is executed when the element
@@ -99,7 +105,7 @@ class InputSwitch extends HTMLElement {
         this.checkbox.checked = !this.checkbox.checked;
         this.checked = this.checkbox.checked;
         this.setAttribute("checked", JSON.stringify(this.checked));
-        const change = new Event("change");
+        const change = new Event("change",{bubbles: true});
         this.checkbox.dispatchEvent(change);
         this.dispatchEvent(change);
     }
@@ -125,7 +131,6 @@ class InputSwitch extends HTMLElement {
     }
 }
 
-customElements.define("input-switch", InputSwitch);
 
 // class SwitchContainer extends HTMLElement {
 //     connectedCallback() {
@@ -699,7 +704,7 @@ class InputNumber extends HTMLElement {
         this.realField.inputMode = this.getAttribute("input-mode") ?? "numeric";
         this.realField.addEventListener("change", e => {
             e.stopPropagation();
-            this.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change",{bubbles: true}));
         })
         // this.realField.disabled = this.getAttribute("disabled");
         this.value = this.getAttribute("value");

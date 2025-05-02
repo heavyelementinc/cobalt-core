@@ -12,7 +12,6 @@ class ObjectPicker extends HTMLElement {
         super()
         this.METHOD = method;
         this.ACTION = action;
-        this.PARAMS = {}
     }
 
     connectedCallback() {
@@ -34,7 +33,7 @@ class ObjectPicker extends HTMLElement {
         const url = new URL(action, location.origin);
         url.searchParams.set("limit", this.PARAMS.limit);
         url.searchParams.set("page", this.PARAMS.page);
-        if(this.search_param !== null) url.searchParams.set("search", this.search_param);
+        if(this.search_param !== null) url.searchParams.set("query", this.search_param);
         return url.toString();
     }
 
@@ -58,18 +57,25 @@ class ObjectPicker extends HTMLElement {
         this.modal = new Dialog({
             body: "",
             chrome: {
+                close: {
+                    label: "Cancel",
+                    classList: ["modal-close-button"],
+                    dangerous: false,
+                    callback: () => true
+                },
                 select: {
                     label: "Select",
-                    classes: "modal-confirm-button",
+                    classList: ["modal-confirm-button"],
                     dangerous: false,
                     callback: this.makeSelection.bind(this)
                 }
             }
         });
-        this.modal.draw();
+        this.modal.draw(" ");
         this.body = document.createElement("div")
         this.body.classList.add("object-gallery--selection-window");
         const dialog = this.modal.content
+        dialog.innerHTML = "";
         dialog.appendChild(this.body);
         this.page(0);
         
@@ -78,6 +84,8 @@ class ObjectPicker extends HTMLElement {
         dialog.appendChild(button_row);
         
         const search_box = document.createElement("input");
+        search_box.type = "search";
+        search_box.placeholder = "Search here...";
         search_box.addEventListener("input", e => {
             if(search_box.value.length <= 3) {
                 this.search_param = null;
@@ -89,22 +97,33 @@ class ObjectPicker extends HTMLElement {
         });
         button_row.appendChild(search_box);
 
-        const prev_page = document.createElement("button");
-        prev_page.innerHTML = "<i name='chevron-left'></i>";
-        prev_page.addEventListener("click", () => this.page(-1));
-        button_row.appendChild(prev_page);
+        this.prev_page = document.createElement("button");
+        this.prev_page.disabled = true;
+        this.prev_page.innerHTML = "<i name='chevron-left'></i>";
+        this.prev_page.addEventListener("click", () => this.page(-1));
+        button_row.appendChild(this.prev_page);
 
-        const next_page = document.createElement("button");
-        next_page.innerHTML = "<i name='chevron-right'></i>";
-        next_page.addEventListener("click", () => this.page(1));
-        button_row.appendChild(next_page);
+        this.next_page = document.createElement("button");
+        this.next_page.disabled = true;
+        this.next_page.innerHTML = "<i name='chevron-right'></i>";
+        this.next_page.addEventListener("click", () => this.page(1));
+        button_row.appendChild(this.next_page);
     }
 
     async page(direction) {
         if(typeof direction !== "number") direction = 0;
         this.PARAMS.page += direction;
+        if(this.PARAMS.page < 0) this.PARAMS.page = 0;
         const api = new AsyncFetch(this.action, this.method);
         const result = await api.submit();
+
+        const count = result.count;
+        this.prev_page.disabled = false;
+        this.next_page.disabled = false;
+
+        if(this.PARAMS.page <= 0) this.prev_page.disabled = true;
+        if((this.PARAMS.page * this.PARAMS.limit) > count) this.prev_page.disabled = true;
+
         this.body.innerHTML = result.html;
         
         const okay_button = this.modal.chrome.querySelector(".modal-confirm-button");
@@ -127,7 +146,7 @@ class ObjectPicker extends HTMLElement {
         for(const el of selected) {
             selection.push({
                 id: el.value,
-                html: el.nextSibling.innerHTML
+                html: el.nextSibling?.innerHTML
             });
         }
         this.dispatchEvent(new CustomEvent("selection", {detail: selection}));

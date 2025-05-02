@@ -541,10 +541,10 @@ class InputUser extends AutoCompleteInterface {
             delete this.user;
             this.removeChild(this.clearButton);
             this.classList.remove("value");
-            this.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change",{bubbles: true}));
         });
         this.appendChild(this.clearButton);
-        this.dispatchEvent(new Event("change"));
+        this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
 }

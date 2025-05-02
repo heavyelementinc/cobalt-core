@@ -2,6 +2,7 @@
 
 namespace Cobalt\Model;
 
+use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Traits\Accessible;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
@@ -12,11 +13,12 @@ use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
+use MongoDB\Driver\Cursor;
 use stdClass;
 
 abstract class Model extends GenericModel implements Persistable {
     use Accessible, Schemable;
-    
+
     function __construct() {
         parent::__construct($this->defineSchema(), null);
     }
@@ -26,6 +28,7 @@ abstract class Model extends GenericModel implements Persistable {
      * @return array{}
      */
     abstract function defineSchema(array $schema = []): array;
+    abstract function defineController():ModelController;
 
     abstract static function __getVersion(): string;
 
@@ -47,23 +50,37 @@ abstract class Model extends GenericModel implements Persistable {
         else throw new BadRequest("This looks like a generic model and there's no persistent model defined.");
         if(!$specified_model) throw new NotFound("The specified model was not found.");
         
-        if(!isset($specified_model->{$field_name})) throw new BadRequest("Field $field_name does not exist.");
+        if(!key_exists($field_name, $specified_model->readSchema())) throw new BadRequest("Field $field_name does not exist.");
 
         $field = $specified_model->{$field_name};
         if($field instanceof OrderedListOfIds == false) throw new BadRequest("Field $field_name is not a queryable type.");
-
-        $model = $field->getModel();
-        $limit = $_GET['limit'] ?? 50;
-        $skip  = $_GET['page'] ?? 0;
-
-        $results = $model->find([], ['limit' => (int)$limit, 'skip' => (int)$skip]);
+        
+        $exclude = $_GET['exclude'] === "false" ? false : true;
+        $results = $field->queryForObjects(
+            (int)($_GET[QUERY_PARAM_LIMIT] ?? 50),
+            (int)($_GET[QUERY_PARAM_PAGE_NUM] ?? 0),
+            (string)($_GET[QUERY_PARAM_SORT_NAME] ?? '_id'),
+            (int)($_GET[QUERY_PARAM_SORT_DIR] ?? -1),
+            (string)($_GET[QUERY_PARAM_SEARCH] ?? ""),
+            $exclude
+        );
+        // $controller = $this->defineController();
+        
         $template = $field->fieldItemTemplate();
+        $field_value = $field->getValue() ?? [];
         $html = "";
-        foreach($results as $value) {
-            $html .= "<label class=\"object-gallery--item-selection\"><input type=\"checkbox\" value=\"$value->_id\">".view($template, ['item' => $value])."</label>";
+        foreach($results['cursor'] as $value) {
+            $disabled = "";
+            if(array_search($value->_id, $field_value) !== false) {
+                $disabled = " disabled=\"disabled\"";
+            }
+            $html .= "<label class=\"object-gallery--item-selection\"$disabled><input type=\"checkbox\" value=\"$value->_id\">".view($template, ['item' => $value, 'ordered_list' => $this])."</label>";
         }
 
         // header("Content-Type: text/html");
-        return ['html' => $html];
+        return [
+            'html' => $html,
+            'count' => $results['count']
+        ];
     }
 }

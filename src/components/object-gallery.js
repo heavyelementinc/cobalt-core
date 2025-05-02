@@ -33,7 +33,7 @@ class ObjectGallery extends HTMLElement {
         for(const element of elements) {
             this.addObjectToList(element.id, element.html, false);
         }
-        if(triggerChange) this.dispatchEvent(new Event("change"));
+        if(triggerChange) this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
     addObjectToList(id, html = "", triggerChange = false) {
@@ -48,7 +48,7 @@ class ObjectGallery extends HTMLElement {
         }
         this.insertBefore(obj, this.uploadField);
         
-        if(triggerChange) this.dispatchEvent(new Event("change"));
+        if(triggerChange) this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
     initDragAndDrop() {
@@ -97,7 +97,7 @@ class ObjectGallery extends HTMLElement {
         this.insertBefore(this.dragTarget, trueDropTarget);
         this.cleanUpAfterDragEvent();
 
-        this.dispatchEvent(new Event("change"));
+        this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
     cleanUpAfterDragEvent() {
@@ -136,7 +136,6 @@ class ObjectGallery extends HTMLElement {
             this.dropAfter = false;
             this.dropTarget.classList.remove(this.DROP_TARGET_NEXT);
         }
-        console.log('drag around', {mouse, rect, relativeCursor, halfElementWidth});
         // this.insertBefore(this.dropIndicator, (this.dropAfter) ? this.dropTarget.nextSibling : this.dropTarget);
     }
 
@@ -150,10 +149,6 @@ class ObjectGallery extends HTMLElement {
     }
 
     get value() {
-        const uploadButton = this.uploadField.querySelector("input[type='file']");
-        if(uploadButton && uploadButton.files.length !== 0) {
-            return this.uploadField.files;
-        }
         const items = this.querySelectorAll(this.ITEM_QUERY);
         let value = [];
         for(const el of items) {
@@ -181,6 +176,40 @@ class FileGallery extends ObjectGallery {
         // this.dropIndicator = document.createElement("drop-indicator");
         // this.appendChild(this.dropIndicator);
     }
+    get value() {
+        const uploadButton = this.uploadField.querySelector("input[type='file']");
+        console.log(uploadButton);
+        if(uploadButton && uploadButton.files.length !== 0) {
+            const files = uploadButton.files;
+            // uploadButton.value = null;
+            return files;
+        }
+        return super.value;
+    }
 }
 
 customElements.define("file-gallery", FileGallery);
+
+class GalleryItem extends HTMLElement {
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+        // this.actionMenu = this.querySelector("action-menu");
+        this.initActionMenu();
+    }
+
+    initActionMenu() {
+        if(!this.closest("object-gallery,file-gallery")) return;
+        this.delete = document.createElement("button");
+        this.delete.innerHTML = "<i name='close'></i>";
+        this.insertBefore(this.delete, this.firstElementChild);
+        this.delete.addEventListener("click", () => {
+            const target = this.parentNode;
+            this.parentNode.removeChild(this);
+            target.dispatchEvent(new Event("change",{bubbles: true}));
+        });
+    }
+}
+
+customElements.define("gallery-item", GalleryItem);

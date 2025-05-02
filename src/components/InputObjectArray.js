@@ -6,16 +6,16 @@ class ObjectArrayItem extends HTMLElement {
         };
         this.fields = {};
         this.closeBtn = document.createElement("button");
-        this.closeBtn.innerHTML = "<i class='close'></i>";
+        this.closeBtn.classList.add("close");
         this.closeBtn.addEventListener("click", () => {
             const parent = this.parentNode;
             this.parentNode.removeChild(this);
-            parent.dispatchEvent(new Event("change"));
-        });        
+            parent.dispatchEvent(new Event("change",{bubbles: true}));
+        });
     }
 
     connectedCallback() {
-        this.appendChild(this.closeBtn);
+        this.insertBefore(this.closeBtn, this.firstChildElement);
         this.fields = {};
         const namedItems = this.querySelectorAll("[name]");
         for(const item of namedItems ) {
@@ -56,7 +56,6 @@ class ObjectArrayItem extends HTMLElement {
         if(Array.isArray(object)) throw new TypeError("object-array-items may not be set to an array");
         
         this.props.value = object;
-        console.log(this.props.value);
         if(!this.isConnected) return;
 
         for(const key in object) {
@@ -64,19 +63,20 @@ class ObjectArrayItem extends HTMLElement {
             if(!field) continue;
             const val = object[key];
             switch(field.tagName) {
-                case "INPUT-SWITCH":
-                    this.handleSwitch(field, val);
-                    break;
-                case "INPUT":
-                    switch(field.type) {
-                        case "checkbox":
-                        case "check":
-                            this.handleCheckBox(field, val);
-                            break;
-                        case "radio":
-                            // this.handleRadio(field, val);
-                            break;
-                    }
+                // case "INPUT-SWITCH":
+                //     this.handleSwitch(field, val);
+                //     break;
+                // case "INPUT":
+                //     switch(field.type) {
+                //         case "checkbox":
+                //         case "check":
+                //             this.handleCheckBox(field, val);
+                //             break;
+                //         case "radio":
+                //             // this.handleRadio(field, val);
+                //             break;
+                //     }
+                // break;
                 default:
                     field.value = val;
                     break;
@@ -88,8 +88,8 @@ class ObjectArrayItem extends HTMLElement {
         element.checked = value;
     }
 
-    handleSwitch(element, value) {
-        element.checked = value ? "true" : "false";
+    handleSwitch(inputSwitch, value) {
+        inputSwitch.value = value;
     }
 }
 
@@ -138,7 +138,7 @@ class InputObjectArray extends HTMLElement {
             throw new TypeError("Error initializing input-object-array! Found a non-array value!");
         }
 
-        if(this.startWithEmptyObject) val.push({}); // Start with an additional empty object
+        if(val.length === 0) val.push({}); // Start with an empty object
         this.value = val;
     }
 
@@ -218,178 +218,3 @@ class InputObjectArray extends HTMLElement {
 }
 
 customElements.define("input-object-array", InputObjectArray);
-
-
-class InputObjectArrayOld extends HTMLElement {
-    constructor() {
-        super();
-        this.shadow = this.attachShadow({ mode: 'open' });
-        this.template = this.querySelector("template").innerHTML;
-        this.withAdditional = string_to_bool(this.getAttribute("with-additional")) || false;
-        this.values = [];
-
-        this.fieldItems = [];
-        // this.initInterface();
-        this.setAttribute("__custom-input", "true");
-    }
-
-    connectedCallback() {
-        let json = this.querySelector("var");
-        if (this.hasAttribute("value")) {
-            try {
-                this.value = JSON.parse(this.getAttribute("value")) || [];
-            } catch (e) {
-                throw new Error("Failed to parse JSON from 'value' attribute");
-            }
-        } else if (json && "innerText" in json) {
-            let js = [];
-            try {
-                js = JSON.parse(json.innerText) || [];
-            } catch (error) {
-                throw new Error("Failed to parse JSON from <var> tag");
-            }
-            this.value = js;
-        } else {
-            this.value = [];
-        }
-        this.dispatchEvent(new CustomEvent("ObjectArrayReady"));
-        this.dispatchEvent(new CustomEvent("componentready"));
-    }
-
-    initInterface() {
-        this.shadow.innerHTML = "";
-        this.style();
-        this.addButton();
-        let index = -1;
-        for (const i of this.values) {
-            this.addFieldset(i, index++);
-        }
-        if (this.withAdditional === true) this.addFieldset(); // Start with an empty one
-        else if (this.values.length < 1) this.addFieldset();
-    }
-
-    style() {
-        const main = document.querySelector("#style-main");
-        const links = document.querySelectorAll("link[rel='stylesheet']");
-        let styleLinks = "";
-        for (const i of links) {
-            styleLinks += i.outerHTML;
-        }
-
-        const style = document.createElement("head");
-
-        style.innerHTML = `<style>
-        ${main.textContent}
-        fieldset > label {
-            display:block;
-        }
-        fieldset{
-            padding:0;
-            border:none;
-        }
-        input-fieldset {
-            border: 1px solid var(--project-color-input-border-nofocus);
-            background: var(--project-color-input-background);
-            border-radius: 4px;
-            position: relative;
-            padding: .2rem;
-        }
-        
-        input-fieldset button.input-fieldset--delete-button{
-            border: none;
-            border-left: inherit;
-            border-bottom: inherit;
-            border-radius: 0 4px;
-            background: inherit;
-            position:absolute;
-            color: var(--project-color-input-border-nofocus);
-            top:0;
-            right:0;
-            padding: 1px 4px;
-        }</style>${styleLinks}`;
-        this.shadow.append(style);
-    }
-
-    addButton() {
-        this.button = document.createElement("button");
-        this.button.classList.add("input-object-array--add-button")
-        this.button.innerText = "+";
-        this.button.addEventListener("click", (e) => {
-            this.addFieldset();
-        })
-        this.shadow.appendChild(this.button);
-
-    }
-
-    addFieldset(values = {}, index = null) {
-        if (!index) index = this.fieldItems.length || this.values.length;
-
-        const fieldset = document.createElement("input-fieldset");
-
-        fieldset.innerHTML = this.template;
-
-        if (index in this.fieldItems === false) this.fieldItems[index] = {};
-        this.fieldItems[index] = get_form_elements(fieldset);
-
-        for (const i in values) {
-            const field = fieldset.querySelector(`[name='${i}']`);
-            if (!field) continue;
-            this.fieldItems[index][i].value = values[i];
-        }
-
-        this.addFieldsetButton(fieldset)
-        this.shadow.insertBefore(fieldset, this.button);
-    }
-
-    addFieldsetButton(field) {
-        let button = document.createElement("button");
-        button.classList.add("input-fieldset--delete-button");
-        button.innerText = "✖";
-        button.addEventListener("click", (e) => {
-            const index = [...field.children].indexOf(field)
-            field.parentNode.removeChild(field);
-            delete this.fieldItems[index];
-            this.fieldItems = [...Object.values(this.fieldItems)];
-        });
-        field.appendChild(button);
-    }
-
-    get value() {
-        let data = {};
-        const objects = this.shadow.querySelectorAll("input-fieldset");
-        objects.forEach((e, i) => {
-            data[i] = {}
-            const fieldElements = get_form_elements(e);
-
-            Object.values(fieldElements).forEach(el => {
-                data[i][el.name] = el.value;
-            })
-        })
-        return data;
-    }
-
-    set value(value) {
-        if (!value) return;
-        this.values = value;
-        this.initInterface();
-    }
-
-    static get observedAttributes() {
-        return ['value'];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        const callable = `change_handler_${name.replace("-", "_")}`;
-        if (callable in this) {
-            this[callable](newValue, oldValue);
-        }
-    }
-
-    change_handler_value(newValue) {
-        if (!newValue) {
-            this.values = [];
-            return;
-        }
-        this.values = JSON.parse(newValue);
-    }
-}

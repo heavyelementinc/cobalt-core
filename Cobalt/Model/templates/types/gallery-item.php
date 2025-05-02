@@ -1,6 +1,6 @@
-<gallery-item data-id="{{doc._id}}" draggable="draggable" mime-type="{{doc.meta.mimetype}}">
-    <?= embed_image($vars['doc']) ?>
-    <action-menu type="options">
+<gallery-item data-id="{{item._id}}" draggable="draggable" mime-type="{{item.meta.mimetype}}">
+    <?= embed_image($item) ?>
+    <!-- <action-menu type="options">
         <option method="DELETE" action="">Delete</option>
-    </action-menu>
+    </action-menu> -->
 </gallery-item>

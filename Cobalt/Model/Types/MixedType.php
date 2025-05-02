@@ -136,6 +136,10 @@ class MixedType implements Stringable, ArrayAccess {
         return (string)$this->getValue();
     }
 
+    public function onUpdateConfirmed($value):void {
+        update("[name='$this->name']", ['value' => $this->value]);
+    }
+
     /**
      * Returns a storable value in a string, number, or an array.
      * @return mixed 

@@ -4,6 +4,7 @@ namespace Cobalt\Model\Traits;
 
 use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
+use Cobalt\Model\Exceptions\ReservedFieldName;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\StringType;
 use MongoDB\BSON\Document;
@@ -33,6 +34,7 @@ trait Schemable {
         $schema = array_merge($this->__defaultSchema(), $this->__schema, $schema);
 
         foreach($schema as $field => $directives) {
+            if($this->__isReservedFieldName($field)) throw new ReservedFieldName("$field is a reserved field name and is unsuitable for storage");
             // Let's check if we need to reformat this directive into an array
             if ($directives[0] instanceof MixedType){
                 // If the first directive entry is an instance of Mixed Type
@@ -69,6 +71,31 @@ trait Schemable {
         return [
             '__version' => new StringType,
         ];
+    }
+
+    /**
+     * Returns an array of reserved RegEx strings
+     * @return array 
+     */
+    public function __reservedFieldNames():array {
+        return [
+            'system',
+            QUERY_SEARCH_MATCH_SCORE_FIELD,
+        ];
+    }
+
+    public function __systemFieldNames():array {
+        return [
+            QUERY_SEARCH_MATCH_SCORE_FIELD,
+            '__version',
+        ];
+    }
+
+    public function __isReservedFieldName($field):bool {
+        $reserved = $this->__reservedFieldNames();
+        if(in_array($field, $reserved)) return true;
+        if(preg_match('/^\$(.*)/',$field) === 1) return true;
+        return false;
     }
 
     public function __get_index_checkbox_state():bool {

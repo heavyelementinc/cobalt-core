@@ -2,6 +2,8 @@
 
 namespace Cobalt\EventListings\Models;
 
+use Cobalt\Controllers\ModelController;
+use Cobalt\EventListings\Controllers\Events;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\BlockType;
@@ -53,6 +55,10 @@ class Event extends Model {
             'exclude' => "[name='session_policy_hours']",
         ],
     ];
+
+    public function defineController(): ModelController {
+        return new Events();
+    }
 
     public function defineSchema(array $schema = []): array {
         return [

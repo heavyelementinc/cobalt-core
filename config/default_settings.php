@@ -2163,6 +2163,6 @@ $settings = [
             "default" => "",
         ],
         "Websocket_heartbeat_tick_interval" => [
-            'default' => 100_000
+            'default' => 20000
         ],
 ];

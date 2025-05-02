@@ -91,6 +91,16 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
         return $this->inputArray($class, $misc, $tag);
     }
 
+    #[Prototype]
+    protected function join($delimiter = ", ") {
+        if(!is_array($this->value)) return "";
+        return implode($delimiter, $this->value);
+    }
+
+    #[Prototype]
+    protected function length(): int|null {
+        return count($this->value ?? []);
+    }
     
     /**
      * Filters input from the client before the input is stored in the database

@@ -448,7 +448,7 @@ class AutoComplete extends HTMLElement {
         // this.searchField.value = label;
         this.focusOutHandler(target);
         this.dispatchEvent(new Event("input"));
-        this.dispatchEvent(new Event("change"));
+        this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
     /** Handles enter button events */

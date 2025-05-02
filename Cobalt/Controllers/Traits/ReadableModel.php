@@ -35,7 +35,7 @@ trait ReadableModel {
     }
 
     function index():string {
-        return view("/admin/crudable/default_index.html");
+        return view("Cobalt/Controllers/Templates/admin/index-view.php");
     }
 
     // function index_row(GenericMap $document):string {

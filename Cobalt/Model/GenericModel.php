@@ -3,7 +3,9 @@
 namespace Cobalt\Model;
 
 use ArrayAccess;
+use Cobalt\Controllers\Traits\IndexableModel;
 use Cobalt\Model\Attributes\Prototype;
+use Cobalt\Model\Exceptions\ReservedFieldName;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\Traits\Filterable;
 use Cobalt\Model\Traits\Hydrateable;
@@ -36,6 +38,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     use Schemable, Viewable, Hydrateable, Prototypable, Filterable;
     public ?string $name_prefix = null;
     protected bool $__schema_allow_undefined_fields = false;
+    protected array $__reservedFields = [];
 
     /*************** INITIALIZATION ***************/
     function __construct(?array $schema = [], null|array|BSONDocument|BSONArray $dataset = null, ?string $name_prefix = null, bool $allow_undefined_fields = false) {
@@ -50,14 +53,21 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     public function __get($property) {
         // We store the _id separately, so we'll fetch that as a special case.
         if($property === "_id") return $this->_id; 
+        if(in_array($property,$this->__systemFieldNames())) {
+            return $this->__reservedFields[$property];
+        }
         // Let's check to ensure that the property exists.
         if(key_exists($property, $this->__dataset)) return $this->__dataset[$property];
         throw new Undefined($property, "The property `$property` does not exist on `$this->name`!");
     }
 
     public function __set($property, $value) {
-        $reserved = [];
-        if(in_array($property, $reserved)) throw new \TypeError("Cannot set $property as the name is reserved!");
+        if(in_array($property, $this->__systemFieldNames())) {
+            $this->__reservedFields[$property] = $value;
+            return;
+        }
+        $reserved = $this->__reservedFieldNames();
+        if(in_array($property, $reserved)) throw new ReservedFieldName("Cannot set $property as the name is reserved!");
         $ignored = ['__pclass'];
         if(in_array($property, $ignored)) return;
         

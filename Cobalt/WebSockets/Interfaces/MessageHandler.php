@@ -11,5 +11,6 @@ interface MessageHandler {
     function onMessage(int $socket_id, array &$data, bool &$broadcast_to_all_players):void;
     function onClientJoin(int $socket_id):bool;
     function onClientLeave(int $socket_id):bool;
-    function onEveryGameTick(int $tick):void;
+    function onConsoleLog(string $log, string $type, string $log_message, $log_type = "i", $verbosity_level = 10):void;
+    function onEveryTick(int $tick):void;
 }

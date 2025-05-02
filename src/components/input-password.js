@@ -39,7 +39,7 @@
         this.input = this.querySelector("input");
         this.input.addEventListener("change", (e) => {
             e.stopPropagation();
-            this.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change",{bubbles: true}));
         });
 
         this.input.addEventListener("input", (e) => {

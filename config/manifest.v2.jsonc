@@ -49,6 +49,10 @@
         "contexts": ["common"]
     },
     {
+        "href": "Cobalt/CobaltWebSocket.js",
+        "contexts": ["common"]
+    },
+    {
         "href":"ActionMenu.js",
         "contexts": ["common"],
         "package": "deferred"
@@ -88,7 +92,7 @@
         "package": "deferred"
     },
     {
-        "href":"components/InputObjectArray.js",
+        "href":"components/input-switch.js",
         "contexts": ["common"],
         "package": "deferred"
     },
@@ -254,6 +258,11 @@
     },
     {
         "href":"AudioPlayer.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/InputObjectArray.js",
         "contexts": ["common"],
         "package": "deferred"
     },

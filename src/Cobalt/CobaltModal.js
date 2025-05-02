@@ -8,7 +8,7 @@
 class Dialog extends EventTarget {
     constructor({
         id = random_string(8),
-        classes = "",
+        classList = "",
         body = "",
         chrome = {},
         close_btn = true,
@@ -23,7 +23,7 @@ class Dialog extends EventTarget {
         this.dialog  = document.createElement("modal-dialog");
         this.content = document.createElement("div");
         this.content.classList.add('modal-dialog--content');
-        if(classes) this.content.classList.add(classes.split(" "));
+        if(classList) this.content.classList.add(classList.split(" "));
         if(body) this.bodyCache = body;
         this.chrome = document.createElement("menu");
         this.cancelButton = false;
@@ -54,7 +54,7 @@ class Dialog extends EventTarget {
         const opts = {
             label: "Cancel",
             dangerous: false,
-            classes: [],
+            classList: [],
             dispatch: "modalcancel",
             detail: {},
             callback: async (event) => true,
@@ -63,7 +63,7 @@ class Dialog extends EventTarget {
 
         const li = document.createElement("li");
         const btn = document.createElement("button");
-        const classList = (typeof options.classes === "string") ? [options.classes] : options.classes;
+        const classList = (typeof options.classList === "string") ? [options.classList] : options.classList ?? [];
         btn.classList.add(...classList);
         li.appendChild(btn);
         btn.innerHTML = opts.label;
@@ -88,7 +88,7 @@ class Dialog extends EventTarget {
         
         this.addButton({
             label: label,
-            classes: ["modal-confirm-button"],
+            classList: ["modal-confirm-button"],
             dispatch: "modalconfirm",
             detail,
             callback: async e => {

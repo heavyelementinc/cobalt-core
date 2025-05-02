@@ -211,6 +211,17 @@ trait ClientFSManager {
         return $ids;
     }
 
+    public function uploadFilesAndGetArrayOfIds($key, $arbitrary_data = null, $files = null, $meta = false):array {
+        if(!$files) $fiels = $_FILES;
+        if(empty($files)) throw new BadRequest("No files were uploaded");
+        if(empty($files[$key])) throw new BadRequest("No files were uploaded");
+        $ids = [];
+        foreach($files[$key]['tmp_name'] as $i => $file) {
+            $ids[] = $this->clientUploadFile($key, $i, $arbitrary_data, $files, $meta);
+        }
+        return $ids;
+    }
+
     private $thumbnail_suffix = "thumb";
 
     /**

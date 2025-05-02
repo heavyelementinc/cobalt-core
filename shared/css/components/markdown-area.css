@@ -1,5 +1,32 @@
 markdown-area {
     display: block;
+    .editor-toolbar {
+        display:flex;
+        gap: var(--margin-xs);
+        padding: var(--margin-xs);
+        opacity: 1;
+        &:hover {
+            opacity: 1;
+        }
+        a {
+            display: inline-flex;
+            text-align: center;
+            text-decoration: none !important;
+            color: var(--neutral-color-3);
+            margin: 0;
+            border: 1.5px solid transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            width: 3.5ch;
+            height: 3.5ch;
+            &.active {
+                color: var(--neutral-color-5);
+            }
+        }
+    }
 }
 
 markdown-area[aria-disabled="true"], markdown-area[aria-disabled="true"] .CodeMirror {
@@ -9,6 +36,7 @@ markdown-area[aria-disabled="true"], markdown-area[aria-disabled="true"] .CodeMi
 markdown-area .editor-toolbar .fa:before{
     font-family: "Material Design Icons";
     font-size: 1.5em;
+    font-weight: normal;
 }
 
 markdown-area .editor-toolbar .fa-bold:before {
@@ -18,10 +46,10 @@ markdown-area .editor-toolbar .fa-italic:before {
     content: "\F0277";
 }
 markdown-area .editor-toolbar .fa-header:before {
-    content: "\F0274";
+    content: "\F026B";
 }
 markdown-area .editor-toolbar .fa-quote-left:before {
-    content: "\F0757";
+    content: "\F11A7";
 }
 markdown-area .editor-toolbar .fa-list-ul:before {
     content: "\F0279";

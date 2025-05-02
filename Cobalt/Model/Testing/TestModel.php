@@ -2,6 +2,7 @@
 
 namespace Cobalt\Model\Testing;
 
+use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\ModelType;
@@ -9,6 +10,9 @@ use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
 
 class TestModel extends Model {
+    // public function defineController(): ModelController {
+    //     return 
+    // }
 
     public static function __getVersion(): string {
         return "1.0";

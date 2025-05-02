@@ -24,7 +24,7 @@ class InputDateTime extends HTMLElement {
         this.datePicker.addEventListener("dateselect", (e) => {
             this.value = e.detail;
             this.datePicker.hide();
-            this.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change",{bubbles: true}));
         });
     }
 
@@ -189,7 +189,7 @@ class InputDateTime extends HTMLElement {
         if(datetime) datetime = `${datetime} `
         // datetime += time;
         this.value = this.fromString(`${datetime}`);
-        this.dispatchEvent(new Event("change"));
+        this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
     prefixSingleDigits(digit) {

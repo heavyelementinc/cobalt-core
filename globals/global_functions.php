@@ -230,6 +230,10 @@ function set_template($path, $vars = []) {
     return view($path, $vars);
 }
 
+/**
+ * @param array $user_bar {type: html, ...}
+ * @return void 
+ */
 function register_user_bar_items(array $user_bar):void {
     global $USER_BAR_DETAILS;
     $USER_BAR_DETAILS += $user_bar;
@@ -823,4 +827,8 @@ function isKeyboardModifierSet($constantValue, $header = null):bool {
     if($header === null) $header = (int)getHeader('X-Keyboard-Modifiers', null, true, false);
     if($header === null) return false;
     return ($header & $constantValue) === $constantValue;
+}
+
+function millitime():int {
+    return floor(microtime(true) * 1000);
 }

@@ -8,7 +8,80 @@ switch-container {
     align-items: center;
 }
 
-input-switch {
+input-switch:not([native]) {
+    background: transparent;
+    height: var(--track-height);
+    border-radius: var(--border-radius);
+    --track-width: 65px;
+    --track-height: 28px;
+    --track-radius: 16px;
+    --thumb-size: 20px;
+    --thumb-voffset: 4px;
+    --thumb-padding: 5px;
+    &[small] {
+        --track-width: 55px;
+        --track-height: 25px;
+        --track-radius: 16px;
+        --thumb-size: 18px;
+        --thumb-voffset: 3px;
+        --thumb-padding: 5px;
+    }
+    &[tiny] {
+        --track-width: 45px;
+        --track-height: 20px;
+        --track-radius: 16px;
+        --thumb-size: 13px;
+        --thumb-voffset: 3px;
+        --thumb-padding: 5px;
+    }
+    input[type='checkbox']{
+        -webkit-appearance: none;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        border: 0;
+        outline: 0;
+        cursor: pointer;
+        /* margin: var(--margin-s); */
+        background: transparent;
+        box-sizing: border-box;
+        height: var(--track-height);
+        &:after {
+            content: '';
+            width: var(--track-width);
+            height: var(--track-height);
+            display: inline-block;
+            background-color: var(--input-element-tray);
+            border-radius: var(--track-radius);
+            clear: both;
+            border: var(--input-element-border-value);
+            transition: background-color 0.4s;
+        }
+        &:before {
+            content: '';
+            width: var(--thumb-size);
+            height: var(--thumb-size);
+            display: block;
+            position: absolute;
+            left: var(--thumb-padding);
+            top: var(--thumb-voffset);
+            border-radius: 50%;
+            background-color: rgb(255, 255, 255);
+            box-shadow: 0 1 3px rgba(0, 0, 0, 0.6);
+            border: var(--input-element-border-value);
+            box-sizing: border-box;
+            transition: left 0.4s;
+        }
+        &:checked:before {
+            left: calc((var(--track-width) - var(--thumb-size)) - var(--thumb-padding));
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+        }
+        &:checked:after {
+            background: var(--input-element-active);
+        }
+    }
+}
+
+input-switch-old {
     display: inline-block;
     width: 64px;
     height: 26px;

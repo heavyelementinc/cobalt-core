@@ -238,6 +238,13 @@ $permissions = [
         "default" => false,
         "ring" => 1
     ],
+    "Model_advanced_search_permission" => [
+        "group" => "Users",
+        "label" => "Allows the user to perform advanced queries outside of a given model's searchable fields (dangerous)",
+        "dangerous" => true,
+        "default" => false,
+        "ring" => 1
+    ],
     "Customizations_create" => [
         "group" => "Customization",
         "label" => "Allow the user to create arbitrary customized content (requires the modify privilege as well).",

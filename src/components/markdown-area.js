@@ -18,8 +18,7 @@ class MarkdownArea extends HTMLElement {
         `
         const element = this.querySelector(".editor")
         element.addEventListener("change", event => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
+            event.bubbles = true;
         });
 
         this.editor = new SimpleMDE({
@@ -44,7 +43,7 @@ class MarkdownArea extends HTMLElement {
 
     triggerAutosaveChangeEvent() {
         if(this.props.changed === false) return;
-        const event = this.dispatchEvent(new Event("change", {}));
+        const event = this.dispatchEvent(new Event("change", {bubbles: true}));
         this.props.changed = false;
     }
 

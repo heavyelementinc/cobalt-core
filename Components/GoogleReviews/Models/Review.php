@@ -2,6 +2,7 @@
 
 namespace Components\GoogleReviews\Models;
 
+use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\BooleanType;
 use Cobalt\Model\Types\DateType;

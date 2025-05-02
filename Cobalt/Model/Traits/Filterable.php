@@ -128,22 +128,9 @@ trait Filterable {
     public function getValidationState():bool {
         return $this->__datasetValidated;
     }
-    // protected function __recursive_validation($fieldname, $value, &$target) {
-    //     // We need to find the <I>Type instance
-    //     $explode = explode(".", $fieldname);
-    //     $first_field = array_shift($explode);
 
-    //     if(isset($this->__schema[$first_field])) {
-            
-    //         if($this->__schema[$first_field]['type'] instanceof ModelType) {
-                
-    //             return;
-    //         }
-    //     }
-    // }
-
-    public function __operators($allowUnvalidated = false) {
-        $result = [];
+    public function __operators($allowUnvalidated = false, &$result):void {
+        // $result = [];
         if(!$this->getValidationState() && $allowUnvalidated === false) throw new ValidationFailed("Server configuration error");
         /**
          * @var string $field -> The name of the field
@@ -151,17 +138,24 @@ trait Filterable {
          */
         foreach($this->__validatedFields as $field => $value) {
             
-            /** @var MixedResult $target */
+            /** @var MixedType $target */
             $target = null;
             if(key_exists($field,$this->__dataset)) $target = $this->__dataset[$field];
 
             $operator = '$set';
-            if($target->hasDirective("operator")) $operator = $target->getDirective("operator");
+            if($target->hasDirective("operator")) {
+                $target->getDirective("operator", $result, $field, $value);
+                return;
+            }
             if(!key_exists($operator,$result)) $result[$operator] = [];
             $result[$operator][$field] = $value;
         }
 
-        return $result;
+        // return $result;
+    }
+
+    public function getValidatedFields():array {
+        return $this->__validatedFields;
     }
 }
 
