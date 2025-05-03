@@ -284,11 +284,11 @@ function normalize_file_array() {
  * @throws Exception if $defatulToAppSetting is true and the incoming server name doesn't exist as the apps domain_name or in the allowed_origins list
  * @return string the domain name of this app (with protocol and NO TRAILING SLASH)
  */
-function server_name(bool $defaultToAppSetting = true) {
+function server_name(bool $defaultToAppSetting = true, ?bool $isSecure = null) {
     $request_from = $_SERVER['SERVER_NAME'];
     $name = "https://$request_from";
 
-    $isSecure = is_secure();
+    if($isSecure === null) $isSecure = is_secure();
     if($isSecure === false) $name = "http://$request_from";
     
     if($request_from === __APP_SETTINGS__['domain_name']) {

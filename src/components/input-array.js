@@ -188,7 +188,7 @@ class InputArray extends AutoCompleteInterface {
             const val = this.value;
             val.push(e.detail.value);
             this.value = val;
-            this.dispatchEvent(new Event("change", {...e, target: this}));
+            this.dispatchEvent(new Event("change", {...e, target: this, bubbles: true}));
         })
     }
 
@@ -213,7 +213,7 @@ class InputArray extends AutoCompleteInterface {
             // `el` will still register as `selected` and therefore it will be
             // included in this.value output. So we wait 20ms before dispatching
             // the change event. This sucks. TODO fix this hacky bullshit.
-            this.dispatchEvent(new Event("change", {target: this}));
+            this.dispatchEvent(new Event("change", {target: this, bubbles: true}));
         }, 20)
     }
 

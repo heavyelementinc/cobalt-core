@@ -290,7 +290,7 @@ trait IndexableModel {
 
     /** Override this in your controller to set default query options for your index */
     public function index_options():array {
-        return [];
+        return ['sort' => ['_id' => -1]];
     }
 
     public function get_table_body() {

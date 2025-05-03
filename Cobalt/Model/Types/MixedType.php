@@ -65,7 +65,7 @@ class MixedType implements Stringable, ArrayAccess {
         if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
             $this->getDirective(DIRECTIVE_KEY_VALID);
         }
-        if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
+        // if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
         return $value;
     }
 

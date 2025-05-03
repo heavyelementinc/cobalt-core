@@ -84,18 +84,24 @@ trait SharedFilterEnums {
         
         if(!$allow_custom && $this->hasDirective('allow_custom')) $allow_custom = $this->getDirective("allow_custom");
 
-        // If the current value is not a key in the current valid options AND
-        // we're allowed to have custom options, add the current val to the options
-        if($allow_custom && $val && !key_exists($val, $valid)) $valid += [$val => $val];
-
         $type = gettype($val);
 
         switch ($type) {
                 // case $val instanceof \MongoDB\Model\BSONArray:
                 //     $val = $val->getArrayCopy();
+            case "string":
+            case "int":
+                // If the current value is not a key in the current valid options AND
+                // we're allowed to have custom options, add the current val to the options
+                if($allow_custom && !key_exists($val ?? "", $valid)) $valid += [$val => $val];
+                break;
             case "array":
                 $validValue = [];
                 foreach ($val as $o) {
+                    // If the current value is not a key in the current valid options AND
+                    // we're allowed to have custom options, add the current val to the options
+                    if($o instanceof MixedType) $o = $o->value;
+                    if($allow_custom && !key_exists($o ?? "", $valid)) $valid[$o] = $o;
                     $validValue[(string)$o] = $o;
                 }
                 $valid = array_merge($validValue ?? [], $valid ?? []);

@@ -313,7 +313,7 @@ class NewFormRequest extends HTMLElement {
             switch(field.type) {
                 case "number":
                     return Number(field.value);
-                case "field":
+                case "files":
                     return field.files;
                 default:
                     return field.value;
@@ -321,12 +321,10 @@ class NewFormRequest extends HTMLElement {
         } else if (field.tagName === "BLOCK-EDITOR") {
             return await field.value;
         }
-        const val = field.value;
-        if(val instanceof FileList) {
-            this.fileUploadFields.push(field);
-            return null;
-        }
-        return val;
+        // if(val instanceof FileList) {
+        //     this.fileUploadFields.push(field);
+        // }
+        return field.value;
     }
 
 
@@ -455,6 +453,11 @@ class NewFormRequest extends HTMLElement {
                 this.addElementToFeedbackList(this);
                 break;
         }
+        // if(target) {
+        //     const name = target.getAttribute('name');
+        //     const value = target.value;
+        //     if(name && value) submit[name] = value;
+        // }
         
         return submit;
     }

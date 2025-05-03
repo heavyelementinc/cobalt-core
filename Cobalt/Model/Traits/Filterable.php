@@ -8,8 +8,11 @@ use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
 use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\Error;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use Reflection;
+use ReflectionFunction;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
@@ -80,8 +83,18 @@ trait Filterable {
                 throw new ValidationContinue("This field is empty and it's not required. Continuing.");
             }
 
-            if(key_exists('filter', $this->__schema[$field])) {
-                $value = $this->__schema[$field]['filter']($value);
+            // This is disabled because the filter directive is called later
+            if(key_exists('filter', $this->__schema[$field]) && is_callable($this->__schema[$field]['filter'])) {
+                $funcReflection = new ReflectionFunction($this->__schema[$field]['filter']);
+                $argsReflection = $funcReflection->getParameters();
+                if(!$argsReflection[0]->isPassedByReference()) {
+                    throw new Error("The filter directive specified for field `$this->name` must accept values passed only by reference!");
+                }
+                $returnType = $funcReflection->getReturnType();
+                if((string)$returnType !== "void") {
+                    throw new Error("The filter directive specified for field `$this->name` must specify a return type of `void`!");
+                }
+                $this->__schema[$field]['filter']($value);
             }
 
             if($result->hasDirective("pattern")) {
@@ -145,7 +158,7 @@ trait Filterable {
             $operator = '$set';
             if($target->hasDirective("operator")) {
                 $target->getDirective("operator", $result, $field, $value);
-                return;
+                continue;
             }
             if(!key_exists($operator,$result)) $result[$operator] = [];
             $result[$operator][$field] = $value;
