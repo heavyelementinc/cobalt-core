@@ -1,9 +1,10 @@
 
 class CobaltWebSocket extends EventTarget {
     SERVER_HOST;
+    SOCKET;
     LLCOMMANDS = {
-        acknowledged: "ACK:",
-        replay: "REP:"
+        acknowledged: "ACK",
+        replay: "REP"
     }
     constructor(host = null) {
         super();
@@ -13,25 +14,28 @@ class CobaltWebSocket extends EventTarget {
     }
 
     initSocket(onSocketOpenMessageType, onSocketOpenMessageDetails) {
-        console.log("Initializing WebSocket");
+        console.log("WebSocket Initializing");
         this.SOCKET = new WebSocket(`wss://${this.SERVER_HOST}`);
         this.SOCKET.onopen = (event) => {
+            console.log("WebSocket Open", event);
             this.sendMessage(onSocketOpenMessageType, onSocketOpenMessageDetails);
             this.extendedOpenHandler(event);
         }
 
         this.SOCKET.onmessage = (event) => {
+            console.log("WebSocket Message", event);
             this.fulfillNewMessage(event.data, event);
             this.extendedMessageHandler(event);
         }
 
         this.SOCKET.onclose = (event) => {
-            console.log("Close", event);
+            console.log("WebSocket Close", event);
             this.extendedCloseHandler(event);
         }
 
         this.SOCKET.onerror = (event) => {
-            new StatusError({message: `An error has occured!<br>${event.data}`});
+            console.log("WebSocket Error", event)
+            // new StatusError({message: `An error has occured!<br>${event.data}`});
             console.log();
             this.extendedErrorHandler(event);
         }
@@ -61,9 +65,9 @@ class CobaltWebSocket extends EventTarget {
 
     llAcknowledgeMessage(id, sha1 = null) {
         const message = this.__sent_message_history[id];
-        if(message.sha1 === sha1) {
-            message.ack = true;
-        }
+        // if(message.sha1 === sha1) {
+        message.ack = true;
+        // }
     }
 
     llRepeatMessage(id, sha1 = null) {
@@ -99,10 +103,10 @@ class CobaltWebSocket extends EventTarget {
     fulfillNewMessage(data, event) {
         const llcommand = data.substring(0, 3);
         switch(llcommand) {
-            case LLCOMMANDS.acknowledged:
+            case this.LLCOMMANDS.acknowledged:
                 this.llAcknowledgeMessage(...this.parseLowLevelCommand(data));
                 return;
-            case LLCOMMANDS.replay:
+            case this.LLCOMMANDS.replay:
                 this.llRepeatMessage(...this.parseLowLevelCommand(data));
                 return;
         }

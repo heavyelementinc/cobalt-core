@@ -7,6 +7,7 @@ use Cobalt\Websockets\Exceptions\TargetedException;
 use Cobalt\WebSockets\Interfaces\MessageHandler;
 use Cobalt\WebSockets\Traits\ReadCLI;
 use Cobalt\WebSockets\Traits\SocketInit;
+use JsonException;
 use stdClass;
 
 class WebSocketServer {
@@ -107,19 +108,15 @@ class WebSocketServer {
                     }
                     $this->logWrite("⬇️$socket_id"."⬇️$received_text");
                     $message_id = -1;
-                    $data = $this->parseSocketMessage($received_text, $message_id);
+                    $data = $this->parseSocketMessage($received_text, $message_id, $socket_id);
                     if(!$data) {
-                        // If there was an error parsing data, skip doing anything else with the message
-                        $this->consoleLog("error", "Client ".fmt($socket_id, "e")." sent a malformed message:\n" .fmt($received_text, "i"));
-                        continue; 
+                       continue;
                     }
-                    $broadcast_to_all_players = false;
 
                     try {
-                        $this->handler->onMessage($socket_id, $data, $broadcast_to_all_players);
-                        $this->sendMessageToIndividualClient($this->clients[$socket_id], $this->mask("ACK:$message_id:"));
+                        $this->handler->onMessage($socket_id, $data, $message_id);
                     } catch (SocketException $e) {
-                        $this->sendMessageToIndividualClient($this->clients[$socket_id], $this->mask("REP::"));
+                        $this->sendMessageToIndividualClient($this->clients[$socket_id], $this->mask("REP:$message_id:"));
                         $this->sendError($e);
                     }
                     // if ($data && $broadcast_to_all_players) {
@@ -172,11 +169,21 @@ class WebSocketServer {
         socket_close($this->socket);
     }
 
-    public function parseSocketMessage($data, &$message_id) {
+    public function parseSocketMessage($data, &$message_id, $socket_id) {
+        if($data === "") {
+            // socket_close($socket_id);
+            return false;
+        }
         $delimeter_position = strpos($data, "!");
         $message_id = substr($data,0,$delimeter_position);
         $d = substr($data, $delimeter_position + 1);
-        return json_decode($d, true);
+        try {
+            return json_decode($d, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            $this->sendMessageToIndividualClient($this->clients[$socket_id], $this->mask("REP:$message_id:"));
+            // If there was an error parsing data, skip doing anything else with the message
+            $this->consoleLog("error", "Client ".fmt($socket_id, "e")." sent a malformed message:\n" .fmt($data, "i"));
+        }
     }
 
     public function sendError($e) {
