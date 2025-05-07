@@ -13,7 +13,17 @@ use stdClass;
 class WebSocketServer {
     use SocketInit, ReadCLI;
     const LOG_FILE_PATH = __APP_ROOT__ . "/ignored/logs/websockets/";
-    const HEARTBEAT_TICK_INTERVAL = __APP_SETTINGS__['Websocket_heartbeat_tick_interval'];
+    const HEARTBEAT_TICK_INTERVAL = __APP_SETTINGS__['Websocket_heartbeat_tick_interval_in_milliseconds'];
+    /**
+     * * 5000 =   1 tick every 5 seconds
+     * * 2000 =   1 tick every 2 seconds
+     * * 1000 =   1 tick per second
+     * *  200 =   5 ticks per second
+     * *  100 =  10 ticks per second
+     * *   33 = ~30 ticks per second
+     * *   16 = ~60 ticks per second
+     */
+    const TICK_RATE = __APP_SETTINGS__['Websocket_tick_rate_in_milliseconds'];
     private int $tick = 0;
     private array $timeouts = [];
     private array $intervals = [];
@@ -24,7 +34,7 @@ class WebSocketServer {
     private bool $execute_next_tick = true;
 
     function __construct() {
-        $this->startLogFile();
+        // $this->startLogFile();
     }
 
     private function startLogFile() {
@@ -74,9 +84,18 @@ class WebSocketServer {
     }
 
     public function loop() {
-        $this->setInterval(function () {
+        $this->setInterval(function ($interval, $server) {
             $this->sendMessage("heartbeat", []);
-        }, self::HEARTBEAT_TICK_INTERVAL);
+        }, self::HEARTBEAT_TICK_INTERVAL, "heartbeat");
+
+        $this->setInterval(function (TimeOut $interval, WebSocketServer $server) {
+            try {
+                // Server update code should go here
+                $this->handler->onEveryTick($interval, $server);
+            } catch (SocketException $e) {
+                $this->sendError($e);
+            }
+        }, self::TICK_RATE, "server_tick");
 
         while($this->execute_next_tick) {
             $this->readCommand();
@@ -89,12 +108,6 @@ class WebSocketServer {
             // Check if there are any new connections we need to handle
             if (in_array($this->socket, $changed)) {
                 $this->addClient($changed);
-            }
-            try {
-                // Server update code should go here
-                $this->handler->onEveryTick($this->tick);
-            } catch (SocketException $e) {
-                $this->sendError($e);
             }
 
             // Loop through all socket connections
@@ -146,23 +159,17 @@ class WebSocketServer {
                 }
             }
 
-            // $this->tick += 1;
-            // if($this->tick >= 100_000) {
-            //     $this->tick = 0;
-            //     $this->sendMessage("heartbeat", []);
-            // }
-
             /** @var TimeOut $interval */
             foreach($this->timeouts as $id => $timeout) {
                 if(!$timeout->hasExpired()) continue;
-                $timeout->getCallback()($this);
+                $timeout->getCallback()($timeout, $this);
                 $this->clearTimeout($id);
             }
 
             /** @var TimeOut $interval */
             foreach($this->intervals as $interval) {
                 if(!$interval->hasExpired()) continue;
-                $interval->getCallback()($this);
+                $interval->getCallback()($interval, $this);
                 $interval->setStart(millitime());
             }
         }
@@ -191,12 +198,12 @@ class WebSocketServer {
         if($e instanceof TargetedException) {
             $to = $e->getTo();
         }
-        $this->sendMessage($e->getType(), [
-            'message' => $e->getMessage(),
-            'command' => [
-                $e->getCommand() => $e->getArgs()
-            ]
-        ], $to);
+        // $this->sendMessage($e->getType(), [
+        //     'message' => $e->getMessage(),
+        //     'command' => [
+        //         $e->getCommand() => $e->getArgs()
+        //     ]
+        // ], $to);
         $this->consoleLog('error', $e->getMessage());
     }
 
@@ -220,30 +227,32 @@ class WebSocketServer {
         $this->handler->onConsoleLog($log, $type, $log_message, $log_type, $verbosity_level);
     }
 
-    public function setTimeout(callable $callback, int $microtime):int {
-        return $this->registerTimer($callback, $microtime, $this->timeouts);
+    public function setTimeout(callable $callback, int $microtime, string $id = ""):int|string {
+        return $this->registerTimer($callback, $microtime, $this->timeouts, $id);
     }
 
-    public function setInterval(callable $callback, int $microtime):int {
-        return $this->registerTimer($callback, $microtime, $this->intervals);
+    public function setInterval(callable $callback, int $microtime, string $id = ""):int|string {
+        return $this->registerTimer($callback, $microtime, $this->intervals, $id);
     }
 
-    private function registerTimer(callable $callback, int $microtime, array &$list):int {
+    private function registerTimer(callable $callback, int $microtime, array &$list, $id = ""):int|string {
         $timeout = new TimeOut();
         $timeout->setStart(millitime());
         $timeout->setMilliseconds($microtime);
         $timeout->setCallback($callback);
-        $ids = array_keys($list);
-        $id = $ids[count($ids) - 1] + 1;
+        if(!$id) {
+            $ids = array_keys($list);
+            $id = $ids[count($ids) - 1] + 1;
+        }
         $list[$id] = $timeout;
         return $id;
     }
 
-    public function clearTimeout(int $id) {
+    public function clearTimeout(int|string $id) {
         unset($this->timeouts[$id]);
     }
 
-    public function clearInterval(int $id) {
+    public function clearInterval(int|string $id) {
         unset($this->intervals[$id]);
     }
 }

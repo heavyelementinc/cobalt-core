@@ -19,6 +19,7 @@ function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_E
     header($header);
     $msg = $message;
     if($specific_message) $msg = $specific_message;
+    cobalt_log("KILL", $msg, COBALT_LOG_EXCEPTION);
     $html = "<html>
     <head>
         <title>$title</title>

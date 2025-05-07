@@ -66,6 +66,25 @@ $settings = [
                 ]
             ]
         ],
+        "canonical_name" => [
+            "default" => "",
+            "meta" => [
+                "group" => GROUP_BASIC,
+                "subgroup" => SUBGROUP_BASIC_GENERAL,
+                "name" => "Canonical Name",
+                "alias" => "domain_name",
+                "description" =>  "This is the host name that will be provided by the server_name() function. If it's not set, it will fall back to the `domain_name` value.",
+                "type" => "input"
+            ],
+            "validate" => [
+                "filter" => [
+                    "FILTER_VALIDATE_URL" => []
+                ]
+            ]
+        ],
+        "cobalt_base_path" => [
+            "default" => "",
+        ],
         "app_name" => [
             // The full name of the application.
             "default" => "Cobalt Engine",
@@ -1291,7 +1310,7 @@ $settings = [
             // ]
         ],
         "Font_backend" => [
-            'default' => FONT_BACKEND_FONTSOURCE
+            'default' => FONT_BACKEND_GOOGLE
         ],
         "css-vars" => [
             "default" => [],
@@ -2162,7 +2181,10 @@ $settings = [
         "Websocket_default_message_handler" => [
             "default" => "",
         ],
-        "Websocket_heartbeat_tick_interval" => [
-            'default' => 20000
+        "Websocket_heartbeat_tick_interval_in_milliseconds" => [
+            'default' => 20000 // 
         ],
+        "Websocket_tick_rate_in_milliseconds" => [
+            'default' => 500, // 2 ticks per second
+        ]
 ];

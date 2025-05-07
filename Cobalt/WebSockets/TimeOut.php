@@ -15,9 +15,13 @@ class TimeOut {
         $this->milliseconds = $value;
     }
 
-    function hasExpired($time = null):bool {
-        $time = $time ?? floor(microtime(true) * 1000);
-        return ($time - $this->start) >= $this->milliseconds;
+    function hasExpired(?int $time = null):bool {
+        return $this->getDelta($time) >= $this->milliseconds;
+    }
+
+    function getDelta(?int $time = null):int {
+        $time = $time ?? millitime();
+        return $time - $this->start;
     }
 
     function getCallback():callable {

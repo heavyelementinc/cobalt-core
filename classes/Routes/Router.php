@@ -143,6 +143,10 @@ class Router {
         if ($method  === null) $method  = $this->method;
         if ($context === null) $context = $this->route_context;
 
+        if(__APP_SETTINGS__['cobalt_base_path']) {
+            $route = preg_replace("/^".preg_quote(__APP_SETTINGS__['cobalt_base_path'])."/", "", $route);
+        }
+
         if (strtolower($method) === "head") {
             $this->headRequest = true;
             $method = "get";
