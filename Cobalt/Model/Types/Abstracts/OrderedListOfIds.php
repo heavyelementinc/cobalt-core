@@ -130,8 +130,8 @@ abstract class OrderedListOfIds extends MixedType implements Iterator {
         // Build our gallery tag
         $gallery = "<$tag $attrs $accept method=\"GET\" action=\"$route\">";
         // Loop through all the objects that belong to this field
-        foreach($this->getValue() as $item) {
-            $gallery .= view($this->fieldItemTemplate(), ['item' => $item, 'ordered_list' => $this]);
+        foreach($this->getValue() as $index => $item) {
+            $gallery .= view($this->fieldItemTemplate(), ['item' => $item, 'object_id' => $this->raw[$index], 'ordered_list' => $this]);
         }
         $gallery .= "</$tag>";
         return $gallery;
