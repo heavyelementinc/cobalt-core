@@ -414,6 +414,7 @@ class ParallaxBackgroundElement extends ParallaxCommon {
         if(!this.allowNativeCover) {
             // Height and width of image
             const {height, width} = await this.loadImage(e); // height: 2788, width: 4190
+            if(height == -1 && width == -1) return;
 
 
             const rect = this.ELEMENT.getBoundingClientRect();
@@ -477,10 +478,10 @@ class ParallaxBackgroundElement extends ParallaxCommon {
             }
             image.onerror = (e) => {
                 console.warn(`Failed to load image`, element, e);
-                reject({height: 0, width: 0});
+                resolve({height: -1, width: -1});
             }
             image.src = src;
-            if(image.error) reject({height: 0, width: 0});
+            if(image.error) resolve({height: -1, width: -1});
             if(image.complete) resolve({height: image.naturalHeight, width: image.naturalWidth});
         });
     }
