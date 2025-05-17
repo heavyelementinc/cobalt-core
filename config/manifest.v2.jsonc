@@ -301,6 +301,7 @@
     {
         "href":"custom-components/_ComponentDeclarations.js",
         "contexts": ["common"],
+        "package": "components",
         "append": true,
         "module": true
     },
