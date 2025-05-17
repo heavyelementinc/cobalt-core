@@ -328,7 +328,7 @@ class Route {
 
     static function get_router_context($request_uri) {
         // Remove the query string
-        $request_uri = str_replace("?" . $_SERVER['QUERY_STRING'], "", $request_uri);
+        $request_uri = remove_base_path(str_replace("?" . $_SERVER['QUERY_STRING'], "", $request_uri));
 
         // The default context is web
         $context = "web";

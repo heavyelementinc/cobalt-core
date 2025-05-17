@@ -1,4 +1,6 @@
-class InputSwitch extends HTMLElement {
+import ICustomInput from "./ICustomInput.js";
+
+export default class InputSwitch extends ICustomInput {
     constructor() {
         super();
         this.tabIndex = 0;
@@ -22,6 +24,7 @@ class InputSwitch extends HTMLElement {
             this.value = isChecked;
             this.valueInitialized = true;
         }
+        this.customInputReady.resolve(true)
     }
     
     get value() {
@@ -93,5 +96,3 @@ class InputSwitch extends HTMLElement {
     }
 
 }
-
-customElements.define("input-switch", InputSwitch);

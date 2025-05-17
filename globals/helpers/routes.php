@@ -102,7 +102,7 @@ function route(string $directiveName, array $args = [], array $context = []):str
         if($flag !== CRUDABLE_CONFIG_ADMIN + CRUDABLE_CONFIG_APIV1) throw new Exception("Crudable has not been configured: ".(($flag & CRUDABLE_CONFIG_APIV1) ? "Admin Flag":"APIv1 Flag"));
         throw new Exception("Could not find route based on directive name.");
     }
-    return $route;
+    return to_base_url($route);
 }
 
 function nullable_route(string $directiveName, array $args = [], array $context = []):?string {

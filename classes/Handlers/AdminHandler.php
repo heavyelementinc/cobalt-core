@@ -21,7 +21,7 @@ class AdminHandler extends WebHandler {
     // function post_router_init(){
     //     $this->prepare_html_framework();
     // }
-    public string $userbar_admin_panel   = "<a href=\"/\">".__APP_SETTINGS__['app_short_name']."</a>";
+    public string $userbar_admin_panel   = "<a href=\"".__APP_SETTINGS__['cobalt_base_path']."/\">".__APP_SETTINGS__['app_short_name']."</a>";
 
     function auth_panel() {
         if (!session_exists()) return "";
@@ -34,7 +34,7 @@ class AdminHandler extends WebHandler {
         // ]
 
         $panel = "";
-        if(__APP_SETTINGS__['manifest_engine'] === 1) $panel .= "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{versionHash}}'>";
+        if(__APP_SETTINGS__['manifest_engine'] === 1) $panel .= "<link rel='stylesheet' href='".to_base_url("/core-content/css/admin-panel.css")."?{{versionHash}}'>";
 
         $panel .= "<nav id='admin-panel'>$userPanel<ul class='admin-panel--nav-group directory--group'>";
     

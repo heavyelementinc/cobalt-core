@@ -1,10 +1,14 @@
-object-gallery,file-gallery {
+:root {
+    --object-gallery-dimension: 13em;
+}
+
+object-gallery,file-gallery,foreign-id,file-id {
     display: flex;
     flex-wrap: wrap;
     --gap: var(--margin-s);
     gap: var(--gap);
     padding: var(--gap);
-    --dimensions: 13em;
+    --object-gallery-dimension: 13em;
     --drop-shadow-size: calc(var(--gap) / 2);
     --drop-target-shadow: calc(var(--drop-shadow-size) * -1) 0 0 var(--primary-color-1);
     .object-picker-container {
@@ -13,8 +17,8 @@ object-gallery,file-gallery {
         object-picker, 
         input[type='file'] {
             display: block;
-            height: var(--dimensions);
-            width: var(--dimensions);
+            height: var(--object-gallery-dimension);
+            width: var(--object-gallery-dimension);
         }
         input[type='file'] {
             color: transparent;
@@ -31,17 +35,17 @@ object-gallery,file-gallery {
     }
     drop-indicator {
         display: none;
-        height: var(--dimensions);
+        height: var(--object-gallery-dimension);
         width: 0;
         margin: calc((var(--gap) * 0.4) * -1);
         box-shadow: 1px 1px 1px 1px var(--primary-color-1);
         [orientation="list"] {
             height: 0;
-            width: var(--dimensions);
+            width: var(--object-gallery-dimension);
         }
     }
     &[drag-in-progress="true"] {
-        cursor: grab;
+        cursor: grabbing;
         img, video {
             
         }
@@ -65,6 +69,14 @@ object-gallery,file-gallery {
     }
 }
 
+foreign-id, file-id {
+    :is(gallery-item) {
+        & + .object-picker-container {
+            display: none;
+        }
+    }
+}
+
 object-picker {
     display: grid;
     place-content: center;
@@ -74,8 +86,8 @@ object-picker {
 gallery-item {
     display: block;
     position: relative;
-    height: var(--dimensions);
-    width: var(--dimensions);
+    height: var(--object-gallery-dimension);
+    width: var(--object-gallery-dimension);
     border: 1px solid var(--neutral-color-1);
     padding: var(--margin-xs);
     img, video {
@@ -96,6 +108,10 @@ gallery-item {
             border-color: var(--primary-color-0);
         }
     }
+    /* If we have a mime-type, then we're a file rather than an object */
+    &[mime-type] > button {
+        position: absolute;
+    }
     action-menu {
         position: absolute;
         top: 0;
@@ -103,16 +119,20 @@ gallery-item {
         background: unset;
         font-size: .5em;
     }
+    &.object-gallery--visually-hidden {
+        opacity: 0.2;
+    }
 }
 
-file-gallery gallery-item {
-    > button {
-        position: absolute;
-        right: 0;
-        top: 0;
-    }
-        
+.object-gallery--visual-drop-target {
+    position: fixed;
+    pointer-events: none;
+    cursor: grabbing;
 }
+
+/* file-gallery gallery-item {
+
+} */
 
 .object-gallery--selection-window {
     max-height: 60vh;

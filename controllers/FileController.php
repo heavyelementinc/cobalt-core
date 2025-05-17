@@ -25,13 +25,14 @@ class FileController extends \Controllers\FileController {
         $path = $ROUTER->uri;
         $extensions = [];
         Extensions::invoke("register_shared_dir", $extensions);
+        $path = sanitize_path_name($path);
         // $file = __ENV_ROOT__ . "/shared/$path";
         $file = find_one_file([
             __APP_ROOT__ . "/shared/",
             ...$extensions ?? [],
             __ENV_ROOT__ . "/shared/",
             ...$SHARED_CONTENT
-        ], sanitize_path_name($path));
+        ], $path);
         if (!file_exists($file)) throw new Exceptions\HTTP\NotFound("The resource could not be located");
         // header('Content-Description: File Transfer');
         // header('Content-Type: application/octet-stream');
@@ -82,6 +83,7 @@ class FileController extends \Controllers\FileController {
     }
 
     function css($match) {
+        $match = sanitize_path_name($match);
         $cache = new \Cache\Manager("css-precomp/$match");
         if ($cache->exists) {
             $file = $cache->file_path;
@@ -101,6 +103,7 @@ class FileController extends \Controllers\FileController {
     }
 
     function css_versioned($version, $match) {
+        $match = sanitize_path_name($match);
         $cache = new \Cache\Manager("css-precomp/v$version/$match");
         if ($cache->exists) {
             $file = $cache->file_path;

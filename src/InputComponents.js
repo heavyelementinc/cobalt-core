@@ -209,46 +209,6 @@ class RadioGroup extends HTMLElement {
 
 customElements.define("radio-group", RadioGroup)
 
-class InputRadio extends HTMLElement {
-    get value() {
-        return this.querySelector("[checked='checked']")?.value ?? null;
-    }
-
-    set value(val) {
-        const candidate = this.querySelector(`input[value="${val}"]`);
-        if(!candidate) throw new Error("Invalid selection");
-        candidate.checked = true;
-    }
-
-    get name() {
-        return this.getAttribute("name");
-    }
-
-    connectedCallback() {
-        this.options = this.querySelectorAll("option");
-        this.createRadioButtons()
-    }
-
-    createRadioButtons() {
-        for(const opt of this.options) {
-            this.appendChild(this.radioElement(opt));
-        }
-    }
-
-    /** @param {HTMLOption} element */
-    radioElement(element) {
-        const label = document.createElement("label");
-        let checked = "";
-        if(element.selected == true) {
-            checked = " checked='checked'";
-        }
-        label.innerHTML = `<input type="radio" name="${this.name}" value="${element.value}"${checked}> ${element.innerHTML}`;
-        return label;
-    }
-}
-
-customElements.define("input-radio", InputRadio)
-
 class LoadingSpinner extends HTMLElement {
     constructor() {
         super();
@@ -298,8 +258,13 @@ class DisplayDate extends HTMLElement {
         };
     }
 
+    get value() {
+        return this.getAttribute("value") ?? this.innerText ?? null;
+    }
+
     connectedCallback() {
-        this.date = this.getValue();
+        this.date = this.value;
+        if(!this.date) return;
         // this.format = this.getAttribute("format") || this.formatKeywords.default;
         if ((this.getAttribute("format") || "default") in this.formatKeywords) this.format = this.formatKeywords[this.format];
         else this.format = this.getAttribute("format");

@@ -1,18 +1,21 @@
-class ObjectGallery extends HTMLElement {
+import ICustomInput from "./ICustomInput.js";
+export default {}
+export class ObjectGallery extends ICustomInput {
     uploadField;
     ITEM_QUERY = "gallery-item";
     DRAG_IN_PROGRESS = "drag-in-progress";
     DROP_TARGET_CLASS = "drop-target--class";
     DROP_TARGET_NEXT  = "drop-target--next";
+    VISUALLY_HIDDEN_CLASS = "object-gallery--visually-hidden";
 
     constructor() {
         super();
-        this.setAttribute("__custom-input", "true");
     }
 
     connectedCallback() {
         this.initObjectPicker();
         this.initDragAndDrop();
+        if(this.constructor.name === "ObjectGallery") this.customInputReady.resolve(true);
     }
     
     initObjectPicker() {
@@ -20,6 +23,7 @@ class ObjectGallery extends HTMLElement {
         this.uploadField.classList.add("object-picker-container");
         this.uploadField.method = this.getAttribute("method");
         this.uploadField.action = this.getAttribute("action");
+        this.uploadField.max = this.max;
 
         const picker = document.createElement("object-picker");
         this.uploadField.appendChild(picker);
@@ -53,12 +57,17 @@ class ObjectGallery extends HTMLElement {
 
     initDragAndDrop() {
         const items = this.querySelectorAll(this.ITEM_QUERY);
-        const firstElement = items[0].getBoundingClientRect();
-        const secondElement = items[1].getBoundingClientRect();
-        if(firstElement.y !== secondElement.y) {
-            // this.dragOrientation = ['clientY', 'y', 'height'];
-            // this.setAttribute("orientation", "list");
+        
+        if(items.length > 1) {
+            const firstElement = items[0].getBoundingClientRect();
+            const secondElement = items[1].getBoundingClientRect();
+            
+            if(firstElement.y !== secondElement.y) {
+                // this.dragOrientation = ['clientY', 'y', 'height'];
+                // this.setAttribute("orientation", "list");
+            }
         }
+
         for(const el of items) {
             el.setAttribute("draggable", "true");
             el.addEventListener("dragstart", this.dragStart.bind(this));
@@ -67,7 +76,7 @@ class ObjectGallery extends HTMLElement {
             el.addEventListener("dragenter", this.dragEnter.bind(this));
             el.addEventListener("dragleave", this.dragLeave.bind(this));
         }
-        
+
     }
 
     dragOrientation = ['clientX', 'x', 'width'];
@@ -77,10 +86,19 @@ class ObjectGallery extends HTMLElement {
 
     dragStart(event) {
         this.dragTarget = event.currentTarget;
+        this.visualDropTarget = this.dragTarget.cloneNode(true);
+        this.visualDropTarget.classList.add("object-gallery--visual-drop-target");
+        document.body.appendChild(this.visualDropTarget);
+
+        this.dragTarget.classList.add(this.VISUALLY_HIDDEN_CLASS);
+
         this.setAttribute(this.DRAG_IN_PROGRESS, "true");
     }
 
     dragEnd(event) {
+        if(this.visualDropTarget && this.visualDropTarget.parentNode) {
+            this.visualDropTarget.parentNode.removeChild(this.visualDropTarget);
+        }
         if(!this.dragTarget) {
             console.log("There's no drag target");
             return this.cleanUpAfterDragEvent();
@@ -89,12 +107,13 @@ class ObjectGallery extends HTMLElement {
             console.log("There's no drop target");
             return this.cleanUpAfterDragEvent();
         }
+        this.dragTarget.classList.remove(this.VISUALLY_HIDDEN_CLASS);
         let trueDropTarget = this.dropTarget;
         if(this.dropAfter) {
             this.dropTarget.nextElementSibling;
         }
         console.log(trueDropTarget, this.dropAfter);
-        this.insertBefore(this.dragTarget, trueDropTarget);
+        // this.insertBefore(this.dragTarget, trueDropTarget);
         this.cleanUpAfterDragEvent();
 
         this.dispatchEvent(new Event("change",{bubbles: true}));
@@ -103,6 +122,7 @@ class ObjectGallery extends HTMLElement {
     cleanUpAfterDragEvent() {
         this.dragTarget = null;
         this.dropTarget = null;
+        this.dropAfter = false;
         this.setAttribute(this.DRAG_IN_PROGRESS,"");
         this.dragEnterCounter = 0;
         this.querySelectorAll(`.${this.DROP_TARGET_CLASS}, .${this.DROP_TARGET_NEXT}`).forEach(el => {
@@ -117,10 +137,12 @@ class ObjectGallery extends HTMLElement {
         this.dragEnterCounter += 1;
         if(this.dragEnterCounter !== 1) return;
         this.dropTarget = target;
-        this.dropTarget.classList.add(this.DROP_TARGET_CLASS);
+        // this.dropTarget.classList.add(this.DROP_TARGET_CLASS);
     }
     
     dragAround(event) {
+        this.visualDropTarget.style.left = `${event.clientX - (this.visualDropTarget.clientWidth / 2)}px`;
+        this.visualDropTarget.style.top = `${event.clientY - (this.visualDropTarget.clientHeight / 2)}px`;
         // If we haven't dragged over an element, do nothing
         if(!this.dropTarget) return;
         
@@ -131,12 +153,12 @@ class ObjectGallery extends HTMLElement {
         const halfElementWidth = rect[this.dragOrientation[2]] / 2;
         if(relativeCursor >= halfElementWidth) {
             this.dropAfter = true;
-            this.dropTarget.classList.add(this.DROP_TARGET_NEXT);
+            // this.dropTarget.classList.add(this.DROP_TARGET_NEXT);
         } else {
             this.dropAfter = false;
-            this.dropTarget.classList.remove(this.DROP_TARGET_NEXT);
+            // this.dropTarget.classList.remove(this.DROP_TARGET_NEXT);
         }
-        // this.insertBefore(this.dropIndicator, (this.dropAfter) ? this.dropTarget.nextSibling : this.dropTarget);
+        this.insertBefore(this.dragTarget, (this.dropAfter) ? this.dropTarget.nextSibling : this.dropTarget);
     }
 
     dragLeave(event) {
@@ -159,9 +181,7 @@ class ObjectGallery extends HTMLElement {
 
 }
 
-customElements.define("object-gallery", ObjectGallery);
-
-class FileGallery extends ObjectGallery {
+export class FileGallery extends ObjectGallery {
     initObjectPicker() {
         super.initObjectPicker();
         let field = this.querySelector("input[type='file']");
@@ -173,11 +193,12 @@ class FileGallery extends ObjectGallery {
         }
 
         this.uploadField.appendChild(field);
+        this.customInputReady.resolve(true);
         // this.dropIndicator = document.createElement("drop-indicator");
         // this.appendChild(this.dropIndicator);
     }
     get value() {
-        const uploadButton = this.uploadField.querySelector("input[type='file']");
+        const uploadButton = this.uploadField?.querySelector("input[type='file']");
         console.log(uploadButton);
         if(uploadButton && uploadButton.files.length !== 0) {
             const files = uploadButton.files;
@@ -188,19 +209,21 @@ class FileGallery extends ObjectGallery {
     }
 }
 
-customElements.define("file-gallery", FileGallery);
-
-class GalleryItem extends HTMLElement {
+export class GalleryItem extends HTMLElement {
     constructor() {
         super();
     }
+    get container() {
+        return this.closest("object-gallery,file-gallery,foreign-id,file-id");
+    }
+
     connectedCallback() {
         // this.actionMenu = this.querySelector("action-menu");
         this.initActionMenu();
     }
 
     initActionMenu() {
-        if(!this.closest("object-gallery,file-gallery")) return;
+        if(!this.container) return;
         this.delete = document.createElement("button");
         this.delete.innerHTML = "<i name='close'></i>";
         this.insertBefore(this.delete, this.firstElementChild);
@@ -211,5 +234,3 @@ class GalleryItem extends HTMLElement {
         });
     }
 }
-
-customElements.define("gallery-item", GalleryItem);

@@ -26,6 +26,7 @@ a {
     }
     main {
         grid-column: 2 / span 1;
+        margin-right: var(--margin-s);
     }
     footer {
         display: none;

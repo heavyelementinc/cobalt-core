@@ -18,12 +18,13 @@
     <meta name="theme-color" content="{{app.color_branding}}">
     <meta name="mitigation" content="@csrf_get_token();">
     <meta name="engine" content="<?= sprintf(BODY_CONTENT_ENGINE_CREDIT) ?>" href="https://heavyelement.com/">
+    <meta name="cobalt-base-path" content="<?= to_base_url("/") ?>">
     {{!ai_scraping}}
 
     @maybe_with("$og_template");
     {{!webmention}}
     @fonts_tag();
-    <link href="/core-content/css/material-design/css/material.min.css?{{app.verion}}" rel="stylesheet">
+    <link href='<?=to_base_url("/core-content/css/material-design/css/material.min.css")?>?{{app.verion}}' rel="stylesheet">
     <?php
         use Cobalt\EventListings\Models\Event;
 
@@ -103,7 +104,7 @@
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
     <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
-    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="/core-content/js/editorjs/simpleimage.js"></script>
+    <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src='@to_base_url("/core-content/js/editorjs/simpleimage.js");'></script>
     <!-- <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src=""></script> -->
 
     @script_content@

@@ -6,7 +6,8 @@ use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Traits\Accessible;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
-use Cobalt\Model\Types\Abstracts\OrderedListOfIds;
+use Cobalt\Model\Types\Abstracts\ForeignId;
+use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
 use Cobalt\Model\Types\ArrayOfObjectsType;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
@@ -40,6 +41,9 @@ abstract class Model extends GenericModel implements Persistable {
         parent::__construct($this->defineSchema());
         $this->setData($data);
     }
+    public function getTimestamp() {
+        return $this->_id->getTimestamp() * 1000;
+    }
 
     /************** ORDERED LIST OF ID STUFF *******************/
     public function __model(string $model_id, string $field_name):array {
@@ -53,7 +57,9 @@ abstract class Model extends GenericModel implements Persistable {
         if(!key_exists($field_name, $specified_model->readSchema())) throw new BadRequest("Field $field_name does not exist.");
 
         $field = $specified_model->{$field_name};
-        if($field instanceof OrderedListOfIds == false) throw new BadRequest("Field $field_name is not a queryable type.");
+        if($field instanceof OrderedListOfForeignIds == false && $field instanceof ForeignId == false) {
+            throw new BadRequest("Field $field_name is not a queryable type.");
+        }
         
         $exclude = $_GET['exclude'] === "false" ? false : true;
         $results = $field->queryForObjects(
@@ -69,12 +75,17 @@ abstract class Model extends GenericModel implements Persistable {
         $template = $field->fieldItemTemplate();
         $field_value = $field->getValue() ?? [];
         $html = "";
+        $type = "checkbox";
+        if($_GET['max'] == "1") {
+            $type = "radio";
+        }
         foreach($results['cursor'] as $value) {
             $disabled = "";
             if(array_search($value->_id, $field_value) !== false) {
                 $disabled = " disabled=\"disabled\"";
             }
-            $html .= "<label class=\"object-gallery--item-selection\"$disabled><input type=\"checkbox\" value=\"$value->_id\">".view($template, ['item' => $value, 'ordered_list' => $this])."</label>";
+            
+            $html .= "<label class=\"object-gallery--item-selection\"$disabled><input type=\"$type\" value=\"$value->_id\">".view($template, ['item' => $value, 'ordered_list' => $this])."</label>";
         }
 
         // header("Content-Type: text/html");

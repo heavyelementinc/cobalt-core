@@ -44,64 +44,63 @@ function config() {
     return $CONFIG;
 }
 
-if(file_exists($db_config)) {
-    // Load the settings file
-    require_once $db_config;
-    global $CONFIG;
-    if(!$CONFIG) kill("Cobalt requires your config.php file to declare \$CONFIG");
-    if(config() !== $CONFIG) kill("Something went wrong with the bootstrap process");
+if(!file_exists($db_config)) kill("No configuration file found at $db_config");
+// Load the settings file
+require_once $db_config;
+global $CONFIG;
+if(!$CONFIG) kill("Cobalt requires your config.php file to declare \$CONFIG");
+if(config() !== $CONFIG) kill("Something went wrong with the bootstrap process");
 
-    // Sanity check functions must return TRUE if valid and FALSE if invalid
-    $sanity_check = [
-        'db_driver'       => fn ($val) => $val === "MongoDB",
-        'db_addr'         => fn ($val) => is_string($val),
-        'db_port'         => false,
-        'database'        => fn ($val) => !empty($val),
-        'db_usr'          => false,
-        'db_pwd'          => false,
-        'db_ssl'          => false,
-        'db_sslFile'      => false,
-        'db_invalidCerts' => false,
-        'bootstrap_mode'  => fn ($val) => ($val === COBALT_BOOSTRAP_AS_NEEDED || $val === COBALT_BOOSTRAP_ALWAYS),
-        'safe_mode'       => fn ($val) => is_bool($val),
-        'timezone'        => function ($value) {
-            return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
-        },
-        'mode'            => fn ($val) => in_array($val, [COBALT_MODE_DEVELOPMENT, COBALT_MODE_PRODUCTION]),
-    ];
+// Sanity check functions must return TRUE if valid and FALSE if invalid
+$sanity_check = [
+    'db_driver'       => fn ($val) => $val === "MongoDB",
+    'db_addr'         => fn ($val) => is_string($val),
+    'db_port'         => false,
+    'database'        => fn ($val) => !empty($val),
+    'db_usr'          => false,
+    'db_pwd'          => false,
+    'db_ssl'          => false,
+    'db_sslFile'      => false,
+    'db_invalidCerts' => false,
+    'bootstrap_mode'  => fn ($val) => ($val === COBALT_BOOSTRAP_AS_NEEDED || $val === COBALT_BOOSTRAP_ALWAYS),
+    'safe_mode'       => fn ($val) => is_bool($val),
+    'timezone'        => function ($value) {
+        return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
+    },
+    'mode'            => fn ($val) => in_array($val, [COBALT_MODE_DEVELOPMENT, COBALT_MODE_PRODUCTION]),
+];
 
-    // Default values allow the config file to omit any value with the following
-    // keys. If key is in the $sanity_check and not in $default_values, then the
-    // bootstrap process will die.
-    $default_values = [
-        'db_usr'          => '',
-        'db_pwd'          => '',
-        'db_ssl'          => false,
-        'db_sslFile'      => '',
-        'db_invalidCerts' => false,
-        'bootstrap_mode'  => COBALT_BOOSTRAP_AS_NEEDED,
-        'safe_mode'       => false,
-        'timezone'        => 'America/New_York',
-        'log_level'       => COBALT_LOG_ERROR,
-        'mode'            => COBALT_MODE_PRODUCTION,
-    ];
+// Default values allow the config file to omit any value with the following
+// keys. If key is in the $sanity_check and not in $default_values, then the
+// bootstrap process will die.
+$default_values = [
+    'db_usr'          => '',
+    'db_pwd'          => '',
+    'db_ssl'          => false,
+    'db_sslFile'      => '',
+    'db_invalidCerts' => false,
+    'bootstrap_mode'  => COBALT_BOOSTRAP_AS_NEEDED,
+    'safe_mode'       => false,
+    'timezone'        => 'America/New_York',
+    'log_level'       => COBALT_LOG_ERROR,
+    'mode'            => COBALT_MODE_PRODUCTION,
+];
 
-    foreach($sanity_check as $key => $value) {
-        // If the sanity check key is not in config
-        if(!key_exists($key, $CONFIG)) {
-            // Check if 
-            if(!key_exists($key, $default_values)) kill("Your config.php file is missing a required key.");
-            $CONFIG[$key] = $default_values[$key];
-        }
-        if($value !== false && is_callable($value) && !$value($CONFIG[$key])) kill("config.php validation failed. Key `$key` contains invalid data.");
-        // if($CONFIG[$key] == false) unset($CONFIG[$key]);
+foreach($sanity_check as $key => $value) {
+    // If the sanity check key is not in config
+    if(!key_exists($key, $CONFIG)) {
+        // Check if 
+        if(!key_exists($key, $default_values)) kill("Your config.php file is missing a required key.");
+        $CONFIG[$key] = $default_values[$key];
     }
-    
-    $tz_set_result = date_default_timezone_set($CONFIG['timezone']);
-    // $tz_set_result = date_default_timezone_set($CONFIG['timezone']);
-    if(!$tz_set_result) {
-        throw new Exception("Failed to set timezone");
-    }
+    if($value !== false && is_callable($value) && !$value($CONFIG[$key])) kill("config.php validation failed. Key `$key` contains invalid data.");
+    // if($CONFIG[$key] == false) unset($CONFIG[$key]);
+}
+
+$tz_set_result = date_default_timezone_set($CONFIG['timezone']);
+// $tz_set_result = date_default_timezone_set($CONFIG['timezone']);
+if(!$tz_set_result) {
+    throw new Exception("Failed to set timezone");
 }
 
 /**

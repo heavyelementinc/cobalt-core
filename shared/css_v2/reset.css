@@ -233,6 +233,11 @@ sup {
 
 img {
     border-style: none;
+    &[accent-color], &[contrast-color] {
+        /* background-image: attr(preview type(<string>)); */
+        background-color: attr(accent-color type(<color>));
+        color: attr(contrast-color type(<color>));
+    }
 }
 
 button, input, optgroup, select, textarea {

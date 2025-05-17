@@ -368,6 +368,22 @@ function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
     return $pkey;
 }
 
+function guidv4($data = null) {
+    // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+    if(!$data) $data = random_bytes(16);
+    else $data = str_pad($data, 16, random_string(16));
+    assert(strlen($data) == 16);
+ 
+    // Set version to 0100
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+    // Set bits 6-7 to 10
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+ 
+    $arr = str_split(bin2hex($data), 4);
+
+    // Output the 36 character UUID.
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', $arr);
+}
 
 function url_fragment_sanitize(string $value):string {
     $mutant = strtolower($value);
@@ -499,7 +515,7 @@ function embed_image(null|array|BSONArray|BSONDocument $doc, null|ObjectId $doci
     if($doc === null) $doc = ['filename' => null,'meta' => ['height' => 300, 'width' => 300, 'accent_color' => '#efefef', 'contrast_color' => '#000000']];
     $filename = ($doc['filename']) ? $doc['filename'] : $missing_image;
     if($filename !== $missing_image) {
-        $filename = ($filename[0] == "/") ? "/res/fs/$filename" : "/res/fs$filename";
+        $filename = ($filename[0] == "/") ? "/res/fs$filename" : "/res/fs/$filename";
     }
     $height   = $doc['meta']['height'];
     $width    = $doc['meta']['width'];
@@ -508,7 +524,7 @@ function embed_image(null|array|BSONArray|BSONDocument $doc, null|ObjectId $doci
     $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
     return <<<HTML
     <img src="$filename"$data_id alt="$doc[alt]" 
-        height="$height" width="$width" 
+        height="$height" width="$width" loading="lazy"
         accent-color="$accent" contrast-color="$contrast"
     >
     HTML;

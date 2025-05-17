@@ -46,7 +46,8 @@
     async-button[native],
     a.button[native],
     [role='button'],
-    [__custom-input]
+    [__custom-input],
+    [cobalt-component="cobalt-component"]:not(input-switch)
 )
 {
     display: inline-block;

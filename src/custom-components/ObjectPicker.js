@@ -1,4 +1,4 @@
-class ObjectPicker extends HTMLElement {
+export default class ObjectPicker extends HTMLElement {
     PARAMS = {
         limit: 50,
         page: 0,
@@ -26,7 +26,7 @@ class ObjectPicker extends HTMLElement {
     get action() {
         let action = this.getAttribute("action");
         if(!action) {
-            const closest = this.closest("object-gallery, file-gallery");
+            const closest = this.container
             if(!closest) throw new Error("Cannot find an action");
             action = closest.getAttribute("action");
         }
@@ -44,13 +44,26 @@ class ObjectPicker extends HTMLElement {
     get method() {
         let method = this.getAttribute("method");
         if(method) return method;
-        const closest = this.closest("object-gallery, file-gallery");
+        const closest = this.container;
         if(!closest) throw new Error("Cannot find an method");
         return closest.getAttribute("method");
     }
 
     set method(value) {
         this.setAttribute("method", value);
+    }
+
+    get max() {
+        return this.getAttribute("max") ?? "";
+    }
+
+    set max(value) {
+        if(typeof value == "number") this.setAttribute("max", value);
+        this.removeAttribute("max");
+    }
+
+    get container() {
+        return this.closest("object-gallery,file-gallery,foreign-id,file-id");
     }
 
     async open() {
@@ -114,6 +127,8 @@ class ObjectPicker extends HTMLElement {
         if(typeof direction !== "number") direction = 0;
         this.PARAMS.page += direction;
         if(this.PARAMS.page < 0) this.PARAMS.page = 0;
+        this.PARAMS.max = this.max;
+
         const api = new AsyncFetch(this.action, this.method);
         const result = await api.submit();
 
@@ -141,7 +156,7 @@ class ObjectPicker extends HTMLElement {
     }
 
     makeSelection() {
-        const selected = document.querySelectorAll(`${this.INPUT_TARGET}:checked`);
+        const selected = this.body.querySelectorAll(`${this.INPUT_TARGET}:checked`);
         let selection = [];
         for(const el of selected) {
             selection.push({
@@ -152,5 +167,3 @@ class ObjectPicker extends HTMLElement {
         this.dispatchEvent(new CustomEvent("selection", {detail: selection}));
     }
 }
-
-customElements.define("object-picker", ObjectPicker);

@@ -1,4 +1,6 @@
-class ObjectArrayItem extends HTMLElement {
+import ICustomInput from "./ICustomInput.js";
+
+export class ObjectArrayItem extends ICustomInput {
     constructor() {
         super();
         this.props = {
@@ -25,6 +27,7 @@ class ObjectArrayItem extends HTMLElement {
             item.removeAttribute("name");
         }
         this.value = this.props.value;
+        this.customInputReady.resolve(true);
     }
 
     get disabled() {
@@ -93,9 +96,7 @@ class ObjectArrayItem extends HTMLElement {
     }
 }
 
-customElements.define("object-array-item", ObjectArrayItem);
-
-class InputObjectArray extends HTMLElement {
+export default class InputObjectArray extends ICustomInput {
     OBJECT_ARRAY_ITEM = "object-array-item";
     bootstrapped = false;
     button;
@@ -217,4 +218,3 @@ class InputObjectArray extends HTMLElement {
     }
 }
 
-customElements.define("input-object-array", InputObjectArray);

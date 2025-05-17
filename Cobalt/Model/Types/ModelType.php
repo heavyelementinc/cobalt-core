@@ -59,15 +59,15 @@ class ModelType extends MixedType implements ArrayAccess {
     }
 
     public function offsetGet(mixed $offset): mixed {
-        return $this->value->offsetGet($offset);
+        return $this->value?->offsetGet($offset);
     }
 
     public function offsetSet(mixed $offset, mixed $value): void {
-        $this->value->offsetSet($offset, $value);
+        $this->value?->offsetSet($offset, $value);
     }
 
     public function offsetUnset(mixed $offset): void {
-        $this->value->offsetUnset($offset);
+        $this->value?->offsetUnset($offset);
     }
 
     public function allow_undefined_fields(bool $value) {

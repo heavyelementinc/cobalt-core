@@ -6,6 +6,7 @@ use Cobalt\Pages\Classes\PageManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
 use GuzzleHttp\Exception\GuzzleException;
+use Routes\Exceptions\UnexpectedBasePath;
 use Validation\Exceptions\NoValue;
 
 /**
@@ -246,34 +247,36 @@ function createJWT(array $header, array $payload, $secret) {
  *             [size]       => 21509
  *        )
  * ]
- * @return array 
+ * @deprecated use `normalize_uploaded_files` instead
+ * @return array
  */
 function normalize_file_array() {
-    $fileUploadArray = $_FILES;
-    $resultingDataStructure = [];
-    foreach ($fileUploadArray as $input => $infoArr) {
-        $filesByInput = [];
-        $nextIndex = count($filesByInput);
-        foreach ($infoArr as $key => $valueArr) {
-            if (is_array($valueArr)) { // file input "multiple"
-                foreach($valueArr as $i=>$value) {
-                    $filesByInput[$i][$key] = $value;
-                }
+    return normalize_uploaded_files($_FILES);
+    // $fileUploadArray = $_FILES;
+    // $resultingDataStructure = [];
+    // foreach ($fileUploadArray as $input => $infoArr) {
+    //     $filesByInput = [];
+    //     $nextIndex = count($filesByInput);
+    //     foreach ($infoArr as $key => $valueArr) {
+    //         if (is_array($valueArr)) { // file input "multiple"
+    //             foreach($valueArr as $i=>$value) {
+    //                 $filesByInput[$i][$key] = $value;
+    //             }
                 
-            }
-            else { // -> string, normal file input
-                $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
-                break;
-            }
-        }
-        $filesByInput[$nextIndex]['input_name'] = $input;
-        $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
-    }
-    $filteredFileArray = [];
-    foreach($resultingDataStructure as $file) { // let's filter empty & errors
-        if (!$file['error']) $filteredFileArray[] = $file;
-    }
-    return $filteredFileArray;
+    //         }
+    //         else { // -> string, normal file input
+    //             $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
+    //             break;
+    //         }
+    //     }
+    //     $filesByInput[$nextIndex]['input_name'] = $input;
+    //     $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
+    // }
+    // $filteredFileArray = [];
+    // foreach($resultingDataStructure as $file) { // let's filter empty & errors
+    //     if (!$file['error']) $filteredFileArray[] = $file;
+    // }
+    // return $filteredFileArray;
 }
 
 
@@ -301,6 +304,21 @@ function server_name(bool $defaultToAppSetting = true, ?bool $isSecure = null) {
     return ($isSecure) ? "https://".__APP_SETTINGS__['domain_name'] : "http://".__APP_SETTINGS__['domain_name'];
 }
 
+function to_base_url(string $url, bool $defaultToAppSetting = true, ?bool $isSecure = null) {
+    return preg_replace("/\/{2,}/", "/", __APP_SETTINGS__['cobalt_base_path'] . $url);
+}
+
+function remove_base_path(string $route) {
+    // Check if we have a base_path set
+    if(__APP_SETTINGS__['cobalt_base_path']) {
+        // If we do, let's update our route so that there's *no* base path set
+        $ln = strlen(__APP_SETTINGS__['cobalt_base_path']);
+        if(substr($route, 0, $ln) !== __APP_SETTINGS__['cobalt_base_path']) throw new UnexpectedBasePath("The beginning of this path does not match cobalt_base_path");
+        $route = substr($route, $ln);
+    }
+    return $route;
+}
+
 
 function str_to_id($str) {
     $replace = preg_replace("/([^\w])/", "-", $str);
@@ -315,4 +333,36 @@ function is_bot(?string $useragent = null) {
 
 function is_cli() {
     return http_response_code() === false;
+}
+
+/**
+ * 
+ * @param array $files array{key:array{name:string|array,type:string|array,tmp_name:string|array,error:int|array,size:int|array}}
+ * @return array 
+ */
+function normalize_uploaded_files(array $files):array {
+    $newArray = [];
+    foreach($files as $fieldName => $data) {
+        // Add our current field to the new array
+        if(!key_exists($fieldName, $newArray)) $newArray[$fieldName] = [];
+        // Check if the field 'name' exists in the data, otherwise we skip it
+        if(!key_exists('name', $data)) continue;
+        // If the 'name' field is a string, let's set our data and continue
+        if(is_string($data['name'])) {
+            $newArray[$fieldName] = $data;
+            continue;
+        }
+        // Otherwise, let's unwind this absolute mess of a list and store it in
+        // a sane way
+        foreach($data['name'] as $index => $value) {
+            $newArray[$fieldName][] = [
+                'name' => $value,
+                'type' => $data['type'][$index],
+                'tmp_name' => $data['tmp_name'][$index],
+                'error' => $data['error'][$index],
+                'size' => $data['size'][$index],
+            ];
+        }
+    }
+    return $newArray;
 }

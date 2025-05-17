@@ -12,16 +12,17 @@ use Cobalt\Model\Types\MixedType;
 use Iterator;
 use MongoDB\Driver\Cursor;
 
-abstract class OrderedListOfIds extends MixedType implements Iterator {
+abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
     public array $raw = [];
 
     abstract function getModel(): Model;
     /**
-     * Prepare an $id for storage.
+     * Called once per item in the OrderedList *before* as the value is set in
+     * the array that will be used to join the foreign keys in the database
      * @param mixed $id 
      * @return null|ObjectId Return an ObjectId or `null`, if null, the value will be ignored
      */
-    abstract function restoreValue(&$id): ?ObjectId;
+    abstract function interpretRawValue(&$id): ?ObjectId;
     abstract function storeValue(ObjectId $id): ?ObjectId;
     
     /**
@@ -40,7 +41,7 @@ abstract class OrderedListOfIds extends MixedType implements Iterator {
     }
 
     // If needed, you can override this functionality (as we do with the ImageArrayType)
-    public function queryForValues(Model $model, array $ids): ?Cursor {
+    public function runJoinQuery(Model $model, array $ids): ?Cursor {
         return $model->find(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
     }
     
@@ -67,22 +68,22 @@ abstract class OrderedListOfIds extends MixedType implements Iterator {
         ];
     }
 
-    public function setValue($images):void {
+    public function setValue($originalValue):void {
         $ids = [];
-        foreach($images as $value) {
+        foreach($originalValue as $value) {
             // This is the primary data structure
             if($value instanceof ObjectId) {
                 $ids[] = $value;
                 continue;
             }
-            $ids[] = $this->restoreValue($value);
+            $ids[] = $this->interpretRawValue($value);
         }
         $this->raw = $ids;
 
         $model = $this->getModel();
         
         // Now that we have all our IDs, let's find the details
-        $results = $this->queryForValues($model, $ids);
+        $results = $this->runJoinQuery($model, $ids);
         $unordered = [];
         // if($result) $details = iterator_to_array($result);
         foreach($results as $result) {

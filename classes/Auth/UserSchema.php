@@ -330,10 +330,10 @@ class UserSchema extends \Validation\Normalize {
     }
 
     function getAvatar($val) {
-        if(!$val) return "/core-content/img/unknown-user.jpg";
-        if($val['thumb']['id'] === null) return $val['thumb']['filename'];
+        if(!$val) return to_base_url("/core-content/img/unknown-user.jpg");
+        if($val['thumb']['id'] === null) return to_base_url($val['thumb']['filename']);
         $thumb = $val['thumb']['filename'];
-        return "/res/fs$thumb";
+        return to_base_url("/res/fs$thumb");
     }
 
     function setAvatar($val) {

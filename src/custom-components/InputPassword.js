@@ -1,13 +1,17 @@
+import ICustomInput from "./ICustomInput.js";
+
 /**
  * `<input-password>` valid attibutes include:
  *   * value - 
  */
- class InputPassword extends HTMLElement {
+ export default class InputPassword extends ICustomInput {
+    passwordVisible = false;
+    input = null;
+    button = null;
 
     constructor() {
         super();
-        this.passwordVisible = false;
-        this.setAttribute("__custom-input", "true");
+        // this.setAttribute("__custom-input", "true");
     }
 
     observedAttributes() {
@@ -51,6 +55,7 @@
         this.button = this.querySelector("button");
         this.initButton();
         this.input.focus();
+        this.customInputReady.resolve(true)
     }
 
     updateValue(value = null) {
@@ -67,5 +72,3 @@
     }
 
 }
-
-customElements.define("input-password", InputPassword);

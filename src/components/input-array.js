@@ -464,6 +464,7 @@ class InputUser extends AutoCompleteInterface {
     constructor() {
         super();
         this.user = null;
+        this.__ready__ = false;
     }
 
     connectedCallback() {
@@ -471,7 +472,8 @@ class InputUser extends AutoCompleteInterface {
         this.searchField = this.getAutocompleteSearchField();
         this.appendChild(this.searchField);
         this.addEventListener("autocompleteselect", e => {
-            this.setValue(e.detail);
+            this.setValue(e.detail, this.__ready__);
+            this.__ready__ = true;
         });
         const val = this.getAttribute("value");
         if(val) this.value = val;
@@ -527,7 +529,7 @@ class InputUser extends AutoCompleteInterface {
         return user;
     }
 
-    setValue(values) {
+    setValue(values, dispatchEvent = false) {
         this.user = document.createElement("div");
         this.user.innerHTML = values.label;
         this.user.setAttribute("value", values.value);
@@ -544,7 +546,7 @@ class InputUser extends AutoCompleteInterface {
             this.dispatchEvent(new Event("change",{bubbles: true}));
         });
         this.appendChild(this.clearButton);
-        this.dispatchEvent(new Event("change",{bubbles: true}));
+        if(dispatchEvent) this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
 }

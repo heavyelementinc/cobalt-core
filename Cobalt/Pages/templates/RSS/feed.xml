@@ -5,7 +5,7 @@
         <link>https://{{app.domain_name}}</link>
         <description>{{app.Posts_rss_feed_description}}</description>
         <image>
-            <url>https://{{app.domain_name}}{{app.logo.thumb.filename}}</url>
+            <url>https://{{app.domain_name}}<?= to_base_url(app("logo.thumb.filename")); ?></url>
             <title>{{app.Posts_rss_feed_name}}</title>
             <link>https://{{app.domain_name}}</link>
             <width>{{app.logo.thumb.meta.width}}</width>
@@ -13,7 +13,7 @@
         </image>
         <language>en-us</language>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
-        <copyright>©@date("Y"); {{app.name}}. All rights reserved.</copyright>
+        <copyright>©@date("Y"); {{app.app_copyright_name}} &amp; All rights reserved.<?= ($app["AI_prohibit_scraping_notice"]) ? " AI use is strictly prohibited." : "" ?></copyright>
 {{!posts}}
     </channel>
 </rss>

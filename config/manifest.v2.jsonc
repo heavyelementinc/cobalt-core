@@ -91,11 +91,11 @@
         "contexts": ["common"],
         "package": "deferred"
     },
-    {
-        "href":"components/input-switch.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
+    // {
+    //     "href":"components/input-switch.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
     {
         "href":"components/datepicker.js",
         "contexts": ["common"],
@@ -111,11 +111,11 @@
         "contexts": ["common"],
         "package": "deferred"
     },
-    {
-        "href":"components/input-password.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
+    // {
+    //     "href":"components/input-password.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
     {
         "href":"components/cobalt-carousel.js",
         "contexts": ["common"],
@@ -166,21 +166,21 @@
         "contexts": ["common"],
         "package": "deferred"
     },
-    {
-        "href":"components/object-gallery-picker.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
-    {
-        "href":"components/object-gallery.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
-    {
-        "href":"components/markdown-area.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
+    // {
+    //     "href":"custom-components/object-gallery-picker.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    // {
+    //     "href":"custom-components/object-gallery.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    // {
+    //     "href":"components/markdown-area.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
     {
         "href":"components/CountdownTimer.js",
         "contexts": ["common"],
@@ -191,11 +191,11 @@
         "contexts": ["common"],
         "package": "deferred"
     },
-    {
-        "href":"components/block-editor.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
+    // {
+    //     "href":"components/block-editor.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
     {
         "href":"components/image-result.js",
         "contexts": ["common"],
@@ -261,11 +261,11 @@
         "contexts": ["common"],
         "package": "deferred"
     },
-    {
-        "href":"components/InputObjectArray.js",
-        "contexts": ["common"],
-        "package": "deferred"
-    },
+    // {
+    //     "href":"components/InputObjectArray.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
     {
         "href":"CobaltScrollManager.js",
         "contexts": ["common"]
@@ -299,9 +299,10 @@
         "contexts": ["admin"]
     },
     {
-        "href":"components/FormRequest.js",
-        "contexts": ["common"], 
-        "append": true
+        "href":"custom-components/_ComponentDeclarations.js",
+        "contexts": ["common"],
+        "append": true,
+        "module": true
     },
     {
         "href":"main.js",

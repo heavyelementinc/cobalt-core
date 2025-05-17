@@ -1,5 +1,6 @@
-class BlockButton {
+import ICustomInput from "./ICustomInput.js";
 
+class BlockButton {
     constructor({data}) {
         this.LABEL_CLASS = "blockbutton--label";
         this.HREF_CLASS = "blockbutton--href";
@@ -123,7 +124,11 @@ class Like {
     }
 }
 
-class BlockEditor extends HTMLElement {
+export default class BlockEditor extends ICustomInput {
+    DEFAULT_TIMEOUT = 2550;
+    /** @property {EditorJS|null} __editor__ */
+    __editor__ = null;
+    __synchronousValue__ = {};
     constructor() {
         super();
         this.props = {
@@ -151,7 +156,7 @@ class BlockEditor extends HTMLElement {
         } catch (Error) {
             console.warn("Failed to parse JSON. Data loss is HIGHLY PROBABLE!")
         }
-        this.props.editor = new EditorJS({
+        this.__editor__ = new EditorJS({
             holder: this,
             data: data,
             tools: {
@@ -202,61 +207,46 @@ class BlockEditor extends HTMLElement {
                 blockbutton: BlockButton,
             },
             onChange: (api, event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 this.hasChangeOccurred = true;
-                console.log(`Change: ${this.hasChangeOccurred}`, {api, event});
+                // this.setSyncValue().then(() => {
+                //     this.dispatchEvent(new Event("change", {bubbles: true}));
+                // });
+                // this.dispatchEvent(new Event("change", {bubbles: true}));
             }
         });
-        this.addEventListener("focusout", event => {
+
+        this.addEventListener("focusout", async event => {
             if(this.hasChangeOccurred === false) {
-                console.log(`Change: ${this.hasChangeOccurred}`)
                 return;
             }
-            this.dispatchEvent(new Event("change", {detail: {api: {}, event}}))
+            // await this.setSyncValue();
+            this.dispatchEvent(new Event("change", {bubbles: true, detail: {api: {}, event}}))
             this.hasChangeOccurred = false;
         });
-        this.addEventListener("focusin", event => {
+        this.addEventListener("focusin", async event => {
             if(this.hasChangeOccurred === false) {
-                console.log(`Change: ${this.hasChangeOccurred}`);
                 return;
             }
-            this.dispatchEvent(new Event("change", {detail: {api: {}, event}}));
+            // await this.setSyncValue();
+            this.dispatchEvent(new Event("change", {bubbles: true, detail: {api: {}, event}}));
             this.hasChangeOccurred = false;
         });
-        this.addEventListener("change", event => {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
-        this.addEventListener("input", event => {
-            // event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
+        this.customInputReady.resolve(true)
     }
 
-    get name() {
-        return this.getAttribute("name");
-    }
-
-    set name(value) {
-        this.setAttribute("name", value);
+    async setSyncValue() {
+        await this.__editor__.isReady;
+        this.__synchronousValue__ = await this.__editor__.save();
     }
 
     get value() {
-        return this.props.editor.save();
+        return this.__editor__.save();
     }
 
     /** @var object{time: int, blocks: object, version: string} */
     set value(val) {
-        this.props.editor.data = val;
+        this.__editor__.data = val;
     }
-
-    get autosaveTimeout() {
-        const num = this.getAttribute("autosave-timeout")
-        if(num) return Number(num) * 1000;
-        return 4 * 1000;
-    }
-
 }
-
-customElements.define("block-editor", BlockEditor);

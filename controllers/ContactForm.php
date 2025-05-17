@@ -230,7 +230,8 @@ class ContactForm extends Crudable {
 
     private function getRecipients() {
         $crud = new UserCRUD();
-        $users = $crud->getUsersByPermission(__APP_SETTINGS__['']);
+        $users = $crud->getUsersByPermission(__APP_SETTINGS__['Contact_form_user_permissions_to_notify']);
+        return $users;
     }
 
     private function contactSMTP($mutant) {

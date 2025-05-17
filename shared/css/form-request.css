@@ -229,11 +229,11 @@ form-next-item.displayed {
 }
 
 form-request:has(.form-request--next-frame,.form-request--previous-frame) {
-  overflow-x: clip;
+  overflow: clip;
 }
 
 form-request .form-request--frame {
-  position: absolute;
+  /* position: absolute; */
   inset: 0;
   --end-translation: 0 0;
   translate: var(--end-translation);
@@ -242,10 +242,12 @@ form-request .form-request--frame {
 
 form-request .form-request--next-frame {
   --end-translation: 100% 0;
+  position: absolute;
 }
 
 form-request .form-request--previous-frame {
   --end-translation: -100% 0;
+  position: absolute;
 }
 
 form-request.form-request--backwards .form-request--next-frame {

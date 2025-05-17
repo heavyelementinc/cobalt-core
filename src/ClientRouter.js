@@ -220,12 +220,12 @@ class ClientRouter extends EventTarget{
 
     async navigate(route) {
         const forms = document.querySelectorAll("form-request");
-        for(const f of forms) {
-            if(await f.unsavedChanges()) {
-                const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
-                if(!conf) return;
-            }
-        }
+        // for(const f of forms) {
+        //     if(await f.unsavedChanges()) {
+        //         const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
+        //         if(!conf) return;
+        //     }
+        // }
 
         const navStartEvent = new CustomEvent("navigationstart", {detail: {route}});
         const navStartEventResult = this.dispatchEvent(navStartEvent);

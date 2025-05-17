@@ -41,7 +41,7 @@ require_once __ENV_ROOT__ . "/globals/locales/en_us.php";
 // Establish our app root
 $app_root = "";
 // Go up one directory so we're not in the public space
-if (!empty($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../";
+if (!empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) $app_root = $_SERVER['CONTEXT_DOCUMENT_ROOT'] . "/../";
 // Rely on the Cobalt CLI to mandate the path to our app
 else if (key_exists("cli_app_root", $GLOBALS)) $app_root = $GLOBALS['cli_app_root'];
 else if (key_exists("unit_test", $GLOBALS)) $app_root = $GLOBALS['unit_test'];
@@ -89,6 +89,10 @@ $allowed_to_exit_on_exception = true;
 $WRITE_TO_BUFFER_HANDLED = false;
 
 require_once __DIR__ . "/globals/global_declarations.php";
+
+$app_constants = __APP_ROOT__ . "/app_constants.php";
+if(file_exists($app_constants)) require_once $app_constants;
+
 require_once __DIR__ . "/globals/bootstrap.php";
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_functions.php";

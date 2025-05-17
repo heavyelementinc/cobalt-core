@@ -49,7 +49,7 @@ class ActionMenuElement extends CustomButton {
 
     disconnectedCallback() {
         this.menu.close();
-        if("parentNode" in this.menu.wrapper 
+        if(this.menu.wrapper?.parentNode
         && "deleteChild" in this.menu.wrapper.parentNode) {
             this.menu.wrapper.parentNode.deleteChild(this.menu.wrapper);
         }

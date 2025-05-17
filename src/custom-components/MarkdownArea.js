@@ -1,4 +1,6 @@
-class MarkdownArea extends HTMLElement {
+import ICustomInput from "./ICustomInput.js";
+
+export default class MarkdownArea extends ICustomInput {
     constructor() {
         super();
         this.props = {
@@ -6,7 +8,16 @@ class MarkdownArea extends HTMLElement {
             changed: false,
         }
         this.editor = null;
-        this.setAttribute("__custom-input", "true");
+        // this.setAttribute("__custom-input", "true");
+    }
+    
+    get value() {
+        if(this.editor) return this.editor.value();
+    }
+
+    set value(val) {
+        if(this.editor) return this.editor.value(val);
+        this.props.originalTextContent = val;
     }
 
     connectedCallback() {
@@ -39,6 +50,7 @@ class MarkdownArea extends HTMLElement {
         this.addEventListener("focusout", e => {
             this.triggerAutosaveChangeEvent();
         });
+        this.customInputReady.resolve(true)
     }
 
     triggerAutosaveChangeEvent() {
@@ -47,27 +59,4 @@ class MarkdownArea extends HTMLElement {
         this.props.changed = false;
     }
 
-    get value() {
-        if(this.editor) return this.editor.value();
-    }
-
-    set value(val) {
-        if(this.editor) return this.editor.value(val);
-        this.props.originalTextContent = val;
-    }
-
-    get disabled() {
-        return this.props.disabled;
-    }
-
-    set disabled(val) {
-        if(typeof val !== "boolean") val = Boolean(val);
-        this.props.disabled = val;
-    }
-
-    get name() {
-        return this.getAttribute("name");
-    }
 }
-
-customElements.define("markdown-area", MarkdownArea);

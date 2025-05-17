@@ -508,6 +508,9 @@ $settings = [
                 "type" => "string"
             ]
         ],
+        "Contact_form_user_permissions_to_notify" => [
+            'default' => ["Contact_form_submissions_access"],
+        ],
         
         "Contact_form_notify_on_new_submission" => [
             "default" => false,
@@ -2092,6 +2095,13 @@ $settings = [
                         "session_refresh" => false,
                         "api_access" => false,
                         "prefix" => "/core-content/"
+                    ],
+                    "res" => [
+                        'processor' => "Handlers\\SharedHandler",
+                        'mode' => "application/json",
+                        "session_refresh" => false,
+                        "api_access" => false,
+                        "prefix" => "/res/"
                     ],
                     "apinotifications" => [
                         "processor" => "Handlers\\ApiHandler",

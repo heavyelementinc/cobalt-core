@@ -103,7 +103,7 @@ class ManifestManager {
     function handle_js_cache($details, $context) {
         $tag_generator = function (string &$html_tags, string $package_name, array $package_details, string $compiled) {
             if(!$package_details['inline']) {
-                $html_tags .= "<script src=\"/core-content/js/$package_name?{{versionHash}}\" ".implode("\n",$package_details['meta'])."></script>";
+                $html_tags .= "<script src=\"".to_base_url("/core-content/js/$package_name?{{versionHash}}")."\" ".implode("\n",$package_details['meta'])."></script>";
                 return true;
             }
             $html_tags .= "<script class=\"inline-js\" ".implode("\n",$package_details['meta']).">$compiled</script>";
@@ -116,7 +116,7 @@ class ManifestManager {
     function handle_css_cache($details, $context) {
         $tag_generator = function (string &$html_tags, string $package_name, array $package_details, string $compiled) {
             if(!$package_details['inline']) {
-                $html_tags .= "<link rel=\"stylesheet\" href=\"/core-content/css/$package_name?{{versionHash}}\">";
+                $html_tags .= "<link rel=\"stylesheet\" href=\"".to_base_url("/core-content/css/$package_name?{{versionHash}}")."\">";
                 return true;
             }
             $html_tags .= "<style class=\"inline-css\">$compiled</style>";

@@ -411,6 +411,7 @@ class AsyncUpdate {
             const directive = `fn_${i}`;
             if(directive in this === false) {
                 if(directive === "fn_target") continue;
+                if(directive === "fn_next") continue;
                 console.warn(`Unsupported update directive: ${directive}`);
                 continue;
             }
@@ -552,21 +553,27 @@ function appendElementInformation(element, value, instructions) {
     let el = document.createElement("validation-issue");
     const spawnIndex = spawn_priority(element);
     if (spawnIndex) el.style.zIndex = spawnIndex + 1;
+    el.clearMessage = async () => {
+        if(!el) return;
+        el.dispatchEvent(new CustomEvent("invalidclearstate"));
+        element.invalid = false;
+        // element.ariaInvalid = false;
+        await wait_for_animation(el, "form-request--issue-fade-out");
+        el.parentNode?.removeChild(el);
+    }
 
-    el.addEventListener('click', () => {
-        if (el) {
-            el.parentNode.removeChild(el);
-            element.ariaInvalid = false;
-        }
-    });
+    // If you click on the message, we should remove it
+    el.addEventListener("click", () => {
+        el.clearMessage();
+    }, {once: true});
+
+    // When you focus the field, we should remove the message
+    element.addEventListener("focus", () => {
+        el.clearMessage();
+    }, {once: true});
 
     el.classList.add("form-request--field-issue-message");
     el.innerText = value;
-    el.addEventListener("click", async e => {
-        element.ariaInvalid = false;
-        await wait_for_animation(el, "form-request--issue-fade-out");
-        el.parentNode.removeChild(el);
-    })
 
     const offsets = get_offset(element);
     el.style.top = `${offsets.bottom}px`;

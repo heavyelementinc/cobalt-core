@@ -9,16 +9,33 @@ use DateTime;
 use DateTimeZone;
 
 class DateType extends MixedType {
+    const FORMAT_SHORTHANDS = [
+        'w3c' => \DateTimeInterface::W3C,
+        'datetime-local' => DATETIME_LOCAL_FORMAT,
+        'input' => "Y-m-d",
+        'date'  => "Y-m-d",
+        'time'  => "H:i",
+        'RFC3339' => 'c',
+        'iso' => 'c',
+        'default' => 'm/d/Y',
+        "verbose" => "l, F jS Y g:i A",
+        "no-dow"  => "F jS Y g:i A",
+        "long" => "l, F jS Y",
+        "12-hour" => "g:i a",
+        "24-hour" => "H:i",
+        "seconds" => "g:i:s A",
+    ];
     public function initDirectives(): array {
         return [
-            'fromEncoding' => 'RFC3339',
-            'toEncoding' => 'RFC3339',
+            'fromEncoding' => 'datetime-local',
+            // 'toEncoding'   => 'RFC3339',
+            'toEncoding' => 'datetime-local'
         ];
     }
 
     private function supported_encodings(string $encoding):bool {
-        $encodings = ['RFC3339'];
-        return in_array($encoding, $encodings);
+        // $encodings = ['RFC3339', \DateTimeInterface::W3C, 'datetime-local'];
+        return key_exists($encoding, self::FORMAT_SHORTHANDS);
     }
 
     #[Directive]
@@ -38,9 +55,9 @@ class DateType extends MixedType {
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
-        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-date";
-        if($tag === null) $tag = "input-date";
-        return $this->inputDate($class, $misc, $tag);
+        // if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-date";
+        // if($tag === null) $tag = "input-date";
+        return $this->inputDate($class, $misc);
     }
 
     #[Prototype]
@@ -63,21 +80,11 @@ class DateType extends MixedType {
     }
 
     #[Prototype]
-    protected function format(string $format = "input"):string {
+    protected function format(string $format = "datetime-local"):string {
         $value = $this->getValue();
         if($value === null) return "";
-        $shorthands = [
-            'iso' => 'c',
-            'input' => "Y-m-d",
-            'default' => 'm/d/Y',
-            "verbose" => "l, F jS Y g:i A",
-            "no-dow"  => "F jS Y g:i A",
-            "long" => "l, F jS Y",
-            "12-hour" => "g:i a",
-            "24-hour" => "H:i",
-            "seconds" => "g:i:s A",
-        ];
-        if(key_exists($format,$shorthands) ) $format = $shorthands[$format];
+        $shorthands = self::FORMAT_SHORTHANDS;
+        if(key_exists($format, $shorthands) ) $format = $shorthands[$format];
         if($value instanceof \MongoDB\BSON\UTCDateTime) {
             $value = $value->toDateTime();
         }

@@ -3,6 +3,7 @@
 namespace Cobalt\Model\Types\Traits;
 
 use Cobalt\Model\Attributes\Prototype;
+use DateTimeInterface;
 use Exception;
 
 trait MixedTypeToField {
@@ -42,13 +43,20 @@ trait MixedTypeToField {
 
     protected function inputDate($classes = "", $misc = []) {
         $misc = array_merge([
-            'from' => $this->schema['from'] ?? "ISO 8601",
-            'to'   => $this->schema['to'] ?? "ISO 8601",
+            'from' => $this->schema['from'] ?? 'datetime-local',
+            'to'   => $this->schema['to'] ?? 'datetime-local',
         ], $misc);
         [$misc, $attrs] = $this->defaultFieldData($misc);
         
-        $fmt = "c";
-        switch($misc['from']) {
+        $fmt = DATETIME_LOCAL_FORMAT;
+        switch($misc['to']) {
+            case "datetime-local":
+            case "w3c-simple":
+                $fmt = DATETIME_LOCAL_FORMAT;
+                break;
+            case "w3c":
+                $fmt = DateTimeInterface::W3C;
+                break;
             case "seconds":
             case "php":
             case "time":
@@ -68,12 +76,12 @@ trait MixedTypeToField {
         $formatted = "";
         if($value) $formatted = $this->format($fmt);
 
-        if($misc['from'] === "milliseconds") $formatted * 1000;
+        if($misc['to'] === "milliseconds") $formatted * 1000;
 
-        $pattern = ($this->hasDirective("pattern")) ? $this->getDirective("pattern", false) : "";
-        if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+        // $pattern = ($this->hasDirective("pattern")) ? $this->getDirective("pattern", false) : "";
+        // if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
 
-        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-datetime>";
+        return "<input type=\"datetime-local\" class=\"$classes\" $attrs value=\"$formatted\">";
     }
 
     protected function select($classes = "", $misc = [], $tag = "select") {

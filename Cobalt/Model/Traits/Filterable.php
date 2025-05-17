@@ -88,11 +88,11 @@ trait Filterable {
                 $funcReflection = new ReflectionFunction($this->__schema[$field]['filter']);
                 $argsReflection = $funcReflection->getParameters();
                 if(!$argsReflection[0]->isPassedByReference()) {
-                    throw new Error("The filter directive specified for field `$this->name` must accept values passed only by reference!");
+                    throw new Error("The filter directive specified for field `$field` must accept values passed only by reference!");
                 }
                 $returnType = $funcReflection->getReturnType();
                 if((string)$returnType !== "void") {
-                    throw new Error("The filter directive specified for field `$this->name` must specify a return type of `void`!");
+                    throw new Error("The filter directive specified for field `$field` must specify a return type of `void`!");
                 }
                 $this->__schema[$field]['filter']($value);
             }
@@ -106,8 +106,8 @@ trait Filterable {
                 $validated = $result->set($value);
             }
         } catch (ValidationContinue $e) {
-            // If we catch a ValidationContinue, let's throw it again to
-            // so we know to skip this field when we recieve this signal
+            // If we catch a ValidationContinue, let's throw it again so
+            // we know to skip this field when we recieve this signal
             new ValidationContinue($e);
         } catch (ValidationIssue $e) { // Handle issues
             if (!isset($this->__issues[$field])) {

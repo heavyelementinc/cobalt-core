@@ -1,6 +1,6 @@
 
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], input-radio[name], image-result[name], object-gallery[name], file-gallery[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], input-radio[name], image-result[name], object-gallery[name], file-gallery[name], [cobalt-component=\"cobalt-component\"][name]";
 
 function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());
@@ -928,6 +928,7 @@ function promiseTimeout(callback, value) {
 }
 
 function encodeClickModifiers(event) {
+    if(!event) return 0;
     const SHIFT_KEY = 0b0000001;
     const CTRL_KEY  = 0b0000010;
     const ALT_KEY   = 0b0000100;
@@ -970,11 +971,12 @@ class Deferred {
         resolve: (value) => {},
         reject: (message) => {}
     }
-    constructor(callback) {
+    constructor(callback = () => {}) {
         this._props.promise = new Promise(async (resolve, reject) => {
             this._props.resolve = resolve;
             this._props.reject = reject;
-            await callback(resolve, reject);
+            await this.promise;
+            callback(resolve, reject);
         });
     }
 

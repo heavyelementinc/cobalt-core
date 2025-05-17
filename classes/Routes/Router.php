@@ -32,6 +32,7 @@ use Exceptions\HTTP\NotImplemented;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\UTCDateTime;
 use ReflectionObject;
+use Routes\Exceptions\UnexpectedBasePath;
 
 class Router {
 
@@ -138,14 +139,12 @@ class Router {
 
 
     function discover_route($route = null, $query = null, $method = null, $context = null) {
-        if ($route   === null) $route   = $_SERVER['REQUEST_URI'];
-        if ($query   === null) $query   = $_SERVER['QUERY_STRING'];
-        if ($method  === null) $method  = $this->method;
-        if ($context === null) $context = $this->route_context;
-
-        if(__APP_SETTINGS__['cobalt_base_path']) {
-            $route = preg_replace("/^".preg_quote(__APP_SETTINGS__['cobalt_base_path'])."/", "", $route);
-        }
+        $route   = $route ?? $_SERVER['REQUEST_URI'];
+        $query   = $query ?? $_SERVER['QUERY_STRING'];
+        $method  = $method ?? $this->method;
+        $context = $context ?? $this->route_context;
+        
+        $route = remove_base_path($route);
 
         if (strtolower($method) === "head") {
             $this->headRequest = true;

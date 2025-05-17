@@ -212,7 +212,7 @@ trait ClientFSManager {
     }
 
     public function uploadFilesAndGetArrayOfIds($key, $arbitrary_data = null, $files = null, $meta = false):array {
-        if(!$files) $fiels = $_FILES;
+        if(!$files) $files = $_FILES;
         if(empty($files)) throw new BadRequest("No files were uploaded");
         if(empty($files[$key])) throw new BadRequest("No files were uploaded");
         $ids = [];

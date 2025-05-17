@@ -7,7 +7,7 @@ use Handlers\AdminHandler;
 
 trait UserBar {
 
-    public string $userbar_admin_panel   = "<a href=\"/admin\">".__APP_SETTINGS__['app_short_name']."</a>";
+    public string $userbar_admin_panel   = "<a href=\"".__APP_SETTINGS__['cobalt_base_path']."/admin\">".__APP_SETTINGS__['app_short_name']."</a>";
     public string $userbar_new_post_link = "<a href=\"@route(\"\\\Cobalt\\\Pages\\\Controllers\\\Posts@__new_document\");\"><i name=\"post\"></i> Post</a>";
     public string $userbar_new_page_link = "<a href=\"@route(\"\\\Cobalt\\\Pages\\\Controllers\\\LandingPages@__new_document\");\"><i name=\"file-document\"></i></a>";
 
@@ -18,7 +18,7 @@ trait UserBar {
         if(__APP_SETTINGS__['Web_include_app_branding']) {
             $logo = app("logo.thumb");
             $meta = $logo['meta'];
-            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]' alt=\"".htmlspecialchars(__APP_SETTINGS__['app_name'])." Homepage\"></a>";
+            $masthead = "<a href='".to_base_url("/")."' title='Home'><img class='cobalt-masthead' src='".to_base_url($logo['filename'])."' width='$meta[width]' height='$meta[height]' alt=\"".htmlspecialchars(__APP_SETTINGS__['app_name'])." Homepage\"></a>";
         }
         $admin_masthead = str_replace("href=", "is='real' href=", $masthead);
         add_vars([

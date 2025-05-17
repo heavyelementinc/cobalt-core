@@ -3,65 +3,31 @@ namespace Cobalt\Model\Types;
 
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Model;
-use Cobalt\Model\Types\Abstracts\OrderedListOfIds;
-use Controllers\ClientFSManager;
+use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
+use Cobalt\Model\Types\Traits\FileHandler;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Driver\Cursor;
 use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationIssue;
 
-class ImageArrayType extends OrderedListOfIds {
-    use ClientFSManager;
+class ImageArrayType extends OrderedListOfForeignIds {
+    use FileHandler;
     protected string $operator = '$set';
-    public function queryForValues(Model $model, array $ids): ?Cursor {
-        return $this->findFiles(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
-    }
-
-    public function getModel(): Model {
-        return $this->model;
-    }
-
-    public function restoreValue(&$value): ?ObjectId {
-        // Supporting older formats
-        $id = $value['media']['ref'] ?? $value['media']['id'] ?? $value;
-        if($id instanceof ObjectId) {
-            return $id;
-        } else {
-            return new ObjectId($id);
-        }
-        return $id;
-    }
-
-    public function storeValue($id): ObjectId {
-        return $id;
+    public function runJoinQuery(Model $model, array $ids): ?Cursor {
+        return $this->__find(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
     }
     
-    function fieldItemTemplate(): string {
-        return "Cobalt/Model/templates/types/gallery-item.php";
-    }
-    
-    public function eachSchema() {
-        
-    }
-
-    public function queryForObjects(int $limit, int $skip, string $sortField = "_id", int $sortDirection = -1, string $search = "", bool $exclude = true): array {
-        $query = ['isThumbnail' => ['$exists' => false]];
-        if($exclude) {
-            $query['_id'] = ['$nin' => $this->raw];
-        }
-        $options = ['limit' => $limit, 'skip' => $skip * $limit, 'sort' => [$sortField => $sortDirection]];
-        return [
-            'cursor' => $this->findFiles($query, $options),
-            'count' => $this->fs->count($query, $options)
-        ];
-    }
-
     function filter($oids) {
         $filesKey = $this->name;
-        if(key_exists($filesKey, $_FILES)) {
-            $result = $this->uploadFilesAndGetArrayOfIds($filesKey, ['for' => $this->model->_id ?? null], $_FILES);
-            foreach($result as $arr) {
-                $oids[] = $arr['_id'];
+        if($oids === '$_FILES_$' && key_exists($filesKey, $_FILES)) {
+            $oids = [];
+            // $result = $this->uploadFilesAndGetArrayOfIds($filesKey, ['for' => $this->model->_id ?? null], $_FILES);
+            $files = normalize_uploaded_files($_FILES);
+            foreach($files[$filesKey] as $index => $arr) {
+                $filename = $this->filename($arr);
+                $result = $this->__store($arr['tmp_name'], $filename);
+                if(!$result) throw new ValidationIssue("Failed to store $arr[file]");
+                $oids[] = $result;
             }
             $this->operator = '$addToSet';
         }

@@ -124,6 +124,7 @@ nav#admin-panel {
 #admin-panel + main {
     display: block;
     min-height: 80vh;
+    margin-right: var(--margin-s);
 }
 
 main {

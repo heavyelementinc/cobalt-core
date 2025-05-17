@@ -38,14 +38,20 @@ trait Fieldable {
     }
 
     protected function inputDate($classes = "", $misc = []) {
+        $value = $this->getValue();
+        // $format = $value->format("c");
+        // return "<input type='datetime-local' name='$this->name' value='$format'>";
         $misc = array_merge([
-            'from' => $this->schema['from'] ?? "ISO 8601",
-            'to'   => $this->schema['to'] ?? "ISO 8601",
+            'from' => $this->schema['from'] ?? "datetime-local",
+            'to'   => $this->schema['to'] ?? "datetime-local",
         ], $misc);
         [$misc, $attrs] = $this->defaultFieldData($misc);
         
         $fmt = "c";
         switch($misc['from']) {
+            case "datetime-local":
+                $fmt = DATETIME_LOCAL_FORMAT;
+                break;
             case "seconds":
             case "php":
             case "time":
@@ -67,10 +73,12 @@ trait Fieldable {
 
         if($misc['from'] === "milliseconds") $formatted * 1000;
 
-        $pattern = $this->getDirective("pattern", false);
-        if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+        // $pattern = $this->getDirective("pattern", false);
+        // if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
+        
+        return "<input type=\"datetime-local\" class=\"$classes\" $attrs value=\"$formatted\">";
+        // return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-datetime>";
 
-        return "<input-datetime class=\"$classes\" $attrs value=\"$formatted\"$pattern></input-datetime>";
     }
 
     protected function select($classes = "", $misc = [], $tag = "select") {

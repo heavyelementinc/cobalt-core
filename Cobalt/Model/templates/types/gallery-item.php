@@ -3,4 +3,5 @@
     <!-- <action-menu type="options">
         <option method="DELETE" action="">Delete</option>
     </action-menu> -->
+    
 </gallery-item>

@@ -335,13 +335,13 @@ class WebHandler implements RequestHandler {
     function footer_credits() {
         $credits  = '<section class="footer-credits">';
         $credits .= '<span>&copy;@date("Y"); {{!app.app_copyright_name}}</span> &mdash; <span class="copyright-notice">'.from_markdown(__APP_SETTINGS__['copyright_notice']).'</span>';
-        if (app('Web_display_designer_credit')) $credits .= ' &mdash; <span>{{!app.designer.prefix}} <a href="{{app.designer.href}}" title="{{app.designer.title}}">{{app.designer.name}}</a></span>';
-        if (__APP_SETTINGS__['Web_privacy_policy']) $credits .= " &mdash; <a href='" . __APP_SETTINGS__['Web_privacy_policy'] . "'>Privacy Policy</a>";
-        if (__APP_SETTINGS__['Web_terms_of_service']) $credits .= " &mdash; <a href='" . __APP_SETTINGS__['Web_terms_of_service'] . "'>Terms of Service</a>";
+        if (app('Web_display_designer_credit')) $credits .= ' &mdash; <span>{{!app.designer.prefix}} <a href="'.to_base_url(__APP_SETTINGS__['designer']['href']).'" title="{{app.designer.title}}">{{app.designer.name}}</a></span>';
+        if (__APP_SETTINGS__['Web_privacy_policy']) $credits .= " &mdash; <a href='" . to_base_url(__APP_SETTINGS__['Web_privacy_policy']) . "'>Privacy Policy</a>";
+        if (__APP_SETTINGS__['Web_terms_of_service']) $credits .= " &mdash; <a href='" . to_base_url(__APP_SETTINGS__['Web_terms_of_service']) . "'>Terms of Service</a>";
         $credits .= '</section>';
         $login = "Login";
         if (session()) $login = "Panel";
-        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"{{app.context_prefixes.admin.prefix}}\"  class=\"footer-credits\" is=\"\">Administrator $login</a>";
+        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"".to_base_url(__APP_SETTINGS__['context_prefixes']['admin']['prefix'])."\"  class=\"footer-credits\" is=\"\">Administrator $login</a>";
         return $credits;
     }
 
@@ -466,17 +466,17 @@ class WebHandler implements RequestHandler {
     function get_script_pathname_from_manifest_entry($entry) {
         // $basic_script = "/core-content/js/$entry";
         $type = gettype($entry);
-        if($type === "string") return "/core-content/js/$entry";
+        if($type === "string") return to_base_url("/core-content/js/$entry");
         if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
-        if(key_exists('url', $entry)) return $entry['url'];
+        if(key_exists('url', $entry)) return to_base_url($entry['url']);
         throw new NotFound("Unable to handle resource $type");
     }
 
     function get_css_pathname_from_manifest_entry($entry) {
         $type = gettype($entry);
-        if($type === "string") return "/core-content/css/$entry";
+        if($type === "string") return to_base_url("/core-content/css/$entry");
         if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
-        if(key_exists('url', $entry)) return $entry['url'];
+        if(key_exists('url', $entry)) return to_base_url($entry['url']);
         throw new NotFound("Unable to handle resource $type");
     }
 
