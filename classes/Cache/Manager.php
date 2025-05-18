@@ -9,7 +9,7 @@
  * @todo Provide a mongo-based cache alternative
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  * @license https://github.com/heavyelementinc/cobalt-core/license
- * @copyright 2021 Heavy Element, Inc.
+ * @copyright 2025 Heavy Element, Inc.
  */
 
 namespace Cache;
@@ -18,7 +18,7 @@ use Exception;
 
 class Manager {
 
-    private $cache_dir = __APP_ROOT__ . "/cache";
+    private $cache_dir = __APP_ROOT__ . "/cache/" . __COBALT_VERSION . "/" . __APP_SETTINGS__['version'];
 
     public $reference;
     public $file_path;
@@ -26,7 +26,7 @@ class Manager {
     public $last_modified;
 
     function __construct($filename) {
-        if (!is_dir($this->cache_dir)) mkdir($this->cache_dir);
+        if (!is_dir($this->cache_dir)) mkdir($this->cache_dir, 0777, true);
         $this->reference = $filename;
         $this->file_path = $this->cache_name($this->reference);
         $this->exists = $this->cache_exists();
@@ -92,8 +92,8 @@ class Manager {
 
     private function cache_name($reference) {
         $info = pathinfo($reference);
-        $version = VERSION_HASH;
-        $path = $this->cache_dir . "/$info[dirname]/$info[filename].$version.$info[extension]";
+        // $version = VERSION_HASH;
+        $path = $this->cache_dir . "/$info[dirname]/$info[filename].$info[extension]";
         return $path;
     }
 }

@@ -162,12 +162,10 @@ abstract class SettingsAbstract extends \Drivers\Database {
         $details = $this->bootstrapManifestData($toCache);
 
         $toCache = array_merge($toCache, $details);
-        
-        // Get the ID of the cached settings
-        $id = $this->__settings->_id;
-        if(!$id) $this->__id();
 
-        $this->updateOne(['_id' => $id],
+        $this->updateOne([
+            'Meta.type' => 'cache'
+        ],
         [
             '$set' => array_merge(
                 $toCache,

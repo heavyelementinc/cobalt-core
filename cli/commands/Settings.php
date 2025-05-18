@@ -1,13 +1,12 @@
 <?php
 
-use Cobalt\Settings\Settings as SettingsSettings;
-use SettingsManager\Settings as SettingsManagerSettings;
+use Cobalt\Settings\Settings as CobaltSettings;
 
 /**
  * @todo Do not display help items that require environment context if in pre-env
  */
 class Settings {
-    var $settings;
+    private CobaltSettings $settings;
     public $help_documentation = [
         'modified' => [
             'description' => "List all settings that have been modified by the user",
@@ -15,15 +14,15 @@ class Settings {
         ],
         'reset' => [
             'description' => "[name] Reset the specified setting to default",
-            'context_required' => true
+            'context_required' => true,
         ],
         'value' => [
             'description' => "[name] Get the current value of a setting",
-            'context_required' => true
+            'context_required' => true,
         ],
         'set' => [
             'description' => "[name] [value] Update a setting",
-            'context_required' => true
+            'context_required' => true,
         ],
         'push' => [
             'description' => "[name] [value] Push a value to an array (no duplicates)",
@@ -31,16 +30,20 @@ class Settings {
         ],
         'pull' => [
             'description' => "[name] [value] Pull a value from an array",
-            'context_required' => true
+            'context_required' => true,
+        ],
+        'rebuild' => [
+            'description' => 'Rebuild the settings from scratch',
+            'context_required' => true,
         ],
         'upgrade' => [
             'description' => "Upgrades all JSON-encoded settings files to PHP settings files",
-            'context_required' => true
+            'context_required' => true,
         ]
     ];
 
     function __construct() {
-        $this->settings = @new SettingsManagerSettings(true);
+        $this->settings = @new CobaltSettings();
     }
 
     public function list() {
@@ -128,6 +131,10 @@ class Settings {
         return $value;
     }
 
+    public function rebuild() {
+        $this->settings->bootstrap();
+    }
+
     public function upgrade() {
         say("WARNING: Do not run this command in production! This will overwrite any existing config files!", "e");
         $val = readline("Are you sure you want to continue? y/N");
@@ -135,7 +142,7 @@ class Settings {
         $existed_count = 0;
         $created_count = 0;
         $skipped_count = 0;
-        $settings = new SettingsSettings(false);
+        $settings = new CobaltSettings(false);
         foreach($settings::__DEFINITIONS__ as $file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             if($ext === "php") {
