@@ -32,10 +32,6 @@ class Settings {
             'description' => "[name] [value] Pull a value from an array",
             'context_required' => true,
         ],
-        'rebuild' => [
-            'description' => 'Rebuild the settings from scratch',
-            'context_required' => true,
-        ],
         'upgrade' => [
             'description' => "Upgrades all JSON-encoded settings files to PHP settings files",
             'context_required' => true,
@@ -129,10 +125,6 @@ class Settings {
         if($value === "null") $value = null;
         if(ctype_digit($value)) $value = (int)$value;
         return $value;
-    }
-
-    public function rebuild() {
-        $this->settings->bootstrap();
     }
 
     public function upgrade() {

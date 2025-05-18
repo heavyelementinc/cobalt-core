@@ -96,4 +96,14 @@ class Manager {
         $path = $this->cache_dir . "/$info[dirname]/$info[filename].$info[extension]";
         return $path;
     }
+
+    public function empty() {
+        // if(rmdir($this->cache_dir)) {
+        //     return true;
+        // }
+        // return error_get_last();
+        $deleted = [];
+        rrmdir($this->cache_dir, $deleted);
+        return $deleted;
+    }
 }

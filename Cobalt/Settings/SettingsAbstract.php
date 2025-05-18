@@ -33,6 +33,7 @@ use Exception;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use MongoDB\UpdateResult;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
@@ -40,10 +41,10 @@ abstract class SettingsAbstract extends \Drivers\Database {
     const __DEFINITIONS__ = [
         __APP_ROOT__ . "/config/settings.php",
         __APP_ROOT__ . "/ignored/config/settings.php",
-        __APP_ROOT__ . "/config/settings.jsonc",
-        __APP_ROOT__ . "/ignored/config/settings.jsonc",
-        __APP_ROOT__ . "/config/settings.json",
-        __APP_ROOT__ . "/ignored/config/settings.json",
+        // __APP_ROOT__ . "/config/settings.jsonc",
+        // __APP_ROOT__ . "/ignored/config/settings.jsonc",
+        // __APP_ROOT__ . "/config/settings.json",
+        // __APP_ROOT__ . "/ignored/config/settings.json",
     ];
 
     const __MANIFESTS__ = [
@@ -83,6 +84,7 @@ abstract class SettingsAbstract extends \Drivers\Database {
 
         $bootstrap_required = false;
         $this->max_m_time = $this->getMaxMTime();
+        if($this->max_m_time === 0) $bootstrap_required = true;
         $this->__settings = $this->fetchCachedSettings();
         $bootstrap_required = $this->isBootstrapRequired($bootstrap);
         if ($bootstrap_required) $this->bootstrap();
@@ -118,7 +120,7 @@ abstract class SettingsAbstract extends \Drivers\Database {
         return false;
     }
 
-    final public function bootstrap() {
+    final public function bootstrap(bool $deleteSettings = false):UpdateResult {
         // Get settings definitions from __DEFINITION__ files
         $this->getSettingDefinitions();
         $json = $this->definitions;
@@ -162,17 +164,21 @@ abstract class SettingsAbstract extends \Drivers\Database {
         $details = $this->bootstrapManifestData($toCache);
 
         $toCache = array_merge($toCache, $details);
-
-        $this->updateOne([
+        if($deleteSettings) {
+            $this->deleteOne([
+                'Meta.type' => 'cache'
+            ]);
+        }
+        $result = $this->updateOne([
             'Meta.type' => 'cache'
         ],
         [
             '$set' => array_merge(
-                $toCache,
                 [
                     'Meta.type' => 'cache',
                     'Meta.max_m_time' => $this->max_m_time
-                ]
+                ],
+                $toCache,
             )
         ],
         ['upsert' => true]);
@@ -181,7 +187,7 @@ abstract class SettingsAbstract extends \Drivers\Database {
         global $PUBLIC_SETTINGS;
         $this->updatePublicSettings($PUBLIC_SETTINGS);
 
-        return;
+        return $result;
     }
 
     private function normalizeSetting($name, $data) {
@@ -196,14 +202,18 @@ abstract class SettingsAbstract extends \Drivers\Database {
         ], $data);
     }
 
-    private function getMaxMTime() {
-        $max_m_time = 0;
-        // $this->mtime_candidates = scandir(__ENV_ROOT__ . "/routes/");
+    /**
+     * Finds the most recent settings file modification time
+     * @return int unix timestamp
+     */
+    private function getMaxMTime():int {
+        $max_m_time = filemtime($this->default_definition_path());
+
         foreach ($this->definitions() as $file) {
             if(!file_exists($file)) continue;
             $mtime = filemtime($file);
             if ($mtime === false) continue;
-            if ($mtime > $max_m_time) $max_m_time = $mtime;
+            $max_m_time = max($max_m_time, $mtime);
         }
         return $max_m_time;
     }
@@ -333,8 +343,8 @@ abstract class SettingsAbstract extends \Drivers\Database {
         }
     }
 
-    public function updatePublicSettings($settings) {
-        $this->updateOne([
+    public function updatePublicSettings($settings):UpdateResult {
+        return $this->updateOne([
             'Meta.type' => 'public_js_cache'
         ],
         [

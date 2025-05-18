@@ -11,10 +11,10 @@ class Settings extends SettingsAbstract {
         return [
             __APP_ROOT__ . "/config/settings.php",
             __APP_ROOT__ . "/ignored/config/settings.php",
-            __APP_ROOT__ . "/config/settings.jsonc",
-            __APP_ROOT__ . "/ignored/config/settings.jsonc",
-            __APP_ROOT__ . "/config/settings.json",
-            __APP_ROOT__ . "/ignored/config/settings.json",
+            // __APP_ROOT__ . "/config/settings.jsonc",
+            // __APP_ROOT__ . "/ignored/config/settings.jsonc",
+            // __APP_ROOT__ . "/config/settings.json",
+            // __APP_ROOT__ . "/ignored/config/settings.json",
         ];
     }
     function manifests_v1():array {

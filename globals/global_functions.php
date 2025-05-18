@@ -832,3 +832,22 @@ function isKeyboardModifierSet($constantValue, $header = null):bool {
 function millitime():int {
     return floor(microtime(true) * 1000);
 }
+
+function rrmdir($dir, array &$deleted):void {
+    if(!key_exists("dirs", $deleted)) $deleted['dirs'] = 0;
+    if(!key_exists("files", $deleted)) $deleted['files'] = 0;
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object === "." || $object === "..") continue;
+            if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object)) {
+                rrmdir($dir. DIRECTORY_SEPARATOR .$object, $deleted);
+                continue;
+            } 
+            unlink($dir. DIRECTORY_SEPARATOR .$object); 
+            $deleted['files'] += 1;
+        }
+        rmdir($dir); 
+        $deleted['dirs'] += 1;
+    }
+}

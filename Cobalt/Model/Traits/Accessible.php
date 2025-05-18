@@ -6,6 +6,11 @@ use Exception;
 use MongoDB\Client;
 use MongoDB\Collection;
 use MongoDB\Database;
+use MongoDB\DeleteResult;
+use MongoDB\Driver\Cursor;
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
 
 trait Accessible {
     public ?Client $client = null;
@@ -29,14 +34,14 @@ trait Accessible {
     }
 
     /* CREATE */
-    final function insertOne($document, array $options = []) {
+    final function insertOne($document, array $options = []):InsertOneResult {
         $this->__initAccessible();
         $cursor = $this->collection->insertOne($document, $options);
         benchmark_writes($cursor->getInsertedCount());
         return $cursor;
     }
 
-    final function insertMany($documents, array $options = []) {
+    final function insertMany($documents, array $options = []):InsertManyResult {
         $this->__initAccessible();
         $cursor = $this->collection->insertMany($documents, $options);
         benchmark_writes($cursor->getInsertedCount());
@@ -45,19 +50,19 @@ trait Accessible {
 
 
     /* READ */
-    final function findOne($filter, array $options = []) {
+    final function findOne($filter, array $options = []):array|object|null {
         $this->__initAccessible();
         benchmark_reads();
         return $this->collection->findOne($filter, $options);
     }
 
-    final function findOneAndUpdate($filter, $update, array $options = []) {
+    final function findOneAndUpdate($filter, $update, array $options = []):array|object|null {
         $this->__initAccessible();
         benchmark_reads();
         return $this->collection->findOneAndUpdate($filter, $update, $options);
     }
 
-    final function find($filter = [], array $options = []) {
+    final function find($filter = [], array $options = []):Cursor {
         $this->__initAccessible();
         benchmark_reads();
         return $this->collection->find($filter, $options);
@@ -97,14 +102,14 @@ trait Accessible {
     }
 
     /* UPDATE */
-    final function updateOne($filter, $fields, array $options = []) {
+    final function updateOne($filter, $fields, array $options = []):UpdateResult {
         $this->__initAccessible();
         $cursor = $this->collection->updateOne($filter, $fields, $options);
         benchmark_writes($cursor->getModifiedCount() + $cursor->getUpsertedCount());
         return $cursor;
     }
 
-    final function updateMany($filter, $fields, array $options = []) {
+    final function updateMany($filter, $fields, array $options = []):UpdateResult {
         $this->__initAccessible();
         $cursor = $this->collection->updateMany($filter, $fields, $options);
         benchmark_writes($cursor->getModifiedCount() + $cursor->getUpsertedCount());
@@ -112,14 +117,14 @@ trait Accessible {
     }
 
     /* DESTROY */
-    final function deleteOne($filter, array $options = []) {
+    final function deleteOne($filter, array $options = []):DeleteResult {
         $this->__initAccessible();
         $cursor = $this->collection->deleteOne($filter, $options);
         benchmark_writes($cursor->getDeletedCount());
         return $cursor;
     }
 
-    final function deleteMany($filter, array $options = []) {
+    final function deleteMany($filter, array $options = []):DeleteResult {
         $this->__initAccessible();
         $cursor = $this->collection->deleteMany($filter, $options);
         benchmark_writes($cursor->getDeletedCount());
