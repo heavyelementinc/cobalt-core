@@ -144,6 +144,7 @@ export default class FormRequest extends ProgressWizard {
         this.addEventListener("submission", this.onsubmission.bind(this));
         this.addEventListener("change", this.onchange.bind(this));
         this.addEventListener("click", this.onclick.bind(this));
+        this.addEventListener("keyup", this.onkeyup.bind(this));
     }
 
     connectedCallback() {
@@ -160,7 +161,7 @@ export default class FormRequest extends ProgressWizard {
      */
     get autosave() {
         const autosave = this.getAttribute("autosave");
-        if(autosave) return true;
+        if(autosave == "autosave") return true;
         // If we don't have an explicit autosave attribute set, we should 
         // check if this form-request contains a submit button.
         const hasAtLeastOneSubmitButton = this.querySelector("button[type='submit'], input[type='submit'], button[type='back'], input[type='back']");
@@ -223,7 +224,9 @@ export default class FormRequest extends ProgressWizard {
      * @returns 
      */
     onchange(event) {
-        if(this.autosave === false) return;
+        if(this.autosave === false) {
+            return;
+        }
         event.stopPropagation();
         event.preventDefault();
         clearTimeout(this.__autoSaveTimeout);
@@ -278,6 +281,12 @@ export default class FormRequest extends ProgressWizard {
         details.formData = this.buildSubmission([], event);
 
         this.dispatchEvent(new CustomEvent("submission", {detail: details}));
+    }
+
+    onkeyup(event) {
+        if(this.getAttribute("autosave") !== "enter") return;
+        if(event.key !== "Enter") return;
+        this.dispatchEvent(new CustomEvent("submission", {type: "keyup", formData: this.buildSubmission()}));
     }
 
     /**
@@ -542,7 +551,7 @@ class FormRequestData {
         }
         // If there are no promises, then we should return normal object
         if(Object.values(this.__promises__).length === 0) {
-            if(this.hasFiles()) return this.toFormData();
+            if(this.hasFiles()) return this.formDataWithJSONPayload();
             return this.__formData__;
         }
         return this.__read();
@@ -649,11 +658,20 @@ class FormRequestData {
         return Promise.all(Object.values(this.__promises__));
     }
 
+    async toFormData() {
+        await this.ready();
+        let formData = new FormData();
+        for(const name in this.__formData__) {
+            formData.append(name, this.__formData__[name]);
+        }
+        return formData;
+    }
+
     /**
      * 
      * @returns {FormData}
      */
-    async toFormData() {
+    async formDataWithJSONPayload() {
         // Let's wait for this FormRequestData to be ready
         await this.ready();
         const magicFilesString = "$_FILES_$";
@@ -702,7 +720,7 @@ class FormRequestData {
         return new Promise(async resolve => {
             await this.ready();
             if(this.hasFiles()) {
-                resolve(await this.toFormData());
+                resolve(await this.formDataWithJSONPayload());
                 return;
             }
             resolve(this.__formData__);

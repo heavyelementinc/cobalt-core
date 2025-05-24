@@ -354,6 +354,7 @@ class WebHandler implements RequestHandler {
 
     function notify_panel() {
         if(!__APP_SETTINGS__['Notifications_system_enabled']) return "";
+        if(!session_exists()) return "";
         return view('/Cobalt/Notifications/templates/panel.php');
     }
 

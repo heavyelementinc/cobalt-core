@@ -70,11 +70,14 @@ abstract class Config extends PersistanceMap {
                 $request['headers']['Authorization'] = "Basic ". base64_encode($this->getParam().":".$this->getToken());
                 break;
             case self::AUTH_BEARER:
-                $request['headers']['Authorization'] = "Bearer ". $this->getToken();
+                $prefix = $this->getTokenPrefix() ?? "Bearer";
+                $request['headers']['Authorization'] = "$prefix ". $this->getToken();
                 break;
             case self::AUTH_KEY_BODY:
                 $request['body'][$this->getParam()] = $this->getToken();
                 break;
+            // case self::AUTH_JWT:
+            //     $request['headers']['Authorization'] = $this->getTokenPrefix() . " " . 
             default:
                 throw new TypeError("Invalid auth_type");
         };
@@ -91,5 +94,9 @@ abstract class Config extends PersistanceMap {
      * @return string
      */
     abstract function getParam():string;
+
+    function getTokenPrefix():?string {
+        return null;
+    }
 
 }

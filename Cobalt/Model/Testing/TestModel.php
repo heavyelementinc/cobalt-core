@@ -4,12 +4,16 @@ namespace Cobalt\Model\Testing;
 
 use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Model;
+use Cobalt\Model\Testing\Controller\ModelController as ControllerModelController;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
 
 class TestModel extends Model {
+    public function defineController(): ModelController {
+        return new ControllerModelController();
+    }
     // public function defineController(): ModelController {
     //     return 
     // }
