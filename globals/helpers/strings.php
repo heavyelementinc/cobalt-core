@@ -512,7 +512,9 @@ function snake_case_fixer(string $str):string {
     return str_replace("_", " ", $str);
 }
 
-function embed_image(null|array|BSONArray|BSONDocument|ImageType $doc, null|ObjectId $docid = null, array $attributes = []):string {
+function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, null|ObjectId $docid = null, array $attributes = []):string {
+    if($doc instanceof ObjectId) $doc = get_image_details($doc);
+    if(is_null($doc) && $docid instanceof ObjectId) $doc = get_image_details($docid);
     $filename = get_image_url($doc);
     $height   = $doc['meta']['height'];
     $width    = $doc['meta']['width'];
@@ -531,7 +533,8 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType $doc, null|Obje
     HTML;
 }
 
-function get_image_url(null|array|BSONArray|BSONDocument|ImageType $doc):string {
+function get_image_url(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc):string {
+    if($doc instanceof ObjectId) $doc = get_image_details($doc);
     $missing_image = '/core-content/img/image-missing.webp';
     if($doc === null) $doc = ['filename' => null,'meta' => ['height' => 300, 'width' => 300, 'accent_color' => '#efefef', 'contrast_color' => '#000000']];
     $filename = ($doc['filename']) ? $doc['filename'] : $missing_image;
@@ -539,4 +542,8 @@ function get_image_url(null|array|BSONArray|BSONDocument|ImageType $doc):string 
         $filename = ($filename[0] == "/") ? "/res/fs$filename" : "/res/fs/$filename";
     }
     return $filename;
+}
+
+function get_image_details(ObjectId $id):?BSONDocument {
+    return (new ImageType())->__findOne(['_id' => $id]);
 }
