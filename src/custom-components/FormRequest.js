@@ -144,7 +144,8 @@ export default class FormRequest extends ProgressWizard {
         this.addEventListener("submission", this.onsubmission.bind(this));
         this.addEventListener("change", this.onchange.bind(this));
         this.addEventListener("click", this.onclick.bind(this));
-        this.addEventListener("keyup", this.onkeyup.bind(this));
+        this.addEventListener("keydown", this.onkeydown.bind(this));
+        document.addEventListener("keydown", this.onhotkey.bind(this));
     }
 
     connectedCallback() {
@@ -154,6 +155,7 @@ export default class FormRequest extends ProgressWizard {
     disconnectedCallback() {
         this.removeFeedback();
         this.removeValidationMessages();
+        document.removeEventListener("keydown", this.onhotkey);
     }
 
     /**
@@ -283,10 +285,26 @@ export default class FormRequest extends ProgressWizard {
         this.dispatchEvent(new CustomEvent("submission", {detail: details}));
     }
 
-    onkeyup(event) {
-        if(this.getAttribute("autosave") !== "enter") return;
-        if(event.key !== "Enter") return;
-        this.dispatchEvent(new CustomEvent("submission", {type: "keyup", formData: this.buildSubmission()}));
+    onkeydown(event) {
+        switch(event.key) {
+            case "Enter":
+                if(this.getAttribute("autosave") !== "enter") return;
+                this.dispatchEvent(new CustomEvent("submission", {detail: {type: "keyup", formData: this.buildSubmission()}}));
+                break;
+            case "s":
+                if(!navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) return;
+                event.preventDefault();
+                event.stopPropagation();
+                this.dispatchEvent(new CustomEvent("submission", {detail: {type: "save", formData: this.buildSubmission()}}));
+                break;
+        }
+    }
+
+    onhotkey(event) {
+        console.log("HOTKEY", event);
+        switch(event.key) {
+            
+        }
     }
 
     /**

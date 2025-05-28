@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Model\Types\ImageType;
 use Demyanovs\PHPHighlight\Highlighter;
 use Drivers\UTCDateTime as DriversUTCDateTime;
 use MongoDB\BSON\ObjectId;
@@ -454,6 +455,7 @@ function is_data_uri($uri):bool {
 }
 
 function is_function(mixed $subject):bool {
+    if($subject instanceof Closure) return true;
     if(is_string($subject)) return false;
     return is_callable($subject);
 }
@@ -510,22 +512,31 @@ function snake_case_fixer(string $str):string {
     return str_replace("_", " ", $str);
 }
 
-function embed_image(null|array|BSONArray|BSONDocument $doc, null|ObjectId $docid = null):string {
+function embed_image(null|array|BSONArray|BSONDocument|ImageType $doc, null|ObjectId $docid = null, array $attributes = []):string {
+    $filename = get_image_url($doc);
+    $height   = $doc['meta']['height'];
+    $width    = $doc['meta']['width'];
+    $accent   = $doc['meta']['accent_color'];
+    $contrast = $doc['meta']['contrast_color'];
+    $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
+    $attrs = "";
+    foreach($attributes as $attr => $val) {
+        $attrs .= " $attr=\"$val\"";
+    }
+    return <<<HTML
+    <img src="$filename"$data_id alt="$doc[alt]" 
+        height="$height" width="$width" loading="lazy"
+        accent-color="$accent" contrast-color="$contrast"$attrs
+    >
+    HTML;
+}
+
+function get_image_url(null|array|BSONArray|BSONDocument|ImageType $doc):string {
     $missing_image = '/core-content/img/image-missing.webp';
     if($doc === null) $doc = ['filename' => null,'meta' => ['height' => 300, 'width' => 300, 'accent_color' => '#efefef', 'contrast_color' => '#000000']];
     $filename = ($doc['filename']) ? $doc['filename'] : $missing_image;
     if($filename !== $missing_image) {
         $filename = ($filename[0] == "/") ? "/res/fs$filename" : "/res/fs/$filename";
     }
-    $height   = $doc['meta']['height'];
-    $width    = $doc['meta']['width'];
-    $accent   = $doc['meta']['accent_color'];
-    $contrast = $doc['meta']['contrast_color'];
-    $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
-    return <<<HTML
-    <img src="$filename"$data_id alt="$doc[alt]" 
-        height="$height" width="$width" loading="lazy"
-        accent-color="$accent" contrast-color="$contrast"
-    >
-    HTML;
+    return $filename;
 }

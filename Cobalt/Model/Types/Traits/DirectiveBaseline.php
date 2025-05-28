@@ -5,6 +5,8 @@ namespace Cobalt\Model\Types\Traits;
 
 use Closure;
 use Cobalt\Model\Attributes\Directive;
+use Cobalt\Model\Directives\Abstracts\AbstractDirective;
+use Cobalt\Model\Directives\SetDirective;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\Exceptions\InvalidUpdateOperator;
 use Cobalt\Model\Types\ArrayType;
@@ -57,6 +59,7 @@ trait DirectiveBaseline {
     public function getDirective($name, &...$args) {
         // $name = array_shift($args);
         if(!key_exists($name, $this->directives)) throw new Error("Error on `$this->name`: Directive `$name` does not exist.");
+        if($this->directives[$name] instanceof AbstractDirective) return $this->directives[$name]->getValue(...$args);
         // Let's check if the directive is a function or not
         if(is_function($this->directives[$name])) {
             return $this->directives[$name](...$args);

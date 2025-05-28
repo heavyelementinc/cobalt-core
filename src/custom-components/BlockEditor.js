@@ -134,7 +134,6 @@ export default class BlockEditor extends ICustomInput {
         this.props = {
             editor: null
         }
-        this.setAttribute("__custom-input", "true");
         this.saveTimeout = null;
         this.hasChangeOccurred = false;
     }
@@ -216,6 +215,10 @@ export default class BlockEditor extends ICustomInput {
                 // this.dispatchEvent(new Event("change", {bubbles: true}));
             }
         });
+        // Let's wait for the editor to solve this
+        this.__editor__.isReady.then(() => {
+            this.customInputReady.resolve(true);
+        });
 
         this.addEventListener("focusout", async event => {
             if(this.hasChangeOccurred === false) {
@@ -233,7 +236,6 @@ export default class BlockEditor extends ICustomInput {
             this.dispatchEvent(new Event("change", {bubbles: true, detail: {api: {}, event}}));
             this.hasChangeOccurred = false;
         });
-        this.customInputReady.resolve(true)
     }
 
     async setSyncValue() {

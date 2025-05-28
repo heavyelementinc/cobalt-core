@@ -85,6 +85,7 @@
         font-style: italic;
     }
     &:disabled,
+    &[disabled="disabled"],
     &[aria-disabled="true"],
     &[aria-disabled="true"] .CodeMirror {
         background: var(--input-disabled-background);

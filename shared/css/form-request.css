@@ -39,7 +39,7 @@ form-header :is(h1, h2, h3, h4, h5) {
 }
 
 form-request + form-request,
-:is(form-request) fieldset + fieldset {
+:is(form-request) > fieldset + fieldset {
   margin-top: var(--margin-l);
 }
 

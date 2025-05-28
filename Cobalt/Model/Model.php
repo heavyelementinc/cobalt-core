@@ -15,6 +15,7 @@ use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\Driver\Cursor;
+use MongoDB\Model\BSONDocument;
 use stdClass;
 
 abstract class Model extends GenericModel implements Persistable {
@@ -74,6 +75,7 @@ abstract class Model extends GenericModel implements Persistable {
         
         $template = $field->fieldItemTemplate();
         $field_value = $field->getValue() ?? [];
+        if($field_value instanceof BSONDocument) $field_value = $field_value->getArrayCopy();
         $html = "";
         $type = "checkbox";
         if($_GET['max'] == "1") {

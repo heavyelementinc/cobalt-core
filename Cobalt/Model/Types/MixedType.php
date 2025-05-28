@@ -16,6 +16,8 @@ const DIRECTIVE_KEY_DEFAULT = "default";
 const DIRECTIVE_KEY_IMMUTABLE = "immutable";
 const DIRECTIVE_KEY_VALID = "valid";
 const DIRECTIVE_KEY_FILTER = "filter";
+const DIRECTIVE_KEY_GET = "get";
+const DIRECTIVE_KEY_SET = "set";
 
 class MixedType implements Stringable, ArrayAccess {
     use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField;
@@ -32,9 +34,11 @@ class MixedType implements Stringable, ArrayAccess {
      * @return void|mixed 
      */
     public function getValue() {
-        if(!$this->isSet) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
-        if($this->value === null) return $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
-        return $this->value;
+        $val = $this->value;
+        if(!$this->isSet) $val = $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
+        if($val === null) $val = $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
+        if($this->hasDirective(DIRECTIVE_KEY_GET)) return $this->getDirective(DIRECTIVE_KEY_GET, $val);
+        return $val;
     }
 
     public function setValue($value):void {

@@ -32,6 +32,8 @@ use const Dom\NOT_FOUND_ERR;
  * GenericModels may be accessed using the -> syntax *or* accessed as an array.
  *  * Accessing using the $model->key syntax will return an instance of the MixedType with the value, originalValue, its prototype methods, etc.
  *  * Accessing using the $model->['key'] syntax will return the literal value of the MixedType as if you accessed $model->key->value
+ * 
+ *  * `set()` - [&$validated, [$value]]
  * @package Cobalt\Model
  */
 class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializable, Stringable {
@@ -39,6 +41,10 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     public ?string $name_prefix = null;
     protected bool $__schema_allow_undefined_fields = false;
     protected array $__reservedFields = [];
+    
+    const DIRECTIVE_MAP = [
+        'set' => 'Cobalt\Model\Directives\SetDirective',
+    ];
 
     /*************** INITIALIZATION ***************/
     function __construct(?array $schema = [], null|array|BSONDocument|BSONArray $dataset = null, ?string $name_prefix = null, bool $allow_undefined_fields = false) {

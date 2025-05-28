@@ -8,7 +8,7 @@
  *   * pattern - [""] the pattern for custom elements to be matched against
  */
 class InputArray extends AutoCompleteInterface {
-
+    
     constructor() {
         super();
         this.TAG_CLASS = "input-array--tag";

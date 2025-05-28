@@ -152,9 +152,9 @@ abstract class ForeignId extends MixedType {
         $this->value->{$name} = $value;
     }
 
-    function __isset($name) {
-        return isset($this->value->{$name});
-    }
+    // function __isset($name) {
+    //     return isset($this->value->{$name});
+    // }
 
     // public function initDirectives(): array {
     //     return [

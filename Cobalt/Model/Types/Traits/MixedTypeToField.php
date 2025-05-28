@@ -164,14 +164,17 @@ trait MixedTypeToField {
             'id' => '',
             'name' => $this->name ?? "",
             'type' => $this->type ?? "",
+            'min' => $this->directiveOrNull("min") ?? "",
+            'max' => $this->directiveOrNull("max") ?? "",
+            // 'list' => $this->directiveOrNull("values")->options() ?? "",
             'data' => $misc['data'] ?? [],
             'placeholder' => $misc['placeholder'] ?? $this->directiveOrNull("placeholder") ?? ""
-        ], $misc);
+        ], $this->directiveOrNull('input_attrs') ?? [], $misc);
     }
 
     function getAttribute($attr, $value) {
         $allowedEmptyAttrs = ['open', 'controls', 'disabled'];
-        if(!$value && !in_array($attr, $allowedEmptyAttrs)) return "";
+        if(($value === "" || $value === null) && !in_array($attr, $allowedEmptyAttrs)) return "";
         return "$attr=\"".htmlspecialchars($value)."\"";
     }
 

@@ -4,6 +4,8 @@ namespace Cobalt\Model\Traits;
 
 use Cobalt\Maps\Exceptions\SchemaExcludesUnregisteredKeys;
 use Cobalt\Model\Classes\ValidationResults\MergeResult;
+use Cobalt\Model\Directives\FilterDirective;
+use Cobalt\Model\Directives\SetDirective;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
@@ -13,6 +15,7 @@ use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Reflection;
 use ReflectionFunction;
+use TypeError;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
@@ -84,17 +87,9 @@ trait Filterable {
             }
 
             // This is disabled because the filter directive is called later
-            if(key_exists('filter', $this->__schema[$field]) && is_callable($this->__schema[$field]['filter'])) {
-                $funcReflection = new ReflectionFunction($this->__schema[$field]['filter']);
-                $argsReflection = $funcReflection->getParameters();
-                if(!$argsReflection[0]->isPassedByReference()) {
-                    throw new Error("The filter directive specified for field `$field` must accept values passed only by reference!");
-                }
-                $returnType = $funcReflection->getReturnType();
-                if((string)$returnType !== "void") {
-                    throw new Error("The filter directive specified for field `$field` must specify a return type of `void`!");
-                }
-                $this->__schema[$field]['filter']($value);
+            if(key_exists('filter', $this->__schema[$field])) {
+                if($this->__schema[$field]['filter'] instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
+                $this->__schema[$field]['filter']->getValue($value);
             }
 
             if($result->hasDirective("pattern")) {
@@ -102,8 +97,9 @@ trait Filterable {
                 if($pattern) $this->testPattern($result, $value, $pattern);
             }
             $validated = $result->filter($value);
-            if(key_exists('set', $this->__schema[$field]) && is_callable($this->__schema[$field]['set'])) {
-                $validated = $result->set($value);
+            if(key_exists('set', $this->__schema[$field])) {
+                if($this->__schema[$field]['set'] instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');
+                $this->__schema[$field]['set']->getValue($validated, $value);
             }
         } catch (ValidationContinue $e) {
             // If we catch a ValidationContinue, let's throw it again so
