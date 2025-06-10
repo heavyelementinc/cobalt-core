@@ -182,6 +182,9 @@ class Route {
             'handler'    => $options['handler'],
             'handler_data'  => $handler_data, // Handler script data
 
+            // Called whenever the route is accessed (this includes HEAD and OPTIONS requests)
+            'headers' => $options['headers'] ?? function () {},
+
             // The sitemap directives
             'sitemap'    => $options['sitemap'] ?? [], // array_merge([
             //     'ignore' => false, // Whether the sitemap should ignore this route

@@ -49,6 +49,7 @@ class Router {
     public $uri = null;
     public $context_prefix = null;
     public $cache_resource = null;
+    public $isOptions = false;
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -143,13 +144,21 @@ class Router {
         $query   = $query ?? $_SERVER['QUERY_STRING'];
         $method  = $method ?? $this->method;
         $context = $context ?? $this->route_context;
+        $this->isOptions = false;
+        switch(strtolower($method)) {
+            case "options":
+                $this->isOptions = true;
+                $method = getHeader("Access-Control-Request-Method", null, true, false);
+                $this->method = $method;
+                break;
+            case "head":
+                $this->headRequest = true;
+                $method = "get";
+                $this->method = $method;
+                break;
+        }
         
         $route = remove_base_path($route);
-
-        if (strtolower($method) === "head") {
-            $this->headRequest = true;
-            $method = "get";
-        }
 
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
@@ -171,7 +180,7 @@ class Router {
                 if ($route[strlen($route) - 1] === "/") {
                     $GLOBALS['PATH'] = "../";
                 }
-                return [$preg_pattern, $directives];
+                return [$preg_pattern, $directives, $this->isOptions];
             }
         }
         if ($this->current_route === null) throw new NotFound("No route discovered for $route");

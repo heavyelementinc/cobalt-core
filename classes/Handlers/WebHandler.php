@@ -21,6 +21,7 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
+use Closure;
 use Cobalt\Extensions\Extensions;
 use Cobalt\Manifests\Classes\Item;
 use Cobalt\Manifests\Classes\ManifestManager;
@@ -39,16 +40,15 @@ use MikeAlmond\Color\Color;
 use Render\Render;
 use TypeError;
 
-class WebHandler implements RequestHandler {
+class WebHandler extends RequestHandler {
     use UserBar;
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
-    var $encoding_mode;
     /** @var Render */
     var $renderer;
-    var $_stage_bootstrap;
     protected string $mainTemplateFilename;
+    public bool $isOptions = false;
 
 
     /** The `body.html` is scanned for these specific tags and then the 
@@ -84,6 +84,7 @@ class WebHandler implements RequestHandler {
     private $push_handler = null;
 
     function __construct() {
+        parent::__construct();
         // $this->web_manifest = get_all_where_available([
         //     __ENV_ROOT__ . "/manifest.jsonc",
         //     __ENV_ROOT__ . "/manifest.json",
@@ -110,10 +111,16 @@ class WebHandler implements RequestHandler {
         return;
     }
 
-    public function _stage_route_discovered($route, $directives):bool {
+    public function _stage_route_discovered(string $route, array $directives, bool $isOptions):bool {
         $this->renderer->stock_vars['route'] = $directives;
         $this->renderer->stock_vars['PATH'] = $GLOBALS['PATH'];
-
+        $this->isOptions = $isOptions;
+        $this->cors_management();
+        if(key_exists('headers', $directives)) {
+            if($directives['headers'] instanceof Closure == false) throw new TypeError("The headers directive must be an instance of `Closure`");  
+            call_user_func($directives['headers'],[$route, $directives]);
+        }
+        if($isOptions) exit;
         return true;
     }
 
@@ -684,7 +691,7 @@ class WebHandler implements RequestHandler {
             if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
             if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
             $this->renderer->set_body($this->template_body);
-            if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
+            // if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
             $this->renderer->set_vars($this->template_vars);
             $buffer = $this->renderer->execute();
             return $buffer;
@@ -706,4 +713,5 @@ class WebHandler implements RequestHandler {
     function userbar_end():string {
         return "";
     }
+
 }

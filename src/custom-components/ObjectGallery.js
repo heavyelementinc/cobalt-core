@@ -82,7 +82,7 @@ export class ObjectGallery extends ICustomInput {
     dragOrientation = ['clientX', 'x', 'width'];
     dragTarget = null;
     dropTarget = null;
-    dropAfter = false;
+    dropAfter = true;
 
     dragStart(event) {
         this.dragTarget = event.currentTarget;
@@ -149,15 +149,15 @@ export class ObjectGallery extends ICustomInput {
         const mouse = event[this.dragOrientation[0]];
         if(mouse === 0) return;
         const rect = this.dropTarget.getBoundingClientRect();
-        const relativeCursor = mouse - rect[this.dragOrientation[1]];
-        const halfElementWidth = rect[this.dragOrientation[2]] / 2;
-        if(relativeCursor >= halfElementWidth) {
-            this.dropAfter = true;
-            // this.dropTarget.classList.add(this.DROP_TARGET_NEXT);
-        } else {
-            this.dropAfter = false;
-            // this.dropTarget.classList.remove(this.DROP_TARGET_NEXT);
-        }
+        // const relativeCursor = mouse - rect[this.dragOrientation[1]];
+        // const halfElementWidth = rect[this.dragOrientation[2]] / 2;
+        // if(relativeCursor >= halfElementWidth) {
+        //     this.dropAfter = true;
+        //     // this.dropTarget.classList.add(this.DROP_TARGET_NEXT);
+        // } else {
+        //     this.dropAfter = false;
+        //     // this.dropTarget.classList.remove(this.DROP_TARGET_NEXT);
+        // }
         this.insertBefore(this.dragTarget, (this.dropAfter) ? this.dropTarget.nextSibling : this.dropTarget);
     }
 

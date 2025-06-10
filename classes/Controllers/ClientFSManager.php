@@ -54,7 +54,7 @@ trait ClientFSManager {
 
     public function download($filename) {
         $this->initFS();
-        header("Cache-Control: private, max-age=31536000, immutable");
+        header("Cache-Control: max-age=31536000, immutable");
         // header();
         $this->fs->download($filename);
     }
