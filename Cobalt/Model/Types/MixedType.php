@@ -80,7 +80,7 @@ class MixedType implements Stringable, ArrayAccess {
                 return $this->getValue();
             case "raw":
             case "original":
-                return $this->originalValue;
+                return $this->value ?? $this->originalValue;
             case "model":
                 return $this->model;
             case "type":
