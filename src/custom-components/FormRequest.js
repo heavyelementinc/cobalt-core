@@ -144,8 +144,8 @@ export default class FormRequest extends ProgressWizard {
         this.addEventListener("submission", this.onsubmission.bind(this));
         this.addEventListener("change", this.onchange.bind(this));
         this.addEventListener("click", this.onclick.bind(this));
-        this.addEventListener("keydown", this.onkeydown.bind(this));
-        document.addEventListener("keydown", this.onhotkey.bind(this));
+        // this.addEventListener("keydown", this.onkeydown.bind(this));
+        // document.addEventListener("keydown", this.onhotkey.bind(this));
     }
 
     connectedCallback() {
@@ -155,7 +155,7 @@ export default class FormRequest extends ProgressWizard {
     disconnectedCallback() {
         this.removeFeedback();
         this.removeValidationMessages();
-        document.removeEventListener("keydown", this.onhotkey);
+        // document.removeEventListener("keydown", this.onhotkey);
     }
 
     /**
