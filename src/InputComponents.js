@@ -25,7 +25,7 @@
 // customElements.define("login-form-request", LoginForm);
 
 
-class InputSwitch extends HTMLElement {
+class InputSwitchOld extends HTMLElement {
     /** InputSwitch gives us a handy way of assigning dynamic functionality to custom
      * HTML tags.
      */
@@ -47,13 +47,19 @@ class InputSwitch extends HTMLElement {
     }
 
     set value(val) {
-        this.checkbox.checked = val;
+        val = [true, "true", "on", "yes", "checked"].includes(val);
+        
+        if(this.checkbox) this.checkbox.checked = val;
         this.checked = val;
         this.setAttribute("checked", JSON.stringify(val));
     }
 
     // get checked() {
-    //     return this.checkbox.checked;
+    //     return this.value;
+    // }
+
+    // set checked(val) {
+    //     this.value = val;
     // }
 
     /** The CONNECTED CALLBACK is the function that is executed when the element
@@ -99,7 +105,7 @@ class InputSwitch extends HTMLElement {
         this.checkbox.checked = !this.checkbox.checked;
         this.checked = this.checkbox.checked;
         this.setAttribute("checked", JSON.stringify(this.checked));
-        const change = new Event("change");
+        const change = new Event("change",{bubbles: true});
         this.checkbox.dispatchEvent(change);
         this.dispatchEvent(change);
     }
@@ -125,7 +131,6 @@ class InputSwitch extends HTMLElement {
     }
 }
 
-customElements.define("input-switch", InputSwitch);
 
 // class SwitchContainer extends HTMLElement {
 //     connectedCallback() {
@@ -153,6 +158,7 @@ customElements.define("input-switch", InputSwitch);
 class RadioGroup extends HTMLElement {
     constructor() {
         super();
+        console.warn("<radio-group> elements have been deprecated in favor of the <input-radio> element");
         this.selected = this.getAttribute("selected") ?? this.getAttribute("value") ?? this.getAttribute("checked");
         this.default = this.getAttribute("default");
 
@@ -252,8 +258,13 @@ class DisplayDate extends HTMLElement {
         };
     }
 
+    get value() {
+        return this.getAttribute("value") ?? this.innerText ?? null;
+    }
+
     connectedCallback() {
-        this.date = this.getValue();
+        this.date = this.value;
+        if(!this.date) return;
         // this.format = this.getAttribute("format") || this.formatKeywords.default;
         if ((this.getAttribute("format") || "default") in this.formatKeywords) this.format = this.formatKeywords[this.format];
         else this.format = this.getAttribute("format");
@@ -328,182 +339,6 @@ class DisplayDate extends HTMLElement {
 }
 
 customElements.define("date-span", DisplayDate);
-
-class InputObjectArray extends HTMLElement {
-    constructor() {
-        super();
-        this.shadow = this.attachShadow({ mode: 'open' });
-        this.template = this.querySelector("template").innerHTML;
-        this.withAdditional = string_to_bool(this.getAttribute("with-additional")) || false;
-        this.values = [];
-
-        this.fieldItems = [];
-        // this.initInterface();
-        this.setAttribute("__custom-input", "true");
-    }
-
-    connectedCallback() {
-        let json = this.querySelector("var");
-        if (this.hasAttribute("value")) {
-            try {
-                this.value = JSON.parse(this.getAttribute("value")) || [];
-            } catch (e) {
-                throw new Error("Failed to parse JSON from 'value' attribute");
-            }
-        } else if (json && "innerText" in json) {
-            let js = [];
-            try {
-                js = JSON.parse(json.innerText) || [];
-            } catch (error) {
-                throw new Error("Failed to parse JSON from <var> tag");
-            }
-            this.value = js;
-        } else {
-            this.value = [];
-        }
-        this.dispatchEvent(new CustomEvent("ObjectArrayReady"));
-        this.dispatchEvent(new CustomEvent("componentready"));
-    }
-
-    initInterface() {
-        this.shadow.innerHTML = "";
-        this.style();
-        this.addButton();
-        let index = -1;
-        for (const i of this.values) {
-            this.addFieldset(i, index++);
-        }
-        if (this.withAdditional === true) this.addFieldset(); // Start with an empty one
-        else if (this.values.length < 1) this.addFieldset();
-    }
-
-    style() {
-        const main = document.querySelector("#style-main");
-        const links = document.querySelectorAll("link[rel='stylesheet']");
-        let styleLinks = "";
-        for (const i of links) {
-            styleLinks += i.outerHTML;
-        }
-
-        const style = document.createElement("head");
-
-        style.innerHTML = `<style>
-        ${main.textContent}
-        fieldset > label {
-            display:block;
-        }
-        fieldset{
-            padding:0;
-            border:none;
-        }
-        input-fieldset {
-            border: 1px solid var(--project-color-input-border-nofocus);
-            background: var(--project-color-input-background);
-            border-radius: 4px;
-            position: relative;
-            padding: .2rem;
-        }
-        
-        input-fieldset button.input-fieldset--delete-button{
-            border: none;
-            border-left: inherit;
-            border-bottom: inherit;
-            border-radius: 0 4px;
-            background: inherit;
-            position:absolute;
-            color: var(--project-color-input-border-nofocus);
-            top:0;
-            right:0;
-            padding: 1px 4px;
-        }</style>${styleLinks}`;
-        this.shadow.append(style);
-    }
-
-    addButton() {
-        this.button = document.createElement("button");
-        this.button.classList.add("input-object-array--add-button")
-        this.button.innerText = "+";
-        this.button.addEventListener("click", (e) => {
-            this.addFieldset();
-        })
-        this.shadow.appendChild(this.button);
-
-    }
-
-    addFieldset(values = {}, index = null) {
-        if (!index) index = this.fieldItems.length || this.values.length;
-
-        const fieldset = document.createElement("input-fieldset");
-
-        fieldset.innerHTML = this.template;
-
-        if (index in this.fieldItems === false) this.fieldItems[index] = {};
-        this.fieldItems[index] = get_form_elements(fieldset);
-
-        for (const i in values) {
-            const field = fieldset.querySelector(`[name='${i}']`);
-            if (!field) continue;
-            this.fieldItems[index][i].value = values[i];
-        }
-
-        this.addFieldsetButton(fieldset)
-        this.shadow.insertBefore(fieldset, this.button);
-    }
-
-    addFieldsetButton(field) {
-        let button = document.createElement("button");
-        button.classList.add("input-fieldset--delete-button");
-        button.innerText = "✖";
-        button.addEventListener("click", (e) => {
-            const index = [...field.children].indexOf(field)
-            field.parentNode.removeChild(field);
-            delete this.fieldItems[index];
-            this.fieldItems = [...Object.values(this.fieldItems)];
-        });
-        field.appendChild(button);
-    }
-
-    get value() {
-        let data = {};
-        const objects = this.shadow.querySelectorAll("input-fieldset");
-        objects.forEach((e, i) => {
-            data[i] = {}
-            const fieldElements = get_form_elements(e);
-
-            Object.values(fieldElements).forEach(el => {
-                data[i][el.name] = el.value;
-            })
-        })
-        return data;
-    }
-
-    set value(value) {
-        if (!value) return;
-        this.values = value;
-        this.initInterface();
-    }
-
-    static get observedAttributes() {
-        return ['value'];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        const callable = `change_handler_${name.replace("-", "_")}`;
-        if (callable in this) {
-            this[callable](newValue, oldValue);
-        }
-    }
-
-    change_handler_value(newValue) {
-        if (!newValue) {
-            this.values = [];
-            return;
-        }
-        this.values = JSON.parse(newValue);
-    }
-}
-
-customElements.define("input-object-array", InputObjectArray);
 
 class HelpSpan extends HTMLElement {
 
@@ -813,7 +648,7 @@ class ProgressBar extends HTMLElement {
         this.isComplete = newValue;
         const truthy = ["complete", "true", true, "done"];
         if (truthy.indexOf(newValue) === -1) this.show();
-        else this.hide()
+        else this.hide();
     }
 }
 
@@ -827,13 +662,14 @@ class InputNumber extends HTMLElement {
 
     connectedCallback() {
         this.realField = document.createElement("input");
-        this.realField.type = "number";
+        this.realField.type = "text";
         this.realField.min = this.getAttribute("min");
         this.realField.max = this.getAttribute("max");
-        this.realField.pattern = this.getAttribute("pattern");
+        this.realField.pattern = this.getAttribute("pattern") ?? "[0-9]+";
+        this.realField.inputMode = this.getAttribute("input-mode") ?? "numeric";
         this.realField.addEventListener("change", e => {
             e.stopPropagation();
-            this.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change",{bubbles: true}));
         })
         // this.realField.disabled = this.getAttribute("disabled");
         this.value = this.getAttribute("value");
@@ -886,3 +722,4 @@ class InputNumber extends HTMLElement {
 }
 
 customElements.define("input-number", InputNumber);
+

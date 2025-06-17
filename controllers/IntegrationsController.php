@@ -7,26 +7,26 @@ use Exceptions\HTTP\NotFound;
 
 class IntegrationsController extends Controller{
     public function index() {
-        $integrations = $this->load_classes(__APP_ROOT__ . "/classes/Cobalt/Integrations/");
-        $integrations = array_merge($integrations, $this->load_classes(__ENV_ROOT__ . "/classes/Cobalt/Integrations/"));
+        $integrations = $this->load_classes(__APP_ROOT__ . "/Cobalt/Integrations/Final");
+        $integrations = array_merge($integrations, $this->load_classes(__ENV_ROOT__ . "/Cobalt/Integrations/Final"));
 
         $html = "";
         foreach($integrations as $integration) {
-            $namespaced = "\\Cobalt\\Integrations\\$integration\\$integration";
+            $namespaced = "\\Cobalt\\Integrations\\Final\\$integration\\$integration";
             $i = new $namespaced();
             if($i instanceof Base === false) throw new Exception("Namespaced class $namespaced is not an instance of the Base Integration");
             $html .= $i->html_index_button();
         }
 
-        return view("/admin/integrations/index.html", ['html' => $html]);
+        return view("/Cobalt/Integrations/templates/index.html", ['html' => $html]);
     }
 
     public function getOauthIntegrations() {
-        $integrations = $this->load_classes(__APP_ROOT__ . "/classes/Cobalt/Integrations/");
-        $integrations = array_merge($integrations, $this->load_classes(__ENV_ROOT__ . "/classes/Cobalt/Integrations/"));
+        $integrations = $this->load_classes(__APP_ROOT__ . "/Cobalt/Integrations/Final");
+        $integrations = array_merge($integrations, $this->load_classes(__ENV_ROOT__ . "/Cobalt/Integrations/Final"));
         $html = "";
         foreach($integrations as $integration) {
-            $namespaced = "\\Cobalt\\Integrations\\$integration\\$integration";
+            $namespaced = "\\Cobalt\\Integrations\\Final\\$integration\\$integration";
             $i = new $namespaced();
             if($i instanceof OauthBase === false) continue;//throw new Exception("Namespaced class $namespaced is not an instance of the Base Integration");
             $html .= $i->html_oauth_button();
@@ -36,16 +36,20 @@ class IntegrationsController extends Controller{
 
     private function load_classes($dir) {
         $scandir = @scandir($dir);
+        if(!$scandir) return [];
         $candidates = [];
         foreach($scandir as $file) {
             if($file === "." || $file === "..") continue;
-            if(is_dir($dir . $file)) $candidates[] = $file;
+            if($file[0] === ".") continue;
+            if(is_dir($dir ."/". $file)) {
+                if(file_exists("$dir/$file/$file.php")) $candidates[] = $file;
+            }
         }
         return $candidates;
     }
 
     private function namespaced($name) {
-        $namespaced = "\\Cobalt\\Integrations\\$name\\$name";
+        $namespaced = "\\Cobalt\\Integrations\\Final\\$name\\$name";
         try {
             $i = new $namespaced();
         } catch (Exception $e) {
@@ -112,7 +116,7 @@ class IntegrationsController extends Controller{
         $result = $i->oauth_receive($_GET);
 
         $state = $_GET['state'];
-        if(!$state) $state = "/";
+        if(!$state) $state = "/me";
 
         header("Location: $state");
         exit;

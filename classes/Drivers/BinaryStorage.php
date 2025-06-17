@@ -8,7 +8,10 @@ use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\ServiceUnavailable;
 use MongoDB\BSON\Document;
 use MikeAlmond\Color\Color;
-
+use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\Persistable;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 
 trait BinaryStorage {
     protected string $__db;
@@ -18,7 +21,17 @@ trait BinaryStorage {
     protected \MongoDB\Collection $__collection;
     protected bool $__initialized = false;
 
-    final public function __store(string $pathToFile, string $filenameForStorage, $data = [], $storageOptions = []) {
+    /**
+     * Store a file in the GridFS filesystem
+     * @param string $pathToFile 
+     * @param string $filenameForStorage 
+     * @param array $data 
+     * @param array $storageOptions 
+     * @return ?ObjectId
+     * @throws NotFound 
+     * @throws ServiceUnavailable 
+     */
+    final public function __store(string $pathToFile, string $filenameForStorage, $data = [], $storageOptions = []):?ObjectId {
         $this->__initFS();
         if(!file_exists($pathToFile)) throw new NotFound("File does not exist");
 
@@ -32,6 +45,8 @@ trait BinaryStorage {
         if($resource === false) throw new ServiceUnavailable("Could not open file");
 
         $id = $this->__bucket->uploadFromStream($filenameForStorage, $resource, $storageOptions);
+        $data['meta'] = $this->__getMetadata($pathToFile);
+        $data['_v'] = 3;
 
         $result = $this->__collection->updateOne(
             ['_id' => $id],
@@ -61,7 +76,7 @@ trait BinaryStorage {
         // }
     }
 
-    final public function __updateFile(string $filename, array|GenericMap|SchemaResult|Document $data) {
+    final public function __updateFile(string $filename, array|GenericMap|SchemaResult|Document $data):void {
         $this->__initFS();
         $this->__collection->updateOne(
             ['name' => $filename],
@@ -70,8 +85,19 @@ trait BinaryStorage {
         return;
     }
 
-    final public function __findOne(string $filename, array $options = []){
-        return $this->__collection->findOne(['name' => $filename], $options);
+    final public function __findOne(array $query, array $options = []):null|BSONArray|BSONDocument|Persistable{
+        $this->__initFS();
+        return $this->__collection->findOne($query, $options);
+    }
+
+    final public function __find(array $query, array $options) {
+        $this->__initFS();
+        return $this->__collection->find($query, $options);
+    }
+
+    final public function __count(array $query, array $options) {
+        $this->__initFS();
+        return $this->__collection->count($query, $options);
     }
 
     final public function __get_uploaded_files(string|int|null $field = null, int $limit = 0):?array {
@@ -119,8 +145,7 @@ trait BinaryStorage {
         $this->__initialized = true;
     }
 
-    
-    
+
     private function getImageMetadata($path_to_file, $mime_type = null) {
         if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
         
@@ -138,9 +163,9 @@ trait BinaryStorage {
         } else $avg = "#fff";
 
         $meta = [
-            'width' => $metadata[0],
-            'height' => $metadata[1],
             'mimetype' => $metadata['mimetype'],
+            'width'    => $metadata[0],
+            'height'   => $metadata[1],
             'accent_color' => $avg,
             'contrast_color' => (Color::fromHex($avg)->isDark()) ? "#FFFFFF" : "#000000"
         ];
@@ -154,6 +179,7 @@ trait BinaryStorage {
         $info = $id3->analyze($path_to_file);
         
         $meta = [
+            'mimetype' => $mime_type,
             'width' => $info['video']['resolution_x'],
             'height' => $info['video']['resolution_y'],
             'seconds' => $info['playtime_seconds'],
@@ -161,7 +187,6 @@ trait BinaryStorage {
             'framerate' => $info['video']['framerate'],
             'rotation' => $info['video']['rotate'],
             'audio' => $info['audio'],
-            'mimetype' => $mime_type,
         ];
 
         return $meta;
@@ -186,9 +211,9 @@ trait BinaryStorage {
         $attrs = $xml->attributes();
 
         return [
+            'mimetype' => $mime_type,
             'width'    => substr((string)$attrs->width,0,-2),
             'height'   => substr((string)$attrs->height,0,-2),
-            'mimetype' => $mime_type
         ];
     }
 

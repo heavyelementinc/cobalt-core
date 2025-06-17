@@ -270,7 +270,7 @@ if (app("enable_debug_routes")) {
         'navigation' => [
             'debug_prototypes'
         ],
-        'anchor' => ['name' => 'Modal Test']
+        'anchor' => ['name' => 'Model Test']
     ]);
 
     Route::get("/compiler", '\Cobalt\Templates\Tests\Controllers\TemplateTest@compiler_output',[

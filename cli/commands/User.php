@@ -2,7 +2,7 @@
 
 use Auth\Permissions;
 use Auth\UserCRUD;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 

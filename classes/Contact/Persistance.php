@@ -87,6 +87,7 @@ class Persistance extends PersistanceMap {
                 'index' => [
                     'title' => 'Date',
                     'order' => 1,
+                    'sort' => -1,
                     // 'view' => fn () => $this->date->format("c")
                 ]
             ],

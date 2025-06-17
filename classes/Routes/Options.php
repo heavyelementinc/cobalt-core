@@ -2,6 +2,8 @@
 
 namespace Routes;
 
+use Closure;
+use Error;
 use Exception;
 use Iterator;
 use JsonSerializable;
@@ -24,6 +26,7 @@ class Options implements Iterator, JsonSerializable {
         'groups',
         'csrf_required',
         'require_session',
+        'headers',
     ];
 
     private int $index = 0;
@@ -54,6 +57,7 @@ class Options implements Iterator, JsonSerializable {
     private ?string $groups = null;
     private bool $require_session = false;
     private bool $csrf_required = false;
+    private ?Closure $headers = null;
 
     function __construct(string $path, string $controller) {
         $this->set_path($path);
@@ -248,15 +252,25 @@ class Options implements Iterator, JsonSerializable {
         return $this->require_session;
     }
 
+    public function set_headers(Closure $funct):self {
+        $this->headers = $funct;
+        return $this;
+    }
+
+    public function get_headers(): Closure {
+        if(is_null($this->headers)) return function () {};
+        return $this->headers;
+    }
+
     // public function __get($name) {
-    //     if(in_array($name, self::KEYS)) return $this->{$name};
+    //     if(in_array($name, self::KEYS)) return $this->{"get_".$name};
     //     return null;
     // }
 
-    // public function __isset($name) {
-    //     if(!in_array($name, self::KEYS)) return false;
-    //     return isset($this->{$name});
-    // }
+    public function __isset($name) {
+        if(!in_array($name, self::KEYS)) return false;
+        return isset($this->{$name});
+    }
 
     /************INTERFACE*************/
     public function jsonSerialize(): mixed {
@@ -269,7 +283,9 @@ class Options implements Iterator, JsonSerializable {
     }
 
     public function current(): mixed {
-        return $this->{$this->key()};
+        $method = "get_" . $this->key();
+        if(!method_exists($this, $method)) throw new Error("Method `$method` is invalid");
+        return $this->{$method}();
     }
 
     public function next(): void {

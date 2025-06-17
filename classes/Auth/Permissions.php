@@ -16,13 +16,10 @@ use Render\CLITable;
 class Permissions extends Database {
     /** @todo Remove /private directory */
     private $permission_files = [
-        __ENV_ROOT__ . "/config/default_permissions.jsonc",
-        __APP_ROOT__ . "/config/permissions.jsonc",
-        __APP_ROOT__ . "/config/permissions.json",
-        __APP_ROOT__ . "/config/app_permissions.jsonc",
-        __APP_ROOT__ . "/config/app_permissions.json",
-        __APP_ROOT__ . "/private/config/permissions.jsonc",
-        __APP_ROOT__ . "/private/config/permissions.json",
+        __ENV_ROOT__ . "/config/default_permissions.php",
+        __APP_ROOT__ . "/config/permissions.php",
+        __APP_ROOT__ . "/config/app_permissions.php",
+        __APP_ROOT__ . "/private/config/permissions.php",
     ];
     public $valid = [];
     public $groups = [];
@@ -46,7 +43,7 @@ class Permissions extends Database {
     /** Load the permissions and create a list of valid groups*/
     function load_permissions() {
         /** Load both the built-in permissions as well as the app-specific ones */
-        $this->valid = \get_all_where_available($this->permission_files);
+        $this->valid = $this->load_permission_files($this->permission_files);
         /** Create a list of groups */
         $this->groups = [];
         if (app('Auth_enable_root_group')) $this->groups[0] = "root";
@@ -58,6 +55,16 @@ class Permissions extends Database {
         /** Make the groups list unique */
         $this->groups = array_unique($this->groups);
         $this->valid = array_merge($this->valid ?? [], $GLOBALS['PERMISSIONS'] ?? []);
+    }
+
+    function load_permission_files(array $paths):array {
+        $__permissions = [];
+        foreach($paths as $index => $path) {
+            if(!file_exists($path)) continue;
+            include $path;
+            $__permissions[] = $permissions;
+        }
+        return array_merge(...$__permissions);
     }
 
     /** Render out a list of permissions for the specified user. This is how we handle
@@ -104,8 +111,9 @@ class Permissions extends Database {
                 $table[$group] = "<details><summary>$group</summary>\n<ul class='list-panel'>";
                 $groups .= "<li><input-switch name='groups.$group' checked='$groupCheck'></input-switch> $group</li>";
             }
+            $prettyName = $item['name'] ?? snake_case_fixer($name);
             /** Concat our current permission into the group */
-            $table[$group] .= "<li><input-switch checked='$checked' name='permissions.$name' $dangerous></input-switch>$item[label]</li>\n";
+            $table[$group] .= "<li><input-switch checked='$checked' name='permissions.$name' $dangerous></input-switch>$prettyName<br><small>$item[label]</small></li>\n";
         }
         /** Collapse our sorted groups to a string, closing our unordered lists and completing our HTML */
         return ['permissions' => "$root_group" . implode("</ul></details>\n", $table) . "</ul>\n", 'groups' => "<ul class='list-panel'>$groups</ul>"];
@@ -288,5 +296,13 @@ class Permissions extends Database {
         if(key_exists($key, $this->valid)) return self::ENUM_VALUE_DIFF['WRONG_VALUE'];
         if($this->valid[$key]['default'] === $value) return self::ENUM_VALUE_DIFF['IS_SAME'];
         else return self::ENUM_VALUE_DIFF['IS_DIFFERENT'];
+    }
+
+    function get_valid_permissions() {
+        $perms = [];
+        foreach($this->valid as $key => $details){
+            $perms[$key] = $details['name'] ?? snake_case_fixer($key);
+        }
+        return $perms;
     }
 }

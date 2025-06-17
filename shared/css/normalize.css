@@ -361,6 +361,12 @@ footer .social-media a:hover{
     flex-grow: 1;
     font-size: .8rem;
     text-align: center;
+    .copyright-notice {
+        display: inline-flex;
+        * {
+            margin: 0;
+        }
+    }
 }
 
 .mobile-only {
@@ -419,6 +425,13 @@ ul.columnated {
     -webkit-column-gap: var(--gap,1em);
     column-count: var(--columns,2);
     column-gap: var(--gap,1em);
+}
+
+@media only screen and (max-width: 35em) {
+    ul.columnated {
+        column-count: unset;
+        column-gap: unset;
+    }
 }
 
 

@@ -1,0 +1,379 @@
+:root {
+    --btn-normal: var(--neutral-color-2);
+    --btn-text: var(--neutral-color-2-fg);
+    --btn-hover: var(--neutral-color-1);
+    --btn-hover-text: var(--neutral-color-1-fg);
+    --btn-active: var(--neutral-color-3);
+    --btn-active-text: var(--neutral-color-3-fg);
+}
+
+/** BUTTON LINKS **/
+.button,
+a.button,
+[role='button'],
+a.floater--new-item
+{
+    --_anchor-element-color: var(--primary-color-1-fg);
+    --_anchor-element-background: var(--primary-color-1);
+    --_anchor-hover-color: var(--primary-color-0-fg);
+    --_anchor-hover-background: var(--primary-color-0);
+    --_anchor-active-color: var(--primary-color-2-fg);
+    --_anchor-active-background: var(--primary-color-2);
+    --_anchor-visited-color: var(--_anchor-element-color);
+    --_anchor-visited-background: var(--_anchor-element-background);
+    background-color: var(--_anchor-element-background);
+    color: var(--_anchor-element-color);
+    padding: .7rem 1.4rem;
+    border-radius: 2rem;
+    border: 0;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    box-sizing: border-box;
+    border: var(--input-element-border-width) solid transparent;
+    text-decoration: none;
+    font-weight: bolder;
+    margin-bottom: var(--margin-xs);
+    
+    
+    
+    
+    &:not(button) {
+        /* border-radius: 0; */
+        /* border: 1px solid var(--project-color-input-border-nofocus); */
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        cursor: normal;
+        user-select: none;
+    }
+    &.light-alt,
+    &.light {
+        --_anchor-element-color: var(--neutral-color-1-fg);
+        --_anchor-element-background: var(--neutral-color-1);
+        --_anchor-hover-color: var(--neutral-color-0-fg);
+        --_anchor-hover-background: var(--neutral-color-0);
+        /* border: 1px solid; */
+    }
+    &.dark-alt,
+    &.dark {
+        --_anchor-element-color: var(--neutral-color-4-fg);
+        --_anchor-element-background: var(--neutral-color-4);
+        --_anchor-hover-color: var(--neutral-color-3-fg);
+        --_anchor-hover-background: var(--neutral-color-3);
+        --_anchor-active-color: var(--neutral-color-5-fg);
+        --_anchor-active-background: var(--primary-color-5);
+        /* border: 1px solid; */
+    }
+    &.primary,
+    &.primary-action {
+        --_anchor-element-color: var(--primary-color-1-fg);
+        --_anchor-element-background: var(--primary-color-1);
+        --_anchor-hover-color: var(--primary-color-0-fg);
+        --_anchor-hover-background: var(--primary-color-0);
+        --_anchor-active-color: var(--primary-color-2-fg);
+        --_anchor-active-background: var(--primary-color-2);
+        &.light-alt {
+            --_anchor-element-color: var(--primary-color-1-fg);
+            --_anchor-element-background: var(--primary-color-1);
+            --_anchor-hover-color: var(--primary-color-0-fg);
+            --_anchor-hover-background: var(--primary-color-0);
+            --_anchor-active-color: var(--primary-color-2-fg);
+            --_anchor-active-background: var(--primary-color-2);
+            /* border: 1px solid; */
+        }
+        &.dark-alt {
+            --_anchor-element-color: var(--primary-color-5-fg);
+            --_anchor-element-background: var(--primary-color-5);
+            --_anchor-hover-color: var(--primary-color-4-fg);
+            --_anchor-hover-background: var(--primary-color-4);
+            --_anchor-active-color: var(--primary-color-5-fg);
+            --_anchor-active-background: var(--primary-color-5);
+            /* border: 1px solid; */
+        }
+    }
+    &.tertiary {
+        --_anchor-element-color: inherit;
+        --_anchor-element-background: transparent;
+        --_anchor-hover-color: inherit;
+        --_anchor-hover-background: transparent;
+        --_anchor-active-color: inherit;
+        --_anchor-active-background: transparent;
+        padding-left: 0;
+        padding-right: 0;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+    &.dangerous,
+    &.issue {
+        --_anchor-element-color: var(--issue-color-1-fg);
+        --_anchor-element-background: var(--issue-color-1);
+        --_anchor-hover-color: var(--issue-color-0-fg);
+        --_anchor-hover-background: var(--issue-color-0);
+        --_anchor-active-color: var(--issue-color-2-fg);
+        --_anchor-active-background: var(--issue-color-2);
+    }
+    &:visited {
+        background: var(--_anchor-visited-background);
+        color: var(--_anchor-visited-color);
+    }
+    &:hover,
+    &:focus,
+    &:focus-visible {
+        background: var(--_anchor-hover-background);
+        color: var(--_anchor-hover-color);
+    }
+    &:active {
+        background: var(--_anchor-active-background);
+        color: var(--_anchor-active-color);
+    }
+    & loading-spinner {
+        font-size: 1em;
+        height: 1em;
+        width: 1em;
+    }
+}
+
+a.floater--new-item {
+    position:fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    &::before{
+      content: "+";
+      font-size: 2.5rem;
+    }
+}
+
+a.custom-element-edit-link {
+    color: inherit;
+    font-size: .7em;
+    vertical-align: super;
+}
+
+async-button{
+    transition: padding 1s;
+    &:not(.link, [link]) {
+        appearance: initial;
+        border-radius: 5px;
+        background-color: #e9e9ed;
+        border: 1px solid #8f8f9d;
+        color: black;
+        padding: .2em .4em;
+        cursor: default;
+    }
+    &:not(.link, [link]):hover {
+        border: 1px solid #676774;
+        background-color: #d0d0d7;
+    }
+    &:not(.link, [link]):active {
+        border: 1px solid #484851;
+        background-color: #b1b1b9;
+    }
+    &:not(.link, [link]) {
+        display: inline-flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        padding: 0.2em;
+    }
+    &.link,
+    &[link] {
+        cursor: pointer;
+        background: transparent;
+        font-size: 1em;
+        border: 0;
+        padding: 0;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+    &.working {
+        padding: .2em .4em .2em .6em;
+        pointer-events: none;
+    }
+    &.working > svg {
+        margin-right: .5em;
+        visibility: visible;
+        opacity: 1;
+    }
+    &[aria-disabled="true"] {
+        pointer-events: none;
+        color: rgba(0,0,0,.4);
+    }
+    &[aria-disabled="true"][native] {
+        opacity: .5;
+    }
+    > svg {
+        display: inline-block;
+        visibility: hidden;
+        opacity: 0;
+        /* box-sizing: border-box; */
+        border-radius: 50%;
+        height: 1em;
+        width: 1em;
+        animation: asyncButtonWorking 2s;
+        stroke-dasharray: 68%;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+        transition: margin 1s, opacity 1s;
+    }
+    &.error {
+        border: 1px solid red;
+    }
+    &.done {
+        padding: .2em .7em .2em .7em;
+    }
+    &.final{
+        pointer-events: none;
+        opacity: .8;
+    }
+}
+
+@keyframes asyncButtonWorking {
+    0%{
+        stroke-dasharray: 68%;
+        transform: rotate(0deg);
+    }
+      
+    50%{
+        stroke-dasharray: 160%;
+    }
+    99%{
+        stroke-dasharray: 68%;
+    }
+    100% {
+        transform: rotate(360deg);
+        stroke-dasharray: 68%;
+        animation-timing-function: step-end;
+    }
+}
+
+split-button {
+    display: flex;
+    border: 1px solid currentColor;
+    background: var(--project-color-button-init);
+    border-radius: 4px;
+    font-size: 1.1rem;
+    color: var(--project-color-button-text);
+    overflow: hidden;
+    grid-template-rows: auto;
+    grid-template-columns: auto 3rem;
+    & option {
+        display: none;
+    }
+    & button, 
+    & async-button:not(.link, [link]),
+    & async-button.link, 
+    & async-button[link] {
+        border: none;
+        color: inherit;
+        background: none;
+        margin: 0;
+        padding: .4rem .6rem;
+        text-align: center;
+        border-radius: 0;
+        transition: none;
+        height: 100%;
+        flex-grow: 1;
+        align-items:center;
+        height: 3rem;
+        box-sizing: border-box;
+        &:hover {
+            background: var(--project-color-button-hover);
+            color: var(--project-color-button-hover-text);
+        }
+    }
+    & button.split-button--additional-options,
+    & button.split-button--additional-options:hover {
+        border-left: .5px solid currentColor;
+        max-width: 3rem;
+        width: 3rem;
+    }
+}
+
+
+
+
+
+button[aria-pressed='true'], :is(async-button, input[type="button"])[aria-pressed='true'] {
+    background: var(--project-color-button-text);
+    color: var(--project-color-button-init);
+}
+
+button-toggle {
+}
+
+button-toggle[aria-pressed="true"] {
+
+}
+
+button-toggle[aria-pressed="false"] {
+
+}
+
+
+captcha-button {
+    display: flex;
+    width: 100%;
+    padding: var(--margin-s);
+    gap: var(--margin-s);
+    h1 {
+        margin: 0;
+        font-size: large;
+    }
+    p {
+        font-size: small;
+        margin: var(--margin-xs) 0 0;
+    }
+    /* max-width: 30ch; */
+    /* height: 10ch; */
+    .status {
+        border: var(--input-element-border-value);
+        background: var(--input-element-background);
+        /* padding: var(--input-element-padding); */
+        border-radius: var(--input-element-radius);
+        font-size: 1.1rem;
+        color: var(--input-element-color);
+        height: 2rem;
+        width: 2rem;
+        display: grid;
+        place-content: center;
+    }
+    .checking .status {
+        color: black;
+    }
+    loading-spinner {
+        height: 2rem;
+        width: 2rem;
+        display: grid;
+        place-content: center;
+    }
+    & .status:before {
+        content: "";
+        /* margin-right: var(--margin-s); */
+        font-size: 1em;
+        font-family: 'Material Design Icons';
+        color: var(--input-element-background);
+        display: grid;
+        place-items: center;
+    }
+    &:not(.checking,.activated):hover .status:before {
+        content: "\F0E1E";
+        color: rgb(from var(--input-element-color) r g b / .3);
+    }
+    &.activated .status:before {
+        content: "\F0E1E";
+        color: var(--input-element-color);
+    }
+    &.activated .status loading-spinner {
+        display: none;
+    }
+}

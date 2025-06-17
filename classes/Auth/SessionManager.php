@@ -37,7 +37,9 @@ class SessionManager extends \Drivers\Database {
         if($id === null) return "";
         $result = $this->find(['user_id' => $id]);
         
-        $html = view_each("/authentication/user-management/sessions/session-item.html", ['doc' => iterator_to_array($result)]);
+        $html = view_each("/authentication/user-management/sessions/session-item.php", [
+            'doc' => iterator_to_array($result)
+        ]);
 
         return view("/authentication/user-management/sessions/session-ui.html", ['html' => $html]);
     }

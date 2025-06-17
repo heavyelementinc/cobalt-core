@@ -1,0 +1,520 @@
+[
+    // {
+    //     "href": "/editorjs/editorjs.mjs",
+    //     "contexts": ["common"],
+    //     "module": true
+    // },
+    {
+        "href":"Preferences.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"global_functions.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"Cobalt.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"Modal.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"Cobalt/CobaltModal.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"StatusMessage.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"AsyncMessageHandler.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"sortable.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"AsyncFetch.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"ApiFetch.js",
+        "contexts": ["common"]
+    },
+    {
+        "href": "Cobalt/CobaltWebSocket.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"ActionMenu.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/custom-button.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"components/simplemde.min.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/autocomplete-interface.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/radio-buttons.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/split-button.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/button-toggle.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/input-array.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    // {
+    //     "href":"components/input-switch.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    {
+        "href":"components/datepicker.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/input-datetime.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/autocomplete.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    // {
+    //     "href":"components/input-password.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    {
+        "href":"components/cobalt-carousel.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/tag-select.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/fs-listing.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/fold-out.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/tab-nav.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/credit-card.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/flex-table.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/action-menu-element.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/NotificationsPanel.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/input-text.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    // {
+    //     "href":"custom-components/object-gallery-picker.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    // {
+    //     "href":"custom-components/object-gallery.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    // {
+    //     "href":"components/markdown-area.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    {
+        "href":"components/CountdownTimer.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/horizontal-scroll.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    // {
+    //     "href":"components/block-editor.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    {
+        "href":"components/image-result.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/NumberReveal.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"components/type-writer.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"Cobalt/Shadowbox.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"DateConverter.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"TabbedUI.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"InputClasses.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"InputComponents.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"AsyncButton.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"UserMenu.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"Events.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"PaginatedContainer.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
+        "href":"AudioPlayer.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    // {
+    //     "href":"components/InputObjectArray.js",
+    //     "contexts": ["common"],
+    //     "package": "deferred"
+    // },
+    {
+        "href":"CobaltScrollManager.js",
+        "contexts": ["common"]
+    },
+    {
+        "href":"PushNotifications.js",
+        "contexts": ["common"]
+    },
+    {
+        "href": "protected/Posts.js",
+        "contexts": ["admin"]
+    },
+    {
+        "href": "protected/UserPanel.js",
+        "contexts": ["admin"]
+    },
+    {
+        "href": "protected/UserManager.js",
+        "contexts": ["admin"]
+    },
+    {
+        "href": "protected/EventManager.js",
+        "contexts": ["admin"]
+    },
+    {
+        "href": "protected/FSManager.js",
+        "contexts": ["admin"]
+    },
+    {
+        "href": "protected/PageEditor.js",
+        "contexts": ["admin"]
+    },
+    {
+        "href":"custom-components/_ComponentDeclarations.js",
+        "contexts": ["common"],
+        "package": "components",
+        "append": true,
+        "module": true
+    },
+    {
+        "href":"main.js",
+        "contexts": ["common"], 
+        "append": true
+    },
+    {
+        "href":"app.js",
+        "contexts": ["common"], 
+        "append": true
+    },
+    {
+        "href":"Cobalt/MobileNavMenu.js",
+        "contexts": ["common"], 
+        "append": true
+    },
+    {
+        "href":"ClientRouter.js",
+        "contexts": ["common"], 
+        "append": true
+    },
+    /* CSS */
+    // {
+    //     "href": "material-design/css/material.min.css",
+    //     "contexts": ["common"],
+    //     "package": "inline",
+    //     "inline": true
+    // },
+    {
+        "href": "reset.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "web.css",
+        "contexts": ["web"],
+        "version": 2
+    },
+    {
+        "href": "basic-buttons.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "basic-input.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/input-array.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/object-gallery.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/misc-components.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/flex-table.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/datetime.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/tag-select.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/fold-out.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/split-button.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/tab-nav.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "components/cobalt-carousel.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/action-menu-element.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/input-text.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/markdown-area.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/shadowbox.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/countdown-timer.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/horizontal-scroll.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "components/block-editor.css",
+        "contexts": ["common"]
+    },
+    {
+        "href":"components/type-writer.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "simplemde.min.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "loading-spinner.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "notification.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "action-menu.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "action-menu-refactor.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "status-message.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "form-request.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "login-form.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "posts.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "cobalt-events.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "modal.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "tabs-drawer.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "calendar.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "audio-player.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "paginated-container.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "parallax.css",
+        "contexts": ["common"]
+    },
+    {
+        "href": "pages.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "header.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "template.css",
+        "contexts": ["common"],
+        "version": 2
+    },
+    {
+        "href": "main.css",
+        "contexts": ["web"]
+    },
+    {
+        "href": "admin.css",
+        "contexts": ["admin"],
+        "version": 2
+    }
+]

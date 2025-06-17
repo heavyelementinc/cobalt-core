@@ -54,6 +54,25 @@ function associative_to_path(array $arr) {
 }
 
 /**
+ * This function accepts an associative array and returns a string of HTML
+ * attributes from that array.
+ * @throws TypeError If we're passed a non-associative array, get a TypeError
+ * @param array $attributes Follow the format ['attribute' => 'value]
+ * @return string string of HTML attributes
+ */
+function associative_array_to_html_attributes(array $attributes):string {
+    if(empty($attributes)) return "";
+    if(!is_associative_array($attributes)) throw new TypeError("Array must be associative!");
+    
+    $attrs = join(' ', array_map(function($key) use ($attributes){
+        if(is_bool($attributes[$key])) return $attributes[$key]?$key:'';
+        return $key.'="'.$attributes[$key].'"';
+    }, array_keys($attributes)));
+
+    return $attrs;
+}
+
+/**
  * Will determine if an array has string keys
  * Will provide a false positive if indexes are non-linear
  * @param mixed $array 
@@ -129,4 +148,99 @@ function array_append(&$array) {
 
 function get_random_array_element(array $array):mixed {
     return $array[rand(0,count($array) - 1)];
+}
+
+function var_export_short(mixed $value, bool $return = true) {
+    $dump = var_export($value, true);
+
+    $dump = preg_replace('#(?:\A|\n)([ ]*)array \(#i', '[', $dump); // Starts
+    $dump = preg_replace('#\n([ ]*)\),#', "\n$1],", $dump); // Ends
+    $dump = preg_replace('#=> \[\n\s+\],\n#', "=> [],\n", $dump); // Empties
+
+    if (gettype($value) == 'object') { // Deal with object states
+        $dump = str_replace('__set_state(array(', '__set_state([', $dump);
+        $dump = preg_replace('#\)\)$#', "])", $dump);
+    } else { 
+        $dump = preg_replace('#\)$#', "]", $dump);
+    }
+
+    if ($return===true) {
+        return $dump;
+    } else {
+        echo $dump;
+    }
+}
+
+/**
+ * Borrowed from https://github.com/michael-rubel/framework/blob/11.x/src/Illuminate/Collections/Arr.php
+ * @param mixed $array 
+ * @param string $prepend
+ * @param bool $unpackIndexedArrays 
+ * @return array 
+ */
+function array_dot($array, $prepend = '', $unpackIndexedArrays = true){
+    $results = [];
+
+    foreach ($array as $key => $value) {
+        if (is_array($value) && !empty($value) && (is_dictionary_array($value) || $unpackIndexedArrays)) {
+            $results = array_merge($results, array_dot($value, $prepend.$key.'.'));
+        } else {
+            $results[$prepend.$key] = $value;
+        }
+    }
+
+    return $results;
+}
+
+/**
+ * Borrowed from https://github.com/michael-rubel/framework/blob/11.x/src/Illuminate/Collections/Arr.php
+ * 
+ * @param mixed $array 
+ * @return array 
+ */
+function array_undot($array) {
+    $results = [];
+
+    foreach ($array as $key => $value) {
+        array_set($results, $key, $value);
+    }
+
+    return $results;
+}
+
+/**
+ * Borrowed from https://github.com/michael-rubel/framework/blob/11.x/src/Illuminate/Collections/Arr.php
+ * 
+ * @param mixed &$array 
+ * @param mixed $key 
+ * @param mixed $value 
+ * @return mixed 
+ */
+function array_set(&$array, $key, $value) {
+    if (is_null($key)) {
+        return $array = $value;
+    }
+
+    $keys = explode('.', $key);
+
+    foreach ($keys as $i => $key) {
+        if (count($keys) === 1) {
+            break;
+        }
+
+        unset($keys[$i]);
+
+        // If the key doesn't exist at this depth, we will just create an empty array
+        // to hold the next value, allowing us to create the arrays to hold final
+        // values at the correct depth. Then we'll keep digging into the array.
+        if (! isset($array[$key]) || ! is_array($array[$key])) {
+            $array[$key] = [];
+        }
+
+        $array = &$array[$key];
+    }
+
+    $array[array_shift($keys)] = $value;
+
+    return $array;
 }

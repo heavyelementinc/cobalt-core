@@ -151,6 +151,7 @@ class Run extends \Drivers\Database {
             'finished' => null,
             'task_completed' => null, 
             'task_finished' => null,
+            
         ];
 
         return $result;
@@ -170,9 +171,10 @@ class Run extends \Drivers\Database {
         if($status['started']) {
             $now = (float)(new DateTime())->format('U.u');
             $then = (float)$status['started']->toDateTime()->format('U.u');
-            $five_minutes = 15 * 60 * 1000;
-            if($now - $then >= $five_minutes) {
-                $warning .= "<li>The last cron task was executed a long time ago. <help-span value='Cron tasks should execute every five minutes.'></help-span></li>";
+            $five_minutes = 15 * 60;
+            $diff = $now - $then;
+            if($diff >= $five_minutes) {
+                $warning .= "<li>Warning! Critical scheduled tasks have not been completed since ".relative_time($then)." <help-span value='Cron tasks should execute at least every 15 minutes.'></help-span></li>";
             }
             $finished = date('r',$then);
         }

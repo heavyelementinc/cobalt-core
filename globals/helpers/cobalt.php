@@ -1,6 +1,7 @@
 <?php
 
 use Auth\UserPersistance;
+use MongoDB\BSON\ObjectId;
 
 function async_cobalt_command($command, $context = true, $log = "/dev/null") {
     $shell = __ENV_ROOT__ . "/core.sh";
@@ -30,6 +31,20 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
  */
 function session($info = null) {
     global $session;
+    if(is_cli()) {
+        
+        // $session = new UserPersistance([
+        //     '_id' => new ObjectId(),
+        //     'fname' => 'Cobalt',
+        //     'lname' => 'Engine',
+        //     'uname' => '__cobalt_engine_cli',
+        //     'email' => 'dummy@heavyelement.com',
+        //     // 'flags' => UserPersistance::STATE_USER_VERIFIED,
+        //     'groups' => ['root'],
+        //     'permissions' => [],
+        //     'is_root' => true,
+        // ]);
+    }
     if (!isset($session)) return null;
     if ($info === null) return $session ?? null;
     if (key_exists($info, $session->__dataset ?? [])) return $session->{$info}?->getValue() ?? null;
@@ -64,6 +79,7 @@ function session_exists() {
  * @return bool true if the user has permission, false otherwise
  */
 function has_permission($perm_name, $group = null, ?UserPersistance $user = null, $throw_no_session = true):bool {
+    if(is_cli()) return true;
     return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 

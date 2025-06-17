@@ -19,8 +19,10 @@ use DateTime;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\Driver\Cursor;
 use PhpParser\Node\Expr\Cast\Object_;
 use Validation\Exceptions\ValidationFailed;
 
@@ -30,7 +32,7 @@ class UserCRUD extends \Drivers\Database {
     }
 
     function get_schema_name($doc = []) {
-        return "\\Auth\\UserSchema";
+        return "\\Auth\\UserPersistance";
     }
 
     final function getUserById($id) {
@@ -54,7 +56,14 @@ class UserCRUD extends \Drivers\Database {
         ]);
     }
 
-    final function getUsersByPermission($permissions, $status = true, $options = null) {
+    /**
+     * 
+     * @param string|array<string> $permissions 
+     * @param bool $status 
+     * @param mixed $options 
+     * @return Cursor 
+     */
+    final function getUsersByPermission(string|array $permissions, bool $status = true, ?array $options = null) {
         if(!$options) $options = [
             'limit' => 50
         ];
@@ -74,6 +83,18 @@ class UserCRUD extends \Drivers\Database {
         );
     }
 
+    final function getUserIdArrayByPermission(string|array $permissions, bool $status = true, ?array $options = null):array {
+        $options = array_merge([
+            'limit' => 50,
+            'projection' => ['_id' => 1]
+        ], $options ?? []);
+        $map = [];
+        foreach($this->getUsersByPermission($permissions, $status, $options) as $user) {
+            $map[] = $user->_id;
+        }
+        return $map;
+    }
+
     final function getUsersByGroup($groups, $options = null) {
         if(!$options) $options = [
             'limit' => 50
@@ -88,14 +109,15 @@ class UserCRUD extends \Drivers\Database {
         return iterator_to_array($this->find(['is_root' => true]));
     }
 
-    final function findUserByToken(string $name, string $token):?UserSchema {
+    final function findUserByToken(string $name, string $token):?UserPersistance {
         $result = $this->findOne([
             'token.name' => $name,
             'token.value' => $token,
         ]);
         if(!$result) return null;
         $tkn = $result->get_token($name);
-        $expires = $tkn->getExpires();
+        if($tkn === null) throw new NotFound("Bad token", true);
+        $expires = $tkn->get_expires();
         // Expire token if its invalid
         if($expires && $expires > new DateTime()) {
             $modified = $result->expire_token($tkn);
@@ -105,21 +127,21 @@ class UserCRUD extends \Drivers\Database {
     }
 
     final function updateUser($id, $request) {
-        $val = new UserSchema();
+        $val = new UserPersistance();
         $mutant = $val->__validate($request);
         $result = $this->updateOne(
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
         if ($result->getModifiedCount() !== 1) throw new HTTPException("Failed to update fields", true);
-        return new UserSchema($mutant);
+        return new UserPersistance($mutant);
     }
 
     final function createUser($request, $mode = "require") {
-        $val = new UserValidate();
+        $val = new UserPersistance();
 
-        $val->setMode($mode);
-        $mutant = $val->validate($request);
+        // $val->setMode($mode);
+        $mutant = $val->__validate($request);
         $flags = [];
         $flag = "flags.";
         $len = strlen($flag);
@@ -144,8 +166,8 @@ class UserCRUD extends \Drivers\Database {
         ];
         $request = array_merge(
             $default,
-            $mutant,
-            ['_id' => $this->__id()]
+            $mutant->__dataset,
+            // ['_id' => $mutant->_id]
         );
         $result = $this->insertOne($request);
 
@@ -218,18 +240,35 @@ class UserCRUD extends \Drivers\Database {
         return $result;
     }
 
-    final function store_integration_credentials(ObjectId $user, $type, $details, $expiration) {
+    final function store_integration_credentials(ObjectId $user, $type, $details, DateTime|UTCDateTime $issued) {
+        if($issued instanceof DateTime) $issued = new UTCDateTime($issued);
         $result = $this->updateOne(
             ['_id' => $user],
             [
-                '$push' => [
+                '$set' => [
                     "integrations.$type" => [
                         'details' => $details,
-                        'expiration' => $expiration
+                        'fresh_as_of' => $issued,
+                        'provisioned' => $issued
                     ]
                 ]
             ]
         );
+        return $result->getModifiedCount();
+    }
+
+    final function update_integration_credentials(ObjectId $user, $type, $details, DateTime|UTCDateTime $issued):int {
+        $d = [];
+        foreach($details as $key => $val) {
+            $d["integrations.$type.details.$key"] = $val;
+        }
+        if($issued instanceof DateTime) $issued = new UTCDateTime($issued);
+        $d["integrations.$type.fresh_as_of"] = $issued;
+        $result = $this->updateOne([
+            '_id' => $user
+        ],[
+            '$set' => $d
+        ]);
         return $result->getModifiedCount();
     }
 

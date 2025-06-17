@@ -4,7 +4,7 @@
  * @emits actionmenuselect
  */
 class ActionMenu extends EventTarget {
-    constructor(button = null, mode = null) {
+    constructor(button = null, type = null) {
         super();
         // Constants
         this.ACTION_MENU_CLASS = "action-menu-wrapper";
@@ -28,10 +28,10 @@ class ActionMenu extends EventTarget {
         this.headlineTitle = document.createElement("h1");
         this.actionMenuItems = document.createElement("menu");
         this.closeGlyph = document.createElement("button");
-        this.closeGlyph.innerHTML =  `<span class='close-glyph'></span>`;
+        this.closeGlyph.innerHTML = `<span class='close-glyph'></span>`;
         this.initWrapper();
         
-        this.type = mode;
+        this.type = type;
         // if(window.menu_instance) window.menu_instance.closeMenu()
     }
 
@@ -53,7 +53,7 @@ class ActionMenu extends EventTarget {
         headline.classList.add("action-menu-header");
         this.wrapper.appendChild(headline);
         headline.appendChild(this.headlineTitle);
-        headline.appendChild(this.closeGlyph);
+        this.headlineTitle.appendChild(this.closeGlyph);
         this.wrapper.appendChild(this.actionMenuItems);
         // If this element lives in main, we want to place its wrapper in main,
         // otherwise, we want it in the body tag.
@@ -85,7 +85,7 @@ class ActionMenu extends EventTarget {
         else mode = this.ACTION_MENU_TYPES[0]
 
         // Check if we're in mobile mode
-        if(window.matchMedia("only screen and (max-width: 35em)")) {
+        if(isMobile()) {
             mode = this.ACTION_MENU_TYPES[1];
         }
         // There can only be one type set
@@ -190,7 +190,9 @@ class ActionMenu extends EventTarget {
     }
 
     async handleRequest(action, event) {
-        const api = new AsyncFetch(action.requestAction, action.requestMethod);
+        const api = new AsyncFetch(action.requestAction, action.requestMethod, {
+            headers: {'X-Keyboard-Modifiers': encodeClickModifiers(event)}
+        });
         action.throbberStart();
         let result
         try {

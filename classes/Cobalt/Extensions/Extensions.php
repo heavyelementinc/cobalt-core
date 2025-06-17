@@ -249,6 +249,11 @@ class Extensions extends \Drivers\Database {
             'name' => "Add fields to a user account",
             'icon' => 'user',
             'default' => false
+        ],
+        "register_user_panel_buttons" => [
+            'name' => "Add buttons to the user panel",
+            'icon' => 'button',
+            'default' => false
         ]
     ];
 

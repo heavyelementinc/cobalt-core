@@ -70,7 +70,7 @@ class TagSelect extends HTMLElement {
         this.setSelection(e);
 
         this.dispatchEvent(new Event("input"));
-        this.dispatchEvent(new Event("change"));
+        this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 }
 

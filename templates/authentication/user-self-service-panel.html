@@ -41,6 +41,7 @@
                 </ul>
             </fieldset>
             <fieldset>
+                <legend>Biography & More</legend>
                 <ul class="list-panel">
                     <li>
                         <label>Default Author Bio</label>
@@ -89,7 +90,12 @@
                 <legend>Notifications</legend>
                 <ul class="list-panel">
                     <li>
-                        <label>Enroll in Push Notifications</label>
+                        <div id="enrollment" class="hbox">
+                            <label>Enroll in Push Notifications</label>
+                            <action-menu type="options" title="Push Notifications">
+                                <option name="test" method="PUT" action="/api/notifications/push/test/">Test Push Notifications</option>
+                            </action-menu>
+                        </div>
                         <push-enrollment-button><loading-spinner></loading-spinner> Loading...</push-enrollment-button>
                     </li>
                     {{!notifications}}
@@ -125,5 +131,15 @@
     form-request fieldset :is([__custom-input="true"], textarea, input, select) {
         width: 100%;
         box-sizing: border-box;
+    }
+    #enrollment {
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        flex-wrap: nowrap;
+        action-menu {
+            width: 2ch;
+            height: 2ch;
+        }
     }
 </style>

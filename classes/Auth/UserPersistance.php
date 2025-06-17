@@ -19,6 +19,8 @@ use Cobalt\SchemaPrototypes\Compound\HrefResult;
 use Cobalt\SchemaPrototypes\Compound\ImageResult;
 use Cobalt\SchemaPrototypes\Compound\UniqueResult;
 use Cobalt\SchemaPrototypes\MapResult;
+use Cobalt\Token;
+use DateTime;
 use Drivers\Database;
 use MongoDB\BSON\UTCDateTime;
 use Validation\Exceptions\ValidationIssue;
@@ -54,7 +56,11 @@ class UserPersistance extends PersistanceMap {
             'name' => [
                 new FakeResult,
                 'get' => function () {
-                    if($this->fname && $this->lname) return "<span title='Username: $this->uname'>$this->fname " . $this->lname[0] . ".</span>";
+                    if($this->fname) {
+                        $lname = $this->lname[0];
+                        if($lname) $lname = " $lname.";
+                        return "<span title='Username: $this->uname'>$this->fname $lname</span>";
+                    }
                     return $this->uname;
                 },
                 'tag' => function () {
@@ -101,7 +107,14 @@ class UserPersistance extends PersistanceMap {
                     'title' => 'Email Address',
                 ]
             ],
-            'avatar' => new ImageResult,
+            'avatar' => [
+                new ImageResult,
+                'default' => [
+                    'url' => '/core-content/img/unknown-user.thumb.jpg',
+                    'height' => 250,
+                    'width' => 226
+                ]
+            ],
             'flags' => [
                 new ArrayResult,
                 // 'schema' => [
@@ -119,7 +132,7 @@ class UserPersistance extends PersistanceMap {
                     self::STATE_USER_VERIFIED => 'User is verified',
                 ]
             ],
-            'token' => new StringResult,
+            'token' => new ArrayResult,
             'prefs' => new ObjectResult,
             'since' => [
                 new DateResult,
@@ -221,6 +234,65 @@ class UserPersistance extends PersistanceMap {
 
     public function nametag() {
         return "<div class='cobalt-user--profile-display'>".$this->{"avatar.display"}." $this->name ".$this->{'flags.verified.display'}."</div>";
+    }
+
+    public function generate_token($name, null|int|DateTime $expires = null) {
+        if(!$this->_id) throw new \Exception("Tokens may only be generated for populated schemas.");
+        $token = new \Cobalt\Token();
+        $crud = $this->__set_manager();
+        $crud->updateOne(
+            [
+                '_id' => $this->_id
+            ],[
+                '$addToSet' => [
+                    "token" => [
+                        'name' => $name,
+                        'value' => (string)$token,
+                        'expires' => new UTCDateTime((gettype($expires) === "int") ? $expires * 1000 : $expires)
+                    ]
+                ]
+            ]
+        );
+        return $token;
+    }
+
+    public function get_token($name) {
+        foreach($this->token as $token) {
+            if($token->name === $name) {
+                return new Token($token->value, $token->expires, $token->name);
+            }
+        }
+        return null;
+    }
+
+    public function expire_token($token_object) {
+        if(!$this->_id) throw new \Exception("Tokens may only be expired for populated schemas.");
+        $crud = new UserCRUD();
+        $query = $token_object;
+        $result = $crud->updateOne(['_id' => $this->_id], [
+            '$pull' => [
+                'token' => $query,
+            ]
+        ]);
+        return $result->getModifiedCount();
+    }
+
+    public function expire_token_type($name) {
+        if(!$this->_id) throw new \Exception("Tokens may only be expired for populated schemas.");
+        $crud = new UserCRUD();
+        $query = [
+            '$elemMatch' => ['name' => $name]
+        ];
+        $result = $crud->updateOne(
+            ['_id' => $this->_id],
+            [
+                '$pull' => [
+                    'token' => [
+                        'name' => $name
+                    ]
+                ]
+            ]);
+        return $result->getModifiedCount();
     }
 
 }

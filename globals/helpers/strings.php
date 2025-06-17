@@ -1,8 +1,12 @@
 <?php
 
+use Cobalt\Model\Types\ImageType;
 use Demyanovs\PHPHighlight\Highlighter;
 use Drivers\UTCDateTime as DriversUTCDateTime;
+use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationIssue;
 
 function fediverse_href_to_user_tag(string $href) {
@@ -69,6 +73,13 @@ function cookie_consent_check() {
 
 function sanitize_path_name($path) {
     return str_replace(["../"], "", $path);
+}
+
+function path_exists_in_base(string $base_path, $untrusted_path): bool {
+    $path_to_test = realpath($untrusted_path);
+    $base_ln = strlen($base_path);
+    if(substr($path_to_test,0, $base_ln) === $base_path) return true;
+    return false;
 }
 
 function relative_time($time = false, $now = null, $limit = 86400, $format = "M jS g:i A") {
@@ -329,7 +340,7 @@ function random_string($length, $fromChars = null) {
     $max = strlen($validChars) - 1;
     $random = "";
     for ($i = 0; $i <= $length; $i++) {
-        $random .= $validChars[rand($min, $max)];
+        $random .= $validChars[random_int($min, $max)];
     }
     return $random;
 }
@@ -358,6 +369,22 @@ function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
     return $pkey;
 }
 
+function guidv4($data = null) {
+    // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+    if(!$data) $data = random_bytes(16);
+    else $data = str_pad($data, 16, random_string(16));
+    assert(strlen($data) == 16);
+ 
+    // Set version to 0100
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+    // Set bits 6-7 to 10
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+ 
+    $arr = str_split(bin2hex($data), 4);
+
+    // Output the 36 character UUID.
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', $arr);
+}
 
 function url_fragment_sanitize(string $value):string {
     $mutant = strtolower($value);
@@ -428,6 +455,7 @@ function is_data_uri($uri):bool {
 }
 
 function is_function(mixed $subject):bool {
+    if($subject instanceof Closure) return true;
     if(is_string($subject)) return false;
     return is_callable($subject);
 }
@@ -458,4 +486,64 @@ function add_target_blank_to_external_links(string $html, string $t = "p"):strin
         }
     }
     return $html ?? ""; 
+}
+
+function social_media_links(array $included = []):string {
+    $socials = $included;
+    if(empty($socials)) $socials = [
+        'SocialMedia_email' => __APP_SETTINGS__['SocialMedia_email'],
+        'SocialMedia_fediverse' => __APP_SETTINGS__['SocialMedia_fediverse'],
+        'SocialMedia_facebook' => __APP_SETTINGS__['SocialMedia_facebook'],
+        'SocialMedia_instagram' => __APP_SETTINGS__['SocialMedia_instagram'],
+        'SocialMedia_twitter' => __APP_SETTINGS__['SocialMedia_twitter'],
+        'SocialMedia_mastodon' => __APP_SETTINGS__['SocialMedia_mastodon'],
+    ];
+    $social_links = "";
+    foreach($socials as $setting => $value) {
+        if(!$value) continue;
+        $icon = str_replace('SocialMedia_', "", $setting);
+        $name = ucwords($icon);
+        $social_links .= "<a href=\"$value\" target=\"_blank\" title=\"$name\"><i name=\"$icon\"></i><a>";
+    }
+    return $social_links;
+}
+
+function snake_case_fixer(string $str):string {
+    return str_replace("_", " ", $str);
+}
+
+function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, null|ObjectId $docid = null, array $attributes = []):string {
+    if($doc instanceof ObjectId) $doc = get_image_details($doc);
+    if(is_null($doc) && $docid instanceof ObjectId) $doc = get_image_details($docid);
+    $filename = get_image_url($doc);
+    $height   = $doc['meta']['height'];
+    $width    = $doc['meta']['width'];
+    $accent   = $doc['meta']['accent_color'];
+    $contrast = $doc['meta']['contrast_color'];
+    $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
+    $attrs = "";
+    foreach($attributes as $attr => $val) {
+        $attrs .= " $attr=\"$val\"";
+    }
+    return <<<HTML
+    <img src="$filename"$data_id alt="$doc[alt]" 
+        height="$height" width="$width" loading="lazy"
+        accent-color="$accent" contrast-color="$contrast"$attrs
+    >
+    HTML;
+}
+
+function get_image_url(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc):string {
+    if($doc instanceof ObjectId) $doc = get_image_details($doc);
+    $missing_image = '/core-content/img/image-missing.webp';
+    if($doc === null) $doc = ['filename' => null,'meta' => ['height' => 300, 'width' => 300, 'accent_color' => '#efefef', 'contrast_color' => '#000000']];
+    $filename = ($doc['filename']) ? $doc['filename'] : $missing_image;
+    if($filename !== $missing_image) {
+        $filename = ($filename[0] == "/") ? "/res/fs$filename" : "/res/fs/$filename";
+    }
+    return $filename;
+}
+
+function get_image_details(ObjectId $id):?BSONDocument {
+    return (new ImageType())->__findOne(['_id' => $id]);
 }

@@ -1,8 +1,19 @@
-<content id="login-form-container">
+<!-- <content id="login-form-container">
     <form-request id="login-form" method="PUT" action="/api/v1/password-reset/request/">
         <h1>Password Reset</h1>
         <label>To start the password reset process, please provide your username or email address.</label>
         <input name="username" placeholder="Username/Email Address">
         <button type="submit">Submit</button>
     </form-request>
-</content>
+</content> -->
+<section id="login-form-container" class="login-form-container">
+    <section class="login-hero-sidebar" style="background-image: url('{{app.login-hero-sidebar}}')"></section>
+    <h1>Password Reset</h1>
+    <span class="error">{{!message}}</span>
+    <form-request id="login-form" method="PUT" action="/api/v1/password-reset/request/">
+        <label>Email Address</label>
+        <input name="email" placeholder="Email Address">
+        <small>To start the password reset process, please provide your email address.</small>
+        <button type="submit" class="button primary">Submit</button>
+    </form-request>
+</section>

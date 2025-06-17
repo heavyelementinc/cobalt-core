@@ -51,6 +51,11 @@ class CoreApi extends \Controllers\Pages {
         if($current_route_meta[1]['cache_control'] === false) {
             header("Cache-Control: ");
         }
+        if(method_exists($processor, 'user_menu')) {
+            update("#user-menu-bar", [
+                'outerHTML' => $processor->user_menu()
+            ]);
+        }
         return array_merge($EXPORTED_PUBLIC_VARS, [
             "title" => $processor->template_vars['title'],
             "body" => $body
@@ -123,5 +128,9 @@ class CoreApi extends \Controllers\Pages {
             'secret' => '',
             'token' => ''
         ];
+    }
+
+    function ping() {
+        return "pong";
     }
 }

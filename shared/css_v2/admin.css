@@ -1,0 +1,198 @@
+:root {
+    --admin-panel-width: 200px;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: var(--admin-font);
+}
+
+body > header {
+    display: none;
+    font-family: var(--admin-font);
+}
+
+a {
+    font-family: var(--admin-font);
+}
+
+.admin-panel body {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: 2em;
+    min-height: 100vh;
+    gap: 0 1em;
+    #admin-panel {
+        grid-column: 1 / span 1;
+    }
+    main {
+        grid-column: 2 / span 1;
+        margin-right: var(--margin-s);
+    }
+    footer {
+        display: none;
+    }
+    @media only screen and (max-width: 35em) {
+        grid-template-columns: 1fr;
+        grid-template-rows: 5em 1fr;
+/*         display: flex;
+        flex-direction: column; */
+        #admin-panel {
+            position: absolute;
+            grid-column: 1 / span 1;
+            grid-row: 1 / span 1;
+        }
+        main {
+            grid-column: 1 / span 1;
+            grid-row: 2;
+            margin-top: var(--margin-xl);
+        }
+    }
+}
+
+#admin-panel {
+    /* display: flex;
+    flex-direction: column; */
+    height: 100%;
+    background: var(--branding-color-3);
+    z-index: calc(var(--project-modal-z-index) - 1);
+    color:  var(--branding-color-3-fg);
+    & > ul.admin-panel--nav-group {
+        flex-grow: 1;
+        height: 100%;
+        /* overflow-y: scroll; */
+        scrollbar-width: thin;
+    }
+    & a[is="real"][href="/"] {
+        display: flex;
+        justify-content: center;
+    }
+    & .cobalt-masthead {
+        width: calc(var(--admin-panel-width) - 10%);
+        height: 150px;
+        max-height: unset;
+        object-fit: contain;
+    }
+    li a {
+        display: flex;
+        flex-direction: column;
+        /*     align-items:center; */
+        justify-content: center;
+        padding: 10px;
+        height: 50px;
+        box-sizing: border-box;
+        color: var(--branding-color-3-fg);
+        text-decoration: none;
+        transition: background-color .3s, color .2s, padding-left .5s;
+    }
+    & ul::-webkit-scrollbar {
+        display: none;
+    }
+    li a:hover {
+        background-color: var(--branding-color-1);
+        color: var(--branding-color-1-fg);
+        padding-left: 20px;
+    }
+    li a.navigation--current {
+        background-color: var(--background-color);
+        color: var(--font-body-color);
+        padding-left: 20px;
+        box-shadow: none;
+    }
+
+    .directory--group li:hover ul.directory--submenu {
+        display: block;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        background: var(--branding-color-4);
+        width: var(--admin-panel-width);
+    }
+
+    .settings-panel--footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        color: var(--neutral-color-5-fg);
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 5px;
+        background: var(--neutral-color-5);
+        width: var(--admin-panel-width);
+        padding: 5px 5px 2px;
+        box-sizing: border-box;
+        
+        
+        
+        &:empty {
+            display: none;
+        }
+        :is(a, notify-button) {
+            color: inherit;
+            text-decoration: none;
+            background-color: inherit;
+            opacity: .5;
+            transition: opacity .5s;
+        }
+        :is(a, notify-button):hover {
+            opacity: 1;
+        }
+        notify-button[aria-pressed="true"] {
+            opacity: 1;
+        }
+        :is(i, notify-button) {
+            font-size: 2em;
+        }
+    }
+
+}
+
+#admin-panel + main {
+    display: block;
+    min-height: 80vh;
+}
+
+/* main {
+    margin-left: var(--admin-panel-width);
+    padding: 20px;
+} */
+
+.cobalt-admin--fieldset{
+    border: 1px solid var(--project-color-input-border-nofocus);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+#admin-panel form-request {
+    background: var(--project-calendar-cell-bg);
+    border: var(--project-action-menu-border);
+}
+
+
+
+@media only screen and (max-width: 35em) {
+    :root {
+        --admin-panel-width: 0;
+    }
+    
+    nav#admin-panel{
+        z-index: calc(var(--project-modal-z-index) - 10);
+        translate: -100vw;
+/*         left: -100vw; */
+        width: 100vw;
+        transition: translate .4s;
+    }
+    
+    #admin-panel .settings-panel--footer {
+        width: 100vw;
+    }
+    
+    
+    .js-nav-spawned nav#admin-panel {
+        translate: 0;
+    }
+    
+    #app-header {
+        display: none
+    }
+}

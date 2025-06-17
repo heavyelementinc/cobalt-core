@@ -1,7 +1,8 @@
-<li>
-    <switch-container>
-        <input-switch name='{{setting}}' checked='{{value}}' {{disabled}}></input-switch>
-        <label>{{!name}}</label>
-    </switch-container>
-    @view("/admin/settings/inputs/reset.html");
+<li class="settings-panel--setting settings-panel--switch-container settings-panel--{{setting}}">
+    <div class="settings-panel--description">
+        <label>{{!name}}{{!help}}</label>
+        {{!small}}
+        @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
+    </div>
+    <input-switch name='{{setting}}' checked='{{$value}}' {{disabled}}></input-switch>
 </li>

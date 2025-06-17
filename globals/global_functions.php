@@ -18,9 +18,9 @@ use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
-use Cobalt\Pages\PageMap;
-use Cobalt\Pages\PostMap;
-use Cobalt\Renderer\Render;
+use Cobalt\Model\Types\MixedType;
+use Cobalt\Pages\Models\PageMap;
+use Cobalt\Pages\Models\PostMap;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\Error;
@@ -71,7 +71,7 @@ function cobalt_autoload_fallback($class) {
 
     if ($file !== false) {
         try{
-            class_loader($file, $class, "PHASE_2_FIND_ONE");
+            class_loader($file, $class, "PHASE_3_FIND_ONE");
         } catch (ParseError $e) {
             kill("Syntax error in ".obfuscate_path_name($e->getFile()));
         }
@@ -81,7 +81,7 @@ function cobalt_autoload_fallback($class) {
     if (preg_match($controllers_special_case, $class)) {
         $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class);
         if ($file !== false) {
-            class_loader($file, $class, "PHASE_2_CONTROLLER");
+            class_loader($file, $class, "PHASE_3_CONTROLLER");
 
             return;
         }
@@ -91,7 +91,7 @@ function cobalt_autoload_fallback($class) {
     if($has_namespace === false) {
         $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class . ".php");
         if ($file !== false) {
-            class_loader($file, $class, "PHASE_2_HAS_NAMESPACE");
+            class_loader($file, $class, "PHASE_3_HAS_NAMESPACE");
             return;
         }
     }
@@ -121,12 +121,12 @@ function cobalt_autoload_fallback($class) {
     // If the path key exists, process the strings and require the file
     if (key_exists('path', $load)) {
         $final_name = str_replace(
-            ['__ENV_CLASSES__', '__APP_CLASSES__'],
-            [__ENV_ROOT__ . "/classes/", __APP_ROOT__, "/private/classes/"],
+            ['__ENV_CLASSES__', '__ENV_ROOT__', '__APP_CLASSES__', '__APP_ROOT__'],
+            [__ENV_ROOT__ . "/classes/", __ENV_ROOT__, __APP_ROOT__ . "/private/classes/", __APP_ROOT__],
             $load['path']
         );
         if (pathinfo($final_name, PATHINFO_EXTENSION) !== "php") $final_name .= "$class_name.php";
-        class_loader($final_name, $class, "PHASE_2_CLASS_MAP");
+        class_loader($final_name, $class, "PHASE_3_CLASS_MAP");
         return;
     }
     
@@ -146,7 +146,29 @@ function cobalt_autoload($class) {
         return;
     }
 
+    $classDirectory = "/config/class_map.php";
+    $directory = __APP_ROOT__.$classDirectory;
+    if(file_exists($directory)) {
+        if(loadFromDirectory($class, $directory, "PHASE_2_APPLICATION")) {
+            return;
+        }
+    }
+    $directory = __ENV_ROOT__.$classDirectory;
+    if(file_exists($directory)) {
+        if(loadFromDirectory($class, $directory, "PHASE_2_ENVIRONMENT")) {
+            return;
+        }
+    }
+
     return cobalt_autoload_fallback($class);
+}
+
+function loadFromDirectory($className, $directoryLocation, $stage) {
+    if(!file_exists($directoryLocation)) return false;
+    include $directoryLocation;
+    if(key_exists($className, $CLASS_MAP)) {
+        class_loader($CLASS_MAP[$className]['path'], $className, $stage);
+    }
 }
 
 function class_loader($path, $originalName, $stage) {
@@ -191,11 +213,13 @@ function class_loader($path, $originalName, $stage) {
  */
 function get_controller(string $controllerName, bool $instanced = false, bool $path = false) {
     $locations = [
+        __APP_ROOT__,
+        __ENV_ROOT__,
         __APP_ROOT__ . "/controllers",
         __ENV_ROOT__ . "/controllers",
     ];
 
-    $found = find_one_file($locations,"$controllerName.php");
+    $found = find_one_file($locations,str_replace("\\","/",$controllerName).".php");
     if($found === false) throw new HTTPException("Could not locate requested controller");
     if($path) return $found;
     require_once $found;
@@ -226,6 +250,15 @@ function set_template($path, $vars = []) {
     }
     $GLOBALS['WEB_PROCESSOR_TEMPLATE'] = $path;
     return view($path, $vars);
+}
+
+/**
+ * @param array $user_bar {type: html, ...}
+ * @return void 
+ */
+function register_user_bar_items(array $user_bar):void {
+    global $USER_BAR_DETAILS;
+    $USER_BAR_DETAILS += $user_bar;
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.
@@ -436,9 +469,16 @@ function recursive_lookup(array $split_path, mixed $mutant):mixed {
         if($split_count === 0) return $mutant->{$key};
         return recursive_lookup($split_path, $mutant->{$key});
     }
-    if(isset($mutant[(string)$key])) {
+    if(isset($mutant[$key])) {
         if($split_count === 0) return $mutant[$key];
-        return recursive_lookup($split_path, $mutant[$key]);
+        $result = recursive_lookup($split_path, $mutant[$key]);
+        if($result instanceof Undefined === false) return $result;
+    } else if ($mutant) {
+        
+    }
+
+    if($mutant instanceof MixedType) {
+        return $mutant;
     }
 
     return new Undefined($key, "Value $split_path is undefined");
@@ -471,116 +511,6 @@ function jsonc_decode($json, $assoc = false, $depth = 512, $flags = 0) {
     return json_decode($json, $assoc, $depth, $flags);
 }
 
-
-/**
- * A shorthand way of rendering a template and getting the results. This is
- * included so you can include a template inside another template. This has the
- * potential to cause some recursive crap... so use caution!
- *
- * @param  string $template The name of the template
- * @param  mixed  $vars     Variables to include
- * @return string Processed template
- * @deprecated Use view() instead
- */
-function with(string $template, $vars = []) {
-    return view($template, $vars);
-}
-
-/** An error-tolerant template inclusion routine. Wraps the `with` function in a
- * try/catch block
- * 
- * @param string  $template The name of the template
- * @param mixed   $vars     Variables to include
- * @return string The processed template OR an empty string on error
- * @deprecated use maybe_view()
- */
-function maybe_with($template, $vars = []) {
-    return maybe_view($template, $vars);
-}
-
-/**
- * A shorthand way of rendering a template and getting the results. This is
- * included so you can include a template inside another template. This has the
- * potential to cause some recursive crap... so use caution!
- *
- * @param  string $template The name of the template
- * @param  mixed  $vars     Variables to include
- * @return string Processed template
- */
-function view(string $template, array $vars = []):string {
-    if(__APP_SETTINGS__['Render_use_v2_engine']) {
-        $render = new Render();
-        $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
-        $render->getBodyFromTemplate($template);
-    } else {
-        $render = new \Render\Render();
-        $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
-        $render->set_vars($vars);
-        $render->from_template($template);
-    }
-    return $render->execute();
-}
-
-function view_from_string(string $view, array $vars = []):string {
-    $render = new \Render\Render();
-    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
-    $render->set_vars($vars);
-    $render->set_body($view, 'string');
-    return $render->execute();
-}
-
-/** An error-tolerant template inclusion routine. Wraps the `with` function in a
- * try/catch block
- * 
- * @param string  $template The name of the template
- * @param mixed   $vars     Variables to include
- * @return string The processed template OR an empty string on error
- */
-function maybe_view(string $template, array $vars = []):string {
-    if (!$template) return "";
-    if (!is_string($template)) return "";
-    try {
-        return view($template, $vars);
-    } catch (Exception $e) {
-        return "";
-    }
-}
-
-
-function conditional_addition(string $template, bool $is_shown, $vars = []) {
-    if (!$is_shown) return "";
-    return view($template, $vars);
-}
-
-function with_each(string $template, $docs, $var_name = 'doc') {
-    $rendered = "";
-    foreach ($docs as $doc) {
-        $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
-    }
-    return $rendered;
-}
-
-function view_each(string $template, Iterator|array $docs, string $var_name = 'doc', string|false $separator = "") {
-    return implode($separator, view_array($template, $docs, $var_name));
-}
-
-function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
-    if(!is_array($docs) && is_iterable($docs)) $docs = iterator_to_array_recursive($docs);
-    $array = [];
-    $d = $docs;
-    if(gettype($docs) === "array") {
-        if(key_exists($var_name, $docs)) $d = $docs[$var_name];
-    } else {
-        $d = iterator_to_array($d);
-    }
-    foreach($d as $index => $doc){
-        $array[$index] = view($template, array_merge(
-            $d,
-            [$var_name => $doc]
-        ));
-    }
-    return $array;
-}
 
 function credit_card_form(array|object $data = [],$shipping = false):string {
     $currentYear = (int)date("Y");
@@ -661,13 +591,13 @@ function plugin($name) {
     throw new Exception('Plugin is not active!');
 }
 
-function get_posts_from_tags(array $tags, string $controller = "Posts", int $limit = 3):string {
+function get_posts_from_tags(array $tags, string $controller = "\\Cobalt\\Pages\\Controllers\\Posts", int $limit = 3, array $sort = []):string {
     $html = "";
-    /** @var \Controllers\Landing\Page */
+    /** @var \Cobalt\Pages\Controllers\Posts */
     $postController = get_controller($controller, true);
     $posts = $postController->manager;
     
-    $result = $posts->getPagesFromTags($tags, $limit);
+    $result = $posts->getPagesFromTags($tags, $limit, $sort);
 
     foreach($result as $post) {
         $html .= $postController->renderPreview($post);
@@ -719,7 +649,8 @@ function benchmark_writes($modified) {
 
 function set_up_db_config_file(string $database, string $user, string $password, string $addr = "localhost", string $port = "27017", string $ssl = "false", string $sslFile = "", string $invalidCerts = "false", ?string $path = null) {
     $path = $path ?? $GLOBALS['db_config'];
-    return file_put_contents($path,"<?php
+    return file_put_contents($path,<<<PHP
+    <?php
 /**
  * This is the bootstrap config file. We use this to
  * Set up our database access. This file is read every
@@ -728,15 +659,16 @@ function set_up_db_config_file(string $database, string $user, string $password,
 
 \$GLOBALS['CONFIG'] = [
     'db_driver'      => 'MongoDB', // The Cobalt Engine database driver to use to access the database (MongoDB is the only supported driver)
-    'db_addr'        => '$addr', // The database's address
-    'db_port'        => '$port', // The database port number
-    'database'       => '$database', // The name of your app's database
-    'db_usr'         => '$user', // The username for your database
-    'db_pwd'         => '$password', // The password for your database
-    'db_ssl'         => $ssl, // Enable SSL communication between the app and database
-    'db_sslFile'     => '$sslFile', // The SSL cert file for communicating with the database
-    'db_invalidCerts'=> $invalidCerts, // Allow self-signed certificates
-];"
+    'db_addr'        => '\$addr', // The database's address
+    'db_port'        => '\$port', // The database port number
+    'database'       => '\$database', // The name of your app's database
+    'db_usr'         => '\$user', // The username for your database
+    'db_pwd'         => '\$password', // The password for your database
+    'db_ssl'         => \$ssl, // Enable SSL communication between the app and database
+    'db_sslFile'     => '\$sslFile', // The SSL cert file for communicating with the database
+    'db_invalidCerts'=> \$invalidCerts, // Allow self-signed certificates
+];
+PHP
 );
 }
 
@@ -779,7 +711,16 @@ function get_crudable_flag(string $name): ?int {
 }
 
 function compare_and_juggle($canonical, $value) {
-    if($canonical !== $value) $value = juggler(gettype($canonical), $value);
+    // Handle common shorthands
+    switch($canonical) {
+        case "bool":
+            $canonical = "boolean";
+            break;
+        case "int":
+            $canonical = "integer";
+            break;
+    }
+    if($canonical !== gettype($value)) return juggler($canonical, $value);
     return $value;
 }
 
@@ -793,34 +734,48 @@ function compare_and_juggle($canonical, $value) {
 function juggler(string $canonincal, mixed $value) {
     switch($canonincal) {
         case "boolean":
-            $value = (bool)$value;
+        case "bool":
+            return filter_var($value, FILTER_VALIDATE_BOOL);
             break;
         case "string":
-            $value = (string)$value;
+            return (string)$value;
             break;
+        case "number":
+            return match(gettype($value)) {
+                "integer" => $value,
+                "double" => $value,
+                "float" => $value,
+                // Let's convert a string based on if it has a . in it or not
+                "string" => (strpos($value,".") === false) ? intval($value) : floatval($value),
+                "boolean" => intval($value),
+                // If $value is empty, we want to return a 0
+                "array" => empty($value) ? 0 : 1,
+                "NULL" => 0,
+                "object" => 1,
+                "resource" => 1,
+                default => intval($value),
+            };
         case "integer":
-            $value = (int)$value;
+        case "int":
+            return intval($value);
             break;
         case "double":
-            $value = (double)$value;
-            break;
         case "float":
-            $value = (float)$value;
+            return floatval($value);
             break;
         case "array":
-            $value = (array)$value;
+            return (array)$value;
             break;
         case "object":
-            $value = (object)$value;
+            return (object)$value;
             break;
         case "resource":
             throw new TypeError("Cannot convert resources");
             break;
         case "NULL":
-            $value = null;
+            return null;
             break;
     }
-    return $value;
 }
 
 /**
@@ -900,4 +855,44 @@ function get_usable_mime_array(){
     $cacheMan->set($s, true);
     return $s;
     // return @sort($s)?'$mime_types = array(<br />'.implode($s,',<br />').'<br />);':false;
+}
+
+
+
+const SHIFT_KEY = 0b0000001;
+const CTRL_KEY  = 0b0000010;
+const ALT_KEY   = 0b0000100;
+const META_KEY  = 0b0001000;
+
+/** Returns boolean value for a keyboard modifier
+ * @param int $constantValue {SHIFT_KEY, CTRL_KEY, ALT_KEY, META_KEY}
+ * @param int $header The incoming keyboard modifier (usually X-Keyboard-Modifier header)
+ */
+function isKeyboardModifierSet($constantValue, $header = null):bool {
+    if($header === null) $header = (int)getHeader('X-Keyboard-Modifiers', null, true, false);
+    if($header === null) return false;
+    return ($header & $constantValue) === $constantValue;
+}
+
+function millitime():int {
+    return floor(microtime(true) * 1000);
+}
+
+function rrmdir($dir, array &$deleted):void {
+    if(!key_exists("dirs", $deleted)) $deleted['dirs'] = 0;
+    if(!key_exists("files", $deleted)) $deleted['files'] = 0;
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object === "." || $object === "..") continue;
+            if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object)) {
+                rrmdir($dir. DIRECTORY_SEPARATOR .$object, $deleted);
+                continue;
+            } 
+            unlink($dir. DIRECTORY_SEPARATOR .$object); 
+            $deleted['files'] += 1;
+        }
+        rmdir($dir); 
+        $deleted['dirs'] += 1;
+    }
 }

@@ -227,7 +227,7 @@ class CustomSchema extends Normalize {
         return $rt;
     }
 
-    static function define(string $type, string $slug, string $group, mixed $value, bool $allow_HTML = false, string $description = "") {
+    static function define(string $type, string $slug, string $group, mixed $value, bool $allow_HTML = false, string $description = "", ?string $date = null) {
         global $DECLARED_CUSTOMIZATIONS;
         $pretty_name = ucwords(str_replace("_", " ", $slug));
 

@@ -39,6 +39,7 @@ class AsyncFetch extends EventTarget {
             'x-refresh': XRefresh,
             'x-confirm': XConfirm,
             'x-reauthorization': XReauth,
+            'x-captcha': XCaptcha,
             // 'x-mitigation-update': 
         }
         this.headerReactions = {};
@@ -59,9 +60,9 @@ class AsyncFetch extends EventTarget {
             
             const client = new XMLHttpRequest();
 
-            client.onload = event => this._onload(event, client, resolve);
             client.onprogress = progress =>  this._onprogress(progress, client);
             client.onreadystatechange = statechange => this._onreadystatechange(statechange, client);
+            client.onload = event => this._onload(event, client, resolve);
             client.onerror = error => this._onerror(error, client);
             client.onabort = abort => this._onabort(abort, client);
             client.ontimeout = (timeout) => this._ontimeout(timeout, client);
@@ -75,8 +76,9 @@ class AsyncFetch extends EventTarget {
             for(const h in this.requestHeaders) {
                 client.setRequestHeader(h, this.requestHeaders[h]);
             }
-
-            client.setRequestHeader('X-Include', "fulfillment,update,events");
+            let include_header = "fulfillment,update";
+            if(document.querySelector("#user-menu-bar")) include_header += ",notification";
+            client.setRequestHeader('X-Include', include_header);
             client.setRequestHeader('X-Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
             client.setRequestHeader('X-Request-Source', "AsyncFetch");
             const submission = this.encodeFormData(this.data)
@@ -142,6 +144,7 @@ class AsyncFetch extends EventTarget {
 
         // new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
 
         this.dispatchEvent(new CustomEvent("done", {
             detail: {
@@ -170,11 +173,22 @@ class AsyncFetch extends EventTarget {
     }
 
     _onreadystatechange(statechange) {
+        /** @var {XMLHttpRequest} client */
         const client = this._getClient(statechange);
         switch(client.readyState) {
+            case client.UNSENT:
+                break;
+            case client.OPENED:
+                break;
             case client.HEADERS_RECEIVED:
                 this.setResponseHeaders(client.getAllResponseHeaders());
                 break;
+            case client.LOADING:
+                break;
+            case client.DONE:
+                this.dispatchEvent(new CustomEvent("asyncfinished"));
+                break;
+
         }
     }
 
@@ -188,6 +202,7 @@ class AsyncFetch extends EventTarget {
         console.warn("There was an error with the XHR request");
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
         this.reject(error);
     }
 
@@ -201,6 +216,7 @@ class AsyncFetch extends EventTarget {
         const client = this._getClient(abort);
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
         this.dispatchEvent(new CustomEvent("aborted", {detail: this}));
     }
 
@@ -213,6 +229,7 @@ class AsyncFetch extends EventTarget {
         // this.
         new AsyncMessageHandler(this, "AsyncFetch", "async"); // Process headers
         new AsyncUpdate(this); // Handle update instructions
+        new AsyncNotification(this);
         this.reject(client);
     }
 
@@ -383,6 +400,9 @@ class AsyncUpdate {
             }
             delete instructions.clear
         }
+        if("next" in instructions) {
+            this.request.form.next(instructions.next);
+        }
         this.updateElement(this.request.form, instructions)
     }
 
@@ -391,6 +411,7 @@ class AsyncUpdate {
             const directive = `fn_${i}`;
             if(directive in this === false) {
                 if(directive === "fn_target") continue;
+                if(directive === "fn_next") continue;
                 console.warn(`Unsupported update directive: ${directive}`);
                 continue;
             }
@@ -513,25 +534,46 @@ class AsyncUpdate {
 
 }
 
+class AsyncNotification {
+    constructor(request) {
+        if(!request?.resolved) return this;
+        if("notification" in request.resolved == false) return this;
+        this.request = request;
+        this.exec();
+    }
+
+    exec() {
+        const ntfyBtn = document.querySelector("notify-button");
+        if(!ntfyBtn) return;
+        ntfyBtn.unread = this.request.resolved.notification?.unseen ?? 0;
+    }
+}
+
 function appendElementInformation(element, value, instructions) {
     let el = document.createElement("validation-issue");
     const spawnIndex = spawn_priority(element);
     if (spawnIndex) el.style.zIndex = spawnIndex + 1;
+    el.clearMessage = async () => {
+        if(!el) return;
+        el.dispatchEvent(new CustomEvent("invalidclearstate"));
+        element.invalid = false;
+        // element.ariaInvalid = false;
+        await wait_for_animation(el, "form-request--issue-fade-out");
+        el.parentNode?.removeChild(el);
+    }
 
-    el.addEventListener('click', () => {
-        if (el) {
-            el.parentNode.removeChild(el);
-            element.ariaInvalid = false;
-        }
-    });
+    // If you click on the message, we should remove it
+    el.addEventListener("click", () => {
+        el.clearMessage();
+    }, {once: true});
+
+    // When you focus the field, we should remove the message
+    element.addEventListener("focus", () => {
+        el.clearMessage();
+    }, {once: true});
 
     el.classList.add("form-request--field-issue-message");
     el.innerText = value;
-    el.addEventListener("click", async e => {
-        element.ariaInvalid = false;
-        await wait_for_animation(el, "form-request--issue-fade-out");
-        el.parentNode.removeChild(el);
-    })
 
     const offsets = get_offset(element);
     el.style.top = `${offsets.bottom}px`;
@@ -580,6 +622,10 @@ class HeaderDirective {
 
     get action() {
         return this.props.action;
+    }
+
+    get data() {
+        return this.props.xhrRequest.data;
     }
 
     get identifier() {
@@ -651,8 +697,8 @@ class XModal extends HeaderDirective {
 
 /**
  * Supported tags:
- * @wait({int})
- * @delay({int}) alias of @wait
+ * @wait {int}
+ * @delay {int} alias of @wait
  */
 class XRedirect extends HeaderDirective {
     execute() {
@@ -684,13 +730,16 @@ class XReplace extends XRedirect {
 
 /** Supported tags
  * @now           - no parameters, executes refresh now. (deprecated "now" as the header content)
- * @wait({num})   - a number (in seconds) to wait before refreshing the page. A status message is displayed
- * @silent({num}) - exactly the same as @wait, except it does not display a status message
+ * @wait {num}   - a number (in seconds) to wait before refreshing the page. A status message is displayed
+ * @silent {num} - exactly the same as @wait, except it does not display a status message
 */
 class XRefresh extends HeaderDirective {
     execute() {
         // let location = String(location)
         switch(this.tag) {
+            case "reload":
+                Location.reload();
+                break;
             case "wait":
                 new StatusMessage({message: `Refreshing in ${wait} seconds`});
             case "silent":
@@ -700,6 +749,7 @@ class XRefresh extends HeaderDirective {
                 }, wait * 1000);
             case "now":
             case "true":
+            case "async":
             default:
                 Cobalt.router.location = String(window.location);
                 break; 
@@ -720,6 +770,38 @@ class XConfirm extends HeaderDirective {
 
         xhr.setRequestHeader('X-Confirm-Dangerous', 'true');
         return await xhr.submit(fulfillment.data.return);
+    }
+}
+
+class XCaptcha extends HeaderDirective {
+    async execute() {
+        const xhr = this.props.xhrRequest;
+        const responseBody = JSON.parse(xhr.response);
+        const fulfillment = responseBody.fulfillment;
+        this.props.xhrRequest.errorHandled = true;
+        const deferred = new Deferred(() => {});
+        let confirm = modalInput(`
+            <p>${fulfillment.error}</p>
+            <img id="__captcha_image" src=\"/core-content/captcha/\" height="60" width="140" style="height: 60px; width: 140px;" alt="Please solve the captcha image.">
+            <button id="__captcha_refresh_button" disabled='disabled'>
+                <i name="refresh"></i>
+            </button>
+            <p><small>Type the characters in the image into the field below.</small></p>
+            `, {okay: "Submit", cancel: "Cancel"}
+        ).then(async captchaSolution => {
+            if(captchaSolution === false) return;
+            xhr.dispatchEvent(new CustomEvent("resubmission", {detail: true}));
+
+            xhr.setRequestHeader('X-Captcha', captchaSolution);
+            deferred.resolve(captchaSolution);
+            await xhr.submit(fulfillment.data);
+        });
+        const button = document.querySelector("#__captcha_refresh_button");
+        if(!button) return;
+        button.addEventListener("click", () => {
+            document.querySelector("#__captcha_image").src = `/core-content/captcha/?${random_string()}`;
+        });
+        button.disabled = false;
     }
 }
 

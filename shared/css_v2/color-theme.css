@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@0,87.5,100..900;1,87.5,100..900&display=swap');
+
+@property --branding-increment {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.branding_increment}};
+}
+
+@property --branding-rotation {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.branding_rotation}};
+}
+
+@property --branding-color-1 {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{theme.color_branding}};
+}
+
+@property --primary-increment {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.primary_increment}};
+}
+
+@property --primary-rotation {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.primary_rotation}};
+}
+
+@property --primary-color-1 {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{theme.color_primary}};
+}
+
+
+@property --issue-increment {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.issue_increment}};
+}
+
+@property --issue-rotation {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.issue_rotation}};
+}
+
+@property --issue-color-1 {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{theme.color_issue}};
+}
+
+@property --neutral-increment {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.neutral_increment}};
+}
+
+@property --neutral-rotation {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.neutral_rotation}};
+}
+
+@property --neutral-color-1 {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{theme.color_neutral}};
+}
+
+@property --background-increment {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.background_increment}};
+}
+
+@property --background-rotation {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: {{theme.background_rotation}};
+}
+
+@property --background-color {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{theme.color_background}};
+}
+
+@property --font-body-color {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: {{theme.color_font_body}};
+}
+
+:root {
+    --project-modal-z-index: 2000;
+    
+    /** PALETTE VALUES */
+    --branding-color-0 : oklch(from var(--branding-color-1) calc(l + (var(--branding-increment, .1) * 1)) c calc(h + (var(--branding-rotation, 10) * 1)));
+    --branding-color-2 : oklch(from var(--branding-color-1) calc(l - (var(--branding-increment, .1) * 1)) c calc(h - (var(--branding-rotation, 10) * 1)));
+    --branding-color-3 : oklch(from var(--branding-color-1) calc(l - (var(--branding-increment, .1) * 2)) c calc(h - (var(--branding-rotation, 10) * 2)));
+    --branding-color-4 : oklch(from var(--branding-color-1) calc(l - (var(--branding-increment, .1) * 3)) c calc(h - (var(--branding-rotation, 10) * 3)));
+    --branding-color-5 : oklch(from var(--branding-color-1) calc(l - (var(--branding-increment, .1) * 4)) c calc(h - (var(--branding-rotation, 10) * 4)));
+    --branding-color-0-fg: rgb(from var(--branding-color-0) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --branding-color-1-fg: rgb(from var(--branding-color-1) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --branding-color-2-fg: rgb(from var(--branding-color-2) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --branding-color-3-fg: rgb(from var(--branding-color-3) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --branding-color-4-fg: rgb(from var(--branding-color-4) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --branding-color-5-fg: rgb(from var(--branding-color-5) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+
+    
+    --primary-color-0: oklch(from var(--primary-color-1) calc(l + (var(--primary-increment, .1) * 1)) c calc(h + (var(--primary-rotation, 10) * 1)));
+    --primary-color-2: oklch(from var(--primary-color-1) calc(l - (var(--primary-increment, .1) * 1)) c calc(h - (var(--primary-rotation, 10) * 1)));
+    --primary-color-3: oklch(from var(--primary-color-1) calc(l - (var(--primary-increment, .1) * 2)) c calc(h - (var(--primary-rotation, 10) * 2)));
+    --primary-color-4: oklch(from var(--primary-color-1) calc(l - (var(--primary-increment, .1) * 3)) c calc(h - (var(--primary-rotation, 10) * 3)));
+    --primary-color-5: oklch(from var(--primary-color-1) calc(l - (var(--primary-increment, .1) * 4)) c calc(h - (var(--primary-rotation, 10) * 4)));
+    --primary-color-0-fg: rgb(from var(--primary-color-0) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --primary-color-1-fg: rgb(from var(--primary-color-1) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --primary-color-2-fg: rgb(from var(--primary-color-2) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --primary-color-3-fg: rgb(from var(--primary-color-3) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --primary-color-4-fg: rgb(from var(--primary-color-4) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --primary-color-5-fg: rgb(from var(--primary-color-5) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+
+
+    --neutral-color-0: oklch(from var(--neutral-color-1) calc(l + (var(--neutral-increment, 1) * 1)) c calc(h + (var(--neutral-rotation, 10) * 1)));
+    --neutral-color-2: oklch(from var(--neutral-color-1) calc(l - (var(--neutral-increment, 1) * 1)) c calc(h - (var(--neutral-rotation, 10) * 1)));
+    --neutral-color-3: oklch(from var(--neutral-color-1) calc(l - (var(--neutral-increment, 1) * 2)) c calc(h - (var(--neutral-rotation, 10) * 2)));
+    --neutral-color-4: oklch(from var(--neutral-color-1) calc(l - (var(--neutral-increment, 1) * 3)) c calc(h - (var(--neutral-rotation, 10) * 3)));
+    --neutral-color-5: oklch(from var(--neutral-color-1) calc(l - (var(--neutral-increment, 1) * 4)) c calc(h - (var(--neutral-rotation, 10) * 4)));
+    --neutral-color-0-fg: rgb(from var(--neutral-color-0) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --neutral-color-1-fg: rgb(from var(--neutral-color-1) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --neutral-color-2-fg: rgb(from var(--neutral-color-2) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --neutral-color-3-fg: rgb(from var(--neutral-color-3) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --neutral-color-4-fg: rgb(from var(--neutral-color-4) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --neutral-color-5-fg: rgb(from var(--neutral-color-5) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+
+    --issue-color-0: oklch(from var(--issue-color-1) calc(l + (var(--issue-increment, 1) * 1)) c calc(h + (var(--issue-rotation, 10) * 1)));
+    --issue-color-2: oklch(from var(--issue-color-1) calc(l - (var(--issue-increment, 1) * 1)) c calc(h - (var(--issue-rotation, 10) * 1)));
+    --issue-color-3: oklch(from var(--issue-color-1) calc(l - (var(--issue-increment, 1) * 2)) c calc(h - (var(--issue-rotation, 10) * 2)));
+    --issue-color-4: oklch(from var(--issue-color-1) calc(l - (var(--issue-increment, 1) * 3)) c calc(h - (var(--issue-rotation, 10) * 3)));
+    --issue-color-5: oklch(from var(--issue-color-1) calc(l - (var(--issue-increment, 1) * 4)) c calc(h - (var(--issue-rotation, 10) * 4)));
+    --issue-color-0-fg: rgb(from var(--issue-color-0) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --issue-color-1-fg: rgb(from var(--issue-color-1) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --issue-color-2-fg: rgb(from var(--issue-color-2) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --issue-color-3-fg: rgb(from var(--issue-color-3) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --issue-color-4-fg: rgb(from var(--issue-color-4) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --issue-color-5-fg: rgb(from var(--issue-color-5) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+
+    --background-color-0: oklch(from var(--background-color) calc(l + (var(--background-increment, .1) * 1)) c calc(h + (var(--background-rotation, 10) * 1)));
+    --background-color-1: var(--background-color);
+    --background-color-2: oklch(from var(--background-color) calc(l - (var(--background-increment, .1) * 1)) c calc(h - (var(--background-rotation, 10) * 1)));
+    --background-color-3: oklch(from var(--background-color) calc(l - (var(--background-increment, 1) * 2)) c calc(h - (var(--background-rotation, 10) * 2)));
+    --background-color-4: oklch(from var(--background-color) calc(l - (var(--background-increment, 1) * 3)) c calc(h - (var(--background-rotation, 10) * 3)));
+    --background-color-5: oklch(from var(--background-color) calc(l - (var(--background-increment, 1) * 4)) c calc(h - (var(--background-rotation, 10) * 4)));
+    --background-color-0-fg: rgb(from var(--background-color-0) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --background-color-1-fg: rgb(from var(--background-color-1) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --background-color-2-fg: rgb(from var(--background-color-2) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --background-color-3-fg: rgb(from var(--background-color-3) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --background-color-4-fg: rgb(from var(--background-color-4) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --background-color-5-fg: rgb(from var(--background-color-5) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+
+    
+    /** DERIVED VALUES */
+    --main-content-color: oklch(from var(--background-color) calc(l - .60) c h);
+
+    --input-element-border: hsl(from var(--primary-color-1) h 15% 80%);
+    --input-element-border-fg: rgb(from var(--input-element-border) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --input-element-tray: hsl(from var(--primary-color-1) h 10% 94%);
+    --input-element-tray-fg: rgb(from var(--input-element-tray) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --input-element-background: hsl(from var(--primary-color-1) h 15% 99%);
+    --input-element-color: oklch(from var(--input-element-background) calc(1 - 0.8) c h);
+    --input-element-active: var(--primary-color-1);
+    --input-element-active-fg: rgb(from var(--input-element-active) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    
+    
+
+    
+
+    /** LEGACY STYLING */
+    --project-body-background: var(--background-color);
+    --project-body-color: var(--main-content-color);
+
+
+    --project-box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+    --project-color-header-branding: #004BA8;
+    --project-color-user-panel-button: #342A21;
+    --project-color-acknowledge: #598B2C;
+    --project-color-active: #598B2C;
+    --project-color-inactive: #B1C1C0;
+    --project-color-input-border-nofocus: #b1c3c3;
+    --project-color-input-border-focus: #000;
+    --project-color-input-background: #fff;
+    --project-color-input-text-color: #000;
+    --project-color-input-background-focus: #FFF;
+    --project-color-input-invalid-border: #BB4430;
+    --project-color-input-invalid-bg: #F7E2DE;
+    --project-color-input-invalid-label-text: #FFF;
+    --project-color-input-disabled: #F4F6F6;
+    --project-color-disabled: rgba(0,0,0,.2);
+
+    --project-color-table-border: 1px solid var(--neutral-color-2);
+    --project-color-table-bg-odd: var(--background-color-0);
+    --project-color-table-bg-even: var(--neutral-color-0);
+
+    --project-color-problem: var(--issue-color-0);
+
+    --project-color-button-init: var(--primary-color-1);
+    --project-color-button-text: var(--primary-color-1-fg);
+    --project-color-button-hover: var(--primary-color-0);
+    --project-color-button-hover-text: var(--primary-color-0-fg);
+    --project-color-button-pressed: var(--primary-color-2);
+    --project-calendar-borders: 1px solid var(--project-color-button-init);
+    --project-calendar-cell-bg: #FFF;
+    --project-calendar-cell-other-bg: #EFEFEF;
+    --project-calendar-cell-txt: #000;
+    --project-calendar-header-color: var(--project-color-button-init);
+    --project-calendar-header-text: var(--project-color-button-text);
+    --project-action-menu-background: var(--project-color-input-disabled);
+    --project-action-menu-color: var(--project-color-input-text-color);
+    --project-action-menu-border: var(--project-color-table-border);
+    --project-action-menu-hover: var(--project-color-inactive);
+    --project-events-banner-background: #efefef;
+    --project-events-banner-text: #000000;
+    --project-events-button-color: var(--project-color-button-init);
+    --project-events-button-color-hover: var(--project-color-button-hover);
+    --project-events-button-text: var(--project-color-button-text);
+    --project-events-button-text-hover: var(--project-color-button-hover-text);
+    --project-events-font-family: var(--project-body-family);
+    --project-landing-page-content-width: 80ch;
+
+    --admin-font: 'Roboto', 'Arial', sans-serif;
+}

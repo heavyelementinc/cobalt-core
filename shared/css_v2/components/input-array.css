@@ -1,0 +1,238 @@
+input-autocomplete[__custom-input="true"] {
+    padding: 0;
+    overflow: hidden;
+    & input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    &.invalid {
+        background: var(--input-invalid-background);
+        border: var(--input-element-border-width) solid var(--project-color-input-invalid-border);
+    }
+    & option {
+        display: none;
+    }
+}
+
+
+fieldset > :is(input-array, input-user-array){
+    width: 100%;
+}
+
+input-array,
+input-user-array {
+    display: inline-flex;
+    flex-direction: column;
+    border: var(--input-element-border-width) solid var(--input-disabled-border);
+    background: var(--input-element-background);
+    padding: 0;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    overflow: hidden;
+    box-sizing: border-box;
+    & ol.input-array--tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        flex-grow:1;
+        min-height: 2rem;
+        border: 0;
+        border-bottom: var(--input-element-border-width) solid var(--input-disabled-border);
+        background: var(--input-element-tray);
+        margin: 0;
+        padding:.4rem;
+        gap: .4rem;
+        max-width: 100%;
+        &:empty{
+            text-align: center;
+            font-style: italic;
+            opacity: .6;
+            font-size: .6em;
+            &:before{
+                content:"Use the field below to add items to this list";
+            }
+        }
+        & :is(li.input-array--tag,
+            input-array-item,
+            input-array-tag,
+            input-user)
+        {
+            display: inline-flex;
+            justify-content: space-between;
+            align-items: center;
+            border: var(--input-element-border-width) solid var(--input-disabled-border);
+            background: var(--input-element-background);
+            border-radius: 4px;
+            font-size: .8em;
+            overflow: hidden;
+            & span,
+            & label{
+                margin: 0 .3rem;
+            }
+            & input[type="button"]
+            & > button {
+                font-size: .8rem;
+                color: var(--input-disabled-border);
+                border: none;
+                border-left: var(--input-element-border-width) solid var(--input-disabled-border);
+                border-radius: unset;
+                margin: 0;
+                height: 100%;
+            }
+            & input[type='button']:hover {
+                background-color:var(--input-invalid-background);
+                color:white;
+            }
+        }
+    }
+    & .autocomplete--search-container {
+        display:flex;
+        flex-direction:row;
+        background: var(--input-element-background);
+        cursor: text;
+        padding: 0;
+        border: 0;
+        &:focus-within {
+            outline: var(--input-element-border-width) solid var(--input-element-border);
+        }
+        & input[type='search'] {
+            width:100%;
+        }
+    }
+    &:disabled,
+    &[disabled="disabled"],
+    &[aria-disabled="true"] {
+        & :is(.autocomplete--search-container, input-array-tag) {
+            background-color: var(--input-element-tray);
+            pointer-events: none;
+            padding: 0;
+        }
+        & :is(input-array-tag input[type="button"]) {
+            display: none;
+        }
+    }
+    
+    & input[type="search"]{
+        border: 0;
+        border-radius: unset;
+        font-size: .9rem;
+        background-color: inherit;
+        margin:0;
+    }
+    
+    & input[type="search"]:focus{
+        background: var(--input-element-background);
+    }
+
+    & optgroup, 
+    & option{
+        display: none;
+    }
+}
+  
+.input-array--search-results, autocomplete-results-container{
+    display: block;
+    font-size: .9rem;
+    padding: .2rem;
+    margin:0;
+    list-style: none;
+    position:absolute;
+    background: var(--input-element-background);
+    border: var(--input-element-border-width) solid var(--input-disabled-border);
+    border-top: none;
+    width: calc(100% - .2rem);
+    top:100%;
+    left:.1rem;
+    z-index: calc(var(--project-modal-z-index) + 100);
+    box-sizing: border-box;
+    &:empty {
+        display:none;
+    }
+    & li {
+        padding: .2rem;
+        border: var(--input-element-border-width) solid transparent;
+        box-sizing: border-box;
+        &:hover,
+        &:focus,
+        &.input-array--will-select-on-enter {
+            background: var(--input-element-tray);
+            border:var(--input-element-border-width) solid var(--input-disabled-border);
+            cursor:pointer;
+            color:black;
+        }
+        &:is(.input-array--list-custom,
+        .autocomplete--list-custom) {
+            font-weight: bold;
+            &:not(.input-array--will-select-on-enter){
+              color:var(--input-disabled-border);
+            }
+        }
+        &.input-array--list-custom:before {
+            content: "+";
+            margin: 0 0.4rem 0 .2rem;
+            font-weight: bold;
+            color: white;
+            background: var(--input-disabled-border);
+            border-radius: 50%;
+            width: 1rem;
+            display: inline-flex;
+            height: 1rem;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+    & li + li {
+        margin-top: .1rem;
+    }
+}
+
+
+input-object-array {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 2rem;
+    position: inherit;
+    border: var(--input-element-border-width) solid var(--input-disabled-border);
+    background: var(--input-element-tray);
+    margin: 0;
+    padding: .4rem;
+    max-width: 100%;
+    border-radius: 4px;
+    gap: .4rem;
+    & var{
+      display: none;
+    }
+    & .input-object-array--add-button{
+      margin-left:auto;
+    }
+}
+
+object-array-item {
+    display: block;
+    position: relative;
+    isolation: isolate;
+    > button.close {
+        float: right;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 100;
+        background: white;
+        border: var(--input-element-border-value);
+        font-size: 0.6em;
+        &:before {
+            content: "\F0156";
+            font-family: 'Material Design Icons';
+        }
+        &:hover {
+            border-color: var(--input-element-active);
+        }
+    }
+}
+
+button.add-new-object-button {
+    &:before {
+        content: "\F0417";
+        font-family: 'Material Design Icons', sans-serif;
+    }
+}

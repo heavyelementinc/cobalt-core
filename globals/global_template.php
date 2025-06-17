@@ -4,6 +4,119 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\Model\GenericModel;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\Templates\Classes\NotAFunction;
+use Cobalt\Renderer\Render;
+
+
+/**
+ * A shorthand way of rendering a template and getting the results. This is
+ * included so you can include a template inside another template. This has the
+ * potential to cause some recursive crap... so use caution!
+ *
+ * @param  string $template The name of the template
+ * @param  mixed  $vars     Variables to include
+ * @return string Processed template
+ * @deprecated Use view() instead
+ */
+function with(string $template, $vars = []) {
+    return view($template, $vars);
+}
+
+/** An error-tolerant template inclusion routine. Wraps the `with` function in a
+ * try/catch block
+ * 
+ * @param string  $template The name of the template
+ * @param mixed   $vars     Variables to include
+ * @return string The processed template OR an empty string on error
+ * @deprecated use maybe_view()
+ */
+function maybe_with($template, $vars = []) {
+    return maybe_view($template, $vars);
+}
+
+/**
+ * A shorthand way of rendering a template and getting the results. This is
+ * included so you can include a template inside another template. This has the
+ * potential to cause some recursive crap... so use caution!
+ *
+ * @param  string $template The name of the template
+ * @param  mixed  $vars     Variables to include
+ * @return string Processed template
+ */
+function view(string $template, array $vars = [], bool $absolute_path = false):string {
+    if(__APP_SETTINGS__['Render_use_v2_engine']) {
+        $render = new Render();
+        $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
+        $render->getBodyFromTemplate($template);
+    } else {
+        $render = new \Render\Render();
+        $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
+        $render->set_vars($vars);
+        $render->from_template($template, $absolute_path);
+    }
+    return $render->execute();
+}
+
+function view_from_string(string $view, array $vars = []):string {
+    $render = new \Render\Render();
+    if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];
+    $render->set_vars($vars);
+    $render->set_body($view, 'string');
+    return $render->execute();
+}
+
+/** An error-tolerant template inclusion routine. Wraps the `with` function in a
+ * try/catch block
+ * 
+ * @param string  $template The name of the template
+ * @param mixed   $vars     Variables to include
+ * @return string The processed template OR an empty string on error
+ */
+function maybe_view(string $template, array $vars = []):string {
+    if (!$template) return "";
+    if (!is_string($template)) return "";
+    try {
+        return view($template, $vars);
+    } catch (Exception $e) {
+        return "";
+    }
+}
+
+
+function conditional_addition(string $template, bool $is_shown, $vars = []) {
+    if (!$is_shown) return "";
+    return view($template, $vars);
+}
+
+function with_each(string $template, $docs, $var_name = 'doc') {
+    $rendered = "";
+    foreach ($docs as $doc) {
+        $rendered .= with($template, array_merge($GLOBALS['WEB_PROCESSOR_VARS'], [$var_name => $doc]));
+    }
+    return $rendered;
+}
+
+function view_each(string $template, Iterator|array $docs, string $var_name = 'doc', string|false $separator = "") {
+    return implode($separator, view_array($template, $docs, $var_name));
+}
+
+function view_array(string $template, Iterator|array $docs, string $var_name = 'doc'){
+    if(!is_array($docs) && is_iterable($docs)) $docs = iterator_to_array_recursive($docs);
+    $array = [];
+    $d = $docs;
+    if(gettype($docs) === "array") {
+        if(key_exists($var_name, $docs)) $d = $docs[$var_name];
+    } else {
+        $d = iterator_to_array($d);
+    }
+    foreach($d as $index => $doc){
+        $array[$index] = view($template, array_merge(
+            $d,
+            [$var_name => $doc]
+        ));
+    }
+    return $array;
+}
+
 
 function render($name, $posStart, $posEnd, $vars, $func_args) {
     global $WEB_PROCESSOR_VARS;
@@ -116,10 +229,19 @@ function individual_var($name, $vars, $arguments, $posStart, $posEnd) {
 
     if ($is_inline_json) $literal_value = json_encode($literal_value, $is_pretty_print); // Convert to JSON
     
+    switch(gettype($literal_value)) {
+        case "boolean":
+            $literal_value = ($literal_value) ? "true" : "false";
+            break;
+        case "null":
+            $literal_value = "null";
+            break;
+    }
+
     if($literal_value instanceof SchemaResult) $literal_value->htmlSafe($is_inline_html);
     // if(gettype($literal_value) === "object" && method_exists($literal_value, '__toString')) $literal_value = $literal_value->__toString();
     else if (!$is_inline_html) $literal_value = htmlspecialchars((string)$literal_value ?? '', $options); // < = &lt;
-    
+
     return $final_value . $literal_value . $closing_tag;
 }
 
@@ -163,16 +285,23 @@ function fonts_tag() {
         case 2:
             return font_tag_v2();
         default:
-            $head = __APP_SETTINGS__['fonts']['head']['import'];
-            $body = __APP_SETTINGS__['fonts']['body']['import'];
-            $headFam = __APP_SETTINGS__['fonts']['head']['family'];
-            $bodyFam = __APP_SETTINGS__['fonts']['body']['family'];
+            // $head = __APP_SETTINGS__['fonts']['head']['import'];
+            // $body = __APP_SETTINGS__['fonts']['body']['import'];
+            // $headFam = __APP_SETTINGS__['fonts']['head']['family'];
+            // $bodyFam = __APP_SETTINGS__['fonts']['body']['family'];
+            $links = [];
+            $root = "";
+            foreach(__APP_SETTINGS__['fonts'] as $link => $details) {
+                $links[] = $details['import'];
+                $root .= "--project-$link-family: $details[family];\n";
+            }
+            $links = implode("|", $links);
             return <<<HTML
-            <link href="https://fonts.googleapis.com/css?family=$head|$body&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/" rel="preconnect">
+            <link href="https://fonts.googleapis.com/css?family=$links&display=swap" rel="stylesheet">
             <style>
                 :root{
-                    --project-head-family: $headFam;
-                    --project-body-family: $bodyFam;
+                    $root
                 }
             </style>
             HTML;
@@ -180,6 +309,18 @@ function fonts_tag() {
 }
 
 function font_tag_v2() {
+    switch(__APP_SETTINGS__['Font_backend']) {
+        case FONT_BACKEND_GOOGLE:
+            return font_tag_2_google();
+        case FONT_BACKEND_FONTSOURCE:
+            return font_tag_2_fontsource();
+        default:
+            throw new Exception("No font handler specified");
+    }
+    
+}
+
+function font_tag_2_google() {
     $google = "https://fonts.googleapis.com";
     $href = "<link rel=\"preconnect\" href=\"$google\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n";
     $tag = "";
@@ -192,4 +333,28 @@ function font_tag_v2() {
         $def .= "--project-$type"."-family: \"$family\", $fallback;\n";
     }
     return $href . "<link href=\"$google/css2?$tag"."display=swap\" rel=\"stylesheet\">\n$def}</style>";
+}
+
+function font_tag_2_fontsource() {
+    $url = "https://cdn.jsdelivr.net";
+    $tag = "
+    <link rel=\"preconnect\" href=\"$url\" crossorigin>\n
+    <style>\n";
+    foreach(__APP_SETTINGS__['fonts'] as $type => $font) {
+        $font["style"] = $font['style'] ?? "normal";
+        $font['weight'] = $font['weight'] ?? 400;
+        $font['display'] = $font['display'] ?? "swap";
+        $font['unicode_range'] = $font['unicode-range'] ?? $font['unicode_range'] ?? "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
+        $tag .= <<<CSS
+        @font-face {
+            font-family: $font[family];
+            font-style: $font[style];
+            font-display: $font[display];
+            font-weight: $font[weight];
+            src: $font[src];
+            unicode-range: $font[unicode_range];
+        }
+        CSS;
+    }
+    return "$tag</style>";
 }

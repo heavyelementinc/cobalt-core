@@ -1,3 +1,8 @@
+:root {
+  --lazy-movement: 5%;
+  --lazy-start-transform: translateY(calc(var(--lazy-movement) * -1));
+  --lazy-end-transform: unset;
+}
 /* THIS DOES NOT WORK YET */
 .cobalt-parallax--container{
   --parallax-depth: 8px;
@@ -25,30 +30,39 @@
   background-size: cover;
 }
 
-:is(html.js [lazy-reveal]){
-  opacity: 0;
-  transform: translateY(-5%);
-  transition: opacity .5s, transform .5s;
-  transition-delay: var(--lazy-delay);
-}
-
-:is(html.js [lazy-reveal].lazy-reveal--revealed) {
-  opacity: 1;
-  transform: unset;
-}
-
-:is(html.js [lazy-reveal] [lazy-child]) {
-  opacity: 0;
-  transform: translateY(-5%);
-  transition: opacity .5s, transform .5s;
-  transition-delay: var(--lazy-delay);
-}
-
-:is(html.js [lazy-reveal].lazy-reveal--revealed [lazy-child]) {
-  opacity: 1;
-  transform: unset;
-}
-
-:is(html.js [lazy-reveal].lazy-reveal--reverted [lazy-child]) {
-  transition-delay: 0;
+:where(html._parallax) {
+  [lazy-reveal] {
+    --_lazy-movement: 5%;
+    --_lazy-speed: 500ms;
+    &.lazy-reveal--revealed {
+      opacity: 1;
+      transform: var(--lazy-end-transform);
+      [lazy-child] {
+        opacity: 1;
+        transform: var(--lazy-end-transform);
+      }
+    }
+    .lazy-reveal--reverted [lazy-child] {
+      transition-delay: 0;
+    }
+  }
+  [lazy-reveal],
+  [lazy-child] {
+    opacity: 0;
+    transition: opacity var(--_lazy-speed), transform var(--_lazy-speed);
+    transition-delay: var(--lazy-delay);
+    transform: var(--lazy-start-transform);
+    &.lazy--from-left {
+      --lazy-start-transform: translateX(calc(var(--_lazy-movement) * -1));
+    }
+    &.lazy--from-right {
+      --lazy-start-transform: translateX(5%);
+    }
+    &.lazy--from-bottom {
+      --lazy-start-transform: translateY(5%);
+    }
+    &.lazy--from-transparent {
+      --lazy-start-transform: unset;
+    }
+  }
 }

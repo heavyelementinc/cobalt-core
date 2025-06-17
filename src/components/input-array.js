@@ -8,20 +8,48 @@
  *   * pattern - [""] the pattern for custom elements to be matched against
  */
 class InputArray extends AutoCompleteInterface {
-
+    
     constructor() {
         super();
+        this.TAG_CLASS = "input-array--tag";
         this.readonly = false;
         this.tags = null;
         this.action = this.getAttribute("action");
         this.allowCustom = string_to_bool(this.getAttribute("allow-custom")) ?? false;
         this.excludeCurrent = string_to_bool(this.getAttribute("exclude-current")) ?? true;
         this.setAttribute("__custom-input", "true");
+
+        this.validationMessage = "";
+
+        // Validity should always return TRUE if
+        this.validity = {
+            required: () => {
+                const required = this.hasAttribute("required");
+                if(!required) return false;
+                if(this.value.length < 1) {
+                    this.validationMessage += `This field is required\n`;
+                    return true;
+                }
+                return false;
+            },
+            valueMissing: () => {
+                const length = this.getAttribute("min");
+                if(length === null) return false;
+                const val = this.value.length < length;
+                if(val) this.validationMessage += `Must have at least one ${length} item${plurality(length)} selected.\n`;
+                return val;
+            },
+            // patternMismatch: () => {
+            //     if(this.getAttribute("pattern"))
+            // }
+
+        }
     }
 
     connectedCallback() {
         this.change_handler_value(this.getAttribute("value"));
-        this.tags = document.createElement("fieldset");
+        this.tags = document.createElement("ol");
+        this.tags.classList.add("input-array--tag-container");
         this.prepend(this.tags);
         for(const i of this.value) {
             const el = this.querySelector(`option[value='${i}']`);
@@ -160,7 +188,7 @@ class InputArray extends AutoCompleteInterface {
             const val = this.value;
             val.push(e.detail.value);
             this.value = val;
-            this.dispatchEvent(new Event("change", {...e, target: this}));
+            this.dispatchEvent(new Event("change", {...e, target: this, bubbles: true}));
         })
     }
 
@@ -185,7 +213,7 @@ class InputArray extends AutoCompleteInterface {
             // `el` will still register as `selected` and therefore it will be
             // included in this.value output. So we wait 20ms before dispatching
             // the change event. This sucks. TODO fix this hacky bullshit.
-            this.dispatchEvent(new Event("change", {target: this}));
+            this.dispatchEvent(new Event("change", {target: this, bubbles: true}));
         }, 20)
     }
 
@@ -194,7 +222,8 @@ class InputArray extends AutoCompleteInterface {
     drawTag(i) {
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
         if(this.tags === null) return;
-        let tag = document.createElement("input-array-tag");
+        let tag = document.createElement("li");
+        tag.classList.add(this.TAG_CLASS);
         tag.setAttribute("value", i.value);
         tag.innerHTML = `<label>${i.innerText}</label>`;
         this.initTagButton(tag);
@@ -215,7 +244,7 @@ class InputArray extends AutoCompleteInterface {
     }
 
     getSelectedByRemainingTags() {
-        const tags = this.querySelectorAll("input-array-tag");
+        const tags = this.querySelectorAll(`.${this.TAG_CLASS}`);
         let values = [];
 
         for(const i of tags) {
@@ -240,9 +269,21 @@ class InputArray extends AutoCompleteInterface {
 
     removeTag(i) {
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
-        const tag = this.querySelector(`input-array-tag[value='${i.value}']`);
+        const tag = this.querySelector(`.${this.TAG_CLASS}[value='${i.value}']`);
         if(tag) tag.parentNode.removeChild(tag);
     }
+
+    // checkValidity() {
+    //     this.validationMessage = "";
+    //     this.valid.required();
+    //     this.valid.valueMissing();
+    //     if(this.validationMessage) {
+    //         this.dispatchEvent(new Event("invalid"), {detail: {message: this.validationMessage}});
+            
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
 }
 
@@ -341,6 +382,7 @@ class InputUserArray extends InputArray {
     // }
 
     renderOptions(opts) {
+        // return opts;
         let finalOptions = [];
         for(const el in opts) {
             const label = this.drawLabel(opts[el],opts);
@@ -402,7 +444,8 @@ class InputUserArray extends InputArray {
     drawTag(i){
         if("value" in i === false) throw new TypeError("Missing property 'value' when drawing tag");
         if(this.tags === null) return;
-        let tag = document.createElement("input-array-tag");
+        let tag = document.createElement("li");
+        tag.classList.add(this.TAG_CLASS);
         tag.setAttribute("value", i.value);
         tag.innerHTML = `<label>${this.drawLabel(i)}</label>`;
         this.initTagButton(tag);
@@ -421,6 +464,7 @@ class InputUser extends AutoCompleteInterface {
     constructor() {
         super();
         this.user = null;
+        this.__ready__ = false;
     }
 
     connectedCallback() {
@@ -428,7 +472,8 @@ class InputUser extends AutoCompleteInterface {
         this.searchField = this.getAutocompleteSearchField();
         this.appendChild(this.searchField);
         this.addEventListener("autocompleteselect", e => {
-            this.setValue(e.detail);
+            this.setValue(e.detail, this.__ready__);
+            this.__ready__ = true;
         });
         const val = this.getAttribute("value");
         if(val) this.value = val;
@@ -454,37 +499,37 @@ class InputUser extends AutoCompleteInterface {
         return this.getAttribute("name");
     }
 
-    // renderOptions(opts) {
-    //     let finalOptions = [];
-    //     for(const el in opts) {
-    //         const label = this.drawLabel(opts[el],opts);
-    //         finalOptions[el] = {
-    //             search: label.outerHTML,
-    //             label: label.outerHTML,
-    //             value: opts[el]._id.$oid
-    //         }
-    //     }
-    //     // this.options = finalOptions;
-    //     return finalOptions;
-    // }
+    renderOptions(opts) {
+        let finalOptions = [];
+        for(const el in opts) {
+            const label = this.drawLabel(opts[el],opts);
+            finalOptions[el] = {
+                search: label.outerHTML,
+                label: label.outerHTML,
+                value: opts[el]._id.$oid
+            }
+        }
+        // this.options = finalOptions;
+        return finalOptions;
+    }
 
-    // drawLabel(values) {
-    //     let user = document.createElement("div");
-    //     user.classList.add("cobalt-user--profile-display");
-    //     user.setAttribute("value", values.value);
+    drawLabel(values) {
+        let user = document.createElement("div");
+        user.classList.add("cobalt-user--profile-display");
+        user.setAttribute("value", values.value);
 
-    //     user.innerHTML = `
-    //         <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
-    //         <div class='vbox'>
-    //             <span>${values.fname} ${values.lname}</span>
-    //             <span class='username'>@${values.uname}</span>
-    //         </div>
-    //     `;
+        user.innerHTML = `
+            <img src="${values.avatar?.thumb?.filename || "/core-content/img/unknown-user.thumb.jpg"}" class="cobalt-user--avatar">
+            <div class='vbox'>
+                <span>${values.fname} ${values.lname}</span>
+                <span class='username'>@${values.uname}</span>
+            </div>
+        `;
         
-    //     return user;
-    // }
+        return user;
+    }
 
-    setValue(values) {
+    setValue(values, dispatchEvent = false) {
         this.user = document.createElement("div");
         this.user.innerHTML = values.label;
         this.user.setAttribute("value", values.value);
@@ -498,10 +543,10 @@ class InputUser extends AutoCompleteInterface {
             delete this.user;
             this.removeChild(this.clearButton);
             this.classList.remove("value");
-            this.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change",{bubbles: true}));
         });
         this.appendChild(this.clearButton);
-        this.dispatchEvent(new Event("change"));
+        if(dispatchEvent) this.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
 }

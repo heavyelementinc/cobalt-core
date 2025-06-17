@@ -1,0 +1,14 @@
+body {
+    font-family: var(--project-body-family);
+    background: var(--background-color-1);
+    color: var(--background-color-1-fg);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: var(--project-head-family);
+    text-wrap: balance;
+}

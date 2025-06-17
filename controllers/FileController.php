@@ -1,7 +1,7 @@
 <?php
 
 use Cobalt\Extensions\Extensions;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Controllers\ClientFSManager;
 use Exceptions\HTTP\NotFound;
 
@@ -12,9 +12,9 @@ class FileController extends \Controllers\FileController {
         $cacheControl = 'Cache-Control: private, ';
         $cacheControl .= "immutable, ";
         $cacheControl .= "max-age=31536000";
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $cacheControl = "Cache-Control: no-cache";
         header($cacheControl);
         header('Pragma: private');
-        header('Last-Modified: Sat, 26 Oct 1985 08:15:00 GMT');
         $expires = gmdate("D, d M Y H:i:s", strtotime("+30 days"));
         header("Expires: $expires");
     }
@@ -25,13 +25,14 @@ class FileController extends \Controllers\FileController {
         $path = $ROUTER->uri;
         $extensions = [];
         Extensions::invoke("register_shared_dir", $extensions);
+        $path = sanitize_path_name($path);
         // $file = __ENV_ROOT__ . "/shared/$path";
         $file = find_one_file([
             __APP_ROOT__ . "/shared/",
             ...$extensions ?? [],
             __ENV_ROOT__ . "/shared/",
             ...$SHARED_CONTENT
-        ], sanitize_path_name($path));
+        ], $path);
         if (!file_exists($file)) throw new Exceptions\HTTP\NotFound("The resource could not be located");
         // header('Content-Description: File Transfer');
         // header('Content-Type: application/octet-stream');
@@ -81,24 +82,43 @@ class FileController extends \Controllers\FileController {
         exit;
     }
 
-    function vapid_pub_key(){
-        header("Content-Type: application/json;charset=UTF-8");
-        echo json_encode((new PushNotifications())->vapid_keys->keyset->publicKey);
-        exit;
-    }
-
     function css($match) {
+        $match = sanitize_path_name($match);
         $cache = new \Cache\Manager("css-precomp/$match");
         if ($cache->exists) {
             $file = $cache->file_path;
         } else {
-            $file = __ENV_ROOT__ . "/shared/css/$match";
-            $file_exists = file_exists($file);
-            if (!$file_exists)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
+            // $file = __ENV_ROOT__ . "/shared/css/$match";
+            $file = find_one_file([
+                __APP_ROOT__."/shared/css/",
+                __ENV_ROOT__."/shared/css/",
+            ],$match);
+            if (!$file)  throw new \Exceptions\HTTP\NotFound("The resource could not be located");
         }
 
         header("Content-Type: text/css;charset=UTF-8");
         $this->get_etag($file);
+        readfile($file);
+        exit;
+    }
+
+    function css_versioned($version, $match) {
+        $match = sanitize_path_name($match);
+        $cache = new \Cache\Manager("css-precomp/v$version/$match");
+        if ($cache->exists) {
+            $file = $cache->file_path;
+        } else {
+            // $file = __ENV_ROOT__ . "/shared/css/v2/$match";
+            $file = find_one_file([
+                __APP_ROOT__."/shared/css_v$version/",
+                __ENV_ROOT__."/shared/css_v$version/",
+            ],$match);
+            // $file = "/shared/css_v$version/$match";
+        }
+
+        header("Content-Type: text/css;charset=UTF-8");
+        $this->get_etag($file);
+        // echo view($file);
         readfile($file);
         exit;
     }
@@ -144,6 +164,7 @@ class FileController extends \Controllers\FileController {
     }
 
     function get_etag($path) {
+        header('Last-Modified: '. date("r",filemtime($path)));
         $mbThreshold = 25600;
         $filesize = filesize($path);
         $header = "ETag: \"";
@@ -151,6 +172,7 @@ class FileController extends \Controllers\FileController {
         $header .= app('version') . "\"";
         header($header);
         header('Content-Length: ' . $filesize);
+
         // exit;
     }
 
@@ -173,12 +195,35 @@ class FileController extends \Controllers\FileController {
         exit;
     }
 
+    function ai() {
+        $file = find_one_file([
+            __APP_ROOT__ . "/templates/",
+            // ...$extensions ?? [],
+            __ENV_ROOT__ . "/templates/",
+            // ...$SHARED_CONTENT
+        ], "ai.txt");
+
+        if(!$file) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+
+        $ai_bots = "";
+        // if(__APP_SETTINGS__["Robots_txt_block_known_ai_crawlers"]) $ai_bots = view("known-ai-robots.txt");
+        $view = view("ai.txt", ['ai_bots' => $ai_bots]);
+        header('Content-Length: ' . strlen($view));
+        header('Content-Type: text');
+        echo $view;
+        exit;
+    }
+
     function sitemap() {
         global $ROUTER;
         $html = "";
         foreach($ROUTER->routes['web']['get'] as $route => $data) {
             $includeRawRoute = true;
             $registered = null;
+            if($data['original_path'] === "/portfolio/type/{type}") {
+                if(false) {
+                }
+            }
             if(isset($data['sitemap'])) {
                 if($data['sitemap']['children']) $registered = $data['sitemap']['children'];
                 if($data['sitemap']['ignore']) $includeRawRoute = !$data['sitemap']['ignore'];

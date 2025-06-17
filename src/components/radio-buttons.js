@@ -45,7 +45,7 @@ class RadioButtons extends HTMLElement {
     buttonState(btn, state, triggerEvent = false) {
         btn.pressed = state;
         btn.setAttribute("aria-pressed", JSON.stringify(state));
-        if(triggerEvent) btn.dispatchEvent(new Event("change"));
+        if(triggerEvent) btn.dispatchEvent(new Event("change",{bubbles: true}));
     }
 
     togglePressedState(btn, triggerEvent = false) {
@@ -72,7 +72,7 @@ class RadioButtons extends HTMLElement {
                     break;
             }
             this.resetButtons();
-            this.clearButton.dispatchEvent(new Event("change"));
+            this.clearButton.dispatchEvent(new Event("change",{bubbles: true}));
         });
         this.appendChild(this.clearButton);
     }

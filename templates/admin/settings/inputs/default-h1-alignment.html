@@ -1,4 +1,4 @@
-<li>
+<li class="settings-panel--setting settings-panel--{{setting}}">
     <label>Default Event Banner Text Alignment</label>
     <radio-group name="CobaltEvents_default_h1_alignment" value="{{value}}">
         <label>
@@ -14,8 +14,7 @@
             <i name="format-align-right"></i>
         </label>
     </radio-group>
-    @view("/admin/settings/inputs/reset.html");
-    <style>
+    @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);    <style>
         input[type=radio]:checked + i {
             border: 1px solid black;
         }

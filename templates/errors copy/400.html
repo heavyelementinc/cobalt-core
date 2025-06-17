@@ -1,0 +1,7 @@
+<section class="error_page">
+    <h1>That's a Bad Request</h1>
+    <p>It must've been something you typed.</p>
+    <code><?= $status_code ?? "500" ?> {{message}}</code>
+    <pre class="error_code">{{embed}}</pre>
+    <pre>{{exception}}</pre>
+</section>

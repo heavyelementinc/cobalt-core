@@ -676,6 +676,7 @@ class HorizontalScroll extends HTMLElement {
         viewport: this,
         content: this.scrollableTrack,
         direction: "horizontal",
+        lockScrollOnDragDirection: "horizontal",
         scrollMode: "transform",
         bounce: true,
         onPointerDown: (e) => {
@@ -730,6 +731,7 @@ class HorizontalScroll extends HTMLElement {
         const listItem = document.createElement("li");
         const button = document.createElement("button");
         button.dataset.index = index;
+        button.ariaLabel = `Scroll to element #${index}`;
         listItem.appendChild(button);
 
         // Let's add a listener for when this button is clicked.

@@ -54,7 +54,7 @@ trait ClientFSManager {
 
     public function download($filename) {
         $this->initFS();
-        header("Cache-Control: private, max-age=31536000, immutable");
+        header("Cache-Control: max-age=31536000, immutable");
         // header();
         $this->fs->download($filename);
     }
@@ -101,7 +101,7 @@ trait ClientFSManager {
 
     public function deleteAllBelongingToId($parent_id, $key = "for") {
         $_id = new ObjectId($parent_id);
-        $result = $this->findMany([$key => $_id]);
+        $result = $this->fs->findMany([$key => $_id]);
         $this->last_modified_result = $result;
         $deleted = 0;
         foreach($result as $doc) {
@@ -207,6 +207,17 @@ trait ClientFSManager {
         $ids = [];
         foreach($files[$key]['tmp_name'] as $i => $file) {
             $ids = array_merge($ids,$this->clientUploadFile($key, $i, $arbitrary_data, $files, $meta));
+        }
+        return $ids;
+    }
+
+    public function uploadFilesAndGetArrayOfIds($key, $arbitrary_data = null, $files = null, $meta = false):array {
+        if(!$files) $files = $_FILES;
+        if(empty($files)) throw new BadRequest("No files were uploaded");
+        if(empty($files[$key])) throw new BadRequest("No files were uploaded");
+        $ids = [];
+        foreach($files[$key]['tmp_name'] as $i => $file) {
+            $ids[] = $this->clientUploadFile($key, $i, $arbitrary_data, $files, $meta);
         }
         return $ids;
     }

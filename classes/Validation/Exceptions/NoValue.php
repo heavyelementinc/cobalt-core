@@ -15,6 +15,10 @@
 
 namespace Validation\Exceptions;
 
+/**
+ * @deprecated use Cobalt\Models\Issues\FilterSkip instead
+ * @package Validation\Exceptions
+ */
 class NoValue extends \Exception {
     function __construct($message) {
         parent::__construct($message);

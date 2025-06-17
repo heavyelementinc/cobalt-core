@@ -4,7 +4,7 @@
     inset: 0;
     background: rgba(0,0,0,.9);
     backdrop-filter: blur(30px);
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     z-index: calc(var(--project-modal-z-index) + 10);
 }
@@ -24,11 +24,20 @@
     object-fit: contain;
 }
 
-.shadowbox-container button{
+.shadowbox-container.shadowbox-container button{
     background: none;
     border: none;
     font-size: 2em;
     color: white;
+    cursor: pointer;
+    &[value="-1"] {
+        justify-self: flex-start;
+        margin: 0;
+    }
+    &[value="1"] {
+        justify-self: flex-end;
+        margin: 0;
+    }
 }
 
 .shadowbox-container .close {
@@ -38,6 +47,7 @@
     color: white;
 }
 
-.shadowbox-container button:hover, .shadowbox-container .close:hover {
-    color: black;
+.shadowbox-container.shadowbox-container button:hover, 
+.shadowbox-container.shadowbox-container .close:hover {
+    color: white;
 }

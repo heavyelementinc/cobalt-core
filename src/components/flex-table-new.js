@@ -4,6 +4,7 @@ class FlexTable extends HTMLElement {
         this.props = {
             maxWidth: null,
             promises: [],
+            headerLabels: [],
         }
     }
 
@@ -55,7 +56,8 @@ class FlexTable extends HTMLElement {
                 }
 
                 this.cellData[rowIndex].push(this.getCellData(cell, row));
-                
+                cell.setAttribute("data-label", this.props.headerLabels[rowIndex]);
+
                 // Initialize the widths counter for this column
                 if(!this.maxCellCharLengths[columnCount]) this.maxCellCharLengths[columnCount] = 0;
 
@@ -79,13 +81,15 @@ class FlexTable extends HTMLElement {
     getCellData(cell, row) {
         let type = "cell";
         if(cell.tagName === "FLEX-HEADER") type = "header";
-        let width = cell.innerText.length + cell.getAttribute("padding") ?? 2;
+        let width = (cell.innerText.length) ? cell.innerText.length + (cell.getAttribute("padding") ?? 2) : 5;
         let colStart = Array.from(row.children).indexOf(cell);
+        let colEnd = colStart + ((cell.getAttribute("colspan") ?? 0) - 1);
+        if(type === "header") this.props.headerLabels[colEnd] = cell.innerText;
         return {
             type,
             width,
             colStart,
-            colEnd: colStart + ((cell.getAttribute("colspan") ?? 0) - 1),
+            colEnd,
         }
     }
 
@@ -98,8 +102,8 @@ class FlexTable extends HTMLElement {
         for (let i = 0; i < l; i++) {
             let normal = Math.round(this.maxCellCharLengths[i] / ratio);
             this.normalizedCellLengths[i] = normal;
-            // if(normal < 1) normal = 1;
-            // if(normal > maxWidth) normal = maxWidth;
+            if(normal < 1) normal = 1;
+            if(normal > maxWidth) normal = maxWidth;
             columns.push(`${normal}fr`)
         }
         

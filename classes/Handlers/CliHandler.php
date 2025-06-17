@@ -10,7 +10,7 @@
 
 namespace Handlers;
 
-class CliHandler implements RequestHandler {
+class CliHandler extends RequestHandler {
     
     function __construct() {
         
@@ -21,7 +21,7 @@ class CliHandler implements RequestHandler {
         
     }
 
-    public function _stage_route_discovered($route, $directives):bool {
+    public function _stage_route_discovered(string $route, array $directives, bool $isOptions):bool {
         return false;
     }
 

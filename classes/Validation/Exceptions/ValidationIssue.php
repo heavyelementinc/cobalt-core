@@ -14,6 +14,10 @@
 
 namespace Validation\Exceptions;
 
+/**
+ * @deprecated use Cobalt\Models\Issues\FilterIssue instead
+ * @package Validation\Exceptions
+ */
 class ValidationIssue extends \Exception {
     function __construct($message) {
         parent::__construct($message);

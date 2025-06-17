@@ -31,9 +31,10 @@ abstract class AbstractPageController extends Crudable {
         $query = null;
         if(strpos($queryPath, "/")) {
             $exploded = explode("/", $queryPath);
-            $query = $exploded[0];
+            $length = count($exploded);
+            $query = $exploded[$length - 2];
             try{
-                $_id = new ObjectId($exploded[1]);
+                $_id = new ObjectId($exploded[$length - 1]);
             } catch (Exception $e) {
                 $_id = null;
             }
@@ -82,7 +83,7 @@ abstract class AbstractPageController extends Crudable {
         return null;
     }
 
-    function page($query = null) {        
+    function page($query = null) {
         // Let's get our page data
         $page = $this->get_page_data($query);
         $does_not_exist = "That page does not exist.";
@@ -160,7 +161,8 @@ abstract class AbstractPageController extends Crudable {
             'comments' => $this->getComments($page),
             'likes' => $this->getLikes($page),
         ]);
-
+        $route = route($this::class."@__edit", [(string)$page->_id]);
+        register_user_bar_items(['_page_post_edit' => "<a href='$route'><i name='pencil'></i> Edit</a>"]);
         // Get our view and check if it's in the view types
         $v = (string)$page->view;
         return view($page::VIEW_TYPE[$v]);
@@ -196,6 +198,7 @@ abstract class AbstractPageController extends Crudable {
                 break;
             case $page::SPLASH_POSITION_CENTER:
                 $classes .= " landing-splash--type-centered";
+                break;
             case $page::SPLASH_IMAGE_ONLY:
                 $classes = " landing-splash--type-image-only";
                 break;
@@ -307,7 +310,7 @@ abstract class AbstractPageController extends Crudable {
         foreach($page->tags as $tag) {
             $html_tag = htmlspecialchars((string)$tag);
             $url_tag = urlencode((string)$tag);
-            $nav .= "<a href=\"".__APP_SETTINGS__['Posts']['public_index']."?tag=$url_tag\">$html_tag</a>";
+            $nav .= "<a href=\"".__APP_SETTINGS__['Posts_public_index']."?tag=$url_tag\">$html_tag</a>";
         }
         if($nav) $nav = "<strong>Tags for this post</strong><nav>$nav</nav>";
         return "$footer$nav</footer>";
@@ -451,9 +454,17 @@ abstract class AbstractPageController extends Crudable {
             $confirm_message = ['message' => "This will undelete this post and restore it to its current visibility status. Are you sure you want to continue?", 'post' => $confirm_message['post']];
             $action = "undelete";
         }
+        if(isKeyboardModifierSet(CTRL_KEY)) {
+            $action = "permanent";
+        }
         confirm($confirm_message['message'] ?? $confirm_message[0] ?? $default_confirm_message, $confirm_message['post'] ?? $_POST, $confirm_message['okay'] ?? "Yes", $confirm_message['dangerous'] ?? true);
         
         switch($action) {
+            case "permanent":
+                $result = $this->manager->deleteOne(['_id' => $read->_id]);
+                header("X-Refresh: @now");
+                return $result->getDeletedCount();
+                break;
             case "undelete":
                 $result = $this->manager->updateOne(['_id' => $read->_id], ['$unset' => ['deleted' => 1]]);
                 break;
@@ -474,6 +485,12 @@ abstract class AbstractPageController extends Crudable {
         $query = ['_id' => ['$in' => $upgraded]];
         $results = $this->manager->count($query);
         confirm("This will delete $results document".plural($results).". Do you want to continue?", $_POST);
+
+        if(isKeyboardModifierSet(CTRL_KEY)) {
+            $result = $this->manager->deleteMany($query);
+            header("X-Refresh: @now");
+            return $result->getDeletedCount();
+        }
 
         $deleted = $this->manager->updateMany($query, ['$set' => ['deleted' => new UTCDateTime()]]);
         header("X-Refresh: @now");

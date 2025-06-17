@@ -97,7 +97,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                 },
                 'get_path' => function ($val) {
                     $permalink = ($this->flags->getValue() & self::FLAGS_INCLUDE_PERMALINK) ? "/$this->_id" : "";
-                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts']['public_post'] . "$val" . $permalink;
+                    if($this instanceof PostMap) return __APP_SETTINGS__['Posts_public_post'] . "$val" . $permalink;
                     return __APP_SETTINGS__['LandingPage_route_prefix'] . "$val" . $permalink;
 
                 }
@@ -393,7 +393,8 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
                     self::FLAGS_READ_TIME_MANUALLY_SET => "Read Time Manually Set",
                     self::FLAGS_INCLUDE_PERMALINK => "Include Permalink in URL",
                     self::FLAGS_HIDE_WEBMENTIONS => "Hide Webmention Interactions",
-                ]
+                ],
+                'default' => (__APP_SETTINGS__['LandingPages_show_related']) ? self::FLAGS_EXCLUDE_RELATED_PAGES : 0
             ],
             'preview_key' => [
                 new StringResult,
@@ -531,7 +532,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
             $follow_link = " &middot; <action-menu class=\"rss-feed-link button\" title=\"Follow\" icon=\"rss\">";
             $follow_link.= "&nbsp;Follow";
-            $follow_link.= "<option onclick=\"copyToClipboard('".server_name().route("Posts@rss_feed")."', 'Copied the link to your clipboard. Now paste this into your favorite RSS reader!')\" target=\"_blank\" icon=\"rss\">RSS Feed<br><small style=\"font-weight: normal;display: block;white-space: pre-wrap;\">This will copy our RSS feed link to your clipboard. You can then paste the link into your favorite RSS reader!</small></option>";
+            $follow_link.= "<option onclick=\"copyToClipboard('".server_name().route("\\Cobalt\\Pages\\Controllers\\Posts@rss_feed")."', 'Copied the link to your clipboard. Now paste this into your favorite RSS reader!')\" target=\"_blank\" icon=\"rss\">RSS Feed<br><small style=\"font-weight: normal;display: block;white-space: pre-wrap;\">This will copy our RSS feed link to your clipboard. You can then paste the link into your favorite RSS reader!</small></option>";
 
             $socials = ["SocialMedia_email","SocialMedia_mastodon","SocialMedia_facebook","SocialMedia_instagram","SocialMedia_twitter"];
             foreach($socials as $platform) {
@@ -549,7 +550,11 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if($this instanceof PostMap == false) return '';
         $mentionCount = 0;
         if($mentions) {
-            $mentionCount = $this->get_webmention_details()['repostCount'];
+            try {
+                $mentionCount = $this->get_webmention_details()['repostCount'];
+            } catch (Exception $e) {
+                $mentionCount = "";
+            }
         }
 
         $html = "<div class=\"post-details\">";
@@ -589,6 +594,7 @@ class PageMap extends PersistanceMap implements WebmentionDocument {
         if($this->mentions !== null) return $this->mentions;
         $mentionManger = new WebmentionHandler();
         $path = parse_url($this->webmention_get_canonincal_url(), PHP_URL_PATH);
+        
         $mentions = $mentionManger->findBySlug($path, ['limit' => 100]);
         $this->mentions = $empty;
         foreach($mentions as $mention) {

@@ -34,7 +34,7 @@ use MongoDB\BSON\Persistable;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Traits\Prototype;
 use Cobalt\Maps\Exceptions\DirectiveException;
-use Cobalt\Model\Traits\HtmlSafeable;
+use Cobalt\Model\Types\Traits\HtmlSafeable;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use MongoDB\Model\BSONDocument;
 

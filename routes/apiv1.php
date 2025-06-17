@@ -1,7 +1,10 @@
 <?php
 
+use Cobalt\EventListings\Controllers\Events;
 use Routes\Options;
 use Routes\Route;
+
+Route::get("/ping", "CoreApi@ping");
 
 if(app("UGC_enable_user_generated_content")) {
     Route::post(app("UGC_submit_endpoint"), "UGC@submit");
@@ -18,7 +21,7 @@ if (app('Auth_logins_enabled')) {
 
     if(app("Auth_allow_password_reset")) {
         Route::put("/password-reset/request", "Login@api_password_reset_username_endpoint");
-        Route::put("/password-reset/{token}", "Login@api_password_reset_username_endpoint");
+        Route::put("/password-reset/{token}", "Login@api_password_reset_password_validation");
     }
     
     if(app("Auth_account_creation_enabled")){
@@ -48,11 +51,15 @@ if (app('Auth_logins_enabled')) {
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 
+    Route::s_put("/settings/theme/update", "CoreSettingsPanel@theme_update",[
+        'permission' => 'Auth_modify_cobalt_settings'
+    ]);
+
     Route::s_post("/settings/update/", "CoreSettingsPanel@updateLogo", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 
-    Route::s_put("/settings/default/{name}", "CoreSettingsPanel@reset_to_default", [
+    Route::s_put("/settings/{name}/default/", "CoreSettingsPanel@reset_to_default", [
         'permission' => 'Auth_modify_cobalt_settings'
     ]);
 
@@ -71,13 +78,14 @@ if (app('API_contact_form_enabled')) {
 }
 
 if (app("CobaltEvents_enabled")) {
-    Route::get("/cobalt-events/current", "EventsController@current");
-    Route::s_put("/cobalt-events/update/{id}?", "EventsController@update_event", [
-        'permission' => 'CobaltEvents_crud_events'
-    ]);
-    Route::s_delete("/cobalt-events/{id}", "EventsController@delete_event", [
-        'permission' => 'CobaltEvents_crud_events'
-    ]);
+    // Route::get("/cobalt-events/current", "EventsController@current");
+    // Route::s_put("/cobalt-events/update/{id}?", "EventsController@update_event", [
+    //     'permission' => 'CobaltEvents_crud_events'
+    // ]);
+    // Route::s_delete("/cobalt-events/{id}", "EventsController@delete_event", [
+    //     'permission' => 'CobaltEvents_crud_events'
+    // ]);
+    Events::apiv1();
 }
 
 
@@ -122,7 +130,7 @@ if(app("enable_debug_routes")) {
     Route::post("/proto/", "SchemaDebug@filter_test");
 }
 
-// if(__APP_SETTINGS__['Posts']['default_enabled']) {
+// if(__APP_SETTINGS__['Posts_default_enabled']) {
 //     Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
 //     Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
 //     Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);

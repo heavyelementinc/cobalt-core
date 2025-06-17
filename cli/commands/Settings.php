@@ -6,7 +6,7 @@ use Cobalt\Settings\Settings as CobaltSettings;
  * @todo Do not display help items that require environment context if in pre-env
  */
 class Settings {
-    var $settings;
+    private CobaltSettings $settings;
     public $help_documentation = [
         'modified' => [
             'description' => "List all settings that have been modified by the user",
@@ -14,15 +14,15 @@ class Settings {
         ],
         'reset' => [
             'description' => "[name] Reset the specified setting to default",
-            'context_required' => true
+            'context_required' => true,
         ],
         'value' => [
             'description' => "[name] Get the current value of a setting",
-            'context_required' => true
+            'context_required' => true,
         ],
         'set' => [
             'description' => "[name] [value] Update a setting",
-            'context_required' => true
+            'context_required' => true,
         ],
         'push' => [
             'description' => "[name] [value] Push a value to an array (no duplicates)",
@@ -30,12 +30,16 @@ class Settings {
         ],
         'pull' => [
             'description' => "[name] [value] Pull a value from an array",
-            'context_required' => true
+            'context_required' => true,
+        ],
+        'upgrade' => [
+            'description' => "Upgrades all JSON-encoded settings files to PHP settings files",
+            'context_required' => true,
         ]
     ];
 
     function __construct() {
-        $this->settings = @new CobaltSettings(true);
+        $this->settings = @new CobaltSettings();
     }
 
     public function list() {
@@ -121,5 +125,38 @@ class Settings {
         if($value === "null") $value = null;
         if(ctype_digit($value)) $value = (int)$value;
         return $value;
+    }
+
+    public function upgrade() {
+        say("WARNING: Do not run this command in production! This will overwrite any existing config files!", "e");
+        $val = readline("Are you sure you want to continue? y/N");
+        if($val !== "y") return "Aborting.\n";
+        $existed_count = 0;
+        $created_count = 0;
+        $skipped_count = 0;
+        $settings = new CobaltSettings(false);
+        foreach($settings::__DEFINITIONS__ as $file) {
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if($ext === "php") {
+                $existed_count += 1;
+                continue;
+            }
+            if(!file_exists($file)) continue;
+            $target = str_replace($ext, "php", $file);
+            if(file_exists($target)) {
+                $skipped_count += 1;
+                continue;
+            }
+            $raw = get_json($file, true);
+            
+            print("Creating " . fmt($target, "i") . "... ");
+            $written = file_put_contents($target, "<?php\n// Settings automatically upgraded from JSON on ".date("r")."\n\$settings = ".var_export_short($raw, true).";");
+            $created_count += 1;
+            if($written) say("OKAY", "i");
+            else say("FAIL", "e");
+        }
+
+        return "CREATED: $created_count
+        SKIPPED: $skipped_count";
     }
 }

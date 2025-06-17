@@ -68,7 +68,7 @@ class SessionSchema extends Normalize {
         ];
     }
 
-    function platform_lookup($val) {
+    static function platform_lookup($val) {
         $arr = [
             'Android' => 'android',
             'Windows' => 'microsoft-windows-classic',
@@ -82,7 +82,7 @@ class SessionSchema extends Normalize {
         return $arr[$val] ?? 'alert-circle';
     }
 
-    function browser_lookup($val) {
+    static function browser_lookup($val) {
         $arr = [
             'Chrome' => 'google-chrome',
             'Edge' => 'microsoft-edge',
@@ -94,4 +94,5 @@ class SessionSchema extends Normalize {
 
         return $arr[$val] ?? 'alert-circle';
     }
+
 }

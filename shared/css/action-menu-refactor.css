@@ -39,6 +39,29 @@ action-menu {
     top: anchor(bottom);
     left: anchor(left);
     position-try-options: flip-block, flip-inline, flip-block flip-inline;
+    position-try-fallbacks: --first-fallback, --second-fallback, --third-fallback, --fourth-fallback;
+    padding: 0
+}
+
+@position-try --first-fallback {
+    top: anchor(bottom);
+    left: anchor(left);
+}
+
+@position-try --second-fallback {
+    top: anchor(bottom);
+    left: unset;
+    right: anchor(right);
+}
+
+@position-try --third-fallback {
+    bottom: anchor(top);
+}
+
+@position-try --fourth-fallback {
+    bottom: anchor(top);
+    left: unset;
+    right: anchor(right);
 }
 
 .action-menu-wrapper[mode="modal"]::backdrop {
@@ -75,13 +98,14 @@ action-menu {
 }
 
     .action-menu-wrapper .action-menu-header button {
-        position: absolute;
+        /* position: absolute;
         top: .5em;
-        right: .5em;
+        right: .5em; */
         background: transparent;
         padding: unset;
         border: unset;
         color: inherit;
+        float: right;
     }
 
     .action-menu-wrapper .action-menu-header button:hover {

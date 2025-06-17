@@ -129,14 +129,18 @@ try {
     $context_processor->_stage_bootstrap['_stage_output'] = true;
     ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
-    ob_clean(); // Clear the output buffer
+     ob_clean(); // Clear the output buffer
+    $http_version = $e->getHttpVersion() ?? "1.0";
+    $status_code = $e->getStatusCode() ?? "500";
+    $name = $e->getStatusName() ?? "Internal Server Error";
+    $header = "HTTP/$http_version $status_code $name";
+    header($header);
     $context_result = $context_processor->_public_exception_handler($e);
-} catch (Exception $e) {
+} catch (Error|Exception $e) {
     ob_clean();
-    $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
-} catch (Error $e) {
-    ob_clean();
-    $context_result = $context_processor->_public_exception_handler(new \Exceptions\HTTP\UnknownError($e->getMessage()));
+    $header = "HTTP/1.0 500 Internal Server Error";
+    header($header);
+    $context_result = $context_processor->_public_exception_handler($e);
 }
 
 benchmark_end("controller_execution");

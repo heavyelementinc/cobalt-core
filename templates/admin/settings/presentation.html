@@ -24,7 +24,7 @@
                 </li>
                 <li>
                     <switch-container>
-                        <input-switch name="display_masthead" checked="{{app.display_masthead}}"></input-switch>
+                        <input-switch name="display_masthead" checked="{{$app.display_masthead}}"></input-switch>
                         <label>Display logo as public masthead</label>
                     </switch-container>
                     <small style="width:100%">Generally speaking, this value to should be set to "on."</small>
@@ -59,7 +59,7 @@
             </pre>
         </details>
     </form-request>
-    <form-request id="theme" action="/api/v1/settings/update/" method="PUT">
+    <form-request id="theme" action="/api/v1/settings/theme/update/" method="PUT">
         <hgroup><h2><i name="palette"></i> Theme</h2></hgroup>
         <fieldset>
             <legend>Base Theme</legend>
@@ -68,7 +68,7 @@
                     <label>Primary Theme</label>
                     <div class="hbox">
                         <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;"><i name="brightness-4"></i> Dark</span>
-                        <input-switch name="default_color_scheme" tiny style="margin: 0 .5rem 0" checked="{{app.default_color_scheme}}"></input-switch>
+                        <input-switch name="default_color_scheme" tiny style="margin: 0 .5rem 0" checked="{{$app.default_color_scheme}}"></input-switch>
                         <span style="font-size: .8rem; text-transform: uppercase; font-weight: bold;">Light <i name="brightness-5"></i></span>
                     </div>
                 </li>
@@ -76,29 +76,115 @@
         </fieldset>
         <fieldset>
             <legend>Accent Colors</legend>
-            <ul class="list-panel">
+            <ul class="list-panel colors">
                 <li>
-                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
-                        <div>
-                            <label>Primary Accent Color</label>
-                            <small>This color is used to as the banner header
-                                color. It's also used to derive all button, 
-                                input, and other color values.</small>
-                        </div>
-                        <input type="color" name="color_primary" value="{{app.color_primary}}">
+                    <div>
+                        <label>Branding Color</label>
+                        <small>This value is used as the masthead/main navigation
+                            and admin navigation background color. It's also
+                            used as the meta &lt;meta name="theme-color"&gt; value.
+                        </small>
                     </div>
+                    <input type="color" name="color_branding" value="{{app.color_branding}}">
+                    <div class="numeric-adjust">
+                        <i name="brightness-6"></i>
+                        <input name="branding_increment" value="{{app.branding_increment}}" title="Luminance Adjustment">
+                    </div>
+                    <div class="numeric-adjust">
+                        <i name="rotate-360"></i>
+                        <input name="branding_rotation" value="{{app.branding_rotation}}" title="Hue Adjustment">
+                    </div>
+                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_branding,branding_increment,branding_rotation', 'name' => "Branding", 'value' => __APP_SETTINGS__['color_branding']]);
                 </li>
                 <li>
-                    <div class="hbox" style="justify-content: space-between; flex-wrap: nowrap">
-                        <div>
-                            <label>Background Color</label>
-                            <small>This value is used as the background color
-                                for the HTML body. It also is used to derive the
-                                color for odd table backgrounds, 
-                            </small>
-                        </div>
-                        <input type="color" name="color_background" value="{{app.color_background}}">
+                    <div>
+                        <label>Primary Color</label>
+                        <small>This color is used for inputs, especially for
+                            checkboxes, radio select, primary buttons, and other
+                            details.</small>
                     </div>
+                    <input type="color" name="color_primary" value="{{app.color_primary}}">
+                    <div  class="numeric-adjust">
+                        <i name="brightness-6"></i>
+                        <input name="primary_increment" value="{{app.primary_increment}}" title="Luminance Adjustment">
+                    </div>
+                    <div class="numeric-adjust">
+                        <i name="rotate-360"></i>
+                        <input name="primary_rotation" value="{{app.primary_rotation}}" title="Hue Adjustment">
+                    </div>
+                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_primary,primary_increment,primary_rotation', 'name' => "Primary", 'value' => __APP_SETTINGS__['color_primary']]);
+                </li>
+                <li>
+                    <div>
+                        <label>Issue Color</label>
+                        <small>This value is used to present dangerous actions,
+                            display errors, and more.
+                        </small>
+                    </div>
+                    <input type="color" name="color_issue" value="{{app.color_issue}}">
+                    <div class="numeric-adjust">
+                        <i name="brightness-6"></i>
+                        <input name="issue_increment" value="{{app.issue_increment}}" title="Luminance Adjustment">
+                    </div>
+                    <div class="numeric-adjust">
+                        <i name="rotate-360"></i>
+                        <input name="issue_rotation" value="{{app.issue_rotation}}" title="Hue Adjustment">
+                    </div>
+                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_issue,issue_increment,issue_rotation', 'name' => "Issue", 'value' => __APP_SETTINGS__['color_issue']]);
+                </li>
+                <li>
+                    <div>
+                        <label>Neutral Color</label>
+                        <small>This color is used for tertiary buttons,
+                            input trays, disabled UI elements, table borders,
+                            alternating color details, and more.</small>
+                    </div>
+                    <input type="color" name="color_neutral" value="{{app.color_neutral}}">
+                    <div class="numeric-adjust">
+                        <i name="brightness-6"></i>
+                        <input name="neutral_increment" value="{{app.neutral_increment}}" title="Luminance Adjustment">
+                    </div>
+                    <div class="numeric-adjust">
+                        <i name="rotate-360"></i>
+                        <input name="neutral_rotation" value="{{app.neutral_rotation}}" title="Hue Adjustment">
+                    </div>
+                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_neutral,neutral_increment,neutral_rotation', 'name' => "Neutral", 'value' => __APP_SETTINGS__['color_neutral']]);
+                </li>
+                <li>
+                    <div>
+                        <label>Background Color</label>
+                        <small>This value is used as the background color
+                            for the HTML body.
+                        </small>
+                    </div>
+                    <input type="color" name="color_background" value="{{app.color_background}}">
+                    <div class="numeric-adjust">
+                        <i name="brightness-6"></i>
+                        <input name="background_increment" value="{{app.background_increment}}" title="Luminance Adjustment">
+                    </div>
+                    <div class="numeric-adjust">
+                        <i name="rotate-360"></i>
+                        <input name="background_rotation" value="{{app.background_rotation}}" title="Hue Adjustment">
+                    </div>
+                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_background,background_increment,background_rotation', 'name' => "Background", 'value' => __APP_SETTINGS__['color_background']]);
+                </li>
+                <li>
+                    <div>
+                        <label>Text Color</label>
+                        <small>This value is used as the primary color
+                            for text on your website.
+                        </small>
+                    </div>
+                    <input type="color" name="color_font_body" value="{{app.color_font_body}}">
+                    <div class="numeric-adjust">
+                        <i name="brightness-6"></i>
+                        <input name="font_body_increment" value="{{app.font_body_increment}}" disabled="disabled">
+                    </div>
+                    <div class="numeric-adjust">
+                        <i name="rotate-360"></i>
+                        <input name="font_body_rotation" value="{{app.font_body_rotation}}" disabled="disabled">
+                    </div>
+                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_font_body', 'name' => "Text Color", 'value' => __APP_SETTINGS__['color_font_body']]);
                 </li>
                 
                 <!-- <li>
@@ -129,49 +215,48 @@
             <legend>Accents</legend>
             <table>
                 <tr>
-                    <th colspan="6">Accent Colors</th>
+                    <th colspan="6">Branding Colors</th>
                 </tr>
                 <tr>
-                    <td class="color-swatch" style="background-color: var(--primary-000);color: var(--primary-000-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--primary-100);color: var(--primary-100-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--primary-200);color: var(--primary-200-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--primary-300);color: var(--primary-300-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--primary-400);color: var(--primary-400-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--primary-500);color: var(--primary-500-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--branding-color-0);color: var(--branding-color-0-fg)">0</td>
+                    <td class="color-swatch" style="background-color: var(--branding-color-1);color: var(--branding-color-1-fg)">1</td>
+                    <td class="color-swatch" style="background-color: var(--branding-color-2);color: var(--branding-color-2-fg)">2</td>
+                    <td class="color-swatch" style="background-color: var(--branding-color-3);color: var(--branding-color-3-fg)">3</td>
+                    <td class="color-swatch" style="background-color: var(--branding-color-4);color: var(--branding-color-4-fg)">4</td>
+                    <td class="color-swatch" style="background-color: var(--branding-color-5);color: var(--branding-color-5-fg)">5</td>
                 </tr>
                 <tr>
-                    <th colspan="6">Background Colors</th>
+                    <th colspan="6">Primary Colors</th>
                 </tr>
                 <tr>
-                    <td class="color-swatch" style="background-color: var(--background-000);color: var(--background-000-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--background-100);color: var(--background-100-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--background-200);color: var(--background-200-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--background-300);color: var(--background-300-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--background-400);color: var(--background-400-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--background-500);color: var(--background-500-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--primary-color-0);color: var(--primary-color-0-fg)">0</td>
+                    <td class="color-swatch" style="background-color: var(--primary-color-1);color: var(--primary-color-1-fg)">1</td>
+                    <td class="color-swatch" style="background-color: var(--primary-color-2);color: var(--primary-color-2-fg)">2</td>
+                    <td class="color-swatch" style="background-color: var(--primary-color-3);color: var(--primary-color-3-fg)">3</td>
+                    <td class="color-swatch" style="background-color: var(--primary-color-4);color: var(--primary-color-4-fg)">4</td>
+                    <td class="color-swatch" style="background-color: var(--primary-color-5);color: var(--primary-color-5-fg)">5</td>
                 </tr>
                 <tr>
-                    <th colspan="6">Mixed Colors</th>
+                    <th colspan="6">Issue Colors</th>
                 </tr>
                 <tr>
-                    <td class="color-swatch" style="background-color: var(--mixed-000);color: var(--mixed-000-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--mixed-100);color: var(--mixed-100-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--mixed-200);color: var(--mixed-200-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--mixed-300);color: var(--mixed-300-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--mixed-400);color: var(--mixed-400-c)">Text</td>
-                    <td class="color-swatch" style="background-color: var(--mixed-500);color: var(--mixed-500-c)">Text</td>
+                    <td class="color-swatch" style="background-color: var(--issue-color-0);color: var(--issue-color-0-fg)">0</td>
+                    <td class="color-swatch" style="background-color: var(--issue-color-1);color: var(--issue-color-1-fg)">1</td>
+                    <td class="color-swatch" style="background-color: var(--issue-color-2);color: var(--issue-color-2-fg)">2</td>
+                    <td class="color-swatch" style="background-color: var(--issue-color-3);color: var(--issue-color-3-fg)">3</td>
+                    <td class="color-swatch" style="background-color: var(--issue-color-4);color: var(--issue-color-4-fg)">4</td>
+                    <td class="color-swatch" style="background-color: var(--issue-color-5);color: var(--issue-color-5-fg)">5</td>
                 </tr>
                 <tr>
-                    <th colspan="6">UI Colors</th>
+                    <th colspan="6">Neutral Colors</th>
                 </tr>
                 <tr>
-                    <td class="color-swatch" style="background-color: var(--contrast-color)"></td>
-                    <td class="color-swatch" style="background-color: var(--input-invalid)"></td>
-                    <!-- <td class="color-swatch" style="background-color: var(--mixed-100)"></td>
-                    <td class="color-swatch" style="background-color: var(--mixed-200)"></td>
-                    <td class="color-swatch" style="background-color: var(--mixed-300)"></td>
-                    <td class="color-swatch" style="background-color: var(--mixed-400)"></td>
-                    <td class="color-swatch" style="background-color: var(--mixed-500)"></td> -->
+                    <td class="color-swatch" style="background-color: var(--neutral-color-0);color: var(--neutral-color-0-fg)">0</td>
+                    <td class="color-swatch" style="background-color: var(--neutral-color-1);color: var(--neutral-color-1-fg)">1</td>
+                    <td class="color-swatch" style="background-color: var(--neutral-color-2);color: var(--neutral-color-2-fg)">2</td>
+                    <td class="color-swatch" style="background-color: var(--neutral-color-3);color: var(--neutral-color-3-fg)">3</td>
+                    <td class="color-swatch" style="background-color: var(--neutral-color-4);color: var(--neutral-color-4-fg)">4</td>
+                    <td class="color-swatch" style="background-color: var(--neutral-color-5);color: var(--neutral-color-5-fg)">5</td>
                 </tr>
             </table>
         </fieldset>
@@ -202,5 +287,35 @@
         height: 3em;
         width: 3em;
         margin-left: auto
+    }
+
+    .colors.list-panel li {
+        display: grid;
+        grid-template-columns: 1fr 10em 7ch 7ch 2em;
+        gap: 1em
+    }
+
+    .numeric-adjust {
+        position: relative;
+        &:focus-within i,
+        &:hover i {
+            opacity: 0;
+        }
+        i {
+            position: absolute;
+            top: 50%;
+            left: .35ch;
+            pointer-events: none;
+            transition: opacity .3s;
+            translate: 0 -50%;
+        }
+        &:has(:disabled) i {
+            color: var(--input-disabled-color);
+        }
+        input {
+            /* padding: 0; */
+            width: 5ch;
+            text-align: right;
+        }
     }
 </style>

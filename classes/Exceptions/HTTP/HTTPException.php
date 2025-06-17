@@ -11,6 +11,7 @@ namespace Exceptions\HTTP;
  */
 class HTTPException extends \Exception {
     private $mode;
+    private string $httpVersion = "1.0";
     public $status_code = 500;
     public $data = [
         /*
@@ -43,8 +44,8 @@ class HTTPException extends \Exception {
             else $exe = "api";
         }
         $this->mode = $exe;
-        $header = "HTTP/1.0 " . $this->status_code . " " . $this->name;
-        header($header, true, $this->status_code);
+        // $header = "HTTP/1.0 " . $this->status_code . " " . $this->name;
+        // header($header, true, $this->status_code);
         // $this->{$exe . "_execute"}($message, $data);
         parent::__construct($message);
     }
@@ -54,6 +55,18 @@ class HTTPException extends \Exception {
         if(!$message) $message = $this->name;
         if(!$message) $message = get_class($this);
         return $message;
+    }
+
+    public function getHttpVersion():string {
+        return $this->httpVersion;
+    }
+
+    public function getStatusCode():int {
+        return $this->status_code;
+    }
+
+    public function getStatusName():string {
+        return $this->name;
     }
 
     public function api_execute($message, $data) {

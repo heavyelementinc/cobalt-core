@@ -22,6 +22,7 @@
 namespace Routes;
 
 use Cobalt\Extensions\Extensions;
+use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Pages\Classes\PageManager;
 use Controllers\Attributes\Attribute;
 use Exception;
@@ -31,6 +32,7 @@ use Exceptions\HTTP\NotImplemented;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\UTCDateTime;
 use ReflectionObject;
+use Routes\Exceptions\UnexpectedBasePath;
 
 class Router {
 
@@ -47,6 +49,7 @@ class Router {
     public $uri = null;
     public $context_prefix = null;
     public $cache_resource = null;
+    public $isOptions = false;
 
     /** Let's establish our $route_context and our method  */
     function __construct($route_context = "web", $method = null) {
@@ -137,15 +140,25 @@ class Router {
 
 
     function discover_route($route = null, $query = null, $method = null, $context = null) {
-        if ($route   === null) $route   = $_SERVER['REQUEST_URI'];
-        if ($query   === null) $query   = $_SERVER['QUERY_STRING'];
-        if ($method  === null) $method  = $this->method;
-        if ($context === null) $context = $this->route_context;
-
-        if (strtolower($method) === "head") {
-            $this->headRequest = true;
-            $method = "get";
+        $route   = $route ?? $_SERVER['REQUEST_URI'];
+        $query   = $query ?? $_SERVER['QUERY_STRING'];
+        $method  = $method ?? $this->method;
+        $context = $context ?? $this->route_context;
+        $this->isOptions = false;
+        switch(strtolower($method)) {
+            case "options":
+                $this->isOptions = true;
+                $method = getHeader("Access-Control-Request-Method", null, true, false);
+                $this->method = $method;
+                break;
+            case "head":
+                $this->headRequest = true;
+                $method = "get";
+                $this->method = $method;
+                break;
         }
+        
+        $route = remove_base_path($route);
 
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
@@ -167,7 +180,7 @@ class Router {
                 if ($route[strlen($route) - 1] === "/") {
                     $GLOBALS['PATH'] = "../";
                 }
-                return [$preg_pattern, $directives];
+                return [$preg_pattern, $directives, $this->isOptions];
             }
         }
         if ($this->current_route === null) throw new NotFound("No route discovered for $route");
@@ -225,7 +238,12 @@ class Router {
         /** Check if we're a callable or a string and execute as necessary */
         if (is_callable($exe['controller'])) throw new \Exception("Anonymous functions are no longer supported as controllers."); //return $this->controller_callable($exe);
 
-        if (is_string($exe['controller'])) return $this->controller_string($exe);
+        if (is_string($exe['controller'])) $results = $this->controller_string($exe);
+        if(session_exists()) {
+            $notifications = new NotificationManager();
+            $notifications->readNotificationByRouteLiteral($_REQUEST['route'], session()['_id']);
+        }
+        return $results;
     }
 
     function controller_callable($exe) {
@@ -326,7 +344,7 @@ class Router {
 
         extensions()::invoke("register_client_controllers",$this->router_js_table);
 
-        foreach($this->routes as $context => $methods) {
+        foreach ($this->routes as $context => $methods) {
             foreach ($methods as $method => $routes) {
                 foreach ($routes as $path => $route) {
                     $handler = $route['handler'];
@@ -350,7 +368,7 @@ class Router {
                         if ($real_regex[0] === "%") $index1 = 1;
                         if ($real_regex[strlen($real_regex) - 1] === "%") $index2 = -1;
                         $real_regex = substr($real_regex, $index1, $index2);
-                        array_push($table, "\n'$real_regex': " . file_get_contents($file));
+                        $table[] = "\n'$real_regex': " . file_get_contents($file);
                         continue;
                     }
                 }

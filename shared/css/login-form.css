@@ -33,7 +33,7 @@ main:has(#login-form-container) {
   width: 100%;
 }
 
-#login-form-container :is(input, button) {
+#login-form-container :is(input, button.primary) {
   width:100%;
   box-sizing: border-box;
 }
@@ -47,13 +47,51 @@ modal-box#login-modal>section {
   margin: 0
 }
 
-.login-form-container :is(form-request, login-form-request) {
-  padding: 1rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box;
+.login-form-container {
+  --width: calc(100% - (var(--margin-l) * 2) - (var(--input-element-border-width) * 2));
+  /* [__custom-input] {
+    margin: var(--margin-xs) var(--margin-l);
+    width: var(--width);
+    box-sizing: border-box;
+  } */
+  .hbox {
+    justify-content: flex-end;
+    /* width: var(--width); */
+    width: 100%;
+    margin: var(--margin-xxs) 0 var(--margin-s);
+    font-size: .8em;
+  }
+  :is(form-request, login-form-request) {
+    padding: var(--margin-xs) var(--margin-l) var(--margin-l);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  label{
+    text-align: left;
+    margin-bottom: var(--margin-xxs);
+    &:has(input-switch) {
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      margin-top: var(--margin-xs) 0 var(--margin-s);
+    }
+  }
+  small {
+    margin: var(--margin-xs) 0;
+  }
+  input-password {
+    margin-bottom: var(--margin-xs);
+  }
+  chip-nav {
+    border: none;
+    border-top: 1px solid var(--input-element-border);
+    hgroup {
+      display: none;
+    }
+  }
 }
 
 .login-form-container :is(h1, p) {
@@ -68,20 +106,20 @@ modal-box#login-modal>section {
 
 #login-form-container h1 {
   font-size: 1.45em;
-  margin-bottom: 0.5em;
+  margin: var(--margin-m) 0 var(--margin-s);
 }
 
 #login-form-container input[type="username"], #login-form-container input[type="password"] {
   width: 100%;
   box-sizing: border-box;
   /* font-family: var(--project-head-family); */
-  padding: .35rem;
-  margin-bottom: 1rem;
+  /* padding: .35rem; */
+  /* margin-bottom: 1rem; */
   font-size: 1.15rem;
 }
 
 #login-form-container input {
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
 }
 
 #login-form-container .error{
@@ -90,24 +128,19 @@ modal-box#login-modal>section {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: var(--margin-s);
 }
 
 #login-form-container hr{
   width:100%;
 }
 
-#login-form-container button {
+#login-form-container button.primary {
   width: 100%;
   padding: .35rem;
   font-size: 1.15rem;
   font-family: var(--project-head-family);
-  margin-top: 1em;
-}
-
-#login-form-container label:has(input-switch) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin-top: var(--margin-m);
 }
 
 #login-form-container input-switch {

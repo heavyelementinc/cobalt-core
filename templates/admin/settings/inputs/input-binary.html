@@ -1,0 +1,10 @@
+<li class="settings-panel--setting settings-panel--{{setting}} settings-panel--input-binary">
+    <div class="settings-panel--description">
+        <label>{{!name}}{{!help}}</label>
+        {{!small}}
+        @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
+    </div>
+    <input-binary name="{{setting}}" value="{{value}}">
+        {{!options}}
+    </input-binary>
+</li>

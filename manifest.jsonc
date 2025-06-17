@@ -118,8 +118,7 @@
             "paginated-container.css",
             "parallax.css",
             "landing-pages.css",
-            "header.css",
-            "template.css"
+            "header.css"
         ],
         "web": [
             "main.css"

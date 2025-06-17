@@ -143,98 +143,8 @@ div.upload-field img{
 .image-field--container {
   font-size: .8em;
 }
-  .image-field--container img {
-    width: 10em;
-    height: 10em;
-    object-fit: contain;
-  }
   
-  .image-field--container flex-table {
-    font-size: .9em;
-  }
 
-  .image-field--container flex-header {
-    max-width: 10ch;
-  }
-
-  .image-field--container copy-span[mini] {
-    height: 1em;
-    width: 1em;
-    font-size: 1em;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-  }
-
-  .image-field--container .url-row flex-cell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .image-field--container .nowrap {
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .image-field--container :is(input[type="file"], input[type="text"]) {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .image-field--container ul.list-panel li {
-    padding: .6em;
-  }
-
-input-user {
-  display: flex;
-  padding: 0;
-  align-items: center;
-  overflow: hidden;
-  justify-content: space-between;
-  width: 20ch;
-}
-
-input-user option {
-  display: none;
-}
-
-input-user fieldset.autocomplete--search-container{
-  padding:0;
-  margin: 0;
-  border: none;
-  flex-grow: 1;
-}
-
-input-user > button {
-  background: inherit;
-  width: 3.5ch;
-  padding: .5ch;
-}
-
-input-user.value fieldset.autocomplete--search-container {
-  display: none;
-}
-
-input-user [type='search'] {
-  border: none;
-}
-
-input-user > div[value] {
-  flex-grow: 1;
-  width: 100%;
-}
-
-input-user .cobalt-user--profile-display {
-  margin-left: .5em;
-  font-size: .95rem;
-}
-
-input-user .cobalt-user--profile-display .username {
-  font-size: .8rem;
-  color: var(--project-color-input-border-nofocus)
-}
 
 
 /** BUTTON LINKS **/
@@ -809,7 +719,8 @@ ol.binary-list li:not(.active){
 }
 
 .crudable-header--hypermedia-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 20ch 1fr;
   justify-content: space-between;
   margin-bottom: 0.2em;
 }
@@ -822,6 +733,21 @@ ol.binary-list li:not(.active){
   a.hypermedia--page-select {
     font-weight: bold;
     font-size: 1.6em;
+  }
+
+  .crudable-header--left {
+    grid-column: 1 / span 1;
+    justify-self: start;
+  }
+
+  .crudable-header--center {
+    grid-column: 2 / span 1;
+    justify-self: center;
+  }
+
+  .crudable-header--right {
+    grid-column: 3 / span 1;
+    justify-self: right;
   }
 
 @media only screen and (max-width: 35em) {

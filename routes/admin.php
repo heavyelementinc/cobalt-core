@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\EventListings\Controllers\Events;
 use Contact\ContactManager;
 use Routes\Route;
 
@@ -11,10 +12,10 @@ Route::get("/", "CoreAdmin@index", [
     'navigation' => ['admin_panel']
 ]);
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
+if(__APP_SETTINGS__['Posts_default_enabled']) {
     Cobalt\Pages\Controllers\Posts::admin();
     // Route::get("/posts/", "Posts@index",[
-    //     'anchor' => ['name' => __APP_SETTINGS__['Posts']['default_name']],
+    //     'anchor' => ['name' => __APP_SETTINGS__['Posts_default_name']],
     //     'navigation' => ['admin_panel'],
     // ]);
     // Route::get("/posts/{id}?", "Posts@edit",[
@@ -90,20 +91,21 @@ Route::get("/me/", "UserAccounts@me",
     }
 
     if (app("CobaltEvents_enabled")) {
-        Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
-            'handler' => 'core/events.js',
-            'permission' => "CobaltEvents_crud_events"
-        ]);
-        Route::get("/cobalt-events/?...?", "EventsController@list_events", [
-            'permission' => "CobaltEvents_crud_events",
-            'anchor' => [
-                'name' => 'Event Manager',
-                'href' => '/cobalt-events/',
-                'icon' => 'information-outline',
-                'icon_color' => 'linear-gradient(0.5turn, #14BDEB, #9d3cf6 80%)',
-            ],
-            'navigation' => ['admin_panel', 'presentation_settings']
-        ]);
+        Events::admin();
+        // Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
+        //     'handler' => 'core/events.js',
+        //     'permission' => "CobaltEvents_crud_events"
+        // ]);
+        // Route::get("/cobalt-events/?...?", "EventsController@list_events", [
+        //     'permission' => "CobaltEvents_crud_events",
+        //     'anchor' => [
+        //         'name' => 'Event Manager',
+        //         'href' => '/cobalt-events/',
+        //         'icon' => 'information-outline',
+        //         'icon_color' => 'linear-gradient(0.5turn, #14BDEB, #9d3cf6 80%)',
+        //     ],
+        //     'navigation' => ['admin_panel', 'presentation_settings']
+        // ]);
     }
     
 /** 
@@ -254,7 +256,7 @@ Route::get("/integrations/{class}", "IntegrationsController@token_editor");
 *  ========================================================
 */
 
-if(app("API_contact_form_enabled") && app("Contact_form_interface") === "panel") {
+if(app("API_contact_form_enabled") && __APP_SETTINGS__["Contact_form_on_success_modes"] & CONTACT_SUCCESS_SYSTEM) {
     ContactForm::admin(null, [
         'index' => [
             'anchor' => [

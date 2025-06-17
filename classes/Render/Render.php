@@ -151,7 +151,7 @@ class Render {
      * @param  mixed $template_path The path to the template you want to use
      * @return void
      */
-    function from_template(string $template_path) {
+    function from_template(string $template_path, bool $absolute_path = false) {
         $is_native_template = __APP_SETTINGS__["Render_all_templates_as_native"];
         // Create our template cache if it doesn't exist
         // if (!\property_exists($GLOBALS, "template_cache")) $GLOBALS['TEMPLATE_CACHE'] = [];
@@ -173,9 +173,13 @@ class Render {
                 $GLOBALS['TEMPLATE_CACHE'][$template_path] = file_get_contents($template_path);
             }
         } else if (!key_exists($template_path, $GLOBALS['TEMPLATE_CACHE'])) { // We do not have the file saved to the template cache
-            // Load our template from the specified paths
-            $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
-            if($contenders === false) throw new Error("The template \"$template_path\" was not found", "Internal server error");
+            if($absolute_path) {
+                $contenders = $template_path;
+            } else {
+                // Load our template from the specified paths
+                $contenders = find_one_file($GLOBALS['TEMPLATE_PATHS'], $template_path);
+                if($contenders === false) throw new Error("The template \"$template_path\" was not found", "Internal server error");
+            }
             
             // Load the template
             if(!$is_native_template) {
@@ -229,6 +233,7 @@ class Render {
         // $cache = __APP_ROOT__ . "/cache/" . $this->compiled_cache_name;
         $cache_file = $cache->file_path;
         $vars = $this->vars;
+        extract($vars);
         require $cache_file;
         $result = ob_get_clean();
         return $result;
@@ -480,7 +485,7 @@ class Render {
     function functs_get_vars($vars):array {
         $mutant = [];
         foreach ($vars as $value) {
-            if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
+            if (is_string($value) && $value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
             else array_push($mutant, $value);
         }
         return $mutant;

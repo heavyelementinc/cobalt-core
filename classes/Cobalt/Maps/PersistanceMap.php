@@ -121,5 +121,8 @@ abstract class PersistanceMap extends GenericMap implements Persistable {
         // if($version && $version !== $data['__version']) throw new OutOfDateVersion("This document's version is `$data[__version]`, but the latest version is `$version`. Please run migrations!");
         $this->ingest($data);
     }
+    function __on_submit():void {
+        return;
+    }
 }
 

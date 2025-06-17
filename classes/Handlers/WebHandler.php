@@ -21,26 +21,34 @@
 namespace Handlers;
 
 use \Cache\Manager as CacheManager;
-use Cobalt\Notifications\PushNotifications;
+use Closure;
+use Cobalt\Extensions\Extensions;
+use Cobalt\Manifests\Classes\Item;
+use Cobalt\Manifests\Classes\ManifestManager;
+use Cobalt\Manifests\Enums\ValidTypes;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Cobalt\Renderer\Debugger;
 use Cobalt\Renderer\Exceptions\TemplateException;
 use Cobalt\SchemaPrototypes\Basic\HexColorResult;
 use Cobalt\ThemeManager;
 use Controllers\Controller;
+use Exceptions\HTTP\Error;
 use \Exceptions\HTTP\HTTPException;
 use \Exceptions\HTTP\NotFound;
+use Handlers\Traits\UserBar;
 use MikeAlmond\Color\Color;
 use Render\Render;
+use TypeError;
 
-class WebHandler implements RequestHandler {
+class WebHandler extends RequestHandler {
+    use UserBar;
     public $template_cache_dir = "templates";
     protected $results_sent_to_client = false;
     var $meta_selector = "web";
-    var $encoding_mode;
     /** @var Render */
     var $renderer;
-    var $_stage_bootstrap;
     protected string $mainTemplateFilename;
+    public bool $isOptions = false;
 
 
     /** The `body.html` is scanned for these specific tags and then the 
@@ -76,6 +84,7 @@ class WebHandler implements RequestHandler {
     private $push_handler = null;
 
     function __construct() {
+        parent::__construct();
         // $this->web_manifest = get_all_where_available([
         //     __ENV_ROOT__ . "/manifest.jsonc",
         //     __ENV_ROOT__ . "/manifest.json",
@@ -102,10 +111,16 @@ class WebHandler implements RequestHandler {
         return;
     }
 
-    public function _stage_route_discovered($route, $directives):bool {
+    public function _stage_route_discovered(string $route, array $directives, bool $isOptions):bool {
         $this->renderer->stock_vars['route'] = $directives;
         $this->renderer->stock_vars['PATH'] = $GLOBALS['PATH'];
-
+        $this->isOptions = $isOptions;
+        $this->cors_management();
+        if(key_exists('headers', $directives)) {
+            if($directives['headers'] instanceof Closure == false) throw new TypeError("The headers directive must be an instance of `Closure`");  
+            call_user_func($directives['headers'],[$route, $directives]);
+        }
+        if($isOptions) exit;
         return true;
     }
 
@@ -152,16 +167,15 @@ class WebHandler implements RequestHandler {
 
         // If we're in debug mode, let's embed the actual error message
         $embed = "$message";
-        if(config()["mode"] === COBALT_MODE_DEVELOPMENT) {
+        if(config()["mode"] === COBALT_MODE_DEVELOPMENT || __APP_SETTINGS__['debug_exceptions_publicly']) {
             $embed .= "<pre class=\"error--message\">";
             if(__APP_SETTINGS__['debug_exceptions_publicly']) {
-                $embed .= $e->getMessage();
+                $embed = $e->getFile() . " on line ". $e->getLine() . ": " . $e->getMessage() . "\n\n". $e->getTraceAsString();
             } else {
                 $embed .= base64_encode($e->getMessage());
             }
             $embed .= "</pre>";
         }
-
 
         add_vars([
             'versionHash' => VERSION_HASH,
@@ -169,6 +183,7 @@ class WebHandler implements RequestHandler {
             'message' => $message,
             'embed' => $embed,
             'status_code' => $e->status_code,
+            'code' => $e->status_code,
             'data' => $data,
             'body_id' => app("HTTP_error_body_id"),
             'keywords' => __APP_SETTINGS__['keywords'],
@@ -229,17 +244,40 @@ class WebHandler implements RequestHandler {
         $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
         $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
         $settings .= $this->getRouteBoundaries();
-        $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
-        $vars = $theme->getPrimaryColor() . $theme->getBackgroundColor() . $theme->getMixedColor();
-        foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
-            $vars .= "--project-$var: $value;\n";
+        if(__APP_SETTINGS__['manifest_engine'] === 1) {
+            $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
+            $vars = $theme->getPrimaryColor() . $theme->getBackgroundColor() . $theme->getMixedColor();
+            foreach(__APP_SETTINGS__["vars"][$this->meta_selector] as $var => $value) {
+                $vars .= "--project-$var: $value;\n";
+            }
+            $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
+        } else {
+            $settings .= "<style id=\"theme-variables\">".view("/shared/css_v2/color-theme.css", ['theme' => $this->getTheme()])."</style>";
+            // $settings .= "\n<link rel=\"stylesheet\" href=\"/core-content/css/v2/color-theme.css\">";
         }
-        // foreach(__APP_SETTINGS__['fonts'] as $name => $family) {
-        //     $vars .= "--project-$name-family: $family[family];\n";
-        // }
-        
-        $settings .= "<style id=\"style-main\">:root{\n$vars\n}</style>";
         return $settings;
+    }
+
+    function getTheme() {
+        return [
+            "branding_increment"     => __APP_SETTINGS__["branding_increment"],
+            "branding_rotation"      => __APP_SETTINGS__["branding_rotation"],
+            "color_branding"         => __APP_SETTINGS__["color_branding"],
+            "primary_increment"      => __APP_SETTINGS__["primary_increment"],
+            "primary_rotation"       => __APP_SETTINGS__["primary_rotation"],
+            "color_primary"          => __APP_SETTINGS__["color_primary"],
+            "neutral_increment"      => __APP_SETTINGS__["neutral_increment"],
+            "neutral_rotation"       => __APP_SETTINGS__["neutral_rotation"],
+            "color_neutral"          => __APP_SETTINGS__["color_neutral"],
+            "background_increment"   => __APP_SETTINGS__["background_increment"],
+            "background_rotation"    => __APP_SETTINGS__["background_rotation"],
+            "color_background"       => __APP_SETTINGS__["color_background"],
+            "issue_increment"        => __APP_SETTINGS__["issue_increment"],
+            "issue_rotation"         => __APP_SETTINGS__["issue_rotation"],
+            "color_issue"            => __APP_SETTINGS__["color_issue"],
+            "color_font_body"        => __APP_SETTINGS__["color_font_body"],
+            "color_mixed_percentage" => __APP_SETTINGS__["color_mixed_percentage"],
+        ];
     }
 
 
@@ -256,19 +294,9 @@ class WebHandler implements RequestHandler {
 
     var $header_nav_cache_name = "template-precomp/header_nav.html";
     function header_content() {
-        $masthead = "";
-        
-        if(__APP_SETTINGS__['Web_include_app_branding']) {
-            $logo = app("logo.thumb");
-            $meta = $logo['meta'];
-            $masthead = "<a href='/' title='Home'><img class='cobalt-masthead' src='$logo[filename]' width='$meta[width]' height='$meta[height]'></a>";
-        }
-        
         add_vars([
             'versionHash' => VERSION_HASH,
             'header_nav' => $this->header_nav(),
-            'masthead' => (app("display_masthead")) ? $masthead : "",
-            'admin_masthead' => str_replace("href=", "is='real' href=", $masthead),
         ]);
         // $header = $this->load_template($this->header_template);
 
@@ -313,28 +341,17 @@ class WebHandler implements RequestHandler {
 
     function footer_credits() {
         $credits  = '<section class="footer-credits">';
-        $credits .= '<span>&copy;@date("Y"); {{app.app_copyright_name}}</span> &mdash; <span>All Rights Reserved</span>';
-        if (app('Web_display_designer_credit')) $credits .= ' &mdash; <span>{{app.designer.prefix}} <a href="{{app.designer.href}}" title="{{app.designer.title}}">{{app.designer.name}}</a></span>';
-        if (__APP_SETTINGS__['Web_privacy_policy']) $credits .= " &mdash; <a href='" . __APP_SETTINGS__['Web_privacy_policy'] . "'>Privacy Policy</a>";
-        if (__APP_SETTINGS__['Web_terms_of_service']) $credits .= " &mdash; <a href='" . __APP_SETTINGS__['Web_terms_of_service'] . "'>Terms of Service</a>";
+        $credits .= '<span>&copy;@date("Y"); {{!app.app_copyright_name}}</span> &mdash; <span class="copyright-notice">'.from_markdown(__APP_SETTINGS__['copyright_notice']).'</span>';
+        if (app('Web_display_designer_credit')) $credits .= ' &mdash; <span>{{!app.designer.prefix}} <a href="'.to_base_url(__APP_SETTINGS__['designer']['href']).'" title="{{app.designer.title}}">{{app.designer.name}}</a></span>';
+        if (__APP_SETTINGS__['Web_privacy_policy']) $credits .= " &mdash; <a href='" . to_base_url(__APP_SETTINGS__['Web_privacy_policy']) . "'>Privacy Policy</a>";
+        if (__APP_SETTINGS__['Web_terms_of_service']) $credits .= " &mdash; <a href='" . to_base_url(__APP_SETTINGS__['Web_terms_of_service']) . "'>Terms of Service</a>";
         $credits .= '</section>';
         $login = "Login";
         if (session()) $login = "Panel";
-        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"{{app.context_prefixes.admin.prefix}}\"  class=\"footer-credits\" is=\"\">Administrator $login</a>";
+        if (app('Auth_logins_enabled') && !app('Auth_session_panel_enabled')) $credits .= "<a href=\"".to_base_url(__APP_SETTINGS__['context_prefixes']['admin']['prefix'])."\"  class=\"footer-credits\" is=\"\">Administrator $login</a>";
         return $credits;
     }
 
-    function user_menu() {
-        if (!app("Auth_user_menu_enabled")) return "";
-        $list = (session_exists()) ? "session" : "no-session";
-        $files = files_exist([
-            __APP_ROOT__ . "/private/config/user_menu.json",
-            __ENV_ROOT__ . "/config/user_menu.json"
-        ]);
-        $user_menu = new \Auth\UserMenu(get_json($files[0])[$list]);
-        $menu = $user_menu->create_menu();
-        return $menu;
-    }
 
     var $script_cache_name = "template-precomp/script.html";
 
@@ -344,7 +361,8 @@ class WebHandler implements RequestHandler {
 
     function notify_panel() {
         if(!__APP_SETTINGS__['Notifications_system_enabled']) return "";
-        return view('/cobalt/notifications/panel.html');
+        if(!session_exists()) return "";
+        return view('/Cobalt/Notifications/templates/panel.php');
     }
 
     var $style_cache_name = "template-precomp/style.html";
@@ -390,11 +408,25 @@ class WebHandler implements RequestHandler {
 
 
     function generate_script_content($script_name) {
+
+        switch(__APP_SETTINGS__['manifest_engine']) {
+            case 1:
+                return $this->scripts_v1();
+            case 2:
+                return $this->scripts_v2();
+            default:
+                throw new Error("Failed to configure scripts for unknown manifest_engine version: `" . __APP_SETTINGS__['manifest_engine']."`");
+        }
+
+    }
+
+    function scripts_v1() {
         $script_tags = "";
         $compiled = "";
         $generate_script_content = app("Package_JS_script_content");
 
         if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
+        
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
             if ($generate_script_content === false) {
@@ -417,7 +449,7 @@ class WebHandler implements RequestHandler {
                 $compiled .= "\n\n" . file_get_contents($private);
             }
         }
-
+        
         if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
 
         if ($compiled !== "") {
@@ -431,20 +463,28 @@ class WebHandler implements RequestHandler {
         return $script_tags;
     }
 
+    function scripts_v2() {
+        $generate_script_content = __APP_SETTINGS__["manifest_v2_package_js_files"];
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $generate_script_content = false;
+
+        $man = new ManifestManager();
+        return $man->get_tags(ValidTypes::js, $this->meta_selector, $generate_script_content, $generate_script_content);
+    }
+
     function get_script_pathname_from_manifest_entry($entry) {
         // $basic_script = "/core-content/js/$entry";
         $type = gettype($entry);
-        if($type === "string") return "/core-content/js/$entry";
+        if($type === "string") return to_base_url("/core-content/js/$entry");
         if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
-        if(key_exists('url', $entry)) return $entry['url'];
+        if(key_exists('url', $entry)) return to_base_url($entry['url']);
         throw new NotFound("Unable to handle resource $type");
     }
 
     function get_css_pathname_from_manifest_entry($entry) {
         $type = gettype($entry);
-        if($type === "string") return "/core-content/css/$entry";
+        if($type === "string") return to_base_url("/core-content/css/$entry");
         if($type !== "array") throw new NotFound("Type $type is not a valid manifest entry");
-        if(key_exists('url', $entry)) return $entry['url'];
+        if(key_exists('url', $entry)) return to_base_url($entry['url']);
         throw new NotFound("Unable to handle resource $type");
     }
 
@@ -486,6 +526,17 @@ class WebHandler implements RequestHandler {
     // }
 
     function generate_style_meta() {
+        switch(__APP_SETTINGS__['manifest_engine']) {
+            case 1:
+                return $this->style_v1();
+            case 2:
+                return $this->style_v2();
+            default:
+                throw new TypeError("Cannot generate style meta for unknown manifest_engine: `".__APP_SETTINGS__['manifest_engine']."`");
+        }
+    }
+
+    function style_v1() {
         $link_tags = "";
         $compiled = "";
         $package_style_content = app("Package_style_content");
@@ -517,7 +568,7 @@ class WebHandler implements RequestHandler {
                 $compiled .= "\n\n" . file_get_contents($file);
             }
         }
-        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.css?{{versionHash}}\">";
+        if ($link_tags === "") $link_tags = "<link rel=\"stylesheet\" href=\"/core-content/css/package.$this->meta_selector.css?{{versionHash}}\">";
 
         $minify = __APP_SETTINGS__['Package_style_minify'];
         if(config()['bootstrap_mode'] === COBALT_BOOSTRAP_ALWAYS) $minify = false;
@@ -528,10 +579,17 @@ class WebHandler implements RequestHandler {
                 $compiled = $minifier->minify();
             }
 
-            $cache = new CacheManager("css-precomp/package.css");
+            $cache = new CacheManager("css-precomp/package.$this->meta_selector.css");
             $cache->set($compiled, false);
         }
         return $link_tags;
+    }
+
+    function style_v2() {
+        $package_style_content = __APP_SETTINGS__["manifest_v2_package_css_files"];
+        if(config()['mode'] === COBALT_MODE_DEVELOPMENT) $package_style_content = false;
+        $man = new ManifestManager();
+        return $man->get_tags(ValidTypes::css, $this->meta_selector, $package_style_content, $package_style_content);
     }
 
     function session_panel() {
@@ -578,7 +636,21 @@ class WebHandler implements RequestHandler {
 
         $this->mainTemplateFilename = $candidates;
 
-        return file_get_contents($candidates);
+        $ext = strtolower(pathinfo($candidates, PATHINFO_EXTENSION));
+        switch($ext) {
+            case "php":
+                // Capture the PHP file's output
+                ob_start(null);
+                include $candidates;
+                $template = ob_get_contents();
+                if(!$template) throw new HTTPException("Failed to load the specified PHP template");
+                ob_end_clean();
+                break;
+            default:
+               $template = file_get_contents($candidates);
+               break;
+        }
+        return $template;
     }
 
     function flush_body_template() {
@@ -619,7 +691,7 @@ class WebHandler implements RequestHandler {
             if (isset($GLOBALS['WEB_PROCESSOR_VARS'])) $this->add_vars($GLOBALS['WEB_PROCESSOR_VARS']);
             if (!isset($GLOBALS['WEB_PROCESSOR_VARS']['main_id'])) $this->add_vars(['__main_id' => get_main_id()]);
             $this->renderer->set_body($this->template_body);
-            if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
+            // if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
             $this->renderer->set_vars($this->template_vars);
             $buffer = $this->renderer->execute();
             return $buffer;
@@ -628,4 +700,18 @@ class WebHandler implements RequestHandler {
             return $debug->render();
         }
     }
+
+    function userbar_start():array {
+        return [];
+    }
+    function userbar_before_extensions(array &$buttons):void {
+        return;
+    }
+    function userbar_after_extensions(array &$buttons):void {
+        return;
+    }
+    function userbar_end():string {
+        return "";
+    }
+
 }

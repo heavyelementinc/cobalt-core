@@ -20,43 +20,32 @@
 
 namespace Handlers;
 
-use Cobalt\Notifications\NotificationManager;
+use Closure;
+use Cobalt\Notifications\Classes\NotificationManager;
 use Exceptions\HTTP\BadRequest;
+use TypeError;
 
-class ApiHandler implements RequestHandler {
+class ApiHandler extends RequestHandler {
     private $methods_from_stdin = ['POST', 'PUT', 'PATCH', 'DELETE'];
-    private $content_type = "application/json; charset=utf-8";
-    
-    public $http_mode = null;
-    public $headers = null;
-    public $method = null;
-    public $allowed_modes = null;
-    public $allowed_origins = null;
+    protected string $content_type = "application/json; charset=utf-8";
+
+    // public $allowed_modes = null;
     public $router_result = null;
-    public $_stage_bootstrap = [];
     public $update_instructions = [];
     public $events = [];
-
-    function __construct() {
-        $this->http_mode = (is_secure()) ? "https" : "http";
-        $this->headers = apache_request_headers();
-        $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->allowed_modes = ["https://", "http://"];
-
-        /** This will make the allowed origins be http or https */
-        $this->allowed_origins = [];
-        foreach (app("API_CORS_allowed_origins") as $el) {
-            array_push($this->allowed_origins, $el);
-        }
-    }
-
 
     public function _stage_init($context_meta):void {
     }
 
-    public function _stage_route_discovered($route, $directives):bool {
+    public function _stage_route_discovered(string $route, array $directives, bool $isOptions):bool {
         /** The request validation is pretty straight-forward, so let's do that */
         $this->request_validation($directives);
+        $this->cors_management();
+        if(key_exists('headers', $directives)) {
+            if($directives['headers'] instanceof Closure == false) throw new TypeError("The headers directive must be an instance of `Closure`");  
+            call_user_func($directives['headers'],[$route, $directives]);
+        }
+        if($isOptions) exit;
         return true;
     }
 
@@ -124,7 +113,11 @@ class ApiHandler implements RequestHandler {
         return $ntfy->getUnreadNotificationCountForUser();
     }
 
+    /**
+     * @param HTTPException||Error $e
+     */
     public function _public_exception_handler($e):mixed {
+        
         // $errorMessage = $e->clientMessage;
         $errorMessage = "Unknown Error";
         if(method_exists($e, "publicMessage")) $errorMessage = $e->publicMessage();
@@ -133,8 +126,9 @@ class ApiHandler implements RequestHandler {
             'error' => $errorMessage,
             'data' => $e->data,
         ];
-        if(__APP_SETTINGS__['debug_exceptions_publicly']) $this->router_result['exception'] = $e->getMessage();
+        if(__APP_SETTINGS__['debug_exceptions_publicly']) $this->router_result['exception'] = $e->getFile() . " on line ". $e->getLine() . ": " . $e->getMessage() . "\n\n". $e->getTraceAsString();
         if($this->router_result['error'] === "Unknown Error") $this->router_result['error'] = $this->router_result['exception'];
+        
         if (!$this->_stage_bootstrap['_stage_output']) return $this->_stage_output();
     }
 
@@ -180,6 +174,10 @@ class ApiHandler implements RequestHandler {
                 $this->handle_xml_post_data($directives, $incoming_content_type);
                 break;
             default:
+                if(getHeader("x-client-ident-set")) {
+                    $this->handle_json_post_data($directives, "application/json");
+                    break;
+                }
                 throw new BadRequest("Unknown Content-Type");
         }
     }
@@ -209,55 +207,9 @@ class ApiHandler implements RequestHandler {
         $_POST = (array)$incoming_stream;
     }
 
-    // This might need some refactoring. Is HTTP_ORIGIN where we want to be 
-    function cors_management() {
-        /** Set our allowed origin to be our app's domain name */
-        $allowed_origin = app("domain_name");
-        $allowed_methods = "GET, POST, PUT, PATCH, DELETE";
-        $current_origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? null;
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) $current_origin = $this->url_to_current_mode($_SERVER['HTTP_X_FORWARDED_HOST']);
-        $current_origin = parse_url($current_origin, PHP_URL_HOST);
-
-        /** Check if our route allows us to ignore CORS */
-        if (isset($GLOBALS['current_route_meta']['cors_disabled']) && $GLOBALS['current_route_meta']['cors_disabled']) {
-            /** If it does, we send the origin back to as the allowed origin */
-            $allowed_origin = $current_origin;
-            /** TODO: Send the current route's method back, too. */
-        } else if (app("API_CORS_enable_other_origins") && isset($current_origin)) {
-            /** If HTTP_ORIGIN is set, we'll check if the origin is in our allowed origins and if not,
-             * throw an unauthorized error */
-            if (!in_array($current_origin, $this->allowed_origins)) $this->cors_error();
-            /** Otherwise, we'll set our to the server origin, since its allowed */
-            $allowed_origin = $current_origin;
-        }
-
-        $allowed_origin = $this->url_to_current_mode($allowed_origin);
-
-        /** Now we'll throw the headers back to the client */
-        header("Access-Control-Allow-Origin: $allowed_origin");
-        header("Access-Control-Allow-Credentials: true");
-        header("Access-Control-Allow-Methods: $allowed_methods");
-        $current_headers = headers_list();
-        if(key_exists('Content-Type',$current_headers) || key_exists('content-type', $current_headers)) $this->content_type = $current_headers['Content-Type'] ?? $current_headers['content-type'];
-        else header("Content-Type: " . $this->content_type);
-    }
-
-    function cors_error() {
-        $origin = $this->url_to_current_mode(app('domain_name'));
-        /** Throw the domain name back as a CORS header */
-        header("Access-Control-Allow-Origin: $origin");
-        header("Access-Control-Allow-Credentials: true");
-        header("Content-Type: " . $this->content_type);
-        /** Throw an unauthorized error */
-        throw new \Exceptions\HTTP\Unauthorized("Your origin was not recognized.");
-    }
-
     function __destruct() {
         // if ($this->_stage_bootstrap['_stage_output'] === true) return;
         // $this->_stage_output();
     }
 
-    function url_to_current_mode($url) {
-        return "$this->http_mode://" . str_replace($this->allowed_modes, "", $url);
-    }
 }

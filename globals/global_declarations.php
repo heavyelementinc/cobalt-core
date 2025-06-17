@@ -1,5 +1,5 @@
 <?php
-require_once __ENV_ROOT__ . "/config/default_settings.php";
+// require_once __ENV_ROOT__ . "/config/default_settings.php";
 global $TEMPLATE_PATHS;
 $TEMPLATE_PATHS = [
     __APP_ROOT__,
@@ -83,6 +83,11 @@ $TEMPLATE_BINDINGS = [
     "main_content_binding_after", "footer_binding_before", "footer_binding_after"
 ];
 
+global $USER_BAR_DETAILS;
+$USER_BAR_DETAILS = [];
+global $USER_BAR_CUSTOMS;
+$USER_BAR_CUSTOMS = [];
+
 /**
  * Append a value to a particular template binding
  * 
@@ -118,16 +123,28 @@ const QUERY_PARAM_PAGE_NUM = 'page';
 const QUERY_PARAM_SEARCH = 'query';
 const QUERY_PARAM_FILTER_NAME = "filter_name";
 const QUERY_PARAM_FILTER_VALUE = "filter_value";
+const QUERY_PARAM_SEARCH_FIELD_TOKEN = "@";
+const QUERY_PARAM_SEARCH_VALUE_TOKEN = ":";
+const QUERY_PARAM_SEARCH_DELIMITER_TOKEN = ",";
 const QUERY_TYPE_CAST_LOOKUP = 0;
 const QUERY_TYPE_CAST_OPTION = 1;
 const QUERY_PARAM_SEARCH_CASE_SENSITVE = "case_sensitive";
 const QUERY_PARAM_COMPARISON_STRENGTH = "strength";
+const QUERY_PARAM_ARCHIVED_DISPLAY = "archived";
+const QUERY_SEARCH_MATCH_SCORE_FIELD = "__score";
 
+const MODEL_RESERVERED_FIELD__FIELDNAME = "fieldName";
+
+const REGEXP_CASE_INSENSITIVE = "i";
+const REGEXP_MULTILINE_START_END = "m";
+const REGEXP_EXTENDED_IGNORE_WHITESPACE = "x";
+const REGEXP_MATCH_NEW_LINE_SPACE_CHAR = "s";
+const REGEXP_UNICODE_SUPPORT = "u";
+
+const CRUDABLE_ARCHIVED_FIELD = '__archived';
 const CRUDABLE_CONFIG_APIV1 = 0b0001;
 const CRUDABLE_CONFIG_ADMIN = 0b0010;
-
 const CRUDABLE_DELETEABLE = 0b00001;
-
 const CRUDABLE_MULTIDESTROY_FIELD = "_ids";
 // const CRUDABLE_
 
@@ -143,3 +160,19 @@ const CUSTOMIZATION_TYPE_SERIES = 'series';
 $DECLARED_CUSTOMIZATIONS = [];
 
 const COBALT_PAGES_DEFAULT_COLLECTION = "CobaltPages";
+
+// Authentication and Login Stuff
+const SESSION_STAGE_STATE = "__auth_stage";
+const SESSION_USER_ID = "__user_id";
+const SESSION_STAY_LOGGED_IN = "__stay_logged_in";
+const SESSION_TFA_STATE = "__tfa_state";
+const SESSION_RESUME_PARAM = "resume";
+const TFA_STATE_DISABLED = 0;
+const TFA_STATE_ENABLED = 1;
+
+const AUTH_STAGE_0_USER_ACCOUNT_VERIFIED = 99;
+const AUTH_STAGE_0_USER_ACCOUNT_DISCOVERY = 0;
+const AUTH_STAGE_1_USER_AUTHENTICATION = 1;
+const AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY = 2;
+
+const DATETIME_LOCAL_FORMAT = "Y-m-d\TH:i";

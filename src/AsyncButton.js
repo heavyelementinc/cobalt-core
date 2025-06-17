@@ -7,9 +7,9 @@ class AsyncButton extends CustomButton{
 
     connectedCallback() {
         this.addEventListener("click", e => {
-            this.submit();
+            this.submit(e);
         })
-        if(this.type !== "multidelete") return;
+        if(this.type !== "batch-action") return;
         this.setDisabledState();
         const checkboxes = document.querySelectorAll(this.checkmarkQuery);
         for(const check of checkboxes) {
@@ -19,24 +19,26 @@ class AsyncButton extends CustomButton{
         }
     }
 
-    submit() {
+    submit(event) {
         if(this.disabled === true) {
             this.shakeNo();
             return;
         }
         this.ariaInvalid = false;
-        const api = new AsyncFetch(this.getAttribute("action") || this.getAttribute("href"), this.getAttribute("method") ?? "POST", {});
+        const api = new AsyncFetch(this.getAttribute("action") || this.getAttribute("href"), (this.getAttribute("method") ?? "POST"), {
+            headers: this.getHeaders(event)
+        });
         api.addEventListener("submit",  e => this.startSpinner.bind(this));
         api.addEventListener("aborted", e => this.endSpinner.bind(this));
         api.addEventListener("error",   e => this.error.bind(this));
         api.addEventListener("done",    e => this.done.bind(this));
-        api.submit(this.value, {});
+        api.submit(this.value);
     }
 
     get value() {
         let val = {};
         switch(this.type) {
-            case "multidelete":
+            case "batch-action":
                 const id_boxes = document.querySelectorAll(this.checkmarkQuery);
                 val._ids = [];
                 for(const box of id_boxes) {
@@ -100,6 +102,15 @@ class AsyncButton extends CustomButton{
         
         this.disabled = false;
     }
+    
+    getHeaders(event) {
+        let headers = {
+            'X-Keyboard-Modifiers': encodeClickModifiers(event)
+        };
+        return headers;
+    }
+
+    
 }
 
 customElements.define("async-button", AsyncButton);// { extends: 'button' });

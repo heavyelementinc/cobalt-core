@@ -23,6 +23,7 @@
 // }
 
 use Cobalt\Pages\Classes\PageManager;
+use Exceptions\HTTP\HTTPException;
 use Routes\Router;
 
 /**
@@ -97,11 +98,24 @@ function route(string $directiveName, array $args = [], array $context = []):str
     $route = get_path_from_route($split[0], $split[1], $args, $routeMethod, $ctx);
     if(!$route) {
         $flag = get_crudable_flag($split[0]);
-        if($flag === null) throw new Exception("Could not find route based on directive name.");
-        if($flag !== CRUDABLE_CONFIG_ADMIN + CRUDABLE_CONFIG_APIV1) throw new Exception("Crudable has not been configured");
+        if($flag === null) throw new Exception("Could not find route based on directive name: `$directiveName`");
+        if($flag !== CRUDABLE_CONFIG_ADMIN + CRUDABLE_CONFIG_APIV1) throw new Exception("Crudable has not been configured: ".(($flag & CRUDABLE_CONFIG_APIV1) ? "Admin Flag":"APIv1 Flag"));
         throw new Exception("Could not find route based on directive name.");
     }
-    return $route;
+    return to_base_url($route);
+}
+
+function nullable_route(string $directiveName, array $args = [], array $context = []):?string {
+    try {
+        return route($directiveName, $args, $context);
+    } catch (HTTPException $e) {
+        return null;
+    } catch (Exception $e) {
+        return null;
+    } catch (Error $e) {
+        return null;
+    }
+    return null;
 }
 
 function validate_route($directiveName, $context) {

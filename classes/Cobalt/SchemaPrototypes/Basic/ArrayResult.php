@@ -23,6 +23,7 @@ use MongoDB\BSON\Persistable;
 use MongoDB\Model\BSONDocument;
 use TypeError;
 
+
 /**
  *  * hydrate - <bool> if false, arrays won't be hydrated
  * @package Cobalt\SchemaPrototypes\Basic
@@ -238,6 +239,7 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     protected function join($delimiter) {
         $array = $this->getValue();
         if($array instanceof BSONDocument) $array = $array->getArrayCopy();
+        $array = iterator_to_array_recursive($delimiter);
         $val = implode($delimiter, $array ?? []);
         return $val;
     }
@@ -277,6 +279,8 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
     }
 
     private function arraylike_to_array($arraylike):array {
+        // If we're passed a null value, let's create an empty array
+        if($arraylike === null) $arraylike = [];
         if(gettype($arraylike) !== "array") {
             if($arraylike instanceof ArrayResult) {
                 $arraylike = $arraylike->getRaw();
@@ -284,8 +288,9 @@ class ArrayResult extends SchemaResult implements ArrayAccess, Iterator, Travers
             if($arraylike instanceof BSONArray) {
                 $arraylike = $arraylike->getArrayCopy();
             }
+            if(is_null($arraylike)) return [];
             if(gettype($arraylike) !== "array") {
-                throw new TypeError("arraylike must be an array");
+                throw new TypeError("\$arraylike '$this->name' must be an array but found '" . gettype($arraylike) ."'");
             }
         }
         return $arraylike;

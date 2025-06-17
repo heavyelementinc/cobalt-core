@@ -220,12 +220,12 @@ class ClientRouter extends EventTarget{
 
     async navigate(route) {
         const forms = document.querySelectorAll("form-request");
-        for(const f of forms) {
-            if(await f.unsavedChanges()) {
-                const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
-                if(!conf) return;
-            }
-        }
+        // for(const f of forms) {
+        //     if(await f.unsavedChanges()) {
+        //         const conf = await dialogConfirm("This form has unsaved changes. Continue?", "Continue", "Stay on this page");
+        //         if(!conf) return;
+        //     }
+        // }
 
         const navStartEvent = new CustomEvent("navigationstart", {detail: {route}});
         const navStartEventResult = this.dispatchEvent(navStartEvent);
@@ -270,14 +270,15 @@ class ClientRouter extends EventTarget{
             this.lastPageRequestResult = result;
         } catch(error) {
             this.progressBar.classList.remove("navigation-start");
-            this.dispatchEvent(new CustomEvent("navigateerror", {detail: {error, route: this.route}}));
+            const errorEvent = new CustomEvent("navigateerror", {detail: {error, route: this.route}});
+            this.dispatchEvent(errorEvent);
+            document.dispatchEvent(errorEvent);
             this.lastPageRequestResult = {};
             return;
         }
-        
 
         this.updateContent(result);
-        this.updateScroll();
+        const scrollState = this.updateScroll();
         if(!this.allowStateChange) {
             this.setPushStateMode();
             return;
@@ -292,7 +293,13 @@ class ClientRouter extends EventTarget{
         );
 
         this.setPushStateMode();
-        
+        if(window.location.hash) {
+            const scrollTo = document.querySelector(window.location.hash);
+            if(scrollTo) {
+                scrollTo.scrollIntoView();
+            }
+        }
+        // await scrollState;
         this.dispatchEvent(new CustomEvent("navigateend", {detail: {previous: this.previousRoute, next: route, pageData: result}}));
     }
 

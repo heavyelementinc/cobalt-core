@@ -21,20 +21,22 @@ class AdminHandler extends WebHandler {
     // function post_router_init(){
     //     $this->prepare_html_framework();
     // }
+    public string $userbar_admin_panel   = "<a href=\"".__APP_SETTINGS__['cobalt_base_path']."/\">".__APP_SETTINGS__['app_short_name']."</a>";
+
     function auth_panel() {
         if (!session_exists()) return "";
         
         // $session = session();
-        $settings = route("CoreAdmin@settings_index");
-        $customize = route("Customizations@index");
-        $userPanel = view('/admin/users/session-panel.html',[]);
+
+        $userPanel = "";
         // [
         //     'settings' => ($settings) ? "<option icon='cog' onclick=\"Cobalt.router.location = ''; return true;\">Settings</option>" : ""
         // ]
 
-        $panel = "<link rel='stylesheet' href='/core-content/css/admin-panel.css?{{versionHash}}'>";
+        $panel = "";
+        if(__APP_SETTINGS__['manifest_engine'] === 1) $panel .= "<link rel='stylesheet' href='".to_base_url("/core-content/css/admin-panel.css")."?{{versionHash}}'>";
 
-        $panel .= "<nav id='admin-panel'>{{!admin_masthead}}$userPanel<ul class='admin-panel--nav-group directory--group'>";
+        $panel .= "<nav id='admin-panel'>$userPanel<ul class='admin-panel--nav-group directory--group'>";
     
     
         $panel .= get_route_group("admin_panel", [
@@ -44,11 +46,6 @@ class AdminHandler extends WebHandler {
         ]);
         // $settings = route("CoreAdmin@settings_index");
         // $panel .= ;
-        $panel .= "</ul>";
-        $panel .= "<ul class='settings-panel--footer'>";
-        $panel .= (__APP_SETTINGS__['Notifications_system_enabled']) ? "<notify-button></notify-button>" : "";
-        $panel .= ($customize) ? "<a class='admin-panel--customize-link' href='$customize' rel='Customize Panel' title='Customize Panel'><i name='application-edit-outline'></i><span class='contextual contextual--hover'>Customize</span></a>" : "";
-        $panel .= ($settings) ? "<a class='admin-panel--settings-link' href='$settings' rel='Settings Panel' title='Settings Panel'><i name='cog'></i><span class='contextual contextual--hover'>Settings</span></a>" : "";
         $panel .= "</ul>";
         $panel .= "</nav>";
         return $panel;
@@ -97,5 +94,26 @@ class AdminHandler extends WebHandler {
     //     }
     //     return $link_tags;
     // }
-
+    function getTheme() {
+        if(__APP_SETTINGS__['universal_theme']) return parent::getTheme();
+        return [
+            "branding_increment"     => "0.05",
+            "branding_rotation"      => "10",
+            "color_branding"         => "#2F4858",
+            "primary_increment"      => "0.1",
+            "primary_rotation"       => "-10",
+            "color_primary"          => "#009DDC",
+            "neutral_increment"      => "0.1",
+            "neutral_rotation"       => "0",
+            "color_neutral"          => "#D2D6DA",
+            "background_increment"   => "0.1",
+            "background_rotation"    => "0",
+            "color_background"       => "#F4F5F6",
+            "issue_increment"        => "0.1",
+            "issue_rotation"         => "-10",
+            "color_issue"            => "#F96F5D",
+            "color_font_body"        => "#02040F",
+            "color_mixed_percentage" => 75,
+        ];
+    }
 }

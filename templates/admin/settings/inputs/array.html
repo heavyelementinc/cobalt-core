@@ -1,5 +1,8 @@
-<li>
-    <label>{{!name}}</label>
+<li class="settings-panel--setting">
+    <div class="settings-panel--description">
+        <label>{{!name}}{{!help}}</label>
+        {{!small}}
+        @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
+    </div>
     <input-array name='{{setting}}' {{disabled}}>{{!options}}</input-array>
-    @view("/admin/settings/inputs/reset.html");
 </li>

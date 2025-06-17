@@ -9,25 +9,23 @@ if(app("UGC_enable_user_generated_content")) {
 
 Route::get(new Options("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']));
 
-Route::get(new Options("/res/fs/...","FileController@download"));
-
 Route::get(new Options("/ServiceWorker.js", "FileController@service_worker"));
 
-if(__APP_SETTINGS__['Posts']['default_enabled']) {
+if(__APP_SETTINGS__['Posts_default_enabled']) {
     if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
-        $address = __APP_SETTINGS__['Posts']['public_index'];
+        $address = __APP_SETTINGS__['Posts_public_index'];
         $length = strlen($address) - 1;
         if($address[$length] === "/") $address = substr($address, 0, -1);
-        Route::get("$address.xml", "Posts@rss_feed");
+        Route::get("$address.xml", "\\Cobalt\\Pages\\Controllers\\Posts@rss_feed");
     }
-    Route::get(__APP_SETTINGS__['Posts']['public_index'], "\\Cobalt\\Pages\\Controllers\\Posts@posts_landing", __APP_SETTINGS__['Posts']['public_index_options']);
+    Route::get(__APP_SETTINGS__['Posts_public_index'], "\\Cobalt\\Pages\\Controllers\\Posts@posts_landing", __APP_SETTINGS__['Posts_public_index_options']);
     
     $posts = array_merge(
-        __APP_SETTINGS__['Posts']['public_post_options'] ?? [], [
+        __APP_SETTINGS__['Posts_public_post_options'] ?? [], [
             
     ]);
     
-    Route::get(__APP_SETTINGS__['Posts']['public_post'] . "...",  "\\Cobalt\\Pages\\Controllers\\Posts@page", [
+    Route::get(__APP_SETTINGS__['Posts_public_post'] . "...",  "\\Cobalt\\Pages\\Controllers\\Posts@page", [
         'sitemap' => [
             'ignore' => true,
             'children' => function () {
@@ -36,7 +34,7 @@ if(__APP_SETTINGS__['Posts']['default_enabled']) {
             'lastmod' => fn() => null
         ]
     ]
-        // (new Options(__APP_SETTINGS__['Posts']['public_post'] . "...",  "Posts@page"))
+        // (new Options(__APP_SETTINGS__['Posts_public_post'] . "...",  "Posts@page"))
         // ->set_sitemap([
         //     'ignore' => true,
         //     'children' => function () {
@@ -67,10 +65,10 @@ if (app("Auth_logins_enabled")) {
 
     // Route::get("/user/menu", "UserAccounts@get_user_menu");
     Route::get("/admin", "CoreController@admin_redirect");
-    Route::get("/password-reset", "Login@password_reset_initial_form", [
+    Route::get("/login/password-reset", "Login@password_reset_initial_form", [
         'sitemap' => ['ignore' => true]
     ]);
-    Route::get("/password-reset/{token}", "Login@password_reset_token_form");
+    Route::get("/login/password-reset/{token}", "Login@password_reset_token_form");
 }
 
 if(__APP_SETTINGS__['Mailchimp_default_list_id']) {
@@ -85,9 +83,10 @@ if (app("Database_fs_enabled")) {
     Route::get(trim_trailing_slash(app("Database_fs_public_endpoint")) . "/...", "FileController@download");
 }
 
-Route::get("/resource/vapid-key.json", "FileController@vapid_pub_key");
-
 Route::get("/robots.txt", "FileController@robots");
+if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
+    Route::get("/ai.txt", "FileController@ai");
+}
 Route::get("/sitemap.xml", "FileController@sitemap");
 
 Route::get("/auth/{id}/register", "IntegrationsController@oauth_receive");
@@ -98,3 +97,4 @@ Route::s_get("/me", "UserAccounts@me");
 Route::s_get("/file-picker/", "CrudableFiles@file_picker", [
     'permission' => 'Customizations_modify'
 ]);
+

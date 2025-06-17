@@ -182,6 +182,9 @@ class Route {
             'handler'    => $options['handler'],
             'handler_data'  => $handler_data, // Handler script data
 
+            // Called whenever the route is accessed (this includes HEAD and OPTIONS requests)
+            'headers' => $options['headers'] ?? function () {},
+
             // The sitemap directives
             'sitemap'    => $options['sitemap'] ?? [], // array_merge([
             //     'ignore' => false, // Whether the sitemap should ignore this route
@@ -239,8 +242,7 @@ class Route {
         $nat_order = count($GLOBALS['ROUTE_TABLE'][$ROUTE_TABLE_ADDRESS][$method]);
         $controller = $route->get_controller();
         $real_path = $route->get_real_path();
-
-        $ROUTE_TABLE[$ROUTE_TABLE_ADDRESS][$method][$regex] = [
+        $details = [
             // Request
             'original_path' => $route->get_path(),
             'real_path' => $real_path,
@@ -248,6 +250,7 @@ class Route {
             'uri_var_names' => $route->get_var_names(),
             'context' => $route->get_context(),
             'context_root' => $route->get_context_root(),
+            'headers' => $route->get_headers(),
             
             // Fulfillment
             'controller' => $controller,
@@ -270,6 +273,8 @@ class Route {
             'csrf_required' => $route->get_csrf_required(),
             'require_session' => $route->get_require_session(),
         ];
+        
+        $ROUTE_TABLE[$ROUTE_TABLE_ADDRESS][$method][$regex] = $details;
 
         if(!key_exists($controller, $GLOBALS['ROUTE_LOOKUP_CACHE'])) {
             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controller] = $real_path;
@@ -327,7 +332,7 @@ class Route {
 
     static function get_router_context($request_uri) {
         // Remove the query string
-        $request_uri = str_replace("?" . $_SERVER['QUERY_STRING'], "", $request_uri);
+        $request_uri = remove_base_path(str_replace("?" . $_SERVER['QUERY_STRING'], "", $request_uri));
 
         // The default context is web
         $context = "web";

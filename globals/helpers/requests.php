@@ -1,9 +1,12 @@
 <?php
 
+use Cobalt\Captcha\Classes\Captcha;
+use Cobalt\Captcha\Exceptions\HumanTest;
 use Cobalt\Pages\Classes\PageManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
 use GuzzleHttp\Exception\GuzzleException;
+use Routes\Exceptions\UnexpectedBasePath;
 use Validation\Exceptions\NoValue;
 
 /**
@@ -32,6 +35,8 @@ function is_secure():bool {
  * @throws Confirm if headers are not detected throw Confirm
  */
 function confirm($message, $data, $okay = "Continue", $dangerous = true) {
+    $altModSet = isKeyboardModifierSet(ALT_KEY);
+    if($altModSet) return true;
     try {
         $header = getHeader("X-Confirm-Dangerous");
         if($header) return true;
@@ -76,6 +81,15 @@ function reauthorize($message = "You must re-authroize your account", $resubmit)
     return true;
 }
 
+function captcha_check($message = "Please confirm you're human", $resubmit) {
+    $captcha = new Captcha();
+    $header = getHeader($captcha::HEADER_FIELD_NAME,null,true, false);
+    if($header) {
+        if($captcha->validate($header)) return true;
+    }
+    throw new HumanTest($message, $resubmit);
+}
+
 /**
  * 
  * @param mixed $url 
@@ -115,7 +129,7 @@ function fetch_and_save($url) {
 }
 
 
-function register_individual_post_routes($collection = __APP_SETTINGS__['Posts']['collection_name']) {
+function register_individual_post_routes($collection = __APP_SETTINGS__['Posts_collection_name']) {
     $manager = new PageManager(null, $collection);
     $pages = $manager->find($manager->public_query(), ['limit' => 100]);
     $server_name = server_name();
@@ -233,34 +247,36 @@ function createJWT(array $header, array $payload, $secret) {
  *             [size]       => 21509
  *        )
  * ]
- * @return array 
+ * @deprecated use `normalize_uploaded_files` instead
+ * @return array
  */
 function normalize_file_array() {
-    $fileUploadArray = $_FILES;
-    $resultingDataStructure = [];
-    foreach ($fileUploadArray as $input => $infoArr) {
-        $filesByInput = [];
-        $nextIndex = count($filesByInput);
-        foreach ($infoArr as $key => $valueArr) {
-            if (is_array($valueArr)) { // file input "multiple"
-                foreach($valueArr as $i=>$value) {
-                    $filesByInput[$i][$key] = $value;
-                }
+    return normalize_uploaded_files($_FILES);
+    // $fileUploadArray = $_FILES;
+    // $resultingDataStructure = [];
+    // foreach ($fileUploadArray as $input => $infoArr) {
+    //     $filesByInput = [];
+    //     $nextIndex = count($filesByInput);
+    //     foreach ($infoArr as $key => $valueArr) {
+    //         if (is_array($valueArr)) { // file input "multiple"
+    //             foreach($valueArr as $i=>$value) {
+    //                 $filesByInput[$i][$key] = $value;
+    //             }
                 
-            }
-            else { // -> string, normal file input
-                $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
-                break;
-            }
-        }
-        $filesByInput[$nextIndex]['input_name'] = $input;
-        $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
-    }
-    $filteredFileArray = [];
-    foreach($resultingDataStructure as $file) { // let's filter empty & errors
-        if (!$file['error']) $filteredFileArray[] = $file;
-    }
-    return $filteredFileArray;
+    //         }
+    //         else { // -> string, normal file input
+    //             $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
+    //             break;
+    //         }
+    //     }
+    //     $filesByInput[$nextIndex]['input_name'] = $input;
+    //     $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
+    // }
+    // $filteredFileArray = [];
+    // foreach($resultingDataStructure as $file) { // let's filter empty & errors
+    //     if (!$file['error']) $filteredFileArray[] = $file;
+    // }
+    // return $filteredFileArray;
 }
 
 
@@ -271,11 +287,11 @@ function normalize_file_array() {
  * @throws Exception if $defatulToAppSetting is true and the incoming server name doesn't exist as the apps domain_name or in the allowed_origins list
  * @return string the domain name of this app (with protocol and NO TRAILING SLASH)
  */
-function server_name(bool $defaultToAppSetting = true) {
+function server_name(bool $defaultToAppSetting = true, ?bool $isSecure = null) {
     $request_from = $_SERVER['SERVER_NAME'];
     $name = "https://$request_from";
 
-    $isSecure = is_secure();
+    if($isSecure === null) $isSecure = is_secure();
     if($isSecure === false) $name = "http://$request_from";
     
     if($request_from === __APP_SETTINGS__['domain_name']) {
@@ -288,6 +304,21 @@ function server_name(bool $defaultToAppSetting = true) {
     return ($isSecure) ? "https://".__APP_SETTINGS__['domain_name'] : "http://".__APP_SETTINGS__['domain_name'];
 }
 
+function to_base_url(string $url, bool $defaultToAppSetting = true, ?bool $isSecure = null) {
+    return preg_replace("/\/{2,}/", "/", __APP_SETTINGS__['cobalt_base_path'] . $url);
+}
+
+function remove_base_path(string $route) {
+    // Check if we have a base_path set
+    if(__APP_SETTINGS__['cobalt_base_path']) {
+        // If we do, let's update our route so that there's *no* base path set
+        $ln = strlen(__APP_SETTINGS__['cobalt_base_path']);
+        if(substr($route, 0, $ln) !== __APP_SETTINGS__['cobalt_base_path']) throw new UnexpectedBasePath("The beginning of this path does not match cobalt_base_path");
+        $route = substr($route, $ln);
+    }
+    return $route;
+}
+
 
 function str_to_id($str) {
     $replace = preg_replace("/([^\w])/", "-", $str);
@@ -298,4 +329,40 @@ function is_bot(?string $useragent = null) {
     if(!$useragent) $useragent = $_SERVER['HTTP_USER_AGENT'];
     if(!isset($useragent)) return false;
     return (preg_match('/bot|crawl|curl|dataprovider|search|get|spider|find|java|majesticsEO|google|yahoo|teoma|contaxe|yandex|libwww-perl|facebookexternalhit|mediapartners/i', $useragent));
+}
+
+function is_cli() {
+    return http_response_code() === false;
+}
+
+/**
+ * 
+ * @param array $files array{key:array{name:string|array,type:string|array,tmp_name:string|array,error:int|array,size:int|array}}
+ * @return array 
+ */
+function normalize_uploaded_files(array $files):array {
+    $newArray = [];
+    foreach($files as $fieldName => $data) {
+        // Add our current field to the new array
+        if(!key_exists($fieldName, $newArray)) $newArray[$fieldName] = [];
+        // Check if the field 'name' exists in the data, otherwise we skip it
+        if(!key_exists('name', $data)) continue;
+        // If the 'name' field is a string, let's set our data and continue
+        if(is_string($data['name'])) {
+            $newArray[$fieldName] = $data;
+            continue;
+        }
+        // Otherwise, let's unwind this absolute mess of a list and store it in
+        // a sane way
+        foreach($data['name'] as $index => $value) {
+            $newArray[$fieldName][] = [
+                'name' => $value,
+                'type' => $data['type'][$index],
+                'tmp_name' => $data['tmp_name'][$index],
+                'error' => $data['error'][$index],
+                'size' => $data['size'][$index],
+            ];
+        }
+    }
+    return $newArray;
 }

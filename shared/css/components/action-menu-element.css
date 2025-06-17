@@ -34,7 +34,7 @@ action-menu:hover:not([aria-pressed="true"]) {
 }
 
 action-menu[type="options"] {
-    display: inline-block;
+    display: inline-flex;
     border: none;
     background: transparent;
     margin: 0;

@@ -38,7 +38,7 @@ class PostMap extends PageMap {
     }
 
     function __set_manager(?Database $manager = null):?Database {
-        // return new PageManager(null, __APP_SETTINGS__['Posts']['collection_name']);
+        // return new PageManager(null, __APP_SETTINGS__['Posts_collection_name']);
         return new PostManager();
     }
 }

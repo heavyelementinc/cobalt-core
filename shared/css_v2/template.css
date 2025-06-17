@@ -1,0 +1,372 @@
+/** template.css
+*   This file contains typical styling for Heavy Element's
+*   template sites.
+*   @copyright 2025 Heavy Element
+*/
+:root {
+    --project-callout-background: var(--primary-color-2, #C7EFCF);
+    --project-callout-background-color: var(--primary-color-2-fg, black);
+    --project-callout-background-inverted: var(--neutral-color-1, #254441);
+    --project-callout-background-inverted-color: var(--neutral-color-1-fg, white);
+    --padding-top: var(--margin-xxl, 3rem);
+    --padding-right: var(--margin-xxs, 0);
+    --padding-bottom: var(--margin-xxxl, 3.8rem);
+    --padding-left: var(--margin-xxs, 0);
+    --project-callout-customer-quote: var(--neutral-color-1, var(--body-color-1, #fff));
+    --project-callout-customer-quote-color: var(--neutral-color-1-fg, var(--body-color-1-fg, #000));
+
+    --template-card-bg: var(--neutral-color-1);
+    --template-card-color: var(--neutral-color-1-fg);
+
+    --template-up-width: min(100ch, 100%);
+    --review-star-color: #feb95f;
+}
+
+:where(.template-splash, .template-hero) {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+}
+
+:where(.template-splash--content, .template-hero--callout) {
+    max-width: 60ch;
+    a.button {
+        margin-top: 1em;
+    }
+}
+
+.template-splash--content h1, .landing-main--title-container h1{
+    font-size: 2.75em;
+}
+
+.template-callout {
+    background: var(--project-callout-background);
+    color: var(--project-callout-background-color);
+    padding-top: var(--padding-top, 3em);
+    padding-right: var(--padding-right, 0);
+    padding-bottom: var(--padding-bottom, 3.8em);
+    padding-left: var(--padding-left);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    min-height: 30vh;
+    &.inverted {
+        background: var(--project-callout-background-inverted);
+        color: var(--project-callout-background-inverted-color, #FFFFFF);
+    }
+    > h1 {
+        width: 100%;
+        text-align: center;
+    }
+    &:where(.neutral, .white, .transparent) {
+        background-color: transparent;
+    }
+}
+
+.template-rounded-box {
+    max-width: 60ch;
+    background-color: var(--primary-color-1);
+    color: var(--primary-color-1-fg);
+    margin: 0 auto;
+    padding: var(--margin-l);
+    border-radius: var(--margin-l);
+    > .section-title {
+        margin-top: 0;
+    }
+    .button {
+        &.primary {
+            --_anchor-element-color: var(--branding-color-1-fg);
+            --_anchor-element-background: var(--branding-color-1);
+            --_anchor-hover-color: var(--branding-color-0-fg);
+            --_anchor-hover-background: var(--branding-color-0);
+            --_anchor-active-color: var(--branding-color-2-fg);
+            --_anchor-active-background: var(--branding-color-2);
+            --_anchor-visited-color: var(--_anchor-element-color);
+            --_anchor-visited-background: var(--_anchor-element-background);
+        }
+    }
+    @media only screen and (max-width: 35em) {
+        width: 100%
+    }
+}
+
+.quote-blurb {
+    width: 100%;
+}
+
+.quote-blurb p {
+    max-width: 60ch;
+    text-align: center;
+    margin: 0 auto;
+}
+
+:where(.customer-quote) {
+    background: var(--project-callout-customer-quote, var(--project-body-background, #ffffff));
+    color: var(--project-callout-customer-quote-color);
+    padding: 2em;
+    box-sizing: border-box;
+    /* margin: 1.5em; */
+    border-radius: 2em;
+    hgroup {
+        display: grid;
+        --avatar-size: 3em;
+        --avatar-half-height: calc(var(--avatar-size) / 2);
+        grid-template-columns: var(--avatar-size) 1fr;
+        grid-template-rows: var(--avatar-half-height) var(--avatar-half-height);
+        gap: 0 1em;
+        margin-bottom: 0;
+        border: none;
+    }
+    img.avatar {
+        height: var(--avatar-size);
+        width: var(--avatar-size);
+        grid-row: 1 / span 2;
+        grid-column: 1 / span 1;
+        border-radius: var(--avatar-half-height);
+    }
+    h1 {
+        text-align: left;
+        font-size: 1.2em;
+        margin: 0;
+        grid-row: 1 / span 1;
+        grid-column: 2 / span 1;
+    }
+    article {
+        max-width: 50ch;
+    }
+}
+
+star-rating {
+    display: grid;
+    grid-template-columns: repeat(5, 2ch);
+    font-size: 1.2em;
+    margin: 0;
+    grid-row: 2 / span 1;
+    grid-column: 2 / span 1;
+    width: fit-content;
+    color: var(--review-star-color, #feb95f);
+    :where(star) {
+        font-family: "Material Design Icons", sans-serif;
+        /* opacity: .5; */
+        width: 1.6ch;
+        &::before{
+            content: "\F04D2";
+        }
+        &.half::before{
+            content: "\F04D0";
+        }
+        &.full::before {
+            content: "\F04CE"
+        }
+    }
+}
+
+    
+
+.list-panel.contact-panel :is(h1, h2, h3, h4, h5) {
+    width: 100%;
+    font-family: var(--project-body-family);
+    font-size: 1em;
+    margin: 0;
+    font-weight: bold;
+}
+
+.template-up {
+    --_gap: var(--margin-m);
+    display: grid;
+    flex-wrap: wrap;
+    gap: var(--_gap);
+    justify-content: center;
+    grid-template-rows: 1fr auto;
+    width: var(--template-up-width);
+    .section-title {
+        grid-row: 1;
+        grid-column: 1 / span all;
+    }
+    &.two-up {
+        grid-template-columns: .5fr .5fr;
+    }
+    
+    &.three-up {
+        grid-template-columns: .333fr .333fr .333fr;
+    }
+    > *:not(.section-title) {
+        width: 100%;
+        grid-row: 2;
+    }
+    @media only screen and (max-width: 35em) {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+:where(.card) {
+    --_img-height: var(--template-card-img-height, 9rem);
+    --_title-height: auto;
+    --_p-height: auto;
+    --_padding: var(--margin-l);
+    --_gap: var(--margin-m);
+    background-color: var(--template-card-bg);
+    color: var(--template-card-color);
+    --_anchor-element-color: var(--template-card-color);
+    display: grid;
+    height: calc(var(--_img-height) + var(--_title-height) + var(--_p-height) + var(--_gap));
+    grid-template-columns: 1;
+    grid-template-rows: var(--_img-height) var(--_title-height) var(--_p-height);
+    gap: var(--_gap);
+    text-decoration: none;
+    overflow: hidden;
+    border-radius: var(--_padding);
+    img {
+        object-fit: cover;
+        object-position: center;
+        height: 100%;
+        width: 100%;
+    }
+    h1, h2, h3, h4, h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        overflow: hidden;
+        padding: 0 var(--_padding);
+    }
+    p {
+        margin: 0;
+        font-size: .8rem;
+        height: 100%;
+        overflow: hidden;
+        padding: 0 var(--_padding) var(--_padding);
+    }
+}
+
+.template-landing-user-reviews {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.template-landing-user-reviews h2 {
+    font-size: 1em;
+    font-family: var(--project-body-family);
+    font-weight: normal;
+    color: rgba(0,0,0,.5);
+    font-size: .8em;
+    width: fit-content;
+}
+
+.template-landing-user-reviews .review-avatars {
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: end;
+    justify-content: flex-end;
+    /* flex-direction: row-reverse; */
+    overflow-wrap: break-word;
+    border-width: 0px;
+    border-style: solid;
+    box-sizing: border-box;
+}
+
+.template-landing-user-reviews .vbox, .landing-splash .template-landing-user-reviews .vbox {
+    margin: 0 0 0 .5em;
+    padding: 0;
+    width: fit-content;
+    flex-shrink: 1;
+    flex-grow: 0;
+}
+
+.template-landing-user-reviews .review-avatars img {
+    border-width: 2px;
+    display: inline-flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: normal;
+    position: relative;
+    flex-shrink: 0;
+    background: rgb(244, 247, 251);
+    color: var(--project-body-background);
+    border-color: var(--project-body-background);
+    vertical-align: top;
+    width: 50px;
+    height: 50px;
+    font-size: calc(1.2em);
+    margin-inline-end: 0px;
+    border-radius: 50%;
+    overflow-wrap: break-word;
+    border-style: solid;
+    box-sizing: border-box;
+}
+
+.template-landing-user-reviews .review-avatars img:not(:first-of-type) {
+    margin-left: -20px;
+}
+
+.template-site footer {
+    background: var(--project-template-footer-bg, #483519);
+    color: var(--project-template-footer-color, #fff);
+    margin: 0;
+    padding: 3em;
+    gap: 1em;
+    justify-content: center;
+}
+
+    .template-site footer .blurb {
+        width: 40ch;
+    }
+
+    .template-site footer :is(h2, h3, h4, h5) {
+        font-size: 1em;
+        text-transform: uppercase;
+    }
+
+@media only screen and (max-width: 35em) {
+    
+    html, body {
+        font-size: 4.5vw;
+        --header-offset: 0px;
+    }
+    .template-splash {
+        display: flex;
+        --image-width: 100%;
+        flex-direction: column-reverse;
+    }
+    img.template-splash--image {
+        display: block;
+        height: 60vh;
+        width: 100%;
+    }
+
+    
+    .template-callout {
+        flex-direction: column;
+    }
+
+    .customer-quote {
+        width: calc(100% - 3em);
+    }
+
+    .customer-quote article {
+        width: unset;
+    }
+
+    .template-site footer {
+        flex-direction: column-reverse;
+    }
+
+    .template-site footer .footer-credits {
+        order: -10;
+    }
+
+    .template-site footer a.footer-credits {
+        order: -20;
+    }
+
+    .template-site footer .blurb {
+        width: 100%;
+    }
+}

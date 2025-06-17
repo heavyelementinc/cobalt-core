@@ -1,0 +1,176 @@
+:root {
+    --object-gallery-dimension: 13em;
+}
+
+object-gallery,file-gallery,foreign-id,file-id {
+    display: flex;
+    flex-wrap: wrap;
+    --gap: var(--margin-s);
+    gap: var(--gap);
+    padding: var(--gap);
+    --object-gallery-dimension: 13em;
+    --drop-shadow-size: calc(var(--gap) / 2);
+    --drop-target-shadow: calc(var(--drop-shadow-size) * -1) 0 0 var(--primary-color-1);
+    .object-picker-container {
+        display: flex;
+        flex-direction: column;
+        object-picker, 
+        input[type='file'] {
+            display: block;
+            height: var(--object-gallery-dimension);
+            width: var(--object-gallery-dimension);
+        }
+        input[type='file'] {
+            color: transparent;
+            &::file-selector-button {
+                height: 100%;
+                width: 100%;
+            }
+        }
+        &:has(object-picker, input[type='file']) {
+            object-picker, input[type='file'] {
+                height: 50%;
+            }
+        }
+    }
+    drop-indicator {
+        display: none;
+        height: var(--object-gallery-dimension);
+        width: 0;
+        margin: calc((var(--gap) * 0.4) * -1);
+        box-shadow: 1px 1px 1px 1px var(--primary-color-1);
+        [orientation="list"] {
+            height: 0;
+            width: var(--object-gallery-dimension);
+        }
+    }
+    &[drag-in-progress="true"] {
+        cursor: grabbing;
+        img, video {
+            
+        }
+        drop-indicator {
+            display: block;
+        }
+        &[orientation="list"] {
+            --drop-target-shadow: 0 calc(var(--drop-shadow-size) * -1) 0 var(--primary-color-1);
+            .drop-target--class {
+                &.drop-target--next {
+                    /* --drop-target-shadow: 0 var(--drop-shadow-size) 0 var(--primary-color-1); */
+                }
+            }
+        }
+        .drop-target--class {
+            box-shadow: var(--drop-target-shadow);
+            &.drop-target--next {
+                /* --drop-target-shadow: var(--drop-shadow-size) 0 0 var(--primary-color-1); */
+            }
+        }
+    }
+}
+
+foreign-id, file-id {
+    :is(gallery-item) {
+        & + .object-picker-container {
+            display: none;
+        }
+    }
+}
+
+object-picker {
+    display: grid;
+    place-content: center;
+    text-align: center;
+}
+
+gallery-item {
+    display: block;
+    position: relative;
+    height: var(--object-gallery-dimension);
+    width: var(--object-gallery-dimension);
+    border: 1px solid var(--neutral-color-1);
+    padding: var(--margin-xs);
+    img, video {
+        display: block;
+        object-fit: cover;
+        object-position: center;
+        height: 100%;
+        width: 100%;
+        user-select: none;
+    }
+    > button {
+        float: right;
+        background: var(--input-element-background);
+        border: var(--input-element-border-value);
+        font-size: .6em;
+        margin: var(--margin-xs);
+        &:hover {
+            border-color: var(--primary-color-0);
+        }
+    }
+    /* If we have a mime-type, then we're a file rather than an object */
+    &[mime-type] > button {
+        position: absolute;
+    }
+    action-menu {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: unset;
+        font-size: .5em;
+    }
+    &.object-gallery--visually-hidden {
+        opacity: 0.2;
+    }
+}
+
+.object-gallery--visual-drop-target {
+    position: fixed;
+    pointer-events: none;
+    cursor: grabbing;
+}
+
+/* file-gallery gallery-item {
+
+} */
+
+.object-gallery--selection-window {
+    max-height: 60vh;
+    overflow-y: scroll;
+    scrollbar-width: small;
+    text-align: center;
+    /* width: fit-content; */
+}
+
+.object-gallery--item-selection {
+    transition: background-color .3s, color .3s;
+    display: inline-block;
+    position: relative;
+    width: 12em;
+    height: 12em;
+    isolation: isolate;
+    margin: var(--margin-xs);
+    vertical-align: top;
+    & > input[type="checkbox"] {
+        position:absolute;
+        top: var(--margin-xs);
+        left: var(--margin-xs);
+        height: 1em;
+        width: 1em;
+        z-index: 100;
+        /* background: rgb(255 255 255 / .2); */
+    }
+    gallery-item {
+        display: inline-block;
+        height: 100%;
+        width: 100%;
+    }
+    &:has(:checked) {
+        /* background-color: var(--primary-color-1);
+        color: var(--primary-color-1-fg); */
+        box-shadow: 0 0 0rem 4px var(--input-element-active);
+    }
+    a, action-menu, button {
+        display: none;
+    }
+}

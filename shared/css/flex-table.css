@@ -43,6 +43,9 @@ flex-table{
             flex-wrap: wrap;
             background: var(--project-color-table-bg-odd);
         }
+        flex-row[archived] {
+            text-decoration: line-through;
+        }
     
         [scroll-x] flex-row{
             display: table-row;
@@ -69,6 +72,16 @@ flex-table{
 
         flex-header.sort-desc:after {
             content: "\F0360";
+        }
+
+        flex-row.flex-table--no-results {
+            justify-self: center;
+            font-style: italic;
+            text-align: center;
+        }
+
+        flex-row.flex-table--no-results flex-cell {
+            color: var(--project-color-input-border-nofocus);
         }
 
         flex-cell a {

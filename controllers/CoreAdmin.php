@@ -8,7 +8,7 @@ use Cobalt\Payments\PaymentGatewaySchema;
 use CobaltEvents\EventManager;
 use Contact\ContactManager;
 use Cobalt\Extensions\Extensions;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 
 class CoreAdmin {
     function index() {
@@ -56,7 +56,7 @@ class CoreAdmin {
     function individual_user_management_panel($id) {
         $ua = new \Auth\UserCRUD();
         $user = $ua->getUserById($id);
-        if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", ['template' => 'errors/404_invalid_user.html']);
+        if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", true, ['template' => 'errors/404_invalid_user.html']);
 
         $table = $GLOBALS['auth']->permissions->get_permission_table($user);
         $push = new PushNotifications();

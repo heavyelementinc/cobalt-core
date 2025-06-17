@@ -1,0 +1,32 @@
+._parallax type-writer {
+    --translate-out: translateY(1em);
+    position: relative;
+    display: inline-block;
+    &[one-line="true"] {
+        min-width: var(--char-count);
+    }
+    &[overlap] > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    & > * {
+        min-height: 1lh;
+        transition: transform 500ms, opacity 500ms;
+        transform: none;
+        opacity: 1;
+        margin: 0;
+        display: none;
+    }
+    & > *:has(.revealed) {
+        display: inline;
+    }
+    span:not(.revealed) {
+        display: none;
+    }
+    & > *.transform-out {
+        opacity: 0;
+        transform: var(--translate-out);
+    }
+}
+

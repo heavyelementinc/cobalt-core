@@ -159,6 +159,9 @@ class EventSchema extends \Validation\Normalize {
                     return $vals;
                 }
             ],
+            "utm_greeting" => [
+                'get' => fn ($val) => $val,
+            ],
             'published' => [
                 'set' => 'boolean_helper'
             ],
@@ -180,6 +183,9 @@ class EventSchema extends \Validation\Normalize {
                 'set' => fn ($val) => $this->set_time($val, 'end'),
                 'display' => fn () => relative_time($this->__dataset['end_time'])
             ],
+            'forever' => [
+                'set' => fn ($val) => $this->boolean_helper($val)
+            ],
             'happening_now' => [
                 'get' => function () {
                     $now = new \DateTime();
@@ -194,6 +200,7 @@ class EventSchema extends \Validation\Normalize {
                 'display' => fn () => ($this->happening_now) ? "<span class='events--happening-now events--active-event'></span>" : "<span class='events--happening-now'></span>"
             ],
             'advanced.included_paths' => [
+                'get' => fn ($val = null) => $val ?? ['/'],
                 'set' => 'relative_pathnames',
                 'valid' => fn ($val) => $this->filled($val)
             ],
@@ -221,7 +228,7 @@ class EventSchema extends \Validation\Normalize {
                     'true'   => 'Displayed, if also marked as "Public"',
                     'always' => 'Displayed, regardless of "Public" status',
                 ]
-            ]
+            ],
         ];
     }
 

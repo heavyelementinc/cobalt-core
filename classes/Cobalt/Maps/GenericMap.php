@@ -7,16 +7,19 @@ use ArrayObject;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Traits\Validatable;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
+use Cobalt\SchemaPrototypes\Basic\DateResult;
 use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\ResultTranslator;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Countable;
+use DateTime;
 use Drivers\Database;
 use Iterator;
 use JsonSerializable;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use ReflectionObject;
@@ -264,6 +267,21 @@ class GenericMap implements Iterator, Traversable, ArrayAccess, JsonSerializable
 
     public function count(): int {
         return count($this->__hydrated);
+    }
+
+    public function __isArchived(UTCDateTime|null $date = null):bool {
+        $archived_time = $this->__archived;
+        if(!$archived_time) return false;
+        $archived_time = $archived_time->getValue();
+        if($archived_time instanceof DateResult || $archived_time instanceof UTCDateTime) {
+            $archived_time = $archived_time->toDateTime()->format("u");
+        } else {
+            return false;
+        }
+        if($date === null) $date = (new DateTime())->format("u");
+        else if($date instanceof UTCDateTime) $date = $date->toDateTime()->format("u");
+
+        return $archived_time < $date;
     }
     
 }

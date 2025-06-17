@@ -1,0 +1,440 @@
+switch-container {
+    padding: .4rem;
+    margin-top: .5rem;
+    border:var(--input-element-border-width) solid var(--input-element-border);
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+input-switch:not([native]) {
+    background: transparent;
+    height: var(--track-height);
+    border-radius: var(--border-radius);
+    --track-width: 65px;
+    --track-height: 28px;
+    --track-radius: 16px;
+    --thumb-size: 20px;
+    --thumb-voffset: 4px;
+    --thumb-padding: 5px;
+    &[small] {
+        --track-width: 55px;
+        --track-height: 25px;
+        --track-radius: 16px;
+        --thumb-size: 18px;
+        --thumb-voffset: 3px;
+        --thumb-padding: 5px;
+    }
+    &[tiny] {
+        --track-width: 45px;
+        --track-height: 20px;
+        --track-radius: 16px;
+        --thumb-size: 13px;
+        --thumb-voffset: 3px;
+        --thumb-padding: 5px;
+    }
+    input[type='checkbox']{
+        -webkit-appearance: none;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        border: 0;
+        outline: 0;
+        cursor: pointer;
+        /* margin: var(--margin-s); */
+        background: transparent;
+        box-sizing: border-box;
+        height: var(--track-height);
+        &:after {
+            content: '';
+            width: var(--track-width);
+            height: var(--track-height);
+            display: inline-block;
+            background-color: var(--input-element-tray);
+            border-radius: var(--track-radius);
+            clear: both;
+            border: var(--input-element-border-value);
+            transition: background-color 0.4s;
+        }
+        &:before {
+            content: '';
+            width: var(--thumb-size);
+            height: var(--thumb-size);
+            display: block;
+            position: absolute;
+            left: var(--thumb-padding);
+            top: var(--thumb-voffset);
+            border-radius: 50%;
+            background-color: rgb(255, 255, 255);
+            box-shadow: 0 1 3px rgba(0, 0, 0, 0.6);
+            border: var(--input-element-border-value);
+            box-sizing: border-box;
+            transition: left 0.4s;
+        }
+        &:checked:before {
+            left: calc((var(--track-width) - var(--thumb-size)) - var(--thumb-padding));
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+        }
+        &:checked:after {
+            background: var(--input-element-active);
+        }
+    }
+}
+
+input-switch-old {
+    display: inline-block;
+    width: 64px;
+    height: 26px;
+    /* margin: .25rem .5rem;
+    border:var(--input-element-border-width) solid white; */
+    border-radius: 25px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    &[disabled="true"] span,
+    &[disabled="disabled"] span {
+        opacity: .5;
+    }
+
+    & input {
+        visibility: hidden;
+    }
+
+    & span {
+        position: absolute;
+        background: var(--input-element-tray);
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        box-shadow: 0 0 6px rgba(0, 0, 0, .3) inset;
+        border-radius: 17px;
+    }
+
+    & span:before {
+        /* content: "✓"; */
+        position: absolute;
+        top: -7px;
+        left: 8px;
+        font-family: monospace;
+        font-weight: bolder;
+        font-size: 20pt;
+        color: white;
+    }
+
+    & span:after {
+        content: "";
+        display: block;
+        height: 20px;
+        width: 35%;
+        background: rgb(255, 255, 255);
+        /* background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 6%, rgba(214, 214, 214, 1) 10%, rgba(255, 255, 255, 1) 10%, rgba(255, 255, 255, 1) 100%); */
+        border-radius: 20px;
+        position: absolute;
+        top: 3px;
+        left: 4px;
+        transition: left .2s;
+        box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+    }
+
+    & input:checked+span {
+        background: var(--primary-color-1);
+    }
+
+    & input:checked+span:after {
+        left: 37px;
+    }
+
+    & input:indeterminate+span {
+        background: var(--input-invalid-color);
+    }
+
+    & input:indeterminate+span:before {
+        content: "";
+    }
+
+    & input:indeterminate+span:after {
+        left: 21px;
+    }
+
+    &[large] input:indeterminate+span:after {
+        left: 27px;
+    }
+
+    &[large] {
+        width: 83px;
+        height: 32px;
+    }
+
+    &[large] span:before {
+        font-size: 32pt;
+        left: 8px;
+        top: -14px;
+    }
+
+    &[large] span:after {
+        height: 26px;
+    }
+
+    &[large] input:checked+span:after {
+        left: 49px;
+    }
+
+    &[small] {
+        width: 42px;
+        height: 26px;
+    }
+
+    &[small] span::after {
+        height: 16px;
+        top: 5px;
+    }
+
+    &[small] input:checked+span::after {
+        left: 22px;
+    }
+
+    &[small] input:indeterminate+span::after {
+        left: 14px;
+    }
+
+    &[small] span::before {
+        content: "";
+    }
+
+    &[tiny] {
+        width: 42px;
+        height: 16px;
+    }
+
+    &[tiny] span::after {
+        height: 10px;
+    }
+
+    &[tiny] input:checked+span::after {
+        left: 22px;
+    }
+
+    &[tiny] input:indeterminate+span::after {
+        left: 14px;
+    }
+
+    &[tiny] span::before {
+        content: "";
+    }
+}
+
+/* form-request{
+    overflow: hidden;
+} */
+
+copy-span {
+    display: inline-flex;
+    position: relative;
+    box-sizing: border-box;
+    &[mini] {
+        background: transparent;
+        border: none;
+
+        &[mini] input {
+            display: none;
+        }
+
+        &[mini] button {
+            font-size: 1em;
+            box-sizing: border-box;
+            border-left: 0;
+            padding: 0;
+        }
+
+        & input {
+            /* display: inline-block; */
+            /* border:var(--input-element-border-width) solid transparent;
+            background: transparent; */
+            /* padding: calc(.4rem - 2px); */
+            box-sizing: border-box;
+            width: 100%;
+/* 
+            &:focus {
+                outline:var(--input-element-border-width) solid transparent;
+                border:var(--input-element-border-width) solid transparent;
+                background: transparent;
+            } */
+
+            &:focus-within {
+                border:var(--input-element-border-width) solid var(--project-color-input-border-focus);
+
+                & button {
+                    border-left-color: var(--project-color-input-border-focus);
+                    color: black;
+                }
+            }
+
+            & button {
+                border: none;
+                background: var(--project-color-input-background);
+                border-left:var(--input-element-border-width) solid var(--project-color-input-border-nofocus);
+                border-radius: 0 4px 4px 0;
+                color: var(--project-color-input-border-nofocus);
+                height: 100%;
+                box-sizing: border-box;
+                position: absolute;
+                top: 0;
+                right: 0;
+
+                &:hover {
+                    color: black;
+                }
+            }
+
+            & .copy-span--confirm {
+                position: absolute;
+                width: 100%;
+                top: calc(100% - 4px);
+                animation: 800ms ease forwards 1;
+                text-align: center;
+                border: inherit;
+                background: inherit;
+                box-shadow: 0 3px 5px rgba(0, 0, 0, .3);
+                border-radius: 0 0 4px 4px;
+                box-sizing: inherit;
+                /* color: var(--project-color-input-border-nofocus); */
+                cursor: normal;
+            }
+
+            & .copy-span--spawn {
+                animation-name: MessageSpawnIn;
+            }
+
+            & .copy-span--disappear {
+                animation-name: MessageDespawn;
+            }
+        }
+    }
+}
+
+@keyframes MessageSpawnIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes MessageDespawn {
+    from {
+        opacity: 1
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+
+help-span,
+copy-span[mini] button {
+    position: relative;
+    font-weight: normal;
+    --_anchor-element-color: rgb(from var(--_anchor-element-color) r g b / .5);
+    &:empty {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 1em;
+        width: 1em;
+        color: var(--input-element-border, currentColor);
+        border-radius: 50%;
+        margin: 0 .5ch;
+        font-family: sans-serif;   
+    }
+    &[warning] {
+        color: var(--project-color-problem);
+
+        &:after {
+            content: "\F0028";
+            justify-self: center;
+            align-self: center;
+        }
+
+        :hover:after {
+            content: "\F05D6";
+        }
+    }
+
+    &:empty:after {
+        content: "\F02FC";
+        font-family: "Material Design Icons";
+        /* font-weight: bold; */
+        font-size: 1em;
+        /* margin-top: .05em; */
+        align-self: flex-start;
+    }
+
+    &:empty:hover:after {
+        content: "\F02FD"
+    }
+}
+
+
+:is(.help-span-article, .help-span-article[popover]) {
+    /* visibility: hidden; */
+    inset: unset;
+    width: 40ch;
+    max-width: 270px;
+    font-size: 1rem;
+    font-weight: normal;
+    background: var(--project-body-background);
+    border:var(--input-element-border-width) solid var(--project-color-input-border-nofocus);
+    box-shadow: var(--project-box-shadow);
+    color: inherit;
+    /* top: 50%; */
+    left: 100%;
+    left: anchor(middle);
+    position: absolute;
+    padding: .2rem .4rem;
+    border-radius: 4px;
+    z-index: calc(var(--project-modal-z-index) + 1);
+
+    &[warning] {
+        background: var(--project-color-problem);
+        border-color: var(--project-color-input-invalid-border);
+        color: white;
+    }
+}
+
+image-editor {
+    display: inline-block;
+    position: relative;
+
+    & button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 1em;
+        width: 1em;
+        background: var(--project-body-background);
+        color: var(--project-body-color);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        font-size: 1em;
+
+        &:hover {
+            background: var(--project-body-color);
+            color: var(--project-body-background);
+        }
+
+        :before {
+            content: "\F01D9";
+            color: inherit;
+            font-family: "Material Design Icons";
+        }
+    }
+}

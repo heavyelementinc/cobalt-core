@@ -1,6 +1,6 @@
 
 window.closeGlyph = "<span class='close-glyph'></span>"; // "✖️";
-var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], markdown-area[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], image-result[name]";
+var universal_input_element_query = "input[name]:not([type='radio']), input[name][type='radio']:checked, select[name], textarea[name], block-editor[name], input-text[name], input-number[name], input-switch[name], input-user[name], input-array[name], input-binary[name], input-user-array[name], input-object-array[name], input-datetime[name], input-autocomplete[name], input-password[name], input-tag-select[name], radio-group[name], input-radio[name], image-result[name], object-gallery[name], file-gallery[name], [cobalt-component=\"cobalt-component\"][name]";
 
 function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());
@@ -31,6 +31,9 @@ function lock_viewport() {
     let width = get_offset(document.body).w;
     document.body.style.overflow = "hidden";
     document.body.style.width = `${width}px`;
+    setTimeout(() => {
+        document.body.style.setProperty("--scrollbar-width", `${width - get_offset(document.body).w}px`);
+    },50);
 }
 
 function unlock_viewport(ignore_lock_level = false) {
@@ -735,8 +738,16 @@ function reflow() {
 
 /**
  * Will convert units to pixels or return the same string
+ * @param {String} ccsValue - A CSS value formatted as a string
+ * @param {?HTMLElement} target - The element to derive relative values like `em` from
+ * @param {Bool} error - Determines if this function can throw an error
+ * @returns {?Number}
  */
  function cssToPixel( cssValue, target = null, error = true ) {
+    if(cssValue === null) {
+        if(error) throw new Error("CSS value not supplied");
+        return null;
+    }
 
     target = target || document.body;
 
@@ -785,7 +796,18 @@ function reflow() {
         } else if (error) throw Error("The value supplied cannot be converted");
     }
 
-    return cssValue;
+    // return cssValue;
+    return null;
+}
+
+/**
+ * Will convert units to pixels or return the same string
+ * @param {String} ccsValue - A CSS value formatted as a string
+ * @param {?HTMLElement} target - The element to derive relative values like `em` from
+ * @returns {?Number}
+ */
+function cssUnitToNumber(cssValue, target = null) {
+    return cssToPixel(cssValue, target, false)
 }
 
 function iOS() {
@@ -798,6 +820,13 @@ function iOS() {
       'iPhone',
       'iPod'
     ].includes(navigator.platform);
+}
+
+/** Returns a boolean value if the viewport is smaller than 35em
+ * @returns {boolean}
+ */
+function isMobile() {
+    return window.matchMedia("(max-width: 35em)").matches;
 }
 
 function imagePromise(url) {
@@ -898,6 +927,20 @@ function promiseTimeout(callback, value) {
     })
 }
 
+function encodeClickModifiers(event) {
+    if(!event) return 0;
+    const SHIFT_KEY = 0b0000001;
+    const CTRL_KEY  = 0b0000010;
+    const ALT_KEY   = 0b0000100;
+    const META_KEY  = 0b0001000;
+    let mod = 0;
+    mod += (event.shiftKey) ? SHIFT_KEY : 0;
+    mod += (event.ctrlKey) ? CTRL_KEY : 0;
+    mod += (event.altKey) ? ALT_KEY : 0;
+    mod += (event.metaKey) ? META_KEY : 0;
+    return mod;
+}
+
 function getTabId() {
     if (window.sessionStorage.tabId) {
         return window.sessionStorage.tabId;
@@ -908,6 +951,58 @@ function getTabId() {
 }
 
 getTabId();
+
+
+
+function upload_field_update(element) {
+    const name = element.name;
+    const container = element.closest(`.upload-field`);
+    const previewTarget = container.querySelector("img");
+    // previewTarget.src = 
+}
+
+function dateFromObjectId(objectId) {
+	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+}
+
+class Deferred {
+    _props = {
+        promise: null, 
+        resolve: (value) => {},
+        reject: (message) => {}
+    }
+    constructor(callback = () => {}) {
+        this._props.promise = new Promise(async (resolve, reject) => {
+            this._props.resolve = resolve;
+            this._props.reject = reject;
+            await this.promise;
+            callback(resolve, reject);
+        });
+    }
+
+    get promise() {
+        return this._props.promise;
+    }
+
+    get resolve() {
+        return this._props.resolve;
+    }
+
+    get reject() {
+        return this._props.reject;
+    }
+
+    async await() {
+        return this.promise;
+    }
+}
+
+
+
+
+
+
+
 
 class Rt {
     get location() {
@@ -924,16 +1019,4 @@ class Rt {
         console.warn("Your app is using a deprecated Cobalt API! Please change any reference to `router.location` to utilize `Cobalt.router.location`");
     }
 }
-
 window.router = new Rt();
-
-function upload_field_update(element) {
-    const name = element.name;
-    const container = element.closest(`.upload-field`);
-    const previewTarget = container.querySelector("img");
-    // previewTarget.src = 
-}
-
-function dateFromObjectId(objectId) {
-	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
-}

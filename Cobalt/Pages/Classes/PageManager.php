@@ -59,7 +59,7 @@ class PageManager extends Database {
         $min_recommended = $page->max_related->getValue();
         $tags = $page->tags->getRaw();
         $result = $this->aggregate($this->getRelatedPagePipeline(
-            $tags, $page->_id, $projection,
+            $tags ?? [], $page->_id, $projection,
         ));
 
         $exclude_ids = [$page->_id];

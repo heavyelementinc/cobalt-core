@@ -8,6 +8,7 @@ use Drivers\Database;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONDocument;
 use Routes\Route;
 use TypeError;
@@ -97,7 +98,8 @@ abstract class Crudable {
                 'delete_option' => '',
                 'method'   => "POST",
                 'action'   => $action,
-                'endpoint' => $action, /** @deprecated */
+                /** @deprecated */
+                'endpoint' => $action,
                 'name'     => $this->name,
             ]);
             
@@ -139,11 +141,12 @@ abstract class Crudable {
         final public function __index():string {
             $this->init($this->get_schema([]), $_GET);
             $new_doc_href = route("$this->name@__new_document");
+            $body = $this->get_table_body();
             $hypermedia = $this->get_hypermedia();
             add_vars([
                 'title'        => $this->friendly_name,
                 'table_header' => $this->get_table_header(),
-                'documents'    => $this->get_table_body(),
+                'documents'    => $body,
                 'hypermedia'   => $hypermedia,
                 'next_page'    => $hypermedia['next'],
                 'previous_page'=> $hypermedia['previous'],
@@ -300,6 +303,63 @@ abstract class Crudable {
             header("X-Redirect: " . route("$this->name@__index"));
         }
 
+        public function __archive($id) {
+            $read = $this->__read($id);
+            if(!$read) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+            $un = "";
+            $update_operator = '$set';
+            if($read->__isArchived()) {
+                $update_operator = '$unset';
+                $un = "un";
+            }
+            $default_confirm_message = "Are you sure you want to $un"."archive this record?";
+            // $confirm_message = $this->archive($)
+            confirm($default_confirm_message, $_POST, "Archive", false);
+            $result = $this->manager->updateOne(['_id' => $read->_id], [$update_operator => [CRUDABLE_ARCHIVED_FIELD => new UTCDateTime()]]);
+            // header("X-Redirect: " . route("$this->name@__index"));
+            return $result->getModifiedCount();
+        }
+
+        public function __archive_batch() {
+            $upgraded = [];
+            foreach($_POST[CRUDABLE_MULTIDESTROY_FIELD] as $id) {
+                if(!$id) throw new BadRequest("Invalid ID found", "Invalid ID supplied");
+                $upgraded[] = new ObjectId($id);
+            }
+            $query = ['_id' => ['$in' => $upgraded]];
+            $results = $this->manager->count($query);
+
+            $find = $this->manager->find($query);
+            $updates = ['archived' => [], 'unarchived' => []];
+
+            foreach($find as $doc) {
+                if($doc->__isArchived()) {
+                    $updates['archived'][] = $doc->_id;
+                } else {
+                    $updates['unarchived'][] = $doc->_id;
+                }
+            }
+            $archived = count($updates['archived']);
+            $unarchived = count($updates['unarchived']);
+
+            if($archived > 0 && $unarchived > 0) {
+                $batch_message = "This batch action will archive all $unarchived unarchived document" .plural($unarchived) . " while also unarchiving all $archived document". plural($archived).". Are you sure you want to perform this action?";
+            } else if($archived > 0){
+                $batch_message = "This action will unarchive $archived document".plural($archived).". Do you want to continue?";
+            } else {
+                $batch_message = "This action will archive $unarchived document".plural($unarchived).". Do you want to continue?";
+            }
+
+            confirm($batch_message, $_POST, "Archive");
+            if($unarchived > 0) {
+                $archived = $this->manager->updateMany(['_id' => ['$in' => $updates['unarchived']]], ['$set' => [CRUDABLE_ARCHIVED_FIELD => new UTCDateTime()]]);
+            } 
+            if ($archived > 0) {
+                $unarchived = $this->manager->updateMany(['_id' => ['$in' => $updates['archived']]], ['$unset' => [CRUDABLE_ARCHIVED_FIELD => true]]);
+            }
+            header("X-Redirect: " . route("$this->name@__index"));
+        }
+
         static public function route_details_destroy():array {
             return [];
         }
@@ -323,6 +383,8 @@ abstract class Crudable {
             Route::post("$mutant/update/{id}", "$class@__update", static::route_details(['permission' => "CRUDControllerPermission"],$options['update'] ?? [], "route_details_update"));
             Route::delete("$mutant/delete/{id}", "$class@__destroy", static::route_details(['permission' => "CRUDControllerPermission"],$options['destroy'] ?? [], "route_details_destroy"));
             Route::delete("$mutant/multi-delete/", "$class@__multidestroy", static::route_details(['permission' => "CRUDControllerPermission"],$options['destroy'] ?? [], "route_details_destroy"));
+            Route::delete("$mutant/archive/batch/", "$class@__archive_batch",  static::route_details(['permission' => "CRUDControllerPermission"],$options['destroy'] ?? [], "route_details_destroy"));
+            Route::delete("$mutant/archive/{id}", "$class@__archive",  static::route_details(['permission' => "CRUDControllerPermission"],$options['destroy'] ?? [], "route_details_destroy"));
             set_crudable_flag($class, CRUDABLE_CONFIG_APIV1);
         }
 

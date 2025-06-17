@@ -1,5 +1,7 @@
 <?php
 
+use Cobalt\Settings\CobaltSetting;
+use Cobalt\Settings\Settings;
 use Controllers\ClientFSManager;
 use Controllers\Controller;
 use Drivers\FSManager;
@@ -20,6 +22,10 @@ class CoreSettingsPanel extends Controller {
         $setting_groups = [];
         $setting_tables = [];
 
+        /**
+         * @var int $index
+         * @var CobaltSetting $setting
+         */
         foreach($this->settings as $index => $setting) {
             if(!isset($setting->meta)) continue;
             if(in_array($setting->meta['group'], $this->requiresRoot) && !is_root()) continue;
@@ -66,7 +72,7 @@ class CoreSettingsPanel extends Controller {
             $name));
     }
 
-    private function get_setting_table_entry($setting, $index, $url) {
+    private function get_setting_table_entry(CobaltSetting $setting, $index, $url) {
         $template = false;
         $type = "input";
         $options = "";
@@ -99,7 +105,7 @@ class CoreSettingsPanel extends Controller {
                 $template = "/admin/settings/inputs/array.html";
                 $options = "";
                 $current = array_combine(__APP_SETTINGS__[$index], __APP_SETTINGS__[$index]);
-                $opts = array_merge($current, $setting->validate['options']);
+                $opts = array_merge($current, $this->get_options($setting));
                 foreach($opts as $key => $option) {
                     $selected = "";
                     if(in_array($key, $current)) $selected = " selected='selected'";
@@ -109,17 +115,27 @@ class CoreSettingsPanel extends Controller {
             case "radio-group":
                 $template = "/admin/settings/inputs/radio-group.html";
                 $options = "";
-                foreach($setting->validate['options'] as $name => $display) {
+                foreach($this->get_options($setting) as $name => $display) {
                     $options .= "<label>
                         <span class='cobalt-radio-group--select-target'>$display</span>
                         <input type='radio' name='$index' value='$name'>
                     </label>";
                 }
                 break;
+            case "input-binary":
+                $template = "/admin/settings/inputs/input-binary.html";
+                $options = "";
+                $opts = $this->get_options($setting);
+                foreach($opts as $key => $option) {
+                    $selected = "";
+                    if($key & __APP_SETTINGS__[$index]) $selected = " selected='selected'";
+                    $options .= "<option value='$key'$selected><span>$option</span></option>";
+                }
+                break;
             case "select":
                 $template = "/admin/settings/inputs/select.html";
                 $options = "";
-                foreach($setting->validate['options'] as $valid => $label) {
+                foreach($this->get_options($setting) as $valid => $label) {
                     $checked = "";
                     if($valid === __APP_SETTINGS__[$index]) $checked = " selected='selected'";
                     $options .= "<option value='$valid'$checked>$label</option>\n";
@@ -130,11 +146,20 @@ class CoreSettingsPanel extends Controller {
             'setting' => $index,
             'value' => __APP_SETTINGS__[$index],
             'default' => $setting->defaultValue,
+            'small' => ($setting->meta['description']) ? "<small>".$setting->meta['description']."</small>" : "",
+            'help' => ($setting->meta['help']) ? "<help-span value=\"".htmlentities($setting->meta['help'])."\"></help-span>" : "",
             'type' => $type,
             'disabled' => '',
             'options' => $options,
         ]);
         return "<li>Can't render \"$index\"</li>";
+    }
+
+    private function get_options($setting):array {
+        $option = $setting->validate['options'];
+        if(is_array($option)) return $option;
+        if(is_callable($option)) return $option($setting);
+        return [];
     }
 
     private function get_input_from_view($setting, $name) {
@@ -151,6 +176,15 @@ class CoreSettingsPanel extends Controller {
         $name  = array_keys($_POST)[0];
         $value = $_POST[$name];
         return $GLOBALS['app']->update_setting($name, $value);
+    }
+
+    public function theme_update() {
+        $this->update();
+        $settings = new Settings(true);
+        add_vars(['app' => $settings->get_settings()]);
+        update('style#theme-variables', [
+            'innerHTML' => view('/shared/css_v2/color-theme.css')
+        ]);
     }
 
     public function updateLogo() {
@@ -194,7 +228,13 @@ class CoreSettingsPanel extends Controller {
     }
 
     public function reset_to_default($name) {
-        return $GLOBALS['app']->reset_to_default($name);
+        $split = explode(",",$name);
+        $updated = [];
+        /** @var SettingsManager $GLOBALS['app'] */
+        foreach($split as $name) {
+            $updated[] = $GLOBALS['app']->reset_to_default($name);
+        }
+        return $updated;
     }
 
     public function presentation() {

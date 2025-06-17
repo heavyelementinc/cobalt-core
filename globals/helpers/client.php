@@ -38,17 +38,18 @@ function update(string $query, array $value) {
  * Redirect will set a response header of either "X-Location" if "X-Request-Source"
  * is among request headers or "Location" if it's not.
  * @param string $path - The path to redirect to
- * @return void 
+ * @return bool - Returns `true` for 'X-Redirect' or false for 'Location'
  */
 function redirect(string $path) {
     $headers = getHeader("X-Request-Source", null, true, false);
     // If the request was sent via AsyncFetch, return `X-Location` header
     if($headers) {
         header("X-Redirect: $path");
-        return;
+        return true;
     }
     // Otherwise, return `Location` header
     header("Location: $path");
+    return false;
 }
 
 /**
@@ -76,5 +77,12 @@ function edit_link($group) {
     } catch (\Exceptions\HTTP\Unauthorized $e) {
         return "";
     }
-    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span style='display: none'>Edit This Customization</span></a>";
+    template_customs_hint($group);
+    return "<a class='custom-element-edit-link' href='/admin/customizations/".urlencode($group)."'><i name='pencil'></i><span class='sr-only'>Edit $group customization</span><span style='display: none'>Edit This Customization</span></a>";
+}
+
+function template_customs_hint(string $group):void {
+    global $USER_BAR_CUSTOMS;
+    if(in_array($group, $USER_BAR_CUSTOMS)) return;
+    array_push($USER_BAR_CUSTOMS, $group);
 }

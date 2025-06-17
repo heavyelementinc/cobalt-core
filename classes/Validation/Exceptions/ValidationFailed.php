@@ -15,6 +15,10 @@
 
 namespace Validation\Exceptions;
 
+/**
+ * @deprecated use Cobalt\Models\Issues\FilterFailure instead
+ * @package Validation\Exceptions
+ */
 class ValidationFailed extends \Exceptions\HTTP\BadRequest {
     public $status_code = 422;
     function __construct($message, $data = []) {

@@ -15,7 +15,7 @@ class NotFound extends HTTPException {
     public $status_code = 404;
     public $name = "Not Found";
 
-    function __construct($message, $data = []) {
-        parent::__construct($message, $data);
+    function __construct($message, $client_message = null, $data = []) {
+        parent::__construct($message, $client_message, $data);
     }
 }

@@ -62,7 +62,7 @@ class EnumResult extends SchemaResult {
         // Check if `strict` is set as a schema element
         $strict = $this->isStrict();
 
-        $message = "Invalid selection";
+        $message = $this->getDirective("filter_failed_message") ?? "Invalid selection";
         // $strict = $this->schema['strict'] ?? true;
         if($strict) throw new ValidationIssue($message);
         return $value;

@@ -21,7 +21,7 @@ class EventMap extends PersistanceMap {
     }
 
     function __get_editor_template_path(): ?string {
-        return "/cobalt_events/edit.v1.html";
+        return "/cobalt_events/edit.v1.php";
     }
 
     function __get_schema():array {
@@ -101,7 +101,7 @@ class EventMap extends PersistanceMap {
                     'true'   => 'Displayed, if also marked as "Public"',
                     'always' => 'Displayed, regardless of "Public" status',
                 ]
-            ]
+            ],
         ];
     }
 

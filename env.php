@@ -36,10 +36,12 @@ require_once __DIR__ . "/globals/global_exceptions.php";
 /* ENV_ROOT defines the root of the core files (the dir this file resides in) */
 define("__ENV_ROOT__", __DIR__);
 
+require_once __ENV_ROOT__ . "/globals/locales/en_us.php";
+
 // Establish our app root
 $app_root = "";
 // Go up one directory so we're not in the public space
-if (!empty($_SERVER['DOCUMENT_ROOT'])) $app_root = $_SERVER['DOCUMENT_ROOT'] . "/../";
+if (!empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) $app_root = $_SERVER['CONTEXT_DOCUMENT_ROOT'] . "/../";
 // Rely on the Cobalt CLI to mandate the path to our app
 else if (key_exists("cli_app_root", $GLOBALS)) $app_root = $GLOBALS['cli_app_root'];
 else if (key_exists("unit_test", $GLOBALS)) $app_root = $GLOBALS['unit_test'];
@@ -49,6 +51,8 @@ else {
 }
 
 define("__APP_ROOT__", realpath($app_root));
+$app_locale = __APP_ROOT__ . "/locales/en_us.php";
+if(file_exists($app_locale)) require_once $app_locale;
 define("__PLG_ROOT__", __APP_ROOT__ . "/plugins");
 
 // Let's make sure our environment is configured properly.
@@ -85,6 +89,10 @@ $allowed_to_exit_on_exception = true;
 $WRITE_TO_BUFFER_HANDLED = false;
 
 require_once __DIR__ . "/globals/global_declarations.php";
+
+$app_constants = __APP_ROOT__ . "/app_constants.php";
+if(file_exists($app_constants)) require_once $app_constants;
+
 require_once __DIR__ . "/globals/bootstrap.php";
 // Let's import our exceptions and our helper functions:
 require_once __DIR__ . "/globals/global_functions.php";
@@ -135,6 +143,17 @@ if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->g
 define("__APP_SETTINGS__", $application->get_settings());
 define("VERSION_HASH", substr(md5(__COBALT_VERSION . __APP_SETTINGS__['version']), 0, 12));
 
+if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
+    header("X-Robots-Tag: noimageai");
+    header("X-Robots-Tag: noai");
+    header("tdm-reservation: 1");
+    add_vars(['ai_scraping' => <<<HTML
+    <meta name="CCBot" content="nofollow">
+    <meta name="robots" content="noai, noimageai">
+    <meta name="tdm-reservation" content="1">
+    HTML]);
+}
+
 // if(__APP_SETTINGS__['Forbid_AI_webcrawler_access']) {
 //     $useragents = get_json(__ENV_ROOT__."/config/robots.json");
 //     foreach($useragents as $name => $details) {
@@ -148,11 +167,27 @@ define("VERSION_HASH", substr(md5(__COBALT_VERSION . __APP_SETTINGS__['version']
 // }
 
 session_name("COBALTID");
+// $sameSite = "Lax";
+// $referer = str_replace(['https://', 'http://'], '', getHeader('referer', null, true, false) ?? $_SERVER['HTTP_REFERER']);
+// if(in_array($referer, __APP_SETTINGS__['API_CORS_allowed_origins'])) {
+//     ini_set('session.cookie_samesite', 'None');
+// }
+// session_set_cookie_params([
+//     'secure' => "1",
+//     'httponly' => "1",
+//     'samesite' => $sameSite,
+// ]);
 $cobalt_session_started = session_start([
     'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
     // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
     // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
 ]);
+$utm_manager = new UTMHandler();
+$utm_details = $utm_manager->parseUTM($_GET);
+if($utm_details) {
+    $utm_manager->storeUTM($utm_details, true);
+    exit;
+}
 // Let's check to see that we have a CSRF token created
 if($_SESSION[CSRF_TOKEN_KEY] === null) csrf_generate_token();
 // Ensure we have a fresh CSRF token for this session!
@@ -160,8 +195,8 @@ csrf_get_token();
 
 // $_SESSION['timezone'] = apache_request_headers()['X-Timezone'];
 
-@$tz= @timezone_open($_SESSION['timezone'] ?? __APP_SETTINGS__['timezone']);
-if($tz) $tz_set_result = date_default_timezone_set($_SESSION['timezone']);
+@$tz= @timezone_open($_SESSION['timezone'] ?? config()['timezone']);
+if($tz) $tz_set_result = date_default_timezone_set($_SESSION['timezone'] ?? config()['timezone']);
 
 if(!key_exists("cli_app_root", $GLOBALS) && $cobalt_session_started === false && app('Auth_logins_enabled')) kill("Something went wrong creating a session. Do you have cookies disabled? They're required for this app.");
 

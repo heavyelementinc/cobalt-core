@@ -17,6 +17,7 @@ namespace Validation\Exceptions;
 /**
  * Throw a ValidationContinue if you want a field to be omitted from 
  * the final validated PersistanceMap.
+ * @deprecated use Cobalt\Models\Issues\FilterSkip instead
  * @package Validation\Exceptions
  */
 class ValidationContinue extends \Exception {

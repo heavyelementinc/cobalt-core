@@ -51,7 +51,7 @@ class EventsController {
     function public_index() {
         $results = $this->events->getPublicListing();
 
-        if($results) $views = view_each('/cobalt_events/public-event-listing.html', $results);
+        if($results) $views = view_each('/cobalt_events/public-event-listing.php', $results);
         else $views = "There are no events yet. Check back later.";
         
         add_vars([
@@ -114,7 +114,7 @@ class EventsController {
             'event' => $event
         ]);
 
-        return view("/cobalt_events/edit.v1.html");
+        return view("/cobalt_events/edit.v1.php");
     }
 
     function update_event($ident = null) {

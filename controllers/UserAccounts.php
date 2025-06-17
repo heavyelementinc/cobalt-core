@@ -7,7 +7,7 @@ use \Auth\UserCRUD;
 use Auth\UserPersistance;
 use Auth\UserSchema;
 use \Auth\UserValidate;
-use Cobalt\Notifications\PushNotifications;
+use Cobalt\Notifications\Classes\PushNotifications;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
@@ -74,11 +74,12 @@ class UserAccounts extends \Controllers\Pages {
         $user = session();
         $totp = new MultiFactorManager($user);
         $backups = $totp->enroll_user($user, $_POST['verification']);
-        $body = "<p>Back up these recovery codes somewhere safe! If you lose access to your TOTP app, you can use these codes as a way to recover access to your account. <strong>You will <u>not</u> see these backup codes again!<strong></p><ul>";
+        $backup_ul = "<ul style='font-family: monospace'>";
         foreach($backups as $b) {
-            $body .= "<li>$b</li>";
+            $backup_ul .= "<li>$b</li>";
         }
-        $body .= "</ul>";
+        $backup_ul .= "</ul>";
+        $body = sprintf(AUTH_TOTP_BACKUP_CODE_BACKUP_PROMPTS, $backup_ul);
 
         update("#enrollment-pane", ['innerHTML' => $body]);
 

@@ -25,10 +25,14 @@
     .directory--icon-group {
         display: flex;
         list-style: none;
-        gap: 1em;
+        gap: var(--margin-m);
     }
-
+    fieldset:has(ul.directory-group) {
+        padding-bottom: var(--margin-m);
+        margin-bottom: var(--margin-m);
+    }
     .directory--icon-group a {
+        --_anchor-element-color: black;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -36,15 +40,18 @@
         color: black;
         font-weight: normal;
         text-decoration: none;
-        height: 5.5rem;
-        width: 5.5rem;
+        height: 7.5rem;
+        width: 7.5rem;
         padding: 1em;
         border-radius: .5rem;
-        background-color:white;
+        background-color:var(--background-color-1);
         text-align: center;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        i {
+            font-size: 4.5rem;
+        }
     }
 
     .directory--icon-group i {
