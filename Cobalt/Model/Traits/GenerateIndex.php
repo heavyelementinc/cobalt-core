@@ -134,11 +134,15 @@ trait IndexableModel {
 
         // Return the 'default query' if it's not set
         if(isset($name)) {
-            // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
-            // We also want to override the "default" query with filter field
-            $this->add_filter_params([
-                $name => $this->{$name}->typecast($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_LOOKUP)
-            ]);
+            $fieldNames = explode(",", $_GET[QUERY_PARAM_FILTER_NAME]);
+            $values = explode(",", $_GET[QUERY_PARAM_FILTER_VALUE]);
+            foreach($fieldNames as $index => $fieldName) {
+                // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
+                // We also want to override the "default" query with filter field
+                $this->add_filter_params([
+                    $fieldName => $this->{$fieldName}->typecast($values[$index], $fieldName, QUERY_TYPE_CAST_LOOKUP)
+                ]);
+            }
         }
         if(isset($search)) {
             $searchOptions = [
@@ -513,7 +517,7 @@ trait IndexableModel {
 
         if($filterable === true) {
             $this->filterableFields[$field] = $this->{$field}
-                ->get_filter_field($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_OPTION);
+                ->get_filter_field($_GET[QUERY_PARAM_FILTER_VALUE], $_GET[QUERY_PARAM_FILTER_NAME], QUERY_TYPE_CAST_OPTION);
         }
         return $filterable;
     }

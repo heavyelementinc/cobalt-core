@@ -18,7 +18,7 @@ abstract class OauthBase extends Base {
      */
     function html_oauth_button($state = null, int $redirect_uri = 0):string {
         
-        return view("/admin/integrations/oauth/button.html", [
+        return view("/Cobalt/Integrations/templates/oauth/button.html", [
             'config' => $this->config,
             'name' => $this->config->name,
             'publicName' => $this->config->publicName,
@@ -71,7 +71,7 @@ abstract class OauthBase extends Base {
         $crud = new UserCRUD();
         $processed = $this->oauth_fetch_credentials($result);
         if(!key_exists('details', $processed) || !key_exists('expiration', $processed)) throw new Exception("Missing expected key from response processor");
-        $result = $crud->store_integration_credentials(session()['_id'], $this->config->name, $processed['details'], $processed['expiration']);
+        $result = $crud->store_integration_credentials(session()['_id'], $this->config->tokenName, $processed['details'], $processed['expiration']);
         return $result;
     }
 
@@ -119,4 +119,26 @@ abstract class OauthBase extends Base {
             'expiration' => $date
         ];
     }
+
+    /** This function should always return valid oauth credentials, either from
+     * the session() or fetched from the API.
+     */
+    // abstract public function get_oauth_credentials(): array;
+
+    public function fetch(string $method, string $action, array $data = [], array $headers = [], bool $authenticate = true):array {
+        
+        // $name = $this->config->tokenName;
+        // $credentials = session("integrations.$name");
+        
+        // $time = time();
+        // $time += $response['expires_in'];
+        // $crud = new UserCRUD();
+        // $crud->update_integration_credentials(session('_id'), $this->config->tokenName, $response, new UTCDateTime(new DateTime(date("c", $time))));
+        return parent::fetch($method, $action, $data, $headers, $authenticate);
+    }
+
+    // public function oauth_fetch(string $method, $action, array $data = [], array $headers = [], bool $authenticate = true): array {
+    //     $response = $this->get_oauth_credentials();
+
+    // }
 }

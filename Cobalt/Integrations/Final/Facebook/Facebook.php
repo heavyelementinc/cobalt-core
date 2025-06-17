@@ -1,11 +1,14 @@
 <?php
 
-namespace Cobalt\Integrations\Facebook;
+namespace Cobalt\Integrations\Final\Facebook;
 
 use Cobalt\Integrations\Config;
 use Cobalt\Integrations\OauthBase;
 
 class Facebook extends OauthBase {
+    public function get_oauth_credentials(): array {
+        return [];
+    }
 
     public function status(): int {
         return self::STATUS_CHECK_OK;
@@ -37,7 +40,7 @@ class Facebook extends OauthBase {
     }
 
     public function html_token_editor(): string {
-        return view("/admin/integrations/edit/facebook.html");
+        return view("Cobalt/Integrations/Final/Facebook/facebook.html");
     }
 
 }

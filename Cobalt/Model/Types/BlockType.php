@@ -100,7 +100,7 @@ class BlockType extends MixedType {
         if($this->__reference instanceof Model) $manager = $this->__reference;
         if($manager) {
             $full_document = $manager->findOne(['_id' => $this->__reference->_id]);
-            foreach($full_document->{$this->name}->blocks as $blk) {
+            foreach($full_document->{$this->{MODEL_RESERVERED_FIELD__FIELDNAME}}->blocks as $blk) {
                 if($blk['type'] === 'imagetool') {
                     $orphaned_images[$blk['id']] = $blk;
                 }
@@ -128,6 +128,16 @@ class BlockType extends MixedType {
 
         if(count($orphaned_images)) header("X-Message: @warning There are ".count($orphaned_images)." orphaned images from this post!");
 
+        return $value;
+    }
+
+    /**
+     * Each child of MixedType should return an appropriately typecast
+     * version of the $value parameter
+     * @param mixed $value 
+     * @return mixed 
+     */
+    public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
         return $value;
     }
 

@@ -1447,7 +1447,7 @@ $settings = [
             "default" => "0.05",
         ],
         "branding_rotation" => [
-            "default" => "10"
+            "default" => "0"
         ],
         "color_branding" => [
             "default" => "#2F4858"
@@ -1459,7 +1459,7 @@ $settings = [
             "default" => "0.1",
         ],
         "primary_rotation" => [
-            "default" => "-10"
+            "default" => "0"
         ],
         "color_primary" => [
             "default" => "#009DDC"
@@ -1491,7 +1491,7 @@ $settings = [
             "default" => "0.1",
         ],
         "issue_rotation" => [
-            "default" => "-10"
+            "default" => "0"
         ],
         "color_issue" => [
             "default" => "#F96F5D"

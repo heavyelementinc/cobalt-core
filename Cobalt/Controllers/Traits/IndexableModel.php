@@ -35,6 +35,7 @@ trait IndexableModel {
     protected Model $schema;
     protected array $indexableSchema;
     protected array $sortedTable;
+    protected bool $hasFilterParamsBeenMerged = false;
     protected array $filterParameters = [];
     protected array $queryParameters = [];
 
@@ -123,17 +124,27 @@ trait IndexableModel {
     }
 
     private function __index_query():array {
+        if($this->hasFilterParamsBeenMerged) return $this->filterParameters;
+        $this->hasFilterParamsBeenMerged = true;
+
         // Let's check if the filter param is set
         $name = $_GET[QUERY_PARAM_FILTER_NAME];
         $search = $_GET[QUERY_PARAM_SEARCH];
 
         // Return the 'default query' if it's not set
         if(isset($name)) {
-            // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
-            // We also want to override the "default" query with filter field
-            $this->add_filter_params([
-                $name => $this->schema->{$name}->typecast($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_LOOKUP)
-            ]);
+            // Return the 'default query' if it's not set
+            if(isset($name)) {
+                $fieldNames = explode(",", $_GET[QUERY_PARAM_FILTER_NAME]);
+                $values = explode(",", $_GET[QUERY_PARAM_FILTER_VALUE]);
+                foreach($fieldNames as $index => $fieldName) {
+                    // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
+                    // We also want to override the "default" query with filter field
+                    $this->add_filter_params([
+                        $fieldName => $this->schema->{$fieldName}->typecast($values[$index], $fieldName, QUERY_TYPE_CAST_LOOKUP)
+                    ]);
+                }
+            }
         }
         if(isset($search) && $search) {
             $searchOptions = [
@@ -293,12 +304,16 @@ trait IndexableModel {
         return ['sort' => ['_id' => -1]];
     }
 
+    public function __index_options():array {
+        return array_merge($this->index_options(), $this->queryParameters);
+    }
+
     public function get_table_body() {
-        $result = $this->schema->find($this->__index_query(), array_merge($this->index_options(), $this->queryParameters));
+        $result = $this->schema->find($this->__index_query(), $this->__index_options());
         $count = 0;
         $html = "";
         foreach($result as $doc) {
-            if($doc instanceof $this->model === false) throw new TypeError("Document must be of type `".$this->model::class."`, found `".$doc::class."` instead.");//$doc = $this->get_schema($doc);
+            // if($doc instanceof $this->model === false) throw new TypeError("Document must be of type `".$this->model::class."`, found `".$doc::class."` instead.");//$doc = $this->get_schema($doc);
             $this->get_table_row($doc, $html);
             $count += 1;
         }
@@ -375,7 +390,7 @@ trait IndexableModel {
 
     
     public function get_hypermedia():array {
-        $count = $this->schema->count($this->index_query(), $this->index_options());
+        $count = $this->schema->count($this->__index_query(), $this->index_options());
 
         $limit = $this->queryParameters['limit'];
         
@@ -509,7 +524,7 @@ trait IndexableModel {
 
         if($filterable === true) {
             $this->filterableFields[$field] = $this->schema->{$field}
-                ->get_filter_field($_GET[QUERY_PARAM_FILTER_VALUE], QUERY_TYPE_CAST_OPTION);
+                ->get_filter_field($_GET[QUERY_PARAM_FILTER_VALUE], $_GET[QUERY_PARAM_FILTER_NAME], QUERY_TYPE_CAST_OPTION);
         }
         return $filterable;
     }

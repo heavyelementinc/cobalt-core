@@ -114,7 +114,7 @@ abstract class ForeignId extends MixedType {
 
 
     public function onUpdateConfirmed($value):void {
-        update("[name='$this->name']", ['outerHTML' => $this->field()]);
+        update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['outerHTML' => $this->field()]);
     }
 
     #[Prototype]
@@ -127,7 +127,7 @@ abstract class ForeignId extends MixedType {
         // Check if the tag is not null
         $tag = $tag ?? "object-id";
         // Get the route
-        $route = route($this->model::class."@__model", [(string)$this->model->_id, $this->name]);
+        $route = route($this->model::class."@__model", [(string)$this->model->_id, $this->{MODEL_RESERVERED_FIELD__FIELDNAME}]);
         // Build our gallery tag
         $gallery = "<$tag $attrs $accept max='1' method=\"GET\" action=\"$route\">";
         // Loop through all the objects that belong to this field
@@ -163,7 +163,7 @@ abstract class ForeignId extends MixedType {
     //         //         $operators[$this->operator][$field] = $details;
     //         //         return;
     //         //     }
-    //         //     $operators[$this->operator][$this->name] = ['$each' => $details];
+    //         //     $operators[$this->operator][$this->{MODEL_RESERVERED_FIELD__FIELDNAME}] = ['$each' => $details];
     //         // },
     //         'schema' => [
     //             // $schema

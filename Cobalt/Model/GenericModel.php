@@ -41,6 +41,8 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     public ?string $name_prefix = null;
     protected bool $__schema_allow_undefined_fields = false;
     protected array $__reservedFields = [];
+    protected ?string $name = "";
+    protected ?string $fieldName = "";
     
     const DIRECTIVE_MAP = [
         'set' => 'Cobalt\Model\Directives\SetDirective',
@@ -64,7 +66,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         }
         // Let's check to ensure that the property exists.
         if(key_exists($property, $this->__dataset)) return $this->__dataset[$property];
-        throw new Undefined($property, "The property `$property` does not exist on `$this->name`!");
+        throw new Undefined($property, "The property `$property` does not exist on `$property"."->".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."!");
     }
 
     public function __set($property, $value) {
@@ -100,7 +102,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
 
     public function __isset($name) {
         if($name === "_id") return isset($this->_id);
-        return isset($this->__dataset[$name]->value);
+        return key_exists($name, $this->__dataset) && $this->__dataset[$name]->isSet;
     }
 
     public function __unset($name) {

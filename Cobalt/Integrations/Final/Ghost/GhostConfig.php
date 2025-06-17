@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Integrations\Ghost;
+namespace Cobalt\Integrations\Final\Ghost;
 
 use Cobalt\Integrations\Config;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
@@ -63,5 +63,14 @@ class GhostConfig extends Config {
             throw new TypeError("invalid mode");
         }
         $this->mode = $mode;
+    }
+
+    function getTokenPrefix():?string {
+        switch($this->mode) {
+            case self::MODE_ADMIN:
+                return "Ghost";
+            default:
+                return null;
+        }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Integrations\Ghost;
+namespace Cobalt\Integrations\Final\Ghost;
 
 use Cobalt\Integrations\Config;
 use Cobalt\Integrations\Base;
@@ -24,7 +24,7 @@ class Ghost extends Base {
     }
 
     public function html_token_editor(): string {
-        return view("admin/integrations/edit/ghost.html");
+        return view("Cobalt/Integrations/Final/Ghost/ghost.html");
     }
 
     protected function get_host() {

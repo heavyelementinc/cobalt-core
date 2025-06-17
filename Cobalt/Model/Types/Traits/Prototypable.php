@@ -21,14 +21,14 @@ trait Prototypable {
             if($this->__isPrototypeAttributeSet($this, $name) === false) throw new \BadFunctionCallException("Method lacks #[Prototype] attribute");
             return $this->{$name}(...$args);
         }
-        $target_name = ($this instanceof MixedType) ? $this->name : "[object Model]";
+        $target_name = ($this instanceof MixedType) ? $this->{MODEL_RESERVERED_FIELD__FIELDNAME} : "[object Model]";
         throw new \BadFunctionCallException("Function `$name` does not exist on `$target_name`");
     }
 
     function __isPrototypeAttributeSet(MixedType|GenericModel $class, string $methodName):?bool {
         $reflection = new ReflectionObject($class);
         $method = $reflection->getMethod($methodName);
-        if(!$method) return null;//throw new \BadMethodCallException("Call for `$methodName` is invalid on `$this->name`");
+        if(!$method) return null;//throw new \BadMethodCallException("Call for `$methodName` is invalid on `".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}.""`");
         $attributes = $method->getAttributes();
         $validPrototypes = ["Prototype", "Cobalt\Model\Attributes\Prototype"];
         foreach($attributes as $attr) {
@@ -39,7 +39,7 @@ trait Prototypable {
 
     #[Prototype]
     protected function getName() {
-        return $this->name;
+        return $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
     }
 
     /**
@@ -96,7 +96,7 @@ trait Prototypable {
         }
         $hasLabel = $this->hasDirective("label");
         if($hasLabel) return $labelStart.$this->getDirective("label") . $labelEnd;
-        $split = str_replace([".","_"], " ", $this->name);
+        $split = str_replace([".","_"], " ", $this->{MODEL_RESERVERED_FIELD__FIELDNAME});
         return $labelStart . ucwords($split) . $labelEnd;
     }
 

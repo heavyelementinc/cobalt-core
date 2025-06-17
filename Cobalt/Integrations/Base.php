@@ -10,6 +10,7 @@ use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionClass;
 use RuntimeException;
+use TypeError;
 
 /**
  * Integrations must live in the \Cobalt\Integrations\ namespace
@@ -59,8 +60,8 @@ abstract class Base extends Database {
     }
 
     /**
-     * Returns 
-     * @return array|object|null 
+     * This is the name of the token as it's stored in the database
+     * @return string
      */
     abstract function get_unique_token(): string;
 
@@ -81,7 +82,7 @@ abstract class Base extends Database {
      * @return string 
      */
     public function html_index_button(): string {
-        return view("/admin/integrations/button.html", [
+        return view("Cobalt/Integrations/templates/button.html", [
             "icon" =>  $this->config->icon,
             "name" => $this->config->publicName,
             "class" => $this->config->name
@@ -122,7 +123,7 @@ abstract class Base extends Database {
         try {
             $request = $client->request($method_type, $action, $rq);
         } catch(ClientException $error) {
-            $errorHandlingResult = $this->handleError($error, $request);
+            $errorHandlingResult = $this->handleError($error, $request) ;
             switch($errorHandlingResult) {
                 case self::ERROR_HANDLING['ABORT_REQUEST']:
                     return ['response' => null, 'headers' => [], 'result' => null, 'error' => $error];
@@ -156,7 +157,7 @@ abstract class Base extends Database {
 
     public function requestBody(mixed $data):array {
         // return $data;
-        switch((int)$this->config->__requestEncoding) {
+        switch($this->__requestEncoding ?? (int)$this->config->__requestEncoding) {
             case REQUEST_ENCODE_JSON:
                 return ['body' => json_encode($data)];
                 break;
@@ -174,6 +175,20 @@ abstract class Base extends Database {
                 return ['body' => (string)$data];
                 break;
         }
+    }
+    private ?int $__requestEncoding = null;
+    public function requestEncoding(?int $type) {
+        switch($type) {
+            case REQUEST_ENCODE_JSON:
+            case REQUEST_ENCODE_FORM:
+            case REQUEST_ENCODE_XML:
+            case REQUEST_ENCODE_MULTIPART_FORM:
+            case REQUEST_ENCODE_PLAINTEXT:
+            case null:
+                $this->__requestEncoding = $type;
+                return;
+        }
+        throw new TypeError("$type is out of range");
     }
 
 }

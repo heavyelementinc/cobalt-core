@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Integrations\MailChimp;
+namespace Cobalt\Integrations\Final\MailChimp;
 
 use Cobalt\Integrations\Config as IntegrationsConfig;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;

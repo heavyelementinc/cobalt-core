@@ -32,17 +32,18 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
 function session($info = null) {
     global $session;
     if(is_cli()) {
-        $session = new UserPersistance([
-            '_id' => new ObjectId(),
-            'fname' => 'Cobalt',
-            'lname' => 'Engine',
-            'uname' => '__cobalt_engine_cli',
-            'email' => 'dummy@heavyelement.com',
-            // 'flags' => UserPersistance::STATE_USER_VERIFIED,
-            'groups' => ['root'],
-            'permissions' => [],
-            'is_root' => true,
-        ]);
+        
+        // $session = new UserPersistance([
+        //     '_id' => new ObjectId(),
+        //     'fname' => 'Cobalt',
+        //     'lname' => 'Engine',
+        //     'uname' => '__cobalt_engine_cli',
+        //     'email' => 'dummy@heavyelement.com',
+        //     // 'flags' => UserPersistance::STATE_USER_VERIFIED,
+        //     'groups' => ['root'],
+        //     'permissions' => [],
+        //     'is_root' => true,
+        // ]);
     }
     if (!isset($session)) return null;
     if ($info === null) return $session ?? null;

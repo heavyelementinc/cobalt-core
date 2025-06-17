@@ -485,7 +485,7 @@ class Render {
     function functs_get_vars($vars):array {
         $mutant = [];
         foreach ($vars as $value) {
-            if ($value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
+            if (is_string($value) && $value[0] === "$") array_push($mutant, $this->lookup_value(substr($value, 1), false));
             else array_push($mutant, $value);
         }
         return $mutant;

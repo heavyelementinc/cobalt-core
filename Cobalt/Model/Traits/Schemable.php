@@ -68,9 +68,7 @@ trait Schemable {
     }
 
     public function __defaultSchema():array {
-        return [
-            '__version' => new StringType,
-        ];
+        return [];
     }
 
     /**
@@ -81,6 +79,13 @@ trait Schemable {
         return [
             'system',
             QUERY_SEARCH_MATCH_SCORE_FIELD,
+            '__value',
+            '__raw',
+            // 'original',
+            'model',
+            // 'type',
+            // 'name',
+            'fieldName',
         ];
     }
 

@@ -76,7 +76,7 @@ trait Hydrateable {
             case "array":
                 if(is_associative_array($value)) {
                     $instance = new ModelType();
-                    $instance->allow_undefined_types(true);
+                    $instance->allow_undefined_fields(true);
                 } else $instance = new ArrayType();
                 break;
             case "object":

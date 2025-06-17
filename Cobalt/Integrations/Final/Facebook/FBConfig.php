@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Integrations\Facebook;
+namespace Cobalt\Integrations\Final\Facebook;
 
 use Cobalt\Integrations\Config;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;

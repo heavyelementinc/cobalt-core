@@ -58,7 +58,7 @@ trait DirectiveBaseline {
      */
     public function getDirective($name, &...$args) {
         // $name = array_shift($args);
-        if(!key_exists($name, $this->directives)) throw new Error("Error on `$this->name`: Directive `$name` does not exist.");
+        if(!key_exists($name, $this->directives)) throw new Error("Error on `".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."`: Directive `$name` does not exist.");
         if($this->directives[$name] instanceof AbstractDirective) return $this->directives[$name]->getValue(...$args);
         // Let's check if the directive is a function or not
         if(is_function($this->directives[$name])) {

@@ -98,6 +98,10 @@ class CobaltScrollManager {
             const attr = e.getAttribute("parallax-mode")?.toLowerCase();
             let parallaxElement = null;
             switch(attr) {
+                case "scroll-pos":
+                case "scroll-position":
+                    parallaxElement = new ParallaxScrollPosition();
+                    break;
                 case "translate-x":
                 case "translatex":
                 case "x":
@@ -134,7 +138,7 @@ class CobaltScrollManager {
         }
 
         this.props.allowUpdate = true;
-        if(this.scrollAnimatedElements.length) requestAnimationFrame(this.animationLoop.bind(this));
+        requestAnimationFrame(this.animationLoop.bind(this));
 
         // Create our list of lazy elements
         this.lazyElements = [];
@@ -182,6 +186,7 @@ class CobaltScrollManager {
         this.visibleScrollPosition =  scrollHeight - this.innerScrollOffset;
         if(document.body.scrollHeight - scrollHeight < (this.innerScrollOffset > .5)) this.visibleScrollPosition = document.body.scrollHeight;
         this.simultaneousTickRevealDelay = 0;
+        document.body.style.setProperty("--viewport-y", `${scrollHeight}px`);
 
         for(const element of this.scrollAnimatedElements) {
             element.animate(scrollHeight);
@@ -368,6 +373,12 @@ class ParallaxCommon extends AnimatedElement {
 
     cleanUp() {
 
+    }
+}
+
+class ParallaxScrollPosition extends ParallaxCommon {
+    animate(scrollHeight) {
+        this.ELEMENT.style.setProperty("--pos-y", `${scrollHeight}px`);
     }
 }
 

@@ -15,6 +15,29 @@ $db_config = __APP_ROOT__ . "/config/config.php";
 if(file_exists(__APP_ROOT__ . "/ignored/DEVELOPMENT") || file_exists(__APP_ROOT__ . "/ignored/DEV")) {
     $db_config = __APP_ROOT__ . "/config/config.development.php";
 }
+register_shutdown_function( "fatal_handler" );
+
+const FATAL_ERROR_CODES = [64];
+
+function fatal_handler() {
+    $errfile = "unknown file";
+    $errstr  = "shutdown";
+    $errno   = E_CORE_ERROR;
+    $errline = 0;
+
+    $error = error_get_last();
+    
+    if($error !== NULL 
+        && in_array($error['type'], FATAL_ERROR_CODES)
+    ) {
+        $errno   = $error["type"];
+        $errfile = $error["file"];
+        $errline = $error["line"];
+        $errstr  = $error["message"];
+
+        kill("A fatal error occurred: " . "$errno $errstr ".str_replace([__APP_ROOT__, __ENV_ROOT__],["__APP_ROOT__", "__ENV_ROOT__"],$errfile)." $errline");
+    }
+}
 
 /**
  * {boostrap_mode: int, safe_mode: int, mode: int, timezone: int|false, enable_debug_routes: bool, db_driver: string, db_addr: string, db_port: string, database: string, db_usr: string|false, db_pwd: string|false, db_ssl: string|false, db_sslFile: string|false, db_invalidCerts: bool, smtp_username:string, smtp_password: string,smtp_host: string,smtp_port: string,smtp_auth: string}

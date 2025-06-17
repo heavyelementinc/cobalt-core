@@ -18,7 +18,7 @@ class FilterDirective extends AbstractDirective {
         $funcReflection = new ReflectionFunction($filter);
         $argsReflection = $funcReflection->getParameters();
         if(!$argsReflection[0]->isPassedByReference()) {
-            throw new Error("The first argument must be assed by reference!");
+            throw new Error("The first argument must be passed by reference!");
         }
         $returnType = $funcReflection->getReturnType();
         if((string)$returnType !== "void") {

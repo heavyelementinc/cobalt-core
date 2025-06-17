@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Model\Types\NumberType;
 use Validation\Exceptions\ValidationIssue;
 
 /** Convert seconds to pretty string */
@@ -14,7 +15,8 @@ function prettify_seconds(?int $seconds) {
  * @param int $cents 
  * @return string the dollar value as a string
  * */
-function cents_to_dollars($cents) {
+function cents_to_dollars(int|NumberType $cents) {
+    if($cents instanceof NumberType) $cents = $cents->value;
     $dollars = round($cents / 100, 2);
     return number_format($dollars, 2);
 }

@@ -1,21 +1,21 @@
 <?php
 
-namespace Cobalt\Integrations\YouTube;
+namespace Cobalt\Integrations\Final\YouTube;
 
 use Auth\UserCRUD;
 use Cobalt\Integrations\OauthBase;
 use Cobalt\Integrations\Config;
-use Cobalt\Integrations\YouTube\Config as YouTubeConfig;
 use DateTime;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Unauthorized;
 use Cobalt\Integrations\Base;
+use Cobalt\Integrations\GoogleOauth\GoogleOauth;
 use Drivers\Database;
 use GuzzleHttp\Exception\GuzzleException;
 use RuntimeException;
 
-class YouTube extends OauthBase {
+class YouTube extends GoogleOauth {
 
     public function __set_manager(?Database $manager = null): ?Database {
         return null;
@@ -42,7 +42,7 @@ class YouTube extends OauthBase {
     }
 
     public function html_token_editor(): string {
-        return view("/admin/integrations/edit/youtube-api.html");
+        return view("Cobalt/Integrations/Final/YouTube/templates/youtube-api.html");
     }
 
     function oauth_errors():array {
@@ -54,31 +54,41 @@ class YouTube extends OauthBase {
         ];
     }
 
-    function fetchYouTubeMembershipTiers() {
+    function fetchAllMembershipTiers() {
         $params = [
             'part' => 'id,snippet'
         ];
         return $this->fetch("GET", "https://www.googleapis.com/youtube/v3/membershipsLevels?" . http_build_query($params));
     }
 
-    function fetchAllYouTubeMembers() {
+    const PAGE_LIMIT = 25;
+
+    function fetchAllMembershipData() {
+        $cli = function_exists("say");
         // $youtube_tiers = $this->fetchYouTubeMembershipTiers()['response'];
-        $fetched_data = [];
-        $pagination = null;
+        $result = [];
+        $cursor = null;
+        $iterations = 0;
         while(true) {
-            $request = $this->fetchYouTubeMembersByPageToken($pagination);
-            array_push($fetched_data, $request);
-            if(!$request->nextPageToken) break;
-            $pagination = $request->nextPageToken;
-        }
-        $members = [];
-        foreach($fetched_data as $request => $payload) {
-            foreach($payload->items as $index => $d) {
-                $snippet = $d->snippet;
-                $members[$snippet->memberDetails->channelId] = $snippet;
+            $request = $this->fetchYouTubeMembersByPageToken($cursor);
+            if($cli) {
+                $totalPages = ceil($request['pageInfo']['totalResults'] / self::PAGE_LIMIT);
+                print("Fetched YouTube members (".($iterations + 1)."/$totalPages)");
             }
+            array_push($result, $request);
+            if(!$request->nextPageToken) break;
+            print("\r");
+            $cursor = $request->nextPageToken;
         }
-        return $members;
+        print("\n");
+        // $members = [];
+        // foreach($fetched_data as $request => $payload) {
+        //     foreach($payload->items as $index => $d) {
+        //         $snippet = $d->snippet;
+        //         $members[$snippet->memberDetails->channelId] = $snippet;
+        //     }
+        // }
+        return $result;
     }
     
     /**
@@ -92,13 +102,22 @@ class YouTube extends OauthBase {
         $params = [
             'part' => 'snippet',
             'mode' => 'all_current',
-            'maxResults' => 1000
+            'maxResults' => 15
         ];
         if($page_token) $params['pageToken'] = $page_token;
-        return json_decode($this->fetch("GET", "https://www.googleapis.com/youtube/v3/members?" . http_build_query($params))['result']);
+        return json_decode($this->fetch("GET", "https://www.googleapis.com/youtube/v3/members?" . http_build_query($params))['result'], true);
     }
 
+    private $requestCount = 0;
     public function handleError($error, &$request):int {
+        // switch($error->code) {
+        //     case 401:
+        //         if($this->requestCount < 1) {
+        //             $this->requestCount += 1;
+        //             $this->refreshToken();
+        //         }
+        // }
         return self::ERROR_HANDLING['UNHANDLED_ERROR'];
     }
+
 }

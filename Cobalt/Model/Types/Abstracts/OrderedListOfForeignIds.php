@@ -114,7 +114,7 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
     }
 
     public function onUpdateConfirmed($value):void {
-        update("[name='$this->name']", ['outerHTML' => $this->field()]);
+        update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['outerHTML' => $this->field()]);
     }
 
     #[Prototype]
@@ -127,7 +127,7 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
         // Check if the tag is not null
         $tag = $tag ?? "object-gallery";
         // Get the route
-        $route = route($this->model::class."@__model", [(string)$this->model->_id, $this->name]);
+        $route = route($this->model::class."@__model", [(string)$this->model->_id, $this->{MODEL_RESERVERED_FIELD__FIELDNAME}]);
         // Build our gallery tag
         $gallery = "<$tag $attrs $accept method=\"GET\" action=\"$route\">";
         // Loop through all the objects that belong to this field

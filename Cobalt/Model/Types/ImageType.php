@@ -18,7 +18,7 @@ class ImageType extends ForeignId {
     }
 
     function filter($oid) {
-        $filesKey = $this->name;
+        $filesKey = $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
         if($oid === '$_FILES_$' && key_exists($filesKey, $_FILES)) {
             $files = normalize_uploaded_files($_FILES);
             $count = count($files[$filesKey]);
@@ -42,7 +42,7 @@ class ImageType extends ForeignId {
     //         //         $operators[$this->operator][$field] = $details;
     //         //         return;
     //         //     }
-    //         //     $operators[$this->operator][$this->name] = ['$each' => $details];
+    //         //     $operators[$this->operator][$this->{MODEL_RESERVERED_FIELD__FIELDNAME}] = ['$each' => $details];
     //         // },
     //         'schema' => [
     //             // $schema

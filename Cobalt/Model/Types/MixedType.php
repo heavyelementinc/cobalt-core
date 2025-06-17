@@ -23,7 +23,9 @@ class MixedType implements Stringable, ArrayAccess {
     use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField;
     protected bool $isSet = false;
     protected $value = null;
-    protected string $name;
+    protected string $type = "mixed";
+    // protected string $name;
+    protected string $fieldName = "";
     protected bool $hasModel = false;
     protected GenericModel $model;
 
@@ -48,7 +50,7 @@ class MixedType implements Stringable, ArrayAccess {
     }
 
     public function setName(string $name):void {
-        $this->name = $name;
+        $this->{MODEL_RESERVERED_FIELD__FIELDNAME} = $name;
     }
 
     public function setModel(GenericModel $model):void {
@@ -60,12 +62,22 @@ class MixedType implements Stringable, ArrayAccess {
     }
 
     /**
+     * Each child of SchemaResult should return an appropriately typecast
+     * version of the $value parameter
+     * @param mixed $value 
+     * @return mixed 
+     */
+    public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
+        if($this->type === "mixed") return $value;
+        return compare_and_juggle($this->type, $value);
+    }
+    /**
      * Filters input from the client before the input is stored in the database
      * @param mixed $value the user input
      * @return mixed Returns the value to the be stored, may be transformed 
      */
     public function filter($value) {
-        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'");
         if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
             $this->getDirective(DIRECTIVE_KEY_VALID);
         }
@@ -86,7 +98,8 @@ class MixedType implements Stringable, ArrayAccess {
             case "type":
                 return gettype($this->value);
             case "name":
-                return $this->name;
+            case MODEL_RESERVERED_FIELD__FIELDNAME:
+                return $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
             default:
                 return null;
         }
@@ -100,7 +113,7 @@ class MixedType implements Stringable, ArrayAccess {
             case "original":
                 return $this->isSet;
             case "name":
-                return isset($this->name);
+                return isset($this->{MODEL_RESERVERED_FIELD__FIELDNAME});
             case "model":
                 return $this->hasModel;
             default:
@@ -117,7 +130,7 @@ class MixedType implements Stringable, ArrayAccess {
             // case "original":
             //     return $this->isSet;
             // case "name":
-            //     return isset($this->name);
+            //     return isset($this->{MODEL_RESERVERED_FIELD__FIELDNAME});
             // case "model":
             //     return $this->hasModel;
             default:
@@ -141,7 +154,7 @@ class MixedType implements Stringable, ArrayAccess {
     }
 
     public function onUpdateConfirmed($value):void {
-        update("[name='$this->name']", ['value' => $this->value]);
+        update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['value' => $this->value]);
     }
 
     /**

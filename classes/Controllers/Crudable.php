@@ -141,11 +141,12 @@ abstract class Crudable {
         final public function __index():string {
             $this->init($this->get_schema([]), $_GET);
             $new_doc_href = route("$this->name@__new_document");
+            $body = $this->get_table_body();
             $hypermedia = $this->get_hypermedia();
             add_vars([
                 'title'        => $this->friendly_name,
                 'table_header' => $this->get_table_header(),
-                'documents'    => $this->get_table_body(),
+                'documents'    => $body,
                 'hypermedia'   => $hypermedia,
                 'next_page'    => $hypermedia['next'],
                 'previous_page'=> $hypermedia['previous'],

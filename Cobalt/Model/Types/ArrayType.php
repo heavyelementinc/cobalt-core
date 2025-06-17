@@ -11,6 +11,7 @@ use Cobalt\Model\GenericModel;
 use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Types\Traits\SharedFilterEnums;
 use Error;
+use Exception;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
@@ -29,14 +30,14 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
             if($schema) {
                 if($value instanceof BSONDocument) $value = $value->getArrayCopy();
                 // if(method_exists($value,"__clone")) $value = $value->__clone();
-                $this->value[$index] = new GenericModel($schema, $value, $this->name . ".$index");
+                $this->value[$index] = new GenericModel($schema, $value, $this->{MODEL_RESERVERED_FIELD__FIELDNAME} . ".$index");
             } else {
                 $this->hydrate(
                     target: $this->value,
                     field_name: $index,
                     value: $value,
                     model: $this->model,
-                    name: $this->name.".$index"
+                    name: $this->{MODEL_RESERVERED_FIELD__FIELDNAME}.".$index"
                 );
             }
         }
@@ -73,7 +74,7 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
             field_name: $offset,
             value: $value,
             model: $this->model,
-            name: $this->name.".$offset",
+            name: $this->{MODEL_RESERVERED_FIELD__FIELDNAME}.".$offset",
             instance: null,
         );
     }
@@ -108,12 +109,31 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
      * @return mixed Returns the value to the be stored, may be transformed 
      */
     public function filter($value) {
-        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'");
         if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
             $this->getDirective(DIRECTIVE_KEY_VALID);
         }
         if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
         return $value;
+    }
+
+    /**
+     * Each child of MixedType should return an appropriately typecast
+     * version of the $value parameter
+     * @param mixed $value 
+     * @return mixed 
+     */
+    public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
+        if(is_array($value)) return $value;
+        if($value[0] === "[" || $value[0] === "{") {
+            try {
+                $result = json_decode($value, true);
+            } catch (Exception $e) {
+                return explode(",", $value);
+            }
+            return $result;
+        }
+        return explode(",", $value);
     }
 
 }

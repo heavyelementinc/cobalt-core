@@ -9,6 +9,7 @@ use Cobalt\Model\Traits\Viewable;
 use Cobalt\Model\Types\Abstracts\ForeignId;
 use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
 use Cobalt\Model\Types\ArrayOfObjectsType;
+use Cobalt\Model\Types\StringType;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\Document;
@@ -94,6 +95,12 @@ abstract class Model extends GenericModel implements Persistable {
         return [
             'html' => $html,
             'count' => $results['count']
+        ];
+    }
+
+    public function __defaultSchema():array {
+        return [
+            '__version' => new StringType,
         ];
     }
 }

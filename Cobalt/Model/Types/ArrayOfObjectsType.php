@@ -17,7 +17,7 @@ class ArrayOfObjectsType extends ArrayType {
         $template = $this->directiveOrNull("template") ?? $this->directiveOrNull("view");
         if(!$template) {
             if(!$this->hasDirective("each")) {
-                throw new Error("Field $this->name does not have a `template`, `view`, or `each` directive specified. Cannot render field.");
+                throw new Error("Field ".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}." does not have a `template`, `view`, or `each` directive specified. Cannot render field.");
             }
             $template = "<ul class='list-panel'>";
             $target = [];
@@ -42,8 +42,9 @@ class ArrayOfObjectsType extends ArrayType {
 
         [$misc, $attrs] = $this->defaultFieldData($misc);
         $template = $this->getTemplate();
+        $name = $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
         return <<<HTML
-        <input-object-array name="$this->name" $attrs>
+        <input-object-array name="$name" $attrs>
         <script type="application/json">$value</script>
         <template>$template</template>
         </input-object-array>

@@ -16,7 +16,7 @@ class ModelType extends MixedType implements ArrayAccess {
         // Let's check if the value is already a Model (this could be because 
         // we) persisted some data from the DB, etc.
         if($value instanceof Model || $value instanceof GenericModel) {
-            $value->name_prefix = $this->name;
+            $value->name_prefix = $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
             $value->set_allow_undefined_fields($this->__allow_undefined_fields);
             $this->value = $value;
             $this->isSet = true;
@@ -26,8 +26,8 @@ class ModelType extends MixedType implements ArrayAccess {
         // a GenericModel
         $schema = ($this->hasDirective('schema')) ? $this->getDirective('schema') : [];
         // if($realKey && key_exists($realKey, $value)) $value = $value[$realKey];
-        $this->value = new GenericModel($schema, $value, $this->name, true);
-        // $this->value->name_prefix = $this->name;
+        $this->value = new GenericModel($schema, $value, $this->{MODEL_RESERVERED_FIELD__FIELDNAME}, true);
+        // $this->value->name_prefix = $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
         $this->isSet = true;
     }
 
@@ -37,7 +37,9 @@ class ModelType extends MixedType implements ArrayAccess {
     }
 
     public function __get($name) {
-        if(isset($this->value->{$name})) return $this->value->{$name};
+        // if(isset($this->value->{$name})) return $this->value->{$name};
+        // if($this->value->__isset($this->value->{$name})) return $this->value->{$name};
+        
         return parent::__get($name);
     }
 
@@ -80,7 +82,7 @@ class ModelType extends MixedType implements ArrayAccess {
      * @return mixed Returns the value to the be stored, may be transformed 
      */
     public function filter($value) {
-        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '$this->name'");
+        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'");
         if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
             $this->getDirective(DIRECTIVE_KEY_VALID);
         }

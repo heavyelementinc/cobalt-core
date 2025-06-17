@@ -240,18 +240,35 @@ class UserCRUD extends \Drivers\Database {
         return $result;
     }
 
-    final function store_integration_credentials(ObjectId $user, $type, $details, $expiration) {
+    final function store_integration_credentials(ObjectId $user, $type, $details, DateTime|UTCDateTime $issued) {
+        if($issued instanceof DateTime) $issued = new UTCDateTime($issued);
         $result = $this->updateOne(
             ['_id' => $user],
             [
-                '$push' => [
+                '$set' => [
                     "integrations.$type" => [
                         'details' => $details,
-                        'expiration' => $expiration
+                        'fresh_as_of' => $issued,
+                        'provisioned' => $issued
                     ]
                 ]
             ]
         );
+        return $result->getModifiedCount();
+    }
+
+    final function update_integration_credentials(ObjectId $user, $type, $details, DateTime|UTCDateTime $issued):int {
+        $d = [];
+        foreach($details as $key => $val) {
+            $d["integrations.$type.details.$key"] = $val;
+        }
+        if($issued instanceof DateTime) $issued = new UTCDateTime($issued);
+        $d["integrations.$type.fresh_as_of"] = $issued;
+        $result = $this->updateOne([
+            '_id' => $user
+        ],[
+            '$set' => $d
+        ]);
         return $result->getModifiedCount();
     }
 

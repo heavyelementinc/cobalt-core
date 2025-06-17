@@ -10,6 +10,6 @@ class Undefined extends Error {
     }
 
     function __toString(): string {
-        return (config()['mode'] === COBALT_MODE_DEVELOPMENT) ? "<!-- $this->name: undefined -->" : "";
+        return (config()['mode'] === COBALT_MODE_DEVELOPMENT) ? "<!-- ".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}.": undefined -->" : "";
     }
 }

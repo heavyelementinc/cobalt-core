@@ -250,6 +250,7 @@ class Route {
             'uri_var_names' => $route->get_var_names(),
             'context' => $route->get_context(),
             'context_root' => $route->get_context_root(),
+            'headers' => $route->get_headers(),
             
             // Fulfillment
             'controller' => $controller,

@@ -113,8 +113,8 @@ trait MixedTypeToField {
             $template = ($this->hasDirective("template")) ? $this->getDirective("template") : "";
             $final = view_from_string($template, ['doc' => $this, 'field' => $this->value[0]]);
         }
-        if(!$template) throw new Exception("Cannot create a field for $this->name, must set a 'view' or 'template' directive");
-        return "<input-object-array name='$this->name'><template>$final</template><var>".json_encode($this->value)."</var></input-object-array>";
+        if(!$template) throw new Exception("Cannot create a field for ".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}.", must set a 'view' or 'template' directive");
+        return "<input-object-array name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'><template>$final</template><var>".json_encode($this->value)."</var></input-object-array>";
     }
 
     public function textarea($classes = "", $misc = [], $tag = "textarea") {
@@ -162,7 +162,7 @@ trait MixedTypeToField {
     function getDefaultFieldAttributes($misc) {
         return array_merge([
             'id' => '',
-            'name' => $this->name ?? "",
+            'name' => $this->{MODEL_RESERVERED_FIELD__FIELDNAME} ?? "",
             'type' => $this->type ?? "",
             'min' => $this->directiveOrNull("min") ?? "",
             'max' => $this->directiveOrNull("max") ?? "",

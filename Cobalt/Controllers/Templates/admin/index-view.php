@@ -14,6 +14,7 @@
     </div>
     <div class="crudable-header--section crudable-header--right">
         <form class="search-form">
+            <help-span id="search-help" value="@field:value:somevalue,@field2.child:value2,@field3:value"></help-span>
             {{!hypermedia.search}}
         </form>
     </div>

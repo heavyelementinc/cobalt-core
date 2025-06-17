@@ -1,5 +1,7 @@
 <?php
 
+use Auth\UserCRUD;
+
 function __process_flags(){
     foreach($GLOBALS['commands'] as $i => $cmd){
         if($cmd[0] === "-"){
@@ -33,6 +35,10 @@ $flags = [
         'description' => 'Executes the command within the context of the given project. Can be app directory name OR absolute path.',
         'exe' => '__app_context',
     ],
+    '--as' => [
+        'description' => 'Used to define the user account to provide as a session',
+        'exe' => '__restore_session'
+    ],
     '--verbose' => [
         'description' => 'Sets the verbosity level of the CLI. Use digits 0 through 2',
         'exe' => '__verbosity',
@@ -48,7 +54,7 @@ $flags = [
     '--export' => [
         'description' => 'Used with the database export function, a comma-delimited list of collections to export',
         'exe' => '__export_flag'
-    ]
+    ],
 ];
 
 
@@ -89,6 +95,12 @@ function __safe_mode() {
 
 function __export_flag($value) {
     $GLOBALS['export_collections'] = explode(",",$value);
+}
+
+function __restore_session($value) {
+    $crud = new UserCRUD();
+    global $session;
+    $session = $crud->findOne(['uname' => $value]);
 }
 
 __process_flags();

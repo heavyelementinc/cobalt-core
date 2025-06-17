@@ -71,7 +71,7 @@ function cobalt_autoload_fallback($class) {
 
     if ($file !== false) {
         try{
-            class_loader($file, $class, "PHASE_2_FIND_ONE");
+            class_loader($file, $class, "PHASE_3_FIND_ONE");
         } catch (ParseError $e) {
             kill("Syntax error in ".obfuscate_path_name($e->getFile()));
         }
@@ -81,7 +81,7 @@ function cobalt_autoload_fallback($class) {
     if (preg_match($controllers_special_case, $class)) {
         $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class);
         if ($file !== false) {
-            class_loader($file, $class, "PHASE_2_CONTROLLER");
+            class_loader($file, $class, "PHASE_3_CONTROLLER");
 
             return;
         }
@@ -91,7 +91,7 @@ function cobalt_autoload_fallback($class) {
     if($has_namespace === false) {
         $file = find_one_file([__APP_ROOT__ . "/controllers", __ENV_ROOT__ . "/controllers"], $class . ".php");
         if ($file !== false) {
-            class_loader($file, $class, "PHASE_2_HAS_NAMESPACE");
+            class_loader($file, $class, "PHASE_3_HAS_NAMESPACE");
             return;
         }
     }
@@ -121,12 +121,12 @@ function cobalt_autoload_fallback($class) {
     // If the path key exists, process the strings and require the file
     if (key_exists('path', $load)) {
         $final_name = str_replace(
-            ['__ENV_CLASSES__', '__APP_CLASSES__'],
-            [__ENV_ROOT__ . "/classes/", __APP_ROOT__, "/private/classes/"],
+            ['__ENV_CLASSES__', '__ENV_ROOT__', '__APP_CLASSES__', '__APP_ROOT__'],
+            [__ENV_ROOT__ . "/classes/", __ENV_ROOT__, __APP_ROOT__ . "/private/classes/", __APP_ROOT__],
             $load['path']
         );
         if (pathinfo($final_name, PATHINFO_EXTENSION) !== "php") $final_name .= "$class_name.php";
-        class_loader($final_name, $class, "PHASE_2_CLASS_MAP");
+        class_loader($final_name, $class, "PHASE_3_CLASS_MAP");
         return;
     }
     
@@ -146,7 +146,29 @@ function cobalt_autoload($class) {
         return;
     }
 
+    $classDirectory = "/config/class_map.php";
+    $directory = __APP_ROOT__.$classDirectory;
+    if(file_exists($directory)) {
+        if(loadFromDirectory($class, $directory, "PHASE_2_APPLICATION")) {
+            return;
+        }
+    }
+    $directory = __ENV_ROOT__.$classDirectory;
+    if(file_exists($directory)) {
+        if(loadFromDirectory($class, $directory, "PHASE_2_ENVIRONMENT")) {
+            return;
+        }
+    }
+
     return cobalt_autoload_fallback($class);
+}
+
+function loadFromDirectory($className, $directoryLocation, $stage) {
+    if(!file_exists($directoryLocation)) return false;
+    include $directoryLocation;
+    if(key_exists($className, $CLASS_MAP)) {
+        class_loader($CLASS_MAP[$className]['path'], $className, $stage);
+    }
 }
 
 function class_loader($path, $originalName, $stage) {
@@ -689,7 +711,16 @@ function get_crudable_flag(string $name): ?int {
 }
 
 function compare_and_juggle($canonical, $value) {
-    if($canonical !== $value) $value = juggler(gettype($canonical), $value);
+    // Handle common shorthands
+    switch($canonical) {
+        case "bool":
+            $canonical = "boolean";
+            break;
+        case "int":
+            $canonical = "integer";
+            break;
+    }
+    if($canonical !== gettype($value)) return juggler($canonical, $value);
     return $value;
 }
 
@@ -703,34 +734,48 @@ function compare_and_juggle($canonical, $value) {
 function juggler(string $canonincal, mixed $value) {
     switch($canonincal) {
         case "boolean":
-            $value = (bool)$value;
+        case "bool":
+            return filter_var($value, FILTER_VALIDATE_BOOL);
             break;
         case "string":
-            $value = (string)$value;
+            return (string)$value;
             break;
+        case "number":
+            return match(gettype($value)) {
+                "integer" => $value,
+                "double" => $value,
+                "float" => $value,
+                // Let's convert a string based on if it has a . in it or not
+                "string" => (strpos($value,".") === false) ? intval($value) : floatval($value),
+                "boolean" => intval($value),
+                // If $value is empty, we want to return a 0
+                "array" => empty($value) ? 0 : 1,
+                "NULL" => 0,
+                "object" => 1,
+                "resource" => 1,
+                default => intval($value),
+            };
         case "integer":
-            $value = (int)$value;
+        case "int":
+            return intval($value);
             break;
         case "double":
-            $value = (double)$value;
-            break;
         case "float":
-            $value = (float)$value;
+            return floatval($value);
             break;
         case "array":
-            $value = (array)$value;
+            return (array)$value;
             break;
         case "object":
-            $value = (object)$value;
+            return (object)$value;
             break;
         case "resource":
             throw new TypeError("Cannot convert resources");
             break;
         case "NULL":
-            $value = null;
+            return null;
             break;
     }
-    return $value;
 }
 
 /**

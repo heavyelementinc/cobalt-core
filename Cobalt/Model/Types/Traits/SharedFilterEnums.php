@@ -28,6 +28,10 @@ trait SharedFilterEnums {
     protected function display():mixed {
         $valid = [];
         if($this->hasDirective("valid")) $valid = $this->getDirective("valid");
+        
+        if(empty($valid ?? [])) return $this->value;
+        if(key_exists($this->value, $valid)) return $valid[$this->value];
+        
         $result = "";
         
         return "";
@@ -50,7 +54,7 @@ trait SharedFilterEnums {
             if ($val instanceof BSONArray) return $val->getArrayCopy();
             if ($val instanceof BSONDocument) return (array)$val;
             if (is_iterable($val)) return iterator_to_array($val);
-            throw new Exception("Return value for $this->name's `valid` directive is not an array or iterable!");
+            throw new Exception("Return value for ".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'s `valid` directive is not an array or iterable!");
         }
         return [];
     }

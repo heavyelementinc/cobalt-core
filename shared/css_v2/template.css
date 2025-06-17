@@ -201,7 +201,7 @@ star-rating {
     }
 }
 
-.card {
+:where(.card) {
     --_img-height: var(--template-card-img-height, 9rem);
     --_title-height: auto;
     --_p-height: auto;

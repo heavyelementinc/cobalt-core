@@ -40,14 +40,14 @@ class DateType extends MixedType {
 
     #[Directive]
     public function define_fromEncoding(mixed $value, string $name):MixedType {
-        if(!$this->supported_encodings($value)) throw new DirectiveDefinitionFailure("$this->name::fromEncoding is not a supported encoding");
+        if(!$this->supported_encodings($value)) throw new DirectiveDefinitionFailure($this->{MODEL_RESERVERED_FIELD__FIELDNAME}."::fromEncoding is not a supported encoding");
         $this->__defineDirective($name, $value);
         return $this;
     }
 
     #[Directive]
     public function define_toEncoding(mixed $value, string $name):MixedType {
-        if(!$this->supported_encodings($value)) throw new DirectiveDefinitionFailure("$this->name::toEncoding is not a supported encoding");
+        if(!$this->supported_encodings($value)) throw new DirectiveDefinitionFailure($this->{MODEL_RESERVERED_FIELD__FIELDNAME}."::toEncoding is not a supported encoding");
         $this->__defineDirective($name, $value);
         return $this;
     }

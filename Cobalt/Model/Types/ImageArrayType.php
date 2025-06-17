@@ -18,7 +18,7 @@ class ImageArrayType extends OrderedListOfForeignIds {
     }
     
     function filter($oids) {
-        $filesKey = $this->name;
+        $filesKey = $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
         if($oids === '$_FILES_$' && key_exists($filesKey, $_FILES)) {
             $oids = [];
             // $result = $this->uploadFilesAndGetArrayOfIds($filesKey, ['for' => $this->model->_id ?? null], $_FILES);
@@ -47,7 +47,7 @@ class ImageArrayType extends OrderedListOfForeignIds {
                     $operators[$this->operator][$field] = $details;
                     return;
                 }
-                $operators[$this->operator][$this->name] = ['$each' => $details];
+                $operators[$this->operator][$this->{MODEL_RESERVERED_FIELD__FIELDNAME}] = ['$each' => $details];
             }
         ];
     }

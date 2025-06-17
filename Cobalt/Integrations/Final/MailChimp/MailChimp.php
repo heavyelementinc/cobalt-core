@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Integrations\MailChimp;
+namespace Cobalt\Integrations\Final\MailChimp;
 
 use Cobalt\Integrations\Config;
 use Cobalt\Integrations\Base;
@@ -42,7 +42,7 @@ class MailChimp extends Base {
     }
 
     public function html_token_editor(): string {
-        return view("/admin/integrations/edit/mailchimp.html");
+        return view("Cobalt/Integrations/Final/MailChimp/templates/mailchimp.html");
     }
 
     private function get_host() {
