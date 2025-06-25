@@ -110,10 +110,9 @@ class PushNotifications {
         foreach($webPush->flush() as $report) {
             $endpoint = $report->getRequest()->getUri()->__toString();
             if($report->isSuccess()) {
-                log_item("[Push Notify] Message sent successfully for {$endpoint}");
-
+                cobalt_log(static::class,"Push notification sent successfully to {$endpoint}");
             } else {
-                log_item("[Push Notify] Message failed to send for subscription {$endpoint}: {$report->getReason()}");
+                cobalt_log(static::class,"Message failed to send for subscription {$endpoint}: {$report->getReason()}");
             }
         }
     }
@@ -194,7 +193,10 @@ class PushNotifications {
         $result = $ua->updateOne(['_id' => $userId],[
             '$addToSet' => ['notifications.push.keys' => $validated]
         ]);
-        return $result->getModifiedCount();
+        $modifiedCount = $result->getModifiedCount();
+        if($modifiedCount === 1) cobalt_log(static::class, "Enrolled Push Notification keys for user $user->uname");
+        else cobalt_log(static::class, "Failed to save push notification keys for user $user->uname");
+        return $modifiedCount;
     }
 
     final function revokePushKeys($userId, $key_data) {

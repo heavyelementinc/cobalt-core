@@ -356,6 +356,7 @@ function normalize_uploaded_files(array $files):array {
         // a sane way
         foreach($data['name'] as $index => $value) {
             $newArray[$fieldName][] = [
+                'input_name' => $fieldName,
                 'name' => $value,
                 'type' => $data['type'][$index],
                 'tmp_name' => $data['tmp_name'][$index],

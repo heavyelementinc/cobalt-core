@@ -106,6 +106,7 @@ class UploadResult2 extends MapResult {
             case "thumb":
             case "thumbnail":
             case "small":
+                if(!key_exists('thumb', $this->value->__dataset)) break;
                 return [
                     'url' => ($this->value->thumb) ? $this->value->thumb->getValue() : $this->value->url?->getValue(),
                     'height' => ($this->value->thumb_height) ? $this->value->thumb_height->getValue() : $this->value->height?->getValue(),
@@ -113,15 +114,14 @@ class UploadResult2 extends MapResult {
                     'mimetype' => ($this->value->mimetype) ? $this->value->mimetype->getValue() : $this->value->mimetype?->getValue(),
                     'accent' => ($this->value->accent) ? $this->value->accent->getValue() : $this->value->accent?->getValue(),
                 ];
-            default:
-                return [
-                    'url' => $this->value->url?->getValue(),
-                    'height' => $this->value->height?->getValue(),
-                    'width' => $this->value->width?->getValue(),
-                    'mimetype' => $this->value->mimetype?->getValue(),
-                    'accent' => $this->value->accent?->getValue(),
-                ];
         }
+        return [
+            'url' => $this->value->url?->getValue(),
+            'height' => $this->value->height?->getValue(),
+            'width' => $this->value->width?->getValue(),
+            'mimetype' => $this->value->mimetype?->getValue(),
+            'accent' => $this->value->accent?->getValue(),
+        ];
     }
 
     function __toString(): string {
@@ -142,35 +142,37 @@ class UploadResult2 extends MapResult {
         // If everything passed, let's grab our uploaded file
         $uploadedFiles = $this->__get_uploaded_files();
         $errors = [];
-        foreach($uploadedFiles as $file) {
-            if($file['input_name'] !== $this->name) continue;
-            // Let's do some basic error checking
-            switch($file['error']) {
-                case UPLOAD_ERR_NO_FILE:
-                    if($this->schema['required']) throw new ValidationContinue("No file uploaded");
-                    continue;
-                case UPLOAD_ERR_OK:
-                    // Do nothing and continue
-                    continue;
-                case UPLOAD_ERR_INI_SIZE:
-                    case UPLOAD_ERR_FORM_SIZE:
-                    $errors[] = "File size exceeded";
-                    continue;
-                case UPLOAD_ERR_PARTIAL:
-                    $errors[] = "The upload was only partially recieved";
-                    continue;
-                case UPLOAD_ERR_NO_TMP_DIR:
-                case UPLOAD_ERR_CANT_WRITE:
-                case UPLOAD_ERR_EXTENSION:
-                    $errors[] = "Server error";
-                    continue;
+        foreach($uploadedFiles as $index => $arr) {
+            foreach($arr as $i => $file) {
+                if($index !== $this->name) continue;
+                // Let's do some basic error checking
+                switch($file['error']) {
+                    case UPLOAD_ERR_NO_FILE:
+                        if($this->schema['required']) throw new ValidationContinue("No file uploaded");
+                        continue;
+                    case UPLOAD_ERR_OK:
+                        // Do nothing and continue
+                        continue;
+                    case UPLOAD_ERR_INI_SIZE:
+                        case UPLOAD_ERR_FORM_SIZE:
+                        $errors[] = "File size exceeded";
+                        continue;
+                    case UPLOAD_ERR_PARTIAL:
+                        $errors[] = "The upload was only partially recieved";
+                        continue;
+                    case UPLOAD_ERR_NO_TMP_DIR:
+                    case UPLOAD_ERR_CANT_WRITE:
+                    case UPLOAD_ERR_EXTENSION:
+                        $errors[] = "Server error";
+                        continue;
+                }
             }
         }
         // Check for errors and, if there are any, return them to the client in a ValidationIssue
         if(count($errors) >= 1) throw new ValidationIssue(implode("\n", $errors));
         
         // Store our files
-        $result = $this->storeFile($uploadedFiles[0], $values->__validatedFields ?? []);
+        $result = $this->storeFile($uploadedFiles[$this->name][0], $values->__validatedFields ?? []);
         return $result;
     }
 

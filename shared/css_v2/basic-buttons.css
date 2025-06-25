@@ -118,6 +118,7 @@ a.floater--new-item
     &:hover,
     &:focus,
     &:focus-visible {
+        --_anchor-hover-color: var(--primary-color-1-fg);
         background: var(--_anchor-hover-background);
         color: var(--_anchor-hover-color);
     }

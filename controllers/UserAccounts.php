@@ -233,13 +233,18 @@ class UserAccounts extends \Controllers\Pages {
 
         $sessionMan = new SessionManager();
         $sessions = $sessionMan->session_manager_ui_by_user_id(session('_id'));
+        try {
+            $oauthIntegrations = (new IntegrationsController())->getOauthIntegrations();
+        } catch(Exception|Error|TypeError $e) {
+            $oauthIntegrations = "<h1>Something went wrong and the OAuth panel failed to load.</h1><small>Have you run the token migration yet?</small>" .((__APP_SETTINGS__['debug_exceptions_publicly']) ? "<pre>".$e->getMessage()."</pre>" : "");
+        }
 
         add_vars([
             'title' => "$session->fname $session->lname",
             'doc' => $session,
             'notifications' => $push->render_push_opt_in_form_values($session),
             '2fa' => $multifactor->get_multifactor_enrollment($session),
-            'integrate' => (new IntegrationsController())->getOauthIntegrations(),
+            'integrate' => $oauthIntegrations,
             'links' => $links,
             'extensions' => $extensions,
             'sessions' => "<div id='sessions'>$sessions</div>",
@@ -278,7 +283,7 @@ class UserAccounts extends \Controllers\Pages {
         if(key_exists('avatar', $_POST)) {
             $avatar = $session['avatar'] ?? [];
             try{
-                $session->deleteAvatar();
+                // $session->deleteAvatar();
             } catch(NotFound $e){
                 // Ignore it if we can't delete the avatar.
                 header("HTTP/1.1 200 OK");
@@ -291,7 +296,9 @@ class UserAccounts extends \Controllers\Pages {
         $user = new UserCRUD();
 
         $result = $user->updateOne(['_id' => $session['_id']],['$set' => $validated]);
-
+        // if($result->getModifiedCount() >= 1) {
+        //     cobalt_log(static::class, "Failed to update avatar for $user");
+        // }
         return $validated;
     }
 

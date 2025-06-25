@@ -106,7 +106,7 @@ trait BinaryStorage {
         
         $files = [];
         foreach($result as $index => $r) {
-            if($r['input_name'] !== $field) continue;
+            if($index !== $field) continue;
             $files[] = $r;
             $i = count($files);
             if($limit && $i >= $limit) break;

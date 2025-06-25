@@ -125,10 +125,10 @@ try {
     /** @global $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
-    cobalt_log("Settings", $e->getMessage(), COBALT_LOG_EXCEPTION);
+    cobalt_log($application::class, $e->getMessage(), COBALT_LOG_EXCEPTION);
     kill($e->getMessage());
 } catch (Error $e) {
-    cobalt_log("Settings", $e->getMessage(), COBALT_LOG_ERROR);
+    cobalt_log($application::class, $e->getMessage(), COBALT_LOG_ERROR);
     kill($e->getMessage());
 }
 

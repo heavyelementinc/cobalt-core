@@ -168,7 +168,8 @@ class NotificationManager extends \Drivers\Database {
         );
 
         $upserted_id = $result->getUpsertedId();
-        // cobalt_log('sendNotification', 'Notification sent');
+        $recipientCount = count($note['for']);
+        cobalt_log('NtfyManager', 'Notification from '.$note->from.' sent to '.$recipientCount." recipient".plural($recipientCount));
         
         if(__APP_SETTINGS__["Notifications_enable_push_notifications"] && $push_notify) {
             $this->dispatchPushNotifications($id);
@@ -296,7 +297,7 @@ class NotificationManager extends \Drivers\Database {
     
 
     private function dispatchPushNotifications($id) {
-        $ntfy = $this->findOneAsSchema(['_id' => $id]);
+        $ntfy = $this->findOne(['_id' => $id]);
         if(!$ntfy) return;
 
         $users = [];

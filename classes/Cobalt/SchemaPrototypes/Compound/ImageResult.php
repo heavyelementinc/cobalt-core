@@ -115,11 +115,12 @@ class ImageResult extends UploadResult2 {
     }
 
     function filter($value) {
-        if(key_exists('url', $value)) {
+        if($value === '$_FILES_$') {
+            $value = $_FILES;
             unset($value['url']);
             // If a file is being uploaded, we want the server to overwrite to specify a new accent color.
             unset($value['accent']);
-            $result = $this->upload_filter($value);
+            $result = $this->upload_filter([]);
             
             $this->set_updates($result);
             return [

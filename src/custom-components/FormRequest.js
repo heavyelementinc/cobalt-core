@@ -244,7 +244,7 @@ export default class FormRequest extends ProgressWizard {
         clearTimeout(this.__autoSaveTimeout);
         const formData = new FormRequestData(this);
         const target = event.target.closest("[name]");
-        formData.set(target.name ?? target.getAttribute("name"), this.getFormElementValue(target));
+        formData.set(target.name ?? target.getAttribute("name"), this.getFormElementValue(target, event));
         let timeout = 1000;
         switch(target.tagName) {
             case "INPUT":
@@ -337,7 +337,7 @@ export default class FormRequest extends ProgressWizard {
         const formData = new FormRequestData(this, event?.target ?? null);
         for(const element of targets) {
             const name = element.name ?? element.getAttribute("name");
-            const value = this.getFormElementValue(element);
+            const value = this.getFormElementValue(element, event);
             formData.set(name, value);
         }
 
@@ -445,7 +445,7 @@ export default class FormRequest extends ProgressWizard {
      * @param {HTMLInputElement|ICustomInput|HTMLElement} field 
      * @returns 
      */
-    getFormElementValue(field) {
+    getFormElementValue(field, event = null) {
         if(this.isValid(field) === false) {
             this.__validationMessages.push(appendElementInformation(field, field.validationMessage ?? "Validation failed"));
             throw new TypeError("Validity check failed");
@@ -462,8 +462,15 @@ export default class FormRequest extends ProgressWizard {
                     if(field.value) return new Date(field.value);
                     return null;
                 case "files":
+                case "file":
                     return field.files;
             }
+        }
+        if(field.tagName === "IMAGE-RESULT") {
+            if(event.detail.target.type === "file" || event.detail.target.type === "files") {
+                return event.originalTarget.files;
+            }
+            return field.value;
         }
         return field.value;
     }
