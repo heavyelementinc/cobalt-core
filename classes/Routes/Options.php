@@ -30,7 +30,7 @@ class Options implements Iterator, JsonSerializable {
     ];
 
     private int $index = 0;
-
+    // private string $namespaceToPath;
     private string $context;
     private string $context_prefix;
 
@@ -125,6 +125,7 @@ class Options implements Iterator, JsonSerializable {
 
     public function set_handler(string $value):self {
         $files = [
+            $value,
             __APP_ROOT__ . "/controllers/client/$value",
             __APP_ROOT__ . "/private/controllers/client/$value",
             __ENV_ROOT__ . "/controllers/client/$value",
@@ -271,6 +272,16 @@ class Options implements Iterator, JsonSerializable {
         if(!in_array($name, self::KEYS)) return false;
         return isset($this->{$name});
     }
+
+    // protected function resolveNamespacedFile($path) {
+    //     if(!isset($this->namespaceToPath)) {
+    //         $normalized = pathinfo(str_replace("\\", "/", $path));
+    //         if(file_exists(__APP_ROOT__ ."/". $normalized)) $this->namespaceToPath = __APP_ROOT__ . "/". $normalized;
+    //         else if(file_exists(__ENV_ROOT__."/".$normalized)) $this->namespaceToPath = __ENV_ROOT__."/".$normalized;
+    //         else throw new Exception("Cannot normalize namespace to a path that exists in the current directory structure");
+    //     }
+    //     return $this->namespaceToPath;
+    // }
 
     /************INTERFACE*************/
     public function jsonSerialize(): mixed {

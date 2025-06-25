@@ -22,11 +22,15 @@ class EnumType extends MixedType implements Stringable {
     #[Prototype]
     protected function get_filter_field($param_value, $param_name, $cast_type) {
         // $v = $this->typecast($current_value, $operation);
-        return view("/admin/crudable/filterable-item.html", [
+        $value = "";
+        if($param_value) {
+            $value = $param_value[array_search($this->name,$param_value)];
+        }
+        return view("/Cobalt/Model/templates/filterable/filterable-item.php", [
             'schema' => $this,
             'value' => ($param_name == $this->{MODEL_RESERVERED_FIELD__FIELDNAME}) ? $param_value : "",
             'name' => $this->name,
-            'options' => $this->options($param_value),
+            'options' => $this->options($value),
             'QUERY_PARAM_FILTER_NAME' => QUERY_PARAM_FILTER_NAME,
             'QUERY_PARAM_FILTER_VALUE' => QUERY_PARAM_FILTER_VALUE
         ]);

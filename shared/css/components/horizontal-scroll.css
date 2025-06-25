@@ -7,53 +7,48 @@ horizontal-scroll {
     -ms-overflow-style: none;
     width: 100%;
     box-sizing: border-box;
-}
-
-horizontal-scroll .scrollable-track {
-    display: block;
-    white-space: nowrap;
-    scrollbar-width: none;
-    position: relative;
-    margin-bottom: 2em;
-    > * {
+    .scrollable-track {
+        display: block;
+        white-space: nowrap;
+        scrollbar-width: none;
+        position: relative;
+        margin-bottom: 2em;
+        > * {
             display: inline-grid;
             place-items: center;
+            vertical-align: middle;
+        }
+        .scrollable-track {
+            cursor: grab;
+        }
     }
-}
+    &.active {
+        .scrollable-track {
+            cursor: grabbing;
+            > * {
+                pointer-events: none;
+                user-select: none;
+            }
+        }
+    }
 
-horizontal-scroll .scrollable-track {
-    cursor: grab;
-}
+    > img {
+        pointer-events: none;
+    }
 
-horizontal-scroll .scrollable-track > * {
-    vertical-align: middle;
-}
-
-horizontal-scroll.active .scrollable-track {
-    cursor: grabbing
-}
-
-horizontal-scroll.active .scrollable-track > * {
-    pointer-events: none;
-    user-select: none;
-}
-
-horizontal-scroll > img {
-    pointer-events: none;
-}
-horizontal-scroll[paginated] {
-}
-
-horizontal-scroll[paginated]:not(.active) {
-    /* scroll-snap-type: x proximity; */
-}
-
-horizontal-scroll[paginated] > * {
-    /* scroll-snap-align: left; */
-}
-
-horizontal-scroll[paginated="center"] > * {
-    /* scroll-snap-align: center; */
+    &[pagination-behavior="snap-after-drag"] {
+        .scrollable-track {
+            scroll-snap-type: x proximity;
+        }
+        &.active {
+            .scrollable-track {
+                scroll-snap-type: none;
+            }
+        }
+        > * {
+            scroll-snap-align: left;
+        }
+    }
 }
 
 horizontal-scroll ul.pagination-controls {
@@ -80,4 +75,18 @@ horizontal-scroll ul.pagination-controls li button {
 
 horizontal-scroll ul.pagination-controls li.current button {
     opacity: 1;
+}
+
+horizontal-scroll li button.pagination--go:is([data-index="previous"],[data-index="next"]) {
+    background: transparent;
+    line-height: 0;
+    text-align: center;
+    border: 1px solid transparent;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    &:hover {
+        border: 1px solid transparent;
+        color: var(--font-body-color);
+    }
 }

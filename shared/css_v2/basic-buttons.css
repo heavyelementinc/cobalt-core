@@ -8,8 +8,8 @@
 }
 
 /** BUTTON LINKS **/
-.button,
-a.button,
+:where(.button),
+:where(a.button),
 [role='button'],
 a.floater--new-item
 {
@@ -35,10 +35,6 @@ a.floater--new-item
     text-decoration: none;
     font-weight: bolder;
     margin-bottom: var(--margin-xs);
-    
-    
-    
-    
     &:not(button) {
         /* border-radius: 0; */
         /* border: 1px solid var(--project-color-input-border-nofocus); */

@@ -6,6 +6,7 @@ namespace Cobalt\Model\Types\Traits;
 use Closure;
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Directives\Abstracts\AbstractDirective;
+use Cobalt\Model\Directives\FieldDirective;
 use Cobalt\Model\Directives\SetDirective;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\Exceptions\InvalidUpdateOperator;
@@ -80,6 +81,11 @@ trait DirectiveBaseline {
 
     public function directiveOrNull($name) {
         if($this->hasDirective($name)) return $this->getDirective($name);
+        return null;
+    }
+
+    public function directiveInstance($name) {
+        if(!key_exists($name, $this->directives)) return $this->directives[$name];
         return null;
     }
     
@@ -175,6 +181,11 @@ trait DirectiveBaseline {
     #[Directive]
     public function define_filter($function):MixedType {
         $this->__defineDirective('filter', $function);
+        return $this;
+    }
+
+    public function define_field($function):MixedType {
+        $this->__defineDirective('field', new FieldDirective($function));
         return $this;
     }
 

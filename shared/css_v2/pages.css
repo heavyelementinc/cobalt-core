@@ -43,7 +43,7 @@
             position: absolute;
             inset: 0;
             z-index: -1;
-            background-image: radial-gradient(black, transparent 75%);
+            background-image: radial-gradient(rgb(0 0 0 / .4), transparent 75%);
         }
         & .landing-main--title-container {
             h1 {
@@ -259,6 +259,7 @@ block-editor, .landing-primary-section {
     background-color: var(--_landing-main-content-bg);
     color: var(--_landing-main-content-fg);
     box-sizing: border-box;
+    padding: 0 0 var(--block-editor-margins);
 }
 
 .aside--content {

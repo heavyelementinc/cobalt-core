@@ -644,6 +644,12 @@ class ScrollBooster {
 }
 
 class HorizontalScroll extends HTMLElement {
+    PAGINATION_DRAG      = 0b0001;
+    PAGINATED_DOTS       = 0b0010;
+    PAGINATED_NEXT_PREV  = 0b0100;
+    // PAGINATED_DOTS_NEXT_PREV = 0b1000;
+
+    index = 0;
 
     constructor() {
         super();
@@ -713,44 +719,93 @@ class HorizontalScroll extends HTMLElement {
       for(const e of this.scrollableTrack.children) {
         this.observer.observe(e);
       }
-      if(this.hasAttribute("paginated")) {
+      if(this.hasAttribute("controls")) {
         this.initPagination();
       }
     }
 
+    get controls() {
+        let state = 0;
+        const attrValue = this.getAttribute("controls").toLowerCase().split(",");
+        if(attrValue.length == 0 || attrValue.includes("all")) return this.PAGINATION_DRAG + this.PAGINATED_DOTS + this.PAGINATED_NEXT_PREV;
+
+        if(attrValue.includes("drag")) state += this.PAGINATION_DRAG;
+        if(attrValue.includes("pages")) state += this.PAGINATED_DOTS;
+        if(attrValue.includes("arrows") || attrValue.includes("chevrons")) state += this.PAGINATED_NEXT_PREV;
+        
+        if(state & this.PAGINATION_DRAG) this.setAttribute("pagination-behavior", "snap-after-drag");
+
+        return state;
+    }
+
     initPagination() {
-      this.dotContainer.innerHTML = "";
-      this.dotContainer.classList.add("pagination-controls");
+        this.dotContainer.innerHTML = "";
+        this.dotContainer.classList.add("pagination-controls");
 
-      let index = 0;
-      for(const e of this.scrollableTrack.children) {
-        // Let's link our elements to each other using an index value
-        e.dataset.index = index;
+        let index = 0;
+        const controls = this.controls;
+        const lastListItem = document.createElement("li");
+        if(controls & this.PAGINATED_NEXT_PREV) {
+            const firstListItem = document.createElement("li");
+            const firstButton = document.createElement("button");
+            firstButton.dataset.index = "previous";
+            firstButton.ariaLabel = "Scroll to previous element";
+            firstButton.innerHTML = "<i name='chevron-left'></i>";
+            firstButton.classList.add("pagination--go");
+            firstListItem.appendChild(firstButton);
+            this.dotContainer.appendChild(firstListItem);
+            firstButton.addEventListener("click", () => {
+                this.index -= 1;
+                if(this.index <= 0) this.index = 0;
+                this.scrollToElement(this.scrollableTrack.children[this.index]);
+            });
 
-        // Let's create our listItem and buttons
-        const listItem = document.createElement("li");
-        const button = document.createElement("button");
-        button.dataset.index = index;
-        button.ariaLabel = `Scroll to element #${index}`;
-        listItem.appendChild(button);
+            const lastButton = document.createElement("button");
+            lastButton.dataset.index = "next";
+            lastButton.ariaLabel = "Scroll to next element";
+            lastButton.innerHTML = "<i name='chevron-right'></i>";
+            lastButton.classList.add("pagination--go");
+            lastListItem.appendChild(lastButton);
+            lastButton.addEventListener("click", () => {
+                this.index += 1;
+                if(this.index >= this.scrollableTrack.children.length - 1) this.index = this.scrollableTrack.children.length - 1;
+                this.scrollToElement(this.scrollableTrack.children[this.index]);
+            });
+        }
 
-        // Let's add a listener for when this button is clicked.
-        button.addEventListener("click", () => {
-          // this.lastObservedList = [this.specifyLastObserved(this.scrollableTrack.children[button.dataset.index])];
-          this.scrollToElement(e);
-        });
+        if(controls & this.PAGINATED_DOTS) {
+            for(const e of this.scrollableTrack.children) {
+                // Let's link our elements to each other using an index value
+                e.dataset.index = index;
+        
+                // Let's create our listItem and buttons
+                const listItem = document.createElement("li");
+                const button = document.createElement("button");
+                button.classList.add("pagination--dots");
+                button.dataset.index = index;
+                button.ariaLabel = `Scroll to element #${index}`;
+                listItem.appendChild(button);
+        
+                // Let's add a listener for when this button is clicked.
+                button.addEventListener("click", () => {
+                    this.scrollToElement(e);
+                });
+        
+                this.dotContainer.appendChild(listItem);        
+                index += 1;
+            }
+        }
 
-        this.dotContainer.appendChild(listItem);        
-        index += 1;
-      }
-      this.appendChild(this.dotContainer);
-      this.updateDots(0);
+        if(lastListItem.children.length >= 1) this.dotContainer.appendChild(lastListItem);
+        this.appendChild(this.dotContainer);
+        this.updateDots(0);
     }
 
     scrollToElement(target) {
       // const left  = rect.left + window.getComputedStyle(target).getPropertyValue('margin-left');
       const left = target.offsetLeft;
       this.scroller.scrollTo({x: left});
+      this.updateDots(target.dataset.index);
     }
 
     disconnectedCallback() {
@@ -760,7 +815,9 @@ class HorizontalScroll extends HTMLElement {
     updateDots(index) {
       for(const dot of this.dotContainer.children) {
         dot.classList.remove("current");
-        if(dot.children[0].dataset.index == index) dot.classList.add("current");
+        if(dot.children[0].dataset.index == index) {
+            dot.classList.add("current");
+        }
       }
     }
 

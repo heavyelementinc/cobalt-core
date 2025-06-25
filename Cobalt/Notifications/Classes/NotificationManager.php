@@ -4,8 +4,13 @@ namespace Cobalt\Notifications\Classes;
 
 use Auth\UserCRUD;
 use Auth\UserPersistance;
+use Cobalt\Model\Types\UserIdType;
 use Cobalt\Notifications\Models\NotificationSchema;
+use Cobalt\SchemaPrototypes\Compound\UserIdResult;
+use DateInterval;
+use DateTime;
 use Exceptions\HTTP\BadRequest;
+use Mail\SendMail;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Driver\Cursor;
@@ -301,5 +306,102 @@ class NotificationManager extends \Drivers\Database {
 
         $p = new PushNotifications();
         $p->push('New Notification', $ntfy->body, );
+    }
+
+    public function process_notification_queue($user = null) {
+        if(!app("Mail_username") || !app("Mail_password") || !app("Mail_smtp_host")) {
+            cobalt_log("process_notification_queue", "Username, password, or SMTP host was falsy. Aborting.");
+            return;
+        }
+        $limit = new DateTime();
+        $limit->add(DateInterval::createFromDateString(app("Notifications_process_queue_notes_newer_than")));
+        $query = [
+            'for' => [
+                '$elemMatch' => [
+                    'flags' => [
+                        '$bitsAllClear' => NotificationSchema::NOTIFICATION_EMAIL_SENT
+                    ],
+                ]
+            ],
+            // 'sent' => ['$gte' => new UTCDateTime($limit)]
+        ];
+        // if($user) {
+        //     if(is_string($user)) $user = new ObjectId($user);
+        //     if($user instanceof UserIdResult) $user = $user->value;
+        //     if($user instanceof UserIdType) $user = $user->value;
+        //     if($user instanceof ObjectId) $query['for]['$elemMatch']['user'] = $user;
+        // }
+        $count = $this->count($query);
+        print("".fmt($count, "i")." notification".plural($count)." match parameters\n");
+        $notifications = $this->find($query);
+
+        // Create a list of notes that will be sent to the user's email address
+        $recipients = [];
+        $user_ids = [];
+        // Build our list of notifications
+        foreach($notifications as $note) {
+            foreach($note->for as $user) {
+                if($user->flags & NotificationSchema::NOTIFICATION_EMAIL_SENT) continue;
+                $id = (string)$user->user;
+                $user_ids[] = $user->user;
+                $this->queue_create_recipient($recipients, $id);
+                $recipients[$id]['notes'] .= view($note->template->getValue(), ['ntfy' => $note,'tag' => 'a',]);
+                $recipients[$id]['ids_to_update'][] = $note->_id;
+            }
+            print("Created queue for ".$user->user."\n");
+        }
+        $uc = new UserCRUD();
+        $users = $uc->find(['_id' => ['$in' => $user_ids]], ['projection' => ['uname' => 1, 'fname' => 1,'lname' => 1, 'email' => 1]]);
+        foreach($users as $u) {
+            $this->send_notification_email($recipients[(string)$u->_id], $u);
+        }
+        print("Finished email queue.");
+        return;
+    }
+    private function queue_create_recipient(&$recipients, $user) {
+        if(key_exists($user, $recipients)) return;
+        $recipients[$user] = [
+            'notes' => '',
+            'ids_to_update' => []
+        ];
+    }
+
+    private function send_notification_email(array $queue, $u) {
+        if(!isset($u->email)) {
+            say("$u->uname does not have an email address. Skipping.","e");
+            return;
+        }
+        print("Sending email to user: `$u->uname`\n");
+        $mail = new SendMail();
+        // $mail->set_from("");
+        // $mail->set_vars()
+        // $queue = $recipients[(string)$u->_id];
+        $note_count = count($queue['ids_to_update']);
+        
+        $mail->set_body(view("Cobalt/Notifications/templates/admin/email.php",[
+            'note_count' => $note_count,
+            'notes' => $queue['notes'],
+            'user' => $u,
+        ]));
+        $mail->send($u->email, "You have $note_count new unread notification".plural($note_count)." at ".__APP_SETTINGS__["app_name"]);
+        $updated_result = $this->updateMany(
+            [
+                '_id' => [
+                    '$in' => $queue['ids_to_update']
+                ],
+                'for' => [
+                    '$elemMatch' => [
+                        'user' => $u->_id
+                    ]
+                ]
+            ],
+            [
+                '$bit' => [
+                    'for.$.flags' => ['or' => NotificationSchema::NOTIFICATION_EMAIL_SENT]
+                ]
+            ]
+        );
+        $modCt = $updated_result->getModifiedCount();
+        print("Updated ". fmt($modCt, "i") . " notification state".plural($modCt)." for `$u->uname`.\n");
     }
 }

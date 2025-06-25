@@ -86,8 +86,9 @@ trait MixedTypeToField {
 
     protected function select($classes = "", $misc = [], $tag = "select") {
         [$misc, $attrs] = $this->defaultFieldData($misc);
-        
-        return "<$tag class=\"$classes\" $attrs>".$this->options()."</$tag>";
+        $selected = "";
+        if($tag) $selected = "<button><selectedcontent></selectedcontent></button>\n";
+        return "<$tag class=\"$classes\" $attrs>$selected".$this->options()."</$tag>";
     }
 
     protected function inputAutocomplete($classes = "", $misc = []) {

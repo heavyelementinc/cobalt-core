@@ -184,6 +184,7 @@ function individual_var($name, $vars, $arguments, $posStart, $posEnd) {
     }
 
     $literal_value = lookup_js_notation($name, $vars, false);
+    // $literal_value = lookup($name, $vars, false);
     
     $type = gettype($literal_value);
     if($type === "object") {

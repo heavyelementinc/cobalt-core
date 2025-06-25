@@ -9,6 +9,8 @@ use Cobalt\Model\Model;
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\Controllers\Traits\IndexableModel;
 use Cobalt\Controllers\Traits\ReadableModel;
+use Cobalt\Controllers\Traits\SearchableModel;
+use Cobalt\Controllers\Traits\SortableModel;
 use Cobalt\Controllers\Traits\UpdateableModel;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
@@ -18,7 +20,7 @@ use Routes\Route;
 use TypeError;
 
 abstract class ModelController {
-    use IndexableModel, EditableModel, CreateableModel, ReadableModel, UpdateableModel, DestroyableModel;
+    use IndexableModel, SearchableModel, SortableModel, EditableModel, CreateableModel, ReadableModel, UpdateableModel, DestroyableModel;
     public $name;
     public string $friendly_name;
     public Model $model;

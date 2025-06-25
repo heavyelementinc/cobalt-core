@@ -1,6 +1,6 @@
 /** BLOCK EDITOR **/
 :root {
-    --block-editor-margins: 1.2rem;
+    --block-editor-margins: var(--margin-xl);
 }
 block-editor {
     display: block;
@@ -33,11 +33,12 @@ h6.blockeditor--header {
     }
 
 .blockeditor--image {
-
+    max-width: calc(100% - (var(--block-editor-margins) * 2));
 }
 
     .blockeditor--content.blockeditor--image-stretched {
         margin: 0 0 var(--block-editor-margins);
+        max-width: 100%;
     }
 
     .blockeditor--image-withbackground {
@@ -71,6 +72,7 @@ h6.blockeditor--header {
 .blockeditor--content figcaption {
     display: block;
     width: 100%;
+    max-width: 100%;
     text-align: center;
     font-style: italic;
     margin-top: .3em;
@@ -157,6 +159,7 @@ a.blockeditor--link-preview {
     text-align: center;
     align-items: center;
     flex-direction: column;
+    max-width: 100%;
 }
 
     .blockeditor--embed iframe {
@@ -375,6 +378,11 @@ ol.blockeditor--index ol {
 
 .content-editor--webmention-group textarea {
     margin-bottom: 0;
+}
+
+.landing-bio--container {
+    background-color: var(--background-color-2);
+    color: var(--background-color-2-fg);
 }
 
 @media only screen and (max-width: 35em) {

@@ -23,6 +23,7 @@ class NotificationSchema extends PersistanceMap {
     const NOTIFY_SEEN  = 0b0001;
     const NOTIFY_READ  = 0b0010;
     const NOTIFY_MUTED = 0b0100;
+    const NOTIFICATION_EMAIL_SENT = 0b001;
 
     function __set_manager(?Database $manager = null): ?Database {
         return new NotificationManager();
@@ -110,6 +111,7 @@ class NotificationSchema extends PersistanceMap {
             ],
             'type' => [
                 new EnumResult,
+                'default' => 0,
                 'valid' => [
                     0 => "Notification"
                 ],
@@ -129,7 +131,7 @@ class NotificationSchema extends PersistanceMap {
             'version' => [
                 new StringResult,
                 'default' => '1.0'
-            ],
+            ]
         ];
     }
 
@@ -139,6 +141,15 @@ class NotificationSchema extends PersistanceMap {
 
     function getTemplate() {
         return $this->template->getValue();
+    }
+
+    function getHref() {
+        $href = "";
+        if($this->action->href) $href = $this->action->href;
+        if(!$href) {
+            $href = route($this->action->route, $this->action->params);
+        }
+        return server_name().$href;
     }
 
 }

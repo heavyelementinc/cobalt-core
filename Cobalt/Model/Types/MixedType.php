@@ -90,6 +90,8 @@ class MixedType implements Stringable, ArrayAccess {
         switch($property) {
             case "value":
                 return $this->getValue();
+            case 'isSet':
+                return $this->isSet;
             case "raw":
             case "original":
                 return $this->value ?? $this->originalValue;

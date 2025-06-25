@@ -90,7 +90,7 @@ function route_replacement($path, $args, $data = []) {
  * @return string 
  * @throws Exception 
  */
-function route(string $directiveName, array $args = [], array $context = []):string {
+function route(string $directiveName, array $args = [], array $context = [], bool $throw = true):?string {
     $routeMethod = $context['method'] ?? "get";
     $ctx = $context['context'] ?? "web";
     $split = explode("@", $directiveName);
@@ -98,7 +98,10 @@ function route(string $directiveName, array $args = [], array $context = []):str
     $route = get_path_from_route($split[0], $split[1], $args, $routeMethod, $ctx);
     if(!$route) {
         $flag = get_crudable_flag($split[0]);
-        if($flag === null) throw new Exception("Could not find route based on directive name: `$directiveName`");
+        if($flag === null) {
+            if($throw === true) throw new Exception("Could not find route based on directive name: `$directiveName`");
+            return null;
+        }
         if($flag !== CRUDABLE_CONFIG_ADMIN + CRUDABLE_CONFIG_APIV1) throw new Exception("Crudable has not been configured: ".(($flag & CRUDABLE_CONFIG_APIV1) ? "Admin Flag":"APIv1 Flag"));
         throw new Exception("Could not find route based on directive name.");
     }
@@ -107,7 +110,7 @@ function route(string $directiveName, array $args = [], array $context = []):str
 
 function nullable_route(string $directiveName, array $args = [], array $context = []):?string {
     try {
-        return route($directiveName, $args, $context);
+        return route($directiveName, $args, $context, false);
     } catch (HTTPException $e) {
         return null;
     } catch (Exception $e) {

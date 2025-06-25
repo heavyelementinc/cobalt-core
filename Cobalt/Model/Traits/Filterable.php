@@ -9,6 +9,7 @@ use Cobalt\Model\Directives\SetDirective;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
+use Cobalt\Models\Directives\MutateDirective;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Error;
 use MongoDB\Model\BSONArray;
@@ -37,7 +38,7 @@ trait Filterable {
     public function __filter(array $toValidate):self {
         if($this->__schema) $this->__defineSchema([]);
 
-        $toValidate = array_undot($toValidate);
+        // $toValidate = array_undot($toValidate);
 
         foreach($toValidate as $field => $value) {
             try {
@@ -74,6 +75,73 @@ trait Filterable {
     }
 
     protected function __validate_field($field, $value) {
+        $result = lookup($field, $this);
+
+        // If the $fieldType doesn't exist and we don't accept unregistered keys, throw an error
+        if($result instanceof MixedType == false) {
+            if($this->__excludeUnregisteredKeys) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
+            // If we *do* support unregistered keys, we still need to do basic 
+            // validation, so let's hydrate our input so we can validate it 
+            // against the type
+            $r = [];
+            $this->hydrate($r, $field, $value, $this, $field, $this->__schema[$field], $this->__schema[$field]['type']);
+            $result = $r[$field];
+        }
+
+        try {
+            if($result->hasDirective('mutate')) {
+                $mutateDirective = $result->directiveInstance('mutate');
+                if($mutateDirective instanceof MutateDirective == false) throw new TypeError("$field's mutate directive must be of type \\Cobalt\\Models\\Directives\\MutateDirective");
+                $mutateDirective->getValue($value);
+            }
+            if($value === null || $value === "") {
+                if($result->isRequired()) throw new ValidationIssue("This field is required");
+                throw new ValidationContinue("This field is empty and it's not required. Continuing.");
+            }
+
+            if($result->hasDirective("pattern")) {
+                $pattern = $result->getDirective("pattern");
+                if($pattern) $this->testPattern($result, $value, $pattern);
+            }
+
+            // This is disabled because the filter directive is called later
+            if($result->hasDirective('filter')) {
+                $filterDirective = $result->directiveInstance('filter');
+                if($filterDirective instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
+                $filterDirective->getValue($value);
+            }
+            $validated = $result->filter($value);
+            if($result->hasDirective('set')) {
+                $setDirective = $result->getDirective('set');
+                if($setDirective instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');
+                $setDirective->getValue($validated, $value);
+            }
+        } catch (ValidationContinue $e) {
+            // If we catch a ValidationContinue, let's throw it again so
+            // we know to skip this field when we recieve this signal
+            new ValidationContinue($e);
+        } catch (ValidationIssue $e) { // Handle issues
+            if (!isset($this->__issues[$field])) {
+                $this->__issues[$field] = $e->getMessage();
+                update("[name='$field']", ['message' => $e->getMessage(), 'invalid' => true]);
+            }
+            else {
+                $this->__issues[$field] .= "\n" . $e->getMessage();
+            }
+        } catch (ValidationFailed $e) { // Handle subdoc failure
+            $this->__issues[$field] = $e->data;
+        }
+        
+        if($validated instanceof MergeResult) {
+            foreach($validated->get_value() as $keypath => $value) {
+                $this->__modify($keypath, $value, false);
+            }
+        } else {
+            $this->__modify($field, $validated, false);
+        }
+    }
+
+    protected function __validate_field_old($field, $value) {
         if($this->__excludeUnregisteredKeys) {
             if(!key_exists($field, $this->__schema)) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
         }
@@ -149,7 +217,9 @@ trait Filterable {
             
             /** @var MixedType $target */
             $target = null;
-            if(key_exists($field,$this->__dataset)) $target = $this->__dataset[$field];
+            // if(key_exists($field,$this->__dataset)) $target = $this->__dataset[$field];
+            // if(isset($this->{$field})) 
+            $target = lookup($field, $this);
 
             $operator = '$set';
             if($target->hasDirective("operator")) {

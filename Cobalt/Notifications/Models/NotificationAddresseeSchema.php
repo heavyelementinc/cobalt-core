@@ -15,9 +15,16 @@ class NotificationAddresseeSchema extends PersistanceMap {
     }
     public function __get_schema(): array {
         return [
-            'user' => new UserIdResult,
+            'user' => [new UserIdResult],
             'seen' => [new BooleanResult],
             'read' => [new BooleanResult],
+            'flags' => [
+                new BinaryResult,
+                'default' => 0,
+                'valid' => [
+                    NotificationSchema::NOTIFICATION_EMAIL_SENT => "Email Sent"
+                ]
+            ],
             // 'state' => [
             //     new BinaryResult,
             //     'default' => 0,

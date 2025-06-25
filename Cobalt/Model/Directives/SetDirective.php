@@ -10,7 +10,16 @@ use ReflectionFunction;
 use TypeError;
 
 /**
+ * The SetDirective is called during the process of validating user input.
  * 
+ * The `set` directive is called after *all other checks* including the classes
+ * default filter.
+ * 
+ * If you want to mutate your value before any other checks, use the MutateDirective
+ * 
+ * The supplied Closure must conform to the following parameters:
+ *  * The first and only argument must be passed by reference (&$value)
+ *  * The return value must be void
  * @param Closure $funct [&$value]:void
  * @return void 
  * @throws Error 

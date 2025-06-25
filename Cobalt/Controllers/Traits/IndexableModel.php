@@ -39,8 +39,9 @@ trait IndexableModel {
     protected array $filterParameters = [];
     protected array $queryParameters = [];
 
-    protected array $searchableFields = [];
+    // protected array $searchableFields = [];
     protected array $filterableFields = [];
+    protected array $sortableFields = [];
 
     public function init(Model $model, array $params) {
         $this->schema = $model;
@@ -73,7 +74,6 @@ trait IndexableModel {
         // if(!$this->queryParameters['sort']) return "";
         $arr = [
             QUERY_PARAM_SORT_NAME => $_GET[QUERY_PARAM_SORT_NAME],
-            QUERY_PARAM_SORT_DIR => $_GET[QUERY_PARAM_SORT_DIR]
         ];
         if(isset($_GET[QUERY_PARAM_SEARCH])) $arr[QUERY_PARAM_SEARCH] = $_GET[QUERY_PARAM_SEARCH];
         if($as_array == true) return $arr;
@@ -81,12 +81,13 @@ trait IndexableModel {
     }
 
     public function get_table_header() {
-        $safe_get_params = [];
+        $safe_get_params = $_GET;
+        unset($safe_get_params['uri']);
         // Let's make our GET paramters safe to embed in the page
-        foreach($_GET as $key => $value) {
-            if($key === "uri") continue;
-            $safe_get_params[urlencode($key)] = urlencode($value);
-        }
+        // foreach($_GET as $key => $value) {
+        //     if($key === "uri") continue;
+        //     $safe_get_params[urlencode($key)] = urlencode($value);
+        // }
         // Establish our table header
         $html = "<flex-row>";
         if($this->schema->__get_index_checkbox_state()) {
@@ -94,25 +95,24 @@ trait IndexableModel {
         }
         foreach($this->sortedTable as $field) {
             // Merge the newly-safe params with the params for this field
-            $sort_direction  = 1;
+            $sort_direction = 1;
             $classes = "";
 
             // if($_GET[QUERY_PARAM_SORT_NAME] == $field['name']) {
             if(isset($this->queryParameters['sort'][$field['name']])) {
                 $sort_val = $this->queryParameters['sort'][$field['name']];
                 $sort_direction = match($sort_val) {
-                    null, 0, "0", -1, "-1" => 1,
                     1, "1" => -1,
+                    default => 1,
                 };
                 // Check if this field is the one being sorted by the get peram and
                 // assign the appropriate class so we can communicate the sorting
                 // of this value field to the client
-                $classes = ($sort_val === -1) ? "sort-desc" : "sort-asc";
+                $classes = ($sort_direction === -1) ? "sort-asc" : "sort-desc";
             }
             
-            $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name']), QUERY_PARAM_SORT_DIR => urlencode($sort_direction)]);
+            $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => [urlencode($field['name']) => urlencode($sort_direction)]]);
             $href = "?" . http_build_query($href_params);
-            
             $html .= "<flex-header class=\"$classes\"><a href=\"$href\">".htmlspecialchars($field['title'])."</a></flex-header>";
         }
         return $html . "</flex-row>";
@@ -135,8 +135,8 @@ trait IndexableModel {
         if(isset($name)) {
             // Return the 'default query' if it's not set
             if(isset($name)) {
-                $fieldNames = explode(",", $_GET[QUERY_PARAM_FILTER_NAME]);
-                $values = explode(",", $_GET[QUERY_PARAM_FILTER_VALUE]);
+                $fieldNames = $_GET[QUERY_PARAM_FILTER_NAME];
+                $values = $_GET[QUERY_PARAM_FILTER_VALUE];
                 foreach($fieldNames as $index => $fieldName) {
                     // Let's typecast our query param (this is in case we have an ObjectId or an integer in the URL)
                     // We also want to override the "default" query with filter field
@@ -183,109 +183,7 @@ trait IndexableModel {
         return array_merge($this->index_query(), $this->filterParameters);
     }
 
-    private function getSearchQuery(string &$searchParam, array &$searchQuery, array &$searchOptions, array &$searchableFields, array &$searchableOptions) {
-        $this->parseSearchParam($searchParam, $searchQuery, $searchOptions, $searchableFields, $searchableOptions);
-    }
-
-    private function parseSearchParam(
-        string &$searchParam,
-        array &$searchQuery,
-        array &$searchOptions,
-        array &$searchableFields,
-        array &$searchableOptions
-    ):void {
-        if($searchParam[0] !== QUERY_PARAM_SEARCH_FIELD_TOKEN) {
-            // If there are no fields specified in the user query, let's use the
-            // searchable fields from the model
-            $searchableFields = $this->searchableFields;
-            $searchQuery = ['$text' => [
-                '$search' => $searchParam
-            ]];
-            $searchOptions = [
-                'projection' => [
-                    QUERY_SEARCH_MATCH_SCORE_FIELD => ['$meta' => 'textScore']
-                ],
-                'sort' => [
-                    QUERY_SEARCH_MATCH_SCORE_FIELD => ['$meta' => 'textScore']
-                ]
-            ];
-            return;
-        }
-        // Let's assume we've been sent a search string with multiple fields. It would look like this
-        // @field:value:somevalue,@field2.child:value2,@field3:value
-        $fields = explode(QUERY_PARAM_SEARCH_DELIMITER_TOKEN . QUERY_PARAM_SEARCH_FIELD_TOKEN, substr($searchParam,1));
-        // Fields will now be an array of this structure:
-        // ['field:value:somevalue', 'field2.child:value2', 'field3:value']
-        foreach($fields as $f) {
-            // Iteration 0 through this loop will result in $f looking like this:
-            // 'field:value:somevalue'
-            $firstIndexOfToken = strpos($f, QUERY_PARAM_SEARCH_VALUE_TOKEN);
-            $field = substr($f, 0, $firstIndexOfToken);
-            $value = substr($f, $firstIndexOfToken + 1);
-            // $search[$field] = $value;
-            $this->parseSearchValue($value, $field, $searchQuery, $searchOptions, $searchableFields, $searchableOptions);
-            // After the above instruction, we should have an array that looks like this:
-            // $search = ["field" => "value:somevalue"];
-        }
-        if(!empty($searchableFields)) {
-            $searchQuery = ['$text' => [
-                '$search' => $searchParam
-            ]];
-            $searchOptions = [
-                'projection' => [
-                    QUERY_SEARCH_MATCH_SCORE_FIELD => ['$meta' => 'textScore']
-                ],
-                'sort' => [
-                    QUERY_SEARCH_MATCH_SCORE_FIELD => ['$meta' => 'textScore']
-                ]
-            ];
-        }
-    }
-
-    private function parseSearchValue(
-        string &$searchParam,
-        string &$fieldName,
-        array &$searchQuery,
-        array &$searchOptions,
-        array &$searchableFields,
-        array &$searchableOptions
-    ):void {
-        $regexStartEndDelimiter = "/";
-        $validRegexTerminationChars = [
-            $regexStartEndDelimiter,
-            REGEXP_CASE_INSENSITIVE,
-            REGEXP_MULTILINE_START_END,
-            REGEXP_EXTENDED_IGNORE_WHITESPACE,
-            REGEXP_MATCH_NEW_LINE_SPACE_CHAR,
-            REGEXP_UNICODE_SUPPORT,
-        ];
-        $finalSearchParamChar = $searchParam[strlen($searchParam) - 1];
-        // Check if the first character of the search param is a '/'
-        if($searchParam[0] !== $regexStartEndDelimiter
-            // Check if the last character of the search param is a valid final character for a regex
-            && !in_array($finalSearchParamChar, $validRegexTerminationChars)
-        ) {
-            // $searchQuery[$fieldName] = $searchParam;
-            if(!key_exists($fieldName, $this->searchableFields) 
-            && !has_permission("Model_advanced_search_permission", null, null, false)) {
-                throw new Unauthorized("`$fieldName` is outside of model's searchable fields", "Unauthorized");
-            }
-            $searchableFields[$fieldName] = "text";
-            return;
-        }
-        if(!key_exists($fieldName, $this->searchableFields) 
-            && !has_permission("Model_advanced_search_permission", null, null, false)
-        ) {
-            throw new Unauthorized("`$fieldName` is outside of model's searchable fields", "Unauthorized");
-        }
-        $regexFlags = "";
-        $finalSearchParamDelimiterPosition = strrpos($searchParam, $regexStartEndDelimiter);
-        if($finalSearchParamChar !== $regexStartEndDelimiter) {
-            $regexFlags = substr($searchParam, $finalSearchParamDelimiterPosition + 1);
-            $searchParam = substr($searchParam, 0, $finalSearchParamDelimiterPosition + 1);
-        }
-        $searchQuery[$fieldName] = new Regex(substr($searchParam,1,-1), $regexFlags);
-    }
+    
 
     public function add_filter_params(array $params) {
         $this->add_params($this->filterParameters, $params);
@@ -435,7 +333,8 @@ trait IndexableModel {
             $filterable_content = "<form><label><input type=\"checkbox\"".((filter_var($_GET[QUERY_PARAM_ARCHIVED_DISPLAY], FILTER_VALIDATE_BOOL)) ? "checked=\"checked\"" : "")." name=\"".QUERY_PARAM_ARCHIVED_DISPLAY."\" onchange='submit()'> Show Archived</label></form>";
 
         }
-
+        $sortableFields = implode(" ", $this->sortableFields);
+        $filterableFields = implode(" ", $this->filterableFields);
         return [
             'previous_page' => $prev,
             'next_page' => $next,
@@ -444,20 +343,24 @@ trait IndexableModel {
             'count' => $count,
             'search' => $this->get_search_field(),
             'multidelete_button' => $multidelete_button,
-            'filters' => "<inline-menu icon=\"filter-variant\">$filterable_content".implode(" ",$this->filterableFields) ."</inline-menu>",
+            'filters' => <<<HTML
+            <inline-menu icon="filter-variant">$filterable_content
+                <form class="crudable-hypermedia--filterable-item" style="gap: 0.6em; align-items: center;">
+                    <div class="crudable-hypermedia--sortable-inputs">
+                        $sortableFields
+                    </div>
+                    <div class="crudable-hypermedia--filterable-inputs">
+                        $filterableFields
+                    </div>
+                    <a href="$_REQUEST[route]" class="button" native><i name="filter-off-outline"></i></a>
+                    <button native><i name='table-search'></i> Apply Filter</button>
+                </form>
+            </inline-menu>
+            HTML,
+
         ];
     }
 
-    final protected function get_search_field() {
-        QUERY_PARAM_COMPARISON_STRENGTH;
-
-        return "<input type=\"search\" name=\"".QUERY_PARAM_SEARCH."\" value=\"".htmlspecialchars($_GET[QUERY_PARAM_SEARCH])."\" placeholder=\"Search\">
-        <button type=\"submit\" native><i name=\"magnify\"></i></button>
-        <inline-menu>
-            <label><input type=\"checkbox\" name=\"".QUERY_PARAM_SEARCH_CASE_SENSITVE."\"".(($_GET[QUERY_PARAM_SEARCH_CASE_SENSITVE] === 'on') ? " checked=\"checked\"": "")."> Case Sensitve</label>
-        </inline-menu>
-        ";
-    }
 
     /** All you need in order to have a field be included in the index is to include
      * the 'index' key. Things will be inherited 
@@ -467,6 +370,9 @@ trait IndexableModel {
             return null;
         }
         if(!key_exists('index', $directives)) return null;
+        $filterable = $this->get_filterable($field, $directives);
+        $this->sortableFields[$field."-sortable"] = view("Cobalt/Controllers/Templates/admin/sortable-item.php", ['field' => $this->model->{$field},]);
+
         $array = [
             'name' => $field,
             'title' => $this->get_title($field, $directives),
@@ -474,7 +380,12 @@ trait IndexableModel {
             'sort' => $this->get_sort($field, $directives),
             'view' => $this->get_view($field, $directives),
             'searchable' => $this->get_searchable($field, $directives),
-            'filterable' => $this->get_filterable($field, $directives),
+            'filterable' => <<<HTML
+            <form class="hbox crudable-hypermedia--filterable-item" style="gap: 0.6em; align-items: center;">
+                $filterable
+                <button native><i name='table-search'></i></button>
+            </form>
+            HTML,
         ];
         return $array;
     }
@@ -509,13 +420,7 @@ trait IndexableModel {
         return $sort;
     }
 
-    final protected function get_searchable(string $field, array $directives) {
-        $index = $directives['index'] ?? [];
-        $searchable = $index['searchable'] ?? false;
-        if(is_callable($searchable)) $searchable = $searchable($field, $directives);
-        if($searchable === true) $this->searchableFields[$field] = "text";
-        return $searchable;
-    }
+
 
     final protected function get_filterable(string $field, array $directives) {
         $index = $directives['index'] ?? [];
@@ -542,14 +447,15 @@ trait IndexableModel {
             }
         }
 
-        // Check if the request asks for a sorting override
-        if(key_exists(QUERY_PARAM_SORT_DIR, $params)) {
-            $sort_direction = $params[QUERY_PARAM_SORT_DIR];
-            if(!$sort_direction) $sort_direction = 1;
-            // Let's check to ensure we're only allowing valid values to be passed to the DB
-            if($sort_direction === "1" || $sort_direction === "-1") $sort_direction = (int)$sort_direction;
-
-            $options['sort'] = [$params[QUERY_PARAM_SORT_NAME] => $sort_direction ?? 1];
+        if(key_exists(QUERY_PARAM_SORT_NAME, $params)) {
+            $options['sort'] = [];
+            foreach($params[QUERY_PARAM_SORT_NAME] as $p => $v) {
+                $options['sort'][$p] = match($v) {
+                    "-1"    => -1,
+                     -1     => -1,
+                    default =>  1
+                };
+            }
         }
         
         // Now we handle our pagination.

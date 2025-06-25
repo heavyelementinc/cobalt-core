@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Model\Directives;
+namespace Cobalt\Models\Directives;
 
 use Closure;
 use Cobalt\Model\Directives\Abstracts\AbstractDirective;
@@ -8,12 +8,12 @@ use Error;
 use ReflectionFunction;
 
 /**
- * The FilterDirective is called during the process of validating user input.
+ * The MutateDirective is called during the process of validating user input.
  * 
- * The filter directive is called after the isRequired and pattern directives
- * and before the class-based checks.
+ * The `mutate` directive is called before *any other checks* including the
+ * default check.
  * 
- * If you want to mutate your value BEFORE any other checks, use the MutateDirective
+ * If you want to apply custom filtering to your value before the class-level filter, use the FilterDirective
  * If you want to mutate your value AFTER all other checks, use the SetDirective
  * 
  * The supplied Closure must conform to the following parameters:
@@ -22,7 +22,7 @@ use ReflectionFunction;
  * @package Cobalt\Model\Directives
  * @param Closure $funct [&$value]:void
  */
-class FilterDirective extends AbstractDirective {
+class MutateDirective extends AbstractDirective {
     private Closure $filter;
     function __construct(Closure $filter) {
         $funcReflection = new ReflectionFunction($filter);
@@ -36,8 +36,8 @@ class FilterDirective extends AbstractDirective {
         }
         $this->filter = $filter;
     }
+
     public function getValue(&...$args): mixed {
         return call_user_func_array($this->filter, $args);
     }
-
 }

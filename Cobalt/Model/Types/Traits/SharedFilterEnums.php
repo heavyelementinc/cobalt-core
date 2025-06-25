@@ -5,6 +5,7 @@ namespace Cobalt\Model\Types\Traits;
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Types\MixedType;
+use Cobalt\Model\Types\WeakEnumType;
 use Error;
 use Exception;
 use MongoDB\Model\BSONArray;
@@ -31,7 +32,7 @@ trait SharedFilterEnums {
         
         if(empty($valid ?? [])) return $this->value;
         if(key_exists($this->value, $valid)) return $valid[$this->value];
-        
+        if($this instanceof WeakEnumType) return $this->value;
         $result = "";
         
         return "";

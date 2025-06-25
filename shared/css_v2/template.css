@@ -30,7 +30,7 @@
 
 :where(.template-splash--content, .template-hero--callout) {
     max-width: 60ch;
-    a.button {
+    :where(a.button) {
         margin-top: 1em;
     }
 }

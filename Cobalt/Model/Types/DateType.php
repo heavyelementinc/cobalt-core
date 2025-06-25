@@ -99,6 +99,10 @@ class DateType extends MixedType {
         return $value->format($format);
     }
 
+    public function toDateTime() {
+        return $this->value->toDateTime();
+    }
+
     #[Prototype]
     protected function relative($format = "verbose") {
         $date = $this->format("U");

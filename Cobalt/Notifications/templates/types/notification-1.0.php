@@ -1,5 +1,5 @@
 <li>
-    <notification-item data-id="{{ntfy._id}}" class="notifications--notification-container notifications--notification-container-{{ntfy.version}}" 
+    <<?= $tag ?? "notification-item" ?> href="<?= $ntfy->getHref() ?>" data-id="{{ntfy._id}}" class="notifications--notification-container notifications--notification-container-{{ntfy.version}}" 
         {{ntfy.for.attributes()}}
         {{ntfy.action.attributes()}}>
         <div class="notification--from">
@@ -17,5 +17,5 @@
         <div class="notification--foot">
             {{ntfy.sent.relative()}}
         </div>
-    </notification-item>
+    </<?= $tag ?? "notification-item" ?>>
 </li>

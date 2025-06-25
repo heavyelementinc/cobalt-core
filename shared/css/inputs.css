@@ -181,7 +181,7 @@ div.upload-field img{
   width: 1em;
 }
 
-a.button {
+:where(a.button) {
   color: var(--btn-text);
 }
 

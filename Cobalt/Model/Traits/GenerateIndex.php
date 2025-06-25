@@ -77,7 +77,6 @@ trait IndexableModel {
         // if(!$this->queryParameters['sort']) return "";
         $arr = [
             QUERY_PARAM_SORT_NAME => $_GET[QUERY_PARAM_SORT_NAME],
-            QUERY_PARAM_SORT_DIR => $_GET[QUERY_PARAM_SORT_DIR]
         ];
         if(isset($_GET[QUERY_PARAM_SEARCH])) $arr[QUERY_PARAM_SEARCH] = $_GET[QUERY_PARAM_SEARCH];
         if($as_array == true) return $arr;
@@ -113,8 +112,9 @@ trait IndexableModel {
                 // of this value field to the client
                 $classes = ($sort_val === -1) ? "sort-desc" : "sort-asc";
             }
-            
-            $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name']), QUERY_PARAM_SORT_DIR => urlencode($sort_direction)]);
+
+            $this->filterableFields[$field['name']."-sortable"] = view("Cobalt/Controllers/Templates/admin/sortable-item.php", ['field' => $field,]);
+            $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name'])]);
             $href = "?" . http_build_query($href_params);
             
             $html .= "<flex-header class=\"$classes\"><a href=\"$href\">".htmlspecialchars($field['title'])."</a></flex-header>";
@@ -461,11 +461,11 @@ trait IndexableModel {
         }
         if(!key_exists('index', $directives)) return null;
         $array = [
-            'name' => $field,
-            'title' => $this->get_title($field, $directives),
-            'order' => $this->get_order($field, $directives),
-            'sort' => $this->get_sort($field, $directives),
-            'view' => $this->get_view($field, $directives),
+            'name'       => $field,
+            'title'      => $this->get_title($field, $directives),
+            'order'      => $this->get_order($field, $directives),
+            'sort'       => $this->get_sort($field, $directives),
+            'view'       => $this->get_view($field, $directives),
             'searchable' => $this->get_searchable($field, $directives),
             'filterable' => $this->get_filterable($field, $directives),
         ];
@@ -536,13 +536,29 @@ trait IndexableModel {
         }
 
         // Check if the request asks for a sorting override
-        if(key_exists(QUERY_PARAM_SORT_DIR, $params)) {
-            $sort_direction = $params[QUERY_PARAM_SORT_DIR];
-            if(!$sort_direction) $sort_direction = 1;
-            // Let's check to ensure we're only allowing valid values to be passed to the DB
-            if($sort_direction === "1" || $sort_direction === "-1") $sort_direction = (int)$sort_direction;
+        // if(key_exists(QUERY_PARAM_SORT_DIR, $params)) {
+        //     $sort_direction = $params[QUERY_PARAM_SORT_DIR];
+        //     if(!$sort_direction) $sort_direction = 1;
+        //     // Let's check to ensure we're only allowing valid values to be passed to the DB
+        //     if($sort_direction === "1" || $sort_direction === "-1") $sort_direction = (int)$sort_direction;
 
-            $options['sort'] = [$params[QUERY_PARAM_SORT_NAME] => $sort_direction ?? 1];
+        //     $options['sort'] = [$params[QUERY_PARAM_SORT_NAME] => $sort_direction ?? 1];
+        // }
+
+        if(key_exists(QUERY_PARAM_SORT_NAME, $params)) {
+            // $sort_direction = $params[QUERY_PARAM_SORT_DIR];
+            // if(!$sort_direction) $sort_direction = 1;
+            // // Let's check to ensure we're only allowing valid values to be passed to the DB
+            // if($sort_direction === "1" || $sort_direction === "-1") $sort_direction = (int)$sort_direction;
+            $options['sort'] = [];
+            foreach($params[QUERY_PARAM_SORT_NAME] as $p => $v) {
+                $options['sort'][$p] = match($v) {
+                    "-1"    => -1,
+                     -1     => -1,
+                    default =>  1
+                };
+            }
+            // $options['sort'] = [$params[QUERY_PARAM_SORT_NAME] => $sort_direction ?? 1];
         }
         
         // Now we handle our pagination.

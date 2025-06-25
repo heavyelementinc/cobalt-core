@@ -104,7 +104,7 @@ class DateResult extends SchemaResult {
     protected function relative($format = "verbose") {
         $date = $this->format("U");
         if(!$date) $date = 0;
-        return "<date-span format='$format' relative='true' value='" .($date * 1000). "'></date-span>";
+        return "<date-span format='$format' relative='true' value='" .($date * 1000). "'>".$this->format($format)."</date-span>";
     }
 
     public function filter($value) {

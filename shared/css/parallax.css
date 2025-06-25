@@ -58,6 +58,10 @@
     &.lazy--from-right {
       --lazy-start-transform: translateX(5%);
     }
+    &.lazy--from-above,
+    &.lazy--from-top {
+      --lazy-start-transform: translateY(-5%);
+    }
     &.lazy--from-bottom {
       --lazy-start-transform: translateY(5%);
     }

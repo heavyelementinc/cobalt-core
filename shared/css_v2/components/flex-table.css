@@ -13,11 +13,13 @@ ul.list-panel {
         align-items: center;
         flex-wrap: wrap;
         padding: var(--_item-padding);
-        background: var(--project-color-table-bg-odd);
+        background: var(--background-color-2);
+        color: var(--background-color-2-fg);
         max-width: 100%;
         
         &:nth-of-type(odd) {
-            background: var(--project-color-table-bg-even);
+            background: var(--background-color-0);
+            color: var(--background-color-0-fg);
         }
         &:first-of-type{
             border-radius: var(--_border-radius) var(--_border-radius) 0 0;
@@ -51,7 +53,8 @@ ul.list-panel {
 flex-table{
     display: table;
     width: 100%;
-    background: var(--project-color-table-bg-odd);
+    background: var(--background-color-0);
+    color: var(--background-color-0-fg);
     flex-wrap: wrap;
     border: var(--project-color-table-border);
     & .doc_id_mark {
@@ -78,9 +81,11 @@ flex-table{
         width: 100%;
         flex-grow: 0;
         flex-wrap: wrap;
-        background: var(--project-color-table-bg-odd);
+        background: var(--backgound-color-2);
+        color: var(--background-color-2-fg);
         &:nth-of-type(even){
-            background: var(--project-color-table-bg-even);
+            background: var(--background-color-0);
+            color: var(--background-color-0-fg);
         }
         &.flex-table--no-results {
             justify-self: center;
@@ -230,11 +235,13 @@ td, th{
 }
 
 table{
-    background: var(--project-color-table-bg-odd);
+    background: var(--background-color-0);
+    color: var(--background-color-0-fg);
 }
 
 tr:nth-of-type(even) {
-    background: var(--project-color-table-bg-even);
+    background: var(--background-color-2);
+    color: var(--background-color-2-fg);
 }
 
 flex-table async-button {

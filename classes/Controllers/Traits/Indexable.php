@@ -62,11 +62,10 @@ trait Indexable {
         $this->param_sanity_check($params);
     }
 
-    public function get_persistent_query_params($as_array = false):string {
+    public function get_persistent_query_params($as_array = false):string|array {
         // if(!$this->queryParameters['sort']) return "";
         $arr = [
             QUERY_PARAM_SORT_NAME => $_GET[QUERY_PARAM_SORT_NAME],
-            QUERY_PARAM_SORT_DIR => $_GET[QUERY_PARAM_SORT_DIR],
             QUERY_PARAM_ARCHIVED_DISPLAY => $_GET[QUERY_PARAM_ARCHIVED_DISPLAY],
         ];
         if(isset($_GET[QUERY_PARAM_SEARCH])) $arr[QUERY_PARAM_SEARCH] = $_GET[QUERY_PARAM_SEARCH];
@@ -104,7 +103,7 @@ trait Indexable {
                 $classes = ($sort_val === -1) ? "sort-desc" : "sort-asc";
             }
             
-            $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name']), QUERY_PARAM_SORT_DIR => urlencode($sort_direction)]);
+            $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name'])]);
             $href = "?" . http_build_query($href_params);
             
             $html .= "<flex-header class=\"$classes\"><a href=\"$href\">".htmlspecialchars($field['title'])."</a></flex-header>";
@@ -423,13 +422,20 @@ trait Indexable {
         }
 
         // Check if the request asks for a sorting override
-        if(key_exists(QUERY_PARAM_SORT_DIR, $params)) {
-            $sort_direction = $params[QUERY_PARAM_SORT_DIR];
-            if(!$sort_direction) $sort_direction = 1;
-            // Let's check to ensure we're only allowing valid values to be passed to the DB
-            if($sort_direction === "1" || $sort_direction === "-1") $sort_direction = (int)$sort_direction;
-
-            $options['sort'] = [$params[QUERY_PARAM_SORT_NAME] => $sort_direction ?? 1];
+        if(key_exists(QUERY_PARAM_SORT_NAME, $params)) {
+            // $sort_direction = $params[QUERY_PARAM_SORT_DIR];
+            // if(!$sort_direction) $sort_direction = 1;
+            // // Let's check to ensure we're only allowing valid values to be passed to the DB
+            // if($sort_direction === "1" || $sort_direction === "-1") $sort_direction = (int)$sort_direction;
+            $options['sort'] = [];
+            foreach($params[QUERY_PARAM_SORT_NAME] as $p => $v) {
+                $options['sort'][$p] = match($v) {
+                    "-1"    => -1,
+                     -1     => -1,
+                    default =>  1
+                };
+            }
+            // $options['sort'] = [$params[QUERY_PARAM_SORT_NAME] => $sort_direction ?? 1];
         }
         
         // Now we handle our pagination.

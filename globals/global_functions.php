@@ -383,7 +383,7 @@ function lookup_js_notation(String $path_map, $vars, $throw_on_fail = false) {
 
             if($mutant instanceof GenericModel) {
                 $temp_path = get_temp_path($mutated_path ?? $path_map, $key);
-                return recursive_lookup(explode(".",$temp_path), $mutant);
+                return lookup($temp_path, $mutant);
             }
 
             if(is_a($mutant, "\\Cobalt\\Maps\\GenericMap")) {
@@ -428,22 +428,23 @@ function get_custom(string $name):?CustomSchema {
 }
 
 function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed {
+
     if ($subject instanceof MapResult) {
         $subject = $subject->getRaw();
     }
     if ($subject instanceof SchemaResult) {
         if(isset($subject->{$name})) return $subject->{$name};
-        $type = "SchemaResult";
+        $array_accessible = "SchemaResult";
     }
-    $type = is_array($subject) || $subject instanceof ArrayAccess;
-    if($type) {
+    $array_accessible = is_array($subject) || $subject instanceof ArrayAccess;
+    if($array_accessible) {
         if(isset($subject[$name])) return $subject[$name];
     }
     if(strpos($name, ".") >= 0) {
         $exploded = explode(".", $name);
         $first = array_shift($exploded);
-        if($type === true && isset($subject[$first])) return lookup(implode(".", $exploded), $subject[$first]);
-        if($type === "SchemaResult" && isset($subject->{$first})) return lookup(implode(".", $exploded), $subject->{$first});
+        if($array_accessible === true && isset($subject[$first])) return lookup(implode(".", $exploded), $subject[$first]);
+        if($array_accessible === "SchemaResult" && isset($subject->{$first})) return lookup(implode(".", $exploded), $subject->{$first});
         if($throwOnFail) throw new LookupFailure("Failed to find `$first` on " . gettype($subject));
         // return "";
     }

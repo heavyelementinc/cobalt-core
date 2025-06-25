@@ -93,6 +93,7 @@ trait Schemable {
         return [
             QUERY_SEARCH_MATCH_SCORE_FIELD,
             '__version',
+            // 'name',
         ];
     }
 
@@ -126,6 +127,7 @@ trait Schemable {
     }
 
     public function setData(array|BSONDocument|BSONArray $data): void {
+        $data = array_undot($data);
         $this->_id = $data['_id'];
         foreach($data as $index => $value) {
             if($index === "_id") continue;

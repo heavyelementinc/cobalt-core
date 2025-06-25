@@ -163,7 +163,12 @@ export default class FormRequest extends ProgressWizard {
      */
     get autosave() {
         const autosave = this.getAttribute("autosave");
-        if(autosave == "autosave") return true;
+        switch(autosave) {
+            case "form":
+                return "form";
+            case "autosave":
+                return true;
+        }
         // If we don't have an explicit autosave attribute set, we should 
         // check if this form-request contains a submit button.
         const hasAtLeastOneSubmitButton = this.querySelector("button[type='submit'], input[type='submit'], button[type='back'], input[type='back']");
@@ -172,8 +177,13 @@ export default class FormRequest extends ProgressWizard {
     }
 
     set autosave(value) {
-        if(value) {
-            this.setAttribute("autosave", "autosave");
+        switch(value) {
+            case "form":
+                this.setAttribute("autosave", "form");
+                break;
+            default: 
+                this.setAttribute("autosave","autosave");
+                break;
         }
     }
 
@@ -248,6 +258,14 @@ export default class FormRequest extends ProgressWizard {
         }
 
         this.__autoSaveTimeout = setTimeout(() => {
+            if(this.autosave === "form") {
+                return this.dispatchEvent(new CustomEvent("submission", {
+                    detail: {
+                        type: "autosave",
+                        formData: this.buildSubmission()
+                    }
+                }));
+            }
             this.dispatchEvent(new CustomEvent("submission", {
                 detail: {
                     type: "autosave",

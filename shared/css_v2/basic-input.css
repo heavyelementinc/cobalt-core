@@ -44,11 +44,10 @@
     button,
     input-wrapper,
     async-button[native],
-    a.button[native],
     [role='button'],
     [__custom-input],
     [cobalt-component="cobalt-component"]:not(input-switch)
-)
+), a.button[native]
 {
     display: inline-block;
     border: var(--input-element-border-value);
@@ -636,13 +635,30 @@ select {
         content: "\F0140";
         color: var(--input-element-border);
         font-family: "Material Design Icons";
+        display: flex;
+        align-items: center;
     }
     &:hover::picker-icon {
         color: black;
     }
+    option {
+        border: 1px solid transparent;
+        border-radius: 1em;
+        &:focus-within {
+            background-color: transparent;
+        }
+        &:checked {
+            border: 1px solid var(--primary-color-1);
+        }
+        &::checkmark {
+            content: unset;
+        }
+    }
+
 }
 
 ::picker(select) {
+    appearance: base-select;
     border: var(--input-element-border-value);
     background: var(--input-element-background);
     padding: var(--input-element-padding);

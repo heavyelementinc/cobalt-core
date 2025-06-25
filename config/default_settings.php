@@ -258,7 +258,9 @@ $settings = [
         "Notifications_collection" => [
             "default" => "CobaltNotifications"
         ],
-        
+        "Notifications_process_queue_notes_newer_than" => [
+            "default" => "-30 days"
+        ],
         "Enable_database_import_export" => [
             "default" => true
         ],

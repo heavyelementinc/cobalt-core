@@ -161,7 +161,7 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
     }
 
     public function offsetExists(mixed $offset): bool {
-        return key_exists($offset, $this->value);
+        return key_exists($offset, $this->value ?? []);
     }
 
     public function offsetGet(mixed $offset): mixed {

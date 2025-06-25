@@ -4,12 +4,12 @@
 Cobalt Engine is meant to provide developers with a simple and powerful router-based web development frontend. It's compatible with Docker and easily deployed.
 
 Cobalt aims to provide an all-in-one framework which includes
- * An expressive HTML template engine
- * Robust user account management and permission system
- * A unified routing system for both the backend and frontend
- * Frontend WebComponents for easily interacting with the API
- * A CLI for managing settings, user accounts, CRON tasks, and more
- * Route contexts for HTML content, RESTful APIs, webhooks, and more
+* ✒️ An expressive HTML template engine
+* 👤 Robust user account management and permission system
+* 📍 A unified routing system for both the backend and frontend
+* 👉 Frontend WebComponents for easily interacting with the API
+* 🤖 A CLI for managing settings, user accounts, CRON tasks, and more
+* 💬 Route contexts for HTML content, RESTful APIs, webhooks, and more
 
 It was created by [Heavy Element, Inc](https://heavyelement.io).
 
@@ -22,7 +22,7 @@ To get started with Cobalt, you'll need at least PHP version 8.1 and MongoDB on 
 
 ### On Ubuntu
 ```shell
-  sudo apt install apache2 php8.1 php-mongodb
+  sudo apt install apache2 php8.2 php-mongodb
   # Depending on your setup, you might also want MongoDB set up on your system
   sudo a2enmod rewrite
 ```

@@ -358,7 +358,8 @@ class Router {
                     if($hasHandler === false) continue;
 
                     if(isset($route['handler'])) {
-                        $file = find_one_file($this->router_js_table, $route['handler']);
+                        if(file_exists($route['handler'])) $file = $route['handler'];
+                        else $file = find_one_file($this->router_js_table, $route['handler']);
                         if(!$file) throw new Exception("The router table specfied a client controller but the file was not found");
 
                         $real_regex = $route['real_regex'];

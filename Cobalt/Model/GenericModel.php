@@ -12,6 +12,7 @@ use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;
 use Cobalt\Model\Types\DateType;
+use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\Traits\Prototypable;
 use DateTime;
 use Exceptions\HTTP\BadRequest;
@@ -66,6 +67,8 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         }
         // Let's check to ensure that the property exists.
         if(key_exists($property, $this->__dataset)) return $this->__dataset[$property];
+        $val = lookup($property, $this);
+        if($val instanceof MixedType) return $val;
         throw new Undefined($property, "The property `$property` does not exist on `$property"."->".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."!");
     }
 
@@ -102,7 +105,11 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
 
     public function __isset($name) {
         if($name === "_id") return isset($this->_id);
-        return key_exists($name, $this->__dataset) && $this->__dataset[$name]->isSet;
+        if(key_exists($name, $this->__dataset) && $this->__dataset[$name]->isSet) return true;
+        return isset($this->{$name});
+        // $val = lookup($name, $this);
+        // if($val) return $val->isSet;
+        return false;
     }
 
     public function __unset($name) {

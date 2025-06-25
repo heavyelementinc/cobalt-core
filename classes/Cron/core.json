@@ -25,5 +25,14 @@
         "method": "process_queue",
         "method_args": [],
         "interval": 60
+    },
+    {
+        "type": "DefaultType",
+        "name": "Send Bulk Notification Email",
+        "class": "\\Cobalt\\Notifications\\Classes\\NotificationManager",
+        "class_args": [],
+        "method": "process_notification_queue",
+        "method_args": [],
+        "interval": 3600
     }
 ]
