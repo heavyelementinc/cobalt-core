@@ -20,8 +20,8 @@ use Cobalt\Maps\GenericMap;
 use Cobalt\Maps\PersistanceMap;
 use Contact\Persistance;
 use MongoDB\BSON\ObjectId;
-use Drivers\UTCDateTime;
 use MongoDB\BSON\Persistable;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Collection;
 use MongoDB\Driver\Cursor;
 use MongoDB\Model\BSONArray;
@@ -76,7 +76,7 @@ abstract class Database {
 
     final function __date($value = null) {
         $date = new UTCDateTime($value);
-        return $date->timestamp;
+        return $date;
     }
 
     // /* CREATE */
