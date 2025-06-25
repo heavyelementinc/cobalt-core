@@ -41,6 +41,7 @@ class UploadResult2 extends MapResult {
         $title = ($misc['title']) ? "title=\"".htmlspecialchars($misc['title'])."\"" : "";
         $alt = ($misc['alt']) ? " alt=\"$misc[alt]\"" : "";
         $value = $this->getMediaElements($embedSize);
+        $style = $misc['style'] ?? "";
         $w = $value['width'];
         $h = $value['height'];
 
@@ -70,8 +71,9 @@ class UploadResult2 extends MapResult {
             //     return "<a href=''></a>";
             case "image":
             default:
-                $backgroundColor = ($misc['bg']) ? "style=\"background-color: ".$value['accent'] : "";
-                return "<img$class src=\"$value[url]\"$alt width=\"$w\" height=\"$h\" $backgroundColor\">";
+                $backgroundColor = ($misc['bg']) ? "background-color: ".$value['accent'].";" : "";
+                $style = ($style) ? "style=\"$backgroundColor $style\"" : "style=\"$backgroundColor\"";
+                return "<img$class src=\"$value[url]\"$alt width=\"$w\" height=\"$h\" $style>";
         }
 
         return $rt;
