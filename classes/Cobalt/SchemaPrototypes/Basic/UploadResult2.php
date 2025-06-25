@@ -106,7 +106,7 @@ class UploadResult2 extends MapResult {
             case "thumb":
             case "thumbnail":
             case "small":
-                if(!key_exists('thumb', $this->value->__dataset)) break;
+                if(!key_exists('thumb', $this->value->__dataset ?? [])) break;
                 return [
                     'url' => ($this->value->thumb) ? $this->value->thumb->getValue() : $this->value->url?->getValue(),
                     'height' => ($this->value->thumb_height) ? $this->value->thumb_height->getValue() : $this->value->height?->getValue(),
