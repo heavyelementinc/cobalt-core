@@ -13,10 +13,12 @@ main:has(#login-form-container) {
   flex-direction: column;
   width: 50ch;
   height: auto;
-  border: 1px solid var(--project-color-input-border-nofocus);
-  background: var(--project-color-input-background);
+  border: 1px solid var(--neutral-color-0);
+  background: var(--neutral-color-1);
+  color: var(--neutral-color-1-fg);
   justify-content: space-between;
   overflow: hidden;
+  padding: 0;
 }
 
 .login-hero-sidebar {
