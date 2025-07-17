@@ -44,8 +44,10 @@ trait Schemable {
                 $directives = ['type' => new $directives()];
             }
 
-            if(!isset($directives['type'])) throw new DirectiveDefinitionFailure("Field `$field` lacks a declared 'type' directive");
-            
+            if(!isset($directives['type'])) {
+                throw new DirectiveDefinitionFailure("Field `$field` lacks a declared 'type' directive");
+            }
+
             // Define the schema directives
             $this->__schema[$field] = $directives;
             if(!key_exists($field, $this->__dataset)) {
@@ -72,7 +74,9 @@ trait Schemable {
     }
 
     /**
-     * Returns an array of reserved RegEx strings
+     * Returns an array of reserved RegEx strings. These are invalid names for
+     * user-defined field names. Attempts to use these names will result in an
+     * error!
      * @return array 
      */
     public function __reservedFieldNames():array {
@@ -84,11 +88,17 @@ trait Schemable {
             // 'original',
             'model',
             // 'type',
-            // 'name',
+            'name',
             'fieldName',
+            'client',
         ];
     }
 
+    /**
+     * System names are fields reserved by the GenericModel system. Their values
+     * are automatically assigned by the system and are not user-definable.
+     * @return array 
+     */
     public function __systemFieldNames():array {
         return [
             QUERY_SEARCH_MATCH_SCORE_FIELD,

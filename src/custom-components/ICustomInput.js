@@ -1,6 +1,6 @@
 export default class ICustomInput extends HTMLElement {
     DEFAULT_VALUE = null;
-    DEFAULT_TIMEOUT = 1550;
+    DEFAULT_TIMEOUT = 800;
 
     constructor() {
         super();
@@ -76,6 +76,10 @@ export default class ICustomInput extends HTMLElement {
         this.removeAttribute("required");
     }
 
+    get datalist() {
+        return this.getAttribute("datalist");
+    }
+
     _validity = {
         badInput: false,
         customError: false,
@@ -117,6 +121,13 @@ export default class ICustomInput extends HTMLElement {
         if(this.required == false) return true;
         if("_isRequiredFulfilled" in this) return this._isRequiredFulfilled();
         return !!this.value;
+    }
+
+    /**
+     * @returns {null|HTMLDatalist}
+     */
+    getDatalist() {
+        return document.getElementById(this.datalist);
     }
 
     // handleSaveFeedback() {

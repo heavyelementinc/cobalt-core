@@ -10,6 +10,7 @@ class NumberType extends MixedType {
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
         if($tag === null) $tag = $this->directiveOrNull("input_tag") ?? "input";
+        $misc['step'] = $misc['step'] ?? $this->directiveOrNull('step') ?? 1;
         return $this->input($class, $misc, $tag);
     }
 

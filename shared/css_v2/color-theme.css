@@ -3,98 +3,104 @@
 @property --branding-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.branding_increment}};
+    initial-value: <?= $theme['branding_increment'] ?>;
 }
 
 @property --branding-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.branding_rotation}};
+    initial-value: <?= $theme['branding_rotation'] ?>;
 }
 
 @property --branding-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{theme.color_branding}};
+    initial-value: <?= $theme['color_branding'] ?>;
 }
 
 @property --primary-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.primary_increment}};
+    initial-value: <?= $theme['primary_increment'] ?>;
 }
 
 @property --primary-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.primary_rotation}};
+    initial-value: <?= $theme['primary_rotation'] ?>;
 }
 
 @property --primary-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{theme.color_primary}};
+    initial-value: <?= $theme['color_primary'] ?>;
 }
 
 
 @property --issue-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.issue_increment}};
+    initial-value: <?= $theme['issue_increment'] ?>;
 }
 
 @property --issue-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.issue_rotation}};
+    initial-value: <?= $theme['issue_rotation'] ?>;
 }
 
 @property --issue-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{theme.color_issue}};
+    initial-value: <?= $theme['color_issue'] ?>;
 }
 
 @property --neutral-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.neutral_increment}};
+    initial-value: <?= $theme['neutral_increment'] ?>;
 }
 
 @property --neutral-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.neutral_rotation}};
+    initial-value: <?= $theme['neutral_rotation'] ?>;
 }
 
 @property --neutral-color-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{theme.color_neutral}};
+    initial-value: <?= $theme['color_neutral'] ?>;
 }
 
 @property --background-increment {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.background_increment}};
+    initial-value: <?= $theme['background_increment'] ?>;
 }
 
 @property --background-rotation {
     syntax: "<number>";
     inherits: true;
-    initial-value: {{theme.background_rotation}};
+    initial-value: <?= $theme['background_rotation'] ?>;
 }
 
 @property --background-color {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{theme.color_background}};
+    initial-value: <?= $theme['color_background'] ?>;
 }
 
 @property --font-body-color {
     syntax: "<color>";
     inherits: true;
-    initial-value: {{theme.color_font_body}};
+    initial-value: <?= $theme['color_font_body'] ?>;
+}
+
+@property --theme {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: <?= __APP_SETTINGS__['default_color_scheme'] ? 1 : -1 ?>;
 }
 
 :root {
@@ -164,7 +170,16 @@
     --background-color-4-fg: rgb(from var(--background-color-4) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
     --background-color-5-fg: rgb(from var(--background-color-5) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
 
-    
+    --surface-color-0: oklch(from var(--background-color-1) calc(l + (0.01 * var(--theme))) c h);
+    --surface-color-0-fg: rgb(from var(--surface-color-0) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --surface-color-1: oklch(from var(--background-color-1) calc(l + (0.03 * var(--theme))) c h);
+    --surface-color-1-fg: rgb(from var(--surface-color-1) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --surface-color-2: oklch(from var(--background-color-1) calc(l + (0.06 * var(--theme))) c h);
+    --surface-color-2-fg: rgb(from var(--surface-color-2) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+    --surface-color-3: oklch(from var(--background-color-1) calc(l + (0.09 * var(--theme))) c h);
+    --surface-color-3-fg: rgb(from var(--surface-color-3) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000) calc(((((r * 299) + (g * 587) + (b * 114)) / 1000) - 128) * -1000));
+
+
     /** DERIVED VALUES */
     --main-content-color: oklch(from var(--background-color) calc(l - .60) c h);
 
@@ -234,4 +249,7 @@
     --project-landing-page-content-width: 80ch;
 
     --admin-font: 'Roboto', 'Arial', sans-serif;
+    .dark {
+        
+    }
 }

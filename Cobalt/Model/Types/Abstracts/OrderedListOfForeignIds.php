@@ -36,7 +36,7 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
      * Called when displaying the item as a table column
      * @return string 
      */
-    public function display(): string {
+    public function display(): mixed {
         return (string)count($this->raw);
     }
 

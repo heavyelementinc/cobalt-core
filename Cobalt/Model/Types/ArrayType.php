@@ -17,7 +17,7 @@ use MongoDB\Model\BSONDocument;
 use Stringable;
 
 class ArrayType extends MixedType implements ArrayAccess, Stringable {
-    use Hydrateable, SharedFilterEnums;
+    use Hydrateable;
 
     public function setValue($array):void {
         $this->value = [];
@@ -44,7 +44,7 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
         $this->isSet = true;
     }
 
-    public function getValue() {
+    public function getValue():mixed {
         return $this->value;
     }
 
@@ -86,9 +86,20 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
-        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-array";
-        if($tag === null) $tag = "input-array";
+        
         if($this->hasDirective("allow_custom")) $misc['allow-custom'] = ($this->getDirective('allow_custom')) ? 'true' : "false";
+        
+        if(!$tag && $this->hasDirective("input_tag")) {
+            $tag = $this->getDirective("input_tag") ?? "input-array";
+        }
+
+        if($misc['allow-custom'] === 'true') $tag = "input-array";
+
+        // If no tag has been assigned, let's default
+        if($tag === null) {
+            $tag = ($this->hasDirective("valid") && $this->getDirective("valid")) ? "input-tag-select" : "input-array";
+        }
+
         return $this->inputArray($class, $misc, $tag);
     }
 
@@ -134,6 +145,13 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
             return $result;
         }
         return explode(",", $value);
+    }
+
+    public function includes($value){
+        foreach($this->value as $index => $val) {
+            if($val->value == $value) return true;
+        }
+        return false;
     }
 
 }

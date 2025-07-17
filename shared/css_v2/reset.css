@@ -42,21 +42,21 @@ help-span:where(:not(:empty)) {
     --_anchor-visited-color: var(--_anchor-element-color);
     --_anchor-contrast-mix: 15%;
     color: var(--_anchor-element-color, var(--font-body-color));
-    color: color-mix(in hsl, var(--_anchor-element-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
+    /* color: color-mix(in hsl, var(--_anchor-element-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
     background-color: transparent;
     font-weight: bold;
     cursor: pointer;
     &:visited {
         color: var(--_anchor-visited-color, var(--font-body-color));
-        color: color-mix(in hsl, var(--_anchor-visited-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
+        /* color: color-mix(in hsl, var(--_anchor-visited-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
     }
     &:hover {
         color: var(--_anchor-hover-color, var(--font-body-color));
-        color: color-mix(in hsl, var(--_anchor-hover-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
+        /* color: color-mix(in hsl, var(--_anchor-hover-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
     }
     &:active {
         color: var(--_anchor-active-color, var(--font-body-color));
-        color: color-mix(in hsl, var(--_anchor-active-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix));
+        /* color: color-mix(in hsl, var(--_anchor-active-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
     }
     &:is(:disabled,
     [disabled="disabled"]) {
@@ -240,7 +240,7 @@ img {
     background-repeat: no-repeat;
     background-size: cover;
     shape-margin: 0.75rem;
-    &[accent-color], &[contrast-color] {
+    &:not([transparent])[accent-color], &:not([transparent])[contrast-color] {
         /* background-image: attr(preview type(<string>)); */
         background-color: attr(accent-color type(<color>));
         color: attr(contrast-color type(<color>));

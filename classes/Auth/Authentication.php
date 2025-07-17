@@ -245,6 +245,7 @@ class Authentication {
         $vars = ['message' => $this->messages[$_GET['message'] ?? '']];
         return [$vars, $view];
     }
+    
     private function login_stage_1_authenticate():array {
         $view = "/authentication/login/stage-1-password-prompt.php";
         if(__APP_SETTINGS__['Auth_login_via_email_token']) {
@@ -252,12 +253,14 @@ class Authentication {
                 $view = "/authentication/login/stage-1-password-or-email.php";
             }
         }
+
         $vars = [
             'user' => (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID])),
-            'message' => $this->messages[$_GET['message'] ?? '']
+            'message' => $this->messages[$_GET['message'] ?? ''],
         ];
         return [$vars, $view];
     }
+
     private function login_stage_2_tfa():array {
         $view = "/authentication/login/stage-2-tfa.php";
         $user = (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]));
@@ -398,7 +401,7 @@ class Authentication {
 
     function header_reload_command($target = null) {
         if($target === false || $target === null) {
-            $resume = urldecode($_GET[SESSION_RESUME_PARAM]?? "") ?? $_SERVER['HTTP_REFERER'];
+            $resume = urldecode($_GET[SESSION_RESUME_PARAM]?? "");
             $target = "/login/?".SESSION_RESUME_PARAM."=".urlencode($resume);
         }
         redirect($target);

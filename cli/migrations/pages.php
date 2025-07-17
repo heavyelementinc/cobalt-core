@@ -2,6 +2,9 @@
 
 use \Cobalt\CLI\Migration;
 use Cobalt\Pages\Models\PageMap;
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
 
 class pages extends Migration {
 
@@ -25,7 +28,7 @@ class pages extends Migration {
         return $this->find([], ['limit' => $this->count([]), 'projection' => ['__pclass' => 0]]);
     }
 
-    public function runOne($document) {
+    public function runOne($document):null|InsertOneResult|InsertManyResult|UpdateResult {
         $id = $document['_id'];
         unset($document['_id']);
         $persistance = $this->get_persistance();

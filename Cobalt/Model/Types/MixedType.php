@@ -3,13 +3,20 @@
 namespace Cobalt\Model\Types;
 
 use ArrayAccess;
+use Cobalt\DefinedModel\DefinedModel;
+use Cobalt\DefinedModel\GenericModel as NewGenericModel;
 use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
+use Cobalt\Model\Types\Interfaces\IMixedType;
 use Cobalt\Model\Types\Traits\DirectiveBaseline;
 use Cobalt\Model\Types\Traits\ClientUpdateFilter;
 use Cobalt\Model\Types\Traits\MixedTypeToField;
 use Cobalt\Model\Types\Traits\Prototypable;
+use Cobalt\Model\Types\Traits\SharedFilterEnums;
+use MongoDB\BSON\Document;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Stringable;
 
 const DIRECTIVE_KEY_DEFAULT = "default";
@@ -19,15 +26,38 @@ const DIRECTIVE_KEY_FILTER = "filter";
 const DIRECTIVE_KEY_GET = "get";
 const DIRECTIVE_KEY_SET = "set";
 
-class MixedType implements Stringable, ArrayAccess {
-    use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField;
+class MixedType implements Stringable, ArrayAccess, IMixedType {
+    use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField, SharedFilterEnums;
     protected bool $isSet = false;
     protected $value = null;
     protected string $type = "mixed";
     // protected string $name;
     protected string $fieldName = "";
     protected bool $hasModel = false;
-    protected GenericModel $model;
+    protected GenericModel|NewGenericModel $model;
+    protected NewGenericModel $rootModel;
+    protected NewGenericModel $parentModel;
+
+    public function setParentModel(NewGenericModel $model) {
+        $this->parentModel = $model;
+        $this->model = $model;
+    }
+
+    public function getParentModel(): NewGenericModel {
+        return $this->parentModel;
+    }
+
+    public function setRootModel(NewGenericModel $model) {
+        $this->rootModel = $model;
+    }
+
+    public function getRootModel(): NewGenericModel {
+        return $this->rootModel;
+    }
+
+    public function isSet(): bool {
+        return $this->isSet;
+    }
 
     /**
      * The getValue() function will return the present value or the 
@@ -35,7 +65,7 @@ class MixedType implements Stringable, ArrayAccess {
      * is returned
      * @return void|mixed 
      */
-    public function getValue() {
+    public function getValue():mixed {
         $val = $this->value;
         if(!$this->isSet) $val = $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
         if($val === null) $val = $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
@@ -43,7 +73,7 @@ class MixedType implements Stringable, ArrayAccess {
         return $val;
     }
 
-    public function setValue($value):void {
+    public function setValue(mixed $value):void {
         if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
         $this->value = $value;
         $this->isSet = true;
@@ -53,12 +83,23 @@ class MixedType implements Stringable, ArrayAccess {
         $this->{MODEL_RESERVERED_FIELD__FIELDNAME} = $name;
     }
 
-    public function setModel(GenericModel $model):void {
+    public function getName():string {
+        return $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
+    }
+
+    public function setModel(GenericModel|NewGenericModel $model):void {
         $this->model = $model;
     }
 
     public function finalInitialization():void {
 
+    }
+
+    protected function getAttributes():array {
+        return [
+            'minlength' => $this->directiveOrNull('min'),
+            'maxlength' => $this->directiveOrNull('max'),
+        ];
     }
 
     /**
@@ -181,5 +222,53 @@ class MixedType implements Stringable, ArrayAccess {
 
     public function offsetUnset(mixed $offset): void {
         $this->__unset($offset);
+    }
+
+    static function typeFromValue(mixed $value, string $name):MixedType {
+        $type = gettype($value);
+        switch($type) {
+            case "string":
+                $instance = new StringType();
+                break;
+            case "integer":
+            case "int":
+            case "float":
+            case "double":
+                $instance = new NumberType();
+                break;
+            case "array":
+                if(is_associative_array($value)) {
+                    $instance = new ModelType();
+                    $instance->allow_undefined_fields(true);
+                } else $instance = new ArrayType();
+                break;
+            case "object":
+                $instance = static::normalizeMongoDocuments($value);
+                break;
+            default:
+                $instance = new MixedType();
+        }
+        $instance->setName($name);
+        $instance->setValue($value);
+
+        return $instance;
+    }
+
+    static function normalizeMongoDocuments(&$value, $instance = null) {
+        if($value instanceof Document) {
+            $instance = new ModelType();
+        }
+        if($value instanceof BSONArray) {
+            $instance = new ArrayType();
+            $value = $value->getArrayCopy();
+        }
+        if($value instanceof BSONDocument) {
+            $instance = new ModelType();
+            $value = $value->getArrayCopy();
+        }
+        if($instance === null) {
+            $instance = new MixedType();
+        }
+        return $instance;
     }
 }

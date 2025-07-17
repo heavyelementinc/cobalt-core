@@ -75,7 +75,7 @@ class DateType extends MixedType {
     }
 
     #[Prototype]
-    protected function display():string {
+    public function display(): mixed {
         return $this->format("verbose");
     }
 

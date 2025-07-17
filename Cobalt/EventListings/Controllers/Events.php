@@ -13,7 +13,7 @@ class Events extends ModelController {
     }
 
     public function edit($document): string {
-        return view("/Cobalt/EventListings/templates/admin/editor copy.php", ['doc' => $document]);
+        return view("/Cobalt/EventListings/templates/admin/new-editor.php", ['doc' => $document]);
     }
 
     public function destroy(Model|BSONDocument $document): array {

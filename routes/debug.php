@@ -3,6 +3,10 @@ use Routes\Route;
 
 /** Debug routes are for testing purposes and should not be enabled in production */
 if (app("enable_debug_routes")) {
+    Route::get("/new-users/{id}?", "Cobalt\Auth\UserAccounts\Testing\TestController@loadUser",[
+        'navigation' => ['debug_settings'],
+        'anchor' => ['name' => 'User Test', 'href' => '/new-users/']
+    ]);
     Route::get("/new-render/{user_input}?", "DebugRenderer@render", [
         'navigation' => ['debug_settings'],
         'anchor' => ['name' => 'Render Test', 'href' => '/new-render/']

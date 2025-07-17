@@ -2,6 +2,10 @@
 
 namespace Cobalt\CLI;
 
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
+
 /**
  * Usage: extend this function, in the config method you must set either __run_all or $__run_one to true
  * @package Cobalt\CLI
@@ -34,7 +38,7 @@ abstract class Migration extends \Drivers\Database{
      * @param mixed $document 
      * @return null|\MongoDB\BulkWriteResult
      */
-    abstract function runOne($document);
+    abstract function runOne($document):null|InsertOneResult|InsertManyResult|UpdateResult;
 
     public function execute() {
         $this->__benchmark_start = microtime(true);

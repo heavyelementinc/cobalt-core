@@ -13,13 +13,12 @@ ul.list-panel {
         align-items: center;
         flex-wrap: wrap;
         padding: var(--_item-padding);
-        background: var(--background-color-2);
-        color: var(--background-color-2-fg);
+        background: var(--surface-color-0);
+        color: var(--surface-color-0-fg);
         max-width: 100%;
-        
         &:nth-of-type(odd) {
-            background: var(--background-color-0);
-            color: var(--background-color-0-fg);
+            background: rgb(from var(--surface-color-0) r g b / .4);
+            color: var(--surface-color-0-fg);
         }
         &:first-of-type{
             border-radius: var(--_border-radius) var(--_border-radius) 0 0;

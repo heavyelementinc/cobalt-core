@@ -4,6 +4,8 @@ namespace Cobalt\Model\Types\Traits;
 
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Attributes\Prototype;
+use Cobalt\Model\Types\ArrayType;
+use Cobalt\Model\Types\BinaryType;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\WeakEnumType;
 use Error;
@@ -26,7 +28,7 @@ trait SharedFilterEnums {
     }
 
     #[Prototype]
-    protected function display():mixed {
+    public function display(): mixed {
         $valid = [];
         if($this->hasDirective("valid")) $valid = $this->getDirective("valid");
         
@@ -61,7 +63,7 @@ trait SharedFilterEnums {
     }
 
     /**
-     * The `options` method will return an string of <option> tags based on
+     * The `options` method will return a string of <option> tags based on
      * the return value of the `getValid()` method. The current value of this
      * field will have the `selected="selected"` attribute set.
      * 
@@ -70,48 +72,29 @@ trait SharedFilterEnums {
      * @return string
      */
     #[Prototype]
-    protected function options($selected = null): string {
+    public function options($selected = null): string {
         $valid = $this->getValid();
         
         if($selected) {
-            if($this->hasDirective('allow_custom') && $this->getDirective("allow_custom")) $val = $selected;
-            else if (key_exists($selected, $valid)) $val = $selected;
+            // if($this->hasDirective('allow_custom') && $this->getDirective("allow_custom")) $val = $selected;
+            if (key_exists($selected, $valid)) $val = $selected;
             else $val = $this->getValue() ?? $this->value;
         } else $val = $this->getValue() ?? $this->value;
 
         // if(!is_string($val) && is_numeric($val)) $val = "$val";
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
         
-        // If custom is allowed
+        // Here we determine if we allow custom values and add to our list of options
         $allow_custom = false;
-        
-        if($this->hasDirective('strict')) $allow_custom = $this->getDirective("strict") === false;
-        
-        if(!$allow_custom && $this->hasDirective('allow_custom')) $allow_custom = $this->getDirective("allow_custom");
+        if($this->hasDirective('strict')) {
+            $allow_custom = $this->getDirective("strict") === false;
+        }
+        if($this->hasDirective('allow_custom')) {
+            $allow_custom = $this->getDirective("allow_custom");
+        }
 
         $type = gettype($val);
-
-        switch ($type) {
-                // case $val instanceof \MongoDB\Model\BSONArray:
-                //     $val = $val->getArrayCopy();
-            case "string":
-            case "int":
-                // If the current value is not a key in the current valid options AND
-                // we're allowed to have custom options, add the current val to the options
-                if($allow_custom && !key_exists($val ?? "", $valid)) $valid += [$val => $val];
-                break;
-            case "array":
-                $validValue = [];
-                foreach ($val as $o) {
-                    // If the current value is not a key in the current valid options AND
-                    // we're allowed to have custom options, add the current val to the options
-                    if($o instanceof MixedType) $o = $o->value;
-                    if($allow_custom && !key_exists($o ?? "", $valid)) $valid[$o] = $o;
-                    $validValue[(string)$o] = $o;
-                }
-                $valid = array_merge($validValue ?? [], $valid ?? []);
-                $type = gettype($val);
-        }
+        if($allow_custom) $this->integrate_custom_values_to_valid_array($val, $valid, $type);
 
         $options = "";
         foreach ($valid as $validKey => $validValue) {
@@ -124,25 +107,67 @@ trait SharedFilterEnums {
                     $data .= " data-$attr=\"$val\"";
                 }
             }
-
             $selected = "";
-            switch ($type) {
-                case "string":
-                case "integer":
-                case "double":
-                    $selected = ($val == $validKey) ? "selected='selected'" : "";
-                    break;
-                case "object":
-                    if ($val instanceof \MongoDB\BSON\ObjectId && (string)$val === $validKey) {
-                        $selected = "selected='selected'";
-                    }
-                    break;
-                case "array":
-                    $selected = (in_array($validKey, $val)) ? "selected='selected'" : "";
-                    break;
+            if($this instanceof ArrayType) {
+                $selected = ($this->includes($validKey)) ? "selected='selected'": "";
+            } else if ($this instanceof BinaryType) {
+                $selected = ($this->and($validKey)) ? "selected='selected'" : "";
+            } else {
+                switch ($type) {
+                    case "string":
+                    case "integer":
+                    case "double":
+                        $selected = ($val == $validKey) ? "selected='selected'" : "";
+                        break;
+                    case "object":
+                        if ($val instanceof \MongoDB\BSON\ObjectId && (string)$val === $validKey) {
+                            $selected = "selected='selected'";
+                        }
+                        break;
+                    case "array":
+                        $selected = (in_array($validKey, $val)) ? "selected='selected'" : "";
+                        break;
+                }
             }
             $options .= "<option value='$validKey'$data $selected>$validValue</option>";
         }
         return $options;
+    }
+
+    #[Prototype]
+    public function datalist($selected = null, $name = null) {
+        if(!$name) $name = $this->datalist_name();
+        return "<datalist id=\"$name\">".$this->options($selected)."</datalist>";
+    }
+
+    public function datalist_name() {
+        $name = str_replace(".","_",$this->name);
+        return "datalist_$name";
+    }
+
+    private function integrate_custom_values_to_valid_array(mixed $val, array &$valid, ?string $type = null) {
+        if(is_null($type)) $type = gettype($val);
+    
+        switch ($type) {
+                // case $val instanceof \MongoDB\Model\BSONArray:
+                //     $val = $val->getArrayCopy();
+            case "string":
+            case "int":
+                // If the current value is not a key in the current valid options AND
+                // we're allowed to have custom options, add the current val to the options
+                if(!key_exists($val ?? "", $valid)) $valid += [$val => $val];
+                break;
+            case "array":
+                $validValue = [];
+                foreach ($val as $o) {
+                    // If the current value is not a key in the current valid options AND
+                    // we're allowed to have custom options, add the current val to the options
+                    if($o instanceof MixedType) $o = $o->value;
+                    if(!key_exists($o ?? "", $valid)) $valid[$o] = $o;
+                    $validValue[(string)$o] = $o;
+                }
+                $valid = array_merge($validValue ?? [], $valid ?? []);
+                $type = gettype($val);
+        }
     }
 }

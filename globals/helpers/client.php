@@ -31,7 +31,11 @@ use Handlers\ApiHandler;
 function update(string $query, array $value) {
     global $context_processor;
     if($context_processor instanceof ApiHandler === false) return;
-    $context_processor->update_instructions[] = ['target' => $query, ...$value];
+    $context_processor->update_instructions[] = updater($query, $value);
+}
+
+function updater(string $query, array $value) {
+    return ['target' => $query, ...$value];
 }
 
 /**

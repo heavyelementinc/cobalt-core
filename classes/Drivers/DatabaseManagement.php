@@ -8,6 +8,9 @@ use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use Error;
 use Exception;
+use Iterator;
+use JsonSerializable;
+use MongoDB\BSON\Persistable;
 
 class DatabaseManagement {
     private $db;
@@ -53,20 +56,29 @@ class DatabaseManagement {
 
             $entries = [];
             foreach($result as $i => $row) {
+                // Let's reset the state of the current document output
                 $output_type = "normal";
-                if($row instanceof GenericMap) {
-                    try{
+                
+                try {
+                    if ($row instanceof Persistable) {
+                        $row_to_array = $row->bsonSerialize();
+                    } else if($row instanceof JsonSerializable) {
+                        $row_to_array = $row->jsonSerialize();
+                    } else if($row instanceof GenericMap) {
                         $row_to_array = $this->preserveMap($row);
-                    } catch (Exception $e) {
-                        $error_log .= "EX: $row->_id: " . $e->getMessage() . "\n";
-                    } catch (Error $e) {
-                        $error_log .= "ER: $row->_id: " . $e->getMessage() . "\n";
-                    } finally {
-                        $output_type = "e";
-                        $error_count += 1;
+                    } else if($row instanceof Iterator) {
+                        $row_to_array = iterator_to_array($row);
+                    } else {
+                        $row_to_array = $row;
                     }
-                } else {
-                    $row_to_array = iterator_to_array($row);
+                } catch (Exception $e) {
+                    $error_log .= "EX: $row->_id: " . $e->getMessage() . "\n";
+                    $output_type = "e";
+                    $error_count += 1;
+                } catch (Error $e) {
+                    $error_log .= "ER: $row->_id: " . $e->getMessage() . "\n";
+                    $output_type = "e";
+                    $error_count += 1;
                 }
                 array_push($entries, $row_to_array);
                 if($talk) printf(fmt(".", $output_type));
@@ -78,7 +90,7 @@ class DatabaseManagement {
             ]);
             $export_summary = fmt(" done", "i");
             if($error_count >= 1) $export_summary .= " (with ".fmt("$error_count", "e") . " error" .plural($error_count)."!)\n" . fmt($error_log, "i");
-            if($talk) print($export_summary."\n");
+            if($talk) print($export_summary."\n".$error_log);
         }
         $filepath = $file . $this->get_backup_file_name();
         if($talk) printf("Writing file... ");

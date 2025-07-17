@@ -2,9 +2,13 @@
 
 namespace Cobalt\Model\Types;
 
+use Closure;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Model;
+use DateTime;
 use DOMDocument;
+use DOMElement;
+use DOMNode;
 use Drivers\FileSystem;
 use Exception;
 use MongoDB\BSON\Persistable;
@@ -12,14 +16,18 @@ use ParsedownExtra;
 use Validation\Exceptions\ValidationIssue;
 
 class BlockType extends MixedType {
-    protected $type = "block-editor";
+    protected string $type = "block-editor";
     protected bool $asHTML = true;
+
+    function getRaw() {
+        return $this->value;
+    }
 
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
-        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-date";
-        if($tag === null) $tag = "input-date";
+        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-block";
+        if($tag === null) $tag = "input-block";
         return $this->inputBlock($class, $misc, $tag);
     }
 
@@ -383,5 +391,112 @@ class BlockType extends MixedType {
                 <a href=\"".$block->data->to_url."\" class=\"u-like-of\">$link_title</a>
             </div>
         ";
+    }
+
+    public function from_html(DOMDocument $html, DateTime $modified):array {
+        $document = [
+            'time' => $modified->format("u"),
+            'blocks' => [
+
+            ]
+        ];
+        foreach($html as $el) {
+
+        }
+        return $document;
+    }
+
+    private function __parse_paragraph(DOMElement $el, array &$blocks) {
+        $blocks[] = [
+            'id' => random_string(10),
+            'type' => 'paragraph',
+            'data' => [
+                'text' => DOMinnerHTML($el)
+            ]
+        ];
+    }
+
+    private function __parse_header(DOMElement $el, array &$blocks) {
+        $blocks[] = [
+            'id' => random_string(10),
+            'type' => 'header',
+            'data' => [
+                'text' => DOMinnerHTML($el),
+                'level' => match($el) {
+                    'h1' => 1,
+                    'h2' => 2,
+                    'h3' => 3,
+                    'h4' => 4,
+                    'h5' => 5,
+                    default => 1
+                }
+            ]
+        ];
+    }
+
+    // private function __parse_list(DOMElement $el, array &$blocks) {
+    //     $listItems = [];
+    //     foreach($el->childNodes as $node) {
+    //         $listItems[] = $node->textContent;
+    //     }
+    //     $blocks[] = [
+    //         'id' => random_string(10),
+    //         'type' => 'list',
+    //         'data' => [
+    //             'type' => match($el->nodeName) {
+    //                 'ul' => 'unordered',
+    //                 'ol' => 'ordered',
+    //             },
+    //             'items' => $listItems
+    //         ]
+    //     ];
+    // }
+
+    private function __parse_list(DOMElement $el, array &$blocks) {
+        // $listItems = [];
+        // foreach($el->childNodes as $node) {
+        //     $listItems[] = $node->textContent;
+        // }
+        $recursive = function (DOMElement $el, array &$block, Closure $recursive) {
+            $items = [];
+            
+            foreach($el->childNodes as $item) {
+                $recursive($item, $items, $recursive);
+            }
+            $block[] = [
+                'content' => $el->ownerDocument->saveHTML($el),
+                'items' => $items
+            ];
+        };
+        $b = [];
+        $recursive($el, $b, $recursive);
+        $blocks[] = [
+            'id' => random_string(10),
+            'type' => 'list',
+            'data' => [
+                'style' => match($el->nodeName) {
+                    'ul' => 'unordered',
+                    'ol' => 'ordered',
+                },
+                'items' => $b
+            ]
+        ];
+    }
+
+    private function __parse_img(DOMElement $el, array &$blocks) {
+        $attrs = $el->attributes;
+        $blocks[] = [
+            'id' => random_string(10),
+            'type' => 'image',
+            'data' => [
+                'file' => [
+                    'url' => $attrs->getNamedItem("src")->nodeValue
+                ],
+                'withBorder' => false,
+                'withBackground' => false,
+                'stretched' => false,
+                'caption' => ""
+            ]
+        ];
     }
 }

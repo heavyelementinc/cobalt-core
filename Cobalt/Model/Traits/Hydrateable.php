@@ -3,6 +3,7 @@ namespace Cobalt\Model\Traits;
 
 use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\GenericModel;
+use Cobalt\DefinedModel\GenericModel as NewGenericModel;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
@@ -23,7 +24,7 @@ trait Hydrateable {
      * @param mixed $name 
      * @return void 
      */
-    protected function hydrate(array &$target, string|int $field_name, $value, ?GenericModel $model = null, $name = null, ?array $directives = [], ?MixedType $instance = null):void {
+    protected function hydrate(array &$target, string|int $field_name, $value, null|GenericModel|NewGenericModel $model = null, $name = null, ?array $directives = [], ?MixedType $instance = null):void {
         // Let's find our instance and get ready to modify it
         if($instance === null) {
             /** @var MixedType $instance */
@@ -43,7 +44,7 @@ trait Hydrateable {
         $target[$field_name] = $instance;
     }
 
-    function normalizeMongoDocuments(&$value, $instance = null) {
+    static function normalizeMongoDocuments(&$value, $instance = null) {
         if($value instanceof Document) {
             $instance = new ModelType();
         }
@@ -80,7 +81,7 @@ trait Hydrateable {
                 } else $instance = new ArrayType();
                 break;
             case "object":
-                $instance = $this->normalizeMongoDocuments($value);
+                $instance = static::normalizeMongoDocuments($value);
                 break;
             default:
                 $instance = new MixedType();

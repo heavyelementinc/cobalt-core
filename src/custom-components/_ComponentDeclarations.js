@@ -11,7 +11,13 @@ import MarkdownArea from "./MarkdownArea.js";
 customElements.define("markdown-area", MarkdownArea);
 
 import InputRadio from "./InputRadio.js";
-customElements.define("input-radio", InputRadio)
+customElements.define("input-radio", InputRadio);
+
+import { TagSelect } from "./TagSelect.js";
+customElements.define("input-tag-select", TagSelect);
+
+import { InputBinary } from "./InputBinary.js";
+customElements.define("input-binary", InputBinary); 
 
 import { ObjectGallery, GalleryItem, FileGallery } from "./ObjectGallery.js";
 customElements.define("object-gallery", ObjectGallery);

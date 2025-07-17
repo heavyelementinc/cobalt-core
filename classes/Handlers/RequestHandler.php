@@ -127,7 +127,7 @@ abstract class RequestHandler {
         header("Access-Control-Allow-Credentials: true");
         header("Content-Type: " . $this->content_type);
         /** Throw an unauthorized error */
-        throw new \Exceptions\HTTP\Unauthorized("Your origin was not recognized.");
+        throw new \Exceptions\HTTP\BadRequest("Your origin was not recognized.");
     }
 
     function url_to_current_mode($url) {

@@ -97,9 +97,11 @@
     &:not(input-datetime):has(&) {
         padding: 0;
     }
-    & input,
-    & textarea,
-    & button {
+    & :where(
+        input,
+        textarea,
+        button
+    ) {
         border: var(--input-element-border-width) solid transparent;
         background: transparent;
         &:hover,
@@ -364,55 +366,44 @@ input-user {
 }
 
 
-input-binary {
-    display: inline-flex;
-    padding: var(--input-element-padding);
+/* input-binary {
+    display: inline-grid;
+    grid-template-columns: 1em auto;
+    pointer-events: auto;
+    border: var(--input-element-border-width) solid var(--input-disabled-border);
+    --input-element-border: var(--input-element-tray);
+    outline: var(--input-element-border-value);
+    border: var(--input-element-border-width) solid var(--input-element-background);
+    background: var(--input-element-tray);
+    color: var(--input-element-tray-fg);
+    text-align: left;
+    flex-grow: 1;
+    gap: inherit;
     & option {
-      display: none;
-    }
-    & tag-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--input-element-padding);
-        & button {
-            display: grid;
-            grid-template-columns: 1em auto;
-            /* place-items: center; */
-            pointer-events: auto;
-            border: var(--input-element-border-width) solid var(--input-disabled-border);
-            --input-element-border: var(--input-element-tray);
-            outline: var(--input-element-border-value);
+        &:hover {
+            --input-element-tray: hsl(from var(--input-hover-background) h s 100%);
             border: var(--input-element-border-width) solid var(--input-element-background);
             background: var(--input-element-tray);
             color: var(--input-element-tray-fg);
-            text-align: left;
-            flex-grow: 1;
-            gap: inherit;
-            &:hover {
-                --input-element-tray: hsl(from var(--input-hover-background) h s 100%);
-                border: var(--input-element-border-width) solid var(--input-element-background);
-                background: var(--input-element-tray);
-                color: var(--input-element-tray-fg);
-                outline: var(--input-element-border-value);
-            }
-            &:before{
-                content: "\F0131";
-                font-family: "Material Design Icons";
-                display: inline-block;
-                height: 100%;
-                width: 100%;
-                margin-right: .3em;
-            }
-            &[aria-pressed='true'] {
-                --input-element-tray: var(--input-element-active);
-                border: var(--input-element-border-width) solid var(--input-element-background);
-                background: var(--input-element-tray);
-                color: var(--input-element-active-fg);
-                outline: var(--input-element-border-value);
-                
-                &:before {
-                    content: "\F0135";
-                }
+            outline: var(--input-element-border-value);
+        }
+        &:before{
+            content: "\F0131";
+            font-family: "Material Design Icons";
+            display: inline-block;
+            height: 100%;
+            width: 100%;
+            margin-right: .3em;
+        }
+        &[aria-pressed='true'] {
+            --input-element-tray: var(--input-element-active);
+            border: var(--input-element-border-width) solid var(--input-element-background);
+            background: var(--input-element-tray);
+            color: var(--input-element-active-fg);
+            outline: var(--input-element-border-value);
+            color: currentColor;
+            &:before {
+                content: "\F0135";
             }
         }
     }
@@ -423,6 +414,49 @@ input-binary {
             &[aria-pressed='true'] {
                 border: var(--input-element-border-width) solid var(--input-element-border);
                 background: var(--input-element-background);
+            }
+        }
+    }
+} */
+
+input-binary, input-tag-select {
+    --radius: 4px;
+    background: var(--project-color-input-background);
+    gap: 2px;
+    button.toggleable {
+        display: inline-flex;
+        border-radius: var(--radius);
+        padding: calc(var(--input-element-padding)/2) calc(var(--input-element-padding)/2);
+        margin: calc(var(--input-element-padding) / 4) calc(var(--input-element-padding) / 2);
+        white-space: nowrap;
+        background-color: transparent;
+        color: rgb(from currentColor r g b / 0.6);
+        /* transition: color .5s, background-color .5s; */
+        pointer-events: all;
+        cursor: pointer;
+        border: var(
+        --input-element-border-width) solid transparent;
+        gap: calc(var(
+        --input-element-padding) / 2);
+        &:before {
+            content: "\F0131";
+            font-family: "Material Design Icons";
+        }
+        &:hover {
+            border: var(--input-element-border-width) solid var(--input-element-color);
+            color: rgb(from currentColor r g b / 0.8);
+        }
+        &[aria-pressed="true"] {
+            color: currentColor;
+            &:before {
+                content: "\F0135";
+            }
+        }
+        .content.content {
+            text-align: left;
+            small {
+                display: block;
+                margin-bottom: unset;
             }
         }
     }
@@ -722,4 +756,8 @@ input-radio {
             box-shadow: var(--input-focused-highlight);
         }
     }
+}
+
+match-update {
+    display: none;
 }

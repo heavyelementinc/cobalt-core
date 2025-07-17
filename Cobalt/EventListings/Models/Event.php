@@ -11,6 +11,7 @@ use Cobalt\Model\Types\BooleanType;
 use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\EnumType;
 use Cobalt\Model\Types\HexColorType;
+use Cobalt\Model\Types\ImageType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
@@ -56,17 +57,21 @@ class Event extends Model {
         ],
     ];
 
+    const INDEX_UNLISTED = 'false';
+    const INDEX_IFPUBLIC = 'true';
+    const INDEX_ALWAYS =   'always';
+
     public function defineController(): ModelController {
         return new Events();
     }
 
     public function defineSchema(array $schema = []): array {
         return [
-            'name' => [
+            'event_name' => [
                 new StringType,
                 'required' => true,
                 'index' => [
-                    'title' => 'Name'
+                    'title' => 'Event Name'
                 ]
             ],
             'container_id' => [
@@ -86,7 +91,11 @@ class Event extends Model {
             'type' => [
                 new EnumType,
                 'valid' => fn () => $this->allowed_event_types,
-                'default' => 'banner'
+                'default' => 'banner',
+                'index' => [
+                    'title' => 'Type',
+                    'filterable' => true
+                ]
             ],
             'session_policy' => [
                 new EnumType,
@@ -141,24 +150,26 @@ class Event extends Model {
                     ],
                     'exclusive' => new BooleanType,
                     'delay' => new NumberType,
-                    'public_index' => [
-                        new EnumType,
-                        'valid' => [
-                            'false'  => 'Unlisted (default)',
-                            'true'   => 'Displayed, if also marked as "Public"',
-                            'always' => 'Displayed, regardless of "Public" status',
-                        ]
-                    ],
                 ]
             ],
-            // 'changes_override' => new BooleanType,
-            // 'public' => [
-            //     new ModelType,
-            //     'schema' => [
-            //         'body' => new BlockType,
-            //         // 'image' => new 
-            //     ],
-            // ]
+            'changes_override' => [
+                new BooleanType,
+                'default' => true
+            ],
+            'public_index' => [
+                new EnumType,
+                'valid' => [
+                    static::INDEX_UNLISTED  => 'Unlisted (default)',
+                    static::INDEX_IFPUBLIC  => 'Displayed, if also marked as "Public"',
+                    static::INDEX_ALWAYS     => 'Displayed, regardless of "Public" status',
+                ],
+                'default' => __APP_SETTINGS__["CobaltEvents_default_public_listing_status"]
+            ],
+            'public_head' => [
+                new StringType,
+            ],
+            'public_body' => new BlockType,
+            'public_image' => new ImageType,
         ];
     }
 

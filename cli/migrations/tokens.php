@@ -9,6 +9,9 @@ use Cobalt\Integrations\Final\Patreon\PatreonConfig;
 use Cobalt\Integrations\Final\YouTube\Config;
 use Cobalt\Integrations\Final\YouTube\YouTubeConfig;
 use Cobalt\Pages\Models\PageMap;
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
 
 class tokens extends Migration {
 
@@ -32,7 +35,7 @@ class tokens extends Migration {
         return $this->find([], ['limit' => $this->count([]), 'projection' => ['__pclass' => 0]]);
     }
 
-    public function runOne($document) {
+    public function runOne($document):null|InsertOneResult|InsertManyResult|UpdateResult {
         $id = $document['_id'];
         unset($document['_id']);
         // $persistance = $this->get_persistance();

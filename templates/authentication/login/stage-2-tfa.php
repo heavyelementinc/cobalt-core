@@ -2,7 +2,10 @@
     <section class="login-hero-sidebar" style="background-image: url('{{app.login-hero-sidebar}}')"></section>
     <h1>Two-factor Authentication (2FA)</h1>
     <span class="error">{{!message}}</span>
-    <form-request id="login-form" action="/api/v1/login/" method="POST" complete="refresh" autosave="enter" @csrf_attribute();>
+    <form-request id="login-form" 
+        method="POST" complete="refresh" autosave="enter" @csrf_attribute();
+        action="/api/v1/login/?<?= SESSION_RESUME_PARAM ?>=<?= urlencode($_GET[SESSION_RESUME_PARAM] ?? "")?>" 
+        >
         <div class="username" __custom-input="true">
             {{!user.name.tag()}}
         </div>

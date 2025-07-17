@@ -14,6 +14,7 @@
 
 use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
+use Cobalt\DefinedModel\DefinedModel;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Model\Exceptions\Undefined;
@@ -428,7 +429,7 @@ function get_custom(string $name):?CustomSchema {
 }
 
 function lookup(string $name, mixed $subject, bool $throwOnFail = false): mixed {
-
+    
     if ($subject instanceof MapResult) {
         $subject = $subject->getRaw();
     }
@@ -462,6 +463,17 @@ function get_temp_path($path, $key) {
     return $substr;
 }
 
+function resolve_arbitrary_value(array $list_of_js_do_notation_paths, $subject, bool $resolve_on_first_truthy = true):mixed {
+    foreach($list_of_js_do_notation_paths as $path) {
+        try {
+            $result = @lookup($path, $subject, true);
+            if($result && $resolve_on_first_truthy) return $result;
+        } catch (Exception|Error $e) {
+            continue;
+        }
+    }
+    return null;
+}
 
 function recursive_lookup(array $split_path, mixed $mutant):mixed {
     $key = array_shift($split_path);
@@ -897,3 +909,15 @@ function rrmdir($dir, array &$deleted):void {
         $deleted['dirs'] += 1;
     }
 }
+
+function DOMinnerHTML(DOMNode $element) { 
+    $innerHTML = ""; 
+    $children  = $element->childNodes;
+
+    foreach ($children as $child) 
+    { 
+        $innerHTML .= $element->ownerDocument->saveHTML($child);
+    }
+
+    return $innerHTML; 
+} 

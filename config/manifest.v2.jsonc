@@ -13,6 +13,10 @@
         "contexts": ["common"]
     },
     {
+        "href": "Cobalt/UpdateOperation.js",
+        "contexts": ["common"]
+    },
+    {
         "href":"Cobalt.js",
         "contexts": ["common"]
     },
@@ -122,7 +126,7 @@
         "package": "deferred"
     },
     {
-        "href":"components/tag-select.js",
+        "href":"components/match-update.js",
         "contexts": ["common"],
         "package": "deferred"
     },

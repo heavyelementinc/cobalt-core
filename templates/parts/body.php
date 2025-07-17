@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-US" class="{{context.html_class}} {{app.html_tag_classes}}">
+<html lang="en-US" class="{{context.html_class}} {{app.html_tag_classes}} <?= (__APP_SETTINGS__['default_color_scheme']) ? "light" : "dark" ?>">
 <script>
     // Some user agents don't support (or don't enable) JavaScript. Therefore we
     // should keep track of any content that would be hidden because of JS and

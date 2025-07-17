@@ -24,8 +24,7 @@ enum Operators {
 
 trait DirectiveBaseline {
     public function setDirectives(array $directives) {
-        $d = [];
-        if(method_exists($this,"initDirectives")) $d = $this->initDirectives();
+        $d = $this->initDirectives();
         
         foreach(array_merge($this->directives, $d, $directives) as $directive => $value) {
             $directive_name = "define_$directive";
@@ -39,7 +38,7 @@ trait DirectiveBaseline {
                 foreach($attributes as $attr) {
                     if(in_array($attr->getName(), $validPrototypes)) $found = true;
                 }
-                if($found === false) throw new DirectiveDefinitionFailure("Failed to define $directive. Defining method must have #[Directive] attribute.");
+                if($found === false) throw new DirectiveDefinitionFailure("Failed to define directive '$directive'. Defining method must have #[Directive] attribute.");
                 $this->{$directive_name}($value, $directive);
             }
             else $this->__defineDirective($directive, $value);

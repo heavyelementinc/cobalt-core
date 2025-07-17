@@ -2,6 +2,9 @@
 
 use \Cobalt\CLI\Migration;
 use \Auth\UserPersistance;
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
 
 class useraccounts extends Migration {
 
@@ -21,7 +24,7 @@ class useraccounts extends Migration {
         return $this->find([], ['limit' => $this->count([])]);
     }
 
-    public function runOne($document) {
+    public function runOne($document):null|InsertOneResult|InsertManyResult|UpdateResult {
         // say("\n\nMigrating user ".fmt($document->uname, "i"));
         $id = $document['_id'];
         $document['__v'] = "2.0";

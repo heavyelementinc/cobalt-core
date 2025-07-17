@@ -1,6 +1,7 @@
 <?php
 
 use Auth\UserCRUD;
+use Cobalt\EventListings\Models\Event;
 use PHPMailer\PHPMailer\PHPMailer;
 
 const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
@@ -304,6 +305,26 @@ $settings = [
             ],
             "validate" => [
                 "type" => "boolean"
+            ]
+        ],
+
+        "CobaltEvents_default_public_listing_status" => [
+            'default' => Event::INDEX_IFPUBLIC,
+            "meta" => [
+                "group" => GROUP_FEATURES,
+                "subgroup" =>"Events",
+                "name" => "Default Public Index Behavior",
+                "description" => "Decide how new events will display themselves on the public index (if enabled)",
+                "type" => "select"
+            ],
+            "validate" => [
+                "type" => "string",
+                "options" => [
+                    // "notification" => "Notification",
+                    Event::INDEX_UNLISTED => "Do not display",
+                    Event::INDEX_IFPUBLIC => "Display, if Public",
+                    Event::INDEX_ALWAYS => "Display, even if not public"
+                ]
             ]
         ],
 

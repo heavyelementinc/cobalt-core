@@ -282,6 +282,7 @@ export default class FormRequest extends ProgressWizard {
         const submitButtonTypes = ['submit', 'back'];
         // Let's search for a button
         const target = event.target.closest("button,input");
+        console.log({event, target});
         if(!target) return;
         // We're trying to filter out clicks on non-submit buttons here so we'll
         // just return from this method if the click didn't target a submit button
@@ -334,7 +335,8 @@ export default class FormRequest extends ProgressWizard {
         if(targets.length === 0) {
             targets = this.querySelectorAll(universal_input_element_query);
         }
-        const formData = new FormRequestData(this, event?.target ?? null);
+        const evt_target = event?.target.closest("button,input");
+        const formData = new FormRequestData(this, evt_target ?? null);
         for(const element of targets) {
             const name = element.name ?? element.getAttribute("name");
             const value = this.getFormElementValue(element, event);
@@ -434,6 +436,7 @@ export default class FormRequest extends ProgressWizard {
         this.removeFeedback();
     }
     handleAsyncDoneEvent(e, event) {
+        this.dispatchEvent(new CustomEvent("done"));
         this.removeFeedback();
     }
 

@@ -37,11 +37,6 @@ trait Prototypable {
         return false;
     }
 
-    #[Prototype]
-    protected function getName() {
-        return $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
-    }
-
     /**
      * This function returns the value serialized as JSON
      * @param bool $pretty if set to pretty then JSON_PRETTY_PRING and JSON_UNESCAPED_SLASHES will be passed to `json_encode`
@@ -80,15 +75,16 @@ trait Prototypable {
         return 0;
     }
 
-    #[Prototype]
-    protected function display():mixed {
-        return $this->__toString();
-    }
+    // #[Prototype]
+    // public function display(): mixed {
+    //     return $this->__toString();
+    // }
 
     #[Prototype]
     protected function getLabel($includeHtml = true): string {
-        $labelStart = "<label>";
         $is_required = ($this->directiveOrNull("required")) ? " <span class=\"form-prototype--required-field\">" . __APP_SETTINGS__['Prototypeable_required_field_label'] . "</span>" : "";
+        $required = $is_required ? " required=\"required\"" : ""; 
+        $labelStart = "<label for=\"".MODEL_MIXED_TYPE_ID_PREFIX."$this->name\"$required>";
         $labelEnd = "$is_required</label>";
         if($includeHtml === false) {
             $labelStart = "";

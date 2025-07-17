@@ -23,7 +23,6 @@ use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Driver\Cursor;
-use PhpParser\Node\Expr\Cast\Object_;
 use Validation\Exceptions\ValidationFailed;
 
 class UserCRUD extends \Drivers\Database {

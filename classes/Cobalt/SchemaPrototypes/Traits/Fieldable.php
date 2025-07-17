@@ -83,8 +83,10 @@ trait Fieldable {
 
     protected function select($classes = "", $misc = [], $tag = "select") {
         [$misc, $attrs] = $this->defaultFieldData($misc);
-        
+        // if($tag === "select") {
+        // }
         return "<$tag class=\"$classes\" $attrs>".$this->options()."</$tag>";
+        // return "<$tag class=\"$classes\" $attrs datalist=\"$name\"></$tag>".$this->datalist(name: $name);
     }
 
     protected function inputAutocomplete($classes = "", $misc = []) {

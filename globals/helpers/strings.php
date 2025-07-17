@@ -521,6 +521,9 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
     $accent   = $doc['meta']['accent_color'];
     $contrast = $doc['meta']['contrast_color'];
     $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
+    if($doc instanceof ImageType && $doc->directiveOrNull('transparent')) {
+        $attributes['transparent'] = "true";
+    }
     $attrs = "";
     foreach($attributes as $attr => $val) {
         $attrs .= " $attr=\"$val\"";

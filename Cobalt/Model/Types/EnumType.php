@@ -8,7 +8,6 @@ use Cobalt\Model\Attributes\Prototype;
 use Stringable;
 
 class EnumType extends MixedType implements Stringable {
-    use SharedFilterEnums;
     protected string $type = "string";
 
     #[Prototype]

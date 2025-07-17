@@ -1,9 +1,13 @@
 <?php
 
-namespace Cobalt\Auth;
+namespace Cobalt\Auth\UserAccounts;
 
+use Cobalt\Auth\UserAccounts\Types\UserIntegrations;
+use Cobalt\Auth\UserAccounts\Types\UserPreferences;
+use Cobalt\Auth\UserAccounts\Types\UserSocialAccounts;
 use Cobalt\Controllers\ModelController;
-use Cobalt\Model\Model;
+use Cobalt\DefinedModel\Model;
+use Cobalt\DefinedModel\Traits\ModelInitialize;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\BinaryType;
 use Cobalt\Model\Types\BlockType;
@@ -12,10 +16,38 @@ use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\EmailAddressType;
 use Cobalt\Model\Types\FakeType;
 use Cobalt\Model\Types\ImageType;
+use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\StringType;
 
 class UserPersistance extends Model {
+    use ModelInitialize;
+
+    readonly StringType $fname;
+    readonly StringType $lname;
+    readonly StringType $uname;
+    readonly StringType $pword;
+    readonly EmailAddressType $email;
+    readonly ImageType $avatar;
+    readonly ArrayType $flags;
+    readonly BinaryType $state;
+    readonly ArrayType $token;
+    readonly DateType $since;
+    readonly ArrayType $groups;
+    readonly ArrayType $permissions;
+    readonly BooleanType $is_root;
+    readonly StringType $public_name;
+    readonly FakeType $display_name;
+    readonly BlockType $default_bio_blurb;
+    readonly BlockType $full_biography;
+    readonly UserPreferences $prefs;
+    readonly UserSocialAccounts $socials;
+    readonly UserIntegrations $integrations;
+
+    public function modelView($document): string {
+        return "";
+    }
+    
     public function defineSchema(array $schema = []): array {
         return [
             'fname' =>[
@@ -97,10 +129,8 @@ class UserPersistance extends Model {
         ];
     }
 
-    public function defineController(): ModelController { }
-
-    public static function __getVersion(): string { }
-
-    public function getCollectionName($string = null): string { }
+    public function getCollectionName($string = null): string {
+        return "users";
+    }
 
 }

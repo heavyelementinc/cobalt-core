@@ -31,7 +31,7 @@ trait UpdateableModel {
      */
     function after_update(array $validatedFields, Model|BSONDocument|null $doc):void {
         foreach($validatedFields as $field => $value) {
-            $doc->{$field}->onUpdateConfirmed($value);
+            // $doc->{$field}->onUpdateConfirmed($value);
         }
     }
 
@@ -93,7 +93,7 @@ trait UpdateableModel {
             'update_doc_readonly' => 'readonly="readonly"',
             'autosave' => 'autosave="autosave"',
             'submit_button' => '',
-            'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@__destroy")."$id\" dangerous=\"true\">".$this->getDeleteOptionLabel($doc)."</option>",
+            'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@__destroy")."$id\" dangerous=\"true\" icon=\"delete-outline\">".$this->getDeleteOptionLabel($doc)."</option>",
             'doc' => $doc,
         ]);
         

@@ -20,7 +20,7 @@
                     <ul class="list-panel">
                         <li>
                             <label>Internal Name <help-span value="This is for internal reference only and is not displayed publicly. HOWEVER, this field is not entirely hidden from the public. Do not put sensitive info in this field."></help-span></label>
-                            {{doc.name.field()}}
+                            {{doc.event_name.field()}}
                             <small>Do not store sensitive info in this field.</small>
                         </li>
                         <li>

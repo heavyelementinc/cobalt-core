@@ -7,6 +7,9 @@ use Cobalt\SchemaPrototypes\Compound\UploadImageResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Controllers\ClientFSManager;
 use MongoDB\BSON\ObjectId;
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
 
 class markdown_posts_to_modern_posts extends Migration {
     use ClientFSManager;
@@ -26,7 +29,7 @@ class markdown_posts_to_modern_posts extends Migration {
         return $this->find([], ['limit' => $this->count([])]);
     }
 
-    public function runOne($document) {
+    public function runOne($document):null|InsertOneResult|InsertManyResult|UpdateResult {
         $id = $document['_id'];
         if($document instanceof PostMap) return null;
         $document['__v'] = "2.0";

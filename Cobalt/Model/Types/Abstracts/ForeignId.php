@@ -43,7 +43,7 @@ abstract class ForeignId extends MixedType {
      * Called when displaying the item as a table column
      * @return string 
      */
-    public function display(): string {
+    public function display(): mixed {
         return "[Object $this->raw]";
     }
 

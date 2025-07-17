@@ -4,7 +4,10 @@ namespace Cobalt\Model;
 
 use ArrayAccess;
 use Cobalt\Controllers\Traits\IndexableModel;
+use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\Attributes\Prototype;
+use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
+use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\Exceptions\ReservedFieldName;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\Traits\Filterable;
@@ -15,6 +18,7 @@ use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\Traits\Prototypable;
 use DateTime;
+use Error;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Iterator;
@@ -23,11 +27,11 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use ReflectionException;
+use ReflectionProperty;
 use Stringable;
 use Traversable;
 use TypeError;
-
-use const Dom\NOT_FOUND_ERR;
 
 /**
  * GenericModels may be accessed using the -> syntax *or* accessed as an array.
@@ -41,6 +45,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     use Schemable, Viewable, Hydrateable, Prototypable, Filterable;
     public ?string $name_prefix = null;
     protected bool $__schema_allow_undefined_fields = false;
+    protected array $miscFields = [];
     protected array $__reservedFields = [];
     protected ?string $name = "";
     protected ?string $fieldName = "";
@@ -49,7 +54,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         'set' => 'Cobalt\Model\Directives\SetDirective',
     ];
 
-    /*************** INITIALIZATION ***************/
+/*************** INITIALIZATION ***************/
     function __construct(?array $schema = [], null|array|BSONDocument|BSONArray $dataset = null, ?string $name_prefix = null, bool $allow_undefined_fields = false) {
         $this->name_prefix = $name_prefix;
         $this->set_allow_undefined_fields($allow_undefined_fields);
@@ -72,6 +77,23 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         throw new Undefined($property, "The property `$property` does not exist on `$property"."->".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."!");
     }
 
+    /**
+     * This overloading function is how we set all fields. It's manually invoked
+     * by the setData function (which is called by the bsonUnserialize function).
+     * 
+     * PHP also calls this field when setting a non-existent or inaccessible
+     * value.
+     * 
+     * @param mixed $property 
+     * @param mixed $value 
+     * @return void 
+     * @throws ReservedFieldName 
+     * @throws TypeError 
+     * @throws ReflectionException 
+     * @throws DirectiveDefinitionFailure 
+     * @throws Error 
+     * @throws ImmutableTypeError 
+     */
     public function __set($property, $value) {
         if(in_array($property, $this->__systemFieldNames())) {
             $this->__reservedFields[$property] = $value;
@@ -92,6 +114,13 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         if(!key_exists($property, $this->__schema) && !$this->__schema_allow_undefined_fields) {
             throw new TypeError("ERROR: `$property` is not a defined field. Type: " . gettype($value));
         }
+        // try {
+        //     $prop = new ReflectionProperty($this, $property);
+        // } catch(ReflectionException $e) {
+        //     throw new TypeError("ERROR: `$property` is not a defined field. Type: " . gettype($value));
+        // }
+
+        // $prop::IS_READONLY;
 
         $this->hydrate(
             target: $this->__dataset,

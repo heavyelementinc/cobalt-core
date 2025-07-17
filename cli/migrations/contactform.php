@@ -2,6 +2,9 @@
 
 use \Cobalt\CLI\Migration;
 use \Contact\Persistance;
+use MongoDB\InsertManyResult;
+use MongoDB\InsertOneResult;
+use MongoDB\UpdateResult;
 
 class contactform extends Migration {
 
@@ -21,7 +24,7 @@ class contactform extends Migration {
         return $this->find([], ['limit' => $this->count([])]);
     }
 
-    public function runOne($document) {
+    public function runOne($document):null|InsertOneResult|InsertManyResult|UpdateResult {
         $id = $document['_id'];
         unset($document['_id']);
         $doc = (new Persistance())->ingest($document);
