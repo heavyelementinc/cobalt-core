@@ -88,7 +88,7 @@ trait Schemable {
             // 'original',
             'model',
             // 'type',
-            'name',
+            // 'name',
             'fieldName',
             'client',
         ];
