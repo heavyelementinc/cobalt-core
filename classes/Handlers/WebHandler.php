@@ -115,7 +115,7 @@ class WebHandler extends RequestHandler {
         $this->renderer->stock_vars['route'] = $directives;
         $this->renderer->stock_vars['PATH'] = $GLOBALS['PATH'];
         $this->isOptions = $isOptions;
-        $this->cors_management();
+        $this->cors_management(null, false);
         if(key_exists('headers', $directives)) {
             if($directives['headers'] instanceof Closure == false) throw new TypeError("The headers directive must be an instance of `Closure`");  
             call_user_func($directives['headers'],[$route, $directives]);
