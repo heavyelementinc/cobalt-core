@@ -9,18 +9,23 @@
 <form-request id="event-editor" method="{{method}}" action="{{action}}" {{!autosave}}>
     <tab-nav>
         <nav>
-            <a href="#basic"><i class="information-outline"></i> Common Details</a>
-            <a href="#content"><i class="edit"></i> Content</a>
-            <a href="#styling"><i class="edit"></i> Styling</a>
-            <a href="#public"><i class=""></i> Public</a>
-            <a href="#advanced"><i class="cog"></i> Advanced</a>
+            <a href="#basic"><i name="information-outline"></i> Basic</a>
+            <a href="#popup"><i name="bullhorn"></i> Pop-ups</a>
+            <a href="#content"><i name="newspaper"></i> Content</a>
+            <a href="#styling"><i name="palette-swatch-variant"></i> Styling</a>
+            <a href="#advanced"><i name="cog"></i> Advanced</a>
         </nav>
         <div id="basic">
             <ul class="list-panel">
                 <li>
                     <label>Internal Name <help-span value="This is for internal reference only and is not displayed publicly. HOWEVER, this field is not entirely hidden from the public. Do not put sensitive info in this field."></help-span></label>
-                    {{doc.event_name.field()}}
                     <small>Do not store sensitive information in this field!</small>
+                    {{doc.event_name.field()}}
+                </li>
+                <li>
+                    {{doc.published.getLabel()}}
+                    <small>Controls the visibility of this element</small>
+                    {{doc.published.field()}}
                 </li>
                 <li>
                     {{doc.type.getLabel()}}
@@ -28,7 +33,9 @@
                 </li>
                 <li>
                     {{doc.start_date.getLabel()}}
-                    <small>Start times are when the event starts displaying on the website.</small>
+                    <small>The Event Start Date is the actual start time of the event.
+                        If no <a href="#popup">Pop-up Start Date</a> is specified, this is the date
+                        the event begins displaying on the website.</small>
                     {{doc.start_date.field()}}
                 </li>
                 <li>
@@ -38,10 +45,16 @@
                 </li>
             </ul>
         </div>
-        <div id="content">
+        <div id="popup">
+            <callout-card>
+                Customize the look and feel of your Pop-up! Content on this tab will
+                only be displayed in banners and pop-ups unless otherwise specified!
+            </callout-card>
             <ul class="list-panel">
                 <li>
                     {{doc.headline.getLabel()}}
+                    <small>This headline may be used as the <a href="#content">Content Headline</a> if
+                        no Content Headline is specified.</small>
                     {{doc.headline.field()}}
                 </li>
                 <li>
@@ -59,65 +72,54 @@
                     {{doc.call_to_action_href.field()}}
                 </li>
                 <li>
+                    {{doc.popup_date.getLabel()}}
+                    <small>This field controls when banners/pop-ups appear on your page to promote the event. Leave blank to default to the <a href="#basic">Event Start Date</a>.</small>
+                    {{doc.popup_date.field()}}
+                </li>
+                <li>
                     {{doc.btnColor.getLabel()}}
                     <small>Choose the background color of the 'Call To Action' button. A contrasting text color will be automatically assigned (either black or white).</small>
                     {{doc.btnColor.field()}}
                 </li>
-            </ul>
-        </div>
-        <div id="styling">
-            <ul class="list-panel">
                 <li>
-                    <label>Background Color <help-span value="Choose the background color of your event."></help-span>
-                    </label>
                     <div class="hbox">
-                        {{doc.bgColor.field()}}
-                    </div>
-                </li>
-                <li>
-                    <label>Text Color <help-span value="Choose the text color for your event.">
-                        </help-span></label>
-                    <div class="hbox">
-                        {{doc.txtColor.field()}}
+                        <div>
+                            {{doc.bgColor.getLabel()}}<help-span value="Choose the background color of your pop-up content."></help-span>
+                            {{doc.bgColor.field()}}
+                        </div>
+                        <div>
+                            {{doc.txtColor.getLabel()}}<help-span value="Choose the text color of your pop-up content."></help-span>
+                            {{doc.txtColor.field()}}
+                        </div>
                     </div>
                 </li>
                 <li>
                     <label>Text Justification <help-span value="This will have no effect if there is a Call to Action button."></help-span></label>
-                    <radio-group name="txtJustification" value="{{doc.txtJustification}}">
-                        <label>
-                            <i name="format-align-left"></i>
-                            <input type='radio' name='txtJustification' value='space-between' {{disabled}}>
-                        </label>
-                        <label>
-                            <i name="format-align-center"></i>
-                            <input type='radio' name='txtJustification' value='center' {{disabled}}>
-                        </label>
-                        <label>
-                            <i name="format-align-right"></i>
-                            <input type='radio' name='txtJustification' value='flex-end' {{disabled}}>
-                        </label>
-                    </radio-group>
+                    <?= $doc->txtJustification->radioGroup() ?>
                 </li>
             </ul>
         </div>
-        <div id="public">
+        <div id="content">
             <ul class="list-panel">
                 <li>
-                    <label style="width: auto">Public Index Status<help-span value="Determines if this event is elligible for display on the optional Public Event Index"></help-span></label>
-                    {{doc.public_index.field()}}
+                    <label>Public Index Status<help-span value="Determines if this event is elligible for display on the optional Public Event Index"></help-span></label>
                     <small>The Public Event Index is an optional listing of upcoming events marked as "Displayed."</small>
+                    {{doc.public_index.field()}}
                 </li>
                 <li>
                     <label>Public Headline</label>
+                    <small>If you do not specify a Public Headline below, the <a href="#popup">Content Headline</a> will be used instead.</small>
                     {{doc.public_head.field()}}
                 </li>
                 <li>
-                    <label>Public Content</label>
-                    {{doc.public_body.field()}}
+                    <label>Event Image</label>
+                    <small>If you do not specify an Event Image below, your app logo will be used instead.</small>
+                    {{doc.public_image.field()}}
                 </li>
                 <li>
-                    <label>Event Image</label>
-                    {{doc.public_image.field()}}
+                    <label>Public Content</label>
+                    <small>If you do not specify Public Content below, the <a href="#popup">Content Body</a> will be used instead.</small>
+                    {{doc.public_body.field()}}
                 </li>
             </ul>
         </div>
@@ -174,4 +176,69 @@
             </ul>
         </div>
     </tab-nav>
+    {{!submit_button}}
 </form-request>
+
+
+<details>
+    <summary>Learn More About Cobalt Events</summary>
+    <p>Cobalt Events are messages that will be showed to visitors of your site.
+        This can take the form of banners which stick to the top of the screen
+        or modal boxes which pop up over the content in the page.
+    </p>
+    <h3>Banner vs. Pop up</h3>
+    <p>Generally speaking, banners are less intrusive to the end users experience
+        on your site while modals will guarantee that the user sees the event.
+    </p>
+    <p>Too many pop-ups will cause the end user to become annoyed and leave,
+        especially if they happen frequently. So, please, only use them for
+        important info everyone visiting your site needs to see.
+    </p>
+    <h3>Tracking "seen" status</h3>
+    <p>When an event is displayed to the user the user may click the <em>Call to Action</em> button
+        or the close (<i name="close"></i>) button.
+    </p>
+    <p>Either action will <strong>dismiss</strong> the event dialog and the event
+        will be considered "seen." This "seen" status is stored on the user's
+        device upon interacting with the event.
+    </p>
+    <p>The exact time and date of their closing the event dialog is stored along
+        with this status. Finally, the event's "last_updated_on" value is also
+        stored with this data.
+    </p>
+    <p>The seen status is stored individually for each event. So if you have two
+        (or more) events running at the same time, the user will see the one
+        ending most recently unless they've already "seen" it.
+    </p>
+    <p>Multiple events can be displayed at the same time by unchecking the
+        Advanced<i name="arrow-right"></i>Exclusive box. However, this is
+        <strong>strongly</strong> discouraged. Especially multiple events of the
+        same type (two banners, two pop-ups, etc).
+    </p>
+    <h3>Will people who have "seen" an Event see it again?</h3>
+    <p>Depending on the "Display Again" Policy, the seen status for the device will
+        eventually expire. Most of these are self-explanatory. However, one of them
+        is not. <em>Half time between close and event end</em> has proved to be unintuitive
+        to understand.</p>
+    <cite>In this instance, "closing the event" and "marking an event as seen" are used
+        interchangably.
+    </cite>
+        
+    <p>Essentially, the user will see the event again once they reach the middle
+        point between the time they closed the event and the scheduled time the
+        Event Ends.
+    </p>
+    <blockquote>
+        <p>For example:</p>
+        <p>If I close an event that is scheduled to end ten days from now, I will
+            see it again in five days.</p>
+        <p>If I close an event ending in four days, I'd see it again in two days.</p>
+        <p>If I close an event at 8 AM that ends at 12PM, I'll see it again at about 10 AM.</p>
+    </blockquote>
+
+    <p>The event will <strong>not</strong> be shown to them again until their "seen" status expires
+        for this specific event <strong>or</strong> you update the event with the
+        Advanced<i name="arrow-right"></i><em>Changes override "display again" policy</em> setting.
+    </p>
+    <p></p>
+</details>

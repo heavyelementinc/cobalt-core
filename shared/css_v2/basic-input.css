@@ -604,6 +604,29 @@ progress.spa-loading-indicator {
     opacity: .2;
 }
 
+radio-group.pretty-select {
+    width: 100%;
+    display: flex;
+    gap: var(--margin-m);
+    input[type='radio'] {
+        display: none;
+    }
+    label {
+        display: block;
+        padding: var(--margin-m);
+        border-radius: var(--margin-s);
+    }
+    label:has(:checked) {
+        outline: var(--input-element-border-value);
+        border: var(--input-element-border-width) solid var(--input-hover-background);
+        background: var(--primary-color-1);
+        color: var(--primary-color-1-fg);
+    }
+    label:hover {
+        outline: var(--input-element-border-value);
+    }
+}
+
 input-password {
     display: flex;
     padding: unset;

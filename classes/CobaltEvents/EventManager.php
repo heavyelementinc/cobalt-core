@@ -3,12 +3,13 @@
 namespace CobaltEvents;
 
 use Cobalt\UTMTracker\UTMHandler;
+use MongoDB\BSON\UTCDateTime;
 
 class EventManager extends \Drivers\Database {
 
-    private $sort = [
+    public $sort = [
         'start_time' => -1,
-        'end_time' => 1
+        'end_time'   =>  1
     ];
 
     public function get_collection_name() {
@@ -22,14 +23,18 @@ class EventManager extends \Drivers\Database {
     }
 
     public function getPublicListing() {
-        return $this->findAllAsSchema([
-            // 'start_time' => ['$lte' => $this->__date()],
-            'end_time' => ['$gte' => $this->__date()],
-            '$or' => [
-                ['advanced.public_index' => 'true', 'published' => true],
-                ['advanced.public_index' => 'always']
-            ]
-        ]);
+        $now = new UTCDateTime();
+        return $this->find([
+            'start_time' => ['$lte' => $now],
+            'end_time'   => ['$gte' => $now],
+            // '$or' => [
+            //     [
+            //         // 'public_index' => 'true',
+            //         'published' => true
+            //     ],
+            //     ['public_index' => 'always']
+            // ]
+        ], ['sort' => $this->sort]);
     }
 
     public function getEventListing() {
@@ -57,7 +62,7 @@ class EventManager extends \Drivers\Database {
         return $this->deleteOne(['_id' => $this->__id($id)])->getDeletedCount();
     }
 
-    private function public_query() {
+    private function public_query(bool $includeUTM = true) {
         $query = [
             'published' => true,
             'start_time' => ['$lte' => $this->__date()],
@@ -67,6 +72,7 @@ class EventManager extends \Drivers\Database {
             ],
         ];
 
+        if($includeUTM == false) return $query;
         $details = UTMHandler::read();
         if(!$details) return $query;
         if($details->source() !== null) {

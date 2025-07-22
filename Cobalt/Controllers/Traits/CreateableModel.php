@@ -87,7 +87,7 @@ trait CreateableModel {
             'update_doc_disabled' => '',
             'new_doc_readonly' => 'readonly="readonly"',
             'update_doc_readonly' => '',
-            'submit_button' => '<button type="submit">Submit</button>',
+            'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save', 'Create'),
             'delete_option' => '',
             'method'   => "POST",
             'action'   => $action,

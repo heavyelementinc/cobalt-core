@@ -166,6 +166,11 @@ $settings = [
                 ]
             ]
         ],
+        // When set to `true`, non-web routes will check if the referer is valid. 
+        // If not, it will throw a 400 Unauthorized
+        "CORS_restrictive_referer_policy" => [
+            'default' => true
+        ],
         "API_authentication_mode" => [
             "default" => "POST" // Set to "header" for legacy mode
         ],
@@ -274,7 +279,7 @@ $settings = [
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
                 "name" => "Enable Event Banners",
-                "description" => "Enables the Event Manager and allows you to schedule private & public pop-ups and banners.",
+                "description" => "Enables the Event Manager and allows you to schedule private & public popups.",
                 "type" => "input-switch"
             ],
             "validate" => [
@@ -343,11 +348,7 @@ $settings = [
             ],
             "validate" => [
                 "type" => "string",
-                "options" => [
-                    "space-between" => "<i name='format-align-left'></i> Left Justified<br><small>Text content will be justified to the left of the banner/modal</small>",
-                    "center" => "<i name='format-align-center'></i> Center Justified<br><small>Text content will be justified to the center of the banner/modal</small>",
-                    "flex-end" => "<i name='format-align-right'></i> Right Justified<br><small>Text content will be justified to the right of the banner/modal</small>"
-                ]
+                "options" => Event::POPUP_TXT_JUSTIFICATION
             ]
         ],
 

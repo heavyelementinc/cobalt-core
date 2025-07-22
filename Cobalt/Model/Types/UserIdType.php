@@ -23,7 +23,7 @@ class UserIdType extends MixedType {
     // public function storeValue(ObjectId $id): ?ObjectId { }
 
     // public function fieldItemTemplate(): string { }
-    public function getValue() {
+    public function getValue():mixed {
         if(!$this->isSet) return $this->getUserById($this->directiveOrNull(DIRECTIVE_KEY_DEFAULT));
         if(!$this->value) return $this->getUserById($this->directiveOrNull(DIRECTIVE_KEY_DEFAULT));
         return $this->getUserById($this->value);

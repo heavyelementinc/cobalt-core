@@ -47,6 +47,9 @@ ul.list-panel {
             margin-bottom: var(--margin-m);
         }
     }
+    input, select, textarea, markdown-area, file-id {
+        width: 100%;
+    }
 }
 
 flex-table{

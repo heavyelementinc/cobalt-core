@@ -74,7 +74,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         if(key_exists($property, $this->__dataset)) return $this->__dataset[$property];
         $val = lookup($property, $this);
         if($val instanceof MixedType) return $val;
-        throw new Undefined($property, "The property `$property` does not exist on `$property"."->".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."!");
+        throw new Undefined($property, "The property `$property` does not exist on `document"."->".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."!");
     }
 
     /**

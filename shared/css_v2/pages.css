@@ -259,7 +259,7 @@ block-editor, .landing-primary-section {
     background-color: var(--_landing-main-content-bg);
     color: var(--_landing-main-content-fg);
     box-sizing: border-box;
-    padding: 0 0 var(--block-editor-margins);
+    padding: 0 0 var(--block-editor-vertical);
 }
 
 .aside--content {
@@ -484,7 +484,7 @@ li ul.blockeditor--nestedlist {
     }
 
     .landing-bio--content h2 {
-        margin: var(--block-editor-margins);
+        margin: var(--block-editor-vertical) var(--block-editor-horizontal);
     }
 
     .landing-bio--content .hbox {

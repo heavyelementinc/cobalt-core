@@ -23,4 +23,4 @@
     {{!table_header}}
     {{!documents}}
 </flex-table>
-<a href="{{!href}}" class="floater--new-item"></a>
+<a href="{{!href}}" class="floater floater--new-item"></a>

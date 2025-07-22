@@ -12,9 +12,11 @@ use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\EnumType;
 use Cobalt\Model\Types\HexColorType;
 use Cobalt\Model\Types\ImageType;
+use Cobalt\Model\Types\MarkdownType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
+use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
 class Event extends Model {
@@ -57,6 +59,12 @@ class Event extends Model {
         ],
     ];
 
+    const POPUP_TXT_JUSTIFICATION = [
+        "space-between" => "<i name='format-align-left'></i> Left Justified<br><small>Text content will be justified to the left of the pop-up</small>",
+        "center" => "<i name='format-align-center'></i> Center Justified<br><small>Text content will be justified to the center of the pop-up</small>",
+        "flex-end" => "<i name='format-align-right'></i> Right Justified<br><small>Text content will be justified to the right of the pop-up</small>"
+    ];
+
     const INDEX_UNLISTED = 'false';
     const INDEX_IFPUBLIC = 'true';
     const INDEX_ALWAYS =   'always';
@@ -86,7 +94,7 @@ class Event extends Model {
                 'required' => true
             ],
             'body' => [
-                new StringType,
+                new MarkdownType,
             ],
             'type' => [
                 new EnumType,
@@ -110,33 +118,45 @@ class Event extends Model {
             'call_to_action_href' => new StringType,
             'bgColor' => [
                 new HexColorType,
-                'default' => __APP_SETTINGS__["vars-web.events-banner-background"]
+                'label' => 'Background Color',
+                'default' => __APP_SETTINGS__["color_neutral"]
             ],
             'txtColor' => [
                 new HexColorType,
+                'label' => 'Text Color',
                 'default' => __APP_SETTINGS__["vars-web.events-banner-text"]
             ],
             'txtJustification' => [
                 new EnumType,
                 'default' => __APP_SETTINGS__["CobaltEvents_default_h1_alignment"],
-                'valid' => [
-                    "space-between" => "<i name='format-align-left'></i>",
-                    "center" => "<i name='format-align-center'></i>",
-                    "flex-end" => "<i name='format-align-right'></i>"
-                ]
+                'valid' => static::POPUP_TXT_JUSTIFICATION
             ],
             'btnColor' => [
                 new HexColorType,
-                'default' => __APP_SETTINGS__["vars-web.events-button-color"],
+                'label' => 'Button Background Color',
+                'default' => __APP_SETTINGS__["color_primary"],
             ],
             'btnTextColor' => [
                 new HexColorType,
+                'label' => 'Button Text Color',
                 'get' => fn ($val, $ref) => ($ref->__reference->btnColor) ? $ref->__reference->btnColor->getContrastColor() : "#000000"
             ],
             'valid_paths' => new StringType,
             'published' => new BooleanType,
-            'start_date' => new DateType,
-            'end_date' => new DateType,
+            'popup_date' => [
+                new DateType,
+                'label' => 'Pop-up Start Date',
+            ],
+            'start_date' => [
+                new DateType,
+                'label' => 'Event Start Date',
+                'required' => true
+            ],
+            'end_date' => [
+                new DateType,
+                'label' => 'Event End Date',
+                'required' => true
+            ],
             'advanced' => [
                 new ModelType,
                 'schema' => [
@@ -180,15 +200,35 @@ class Event extends Model {
     public function getCollectionName($string = null): string {
         return "EventListings";
     }
-    
+    const PUBLIC_LISTING_OR_QUERY = [
+        [
+            'public_index' => Event::INDEX_IFPUBLIC,
+            'published' => true,
+        ],
+        [
+            'public_index' => Event::INDEX_ALWAYS
+        ]
+    ];
+
     public function getPublicListing() {
-        return $this->find([
-            // 'start_time' => ['$lte' => $this->__date()],
-            'end_time' => ['$gte' => new UTCDateTime()],
-            '$or' => [
-                ['advanced.public_index' => 'true', 'published' => true],
-                ['advanced.public_index' => 'always']
+        $now = new UTCDateTime();
+        return $this->find(
+            // '_id' => new ObjectId('68798de5215856ee830134b2')
+            // 'start_time' => ['$lte' => $now],
+            // 'end_time' => ['$gte' => $now],
+            // '$or' => [
+            //     ['advanced.public_index' => 'true', 'published' => true],
+            //     ['advanced.public_index' => 'always']
+            // ]
+            [
+                'end_date' => ['$gte' => $now],
+                '$or' => static::PUBLIC_LISTING_OR_QUERY
+            ], [
+                'sort' => [
+                    'start_date' => 1,
+                    'end_date' => -1
+                ]
             ]
-        ]);
+        );
     }
 }

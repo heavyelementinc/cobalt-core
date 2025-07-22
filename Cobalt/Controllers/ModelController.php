@@ -26,16 +26,16 @@ abstract class ModelController {
     public Model $model;
     public int $index_limit = 50;
 
-    static $api_read_permission = "CRUDControllerPermission";
-    static $api_create_permission = "CRUDControllerPermission";
-    static $api_update_permission = "CRUDControllerPermission";
-    static $api_destroy_permission = "CRUDControllerPermission";
-    static $api_multidestroy_permission = "CRUDControllerPermission";
+    static $api_read_permission          = "CRUDControllerPermission";
+    static $api_create_permission        = "CRUDControllerPermission";
+    static $api_update_permission        = "CRUDControllerPermission";
+    static $api_destroy_permission       = "CRUDControllerPermission";
+    static $api_multidestroy_permission  = "CRUDControllerPermission";
     static $api_batch_archive_permission = "CRUDControllerPermission";
-    static $api_archive_permission = "CRUDControllerPermission";
-    static $admin_index = "CRUDControllerPermission";
-    static $admin_new_document = "CRUDControllerPermission";
-    static $admin_edit = "CRUDControllerPermission";
+    static $api_archive_permission       = "CRUDControllerPermission";
+    static $admin_index                  = "CRUDControllerPermission";
+    static $admin_new_document           = "CRUDControllerPermission";
+    static $admin_edit                   = "CRUDControllerPermission";
 
     protected int $index_display_action_menu = 0;
 
@@ -105,7 +105,7 @@ abstract class ModelController {
                 $options['destroy'] ?? [],
                 "route_details_destroy")
             );
-            Route::delete("$mutant/archive/batch", "$class@__batch_archive", static::route_details(
+            Route::delete("$mutant/archive/batch", "$class@__archive_batch", static::route_details(
                 [
                     'permission' => static::$api_batch_archive_permission,
                 ],

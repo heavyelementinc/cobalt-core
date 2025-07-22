@@ -23,11 +23,23 @@ class BlockType extends MixedType {
         return $this->value;
     }
 
+    /**
+     * Returns the number of block items in this content.
+     */
+    function length():int|null {
+        return count($this->value?->blocks ?? []);
+    }
+
+    #[Prototype]
+    function display():mixed {
+        return $this->__toString();
+    }
+
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
-        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "input-block";
-        if($tag === null) $tag = "input-block";
+        if($tag === null && $this->hasDirective("input_tag")) $tag = $this->getDirective("input_tag") ?? "block-editor";
+        if($tag === null) $tag = "block-editor";
         return $this->inputBlock($class, $misc, $tag);
     }
 

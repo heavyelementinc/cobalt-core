@@ -4,7 +4,7 @@
         {{!small}}
         @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
     </div>
-    <radio-group name="{{setting}}" value="{{value}}">
+    <radio-group class="pretty-select" name="{{setting}}" value="{{value}}">
         {{!options}}
     </radio-group>
 </li>

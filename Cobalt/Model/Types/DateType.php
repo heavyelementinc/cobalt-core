@@ -7,6 +7,7 @@ use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\Attributes\Prototype;
 use DateTime;
 use DateTimeZone;
+use MongoDB\BSON\UTCDateTime;
 
 class DateType extends MixedType {
     const FORMAT_SHORTHANDS = [
@@ -25,6 +26,12 @@ class DateType extends MixedType {
         "24-hour" => "H:i",
         "seconds" => "g:i:s A",
     ];
+
+    function filter($value) {
+        $date = new DateTime($value);
+        return new UTCDateTime($date);
+    }
+
     public function initDirectives(): array {
         return [
             'fromEncoding' => 'datetime-local',

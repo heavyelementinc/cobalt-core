@@ -85,7 +85,7 @@ if (app("CobaltEvents_enabled")) {
     // Route::s_delete("/cobalt-events/{id}", "EventsController@delete_event", [
     //     'permission' => 'CobaltEvents_crud_events'
     // ]);
-    Events::apiv1();
+Events::apiv1();
 }
 
 

@@ -1,6 +1,8 @@
 /** BLOCK EDITOR **/
 :root {
     --block-editor-margins: var(--margin-xl);
+    --block-editor-vertical: calc(var(--block-editor-margins) * .8);
+    --block-editor-horizontal: var(--block-editor-margins);
 }
 block-editor {
     display: block;
@@ -10,7 +12,7 @@ block-editor {
 }
 
 .blockeditor--content {
-    margin: calc(var(--block-editor-margins) * .8) var(--block-editor-margins);
+    margin: var(--block-editor-vertical) var(--block-editor-horizontal);
     box-sizing: border-box;
 }
 
@@ -25,7 +27,7 @@ h3.blockeditor--header,
 h4.blockeditor--header,
 h5.blockeditor--header,
 h6.blockeditor--header {
-    margin: var(--block-editor-margins) var(--block-editor-margins) calc(var(--block-editor-margins) * 0.3);
+    margin: var(--block-editor-vertical) var(--block-editor-horizontal) calc(var(--block-editor-vertical) * 0.3);
 }
 
     .blockeditor--header + .blockeditor--paragraph {
@@ -33,11 +35,11 @@ h6.blockeditor--header {
     }
 
 .blockeditor--image {
-    max-width: calc(100% - (var(--block-editor-margins) * 2));
+    max-width: calc(100% - (var(--block-editor-horizontal) * 2));
 }
 
     .blockeditor--content.blockeditor--image-stretched {
-        margin: 0 0 var(--block-editor-margins);
+        margin: 0 0 var(--block-editor-vertical);
         max-width: 100%;
     }
 
@@ -47,7 +49,7 @@ h6.blockeditor--header {
     }
 
     .blockeditor--image.blockeditor--image-withbackground {
-        padding: var(--block-editor-margins) 0;
+        padding: var(--block-editor-vertical) 0;
     }
 
     .blockeditor--image.blockeditor--image-withbackground img {
@@ -102,7 +104,7 @@ a.blockeditor--link-preview {
     gap: var(--gap);
     border: 1px solid gray;
     background-color: white;
-    /* margin: 0 calc(var(--block-editor-margins) * var(--margin-mod)) var(--block-editor-margins); */
+    /* margin: 0 calc(var(--block-editor-horizontal) * var(--margin-mod)) var(--block-editor-vertical); */
 }
 
     a.blockeditor--link-preview:hover .blockeditor--link-title {
@@ -175,9 +177,9 @@ a.blockeditor--link-preview {
 
 
 .blockeditor--quote-block {
-    margin: calc(var(--block-editor-margins) / 2) var(--block-editor-margins);
+    margin: calc(var(--block-editor-vertical) / 2) var(--block-editor-horizontal);
     font-size: .9em;
-    padding: 2em var(--block-editor-margins);
+    padding: 2em var(--block-editor-horizontal);
     background: var(--project-color-input-disabled);
 }
     .blockeditor--quote-block.blockeditor--quote-alignment-center {

@@ -88,11 +88,13 @@ abstract class RequestHandler {
     abstract public function _public_exception_handler($error): mixed;
 
     // This might need some refactoring.
-    function cors_management($origin = null, $referer_priority = true) {
+    function cors_management($origin = null, $restrictive_referer_policy = __APP_SETTINGS__['CORS_restrictive_referer_policy']) {
         /** Set our allowed origin to be our app's domain name */
         $allowed_origin = app("domain_name");
         $allowed_methods = "OPTIONS, GET, POST, PUT, PATCH, DELETE";
-        if($referer_priority) $current_origin = $origin ?? getHeader("referer", null, true, false) ?? $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? null;
+
+        // A referer_priority of 
+        if($restrictive_referer_policy) $current_origin = $origin ?? getHeader("referer", null, true, false) ?? $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? null;
         else $current_origin = $origin ?? $_SERVER['HTTP_ORIGIN'] ?? null;
         
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) $current_origin = $this->url_to_current_mode($_SERVER['HTTP_X_FORWARDED_HOST']);

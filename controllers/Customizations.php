@@ -31,7 +31,7 @@ class Customizations extends \Controllers\Controller {
             ]
         ]);
         $result = $this->man->findAllAsSchema(...$this->params($this->man,$query));
-        if(has_permission("Customizations_create")) $create_button = '<a href="/admin/customizations/edit/new" class="floater--new-item"></a>';
+        if(has_permission("Customizations_create")) $create_button = '<a href="/admin/customizations/edit/new" class="floater floater--new-item"></a>';
 
         $table = "";
         foreach($result as $doc) {

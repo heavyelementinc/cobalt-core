@@ -106,15 +106,15 @@ trait Filterable {
 
             // This is disabled because the filter directive is called later
             if($result->hasDirective('filter')) {
-                $filterDirective = $result->directiveInstance('filter');
-                if($filterDirective instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
-                $filterDirective->getValue($value);
+                $filterDirective = $result->getDirective('filter', $value);
+                // if($filterDirective instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
+                // $filterDirective->getValue($value);
             }
             $validated = $result->filter($value);
             if($result->hasDirective('set')) {
-                $setDirective = $result->getDirective('set');
-                if($setDirective instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');
-                $setDirective->getValue($validated, $value);
+                $result->getDirective('set', $validated);
+                // if($setDirective instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');
+                // $setDirective->getValue($validated, $value);
             }
         } catch (ValidationContinue $e) {
             // If we catch a ValidationContinue, let's throw it again so

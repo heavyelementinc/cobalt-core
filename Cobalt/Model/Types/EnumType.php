@@ -17,6 +17,20 @@ class EnumType extends MixedType implements Stringable {
         if($tag === null) $tag = "select";
         return $this->select($class, $misc, $tag);
     }
+    
+    #[Prototype]
+    protected function radioGroup(string $class = "", array $misc = []) {
+        $options = "";
+        $v = $this->getValue();
+        foreach($this->getValid() as $value => $valid) {
+            $selected = "";
+            if($value == $v) {
+                $selected = " checked='checked'";
+            }
+            $options .= "<label>$valid<input type='radio' name='$this->name' value='$value'$selected></label>";
+        }
+        return "<radio-group class='pretty-select $class' name='$this->name' value='$this->value'>$options</radio-group>";
+    }
 
     #[Prototype]
     protected function get_filter_field($param_value, $param_name, $cast_type) {

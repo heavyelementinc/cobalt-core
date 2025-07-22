@@ -11,6 +11,7 @@
 :where(.button),
 :where(a.button),
 [role='button'],
+.floater,
 a.floater--new-item
 {
     --_anchor-element-color: var(--primary-color-1-fg);
@@ -131,15 +132,17 @@ a.floater--new-item
         height: 1em;
         width: 1em;
     }
+    &.floater {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+    }
 }
 
 a.floater--new-item {
-    position:fixed;
     display: flex;
     justify-content: center;
     align-items: center;
-    bottom: 2rem;
-    right: 2rem;
     width: 4rem;
     height: 4rem;
     border-radius: 50%;

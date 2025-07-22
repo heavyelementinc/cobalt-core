@@ -5,6 +5,7 @@ namespace Cobalt\Model\Traits;
 use Cobalt\Model\Attributes\DoNotSet;
 use Cobalt\Model\Exceptions\DirectiveDefinitionFailure;
 use Cobalt\Model\Exceptions\ReservedFieldName;
+use Cobalt\Model\Types\BooleanType;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\StringType;
 use MongoDB\BSON\Document;
@@ -70,7 +71,9 @@ trait Schemable {
     }
 
     public function __defaultSchema():array {
-        return [];
+        return [
+            '__archived' => new BooleanType
+        ];
     }
 
     /**
@@ -103,6 +106,7 @@ trait Schemable {
         return [
             QUERY_SEARCH_MATCH_SCORE_FIELD,
             '__version',
+            '__archived',
             // 'name',
         ];
     }

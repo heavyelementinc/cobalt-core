@@ -49,16 +49,21 @@ class EventsController {
     }
 
     function public_index() {
-        $results = $this->events->getPublicListing();
-
-        if($results) $views = view_each('/cobalt_events/public-event-listing.php', $results);
-        else $views = "There are no events yet. Check back later.";
+        $results = iterator_to_array($this->events->getPublicListing()??[]);
+        
+        $views = "";
+        if($results) {
+            foreach($results as $doc) {
+                $views .= view('Cobalt/EventListings/templates/web/event-listing.php', ['doc' => $doc]);
+            }
+        } 
+        if(!$views) $views = "There are currently no events. Please check back later.";
         
         add_vars([
             'title' => 'Events',
             'events' => $views
         ]);
-        return view("/cobalt_events/public-index.html");
+        return view("Cobalt/EventListings/templates/web/public-index.php");
     }
 
     function list_events() {

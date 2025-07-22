@@ -9,14 +9,14 @@ class AsyncButton extends CustomButton{
         this.addEventListener("click", e => {
             this.submit(e);
         })
-        if(this.type !== "batch-action") return;
-        this.setDisabledState();
-        const checkboxes = document.querySelectorAll(this.checkmarkQuery);
-        for(const check of checkboxes) {
-            check.addEventListener("change", () => {
-                this.setDisabledState(checkboxes);
-            });
-        }
+        // if(this.type !== "batch-action") return;
+        // this.setDisabledState();
+        // const checkboxes = document.querySelectorAll(this.checkmarkQuery);
+        // for(const check of checkboxes) {
+        //     check.addEventListener("change", () => {
+        //         this.setDisabledState(checkboxes);
+        //     });
+        // }
     }
 
     submit(event) {
@@ -38,6 +38,8 @@ class AsyncButton extends CustomButton{
     get value() {
         let val = {};
         switch(this.type) {
+            case "target":
+                return target?.value;
             case "batch-action":
                 const id_boxes = document.querySelectorAll(this.checkmarkQuery);
                 val._ids = [];
@@ -64,6 +66,10 @@ class AsyncButton extends CustomButton{
 
     get type() {
         return this.getAttribute("type");
+    }
+
+    get target() {
+        return this.querySelector(`#${this.getAttribute("for")}`);
     }
 
     spinner() {

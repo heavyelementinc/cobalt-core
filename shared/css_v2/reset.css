@@ -440,6 +440,39 @@ td {
     }
 }
 
+callout-card {
+    --left-band: .35em;
+    background: rgb(from attr(background type(<color>), var(--primary-color-1)) r g b / .1);
+    border-left: var(--left-band) solid attr(background type(<color>), var(--primary-color-1));
+    color: attr(background type(<color>), var(--primary-color-1));
+    display: flex;
+    width: 100%;
+    padding: 1em;
+    gap: 1em;
+    margin: 0 0 1em;
+    &::before {
+        content: attr(icon, "\F0027");
+        font-family: 'Material Design Icons';
+        font-size: xx-large;
+    }
+    &.warning {
+        background: rgb(from var(--issue-color-1) r g b / .3);
+        border-left: var(--left-band) solid var(--issue-color-1);
+        color: var(--issue-color-1);
+        &::before {
+            content: "\F0026";
+        }
+    }
+    &.info {
+        background: rgb(from var(--branding-color-1) r g b / .3);
+        border-left: var(--left-band) solid var(--branding-color-1);
+        color: var(--branding-color-1);
+        &::before {
+            content: "\F02FC";
+        }
+    }
+}
+
 footer {
     display: flex;
     flex-direction: row;

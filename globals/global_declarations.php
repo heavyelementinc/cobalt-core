@@ -109,6 +109,8 @@ function bind($binding_name, $value) {
     else $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] .= $value;
 }
 
+const FLOATING_SAVE_BUTTON = '<button type="submit" class="floater floater--save-item"><i name="%s"></i> %s</button>';
+
 const REQUEST_ENCODE_JSON = 1;
 const REQUEST_ENCODE_FORM = 2;
 const REQUEST_ENCODE_XML = 4;

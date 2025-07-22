@@ -48,10 +48,11 @@ if(__APP_SETTINGS__['Posts_default_enabled']) {
 }
 
 if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {
-    Route::get('/events', "EventsController@public_index",[
-        'anchor' => ['name' => 'Events'],
+    Route::get('/events', "Cobalt\\EventListings\\Controllers\\Events@public_index",[
+        'anchor'     => ['name' => 'Events'],
         'navigation' => ['main_navigation']
     ]);
+    Route::get("/events/{id}", "Cobalt\\EventListings\\Controllers\\Events@public_listing");
 }
 
 /** If authentications are enabled, these routes should be added to the table */
