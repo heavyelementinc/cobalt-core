@@ -61,7 +61,7 @@ class CoreSettingsPanel extends Controller {
             'settings' => implode("</form-request>", $setting_tables) . "</form-request>"
         ]);
 
-        return set_template("/admin/settings/basic-settings.html");
+        return set_template("Cobalt/Settings/templates/settings/basic-settings.php");
     }
 
 
@@ -78,31 +78,32 @@ class CoreSettingsPanel extends Controller {
         $options = "";
         switch($setting->meta['type']) {
             case "input":
-                $template = "/admin/settings/inputs/input.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/input.php";
                 $type = "text";
                 break;
             case "url":
-                $template = "/admin/settings/inputs/input.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/input.php";
                 $type = "url";
                 break;
-            case "number": 
-                $template = "/admin/settings/inputs/number.html";
+            case "number":
+            case "input-number":
+                $template = "/Cobalt/Settings/templates/settings/inputs/number.php";
                 $type = "number";
                 break;
             case "textarea":
-                $template = "/admin/settings/inputs/textarea.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/textarea.php";
                 $type = "text";
                 break;
             case "password":
-                $template = "/admin/settings/inputs/password.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/password.php";
                 break;
             case "input-switch":
             case "boolean":
             case "bool":
-                $template = "/admin/settings/inputs/bool.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/bool.php";
                 break;
             case "input-array":
-                $template = "/admin/settings/inputs/array.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/array.php";
                 $options = "";
                 $current = array_combine(__APP_SETTINGS__[$index], __APP_SETTINGS__[$index]);
                 $opts = array_merge($current, $this->get_options($setting));
@@ -113,7 +114,7 @@ class CoreSettingsPanel extends Controller {
                 }
                 break;
             case "radio-group":
-                $template = "/admin/settings/inputs/radio-group.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/radio-group.php";
                 $options = "";
                 foreach($this->get_options($setting) as $name => $display) {
                     $options .= "<label>
@@ -123,7 +124,7 @@ class CoreSettingsPanel extends Controller {
                 }
                 break;
             case "input-binary":
-                $template = "/admin/settings/inputs/input-binary.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/input-binary.php";
                 $options = "";
                 $opts = $this->get_options($setting);
                 foreach($opts as $key => $option) {
@@ -133,7 +134,7 @@ class CoreSettingsPanel extends Controller {
                 }
                 break;
             case "select":
-                $template = "/admin/settings/inputs/select.html";
+                $template = "/Cobalt/Settings/templates/settings/inputs/select.php";
                 $options = "";
                 foreach($this->get_options($setting) as $valid => $label) {
                     $checked = "";
@@ -151,6 +152,7 @@ class CoreSettingsPanel extends Controller {
             'type' => $type,
             'disabled' => '',
             'options' => $options,
+            'reset' => view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => $index, 'name' => $setting->meta['name'], 'value' => __APP_SETTINGS__[$index]]),
         ]);
         return "<li>Can't render \"$index\"</li>";
     }

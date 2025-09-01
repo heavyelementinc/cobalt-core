@@ -118,6 +118,7 @@
     }
 }
 
+
 input-wrapper, copy-span {
     display: inline-flex;
     flex-wrap: nowrap;
@@ -171,6 +172,12 @@ input[type="check"],
 input[type="radio"]
 {
     accent-color: var(--primary-color-1);
+    &:hover,
+    &:focus-visible,
+    &:focus-within {
+        border: var(--input-element-border-width) solid var(--input-hover-border);
+        background: var(--input-hover-background);
+    }
     /* -webkit-appearance: none;
     -moz-appearance: none;
     display: inline-block;
@@ -624,6 +631,33 @@ radio-group.pretty-select {
     }
     label:hover {
         outline: var(--input-element-border-value);
+    }
+}
+
+label.tag:has(input[type='radio'], input[type='checkbox']) {
+    display: inline-block;
+    border: var(--input-element-border-value);
+    background: var(--input-element-background);
+    padding: var(--margin-xs) var(--margin-s);
+    border-radius: var(--margin-m);
+    font-size: 0.8em;
+    color: var(--input-element-color);
+    user-select: none;
+    &:has(:checked) {
+        background: var(--branding-color-1);
+        color: var(--branding-color-1-fg);
+    }
+    &:has(:disabled) {
+        opacity: 0.5;
+    }
+    input[type='radio'], input[type='checkbox'] {
+        display: none;
+    }
+    &:hover:not(:has(:checked)),
+    &:focus-visible:not(:has(:checked)),
+    &:focus-within:not(:has(:checked)) {
+        border: var(--input-element-border-width) solid var(--input-hover-border);
+        background: var(--input-hover-background);
     }
 }
 

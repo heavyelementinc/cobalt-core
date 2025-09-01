@@ -156,7 +156,26 @@ class RouteGroup {
         $unread = $this->getUnread($entry);
         if($link === $this->currentRt) $classes .= "navigation--current";
         if(isset($entry['externalLink'])) $classes .= "external-link";
+        if($this->hasView($entry)) {
+            return $this->getView($entry, $icon, $link, $label, $submenu, $classes, $unread);
+        }
         return "{$this->listItemTags[0]}<a href=\"".to_base_url($link)."\" class=\"$classes\">{$icon}{$label}{$unread}</a>{$submenu}{$this->listItemTags[1]}\n";
+    }
+
+    function hasView($entry):bool {
+        return key_exists('view', $entry) && $entry['view'];
+    }
+
+    function getView($entry, $icon, $link, $label, $submenu, $classes, $unread):string {
+        return view($entry['view'], [
+            'entry' => $entry,
+            'icon' => $icon,
+            'link' => to_base_url($link),
+            'label' => $label,
+            'submenu' => $submenu,
+            'classes' => $classes,
+            'unread' => $unread
+        ]);
     }
 
     /**

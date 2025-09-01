@@ -2,7 +2,7 @@
     <div class="settings-panel--description">
         <label>{{!name}}{{!help}}</label>
         {{!small}}
-        @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
+        {{!reset}}
     </div>
     <input-switch name='{{setting}}' checked='{{$value}}' {{disabled}}></input-switch>
 </li>

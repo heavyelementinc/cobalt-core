@@ -13,5 +13,5 @@ if(!$disabled && $_GET[QUERY_PARAM_SORT_NAME][$field['name']] == '-1') $dirBoxCh
                 oninput="this.closest('.hypermedia--sortable').querySelectorAll('.hypermedia--toggleable').forEach(el => el.disabled = !this.checked)" 
             > Sort by <strong>{{field.getLabel()}}</strong>
     </label>
-    <label><input class="hypermedia--toggleable" type="checkbox" name="<?= QUERY_PARAM_SORT_NAME ?>[{{field.name}}]" value="-1" <?= $disabled ?> <?= $dirBoxChecked ?>> <i name="menu-down"></i></label>
+    <label class="tag"><input class="hypermedia--toggleable" type="checkbox" name="<?= QUERY_PARAM_SORT_NAME ?>[{{field.name}}]" value="-1" <?= $disabled ?> <?= $dirBoxChecked ?>> <i name="menu-up"></i></label>
 </div>

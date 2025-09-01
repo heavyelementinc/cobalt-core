@@ -202,6 +202,8 @@ class Route {
 
             // Header stuff -- May contain keys: 'label', 'href', 'attributes'
             'header_nav' => $options['header_nav'] ?? null,
+            'view' => $options['view'] ?? '',
+            'view_args' => $options['view_args'] ?? [],
 
             // Admin panel name
             'panel_name' => $options['name'] ?? null,
@@ -251,6 +253,8 @@ class Route {
             'context' => $route->get_context(),
             'context_root' => $route->get_context_root(),
             'headers' => $route->get_headers(),
+            'view' => $route->get_view(),
+            'view_args' => $route->get_view_args(),
             
             // Fulfillment
             'controller' => $controller,

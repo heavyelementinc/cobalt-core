@@ -27,6 +27,7 @@
     <link href='<?=to_base_url("/core-content/css/material-design/css/material.min.css")?>?{{app.verion}}' rel="stylesheet">
     <?php
         use Cobalt\EventListings\Models\Event;
+        use Handlers\WebHandler;
 
         if(__APP_SETTINGS__['Posts_enable_rss_feed']) {
             $server_name = server_name();
@@ -50,6 +51,7 @@
         window.__ = JSON.parse(atob('@get_exportables_as_json(true);'));
     </script>
     <?= (__APP_SETTINGS__['CobaltEvents_enabled']) ? "<script id=\"cobalt-events\" type=\"application/json\">" . json_encode((new Event())->getPublicListing()) . "</script>" : "<script id=\"cobalt-events\" type=\"application/json\">null</script>" ?>
+    <?= ($GLOBALS['processor'] === "Handlers\WebHandler") ? __APP_SETTINGS__['Web_embedded_content_in_header'] : "" ?>
 </head>
 
 <body id="{{body_id}}" class="{{body_class}}">
@@ -109,5 +111,6 @@
 
     @script_content@
     <!-- <script src="/core-content/js/moduleshim.js?v={{versionHash}}" type="module"></script> -->
+    <?= ($GLOBALS['processor'] === "Handlers\WebHandler") ? __APP_SETTINGS__['Web_embedded_content_after_footer'] : "" ?>
 </body>
 </html>

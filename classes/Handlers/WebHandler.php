@@ -305,7 +305,7 @@ class WebHandler extends RequestHandler {
     }
 
     function header_nav() {
-        return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main"]);
+        return get_route_group("main_navigation", ['withIcons' => false, 'classes' => "navigation--main", 'excludeWrapper' => __APP_SETTINGS__['header_nav_exclude_wrapper']]);
         // $links = "";
         // global $ROUTER:
         // foreach ($router->routes['get'] a Saturday, April 27th 2024 9:29 PM s $regex => $route) {

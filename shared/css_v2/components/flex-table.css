@@ -52,7 +52,7 @@ ul.list-panel {
     }
 }
 
-flex-table{
+flex-table {
     display: table;
     width: 100%;
     background: var(--background-color-0);
@@ -77,7 +77,7 @@ flex-table{
             width: auto;
         }
     }
-    & flex-row{
+    & flex-row {
         display: flex;
         box-sizing: border-box;
         width: 100%;
@@ -113,8 +113,11 @@ flex-table{
         width: 80px;
     }
     & flex-sticky + flex-sticky,
+    /* & .sticky + .sticky, */
     & flex-sticky + flex-cell,
+    /* & .sticky + td, */
     & flex-sticky + flex-header,
+    /* & .sticky + th, */
     & flex-cell + flex-cell,
     & flex-header + flex-cell,
     & flex-header + flex-header{
@@ -129,6 +132,11 @@ flex-table{
 
         &.sort-desc:after {
             content: "\F0360";
+        }
+        a {
+            --_anchor-element-color: var(--font-body-color);
+            --_anchor-element-visited: var(--font-body-color);
+            --_anchor-element-hover: rgb(from var(--font-body-color) r g b / .8);
         }
     }
 
@@ -236,18 +244,67 @@ td, th{
     padding: .2rem;
 }
 
-table{
-    background: var(--background-color-0);
-    color: var(--background-color-0-fg);
-}
-
-tr:nth-of-type(even) {
-    background: var(--background-color-2);
-    color: var(--background-color-2-fg);
-}
-
 flex-table async-button {
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    tr {
+        background: var(--background-color-1);
+        color: var(--background-color-1-fg);
+        border-bottom: 0;
+        border-top: 0;
+        &:nth-of-type(odd) {
+            background: var(--background-color-0);
+            color: var(--background-color-0-fg);
+        }
+    }
+    
+    th {
+        &.sort-asc:after,
+        &.sort-desc:after {
+            content: "\F035D";
+            font-family: "Material Design Icons";
+        }
+
+        &.sort-desc:after {
+            content: "\F0360";
+        }
+        a {
+            --_anchor-element-color: var(--font-body-color);
+            --_anchor-element-visited: var(--font-body-color);
+            --_anchor-element-hover: rgb(from var(--font-body-color) r g b / .8);
+        }
+    }
+
+    td {
+        border-top: 0;
+        border-bottom: 0;
+    }
+
+    th, td {
+        padding: var(--margin-s) var(--margin-xs);
+        &.align-left {
+            text-align: left;
+        }
+        &:has(input[type='checkbox']) {
+            text-align: center;
+            [type='checkbox'] {
+            scale: 1.25
+            }
+        }
+        &.align-center {
+            text-align: center;
+        }
+        &.align-right {
+            text-align: right;
+        }
+        &.doc_id_mark {
+            width: 4ch;
+        }
+    }
 }

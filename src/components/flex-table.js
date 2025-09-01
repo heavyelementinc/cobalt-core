@@ -223,3 +223,95 @@ class FlexTable extends HTMLElement {
 }
 
 customElements.define("flex-table", FlexTable);
+
+class TableContainer extends HTMLElement {
+    connectedCallback() {
+        // const checkbox = document.querySelector("th.doc_id_mark input[type='checkbox']");
+        // if(checkbox) this.configureCheckboxes();
+        this.initCheckboxes();
+    }
+
+    get value() {
+        const checked = this.querySelectorAll("input[type='checkbox']:checked,input-switch :checked");
+        let values = [];
+        checked.forEach(element => {
+            values.push(element.value);
+        });
+        return values;
+    }
+
+    initCheckboxes() {
+        const checks = Array.from(this.querySelectorAll("input[type='checkbox'],input-switch"));
+        if(checks.length === 0) return;
+
+        let firstCheckboxIsSelectAll = (checks[0].closest("th") && checks[0].closest("th").nextElementSibling.tagName === "TH");
+        let selectAll = null;
+        if(firstCheckboxIsSelectAll) {
+            selectAll = checks.shift();
+            selectAll.classList.add("select-all")
+            selectAll.addEventListener("click", (event) => {
+                checks.forEach(element => {
+                    if(event.ctrlKey) return element.checked = !element.checked;
+                    element.checked = selectAll.checked;
+                    element.dispatchEvent(new Event("change"))
+                })
+            });
+        }
+
+        // Set the initial checkbox to the first element in the array.
+        this.lastChecked = checks[0];
+
+        checks.forEach(element => {
+            element.addEventListener("click", event => {
+                console.log(event);
+                if(event.shiftKey) {
+                    this.shiftSelect(this.lastChecked, element, checks, event);
+                }
+                this.lastChecked = element;
+
+                if(!selectAll) return;
+                let checked = this.querySelectorAll("input[type='checkbox']:not(.select-all):checked");
+                if(checked.length === 0) selectAll.indeterminate = false;
+                else if (checked.length >= checks.length) {
+                    selectAll.checked = true;
+                    selectAll.indeterminate = false;
+                }
+                else {
+                    selectAll.checked = false;
+                    selectAll.indeterminate = true;
+                }
+            });
+            element.addEventListener("change", event => {
+                const button = document.querySelectorAll("async-button[type='multidelete']");
+                if(!button) return;
+                for(const check of checks) {
+                    if(check.checked === true) {
+                        button.disabled = false
+                        return;
+                    }
+                    button.disabled = true
+                }
+            });
+        });
+    }
+
+    shiftSelect(previous, current, list, event) {
+        let firstIndex = list.indexOf(previous);
+        let lastIndex = list.indexOf(current);
+
+        // Do some musical chairs
+        if(firstIndex > lastIndex) {
+            let temp = firstIndex;
+            firstIndex = lastIndex;
+            lastIndex = temp + 1;
+        }
+
+        list.slice(firstIndex, lastIndex).forEach(element => {
+            if(event.ctrlKey) return element.checked = !element.checked;
+            element.checked = current.checked;
+        });
+    }
+
+}
+
+customElements.define("table-container", TableContainer);

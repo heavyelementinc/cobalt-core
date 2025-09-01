@@ -138,11 +138,11 @@ class CoreAdmin {
             // 'public_settings_panel'   => get_route_group("public_settings_panel",['with_icon' => true]),
         ]);
 
-        return view("/admin/settings/control-panel.html");
+        return view("Cobalt/Settings/templates/settings/control-panel.php");
     }
 
     function app_settings() {
-        return view("/admin/settings/basic-settings.html");
+        return view("Cobalt/Settings/templates/settings/basic-settings.php");
     }
 
     function cron_panel() {
@@ -175,6 +175,6 @@ class CoreAdmin {
             'paypal' => $paypal,
         ]);
 
-        return view("/admin/settings/payment-gateways.html");
+        return view("Cobalt/Settings/templates/settings/payment-gateways.php");
     }
 }

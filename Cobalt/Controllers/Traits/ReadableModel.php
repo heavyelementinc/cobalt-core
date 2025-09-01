@@ -46,11 +46,13 @@ trait ReadableModel {
         $this->init(new $this->model([]), $_GET);
         $new_doc_href = route("$this->name@__new_document");
         $hypermedia = $this->get_hypermedia();
-        $body = $this->get_table_body();
+        // $body = $this->get_table_body();
+        // $table = $this->get_table();
         add_vars([
             'title'        => $this->friendly_name,
-            'table_header' => $this->get_table_header(),
-            'documents'    => $body,
+            // 'table_header' => $this->get_table_header(),
+            // 'documents'    => $body,
+            'table'        => $this->get_table(),
             'hypermedia'   => $hypermedia,
             'next_page'    => $hypermedia['next'],
             'previous_page'=> $hypermedia['previous'],

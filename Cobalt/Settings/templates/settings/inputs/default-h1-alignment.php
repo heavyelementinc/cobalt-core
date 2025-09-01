@@ -14,7 +14,8 @@
             <i name="format-align-right"></i>
         </label>
     </radio-group>
-    @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);    <style>
+    {{!reset}}
+    <style>
         input[type=radio]:checked + i {
             border: 1px solid black;
         }

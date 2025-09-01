@@ -6,24 +6,24 @@
                 Credit Type
             </label>
             <input name="designer.prefix" value="{{value.prefix}}" placeholder="Credit Type">
-            @view("/admin/settings/inputs/reset.html", ['setting' => 'designer.prefix', 'name' => 'Credit Type', 'value' => $this->vars['value']]);
+            @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'designer.prefix', 'name' => 'Credit Type', 'value' => $this->vars['value']]);
         </div>
         <div class="hbox">
             <label>
                 Designer Name
             </label>
             <input name="designer.name" value="{{value.name}}" placeholder="Designer Name">
-            @view("/admin/settings/inputs/reset.html", ['setting' => 'designer.name', 'name' => 'Designer Name', 'value' => $this->vars['value']]);
+            @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'designer.name', 'name' => 'Designer Name', 'value' => $this->vars['value']]);
         </div>
         <label>
             Designer Website
         </label>
         <input name="designer.href" value="{{value.href}}" placeholder="Designer Website">
-        @view("/admin/settings/inputs/reset.html", ['setting' => 'designer.href', 'name' => 'Designer Website', 'value' => $this->vars['value']]);
+        @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'designer.href', 'name' => 'Designer Website', 'value' => $this->vars['value']]);
         <label>
             Link Title
         </label>
         <input name="designer.title" value="{{value.title}}" placeholder="Link Title">
-        @view("/admin/settings/inputs/reset.html", ['setting' => 'designer.title', 'name' => 'Link Title', 'value' => $this->vars['value']]);
+        @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'designer.title', 'name' => 'Link Title', 'value' => $this->vars['value']]);
     </fieldset>
 </li>

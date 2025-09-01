@@ -160,11 +160,11 @@ notification-item {
         display: flex;
         text-decoration: none;
         flex-direction: column;
-        border: 1px solid var(--project-color-input-border-nofocus);
-        background: var(--project-color-input-background);
+        border: 0.08em solid rgb(from var(--input-element-border) r g b / .2);
+        background: var(--surface-color-1);
         padding: var(--margin-xxs) var(--margin-m, .4em) var(--margin-xs);
-        color: inherit;
-        border-radius: var(--input-element-radius, .3em);
+        color: var(--surface-color-1-fg);
+        border-radius: var(--input-element-radius, .5em);
         &:visited {
             color: inherit;
         }

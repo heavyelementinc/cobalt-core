@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\EventListings\Controllers\Events;
 use Routes\Options;
 use Routes\Route;
@@ -71,10 +72,12 @@ if (app('Web_main_content_via_api')) {
 }
 
 if (app('API_contact_form_enabled')) {
-    Route::post("/contact", "ContactForm@contact_submit");
-    Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
-    Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
-    get_controller("ContactForm")::apiv1();
+    // Submissions::apiv1();
+    Route::post("/contact", "Cobalt\\ContactForm\\Controllers\\Submissions@public_form_submission");
+    // Route::post("/contact", "ContactForm@contact_submit");
+    // Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
+    // Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
+    ContactForm::apiv1();
 }
 
 if (app("CobaltEvents_enabled")) {
@@ -129,15 +132,6 @@ if(app("enable_debug_routes")) {
     Route::get("/header-tests/{response}", "DebugHeaders@response");
     Route::post("/proto/", "SchemaDebug@filter_test");
 }
-
-// if(__APP_SETTINGS__['Posts_default_enabled']) {
-//     Route::s_put(   "/posts/{id}/update",             "Posts@update", ['permission' => 'Posts_manage_posts']);
-//     Route::s_delete("/posts/{id}/delete",             "Posts@deletePost", ['permission' => 'Posts_manage_posts']);
-//     Route::s_post(  "/posts/{id}/upload",             "Posts@upload", ['permission' => 'Posts_manage_posts']);
-//     Route::s_delete("/posts/attachment/{id}",         "Posts@delete", ['permission' => 'Posts_manage_posts']);
-//     Route::s_put(   "/posts/attachment/{id}/default", "Posts@defaultImage", ['permission' => 'Posts_manage_posts']);
-//     Route::s_put(   "/posts/attachment/{id}/sort",    "Posts@updateSortOrder", ['permission' => 'Posts_manage_posts']);
-// }
 
 if(__APP_SETTINGS__['PaymentGateways_enabled']) {
     Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);

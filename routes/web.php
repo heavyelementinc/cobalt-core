@@ -52,7 +52,8 @@ if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {
         'anchor'     => ['name' => 'Events'],
         'navigation' => ['main_navigation']
     ]);
-    Route::get("/events/{id}", "Cobalt\\EventListings\\Controllers\\Events@public_listing");
+    Route::get("/events/{id}.ics", "Cobalt\\EventListings\\Controllers\\Events@iCalEvent");
+    Route::get("/events/{id}",     "Cobalt\\EventListings\\Controllers\\Events@public_listing");
 }
 
 /** If authentications are enabled, these routes should be added to the table */
@@ -70,6 +71,17 @@ if (app("Auth_logins_enabled")) {
         'sitemap' => ['ignore' => true]
     ]);
     Route::get("/login/password-reset/{token}", "Login@password_reset_token_form");
+}
+
+if (__APP_SETTINGS__['Contact_form_public_routes_enabled'] && __APP_SETTINGS__['API_contact_form_enabled']) {
+    Route::get((new Options("/contact/", "Cobalt\ContactForm\Controllers\PublicContact@form"))
+        ->set_handler(__APP_ROOT__.'/Pages/Contact/handlers/contact.js')
+        ->set_navigation(__APP_SETTINGS__['Contact_form_navigation_options'])
+    );
+
+    Route::get((new Options("/contact/finish", "Cobalt\ContactForm\Controllers\PublicContact@submission_success"))
+        ->set_sitemap(['ignore' => true])
+    );
 }
 
 if(__APP_SETTINGS__['Mailchimp_default_list_id']) {

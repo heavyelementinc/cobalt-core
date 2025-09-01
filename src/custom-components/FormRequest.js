@@ -469,6 +469,13 @@ export default class FormRequest extends ProgressWizard {
                     return field.files;
             }
         }
+        if(field.tagName === "SELECT") {
+            let tmp_value = field.value;
+            const opt = field.querySelector(`option[value='${tmp_value}']`) 
+                ?? document.querySelector(`#${field.list} option[value='${tmp_value}']`);
+            if(opt && opt.hasAttribute("is-null") && opt.getAttribute('is-null') === "true") tmp_value = null;
+            return tmp_value;
+        }
         if(field.tagName === "IMAGE-RESULT") {
             if(event.detail.target.type === "file" || event.detail.target.type === "files") {
                 return event.originalTarget.files;

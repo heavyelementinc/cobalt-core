@@ -112,6 +112,10 @@
                     {{doc.public_head.field()}}
                 </li>
                 <li>
+                    {{doc.location.getLabel()}}
+                    {{doc.location.field()}}
+                </li>
+                <li>
                     <label>Event Image</label>
                     <small>If you do not specify an Event Image below, your app logo will be used instead.</small>
                     {{doc.public_image.field()}}

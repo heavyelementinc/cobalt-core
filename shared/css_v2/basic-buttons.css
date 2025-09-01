@@ -163,8 +163,8 @@ async-button{
     &:not(.link, [link]) {
         appearance: initial;
         border-radius: 5px;
-        background-color: #e9e9ed;
-        border: 1px solid #8f8f9d;
+        /* background-color: #e9e9ed; */
+        /* border: 1px solid #8f8f9d; */
         color: black;
         padding: .2em .4em;
         cursor: default;

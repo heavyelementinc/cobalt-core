@@ -4,5 +4,5 @@
             
         </template>
     </input-object-array>
-    @view("/admin/settings/inputs/reset.html", ['setting' => $this->vars['setting'], 'name' => $this->vars['name'], 'value' => $this->vars['value']]);
+    {{!reset}}
 </li>

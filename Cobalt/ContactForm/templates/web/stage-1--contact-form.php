@@ -1,0 +1,29 @@
+<form-request method="POST" action="<?= route("Cobalt\\ContactForm\\Controllers\\Submissions@public_form_submission") ?>">
+  <fieldset>
+    <label>What's your name?</label>
+    <input type="text" name="name" placeholder="Jane Doe">
+  </fieldset>
+  <fieldset>
+    <label>Organization</label>
+    <input type="text" name="organization" placeholder="Bouquets, Inc.">
+  </fieldset>
+  <fieldset>
+    <label>Email address</label>
+    <input type="email" name="email" placeholder="user@example.com">
+  </fieldset>
+  <fieldset>
+    <label>Phone number</label>
+    <input type="tel" name="phone" placeholder="(207) 555-2112">
+  </fieldset>
+  <fieldset>
+    <label>Preferred Contact Method</label>
+    <label><input type="radio" name="preferred" value="email" required="required"> Email</label>
+    <label><input type="radio" name="preferred" value="phone" required="required"> Phone</label>
+  </fieldset>
+  <fieldset>
+    <label>What are you contacting us about?</label>
+    <textarea name="additional" placeholder="Additional information" maxlength="1800"></textarea>
+  </fieldset>
+  <div class="error" style="flex-grow:1"></div>
+  <button type="submit">Submit</button>
+</form-request>

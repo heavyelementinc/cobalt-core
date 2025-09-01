@@ -271,4 +271,8 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
         }
         return $instance;
     }
+
+    function getIndexAlignment() {
+        return "left";
+    }
 }

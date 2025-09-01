@@ -3,6 +3,7 @@
 namespace Cobalt\EventListings\Controllers;
 
 use Cobalt\Controllers\ModelController;
+use Cobalt\EventListings\Classes\CalendarEvent;
 use Cobalt\EventListings\Models\Event;
 use Cobalt\Model\Model;
 use CobaltEvents\EventManager;
@@ -10,8 +11,6 @@ use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONDocument;
-
-use const Dom\NOT_FOUND_ERR;
 
 class Events extends ModelController {
     public static function defineModel(): Model {
@@ -55,7 +54,7 @@ class Events extends ModelController {
             '_id' => new ObjectId($id),
             '$or' => Event::PUBLIC_LISTING_OR_QUERY
         ]);
-        if(!$result) throw new NotFound(NOT_FOUND_ERR);
+        if(!$result) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
         add_vars([
             'title' => $result->public_head->value ?? $result->headline,
             'og_description' => strip_tags($result->public_body->firstParagraph() ?? $result->body->md()),
@@ -64,5 +63,15 @@ class Events extends ModelController {
             'og_image_height' => $result->public_image['meta']['height'] ?? __APP_SETTINGS__['opengraph_image_Y'],
         ]);
         return view("Cobalt/EventListings/templates/web/event-listing.php", ['doc' => $result]);
+    }
+
+    public function iCalEvent($id):string {
+        $event = $this->model->findOne([
+            '_id' => new ObjectId($id)
+        ]);
+        if($event === null) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
+        /** @var Event $event */
+        $event->getICalEvent()->download();
+        exit;
     }
 }

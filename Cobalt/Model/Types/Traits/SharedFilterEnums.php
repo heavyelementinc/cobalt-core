@@ -12,6 +12,7 @@ use Error;
 use Exception;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use Stringable;
 
 trait SharedFilterEnums {
 
@@ -33,10 +34,15 @@ trait SharedFilterEnums {
         if($this->hasDirective("valid")) $valid = $this->getDirective("valid");
         
         if(empty($valid ?? [])) return $this->value;
-        if(key_exists($this->value, $valid)) return $valid[$this->value];
+        // if((is_string($this->value) || is_int($this->value)) && key_exists($this->value, $valid)) return $valid[$this->value];
+        switch(gettype($this->value)) {
+            case "string":
+            case "integer":
+                return $valid[$this->value];
+            case "object":
+                if($this->value instanceof Stringable) return $valid[(string)$this->value];
+        }
         if($this instanceof WeakEnumType) return $this->value;
-        $result = "";
-        
         return "";
     }
 
@@ -83,7 +89,9 @@ trait SharedFilterEnums {
 
         // if(!is_string($val) && is_numeric($val)) $val = "$val";
         // if($val instanceof \MongoDB\Model\BSONArray) $gotten_value = $val->getArrayCopy();
-        
+
+        $options = "";
+
         // Here we determine if we allow custom values and add to our list of options
         $allow_custom = false;
         if($this->hasDirective('strict')) {
@@ -92,11 +100,14 @@ trait SharedFilterEnums {
         if($this->hasDirective('allow_custom')) {
             $allow_custom = $this->getDirective("allow_custom");
         }
-
         $type = gettype($val);
         if($allow_custom) $this->integrate_custom_values_to_valid_array($val, $valid, $type);
 
-        $options = "";
+        $is_nullable = $this->directiveOrNull('nullable');
+        if($is_nullable) {
+            $options .= "<option value=\"\" is-null=\"true\">".($this->directiveOrNull('empty_label') ?? "-- Select --")."</option>";
+        }
+
         foreach ($valid as $validKey => $validValue) {
             $value = $validValue;
             $data = "";

@@ -127,7 +127,16 @@ export default class ICustomInput extends HTMLElement {
      * @returns {null|HTMLDatalist}
      */
     getDatalist() {
-        return document.getElementById(this.datalist);
+        let datalist = document.getElementById(this.datalist);
+        if(!datalist) {
+            datalist = document.createElement("datalist");
+            const options = this.querySelectorAll("option");
+            for(const el of options) {
+                datalist.appendChild(el);
+            }
+            this.appendChild(datalist);
+        }
+        return datalist;
     }
 
     // handleSaveFeedback() {

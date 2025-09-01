@@ -91,9 +91,9 @@ trait IndexableModel {
             $safe_get_params[urlencode($key)] = urlencode($value);
         }
         // Establish our table header
-        $html = "<flex-row>";
+        $html = "<tr>";
         if($this->__get_index_checkbox_state()) {
-            $html .= "<flex-header class=\"doc_id_mark\"><input type=\"checkbox\"></flex-header>";
+            $html .= "<th class=\"doc_id_mark\"><input type=\"checkbox\"></th>";
         }
         foreach($this->sortedTable as $field) {
             // Merge the newly-safe params with the params for this field
@@ -117,9 +117,9 @@ trait IndexableModel {
             $href_params = array_merge($safe_get_params, [QUERY_PARAM_SORT_NAME => urlencode($field['name'])]);
             $href = "?" . http_build_query($href_params);
             
-            $html .= "<flex-header class=\"$classes\"><a href=\"$href\">".htmlspecialchars($field['title'])."</a></flex-header>";
+            $html .= "<th class=\"$classes\"><a href=\"$href\">".htmlspecialchars($field['title'])."</a></th>";
         }
-        return $html . "</flex-row>";
+        return $html . "</tr>";
     }
 
     /** Override this in your controller to set a default query for your index */
@@ -312,7 +312,11 @@ trait IndexableModel {
             $count += 1;
         }
         set("total_document_count", $count);
-        if(!$html) $html = "<flex-row class=\"flex-table--no-results\"><flex-cell col-span=\"".count($this->sortedTable)."\">No results</flex-cell></flex-row>";
+        if(!$html) {
+            $columns = count($this->sortedTable);
+            if($this->__get_index_checkbox_state()) $columns += 1;
+            $html = "<tr class=\"flex-table--no-results\"><td colspan=\"$columns\">No results</td></tr>";
+        }
         return $html;
     }
 
@@ -335,17 +339,17 @@ trait IndexableModel {
         $row_details = $this->getRowDetails($doc);
         $row_class = (isset($row_details['row_class'])) ? " class=\"$row_details[row_class]\"" : "";
         $row_style = (isset($row_details['row_style'])) ? " style=\"$row_details[row_style]\"" : "";
-        $html .= "<flex-row$row_class"."$row_style>";
+        $html .= "<tr$row_class"."$row_style>";
 
         if($this->__get_index_checkbox_state()) {
             $checked = ($row_details['checkbox_checked']) ? " checked=\"checked\"" : "";
             $disabled = ($row_details['checkbox_disabled']) ? " disabled=\"disabled\"" : "";
-            $html .= "<flex-cell class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\"$checked value=\"$doc->_id\"$disabled></flex-cell>";
+            $html .= "<td class=\"doc_id_mark\"><input type=\"checkbox\" name=\"_id\"$checked value=\"$doc->_id\"$disabled></td>";
         }
         $route = route("$this->controller@__edit", [$doc->_id]);
         // Get each cell's contents
         foreach($this->sortedTable as $cell) {
-            $html .= "<flex-cell>";
+            $html .= "<td>";
             
             // $view = $cell['view'];
             // Check if "view" is callable, if it is, let's use the result of that function
@@ -376,9 +380,9 @@ trait IndexableModel {
                 $open = "<a href=\"$route\">";
                 $close = "</a>";
             }
-            $html .= $open . $view . $close . "</flex-cell>";
+            $html .= $open . $view . $close . "</td>";
         }
-        $html .= "</flex-row>";
+        $html .= "</tr>";
     }
 
     

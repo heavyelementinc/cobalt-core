@@ -59,6 +59,9 @@ class Options implements Iterator, JsonSerializable {
     private bool $csrf_required = false;
     private ?Closure $headers = null;
 
+    private string $view = "";
+    private array $view_args = [];
+
     function __construct(string $path, string $controller) {
         $this->set_path($path);
         $this->set_controller($controller);
@@ -111,7 +114,21 @@ class Options implements Iterator, JsonSerializable {
         return $this->var_names[1];
     }
 
-    public function set_controller(string $value) {
+    public function get_view():string {
+        return $this->view;
+    }
+
+    public function get_view_args():array {
+        return $this->view_args;
+    }
+
+    public function set_view(string $view, array $args = []):self {
+        $this->view = $view;
+        $this->view_args = $args;
+        return $this;
+    }
+
+    public function set_controller(string $value):self {
         // $arr = explode("@",$value);
         // $this->controller['controller'] = $arr[0];
         // $this->controller['method'] = $arr[1];
@@ -148,6 +165,7 @@ class Options implements Iterator, JsonSerializable {
             ];
             if($nav['order'] ?? "") $this->navigation[$group]['order'] = $nav['order'];
             if($nav['href'] ?? "") $this->navigation[$group]['href'] = $nav['href'] ?? '';
+            if($nav['submenu_group'] ?? "") $this->navigation[$group]['submenu_group'] = $nav['submenu_group'] ?? '';
         }
         return $this;
     }

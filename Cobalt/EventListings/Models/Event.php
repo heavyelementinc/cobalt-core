@@ -3,6 +3,7 @@
 namespace Cobalt\EventListings\Models;
 
 use Cobalt\Controllers\ModelController;
+use Cobalt\EventListings\Classes\CalendarEvent;
 use Cobalt\EventListings\Controllers\Events;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\ArrayType;
@@ -74,6 +75,7 @@ class Event extends Model {
     }
 
     public function defineSchema(array $schema = []): array {
+        $this->__showCheckboxes(true);
         return [
             'event_name' => [
                 new StringType,
@@ -95,6 +97,9 @@ class Event extends Model {
             ],
             'body' => [
                 new MarkdownType,
+            ],
+            'location' => [
+                new StringType
             ],
             'type' => [
                 new EnumType,
@@ -230,5 +235,26 @@ class Event extends Model {
                 ]
             ]
         );
+    }
+
+    public function getUrlPath():string {
+        return route("Cobalt\\EventListings\\Controllers\\Events@public_listing", [(string)$this->_id]);
+    }
+
+    public function getICalEvent():CalendarEvent {
+        $cal = new CalendarEvent($this->start_date, $this->end_date, $this->_id);
+        $cal->set_name($this->getName());
+        $cal->set_description($this->getBody());
+        $cal->set_location($this->location->value ?? "");
+        $cal->set_url(server_name().$this->getUrlPath());
+        return $cal;
+    }
+
+    public function getName() {
+        return $this->public_name->value ?? $this->headline->value;
+    }
+
+    public function getBody() {
+        return ($this->public_body->length()) ? $this->public_body->display() : $this->body->md();
     }
 }

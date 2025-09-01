@@ -19,8 +19,5 @@
         </form>
     </div>
 </header>
-<flex-table>
-    {{!table_header}}
-    {{!documents}}
-</flex-table>
+{{!table}}
 <a href="{{!href}}" class="floater floater--new-item"></a>

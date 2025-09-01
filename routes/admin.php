@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\EventListings\Controllers\Events;
 use Contact\ContactManager;
 use Routes\Route;
@@ -257,6 +258,9 @@ Route::get("/integrations/{class}", "IntegrationsController@token_editor");
 */
 
 if(app("API_contact_form_enabled") && __APP_SETTINGS__["Contact_form_on_success_modes"] & CONTACT_SUCCESS_SYSTEM) {
+    // Submissions::admin(null, [
+    //     'anchor' => 'Contact Form',
+    // ]);
     ContactForm::admin(null, [
         'index' => [
             'anchor' => [
@@ -270,18 +274,19 @@ if(app("API_contact_form_enabled") && __APP_SETTINGS__["Contact_form_on_success_
             'handler' => '/core/contact-form.js'
         ]
     ]);
-    // Route::get("/contact-form/", "ContactForm@__index", [
-    //     'permission' => 'Contact_form_submissions_access',
-    //     'anchor' => [
-    //         'name' => "Contact Form",
-    //         'icon' => 'chat-alert-outline',
-    //     ],
-    //     'navigation' => ['admin_panel'],
-    //     'unread' => function () {
-    //         return (new ContactManager())->get_unread_count_for_user(session());
-    //     },
-    //     'handler' => '/core/contact-form.js'
+    // Submissions::admin(null, [
+    //     'index' => [
+    //         'anchor' => [
+    //             'name' => "Contact Form",
+    //             'icon' => 'chat-alert-outline',
+    //         ],
+    //         'navigation' => ['admin_panel'],
+    //         // 'unread' => function () {
+    //         //     return (new ContactManager())->get_unread_count_for_user(session());
+    //         // },
+    //         // 'handler' => '/core/contact-form.js'
+    //     ]
     // ]);
-    Route::get("/contact-form/{id}", "ContactForm@read", ['permission' => 'Contact_form_submissions_access']);
+    // Route::get("/contact-form/{id}", "ContactForm@read", ['permission' => 'Contact_form_submissions_access']);
 }
 

@@ -9,6 +9,11 @@ use Stringable;
 
 class EnumType extends MixedType implements Stringable {
     protected string $type = "string";
+    
+    public function finalInitialization():void {
+        $this->__defineDirective('nullable', true);
+        $this->__defineDirective('empty_label', '-- Select --');
+    }
 
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {

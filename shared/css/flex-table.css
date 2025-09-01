@@ -206,7 +206,7 @@ td, th{
 }
 
 table{
-    background: var(--project-color-table-bg-odd);
+
 }
 
 tr:nth-of-type(even) {

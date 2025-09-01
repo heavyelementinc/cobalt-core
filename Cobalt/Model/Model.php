@@ -103,4 +103,8 @@ abstract class Model extends GenericModel implements Persistable {
             '__version' => new StringType,
         ];
     }
+
+    public function __showCheckboxes(bool $show = true) {
+        $this->__set_index_checkbox_state($show);
+    }
 }

@@ -64,7 +64,7 @@ class UserIdResult extends SchemaResult {
     }
 
     public function __toString(): string {
-        return $this->getValue()->uname;
+        return $this->getValue()->uname ?? "[no username set]";
     }
 
     public function getValid():array {

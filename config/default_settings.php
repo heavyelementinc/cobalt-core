@@ -389,6 +389,21 @@ $settings = [
                 ]
             ]
         ],
+        "Contact_form_public_routes_enabled" => [
+            "default" => false,
+        ],
+        "Contact_form_navigation_options" => [
+            "default" => [
+                'main_navigation' => [
+                    'name' => "Contact",
+                    'attrs' => ['classes' => 'contact-form-link'],
+                    'order' => 999,
+                ]
+            ]
+        ],
+        "Contact_form_container_view" => [
+            "default" => "Cobalt/ContactForm/templates/web/stage-1--contact-page.php"
+        ],
         "API_contact_form_recipients" => [
             "default" => ["Contact_form_submissions_access"],
             "meta" => [
@@ -779,13 +794,14 @@ $settings = [
             "default" => "",
             "directives" => [
                 "config" => "smtp_username",
-                "env" => "MAIL_USERNAME"
+                "env" => "MAIL_USERNAME",
             ],
             "meta" => [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "SMTP Username",
-                "type" => "input"
+                "type" => "input",
+                "description" =>  "The username credential used to authenticate with your SMTP service",
             ]
         ],
 
@@ -793,13 +809,14 @@ $settings = [
             "default" => "",
             "directives" => [
                 "config" => "smtp_password",
-                "env" => "MAIL_PASSWORD"
+                "env" => "MAIL_PASSWORD",
             ],
             "meta" => [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "SMTP Password",
-                "type" => "password"
+                "type" => "password",
+                "description" =>  "The password credentials used to authenticate with your SMTP service",
             ],
             "validate" => [
                 "confirm" => "Are you sure you want to update this password? Doing so will overwrite your current password!"
@@ -810,13 +827,14 @@ $settings = [
             "default" => "",
             "directives" =>[
                 "config" => "smtp_host",
-                "env" => "MAIL_SMTP_HOST"
+                "env" => "MAIL_SMTP_HOST",
             ],
             "meta" => [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "SMTP Host",
-                "type" => "input"
+                "type" => "input",
+                "description" =>  "The hostname of your SMTP service",
             ]
         ],
 
@@ -824,13 +842,14 @@ $settings = [
             "default" => 587, // Verified this works with mailgun and PHPMailer::ENCRYPTION_STARTTLS
             "directives" =>[
                 "config" => "smtp_port",
-                "env" => "MAIL_PORT"
+                "env" => "MAIL_PORT",
             ],
             "meta" => [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "SMTP Port",
-                "type" => "number"
+                "type" => "number",
+                "description" =>  "The port number of your SMTP service",
             ],
             "validate" => [
                 "type" => "int"
@@ -842,7 +861,8 @@ $settings = [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "SMTP Connection Type",
-                "number" => "select"
+                "number" => "select",
+                "description" =>  "The connection security for your SMTP service",
             ],
             "valid" => [
                 "options" => [
@@ -857,13 +877,15 @@ $settings = [
             "default" => true,
             "directives" => [
                 "config" => "smtp_auth",
-                "env" => "MAIL_AUTH"
+                "env" => "MAIL_AUTH",
+                "description" =>  "",
             ],
             "meta" => [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "SMTP Auth Enabled",
-                "type" => "input-switch"
+                "type" => "input-switch",
+                "description" =>  "Determines if the SMTP connection should use authentication",
             ],
             "validate" => [
                 "type" => "boolean"
@@ -879,7 +901,8 @@ $settings = [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "Reply To",
-                "type" => "input"
+                "type" => "input",
+                "description" =>  "The email address that should be replied to when receiving an email from Cobalt",
             ],
             "validate" => [
                 "filter" => [
@@ -896,7 +919,8 @@ $settings = [
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "name" => "Reply To Name",
-                "type" => "input"
+                "type" => "input",
+                "description" =>  "The displayed name when receiving an email from Cobalt",
             ]
         ],
         
@@ -1604,8 +1628,14 @@ $settings = [
         "Template_debug_state" => [
             "default" => 0
         ],
-    /** AUTHENTICATION */
+        "Web_embeded_content_in_header" => [
+            "default" => ""
+        ],
+        "Web_embedded_content_after_footer" => [
+            "default" => ""
+        ],
 
+    /** AUTHENTICATION */
         "session_cookie_name" => [
             "default" => "token_session" // Changing this in production will log everyone out.
         ],
@@ -1868,6 +1898,9 @@ $settings = [
             "validate" => [
                 "type" => "boolean"
             ]
+        ],
+        "header_nav_exclude_wrapper" => [
+            "default" => false
         ],
         "apply_header_class_after_scroll" => [
             "default" => 0,

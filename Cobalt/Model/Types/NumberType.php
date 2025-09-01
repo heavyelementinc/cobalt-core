@@ -38,4 +38,8 @@ class NumberType extends MixedType {
         };
         return compare_and_juggle($this->type, $value);
     }
+
+    function getIndexAlignment() {
+        return "right";
+    }
 }

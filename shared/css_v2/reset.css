@@ -159,7 +159,7 @@ hr {
     height: 0;
     overflow: visible;
     border:none;
-    border-top: 1px solid var(--background-color-0-fg, currentColor);
+    border-top: 1px solid var(--background-color-3, currentColor);
 }
 
 .hbox hr {
