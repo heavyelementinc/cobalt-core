@@ -28,9 +28,6 @@
     "namespaces": {
         "Exceptions\\HTTP": {
             "path": "__ENV_CLASSES__/Exceptions/HTTP/"
-        },
-        "Routes": {
-            "path": "__ENV_ROOT__/Cobalt/Routes/"
         }
     }
 }
