@@ -183,8 +183,15 @@ trait DirectiveBaseline {
         return $this;
     }
 
+    #[Directive]
     public function define_field($function):MixedType {
         $this->__defineDirective('field', new FieldDirective($function));
+        return $this;
+    }
+
+    #[Directive]
+    public function define_description($function):MixedType {
+        $this->__defineDirective('description', $function);
         return $this;
     }
 

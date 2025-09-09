@@ -147,7 +147,7 @@ class RouteGroup {
         return "<ul$id class='directory--group ".implode(" ", $this->classes)."'>".implode("",$rendered)."</ul>\n";
     }
 
-    function getEntry($entry):string {
+    function getEntry($entry, $index):string {
         $icon = $this->getIcon($entry);
         $link = $this->getLink($entry);
         $label = $this->getLabel($entry);
@@ -157,7 +157,12 @@ class RouteGroup {
         if($link === $this->currentRt) $classes .= "navigation--current";
         if(isset($entry['externalLink'])) $classes .= "external-link";
         if($this->hasView($entry)) {
-            return $this->getView($entry, $icon, $link, $label, $submenu, $classes, $unread);
+            return $this->getView($entry['view'], $entry, $icon, $link, $label, $submenu, $classes, $unread);
+        }
+        if(key_exists($this->groupName, $entry['navigation'] ?? []) && is_array($entry['navigation'][$this->groupName])) {
+            if(key_exists('view', $entry['navigation'][$this->groupName])) {
+                return $this->getView($entry['navigation'][$this->groupName]['view'], $entry, $icon, $link, $label, $submenu, $classes, $unread);
+            }
         }
         return "{$this->listItemTags[0]}<a href=\"".to_base_url($link)."\" class=\"$classes\">{$icon}{$label}{$unread}</a>{$submenu}{$this->listItemTags[1]}\n";
     }
@@ -166,8 +171,8 @@ class RouteGroup {
         return key_exists('view', $entry) && $entry['view'];
     }
 
-    function getView($entry, $icon, $link, $label, $submenu, $classes, $unread):string {
-        return view($entry['view'], [
+    function getView(string $view, $entry, $icon, $link, $label, $submenu, $classes, $unread):string {
+        return view($view, array_merge([
             'entry' => $entry,
             'icon' => $icon,
             'link' => to_base_url($link),
@@ -175,7 +180,7 @@ class RouteGroup {
             'submenu' => $submenu,
             'classes' => $classes,
             'unread' => $unread
-        ]);
+        ]));
     }
 
     /**

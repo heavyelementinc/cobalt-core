@@ -24,6 +24,11 @@ function is_secure():bool {
         || $_SERVER['SERVER_PORT'] == 443;
 }
 
+function is_trusted_host(array $hosts = [], ?string $from = null):bool {
+    $from = $from ?? $_SERVER['HTTP_REFERER'];
+    $hosts = [...__APP_SETTINGS__['API_CORS_allowed_origins'], ...$hosts];
+    return in_array(parse_url($from, PHP_URL_HOST), $hosts);
+}
 
 /**
  * Check for confirmation headers and throw an exception if they don't exist

@@ -250,7 +250,7 @@ abstract class CRUDController extends Controller {
             "$class@index", 
             array_merge([
                 'anchor' => ['name' => $opts['index']['anchor'] ?? $class, 'submenu_group' => $opts['submenu_group'] ?? $opts['submenu'] ?? ''],
-                'navigation' => ['admin_panel']
+                'navigation' => [$options['navigation'] ?? 'admin_panel']
             ], $permissions['update'] ?? [],
             $opts['index']['options'] ?? []
         ));

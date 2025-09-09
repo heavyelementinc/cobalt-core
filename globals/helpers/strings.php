@@ -518,14 +518,15 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
     $filename = get_image_url($doc);
     $height   = $doc['meta']['height'];
     $width    = $doc['meta']['width'];
-    $accent   = $doc['meta']['accent_color'];
-    $contrast = $doc['meta']['contrast_color'];
+    $accent   = $attributes['accent_color'] ?? $doc['meta']['accent_color'];
+    $contrast = $attributes['contrast_color'] ?? $doc['meta']['contrast_color'];
     $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
     if($doc instanceof ImageType && $doc->directiveOrNull('transparent')) {
         $attributes['transparent'] = "true";
     }
     $attrs = "";
     foreach($attributes as $attr => $val) {
+        if(in_array($attr, ['accent_color', 'contrast_color'])) continue;
         $attrs .= " $attr=\"$val\"";
     }
     return <<<HTML
@@ -549,4 +550,9 @@ function get_image_url(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc
 
 function get_image_details(ObjectId $id):?BSONDocument {
     return (new ImageType())->__findOne(['_id' => $id]);
+}
+
+function prettify_fieldname(string $fieldName):string {
+    $split = str_replace([".","_"], " ", $fieldName);
+    return ucwords($split);
 }

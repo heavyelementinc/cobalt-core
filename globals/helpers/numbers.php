@@ -136,7 +136,7 @@ const PROUND_SUFFIX = 0b00001;
 const PROUND_JOINER = 0b00010;
 const PROUND_NUMBER = 0b00100;
 
-function pretty_rounding($number, $type = 'suffix', $join = "", $flags = PROUND_SUFFIX + PROUND_JOINER + PROUND_NUMBER):string{
+function pretty_rounding($number, $type = 'suffix', $join = "", $flags = PROUND_SUFFIX + PROUND_JOINER + PROUND_NUMBER, ?int $precision = null):string{
     if($number === 0) return "zero";
     if(is_null($number)) return "zero";
     
@@ -148,7 +148,8 @@ function pretty_rounding($number, $type = 'suffix', $join = "", $flags = PROUND_
         if($number < $data['factor']) continue;
         if(!key_exists($type, $data)) $type = "suffix";
         $result = "";
-        if($flags & PROUND_NUMBER) $result .= round($number / $data['factor'], $data['precision'], PHP_ROUND_HALF_UP);
+        $precision = $precision ?? $data['precision'];
+        if($flags & PROUND_NUMBER) $result .= round($number / $data['factor'], $precision, PHP_ROUND_HALF_UP);
         if($flags & PROUND_JOINER) $result .= $join;
         if($flags & PROUND_SUFFIX) $result .= $data[$type];
     }

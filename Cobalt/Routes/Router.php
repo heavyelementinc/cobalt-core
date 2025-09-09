@@ -71,6 +71,7 @@ class Router {
                 'post'   => [],
                 'put'    => [],
                 'delete' => [],
+                'cli'    => [],
             ];
 
             $results = [];

@@ -166,6 +166,7 @@ class Options implements Iterator, JsonSerializable {
             if($nav['order'] ?? "") $this->navigation[$group]['order'] = $nav['order'];
             if($nav['href'] ?? "") $this->navigation[$group]['href'] = $nav['href'] ?? '';
             if($nav['submenu_group'] ?? "") $this->navigation[$group]['submenu_group'] = $nav['submenu_group'] ?? '';
+            if($nav['view'] ?? "") $this->navigation[$group]['view'] = $nav['view'] ?? '';
         }
         return $this;
     }

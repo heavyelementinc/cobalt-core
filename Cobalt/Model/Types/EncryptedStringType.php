@@ -6,11 +6,12 @@ use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\Types\StringType;
 use Exception;
 use RangeException;
+use SensitiveParameter;
 
 use const Cobalt\Model\Types\DIRECTIVE_KEY_IMMUTABLE;
 
 class EncryptedStringType extends StringType {
-    function filter($value) {
+    function filter(#[SensitiveParameter] $value) {
         if(mb_strlen(__APP_SETTINGS__['app_secret'], '8bit') !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
             throw new RangeException('Key is the incorrect size');
         }
@@ -20,7 +21,7 @@ class EncryptedStringType extends StringType {
         return $cipher;
     }
 
-    public function getValue() {
+    public function getValue():mixed {
         return $this->decrypt(parent::getValue());
     }
 

@@ -4,7 +4,7 @@ namespace Cobalt\Integrations\Final\Ghost;
 
 use Cobalt\Integrations\Config;
 use Cobalt\Integrations\Base;
-
+use SensitiveParameter;
 
 class Ghost extends Base {
     public function publicName(): string {
@@ -37,5 +37,19 @@ class Ghost extends Base {
         return self::STATUS_CHECK_OK;
     }
 
+    static function validateWebhookRequest(#[SensitiveParameter] string $secret, ?string $hash = null, ?string $body = null):bool {
+        $body = $body ?? $_REQUEST['input'];
+        $hash = $hash ?? getHeader('x-ghost-signature');
+        $parsedSignature = [];
+        $split = explode(',', $hash);
+        foreach($split as $str) {
+            [$key, $value] = explode('=', trim($str));
+            $parsedSignature[trim($key)] = $value;
+        }
 
+        $foreignHash = $parsedSignature['sha256'];
+        $calculatedHash = hash_hmac('sha256', $body.$parsedSignature['t'], $secret, false);
+
+        return hash_equals($foreignHash, $calculatedHash);
+    }
 }

@@ -92,8 +92,11 @@ trait Prototypable {
         }
         $hasLabel = $this->hasDirective("label");
         if($hasLabel) return $labelStart.$this->getDirective("label") . $labelEnd;
-        $split = str_replace([".","_"], " ", $this->{MODEL_RESERVERED_FIELD__FIELDNAME});
-        return $labelStart . ucwords($split) . $labelEnd;
+        if($this->hasDirective('description')) {
+            $labelEnd .= "<small class=\"form-prototype--field-description\">".$this->getDirective("description")."</small>";
+        }
+        // $split = str_replace([".","_"], " ", $this->{MODEL_RESERVERED_FIELD__FIELDNAME});
+        return $labelStart . prettify_fieldname($this->{MODEL_RESERVERED_FIELD__FIELDNAME}) . $labelEnd;
     }
 
     #[Prototype]

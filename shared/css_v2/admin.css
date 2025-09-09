@@ -168,6 +168,29 @@ a {
     border: var(--project-action-menu-border);
 }
 
+.admin-panel--nav-group {
+    box-sizing: border-box;
+    li {
+        border-bottom: 2px solid transparent;
+        position: relative;
+        &:has(> .navigation--current) {
+            color: var(--font-body-color)
+        }
+    }
+    li:has(.directory--submenu):after{
+        content: "\F0142";
+        font-family: "Material Design Icons";
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    li:has(.navigation--current) {
+        border-bottom: 2px solid var(--background-color);
+    }
+    .directory--submenu {
+        box-shadow: 0 5px 10px black;
+    }
+}
 
 
 @media only screen and (max-width: 35em) {

@@ -398,11 +398,16 @@ abstract class Crudable {
             $class   = self::className();
             $mutant  = self::generate_prefix($prefix);
 
+            $anchor = [
+                'name' => $options['anchor'] ?? static::generate_friendly_name()
+            ];
+            if(key_exists('submenu_group', $options)) {
+                $anchor['submenu_group'] = $options['submenu_group'];
+            }
+
             Route::get("$mutant/", "$class@__index", self::route_details(
                     [
-                    'anchor' => [
-                        'name' => $options['anchor'] ?? self::generate_friendly_name()
-                    ],
+                    'anchor' => $anchor,
                     'navigation' => [$options['navigation'] ?? 'admin_panel'],
                     'permission' => "CRUDControllerPermission",
                 ],

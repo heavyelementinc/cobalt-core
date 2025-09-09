@@ -188,7 +188,8 @@ class ApiHandler extends RequestHandler {
     }
 
     private function handle_json_post_data() {
-        $incoming_stream = trim(file_get_contents("php://input"));
+        $incoming_stream = file_get_contents("php://input");
+        $_REQUEST['input'] = $incoming_stream;
         $_POST = json_decode($incoming_stream, true, 512, JSON_THROW_ON_ERROR);
     }
 

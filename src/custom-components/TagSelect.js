@@ -19,7 +19,7 @@ export class TagSelect extends ICustomInput {
     get value() {
         let values = [];
         for (const i of this.querySelectorAll("[aria-pressed='true']")) {
-            if (i.selected === true) {
+            if (i.ariaPressed === "true") {
                 values.push(i.value ?? i.innerText);
             }
         }

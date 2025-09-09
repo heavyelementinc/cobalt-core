@@ -133,11 +133,16 @@ abstract class ModelController {
             $class   = static::className();
             $mutant  = static::generate_prefix($prefix);
 
+            $anchor = [
+                'name' => $options['name'] ?? $options['anchor'] ?? static::generate_friendly_name()
+            ];
+            if(key_exists('submenu_group', $options)) {
+                $anchor['submenu_group'] = $options['submenu_group'];
+            }
+
             Route::get("$mutant/", "$class@__index", static::route_details(
                     [
-                    'anchor' => [
-                        'name' => $options['anchor'] ?? static::generate_friendly_name()
-                    ],
+                    'anchor' => $anchor,
                     'navigation' => [$options['navigation'] ?? 'admin_panel'],
                     'permission' => static::$admin_index,
                 ],

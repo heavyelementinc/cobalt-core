@@ -5,6 +5,7 @@ namespace Cobalt\Integrations\Final\Patreon;
 use Cobalt\Integrations\Base;
 use Cobalt\Integrations\Config;
 use Cobalt\Integrations\OauthBase;
+use SensitiveParameter;
 
 class Patreon extends Base {
 
@@ -37,8 +38,12 @@ class Patreon extends Base {
         print("\n");
         return $result;
     }
-
-    private function fetchPage(?string $cursor = null) {
+    const MEMBER_SCOPE__MEMBER = 0b001;
+    const MEMBER_SCOPE__TIER   = 0b010;
+    const MEMBER_SCOPE__USER   = 0b100;
+    private function fetchPage(?string $cursor = null, int $scopes = self::MEMBER_SCOPE__MEMBER +
+    self::MEMBER_SCOPE__TIER +
+    self::MEMBER_SCOPE__USER) {
         $query = [
             // 'scope' => implode(",", [
             //     "campaigns.members"
@@ -104,12 +109,76 @@ class Patreon extends Base {
             //     // "state",
             // ])
         ];
+        
         $campaign = $this->config->campaign_id;
         if($cursor !== null) $query['page[cursor]'] = $cursor;
         $url = "https://www.patreon.com/api/oauth2/v2/campaigns/$campaign/members?" . http_build_query($query);
         return $this->fetch('get', $url);
     }
 
+    const STATUS__FORMER_PATRON = "former_patron";
+    public function yieldMembershipData(int $scopes = self::MEMBER_SCOPE__MEMBER + self::MEMBER_SCOPE__TIER + self::MEMBER_SCOPE__USER) {
+        $cli = function_exists("say");
+        $params = [
+
+        ];
+        $result = [];
+        $cursor = null;
+        $iterations = 0;
+        $total = null;
+        while(true) {
+            $response = $this->fetchPage($cursor)['response'];
+            $total = ceil($response['meta']['pagination']['total'] / count($response['data']));
+            if($cli) print("Fetched ".fmt("Patreon", "i")." memberships ($iterations/$total)");
+            $merged = $this->combinePatronDetails($response);
+            foreach($merged as $m){
+                yield $m;
+            }
+            if(!key_exists('cursors', $response['meta']['pagination'])) break;
+            if(!key_exists('next', $response['meta']['pagination']['cursors'])) {
+                if($cli) say("Path to cursor does not exist, breaking...", 'e');
+                break;
+            }
+            $cursor = $response['meta']['pagination']['cursors']['next'];
+            
+            $iterations += 1;
+            if($iterations >= $total) break;
+            if($cli) print("\r");
+            // break;
+        }
+        if($cli) print("\n");
+        return $result;
+    }
+
+    private function combinePatronDetails($response) {
+        $d = [];
+        foreach($response['data'] as $m) {
+            $d[$m['relationships']['user']['data']['id']] = $m;
+        }
+        foreach($response['included'] as $u) {
+            $d[$u['id']]['user'] = $u;
+        }
+        return $d;
+    }
+
+    static function isActiveMembership($patron):array|false {
+        if(empty($patron['relationships']['currently_entitled_tiers']['data'])) return false;
+        $tier = [];
+        foreach($patron['relationships']['currently_entitled_tiers']['data'] as $tier) {
+
+        }
+        return $tier;
+    }
+
+    static function validateWebhookRequest(#[SensitiveParameter] string $secret, ?string $hash = null, ?string $body = null):bool {
+        // $body = json_encode(json_decode($body ?? $_REQUEST['input']));
+        // For some reason, this hashing fails unless we use the explicit file_get_contents('php://input')
+        $body = $body ?? file_get_contents('php://input') ?? $_REQUEST['input'];
+        $foreignHash = $hash ?? $_SERVER['HTTP_X_PATREON_SIGNATURE'];
+        $localHash = hash_hmac('md5', $body, $secret);
+        $hequals = hash_equals($foreignHash, $localHash);
+        return $hequals;
+    }
 
     public function publicName(): string {
         return "Patreon";

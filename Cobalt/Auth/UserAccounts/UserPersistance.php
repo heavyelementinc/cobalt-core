@@ -50,80 +50,81 @@ class UserPersistance extends Model {
     
     public function defineSchema(array $schema = []): array {
         return [
-            'fname' =>[
+            'uname' => [
                 new StringType
             ],
-            'lname' =>[
+            'fname' => [
                 new StringType
             ],
-            'name' =>[
+            'lname' => [
                 new StringType
             ],
-            'uname' =>[
+            'name' => [
                 new StringType
             ],
-            'pword' =>[
+            
+            'pword' => [
                 new StringType,
-                
             ],
-            'email' =>[
+
+            'email' => [
                 new EmailAddressType
             ],
-            'avatar' =>[
+            'avatar' => [
                 new ImageType
             ],
-            'flags' =>[
+            'flags' => [
                 new ArrayType
             ],
-            'state' =>[
+            'state' => [
                 new BinaryType
             ],
-            'token' =>[
+            'token' => [
                 new ArrayType
             ],
-            'prefs' =>[
+            'prefs' => [
                 new ModelType
             ],
-            'since' =>[
+            'since' => [
                 new DateType
             ],
-            'groups' =>[
+            'groups' => [
                 new ArrayType
             ],
-            'permissions' =>[
+            'permissions' => [
                 new ArrayType
             ],
-            'is_root' =>[
+            'is_root' => [
                 new BooleanType
             ],
-            'public_name' =>[
+            'public_name' => [
                 new StringType
             ],
-            'display_name' =>[
+            'display_name' => [
                 new FakeType
             ],
-            'default_bio_blurb' =>[
+            'default_bio_blurb' => [
                 new BlockType
             ],
-            'full_biography' =>[
+            'full_biography' => [
                 new BlockType
             ],
-            'fediverse_profile' =>[
+            'fediverse_profile' => [
                 new StringType
             ],
-            'facebook_profile' =>[
+            'facebook_profile' => [
                 new StringType
             ],
-            'twitter_profile' =>[
+            'twitter_profile' => [
                 new StringType
             ],
-            'instagram_profile' =>[
+            'instagram_profile' => [
                 new StringType
             ],
-            'youtube_profile' =>[
+            'youtube_profile' => [
                 new StringType
             ],
-            'integrations' =>[
+            'integrations' => [
                 new ModelType,
             ],
         ];

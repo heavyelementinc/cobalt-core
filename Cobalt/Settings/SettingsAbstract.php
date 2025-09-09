@@ -59,6 +59,8 @@ abstract class SettingsAbstract extends \Drivers\Database {
         __APP_ROOT__ . "/config/manifest.v2.json",
     ];
 
+    const BOOTSTRAP_CACHE_ID = "bootstrap_cache";
+
     var $mtime_candidates = [];
 
     public $waitingForDependencies;
@@ -166,10 +168,12 @@ abstract class SettingsAbstract extends \Drivers\Database {
         $toCache = array_merge($toCache, $details);
         if($deleteSettings) {
             $this->deleteOne([
+                '_id' => self::BOOTSTRAP_CACHE_ID,
                 'Meta.type' => 'cache'
             ]);
         }
         $result = $this->updateOne([
+            '_id' => self::BOOTSTRAP_CACHE_ID,
             'Meta.type' => 'cache'
         ],
         [
@@ -301,6 +305,7 @@ abstract class SettingsAbstract extends \Drivers\Database {
         
     public function fetchCachedSettings() {
         $cursor = $this->find([
+            '_id' => self::BOOTSTRAP_CACHE_ID,
             'Meta.type' => 'cache'
         ],
         [

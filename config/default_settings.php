@@ -2112,6 +2112,20 @@ $settings = [
             "default" => [],
             "directives" =>[
                 "prepend" => [
+                    "CLI" => [
+                        "processor" => "Handlers\\CLIHandler",
+                        "prefix" => "__cli_context",
+                        "exception_mode" => "cli",
+                        "no_session_exception" => "\\Exceptions\\HTTP\\Unauthorized",
+                        "mode" => "cli",
+                        "permission" => "Admin_panel_access",
+                        "session_refresh" => true,
+                        "api_access" => true,
+                        "router_boundry" => true,
+                        "vars" => [
+                            "html_class" => "cli"
+                        ]
+                    ],
                     "admin" => [
                         "processor" => "Handlers\\AdminHandler",
                         "prefix" => "/admin/",

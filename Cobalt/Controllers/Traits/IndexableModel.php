@@ -420,7 +420,7 @@ trait IndexableModel {
 
     final protected function get_title(string $field, array $directives) {
         $index = $directives['index'] ?? [];
-        $title = $index['title'] ?? $field;
+        $title = $index['title'] ?? prettify_fieldname($field);
         if(gettype($title) !== "string" && is_callable($title)) return $title($field, $directives);
         return $title;
     }

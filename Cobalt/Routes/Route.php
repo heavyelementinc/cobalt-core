@@ -335,6 +335,9 @@ class Route {
     }
 
     static function get_router_context($request_uri) {
+        if(defined("COBALT_MODE_IS_CLI")) {
+            return "CLI";
+        }
         // Remove the query string
         $request_uri = remove_base_path(str_replace("?" . $_SERVER['QUERY_STRING'], "", $request_uri));
 
