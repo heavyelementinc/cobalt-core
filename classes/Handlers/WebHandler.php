@@ -694,10 +694,10 @@ class WebHandler extends RequestHandler {
             // if(method_exists($this->renderer, "setFileName")) $this->renderer->setFileName($this->mainTemplateFilename);
             $this->renderer->set_vars(array_merge($this->template_vars,[
                 // 'og_type' => __APP_SETTINGS__['opengraph_type'],
-                'og_description'  => __APP_SETTINGS__['opengraph_description'],
-                'og_image_path'   => __APP_SETTINGS__['opengraph_image'],
-                'og_image_width'  => __APP_SETTINGS__['opengraph_image_X'],
-                'og_image_height' => __APP_SETTINGS__['opengraph_image_Y'],
+                'og_description'  => $GLOBALS['WEB_PROCESSOR_VARS']['og_description']  ?? __APP_SETTINGS__['opengraph_description'],
+                'og_image_path'   => $GLOBALS['WEB_PROCESSOR_VARS']['og_image_path'] ?? $GLOBALS['WEB_PROCESSOR_VARS']['og_image'] ?? __APP_SETTINGS__['opengraph_image'],
+                'og_image_width'  => $GLOBALS['WEB_PROCESSOR_VARS']['og_image_width']  ?? __APP_SETTINGS__['opengraph_image_X'],
+                'og_image_height' => $GLOBALS['WEB_PROCESSOR_VARS']['og_image_height'] ?? __APP_SETTINGS__['opengraph_image_Y'],
             ]));
             $buffer = $this->renderer->execute();
             return $buffer;
