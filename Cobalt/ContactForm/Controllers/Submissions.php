@@ -218,7 +218,7 @@ class Submissions extends ModelController {
             'subject' => 'New Contact Form Submission',
             'body' => "**$mutant->name** filled out your contact form:\n\n".trim(substr($mutant->additional,0, 100)),
             'action' => [
-                'href' => route("Cobalt\\ContactForm\\Controllers\\Submissions@__edit",[$href])
+                'href' => "/admin/contact-form/edit/$href"//route("Cobalt\\ContactForm\\Controllers\\Submissions@__edit",[$href])
             ],
             'type' => 0,
         ]);
