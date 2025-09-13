@@ -52,6 +52,10 @@ class GhostAdmin extends Ghost {
         return $response;
     }
 
+    public function getSingleMemberData($id) {
+
+    }
+
     public function yieldMembershipData() {
         // $cli = function_exists("say");
         $host = $this->get_host();
@@ -95,6 +99,7 @@ class GhostAdmin extends Ghost {
      */
     static function isActiveMembership(array $member, bool $countCompedMembersAsActive = false):array|false {
         $candidate = false;
+        if($member['subscribed'] !== true) return false;
         foreach($member['subscriptions'] as $sub) {
             if($sub['status'] !== self::MEMBER_STATUS__ACTIVE) continue;
             if($countCompedMembersAsActive === false) {
@@ -119,7 +124,7 @@ class GhostAdmin extends Ghost {
         $membership->bsonUnserialize([
             'platform' => Platform::GHOST->value,
             'cents' => $md['price']['amount'],
-            'is_active' => $md['active'] == self::MEMBER_STATUS__ACTIVE,
+            'is_active' => $md['status'] == self::MEMBER_STATUS__ACTIVE,
             'start_date' => new UTCDateTime(strtotime($md['tier']['created_at'])),
             'end_date'   => new UTCDateTime(strtotime($md['current_period_end'])),
             'next_pledge' => null,
