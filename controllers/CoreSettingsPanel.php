@@ -141,6 +141,10 @@ class CoreSettingsPanel extends Controller {
                     if($valid === __APP_SETTINGS__[$index]) $checked = " selected='selected'";
                     $options .= "<option value='$valid'$checked>$label</option>\n";
                 }
+                break;
+            case "date":
+                $template = "/Cobalt/Settings/templates/settings/inputs/date.php";
+                break;
         }
         if($template) return view($template,[
             'name' => $setting->meta['name'],

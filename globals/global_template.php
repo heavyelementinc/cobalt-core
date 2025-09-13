@@ -359,3 +359,33 @@ function font_tag_2_fontsource() {
     }
     return "$tag</style>";
 }
+
+function cli_cursor_move(int $line = 0, int|string $column = 0) {
+    $up = "A";
+    $down = "B";
+    $right = "C";
+    $left = "D";
+    $l = "";
+    if($line >= 1) {
+        print("\033[$line".$down);
+    } else if ($line <= -1) {
+        print("\033[".abs($line).$up);
+    }
+    if($column >= 1) {
+        print("\033[$column".$right);
+    } else if ($line <= -1) {
+        print("\033[".abs($column).$left);
+    }
+}
+
+function cli_cursor_set(int $line, int $column) {
+    print("\033[$line;$column"."H");
+}
+
+function cli_clear_screen() {
+    print("\033[2J");
+}
+
+function cli_erase_to_eol() {
+    print("\033[K");
+}

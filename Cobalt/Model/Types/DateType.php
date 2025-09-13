@@ -117,4 +117,8 @@ class DateType extends MixedType {
         return "<date-span format='$format' relative='true' value='" .($date * 1000). "'></date-span>";
     }
 
+    public function defaultIndexView() {
+        return "<code class=\"utc-date\">".$this->display()."</code>";
+    }
+
 }

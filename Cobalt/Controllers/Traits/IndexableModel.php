@@ -286,19 +286,7 @@ trait IndexableModel {
             // If view is not set at all at this point, what should we do?
 
             
-            if(isset($schema[$cell['name']]['index']['view'])) {
-                $view = $schema[$cell['name']]['index']['view'];
-                if(!is_string($view) && is_callable($view)) $view = $view($mutableRoute, $doc[$cell['name']], $doc);
-                
-                if(!$view && method_exists($doc->{$cell['name']}, '__defaultIndexPresentation')) {
-                    $view = $doc->{$cell['name']}->__defaultIndexPresentation();
-                }
-                if(!$view) $doc->{$cell['name']}->display();
-            } else if (method_exists($doc->{$cell['name']}, '__defaultIndexPresentation')) {
-                $view = $doc->{$cell['name']}->__defaultIndexPresentation();
-            } else {
-                $view = $doc->{$cell['name']};
-            }
+Cl            $view = $this->get_index_view($cell, $mutableRoute, $doc, $schema);
             // Let's establish our open/close tags
             $open = "";
             $close = "";
@@ -309,6 +297,24 @@ trait IndexableModel {
             $html .= $open . $view . $close . "</td>";
         }
         $html .= "</tr>";
+    }
+
+    public function get_index_view($cell, &$mutableRoute, $doc, $schema) {
+        if(!isset($schema[$cell['name']]['index']['view'])) {
+            if (method_exists($doc->{$cell['name']}, 'defaultIndexView')) {
+                return $doc->{$cell['name']}->defaultIndexView();
+            } else {
+                return (string)$doc->{$cell['name']};
+            }
+        }
+        $view = $schema[$cell['name']]['index']['view'];
+        if(!is_string($view) && is_callable($view)) $view = $view($mutableRoute, $doc[$cell['name']], $doc);
+        
+        if(!$view && method_exists($doc->{$cell['name']}, 'defaultIndexView')) {
+            $view = $doc->{$cell['name']}->defaultIndexView();
+        }
+        if(!$view) $doc->{$cell['name']}->display();
+        return $view;
     }
 
     
@@ -420,7 +426,7 @@ trait IndexableModel {
 
     final protected function get_title(string $field, array $directives) {
         $index = $directives['index'] ?? [];
-        $title = $index['title'] ?? prettify_fieldname($field);
+        $title = $index['title'] ?? $directives['label'] ?? prettify_fieldname($field);
         if(gettype($title) !== "string" && is_callable($title)) return $title($field, $directives);
         return $title;
     }

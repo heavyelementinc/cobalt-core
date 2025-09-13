@@ -14,4 +14,5 @@ enum FieldTypes: string {
     case radio = "radio";
     case binary = "binary";
     case select = "select";
+    case date = "date";
 }
