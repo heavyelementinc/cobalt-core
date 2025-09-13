@@ -286,7 +286,7 @@ trait IndexableModel {
             // If view is not set at all at this point, what should we do?
 
             
-Cl            $view = $this->get_index_view($cell, $mutableRoute, $doc, $schema);
+            $view = $this->get_index_view($cell, $mutableRoute, $doc, $schema);
             // Let's establish our open/close tags
             $open = "";
             $close = "";
