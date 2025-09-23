@@ -166,11 +166,23 @@ button.cobalt-events--banner-close, button.cobalt-events--banner-close:hover, bu
         h2 {
             margin-bottom: 0;
         }
-        time {
+        a.event-listing--date-permalink, time {
             color: rgb(from currentColor r g b / .4);
         }
         article {
             margin-top: 1em;
+        }
+        @media only screen and (max-width: 35em) {
+            display: flex;
+            flex-direction: column;
+            --gap: var(--margin-s);
+            padding-right: 0;
+            img {
+                width: 100%;
+            }
+            h2 {
+                margin: var(--margin-xs) 0 var(--margin-s);
+            }
         }
     }
 }
@@ -201,6 +213,12 @@ button.cobalt-events--banner-close, button.cobalt-events--banner-close:hover, bu
         margin: 0 auto;
         h2, time {
             padding: 0 var(--block-editor-horizontal);
+        }
+    }
+    @media only screen and (max-width: 35em) {
+        --width: 100%;
+        a.calendar-button {
+            margin: 0 0 var(--margin-s);
         }
     }
 }

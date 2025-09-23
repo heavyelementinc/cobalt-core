@@ -45,6 +45,11 @@ class Events extends ModelController {
             'title' => 'Events',
             'events' => $views
         ]);
+
+        register_user_bar_items([
+            '_page_post_new' => "<a href='/admin/events/new'><i name='plus'></i> New Event</a>",
+            '_page_post_edit' => "<a href='/admin/events/'><i name='pencil'></i> Manage Events</a>",
+        ]);
         return view("Cobalt/EventListings/templates/web/public-index.php");
     }
     

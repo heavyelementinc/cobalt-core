@@ -14,7 +14,7 @@ if(!$href) $href = route("Cobalt\\EventListings\\Controllers\\Events@public_list
     <a href="<?=$href?>"><?= embed_image($doc->public_image) ?></a>
     <div>
         <h2><a href="<?= $href ?>"><?= $doc->public_head->value ?? $doc->headline->value ?></a></h2>
-        <time><?= $doc->start_date->format($format_start) . " $separator " . $doc->end_date->format($format_end) ?></time>
+        <time><a class="event-listing--date-permalink" href="<?= $href ?>"><?= $doc->start_date->format($format_start) . " $separator " . $doc->end_date->format($format_end) ?></a></time>
         <article>
             <?= $doc->public_body->firstParagraph() ?? $doc->body->md() ?>
         </article>

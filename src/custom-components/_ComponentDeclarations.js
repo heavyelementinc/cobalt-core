@@ -19,6 +19,9 @@ customElements.define("input-tag-select", TagSelect);
 import { InputBinary } from "./InputBinary.js";
 customElements.define("input-binary", InputBinary); 
 
+import SlideShow from "./SlideShow.js";
+customElements.define("slide-show", SlideShow);
+
 import { ObjectGallery, GalleryItem, FileGallery } from "./ObjectGallery.js";
 customElements.define("object-gallery", ObjectGallery);
 customElements.define("gallery-item", GalleryItem);

@@ -10,7 +10,9 @@ if($doc->start_date->format($format_compare) !== $doc->end_date->format($format_
 }
 $href = $doc->call_to_action_href->value;
 if(!$href) $href = $doc->getUrlPath();
-register_user_bar_items(['edit' => "<a href='".route('Cobalt\EventListings\Controllers\Events@__edit',[(string)$doc->_id])."'><i name='pencil'></i> Edit</a>"]);
+register_user_bar_items([
+    'edit' => "<a href='".route('Cobalt\EventListings\Controllers\Events@__edit',[(string)$doc->_id])."'><i name='pencil'></i> Edit This Event</a>"
+]);
 $cal = $doc->getICalEvent();
 ?>
 <div class="event-listing--content">

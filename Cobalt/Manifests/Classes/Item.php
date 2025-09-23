@@ -46,6 +46,8 @@ class Item implements Persistable{
 
     const COMMON_SHORTHAND_REFERENCE = ["web", "admin", "debug"];
 
+    const INLINE_FILE_CONTENT = "inline";
+
     function __construct() {
     }
 
@@ -176,6 +178,7 @@ class Item implements Persistable{
     }
 
     public function is_inline_content():bool {
+        if(in_array(self::INLINE_FILE_CONTENT, $this->contexts)) return true;
         return $this->inline;
     }
     public function is_deferred_content():bool {
@@ -218,6 +221,9 @@ class Item implements Persistable{
     }
 
     public function get_script_tag(&$packages) {
+        if(in_array(self::INLINE_FILE_CONTENT, $this->contexts)) {
+            return "<script>".$this->read_content()."</script>";
+        }
         $module = "";
         if($this->module) $module = " type=\"module\"";
         $registered = "";
@@ -231,6 +237,9 @@ class Item implements Persistable{
     }
 
     public function get_css_tag(&$packages) {
+        if(in_array(self::INLINE_FILE_CONTENT, $this->contexts)) {
+            return "<style>".$this->read_content()."</style>";
+        }
         $version = "";
         if($this->version > 1) $version = "v$this->version/";
         $pkg = "/core-content/css/$version"."$this->href";

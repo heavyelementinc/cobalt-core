@@ -39,6 +39,79 @@
         }
     ?>
     <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
+    <style>
+        slide-show {
+            --direction: 1;
+            position: relative;
+            isolation: isolate;
+            display: block;
+            height: var(--height, 100%);
+            width: var(--width, 100%);
+            &.slide-show--ready-state {
+                & > .slide-show--slide {
+                    transition: 
+                        opacity var(--duration),
+                        scale var(--duration),
+                        translate var(--duration);
+                    &.slide-show--inert {
+                        transition: unset;
+                    }
+                }
+            }
+            &.slide-show--direction-backwards {
+                --direction: -1;
+            }
+            &:has(.slide-show--animation-in-out) {
+                overflow-clip-margin: 0;
+                overflow: hidden;
+            }
+            & > .slide-show--slide {
+                position: absolute;
+                inset: 0;
+                --duration: 250ms;
+                &.slide-show--inert {
+                    opacity: 0;
+                    pointer-events: none;
+                    user-select: none;
+                    z-index: 1;
+                }
+                &.slide-show--current {
+                    opacity: 1;
+                    pointer-events: all;
+                    user-select: auto;
+                    z-index: 2;
+                }
+                &.slide-show--previous {
+                    opacity: 0;
+                    pointer-events: none;
+                    user-select: none;
+                    z-index: 3;
+                }
+                &.slide-show--animation-in-out{
+                    &.slide-show--inert {
+                        translate: calc(10% * var(--direction));
+                    }
+                    &.slide-show--current {
+                        translate: 0;
+                        opacity: 1;
+                    }
+                    &.slide-show--previous {
+                        translate: calc(-10% * var(--direction));
+                        opacity: 0;
+                    }
+                }
+                &.slide-show--animation-scale-out{
+                    &.slide-show--previous {
+                        scale: 1.4;
+                        opacity: 0;
+                    }
+                    &.slide-show--current {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    </style>
     @style_meta@
 
     @app_settings@

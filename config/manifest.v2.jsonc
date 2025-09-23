@@ -5,6 +5,10 @@
     //     "module": true
     // },
     {
+        "href": "components/slide-show.css",
+        "contexts": ["inline" ]
+    },
+    {
         "href":"Preferences.js",
         "contexts": ["common"]
     },
@@ -401,6 +405,7 @@
         "href": "components/cobalt-carousel.css",
         "contexts": ["common"]
     },
+
     {
         "href": "components/action-menu-element.css",
         "contexts": ["common"]
