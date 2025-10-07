@@ -19,7 +19,8 @@ function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_E
     header($header);
     $msg = $message;
     if($specific_message) $msg = $specific_message;
-    cobalt_log("KILL", $msg, COBALT_LOG_EXCEPTION);
+    if(defined("COBALT_LOG_EXCEPTION")) cobalt_log("KILL", $msg, COBALT_LOG_EXCEPTION);
+    else $specific_message .= "<p>Additionally, this error has not been logged.</p>";
     $html = "<html>
     <head>
         <title>$title</title>

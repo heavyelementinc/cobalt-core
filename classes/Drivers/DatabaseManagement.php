@@ -2,15 +2,23 @@
 
 namespace Drivers;
 
+use ArrayAccess;
 use Cobalt\Maps\GenericMap;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
+use DateTime;
 use Error;
 use Exception;
 use Iterator;
 use JsonSerializable;
+use MongoDB\BSON;
+use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
+use MongoDB\Database;
+use MongoDB\Model\BSONDocument;
+use MongoDB\Model\CollectionInfo;
+use stdClass;
 
 class DatabaseManagement {
     private $db;
@@ -24,8 +32,127 @@ class DatabaseManagement {
     public function collections() {
         return $this->db->listCollections();
     }
-    
+
+    const EXPORT_VERSION_2_0 = "2.0";
+    const EXPORT_VERSION = self::EXPORT_VERSION_2_0;
+
+    const EXPORT_SUPPORTED_VERSIONS = ["2.0"];
+
+    const EXPORT_ENCODING__PLAIN = 0;
+    const EXPORT_ENCODING__GZIP  = 1;
+
+    const IMPORT__LINE_SUCCESS = 0;
+    const IMPORT__LINE_FAILED = 1;
+    const IMPORT__LINE_META = 2;
+
+
     public function export($file = null, $talk = false, $ignored = true, $extraIgnored = [], $onlyExport = null) {
+        $benchmark_start = time();
+        if($talk) $talk = function_exists("say");
+        if($talk) print("Started database export");
+        if(!$file) $file = app("DB_export_directory");
+        $file = __APP_ROOT__ . $file;
+        if(!file_exists($file)) mkdir($file, 0777, true);
+
+        $extraIgnored = array_merge($extraIgnored ?? [], $this::IGNORED);
+
+        $collections = $this->db->listCollections();
+        $backup_path = $file . $this->get_backup_file_name();
+        $handle = fopen($backup_path, "w+");
+        if($handle === false) throw new Error("Cannot open $backup_path for writing.");
+        $meta = [
+            'isMeta' => true,
+            'encoding' => self::EXPORT_ENCODING__PLAIN,
+            'exportedAt' => null,
+            'exportVersion' => self::EXPORT_VERSION,
+            'collectionDetails' => [],
+            'databaseName' => config()['database'],
+        ];
+        foreach($collections as $collection) {
+            $name = $collection->getName();
+            if($ignored === true && in_array($name, $extraIgnored)) continue;
+            if(is_array($onlyExport) && !in_array($name, $onlyExport)) continue;
+            $this->export_collection($handle, $collection, $meta, $talk);
+        }
+        $meta['exportedAt'] = date_format(new DateTime(),"c");
+        fwrite($handle, json_encode($meta));
+        fclose($handle);
+
+        $benchmark_end = time();
+        if($talk) {
+            printf("Exported database in %s\n", fmt(($benchmark_end - $benchmark_start) . " seconds"));
+            printf("Exported to %s\n", fmt($backup_path,"w"));
+        }
+    }
+
+    private function export_collection($handle, CollectionInfo $collection, &$meta, $talk = false) {
+        $name = $collection->getName();
+        $count = $this->db->{$name}->count();
+        $meta['collectionDetails'][$name] = [
+            'name'  => $name,
+            'exported' => 0,
+            'count' => $count,
+        ];
+        $cursor = $this->db->{$name}->find([],[
+            'limit' => $count + 1000, // Find all documents in the collection
+            // 'projection' => ['__pclass' => 0] // Let's recover the actual BSON
+            'typeMap' => [
+                'root' => 'array',
+                'document' => 'array',
+                'array' => 'array',
+            ]
+        ]);
+        foreach($cursor as $i => $document) {
+            $this->export_document($handle, $name, $document, $meta, $collection);
+            if($talk) print("\rExporting document ".str_pad($i + 1,strlen($count), "0")." of $count from collection ".fmt($name, "i"));
+        }
+        if($talk) print("\n");
+    }
+
+    private function export_document($handle, string $name, array $BSONDocument, &$meta, CollectionInfo $collection) {
+        // Let's normalize our inputs
+        $doc = $BSONDocument;
+        
+        $data = [
+            'col' => $name,
+            'doc' => json_encode($doc),
+        ];
+
+        $json = json_encode($data);
+        $int = fwrite($handle, $json.PHP_EOL);
+        if($int === false) throw new Exception("Failed to write ".strlen($json)." bytes to backup file Collection: $name, Document: $doc[id].");
+        $meta['collectionDetails'][$name]['exported'] += 1;
+    }
+
+    function get_backup_file_name() {
+        $name = $this->db->getDatabaseName();
+        return $name . "-" . time() . ".json";
+    }
+
+    static function is_line_meta_entry(array $line, &$reason):bool {
+        // Meta sanity check
+        $sanity_check_failed_string = "Required meta key missing: `%s`";
+        if(!key_exists('isMeta', $line)) {
+            $reason = sprintf($sanity_check_failed_string, 'isMeta');
+            return false;
+        }
+        if(!key_exists('encoding', $line)) {
+            $reason = sprintf($sanity_check_failed_string, 'encoding');
+            return false;
+        }
+        if(!key_exists('exportVersion', $line)) {
+            $reason = sprintf($sanity_check_failed_string, 'exportVersion');
+            return false;
+        }
+        if(!key_exists('collectionDetails', $line)) {
+            $reason = sprintf($sanity_check_failed_string, 'collectionDetails');
+            return false;
+        }
+        return true;
+    }
+
+
+    public function export1($file = null, $talk = false, $ignored = true, $extraIgnored = [], $onlyExport = null) {
         if(!$file) $file = app("DB_export_directory");
         $file = __APP_ROOT__ . $file;
         if(!file_exists($file)) mkdir($file, 0777, true);
@@ -138,12 +265,7 @@ class DatabaseManagement {
         return iterator_to_array_recursive($__dataset);
     }
 
-    function get_backup_file_name() {
-        $name = $this->db->getDatabaseName();
-        return $name . "-" . time() . ".json";
-    }
-
-    public function import($filename, $talk = false, $caution = true) {
+    public function import1($filename, $talk = false, $caution = true) {
         if(!file_exists($filename)) return say("File `$filename` does not exist.", "e");
         $contents = json_decode(file_get_contents($filename),true);
         $count = count($contents);
@@ -170,7 +292,8 @@ class DatabaseManagement {
                 $json_row = json_encode($row);
                 
                 $bson = \MongoDB\BSON\fromJSON($json_row); // @phpstan-ignore-line
-                $row = \MongoDB\BSON\toPHP($bson); // @phpstan-ignore-line
+                /** @phpstan-ignore-line */
+                $row = \MongoDB\BSON\toPHP($bson); 
 
                 if($row instanceof GenericMap) {
                     // $row->__dataset['_id'] = $row->id;

@@ -85,11 +85,13 @@ class NotificationsPanel {
         const bodyContentLockedStatus = ["notification-panel--open"];
         switch(s) {
             case false:
+                this.panel.showModal();
                 lock_viewport();
                 document.body.classList.add(...bodyContentLockedStatus);
                 break;
             default:
             case true:
+                this.panel.close();
                 unlock_viewport();
                 document.body.classList.remove(...bodyContentLockedStatus);
                 break;

@@ -2,7 +2,7 @@
 
 use Cobalt\Notifications\Classes\NotificationManager;
 ?>
-<div class="notifications--notifications-panel" aria-hidden="true">
+<dialog class="notifications--notifications-panel" aria-hidden="true">
     <hgroup>
         <h1>Notifications</h1>
     </hgroup>
@@ -40,4 +40,4 @@ use Cobalt\Notifications\Classes\NotificationManager;
             </input-wrapper>
         </fieldset>
     </form-request>
-</div>
+</dialog>

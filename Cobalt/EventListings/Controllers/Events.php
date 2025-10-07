@@ -39,7 +39,7 @@ class Events extends ModelController {
                 $views .= view('Cobalt/EventListings/templates/web/event-item.php', ['doc' => $doc]);
             }
         }
-        if(!$views) $views = "There are currently no events. Please check back later.";
+        if(!$views) $views = "<p class=\"event-listing--no-results\">There are currently no events. Please check back later.</p>";
         
         add_vars([
             'title' => 'Events',

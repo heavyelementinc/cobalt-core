@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\DBManagement\Import;
 use Drivers\DatabaseManagement;
 
 /**
@@ -23,7 +24,7 @@ class Database {
     }
 
     function import($filename) {
-        $db = new DatabaseManagement();
+        $db = new Import();
         $db->import($filename, true);
     }
 }
