@@ -18,7 +18,6 @@ use MongoDB\BSON\Persistable;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use MongoDB\Model\CollectionInfo;
-use stdClass;
 
 class DatabaseManagement {
     private $db;
@@ -34,9 +33,10 @@ class DatabaseManagement {
     }
 
     const EXPORT_VERSION_2_0 = "2.0";
+    const EXPORT_VERSION_1_0 = null;
     const EXPORT_VERSION = self::EXPORT_VERSION_2_0;
 
-    const EXPORT_SUPPORTED_VERSIONS = ["2.0"];
+    const EXPORT_SUPPORTED_VERSIONS = ['2.0'];
 
     const EXPORT_ENCODING__PLAIN = 0;
     const EXPORT_ENCODING__GZIP  = 1;
@@ -46,10 +46,12 @@ class DatabaseManagement {
     const IMPORT__LINE_META = 2;
 
 
-    public function export($file = null, $talk = false, $ignored = true, $extraIgnored = [], $onlyExport = null) {
+    public function export($file = null, bool $asArchive = false, $talk = false, $ignored = true, $extraIgnored = [], $onlyExport = null) {
         $benchmark_start = time();
-        if($talk) $talk = function_exists("say");
+        // Let's ensure that we're in CLI mode by looking for the 'say' function
+        if($talk) $talk = function_exists("say"); 
         if($talk) print("Started database export");
+        // Get our DB_export_directory
         if(!$file) $file = app("DB_export_directory");
         $file = __APP_ROOT__ . $file;
         if(!file_exists($file)) mkdir($file, 0777, true);
@@ -57,7 +59,7 @@ class DatabaseManagement {
         $extraIgnored = array_merge($extraIgnored ?? [], $this::IGNORED);
 
         $collections = $this->db->listCollections();
-        $backup_path = $file . $this->get_backup_file_name();
+        $backup_path = $file . $this->get_backup_file_name($asArchive);
         $handle = fopen($backup_path, "w+");
         if($handle === false) throw new Error("Cannot open $backup_path for writing.");
         $meta = [
@@ -77,6 +79,21 @@ class DatabaseManagement {
         $meta['exportedAt'] = date_format(new DateTime(),"c");
         fwrite($handle, json_encode($meta));
         fclose($handle);
+        // if($asArchive){
+        //     if($talk) print("Compressing export... please wait...");
+        //     $archive_path = $this->get_archive_file_name($backup_path);
+        //     $archive = new ZipArchive();
+        //     $archive->open($archive_path);
+        //     $archive->setCompressionName('file', ZipArchive::CM_BZIP2, 9);
+        //     $archive->addFile($backup_path, 'file');
+        //     $result = $archive->count();
+        //     if($result === 1) {
+        //         unlink($backup_path);
+        //         $backup_path = $archive_path;
+        //         say(" success!", "s");
+        //     }
+        //     $archive->close();
+        // }
 
         $benchmark_end = time();
         if($talk) {
@@ -126,7 +143,11 @@ class DatabaseManagement {
 
     function get_backup_file_name() {
         $name = $this->db->getDatabaseName();
-        return $name . "-" . time() . ".json";
+        return $name . "-" . time() . ".v".self::EXPORT_VERSION.".json";
+    }
+
+    function get_archive_file_name(string $json_file_path) {
+        return substr($json_file_path, 0, -5) . ".tar.gz";
     }
 
     static function is_line_meta_entry(array $line, &$reason):bool {
@@ -263,48 +284,5 @@ class DatabaseManagement {
         }
 
         return iterator_to_array_recursive($__dataset);
-    }
-
-    public function import1($filename, $talk = false, $caution = true) {
-        if(!file_exists($filename)) return say("File `$filename` does not exist.", "e");
-        $contents = json_decode(file_get_contents($filename),true);
-        $count = count($contents);
-        if($talk) say("Loaded $count collections from file", "i");
-        $read = "n";
-        if(function_exists("say")) say("This operation will ".fmt("drop","e")." any collections contained within this backup before restoring them from this backup.");
-        if($caution) {
-            if(function_exists("say")) say("Any data in your database will be lost if not contained in this backup.", "e");
-            $read = readline("Are you sure you want to continue? y/N");
-            if(!cli_to_bool($read)) return fmt("Aborted.","e");
-        }
-        $db = $this->db;
-        $collections_restored = 0;
-        $documents_inserted = 0;
-        foreach($contents as $col) {
-            $collection_name = $col['collection'];
-            $docs = $col['data'];
-            if($talk) say("Dropping collection $collection_name for clean restoration", 'e');
-            $db->dropCollection($collection_name);
-            if($talk) printf("Processing collection ".fmt($collection_name, "i")." and its ".count($docs)." documents");
-            $collection = $db->{$collection_name};
-            $collections_restored++;
-            foreach($docs as $row) {
-                $json_row = json_encode($row);
-                
-                $bson = \MongoDB\BSON\fromJSON($json_row); // @phpstan-ignore-line
-                /** @phpstan-ignore-line */
-                $row = \MongoDB\BSON\toPHP($bson); 
-
-                if($row instanceof GenericMap) {
-                    // $row->__dataset['_id'] = $row->id;
-                }
-                $result = $collection->insertOne($row);
-
-                $documents_inserted += $result->getInsertedCount();
-                if($talk) printf(".");
-            }
-            if($talk) say(" done", "i");
-        }
-        return "Restored $collections_restored collection".plural($collections_restored)." and $documents_inserted document".plural($documents_inserted).".";
     }
 }

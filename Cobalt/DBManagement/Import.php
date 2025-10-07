@@ -1,6 +1,7 @@
 <?php
 namespace Cobalt\DBManagement;
 
+use Cobalt\DBManagement\Exceptions\NoMetadataFound;
 use Drivers\DatabaseManagement;
 use Exception;
 use MongoDB\BSON\Document;
@@ -15,31 +16,48 @@ class Import extends DatabaseManagement {
 
     public function import(string $filename, bool $talk = false, bool $caution = true) {
         $this->benchmark_start = microtime(true);
+        // Confirm we're in CLI mode
+        if($talk) $talk = function_exists('say');
         if(!file_exists($filename)) {
-            $failed = "Database export `$filename` does not exist";
-            if($talk) print(fmt("Database export `$filename` does not exist", "e"));
-            throw new Exception($failed);
+            $filename = app("DB_export_directory").$filename;
+            if(!file_exists($filename)) {
+                $failed = "Database export `$filename` does not exist";
+                if($talk) print(fmt("Database export `$filename` does not exist", "e"));
+                throw new Exception($failed);
+            }
         }
+        // Let's open our file for reading
         $handle = fopen($filename, "r");
         if(!$handle) {
+            // Error handling in case the file can't be opened for reading
             $failed = "Failed to open `$filename`";
             if($talk) print(fmt($failed, 'e'));
             throw new Exception($failed);
         }
+
         // We've validated that our log file exists and we've ensured that
-        // the handle is valid, now we need to start reading lines
-        
+        // the handle is valid, now we need to start reading lines        
         /** @var Database $db */
         $db = db_cursor(null, null, false, true);
+
+        // Init $results to track of our progress
         $results = [
             'insertedTotal' => 0,
         ];
 
-        // Let's start by fetching our export metadata:
-        $this->meta = $this->import_read_meta_from_file_2_0($handle, $talk, $caution);
+        try {
+            // Let's start by fetching our export metadata:
+            $this->meta = Import::import_read_meta_from_file($handle, $results, $talk, $caution);
+        } catch (NoMetadataFound $e) {
+            return $this->import_1_0($filename, $talk, $caution, $results);
+        }
+
+        // Now that we've loaded our metadata, let's figure our which version
+        // we're going to use to import our data.
         switch($this->meta['exportVersion']) {
             case self::EXPORT_VERSION_2_0:
                 $this->import_2_0($handle, $db, $results, $talk, $caution);
+                break;
         }
 
         fclose($handle);
@@ -53,6 +71,60 @@ class Import extends DatabaseManagement {
             " seconds"
         );
 
+    }
+
+    static function import_read_meta_from_file($handle, array &$results, bool $talk, bool $caution):array {
+        // Move pointer to EOF
+        fseek($handle, 0, SEEK_END);
+        
+        // Keep track of if we've found our 'meta' line
+        $meta_found = false;
+        // Iterate backwards through the file keeping track of our offset
+        $i = 0;
+        // No magic numbers allowed
+        $seek_success = 0;
+        while(true) {
+            $i -= 1;
+            $seek_result = fseek($handle, $i, SEEK_END);
+            if($seek_result !== $seek_success) throw new NoMetadataFound("Seek failed.");
+            $char = fgetc($handle);
+            if($i < -1 && $char === "\n") {
+                // If we've found a new line, we move forward one and break this loop
+                fseek($handle, $i + 1, SEEK_END);
+                $meta_found = true;
+                break;
+            }
+        }
+        if(!$meta_found) {
+            throw new NoMetadataFound("Could not locate export meta details");
+        }
+        $meta = fgets($handle);
+        $meta_decoded = json_decode($meta, true);
+        $reason = "";
+        if(!self::is_line_meta_entry($meta_decoded, $reason)) {
+            throw new NoMetadataFound($reason);
+        }
+        $meta_decoded['totalDocuments'] = 0;
+        $meta_decoded['number_digits'] = 0;
+        foreach($meta_decoded['collectionDetails'] as $collection => $details) {
+            $meta_decoded['totalDocuments'] += $details['exported'];
+            $len = strlen((string)$details['exported']);
+            if($len > $meta_decoded['number_digits']) $meta_decoded['number_digits'] = $len;
+        }
+
+        if($talk) {
+            say("Archive version ".fmt($meta_decoded['exportVersion'],'w'));
+            say("Export date ".fmt($meta_decoded['exportedAt'], 'w'));
+            say("Collections reported: " . fmt(count($meta_decoded['collectionDetails'],'w')));
+            say("Documents reported: ".fmt($meta_decoded['totalDocuments'],'w'));
+            say("Exported from ".fmt($meta_decoded['databaseName'],'w'));
+            say("Importing into ".fmt(config()['database'],'w'));
+        }
+        
+        // Reset the pointer to the start of file
+        fseek($handle, 0, SEEK_SET);
+
+        return $meta_decoded;
     }
 
     private function import_2_0($handle, Database $db, array &$results, bool $talk, bool $caution) {
@@ -77,59 +149,6 @@ class Import extends DatabaseManagement {
             if($result === self::IMPORT__LINE_META) break;
             if($result === self::IMPORT__LINE_FAILED) break;
         }
-    }
-
-    private function import_read_meta_from_file_2_0($handle, bool $talk, bool $caution):array {
-        // Move pointer to EOF
-        fseek($handle, 0, SEEK_END);
-        
-        // Keep track of if we've found our 'meta' line
-        $meta_found = false;
-        // Iterate backwards through the file keeping track of our offset
-        $i = 0;
-        // No magic numbers allowed
-        $seek_success = 0;
-        while(true) {
-            $i -= 1;
-            $seek_result = fseek($handle, $i, SEEK_END);
-            if($seek_result !== $seek_success) throw new Exception("Seek failed.");
-            $char = fgetc($handle);
-            if($i < -1 && $char === "\n") {
-                // If we've found a new line, we move forward one and break this loop
-                fseek($handle, $i + 1, SEEK_END);
-                $meta_found = true;
-                break;
-            }
-        }
-        if(!$meta_found) {
-            throw new Exception("Could not locate export meta details");
-        }
-        $meta = fgets($handle);
-        $meta_decoded = json_decode($meta, true);
-        $reason = "";
-        if(!self::is_line_meta_entry($meta_decoded, $reason)) {
-            throw new Exception($reason);
-        }
-        $meta_decoded['totalDocuments'] = 0;
-        $meta_decoded['number_digits'] = 0;
-        foreach($meta_decoded['collectionDetails'] as $collection => $details) {
-            $meta_decoded['totalDocuments'] += $details['exported'];
-            $len = strlen((string)$details['exported']);
-            if($len > $meta_decoded['number_digits']) $meta_decoded['number_digits'] = $len;
-        }
-
-        if($talk) {
-            say("Archive version ".fmt($meta_decoded['exportVersion'],'w'));
-            say("Export date ".fmt($meta_decoded['exportedAt'], 'w'));
-            say("Documents reported: ".fmt($meta_decoded['totalDocuments'],'w'));
-            say("Exported from ".fmt($meta_decoded['databaseName'],'w'));
-            say("Importing into ".fmt(config()['database'],'w'));
-        }
-        
-        // Reset the pointer to the start of file
-        fseek($handle, 0, SEEK_SET);
-
-        return $meta_decoded;
     }
 
     private function import_archive_sanity_check_2_0($handle, bool $talk, bool $caution):bool {
@@ -241,10 +260,12 @@ class Import extends DatabaseManagement {
         $inserted = $inserted_result->getInsertedCount();
         if($inserted !== 1) return self::IMPORT__LINE_FAILED;
 
-        $import_string = " > Importing %s of %s for collection %s";
+        $import_string = " > Importing %s / %s for collection %s";
         if($this->currentCollection != $content['col']) {
+            // $success = $this->importedForCollection == $this->meta['collectionDetails'][$content['col']]['exported'];
             $this->importedForCollection = 0;
             $this->currentCollection = $content['col'];
+            // print("... " . fmt(($success) ? "SUCCESS!":"FAIL!", ($success) ? "s" : "e"));
             print("\n");
         } else {
             print("\r");
@@ -252,8 +273,8 @@ class Import extends DatabaseManagement {
 
         $this->importedForCollection += 1;
         printf("$import_string",
-            fmt(str_pad($this->importedForCollection, $this->meta['number_digits'], "0", STR_PAD_LEFT),"i"),
-            fmt(str_pad($this->meta['collectionDetails'][$content['col']]['exported'],$this->meta['number_digits'], "0", STR_PAD_LEFT) ,'i'),
+            fmt(str_pad($this->importedForCollection, $this->meta['number_digits'], " ", STR_PAD_LEFT),"s"),
+            str_pad($this->meta['collectionDetails'][$content['col']]['exported'],$this->meta['number_digits'], " ", STR_PAD_LEFT),
             fmt($content['col'],'w')
         );
         return self::IMPORT__LINE_SUCCESS;
@@ -263,4 +284,46 @@ class Import extends DatabaseManagement {
         return Document::fromJSON($json);
     }
 
+
+    private function import_1_0(string $filename, bool $talk = false, bool $caution = true, array &$results) {
+        if(!file_exists($filename)) return say("File `$filename` does not exist.", "e");
+        $contents = json_decode(file_get_contents($filename),true);
+        $count = count($contents);
+        if($talk) {
+            say("Archive version ".fmt('1.0','w'));
+            $explode = explode("-",pathinfo($filename,PATHINFO_FILENAME));
+            say("Export date ".fmt(date('c',$explode[1]), 'w'));
+            say("Collections reported: ".fmt($count, 'w'));
+            $docs = array_reduce($contents, fn ($accumulator, $item) => count($item['data']) + $accumulator, 9);
+            say("Documents reported: ".fmt($docs,'w'));
+        }
+        if(function_exists("say")) say("This operation will ".fmt("drop","e")." any collections contained within this backup before restoring them from this backup.");
+        if($caution) {
+            if(function_exists("say")) say("Any data in your database will be lost if not contained in this backup.", "e");
+            $read = readline("Are you sure you want to continue? (y/N) > ");
+            if(!cli_to_bool($read)) return fmt("Aborted.","e");
+        }
+        /** @var Database $db */
+        $db = db_cursor(null, null, false, true);
+        $collections_restored = 0;
+        $documents_inserted = 0;
+        foreach($contents as $col) {
+            $collection_name = $col['collection'];
+            $docs = $col['data'];
+            if($talk) say("Dropping collection $collection_name for clean restoration", 'e');
+            $db->dropCollection($collection_name);
+            if($talk) printf("Collection ".fmt($collection_name, "w")."");
+            $collection = $db->{$collection_name};
+            $collections_restored++;
+            foreach($docs as $i => $row) {
+                $row = Document::fromPHP($row);
+                $result = $collection->insertOne($row);
+                $documents_inserted += $result->getInsertedCount();
+                if($talk) print("\r > Restoring ".fmt($i + 1, "s")." of " . count($docs) . " documents");
+                $results['insertedTotal'] += 1;
+            }
+            if($talk) print("\n");
+        }
+        return "Restored $collections_restored collection".plural($collections_restored)." and $documents_inserted document".plural($documents_inserted).".";
+    }
 }

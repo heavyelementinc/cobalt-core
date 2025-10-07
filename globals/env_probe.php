@@ -33,6 +33,7 @@ $dependencies = [
     "dom",
     "mongodb",
     "libxml",
+    // "zip",
     // "mcrypt", // Retired mcrypt dependency
     // "protobuf", // Retired protobuf dependency
     "yaml",
@@ -60,7 +61,7 @@ $dependencies = [
     "bcmath",
     "igbinary",
     "curl",
-    // "ERROR FOR TESTING PURPOSES"
+    // "ERROR FOR TESTING PURPOSES",
 ];
 
 $missing = "";

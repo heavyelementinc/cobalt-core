@@ -20,7 +20,7 @@ class Database {
 
     function export($filename = null) {
         $db = new DatabaseManagement();
-        $db->export($filename, true, true, [], $GLOBALS['export_collections'] ?? null);
+        $db->export($filename, false, true, true, [], $GLOBALS['export_collections'] ?? null);
     }
 
     function import($filename) {
