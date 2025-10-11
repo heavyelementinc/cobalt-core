@@ -16,7 +16,8 @@ $cmd = ucfirst($lower); // Uppercase the FIRST LETTER of the command
 $subcmd = array_shift($commands); // $subcmd = "init";   $command = ["--something"];
 
 if (empty($cmd)) {
-    say(" Cobalt Engine command line tool. Find a list of available commands here:");
+    say("Cobalt Engine command line tool");
+    say("  Find a list of available commands here:");
     $lower = "help";
     $cmd = "Help";
     $subcmd = "all";

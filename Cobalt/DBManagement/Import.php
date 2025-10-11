@@ -292,7 +292,7 @@ class Import extends DatabaseManagement {
         if($talk) {
             say("Archive version ".fmt('1.0','w'));
             $explode = explode("-",pathinfo($filename,PATHINFO_FILENAME));
-            say("Export date ".fmt(date('c',$explode[1]), 'w'));
+            say("Export date ".fmt(date('c',$explode[count($explode) - 1]), 'w'));
             say("Collections reported: ".fmt($count, 'w'));
             $docs = array_reduce($contents, fn ($accumulator, $item) => count($item['data']) + $accumulator, 9);
             say("Documents reported: ".fmt($docs,'w'));
@@ -316,8 +316,8 @@ class Import extends DatabaseManagement {
             $collection = $db->{$collection_name};
             $collections_restored++;
             foreach($docs as $i => $row) {
-                $row = Document::fromPHP($row);
-                $result = $collection->insertOne($row);
+                $document = Document::fromJSON(json_encode($row));
+                $result = $collection->insertOne($document);
                 $documents_inserted += $result->getInsertedCount();
                 if($talk) print("\r > Restoring ".fmt($i + 1, "s")." of " . count($docs) . " documents");
                 $results['insertedTotal'] += 1;
@@ -326,4 +326,5 @@ class Import extends DatabaseManagement {
         }
         return "Restored $collections_restored collection".plural($collections_restored)." and $documents_inserted document".plural($documents_inserted).".";
     }
+
 }

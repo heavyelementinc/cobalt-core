@@ -15,6 +15,10 @@ class App {
         'mode' => [
             'description' => '[dev|prod] Set the application\'s mode to dev/prod',
             'context_required' => true
+        ],
+        'info' => [
+            'description' => 'Display version information',
+            'context_required' => true,
         ]
     ];
 
@@ -57,5 +61,13 @@ class App {
         }
         touch($this->production_path);
         return "Created $this->production_path, application is now in DEVELOPMENT MODE";
+    }
+
+    public function version() {
+        versions();
+    }
+
+    public function info() {
+        versions();
     }
 }

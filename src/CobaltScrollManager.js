@@ -210,6 +210,7 @@ class CobaltScrollManager {
 class LazyElement {
     MODE_STAGGER = "stagger";
     MODE_REVERT = "revert";
+    MODE_PARENT = "parent";
 
     /** @param {HTMLElement} element */
     constructor(element, index, delayOffset) {
@@ -228,7 +229,12 @@ class LazyElement {
     
     init() {
         this.ELEMENT.style.setProperty("--lazy-delay", `${this.delay}ms`);
-        this.LAZY_CHILDREN = this.ELEMENT.querySelectorAll(this.QUERY_LAZY_CHILDREN);
+        if(this.ELEMENT.getAttribute("lazy-reveal") === this.MODE_PARENT) {
+            this.LAZY_CHILDREN = this.ELEMENT.children;
+            if(this.delay === 0) this.delay = 100;
+        } else {
+            this.LAZY_CHILDREN = this.ELEMENT.querySelectorAll(this.QUERY_LAZY_CHILDREN);
+        }
         let i = 0;
         for(const el of this.LAZY_CHILDREN) {
             el.lazy = new LazyElement(el, i, this.delay);

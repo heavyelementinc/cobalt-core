@@ -76,7 +76,13 @@ function __app_context($app = ""){
     if(!$context_found) throw new Exception("Could not establish context for $app");
 
     $GLOBALS['cli_app_root'] = $context_found;
-    require __CLI_ROOT__ . "/../env.php";
+    $internal_env = __CLI_ROOT__ . "/../env.php";
+    if(file_exists($internal_env)) {
+        require $internal_env;
+        return;
+    }
+    $shared_env = __CLI_ROOT__ . "/../env.php";
+    require $shared_env;
 }
 
 $GLOBALS['cli_verbosity'] = 0;
