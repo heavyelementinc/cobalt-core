@@ -157,7 +157,7 @@ export default class BlockEditor extends ICustomInput {
 
     async initEditor() {
         await window.Cobalt.promises.ready;
-        this._restoreSavedData();
+        await this._restoreSavedData();
         this.__editor__ = new EditorJS({
             holder: this,
             data: this.data,
