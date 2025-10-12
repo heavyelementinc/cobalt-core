@@ -282,7 +282,7 @@ export default class FormRequest extends ProgressWizard {
         const submitButtonTypes = ['submit', 'back'];
         // Let's search for a button
         const target = event.target.closest("button,input");
-        console.log({event, target});
+        // console.log({event, target});
         if(!target) return;
         // We're trying to filter out clicks on non-submit buttons here so we'll
         // just return from this method if the click didn't target a submit button
@@ -339,6 +339,11 @@ export default class FormRequest extends ProgressWizard {
         const formData = new FormRequestData(this, evt_target ?? null);
         for(const element of targets) {
             const name = element.name ?? element.getAttribute("name");
+            // TODO: Retire IMAGE-RESULT tags and remove this hack.
+            if(element.tagName === "IMAGE-RESULT" || element.closest("image-result") !== null) {
+                formData.delete(name);
+                continue;
+            }
             const value = this.getFormElementValue(element, event);
             formData.set(name, value);
         }
@@ -476,11 +481,12 @@ export default class FormRequest extends ProgressWizard {
             if(opt && opt.hasAttribute("is-null") && opt.getAttribute('is-null') === "true") tmp_value = null;
             return tmp_value;
         }
+        // TODO: Retire IMAGE-RESULT tags and remove this bullshit hack
         if(field.tagName === "IMAGE-RESULT") {
-            if(event.detail.target.type === "file" || event.detail.target.type === "files") {
+            if(event.detail.target && event.detail.target.type === "file" || event.detail.target.type === "files") {
                 return event.originalTarget.files;
             }
-            return field.value;
+            return null;
         }
         return field.value;
     }
@@ -616,6 +622,17 @@ class FormRequestData {
 
     set uploadSize(value) {
         this.__uploadSize__ = value;
+    }
+
+    /**
+     * Delete a key from the FormRequestData
+     * @param {String} name
+     * @returns {undefined}
+     */
+    delete(name) {
+        delete this.__promises__[name];
+        delete this.__formData__[name];
+        delete this.__submitter__[name];
     }
 
     /**

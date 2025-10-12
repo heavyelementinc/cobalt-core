@@ -236,7 +236,8 @@
         
     </chip-nav>
     
-    {{!submit_button}}
+    <?= $submit_button ?>
+    
 </form-request>
 <style>
     #url_slug {

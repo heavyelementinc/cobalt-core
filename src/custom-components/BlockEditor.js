@@ -129,6 +129,7 @@ export default class BlockEditor extends ICustomInput {
     /** @property {EditorJS|null} __editor__ */
     __editor__ = null;
     __synchronousValue__ = {};
+    data = {};
     constructor() {
         super();
         this.props = {
@@ -143,21 +144,23 @@ export default class BlockEditor extends ICustomInput {
         this.initEditor();
     }
 
-    async initEditor() {
-        await window.Cobalt.promises.ready;
-
+    async _restoreSavedData() {
         this.saveDataElement = this.querySelector("script[type='application/json']");
         this.saveData = this.saveDataElement?.innerText;
         if(!this.saveData) this.saveData = "{}";
-        let data
         try {
-            data = await JSON.parse(this.saveData);
+            this.data = await JSON.parse(this.saveData);
         } catch (Error) {
             console.warn("Failed to parse JSON. Data loss is HIGHLY PROBABLE!")
         }
+    }
+
+    async initEditor() {
+        await window.Cobalt.promises.ready;
+        this._restoreSavedData();
         this.__editor__ = new EditorJS({
             holder: this,
-            data: data,
+            data: this.data,
             tools: {
                 header: Header,
                 quote: Quote,
@@ -206,8 +209,8 @@ export default class BlockEditor extends ICustomInput {
                 blockbutton: BlockButton,
             },
             onChange: (api, event) => {
-                event.preventDefault();
-                event.stopPropagation();
+                // event.preventDefault();
+                // event.stopPropagation();
                 this.hasChangeOccurred = true;
                 // this.setSyncValue().then(() => {
                 //     this.dispatchEvent(new Event("change", {bubbles: true}));

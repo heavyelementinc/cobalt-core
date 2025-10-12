@@ -92,7 +92,7 @@ trait UpdateableModel {
             'new_doc_readonly' => '',
             'update_doc_readonly' => 'readonly="readonly"',
             'autosave' => 'autosave="autosave"',
-            'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save', 'Save'),
+            'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save-outline', 'Save'),
             'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@__destroy")."$id\" dangerous=\"true\" icon=\"delete-outline\">".$this->getDeleteOptionLabel($doc)."</option>",
             'doc' => $doc,
         ]);

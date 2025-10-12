@@ -81,7 +81,7 @@ trait Createable {
             'doc'      => $instance,
             'autosave' => 'autosave="none"',
             'style'    => 'display:none;',
-            'submit_button' => '<button type="submit">Submit</button>',
+            'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save-outline', 'Save'),
             'delete_option' => '',
             'endpoint' => route("$this->name@create"),
             'method'   => "POST",

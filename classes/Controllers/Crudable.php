@@ -94,7 +94,7 @@ abstract class Crudable {
                 'doc'      => $instance,
                 'autosave' => 'autosave="none"',
                 'style'    => 'display:none;',
-                'submit_button' => '<button type="submit">Submit</button>',
+                'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save', 'Create'),
                 'delete_option' => '',
                 'method'   => "POST",
                 'action'   => $action,
@@ -242,7 +242,7 @@ abstract class Crudable {
                 'action'   => $route . "$id",
                 'endpoint' => $route . "$id",
                 'autosave' => 'autosave="autosave"',
-                'submit_button' => '',
+                'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save-outline', 'Save'),
                 'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@__destroy")."$id\" dangerous=\"true\">".$this->getDeleteOptionLabel($doc)."</option>",
                 'doc' => $doc,
             ]);

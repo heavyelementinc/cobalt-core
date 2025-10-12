@@ -29,7 +29,7 @@ trait ModelCreate {
             'new_doc_readonly'    => 'readonly="readonly"',
             'update_doc_readonly' => '',
             'autosave'            => '',
-            'submit_button'       => '<button type="submit">Save</button>',
+            'submit_button'       => sprintf(FLOATING_SAVE_BUTTON, 'content-save', 'Create'),
             'delete_option'       => '',
             'doc'                 => $doc,
         ]);

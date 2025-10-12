@@ -179,7 +179,9 @@ class UploadResult2 extends MapResult {
     }
 
     public function storeFile(?array $result, array $mergedata = []) {
-        if(!$result) throw new ValidationIssue("The provided file array was null");
+        if(!$result) {
+            throw new ValidationIssue("The provided file array was null");
+        }
 
         $filename = $this->getFilename($result);
         $map = ['mapId' => $this->__reference->_id];

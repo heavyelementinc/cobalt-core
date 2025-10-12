@@ -2,6 +2,7 @@
 namespace Cobalt\Pages\Controllers;
 
 use Cobalt\Maps\GenericMap;
+use Cobalt\Model\Model;
 use Controllers\Crudable;
 use Cobalt\Pages\Classes\PageManager;
 use Cobalt\Pages\Models\PageMap;
@@ -415,7 +416,7 @@ abstract class AbstractPageController extends Crudable {
         
         $privileged_field_permission = ($this::className() === "Pages") ? 'Posts_enable_privileged_fields' : 'Pages_enable_privileged_fields';
     
-        return view("/Cobalt/Pages/templates/admin/edit.html", [
+        return view("/Cobalt/Pages/templates/admin/edit.php", [
             'admin_fields' => (has_permission($privileged_field_permission)) ? view("/Cobalt/Pages/templates/admin/admin-fields.html") : "",
             'token' => $token,
             'deleted' => (isset($document->__dataset['deleted'])) ? "<small>This post was deleted " . $document->deleted->getValue()->toDateTime()->format("c") . ".</small>" : "",

@@ -48,7 +48,7 @@ trait Updateable {
             'title' => 'Edit',
             'endpoint' => route("$this->name@update") . "$id",
             'autosave' => 'autosave="autosave"',
-            'submit_button' => '',
+            'submit_button' => sprintf(FLOATING_SAVE_BUTTON, 'content-save-outline', 'Save'),
             'delete_option' => "<option method=\"DELETE\" action=\"".route("$this->name@destroy")."$id\" dangerous=\"true\">Delete</option>",
             'method' => 'POST',
             'doc' => $doc,
