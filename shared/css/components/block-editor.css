@@ -104,9 +104,11 @@ a.blockeditor--link-preview {
     padding: 1em;
     flex-wrap: wrap;
     gap: var(--gap);
-    --bg: var(--surface-color-1, white);
-    --color: var(--surface-color-1-fg, black);
-    --color: rgb(from var(--surface-color-1-fg) r g b / .5);
+    --bg: var(--neutral-color-1, white);
+    --color: var(--neutral-color-1-fg, black);
+    --title-color: rgba(from var(--color) r g b / 80%);
+    --description-color: rgba(from var(--color) r g b / 60%);
+    --site-color: rgba(from var(--color) r g b / 30%);
     --_anchor-element-color: transparent;
     /* border: 1px solid var(--color); */
     background-color: var(--bg);
@@ -114,6 +116,12 @@ a.blockeditor--link-preview {
 }
     a.blockeditor--link-preview:not(:has(.blockeditor--link-thumbnail)) {
         --img-width: 0ch;
+    }
+
+    a.blockeditor--link-preview:is(:hover, :focus, :focus-visible, :focus-within) {
+        --title-color: rgba(from var(--color) r g b / 100%);
+        --description-color: rgba(from var(--color) r g b / 100%);
+        --site-color: rgba(from var(--color) r g b / 100%);
     }
 
     a.blockeditor--link-preview:hover .blockeditor--link-title {
@@ -141,7 +149,7 @@ a.blockeditor--link-preview {
     .blockeditor--link-preview .blockeditor--link-title {
         font-size: 1.2rem;
         display: -webkit-box;
-        color: rgb(from var(--color) r g b / 80%);
+        color: var(--title-color);
         /* line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical; */
@@ -165,7 +173,7 @@ a.blockeditor--link-preview {
         -webkit-box-orient: vertical;
         overflow: hidden;
         height: var(--total-lines);
-        color: rgba(from var(--color) r g b / 50%);
+        color: var(--description-color);
     }
 
     .blockeditor--site-name {
@@ -174,8 +182,8 @@ a.blockeditor--link-preview {
         text-transform: uppercase;
         font-size: 0.7em;
         color: rgb(from var(--color) r g b / 25%);
+        color: var(--site-color);
         margin-top: auto;
-        opacity: .25;
     }
 
 .blockeditor--embed {
