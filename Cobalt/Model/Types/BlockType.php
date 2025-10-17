@@ -318,7 +318,7 @@ class BlockType extends MixedType {
     }
 
     private function __from_linktool($block) {
-        return view("/Cobalt/Pages/templates/block-elements/linktool.html", ['block' => $block]);
+        return view("/Cobalt/Pages/templates/block-elements/linktool.php", ['block' => $block]);
     }
 
     private function __from_quote($block) {
