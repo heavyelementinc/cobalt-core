@@ -225,7 +225,7 @@ export class GalleryItem extends HTMLElement {
     initActionMenu() {
         if(!this.container) return;
         this.delete = document.createElement("button");
-        this.delete.innerHTML = "<i name='close'></i>";
+        this.delete.innerHTML = "<i name='backspace'></i>";
         this.insertBefore(this.delete, this.firstElementChild);
         this.delete.addEventListener("click", () => {
             const target = this.parentNode;
