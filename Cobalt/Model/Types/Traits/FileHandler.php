@@ -19,10 +19,11 @@ trait FileHandler {
     }
 
     public function interpretRawValue(&$value): ?ObjectId {
-        $id = $value['media']['ref'] ?? $value['media']['id'] ?? $value;
+        // Handle all kinds of legacy bullshit
+        $id = $value['media']['ref'] ?? $value['media']['id'] ?? $value['_id'] ?? $value;
         if($id instanceof ObjectId) {
             return $id;
-        } else {
+        } else if(is_string($id)) {
             try {
                 return new ObjectId($id);
             } catch (Exception $e) {

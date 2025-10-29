@@ -7,6 +7,8 @@ use Auth\UserCRUD;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\ForeignId;
 use MongoDB\BSON\ObjectId;
+use Cobalt\Model\Attributes\Prototype;
+
 
 class UserIdType extends MixedType {
     private $isCached = false;
@@ -37,5 +39,10 @@ class UserIdType extends MixedType {
         $this->cached = $crud->getUserById($id);
         $this->isCached = true;
         return $this->cached;
+    }
+
+    #[Prototype]
+    protected function get_filter_field($param_value, $param_name, $cast_type) {
+        return "$param_value->fname ".$param_value->lname->value[0] .".";
     }
 }

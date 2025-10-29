@@ -13,10 +13,18 @@ use MongoDB\InsertOneResult;
 use MongoDB\UpdateResult;
 
 trait Accessible {
+    private array $TYPE_MAP = [
+        // 'typeMap' => [
+        //     'root' => 'array',
+        //     'document' => 'array',
+        //     'array' => 'array'
+        // ]
+    ];
     public ?Client $client = null;
     public ?Database $db;
     public ?Collection $collection;
     public string $collectionSpecifiedAtConstruction;
+    
 
     abstract function getCollectionName($string = null):string;
 
@@ -53,18 +61,21 @@ trait Accessible {
     final function findOne($filter, array $options = []):array|object|null {
         $this->__initAccessible();
         benchmark_reads();
+        $options += $this->TYPE_MAP;
         return $this->collection->findOne($filter, $options);
     }
 
     final function findOneAndUpdate($filter, $update, array $options = []):array|object|null {
         $this->__initAccessible();
         benchmark_reads();
+        $options += $this->TYPE_MAP;
         return $this->collection->findOneAndUpdate($filter, $update, $options);
     }
 
     final function find($filter = [], array $options = []):Cursor {
         $this->__initAccessible();
         benchmark_reads();
+        $options += $this->TYPE_MAP;
         return $this->collection->find($filter, $options);
     }
 
@@ -133,6 +144,7 @@ trait Accessible {
 
     final function aggregate($pipeline, $options = []) {
         $this->__initAccessible();
+        $options += $this->TYPE_MAP;
         $cursor = $this->collection->aggregate($pipeline, $options);
         benchmark_reads();
         return $cursor;

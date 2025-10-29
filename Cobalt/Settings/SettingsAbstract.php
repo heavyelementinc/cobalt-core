@@ -335,7 +335,7 @@ abstract class SettingsAbstract extends \Drivers\Database {
             ]);
             return $this->fetchModifiedSettings();
         }
-        return iterator_to_array($array[0]);
+        return $array[0];
     }
 
     public function fetchPublicSettings() {
