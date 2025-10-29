@@ -115,7 +115,7 @@ class Import extends DatabaseManagement {
         if($talk) {
             say("Archive version ".fmt($meta_decoded['exportVersion'],'w'));
             say("Export date ".fmt($meta_decoded['exportedAt'], 'w'));
-            say("Collections reported: " . fmt(count($meta_decoded['collectionDetails'],'w')));
+            say("Collections reported: " . fmt(count($meta_decoded['collectionDetails']),'w'));
             say("Documents reported: ".fmt($meta_decoded['totalDocuments'],'w'));
             say("Exported from ".fmt($meta_decoded['databaseName'],'w'));
             say("Importing into ".fmt(config()['database'],'w'));

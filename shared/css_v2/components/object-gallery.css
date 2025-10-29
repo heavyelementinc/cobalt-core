@@ -105,15 +105,15 @@ gallery-item {
         --stroke-size: 2px;
         background: var(--input-element-background);
         border: var(--input-element-border-value);
-        font-size: .6em;
+        font-size: 0.7em;
         margin: var(--margin-xs);
         color: black;
         text-stroke: var(--stroke-size) solid white;
         -webkit-text-stroke: var(--stroke-size) solid white;
-        text-shadow:calc(var(--stroke-size) *  1) calc(var(--stroke-size) *  1) white,
-                    calc(var(--stroke-size) *  1) calc(var(--stroke-size) * -1) white,
-                    calc(var(--stroke-size) * -1) calc(var(--stroke-size) *  1) white,
-                    calc(var(--stroke-size) * -1) calc(var(--stroke-size) * -1) white;
+        text-shadow: calc(var(--stroke-size) *  1) calc(var(--stroke-size) *  1) white,
+                     calc(var(--stroke-size) *  1) calc(var(--stroke-size) * -1) white,
+                     calc(var(--stroke-size) * -1) calc(var(--stroke-size) *  1) white,
+                     calc(var(--stroke-size) * -1) calc(var(--stroke-size) * -1) white;
         &:hover {
             border-color: var(--primary-color-0);
         }
