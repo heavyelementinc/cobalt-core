@@ -545,7 +545,7 @@ function get_image_url(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc
     if($filename !== $missing_image) {
         $filename = ($filename[0] == "/") ? "/res/fs$filename" : "/res/fs/$filename";
     }
-    return $filename;
+    return server_name() . $filename;
 }
 
 function get_image_details(ObjectId $id):?BSONDocument {

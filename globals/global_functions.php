@@ -27,6 +27,7 @@ use Cobalt\SchemaPrototypes\SchemaResult;
 use Exceptions\HTTP\Error;
 use Exceptions\HTTP\HTTPException;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Driver\Cursor;
 
 /** A shorthand way of getting a specific setting by providing the name of the 
@@ -732,6 +733,10 @@ function compare_and_juggle($canonical, $value) {
         case "int":
             $canonical = "integer";
             break;
+        case "id":
+        case "ObjectID":
+        case "\\MongoDB\\BSON\\ObjectID":
+            $canonical = "objectid";
     }
     if($canonical !== gettype($value)) return juggler($canonical, $value);
     return $value;
@@ -745,7 +750,7 @@ function compare_and_juggle($canonical, $value) {
  * @throws TypeError if a resource is set as $value
  */
 function juggler(string $canonincal, mixed $value) {
-    switch($canonincal) {
+    switch(strtolower($canonincal)) {
         case "boolean":
         case "bool":
             return filter_var($value, FILTER_VALIDATE_BOOL);
@@ -785,6 +790,8 @@ function juggler(string $canonincal, mixed $value) {
         case "resource":
             throw new TypeError("Cannot convert resources");
             break;
+        case "objectid":
+            return new ObjectId($value);
         case "NULL":
             return null;
             break;

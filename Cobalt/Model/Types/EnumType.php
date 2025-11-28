@@ -4,8 +4,9 @@ namespace Cobalt\Model\Types;
 
 use Cobalt\Model\Types\Traits\SharedFilterEnums;
 use Cobalt\Model\Attributes\Prototype;
-
+use Exception;
 use Stringable;
+use TypeError;
 
 class EnumType extends MixedType implements Stringable {
     protected string $type = "string";
@@ -40,14 +41,18 @@ class EnumType extends MixedType implements Stringable {
     #[Prototype]
     protected function get_filter_field($param_value, $param_name, $cast_type) {
         // $v = $this->typecast($current_value, $operation);
+        if($param_name && $param_value) {
+            if(!is_array($param_value)) throw new TypeError("\$param_value must be an array for EnumTypes");
+        }
         $value = "";
         if($param_value) {
+            // We're finding the current value from the index
             $value = $param_value[array_search($this->name,$param_value)];
         }
         return view("/Cobalt/Model/templates/filterable/filterable-item.php", [
-            'schema' => $this,
-            'value' => ($param_name == $this->{MODEL_RESERVERED_FIELD__FIELDNAME}) ? $param_value : "",
-            'name' => $this->name,
+            'schema'  => $this,
+            'value'   => ($param_name == $this->{MODEL_RESERVERED_FIELD__FIELDNAME}) ? $param_value : "",
+            'name'    => $this->name,
             'options' => $this->options($value),
             'QUERY_PARAM_FILTER_NAME' => QUERY_PARAM_FILTER_NAME,
             'QUERY_PARAM_FILTER_VALUE' => QUERY_PARAM_FILTER_VALUE

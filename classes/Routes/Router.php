@@ -98,7 +98,7 @@ class Router {
             return;
         }
         foreach($this->router_table_list as $context => $value) {
-            foreach($value as $table){
+            foreach($value as $table) {
                 $ROUTE_TABLE_ADDRESS = $context;
                 if(file_exists($table)) require_once $table;
             }
