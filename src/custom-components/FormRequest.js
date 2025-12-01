@@ -338,6 +338,7 @@ export default class FormRequest extends ProgressWizard {
         const evt_target = event?.target.closest("button,input");
         const formData = new FormRequestData(this, evt_target ?? null);
         for(const element of targets) {
+            if(element.disabled === true) continue;
             const name = element.name ?? element.getAttribute("name");
             // TODO: Retire IMAGE-RESULT tags and remove this hack.
             if(element.tagName === "IMAGE-RESULT" || element.closest("image-result") !== null) {
@@ -643,6 +644,7 @@ class FormRequestData {
      * @returns 
      */
     append(item, value) {
+        if(item.disabled === true) return;
         // Let's check if we have a FileList
         if(value instanceof FileList) this.__hasFileList__ = true;
         if(item in this.__formData__ === false) {
