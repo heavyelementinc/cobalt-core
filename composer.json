@@ -21,7 +21,8 @@
         "indieweb/mention-client": "^1.2",
         "masterminds/html5": "^2.9",
         "rct567/dom-query": "^1.1",
-        "league/html-to-markdown": "^5.1"
+        "league/html-to-markdown": "^5.1",
+        "team-reflex/discord-php": "^10.40"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"

@@ -81,7 +81,7 @@ trait Prototypable {
     // }
 
     #[Prototype]
-    protected function getLabel($includeHtml = true): string {
+    protected function getLabel($includeHtml = true, $small_text = ""): string {
         $is_required = ($this->directiveOrNull("required")) ? " <span class=\"form-prototype--required-field\">" . __APP_SETTINGS__['Prototypeable_required_field_label'] . "</span>" : "";
         $required = $is_required ? " required=\"required\"" : ""; 
         $labelStart = "<label for=\"".MODEL_MIXED_TYPE_ID_PREFIX."$this->name\"$required>";
@@ -92,9 +92,11 @@ trait Prototypable {
         }
         $hasLabel = $this->hasDirective("label");
         if($hasLabel) return $labelStart.$this->getDirective("label") . $labelEnd;
+        if($small_text) $small_text .= "<br>$small_text";
         if($this->hasDirective('description')) {
-            $labelEnd .= "<small class=\"form-prototype--field-description\">".$this->getDirective("description")."</small>";
+            $small_text = $this->getDirective("description").$small_text;//"</small>";
         }
+        if($small_text) $labelEnd .= "<small class=\"form-prototype--field-description\">$small_text</small>";
         // $split = str_replace([".","_"], " ", $this->{MODEL_RESERVERED_FIELD__FIELDNAME});
         return $labelStart . prettify_fieldname($this->{MODEL_RESERVERED_FIELD__FIELDNAME}) . $labelEnd;
     }
