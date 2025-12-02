@@ -110,7 +110,7 @@ trait Filterable {
                 // if($filterDirective instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
                 // $filterDirective->getValue($value);
             }
-            $validated = $result->filter($value);
+            $validated = $result->filter($result->pre_filter($value));
             if($result->hasDirective('set')) {
                 $result->getDirective('set', $validated);
                 // if($setDirective instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');

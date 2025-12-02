@@ -19,14 +19,15 @@ use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
 
-const DIRECTIVE_KEY_DEFAULT = "default";
-const DIRECTIVE_KEY_IMMUTABLE = "immutable";
-const DIRECTIVE_KEY_VALID = "valid";
-const DIRECTIVE_KEY_FILTER = "filter";
-const DIRECTIVE_KEY_GET = "get";
-const DIRECTIVE_KEY_SET = "set";
-
 class MixedType implements Stringable, ArrayAccess, IMixedType {
+    const DEFAULT = DIRECTIVE_KEY_DEFAULT;
+    const IMMUTABLE = DIRECTIVE_KEY_IMMUTABLE;
+    const VALID = DIRECTIVE_KEY_VALID;
+    const FILTER = DIRECTIVE_KEY_FILTER;
+    const TYPECAST = DIRECTIVE_KEY_TYPECAST;
+    const GET = DIRECTIVE_KEY_GET;
+    const SET = DIRECTIVE_KEY_SET;
+
     use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField, SharedFilterEnums;
     protected bool $isSet = false;
     protected $value = null;
@@ -67,14 +68,14 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
      */
     public function getValue():mixed {
         $val = $this->value;
-        if(!$this->isSet) $val = $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
-        if($val === null) $val = $this->directiveOrNull(DIRECTIVE_KEY_DEFAULT);
-        if($this->hasDirective(DIRECTIVE_KEY_GET)) return $this->getDirective(DIRECTIVE_KEY_GET, $val);
+        if(!$this->isSet) $val = $this->directiveOrNull(self::DEFAULT);
+        if($val === null) $val = $this->directiveOrNull(self::DEFAULT);
+        if($this->hasDirective(DIRECTIVE_KEY_GET)) return $this->getDirective(self::GET, $val);
         return $val;
     }
 
     public function setValue(mixed $value):void {
-        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
+        if($this->isSet && $this->directiveOrNull(self::IMMUTABLE)) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
         $this->value = $value;
         $this->isSet = true;
     }
@@ -112,15 +113,23 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
         if($this->type === "mixed") return $value;
         return compare_and_juggle($this->type, $value);
     }
+
+    public function pre_filter($value):mixed {
+        if($this->hasDirective(self::TYPECAST)) {
+            return compare_and_juggle($this->getDirective(self::TYPECAST),$value);
+        }
+        return $this->typecast($value);
+    }
+
     /**
      * Filters input from the client before the input is stored in the database
      * @param mixed $value the user input
      * @return mixed Returns the value to the be stored, may be transformed 
      */
     public function filter($value) {
-        if($this->isSet && $this->directiveOrNull(DIRECTIVE_KEY_IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'");
-        if($this->hasDirective(DIRECTIVE_KEY_VALID)) {
-            $this->getDirective(DIRECTIVE_KEY_VALID);
+        if($this->isSet && $this->directiveOrNull(self::IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'");
+        if($this->hasDirective(self::VALID)) {
+            $this->getDirective(self::VALID);
         }
         // if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
         return $value;

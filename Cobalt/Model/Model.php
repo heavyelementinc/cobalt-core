@@ -21,7 +21,14 @@ use stdClass;
 
 abstract class Model extends GenericModel implements Persistable {
     use Accessible, Schemable;
-
+    const DEFAULT = DIRECTIVE_KEY_DEFAULT;
+    const IMMUTABLE = DIRECTIVE_KEY_IMMUTABLE;
+    const VALID = DIRECTIVE_KEY_VALID;
+    const FILTER = DIRECTIVE_KEY_FILTER;
+    const TYPECAST = DIRECTIVE_KEY_TYPECAST;
+    const GET = DIRECTIVE_KEY_GET;
+    const SET = DIRECTIVE_KEY_SET;
+    
     function __construct() {
         parent::__construct($this->defineSchema(), null);
     }

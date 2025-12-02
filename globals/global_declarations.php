@@ -179,3 +179,12 @@ const AUTH_STAGE_1_USER_AUTHENTICATION = 1;
 const AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY = 2;
 
 const DATETIME_LOCAL_FORMAT = "Y-m-d\TH:i";
+
+
+const DIRECTIVE_KEY_DEFAULT = "default";
+const DIRECTIVE_KEY_IMMUTABLE = "immutable";
+const DIRECTIVE_KEY_VALID = "valid";
+const DIRECTIVE_KEY_FILTER = "filter";
+const DIRECTIVE_KEY_TYPECAST = "typecast";
+const DIRECTIVE_KEY_GET = "get";
+const DIRECTIVE_KEY_SET = "set";

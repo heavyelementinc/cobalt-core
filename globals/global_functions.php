@@ -726,7 +726,7 @@ function get_crudable_flag(string $name): ?int {
 
 function compare_and_juggle($canonical, $value) {
     // Handle common shorthands
-    switch($canonical) {
+    switch(strtolower($canonical)) {
         case "bool":
             $canonical = "boolean";
             break;
@@ -734,8 +734,8 @@ function compare_and_juggle($canonical, $value) {
             $canonical = "integer";
             break;
         case "id":
-        case "ObjectID":
-        case "\\MongoDB\\BSON\\ObjectID":
+        case "objectid":
+        case "\\mongodb\\bson\\objectid":
             $canonical = "objectid";
     }
     if($canonical !== gettype($value)) return juggler($canonical, $value);
