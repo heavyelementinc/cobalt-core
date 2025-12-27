@@ -143,18 +143,21 @@ class Router {
     function discover_route($route = null, $query = null, $method = null, $context = null) {
         $route   = $route ?? $_SERVER['REQUEST_URI'];
         $query   = $query ?? $_SERVER['QUERY_STRING'];
-        $method  = $method ?? $this->method;
+        $method  = strtolower($method ?? $this->method);
         $context = $context ?? $this->route_context;
         $this->isOptions = false;
-        switch(strtolower($method)) {
+        switch($method) {
+            case "cli":
+                $method = "CLI";
+                break;
             case "options":
                 $this->isOptions = true;
-                $method = getHeader("Access-Control-Request-Method", null, true, false);
+                $method = strtolower(getHeader("Access-Control-Request-Method", null, true, false));
                 $this->method = $method;
                 break;
             case "head":
                 $this->headRequest = true;
-                $method = "get";
+                $method = strtolower(getHeader("Access-Control-Request-Method", null, true, false));
                 $this->method = $method;
                 break;
         }
@@ -178,7 +181,7 @@ class Router {
             if (preg_match($preg_pattern, $this->uri, $directives['matches']) === 1) {
                 if ($directives['matches'] !== null) $this->set_uri_vars($directives, $directives['matches'], $preg_pattern, $context);
                 $this->current_route = $preg_pattern;
-                if ($route[strlen($route) - 1] === "/") {
+                if ($this->uri[strlen($this->uri) - 1] === "/") {
                     $GLOBALS['PATH'] = "../";
                 }
                 return [$preg_pattern, $directives, $this->isOptions];
@@ -210,7 +213,7 @@ class Router {
         if($context === null) $context = $this->route_context;
 
         if($method === "head") {
-            $method = "get";
+            $method = strtolower(getHeader("Access-Control-Request-Method", null, true, false));
         }
 
         /** Store our route data for easy access */
