@@ -142,8 +142,15 @@ trait MixedTypeToField {
         // if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
         $prerequisites = "";
         if($this->hasDirective("prerequisites")) $prerequisites = $this->getDirective("prerequisites",$this);
+        $nullable = "";
+        switch($this->directiveOrNull("nullable")) {
+            case null:
+            case true:
+                $nullable = "<button onclick=\"this.previousSibling.value = '';this.previousSibling.dispatchEvent(new Event('change'));\"><i name='backspace'></i></button>";
+                break;
+        }
 
-        return "<input type=\"datetime-local\" class=\"$classes\" $attrs value=\"$formatted\">$prerequisites";
+        return "<input type=\"datetime-local\" class=\"$classes\" $attrs value=\"$formatted\">$nullable $prerequisites ";
     }
 
     protected function select($classes = "", $misc = [], $tag = "select") {
