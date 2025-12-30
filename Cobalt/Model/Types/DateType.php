@@ -78,7 +78,7 @@ class DateType extends MixedType {
     protected function getSeconds() {
         $result = ($this->getValue());
         if(!$result) return "0";
-        return floor($result->getTimestamp());
+        return floor($result->toDateTime()->getTimestamp());
     }
 
     #[Prototype]
