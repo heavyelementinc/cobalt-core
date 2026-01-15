@@ -109,6 +109,7 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
             }
         }
         $this->setValue($oids);
+        update("[name='".$this->getName()."']", ['outerHTML' => $this->field()]);
         
         return $value;
     }

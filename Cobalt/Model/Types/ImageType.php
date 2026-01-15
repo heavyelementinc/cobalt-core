@@ -51,8 +51,10 @@ class ImageType extends ForeignId {
             $filename = $this->filename($arr);
             $oid = $this->__store($arr['tmp_name'], $filename);
         } else {
-            $this->filter_attributes_objectid($oid);
+            $oid = $this->filter_attributes_objectid($oid);
         }
+        if(!$oid) throw new BadRequest("Failed to upload image to database");
+
         return parent::filter($oid);
     }
 
@@ -62,19 +64,19 @@ class ImageType extends ForeignId {
         $this->filter_image($image_mimetype, $image_resolution);
     }
 
-    protected function filter_attributes_objectid(string|ObjectId $oid) {
+    protected function filter_attributes_objectid(string|ObjectId $oid):ObjectId {
         if($oid instanceof ObjectId === false ) {
             if(!$oid) throw new BadRequest("Malformed ObjectId");
             $oid = new ObjectId($oid);
         }
 
-        $result = $this->__find(['_id' => $oid],[]);
+        $result = $this->__findOne(['_id' => $oid],[]);
         if(!$result) throw new FilterIssue("Failed to find the referenced ForeignId");
 
-        $image_mimetype = $result->meta->mimetype->value;
-        $image_resolution = [$result->meta->width->value, $result->meta->height->value];
+        $image_mimetype    = $result['meta']['mimetype'];
+        $image_resolution = [$result['meta']['width'], $result['meta']['height']];
         $this->filter_image($image_mimetype, $image_resolution);
-
+        return $oid;
     }
 
     protected function filter_image(string $mimetype, string|array $size) {

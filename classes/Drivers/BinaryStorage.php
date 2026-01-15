@@ -47,7 +47,7 @@ trait BinaryStorage {
         $id = $this->__bucket->uploadFromStream($filenameForStorage, $resource, $storageOptions);
         $data['meta'] = $this->__getMetadata($pathToFile);
         $data['_v'] = 3;
-
+        
         $result = $this->__collection->updateOne(
             ['_id' => $id],
             ['$set' => $data]

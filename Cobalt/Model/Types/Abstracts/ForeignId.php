@@ -109,6 +109,7 @@ abstract class ForeignId extends MixedType {
             throw new ValidationIssue('Specified $oid contains invalid characters');
         }
         $this->setValue($_id);
+        update("[name='".$this->getName()."']", ['outerHTML' => $this->field()]);
         return $_id;
     }
 

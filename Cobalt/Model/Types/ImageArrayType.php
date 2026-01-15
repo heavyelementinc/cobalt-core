@@ -5,6 +5,8 @@ use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
 use Cobalt\Model\Types\Traits\FileHandler;
+use Exceptions\HTTP\BadRequest;
+use Iterator;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Driver\Cursor;
 use MongoDB\Model\BSONDocument;
@@ -14,7 +16,9 @@ class ImageArrayType extends OrderedListOfForeignIds {
     use FileHandler;
     protected string $operator = '$set';
     public function runJoinQuery(Model $model, array $ids): ?Cursor {
-        return $this->__find(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
+        $result = $this->__find(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
+        if($result instanceof Cursor) return $result;
+        return null;
     }
     
     function filter($oids) {
@@ -31,7 +35,22 @@ class ImageArrayType extends OrderedListOfForeignIds {
             }
             $this->operator = '$addToSet';
         }
+        
         return parent::filter($oids);
+    }
+
+    function filter_attributes_objectid($oids):array {
+        // If we just have a single object ID, interpret it and return it as index 0 of an array
+        if(is_string($oids)) return [$this->interpretRawValue($oids)];
+        // If don't have an array by this point, throw a BadRequest
+        if(!is_array($oids)) throw new BadRequest("Malformed field", true);
+        // Let's build a list of interpreted ObjectIds
+        $mutant = [];
+        foreach($oids as $item) {
+            // Interpret our raw values
+            $mutant[] = $this->interpretRawValue($item);
+        }
+        return $mutant;
     }
 
     #[Prototype]

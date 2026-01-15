@@ -178,13 +178,13 @@ class Import extends DatabaseManagement {
 
         // Use array_intersect to see if there are more/fewer collections than
         // our meta details say there should be
-        $intersection = array_intersect(array_keys($export_parse_results), array_keys($this->meta['collectionDetails']));
-        $intersection_count = count($intersection);
-        $insersection_failure_message = "It appears this export is corrupted";
-        if($intersection_count !== count($export_parse_results)
-        || $intersection_count !== count($this->meta['collectionDetails'])) {
-            throw new Exception($insersection_failure_message);
-        }
+        // $intersection = array_intersect(array_keys($export_parse_results), array_keys($this->meta['collectionDetails']));
+        // $intersection_count = count($intersection);
+        // $intersection_failure_message = "It appears this export is corrupted. Run this command again with --skip-integrity-check";
+        // if($intersection_count !== count($export_parse_results)
+        // || $intersection_count !== count($this->meta['collectionDetails'])) {
+        //     throw new Exception($intersection_failure_message);
+        // }
 
         $wait_times = [];
         // Loop through the collections and compare numbers

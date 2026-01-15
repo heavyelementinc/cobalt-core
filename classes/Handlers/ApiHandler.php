@@ -196,7 +196,7 @@ class ApiHandler extends RequestHandler {
     private function handle_multipart_form_data($directives, $incoming_content_type) {
         $multipart_form_data = "multipart/form-data;";
         $max_upload = getMaximumFileUploadSize();
-        if ((int)getHeader('Content-Length') > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large");
+        if ((int)getHeader('Content-Length') > $max_upload) throw new \Exceptions\HTTP\BadRequest("File upload is too large", true);
         if (strcasecmp(substr($incoming_content_type, 0, strlen($multipart_form_data)), $multipart_form_data) === 0 && $_POST['json_payload']) {
             $_POST = json_decode($_POST['json_payload'], true, 512, JSON_THROW_ON_ERROR);
         }
