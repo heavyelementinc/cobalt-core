@@ -38,29 +38,30 @@ class App {
         return "Boostrap updated ".fmt((($records == 0) ? "0" : $records)." record".plural($records),'i')."$recordExplainer\n$cleared";
     }
 
+    private string $production_path = "/ignored/DEVELOPMENT";
+
     public function mode(string $mode) {
+        $prod = __APP_ROOT__ . $this->production_path;
         if($mode == "prod" || $mode == "production") {
-            return $this->set_production();
+            return $this->set_production($prod);
         }
-        return $this->set_development();
+        return $this->set_development($prod);
     }
 
-    private string $production_path = __APP_ROOT__ . "/ignored/DEVELOPMENT";
-
-    private function set_production() {
-        if(file_exists($this->production_path)) {
-            unlink($this->production_path);
-            return "Removed $this->production_path, application should now be in PRODUCTION MODE";
+    private function set_production($prod) {
+        if(file_exists(__APP_ROOT__ . $prod)) {
+            unlink($prod);
+            return "Application is now in PRODUCTION MODE";
         }
-        return "$this->production_path did not exist, so there was nothing to do. App is now in PRODUCTION MODE.";
+        return "App was already in PRODUCTION MODE.";
     }
 
-    private function set_development() {
-        if(file_exists($this->production_path)) {
-            return "$this->production_path already existed, so there was nothing to do. App is now in DEVELOPMENT MODE.";
+    private function set_development($prod) {
+        if(file_exists($prod)) {
+            return "App was already in DEVELOPMENT MODE.";
         }
-        touch($this->production_path);
-        return "Created $this->production_path, application is now in DEVELOPMENT MODE";
+        touch($prod);
+        return "Application is now in DEVELOPMENT MODE";
     }
 
     public function version() {
