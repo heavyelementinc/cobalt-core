@@ -2,3 +2,4 @@
 /ignored/
 vendor/
 classes/ReadyTicket/config.json
+./composer.lock

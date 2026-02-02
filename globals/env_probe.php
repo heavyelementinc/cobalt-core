@@ -71,7 +71,10 @@ foreach($dependencies as $dependency) {
     if(!extension_loaded($dependency)) $missing .= " $dependency<br>";
 }
 
-if($missing !== "") kill("Your environment is misconfigured! Please install the following required packages.<br>$missing");
+if($missing !== "") {
+    // phpinfo();
+    kill("Your environment is misconfigured! Please install the following required packages.<br>$missing");
+}
 
 $required_functions = [
     'imagecreatefromjpeg',
@@ -109,7 +112,9 @@ foreach($required_functions as $funct) {
     if(!function_exists($funct)) $missing .= " $funct<br>";
 }
 
-if($missing !== "") kill("Your runtime is missing the following required functions!<br>$missing");
+if($missing !== "") {
+    kill("Your runtime is missing the following required functions!<br>$missing");
+}
 
 // if(!in_array(get_current_user(), ["www-data", "apache"])) die ("You must be running Cobalt as the web server user.");
 
