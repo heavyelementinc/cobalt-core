@@ -14,21 +14,33 @@ object-gallery,file-gallery,foreign-id,file-id {
     .object-picker-container {
         display: flex;
         flex-direction: column;
-        object-picker, 
-        input[type='file'] {
+        object-picker,
+        label.button {
             display: block;
             height: var(--object-gallery-dimension);
             width: var(--object-gallery-dimension);
+            cursor: pointer;
         }
+
+        label.button {
+            text-align: center;
+            font-weight: normal;
+            border-radius: var(--input-element-radius);
+            padding: var(--input-element-padding);
+        }
+
         input[type='file'] {
-            color: transparent;
-            &::file-selector-button {
-                height: 100%;
-                width: 100%;
-            }
+            height: 0px;
+            width: 0px;
+            border: 0px !important;
+            background: transparent;
+            display: inline-block;
+            margin: 0px;
+            padding: 0px;
         }
-        &:has(object-picker, input[type='file']) {
-            object-picker, input[type='file'] {
+
+        &:has(object-picker, label.button) {
+            object-picker, label.button {
                 height: 50%;
             }
         }

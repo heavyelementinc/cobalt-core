@@ -184,19 +184,22 @@ export class ObjectGallery extends ICustomInput {
 export class FileGallery extends ObjectGallery {
     initObjectPicker() {
         super.initObjectPicker();
-        let field = this.querySelector("input[type='file']");
-        if(!field) {
-            field = document.createElement("input");
-            field.type = "file";
-            field.multiple = "multiple";
-            field.accept = this.getAttribute("accept") ?? "";
-        }
+        const label = document.createElement("label");
+        label.classList = "button";
+        label.innerText = "Upload Files";
+        let field = document.createElement("input");
+        label.appendChild(field);
+        field.type = "file";
+        field.multiple = this.multiple ?? "multiple";
+        field.accept = this.getAttribute("accept") ?? "";
+        // }
 
-        this.uploadField.appendChild(field);
+        this.uploadField.appendChild(label);
         this.customInputReady.resolve(true);
         // this.dropIndicator = document.createElement("drop-indicator");
         // this.appendChild(this.dropIndicator);
     }
+
     get value() {
         const uploadButton = this.uploadField?.querySelector("input[type='file']");
         console.log(uploadButton);

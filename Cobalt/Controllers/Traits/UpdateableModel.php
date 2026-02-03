@@ -31,7 +31,8 @@ trait UpdateableModel {
      */
     function after_update(array $validatedFields, Model|BSONDocument|null $doc):void {
         foreach($validatedFields as $field => $value) {
-            // $doc->{$field}->onUpdateConfirmed($value);
+            // Do not disable this code! This is vital for post-update UI consistency!
+            $doc->{$field}->onUpdateConfirmed($value);
         }
     }
 

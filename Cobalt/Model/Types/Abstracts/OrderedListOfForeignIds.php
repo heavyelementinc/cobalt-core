@@ -108,8 +108,6 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
                 throw new ValidationIssue("`$val` was not a valid ObjectId");
             }
         }
-        $this->setValue($oids);
-        update("[name='".$this->getName()."']", ['outerHTML' => $this->field()]);
         
         return $value;
     }

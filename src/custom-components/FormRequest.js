@@ -245,7 +245,7 @@ export default class FormRequest extends ProgressWizard {
         const formData = new FormRequestData(this);
         const target = event.target.closest("[name]");
         formData.set(target.name ?? target.getAttribute("name"), this.getFormElementValue(target, event));
-        let timeout = 1000;
+        let timeout = 0;
         switch(target.tagName) {
             case "INPUT":
                 if(["date", "time", "datetime-local"].includes(target.type)) {
