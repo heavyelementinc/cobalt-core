@@ -170,7 +170,9 @@ function loadFromDirectory($className, $directoryLocation, $stage) {
     include $directoryLocation;
     if(key_exists($className, $CLASS_MAP)) {
         class_loader($CLASS_MAP[$className]['path'], $className, $stage);
+        return true;
     }
+    return false;
 }
 
 function class_loader($path, $originalName, $stage) {

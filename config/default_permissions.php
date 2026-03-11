@@ -286,5 +286,19 @@ $permissions = [
         "dangerous" => true,
         "default" => false,
         "ring" => 1
-    ]
+    ],
+    "Documentation_edit" => [
+        "group" => "Documentation",
+        "label" => "Allows user to edit documentation <help-span value='This can be dangerous if the user can edit sensitive documentation files'></help-span>",
+        "dangerous" => false,
+        "default" => false,
+        "ring" => 3
+    ],
+    "Documentation_destroy" => [
+        "group" => "Documentation",
+        "label" => "Allows user to delete documentation <help-span value='This can be dangerous if the user can edit sensitive documentation files'></help-span>",
+        "dangerous" => false,
+        "default" => false,
+        "ring" => 3
+    ],
 ];

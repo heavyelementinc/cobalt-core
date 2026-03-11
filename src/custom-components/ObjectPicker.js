@@ -17,7 +17,7 @@ export default class ObjectPicker extends HTMLElement {
     connectedCallback() {
         // this.setAttribute("role", "button");
         this.setAttribute("__custom-input", "true");
-        this.innerText = "Pick Existing...";
+        this.innerText = this.getAttribute("label") ?? "Select Existing...";
         this.addEventListener("click", () => {
             this.open();
         });

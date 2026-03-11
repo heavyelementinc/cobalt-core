@@ -160,8 +160,8 @@ class Route {
             'max-age' => '604800',
             'type' => 'private',
         ];
+        // $GLOBALS['WEB_ROUTE_CACHE'][''];
         $nat_order = count($GLOBALS['ROUTE_TABLE'][$router_table_address][$type]);
-
         /** Store our route data in the full route table. */
         $GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex] = [
             // Original pathname

@@ -147,10 +147,11 @@ function country2flag(?string $countryCode, ?string $countryName = null): string
 function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
     if(gettype($code) !== "string") $code = json_encode($code, JSON_PRETTY_PRINT);
     $mutant = "<pre data-file='$filename' data-lang='$language'>$code</pre>";
-    $highlighter = new Highlighter($mutant, 'railscasts');
-    $highlighter->setShowLineNumbers($line_numbers);
-    $highlighter->setShowActionPanel($action_panel);
-    return $highlighter->parse();
+    // $highlighter = new Highlighter($mutant, 'railscasts');
+    // $highlighter->setShowLineNumbers($line_numbers);
+    // $highlighter->setShowActionPanel($action_panel);
+    // return $highlighter->parse();
+    return $mutant;
 }
 
 
@@ -516,6 +517,7 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
     if($doc instanceof ObjectId) $doc = get_image_details($doc);
     if(is_null($doc) && $docid instanceof ObjectId) $doc = get_image_details($docid);
     $filename = get_image_url($doc);
+    $alt      = htmlspecialchars($doc['alt'] ?? $doc['meta']['alt'] ?? pathinfo($filename, PATHINFO_FILENAME));
     $height   = $doc['meta']['height'];
     $width    = $doc['meta']['width'];
     $accent   = $attributes['accent_color'] ?? $doc['meta']['accent_color'];
@@ -530,7 +532,7 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
         $attrs .= " $attr=\"$val\"";
     }
     return <<<HTML
-    <img src="$filename"$data_id alt="$doc[alt]" 
+    <img src="$filename"$data_id alt="$alt" 
         height="$height" width="$width" loading="lazy"
         accent-color="$accent" contrast-color="$contrast"$attrs
     >

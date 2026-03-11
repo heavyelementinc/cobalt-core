@@ -31,11 +31,15 @@ export default class MarkdownArea extends ICustomInput {
         element.addEventListener("change", event => {
             event.bubbles = true;
         });
-
+        let renderConfig = {}
+        if(this.hasAttribute("syntax-highlighting") && this.getAttribute("true")) {
+            // renderConfig.codeSyntaxHighlighting = true;
+        }
         this.editor = new SimpleMDE({
             autoDownloadFontAwesome: false,
             element,
-            placeholder: this.getAttribute("placeholder")
+            placeholder: this.getAttribute("placeholder"),
+            renderingConfig: renderConfig
         });
         // this.value = this.props.originalTextContent;
 

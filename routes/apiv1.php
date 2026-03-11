@@ -181,6 +181,12 @@ if(__APP_SETTINGS__['LandingPages_enabled']) {
     Route::s_post('/landing-pages/{id}/preview-key/', '\\Cobalt\\Pages\\Controllers\\LandingPages@preview_key');
 }
 
+if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
+    \Cobalt\Documentation\Controllers\Documentation::apiv1(null, []);
+    Route::s_post("/documentation/list/",     "\\Cobalt\\Documentation\\Controllers\\Documentation@list");
+    Route::s_post("/documentation/read/{id}", "\\Cobalt\\Documentation\\Controllers\\Documentation@read");
+}
+
 if(__APP_SETTINGS__['Block_Editor_endpoints']) {
     
     Route::s_post('/block-editor/upload/url/', "BlockEditor@fileByURL", [

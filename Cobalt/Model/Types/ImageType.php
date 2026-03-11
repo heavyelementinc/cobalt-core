@@ -58,12 +58,23 @@ class ImageType extends ForeignId {
         return parent::filter($oid);
     }
 
+    /**
+     * This function takes an uploaded file and will throw an ValidationFailed or other Validation error
+     * if the file does not satisfy field directive requirements
+     * @param string $path 
+     * @return void 
+     */
     protected function filter_attributes_upload(string $path) {
         $image_mimetype   = mime_content_type($path);
         $image_resolution = getimagesize($path);
         $this->filter_image($image_mimetype, $image_resolution);
     }
 
+    /**
+     * This function verifies that the given ObjectID satisfies field directive requirements
+     * @param string|ObjectId $oid 
+     * @return ObjectId 
+     */
     protected function filter_attributes_objectid(string|ObjectId $oid):ObjectId {
         if($oid instanceof ObjectId === false ) {
             if(!$oid) throw new BadRequest("Malformed ObjectId");
@@ -155,6 +166,10 @@ class ImageType extends ForeignId {
     #[Prototype]
     protected function getLabel($includeHtml = true, $small_text = ""): string {
         return parent::getLabel($includeHtml, $small_text);
+    }
+
+    function fieldItemTemplate(): string {
+        return "Cobalt/Model/templates/types/image-type.php";
     }
 
     // public function initDirectives(): array {

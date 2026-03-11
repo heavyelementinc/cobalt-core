@@ -20,6 +20,7 @@ use TypeError;
 use Validation\Exceptions\ValidationContinue;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
+use Validation\Exceptions\ValidationSkip;
 
 trait Filterable {
     protected array $__dataset = [];
@@ -46,6 +47,9 @@ trait Filterable {
                 // we want to update, so we use whatever fieldname is submitted as
                 // the `name` attribute will include dot notation here.
                 $this->__validate_field($field, $value);
+            } catch (ValidationSkip $e) {
+                $this->__modify($field, $value);
+                continue;
             } catch (ValidationContinue $e) {
                 continue;
             } catch (SchemaExcludesUnregisteredKeys $e) {
@@ -105,11 +109,11 @@ trait Filterable {
             }
 
             // This is disabled because the filter directive is called later
-            if($result->hasDirective('filter')) {
-                $filterDirective = $result->getDirective('filter', $value);
+            // if($result->hasDirective('filter')) {
+                // $filterDirective = $result->getDirective('filter', $value);
                 // if($filterDirective instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
                 // $filterDirective->getValue($value);
-            }
+            // }
             $validated = $result->filter($result->pre_filter($value));
             if($result->hasDirective('set')) {
                 $result->getDirective('set', $validated);
@@ -141,58 +145,58 @@ trait Filterable {
         }
     }
 
-    protected function __validate_field_old($field, $value) {
-        if($this->__excludeUnregisteredKeys) {
-            if(!key_exists($field, $this->__schema)) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
-        }
-        $r = [];
-        $this->hydrate($r, $field, $value, $this, $field, $this->__schema[$field], $this->__schema[$field]['type']);
-        $result = $r[$field];
-        try {
-            if($value === null || $value === "") {
-                if($result->isRequired()) throw new ValidationIssue("This field is required");
-                throw new ValidationContinue("This field is empty and it's not required. Continuing.");
-            }
+    // protected function __validate_field_old($field, $value) {
+    //     if($this->__excludeUnregisteredKeys) {
+    //         if(!key_exists($field, $this->__schema)) throw new SchemaExcludesUnregisteredKeys('Schema excludes unregistered keys');
+    //     }
+    //     $r = [];
+    //     $this->hydrate($r, $field, $value, $this, $field, $this->__schema[$field], $this->__schema[$field]['type']);
+    //     $result = $r[$field];
+    //     try {
+    //         if($value === null || $value === "") {
+    //             if($result->isRequired()) throw new ValidationIssue("This field is required");
+    //             throw new ValidationContinue("This field is empty and it's not required. Continuing.");
+    //         }
 
-            // This is disabled because the filter directive is called later
-            if(key_exists('filter', $this->__schema[$field])) {
-                if($this->__schema[$field]['filter'] instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
-                $this->__schema[$field]['filter']->getValue($value);
-            }
+    //         // This is disabled because the filter directive is called later
+    //         if(key_exists('filter', $this->__schema[$field])) {
+    //             if($this->__schema[$field]['filter'] instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
+    //             $this->__schema[$field]['filter']->getValue($value);
+    //         }
 
-            if($result->hasDirective("pattern")) {
-                $pattern = $result->getDirective("pattern");
-                if($pattern) $this->testPattern($result, $value, $pattern);
-            }
-            $validated = $result->filter($value);
-            if(key_exists('set', $this->__schema[$field])) {
-                if($this->__schema[$field]['set'] instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');
-                $this->__schema[$field]['set']->getValue($validated, $value);
-            }
-        } catch (ValidationContinue $e) {
-            // If we catch a ValidationContinue, let's throw it again so
-            // we know to skip this field when we recieve this signal
-            new ValidationContinue($e);
-        } catch (ValidationIssue $e) { // Handle issues
-            if (!isset($this->__issues[$field])) {
-                $this->__issues[$field] = $e->getMessage();
-                update("[name='$field']", ['message' => $e->getMessage(), 'invalid' => true]);
-            }
-            else {
-                $this->__issues[$field] .= "\n" . $e->getMessage();
-            }
-        } catch (ValidationFailed $e) { // Handle subdoc failure
-            $this->__issues[$field] = $e->data;
-        }
+    //         if($result->hasDirective("pattern")) {
+    //             $pattern = $result->getDirective("pattern");
+    //             if($pattern) $this->testPattern($result, $value, $pattern);
+    //         }
+    //         $validated = $result->filter($value);
+    //         if(key_exists('set', $this->__schema[$field])) {
+    //             if($this->__schema[$field]['set'] instanceof SetDirective === false) throw new TypeError('The set directive must be an instance of \\Cobalt\\Model\\Directives\\SetDirective');
+    //             $this->__schema[$field]['set']->getValue($validated, $value);
+    //         }
+    //     } catch (ValidationContinue $e) {
+    //         // If we catch a ValidationContinue, let's throw it again so
+    //         // we know to skip this field when we recieve this signal
+    //         new ValidationContinue($e);
+    //     } catch (ValidationIssue $e) { // Handle issues
+    //         if (!isset($this->__issues[$field])) {
+    //             $this->__issues[$field] = $e->getMessage();
+    //             update("[name='$field']", ['message' => $e->getMessage(), 'invalid' => true]);
+    //         }
+    //         else {
+    //             $this->__issues[$field] .= "\n" . $e->getMessage();
+    //         }
+    //     } catch (ValidationFailed $e) { // Handle subdoc failure
+    //         $this->__issues[$field] = $e->data;
+    //     }
         
-        if($validated instanceof MergeResult) {
-            foreach($validated->get_value() as $keypath => $value) {
-                $this->__modify($keypath, $value, false);
-            }
-        } else {
-            $this->__modify($field, $validated, false);
-        }
-    }
+    //     if($validated instanceof MergeResult) {
+    //         foreach($validated->get_value() as $keypath => $value) {
+    //             $this->__modify($keypath, $value, false);
+    //         }
+    //     } else {
+    //         $this->__modify($field, $validated, false);
+    //     }
+    // }
 
     public function set_unregistered_key_state(bool $value):void {
         $this->__excludeUnregisteredKeys = $value;

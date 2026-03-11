@@ -2,10 +2,13 @@
 
 namespace Cobalt\Controllers\Traits;
 
+use Cobalt\Controllers\Interfaces\BatchOperations;
 use Cobalt\Model\Model;
+use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 trait UpdateableModel {
     var $initialized = false;
@@ -107,5 +110,16 @@ trait UpdateableModel {
 
     static public function route_details_update():array {
         return [];
+    }
+
+    function __batchIdOperation($name) {
+        if($this instanceof BatchOperations == false) throw new RouteNotFoundException("Controller is not an instance of BatchOperations");
+        $batchOps = $this->register_batch_functions();
+        /** @var BatchIdOperation $operation */
+        foreach($batchOps as $operation) {
+            if($name != $operation->getName()) continue;
+            return $operation->runPost($_POST['_ids']);
+        }
+        throw new RouteNotFoundException("Specified BatchIdOperation does not exist on this controller.");
     }
 }

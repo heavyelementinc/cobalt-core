@@ -28,6 +28,10 @@ if(__APP_SETTINGS__['LandingPages_enabled']) {
     \Cobalt\Pages\Controllers\LandingPages::admin();
 }
 
+if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
+    \Cobalt\Documentation\Controllers\Documentation::admin();
+}
+
 Route::get("/me/", "UserAccounts@me",
     [
         

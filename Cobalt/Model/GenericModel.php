@@ -201,15 +201,19 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         return $this->serialize();
     }
 
-    public function serialize():mixed {
+    public function serialize($includePrivateFields = true):mixed {
         $data = [];
         /** 
          * @var string $field
          * @var MixedType $value
          */
         foreach($this->__dataset as $field => $value) {
+            if($includePrivateFields === false) {
+                if($field[0] === "_") continue;
+                if($value->directiveOrNull(DIRECTIVE_KEY_PRIVATE)) continue;
+            }
             // if(!isset($value)) continue;
-            $data[$field] = $value->serialize();
+            $data[$field] = $value->serialize($includePrivateFields);
         }
         return $data;
     }
@@ -243,4 +247,13 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
         $this->__schema_allow_undefined_fields = $value;
     }
 
+    private bool $__downstreamJoinPolicy = true;
+
+    final function __setDownstreamJoinPolicy(bool $performJoinOperations) {
+        $this->__downstreamJoinPolicy = $performJoinOperations;
+    }
+
+    final function __getDownstreamJoinPolicy():bool {
+        return $this->__downstreamJoinPolicy;
+    }
 }

@@ -20,7 +20,7 @@ trait FileHandler {
 
     public function interpretRawValue(&$value): ?ObjectId {
         // Handle all kinds of legacy bullshit
-        $id = $value['media']['ref'] ?? $value['media']['id'] ?? $value['_id'] ?? $value;
+        $id = $value['media']['ref'] ?? $value['media']['id'] ?? $value['_id'] ?? $value['id'] ?? $value;
         if($id instanceof ObjectId) {
             return $id;
         } else if(is_string($id)) {
@@ -177,5 +177,43 @@ trait FileHandler {
         return $mime_type;
     }
 
-    
+    public function filterMimetypeOrFileExtension(array $fileUploadDetails, string|array $accepts) {
+        if(!is_array($accepts)) $accepts = [$accepts];
+        foreach($accepts as $accept) {
+            if($accept[0] === ".") {
+                $ext = pathinfo($fileUploadDetails['name'], PATHINFO_EXTENSION);
+                if($this->filterFileExtension($ext,$accept)) return true;
+            }
+
+            $lastChar = strlen($accept);
+            if($accept[$lastChar - 1] === "*") {
+                if($this->filterGlobFiletype($fileUploadDetails['type'],$accept)) return true;
+            }
+
+            if($accept === $fileUploadDetails['type']) return true;
+        }
+        return false;
+    }
+
+    public function filterFileExtension($file_extension, $required):bool {
+        // If our file extensions does not start with a period, let's do that.
+        if($file_extension[0] !== ".") $file_extension = ".$file_extension";
+        if($required[0] !== ".") $required = ".$required";
+
+        if($required === $file_extension) return true;
+        return false;
+    }
+
+    public function filterGlobMimetype($file_mimetype, $required):bool {
+        // We should have been passed a "<type>/*" string for required
+        // So we'll grab our string's length
+        $length = strlen($required);
+        // Let's truncate both oure required and file mimetypes to just before the "*"
+        $mimetype_prefix = substr($file_mimetype, 0, $length - 1);
+        $required_prefix = substr($required, 0, $length - 1);
+        // Compare our truncated strings and return true if they match
+        if($mimetype_prefix === $required_prefix) return true;
+        return false;
+    }
+
 }

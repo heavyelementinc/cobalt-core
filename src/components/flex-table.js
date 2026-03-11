@@ -232,7 +232,7 @@ class TableContainer extends HTMLElement {
     }
 
     get value() {
-        const checked = this.querySelectorAll("input[type='checkbox']:checked,input-switch :checked");
+        const checked = this.querySelectorAll("input[type='checkbox']:not(.select-all):checked,input-switch:not(.select-all) :checked");
         let values = [];
         checked.forEach(element => {
             values.push(element.value);

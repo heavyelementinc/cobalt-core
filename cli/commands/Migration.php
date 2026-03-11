@@ -1,5 +1,11 @@
 <?php
 
+use Cobalt\Model\Model;
+use Drivers\DatabaseManagement;
+use Drivers\UTCDateTime;
+use MongoDB\Client;
+use MongoDB\Database;
+
 class Migration {
 
     const MIGRATIONS_DIRS = [
@@ -10,6 +16,10 @@ class Migration {
     private $available_migrations = [];
 
     public $help_documentation = [
+        'convert' => [
+            'description' => '(namespaced_model) Convert existing documents to a given Model',
+            'context_required' => true
+        ],
         'execute' => [
             'description' => "Executes a migration",
             'context_required' => true
@@ -17,7 +27,7 @@ class Migration {
         'list' => [
             'description' => "List migrations",
             'context_required' => true
-        ]
+        ],
     ];
 
     function execute($name = null) {

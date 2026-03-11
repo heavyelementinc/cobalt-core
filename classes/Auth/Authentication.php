@@ -242,7 +242,10 @@ class Authentication {
         }
 
         $view = "/authentication/login/stage-0-discover-user.php";
-        $vars = ['message' => $this->messages[$_GET['message'] ?? '']];
+        $vars = [
+            SESSION_MESSAGE_PARAM => $this->messages[$_GET[SESSION_MESSAGE_PARAM] ?? ''],
+            SESSION_RESUME_PARAM => urldecode($_GET[SESSION_RESUME_PARAM] ?? "") ?? server_name()."/admin"
+        ];
         return [$vars, $view];
     }
     
@@ -256,7 +259,8 @@ class Authentication {
 
         $vars = [
             'user' => (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID])),
-            'message' => $this->messages[$_GET['message'] ?? ''],
+            SESSION_RESUME_PARAM => urldecode($_GET[SESSION_RESUME_PARAM] ?? "") ?? server_name()."/admin",
+            SESSION_MESSAGE_PARAM => $this->messages[$_GET[SESSION_MESSAGE_PARAM] ?? ''],
         ];
         return [$vars, $view];
     }
@@ -266,7 +270,7 @@ class Authentication {
         $user = (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]));
         if(!$user) throw new NotFound(AUTH_PROCESS_ERROR__USER_NOT_FOUND);
 
-        $resume = urldecode($_GET[SESSION_RESUME_PARAM] ?? "");
+        $resume = urldecode($_GET[SESSION_RESUME_PARAM] ?? server_name() ."/admin");
 
         // If 2FA is not enabled, then the user should be logged in at this point
         // so let's do that.
@@ -277,8 +281,8 @@ class Authentication {
         }
         $vars = [
             'user' => $user, 
-            'resume' => $resume ? $resume : "/admin/",
-            'message' => $this->messages[$_GET['message'] ?? '']
+            SESSION_RESUME_PARAM => $resume ? $resume : "/admin/",
+            SESSION_MESSAGE_PARAM => $this->messages[$_GET[SESSION_MESSAGE_PARAM] ?? '']
         ];
         return [$vars, $view];
     }

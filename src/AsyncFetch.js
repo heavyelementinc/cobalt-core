@@ -476,6 +476,12 @@ class XModal extends HeaderDirective {
     }
 }
 
+class XForm extends HeaderDirective {
+    async execute() {
+        
+    }
+}
+
 /**
  * Supported tags:
  * @wait {int}

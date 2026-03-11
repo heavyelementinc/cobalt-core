@@ -2,6 +2,8 @@
 
 namespace Cobalt\Controllers\Traits;
 
+use Cobalt\Controllers\Interfaces\BatchOperations;
+use Cobalt\Controllers\Operations\Locations;
 use Cobalt\SchemaPrototypes\Basic\Anchor;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
@@ -258,7 +260,7 @@ trait IndexableModel {
         $row_details = $this->getRowDetails($doc);
         $row_class = (isset($row_details['row_class'])) ? " class=\"$row_details[row_class]\"" : "";
         $row_style = (isset($row_details['row_style'])) ? " style=\"$row_details[row_style]\"" : "";
-        $html .= "<tr$row_class"."$row_style>";
+        $html .= "<tr id=\"doc_$doc->_id\"$row_class"."$row_style>";
 
         if($this->schema->__get_index_checkbox_state()) {
             $checked = ($row_details['checkbox_checked']) ? " checked=\"checked\"" : "";
@@ -277,7 +279,7 @@ trait IndexableModel {
             if(isset($schema[$cell['name']]['index']['alignment'])) {
                 $align = $schema[$cell['name']]['index']['alignment'];
             }
-            $html .= "<td class='align-$align'>";
+            $html .= "<td class='align-$align field-$cell[name]'>";
             
             // $view = $cell['view'];
             // Check if "view" is callable, if it is, let's use the result of that function
@@ -299,12 +301,22 @@ trait IndexableModel {
         $html .= "</tr>";
     }
 
+    /**
+     * 
+     * @param mixed $cell 
+     * @param mixed &$mutableRoute 
+     * @param mixed $doc 
+     * @param mixed $schema 
+     * @return mixed|string 
+     */
     public function get_index_view($cell, &$mutableRoute, $doc, $schema) {
+        $undefined = "<span style='opacity: .6;font-style:italic'>Undefined $cell[name]</span>";
         if(!isset($schema[$cell['name']]['index']['view'])) {
             if (method_exists($doc->{$cell['name']}, 'defaultIndexView')) {
                 return $doc->{$cell['name']}->defaultIndexView();
             } else {
-                return (string)$doc->{$cell['name']};
+                if((string)$doc->{$cell['name']}) return (string)$doc->{$cell['name']};
+                return $undefined;
             }
         }
         $view = $schema[$cell['name']]['index']['view'];
@@ -313,7 +325,11 @@ trait IndexableModel {
         if(!$view && method_exists($doc->{$cell['name']}, 'defaultIndexView')) {
             $view = $doc->{$cell['name']}->defaultIndexView();
         }
-        if(!$view) $doc->{$cell['name']}->display();
+        if(!$view) {
+            $display = $doc->{$cell['name']}->display();
+            if($display) return $display;
+            return $undefined;
+        }
         return $view;
     }
 
@@ -366,6 +382,7 @@ trait IndexableModel {
         }
         $sortableFields = implode(" ", $this->sortableFields);
         $filterableFields = implode(" ", $this->filterableFields);
+        $batchOperation = $this->get_batch_operation_hypermedia();
         return [
             'previous_page' => $prev,
             'next_page' => $next,
@@ -374,6 +391,9 @@ trait IndexableModel {
             'count' => $count,
             'search' => $this->get_search_field(),
             'multidelete_button' => $multidelete_button,
+            'batch_left_bar' => $batchOperation['batch_left_bar'],
+            'batch_center_bar' => $batchOperation['batch_center_bar'],
+            'batch_right_bar' => $batchOperation['batch_right_bar'],
             'filters' => <<<HTML
             <inline-menu icon="filter-variant">
                 <form class="crudable-hypermedia--filterable-item" style="gap: 0.6em; align-items: center;">
@@ -386,6 +406,7 @@ trait IndexableModel {
                         $filterableFields
                         $filterable_content
                     </fieldset>
+                    $batchOperation[batch_filter_menu]
                     <a href="$_REQUEST[route]" class="button" native><i name="filter-off-outline"></i></a>
                     <button native><i name='table-search'></i> Apply Filter</button>
                 </form>
@@ -393,6 +414,43 @@ trait IndexableModel {
             HTML,
 
         ];
+    }
+
+    /**
+     * 
+     * @return array{batch_filter_menu: string, batch_left_bar: string, batch_center_bar: string, batch_right_bar: string} 
+     */
+    final function get_batch_operation_hypermedia() {
+        $media = [
+            'batch_filter_menu' => '',
+            'batch_left_bar' => '',
+            'batch_center_bar' => '',
+            'batch_right_bar' => '',
+        ];
+        if($this instanceof BatchOperations == false) return $media;
+        $functions = $this->register_batch_functions();
+        /** @var BatchIdOperation $fn */
+        foreach($functions as $fn) {
+            switch($fn->getLocation()) {
+                case Locations::HYPERMEDIA_LEFT:
+                    $media['batch_left_bar'] .= (string)$fn;
+                    break;
+                case Locations::HYPERMEDIA_CENTER:
+                    $media['batch_center_bar'] .= (string)$fn;
+                    break;
+                case Locations::HYPERMEDIA_RIGHT:
+                    $media['batch_right_bar'] .= (string)$fn;
+                    break;
+                case Locations::FILTER_MENU:
+                default:
+                    if(!$media['batch_filter_menu']) $media['batch_filter_menu'] = "<fieldset><legend>Batch Operations</legend>";
+                    $media['batch_filter_menu'] .= (string)$fn;
+                    break;
+            }
+        }
+
+        if($media['batch_filter_menu']) $media['batch_filter_menu'] .= "</fieldset>";
+        return $media;
     }
 
 
@@ -498,4 +556,6 @@ trait IndexableModel {
         if(key_exists(QUERY_PARAM_PAGE_NUM, $params)) $options['skip'] = $options['limit'] * ((int)$params[QUERY_PARAM_PAGE_NUM] - 1);
         $this->queryParameters = $options;
     }
+
+    
 }

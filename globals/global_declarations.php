@@ -170,6 +170,7 @@ const SESSION_USER_ID = "__user_id";
 const SESSION_STAY_LOGGED_IN = "__stay_logged_in";
 const SESSION_TFA_STATE = "__tfa_state";
 const SESSION_RESUME_PARAM = "resume";
+const SESSION_MESSAGE_PARAM = "message";
 const TFA_STATE_DISABLED = 0;
 const TFA_STATE_ENABLED = 1;
 
@@ -180,11 +181,40 @@ const AUTH_STAGE_2_USER_SECOND_STAGE_VERIFY = 2;
 
 const DATETIME_LOCAL_FORMAT = "Y-m-d\TH:i";
 
+const DATABASE_UPDATE_OPERATORS = [
+    '$currentDate',
+    '$inc',
+    '$min',
+    '$max',
+    '$mul',
+    '$rename',
+    '$set',
+    '$setOnInsert',
+    '$unset',
+];
+
+const DATABASE_ARRAY_UPDATE_OPERATORS = [
+    '$', //Acts as a placeholder to update the first element that matches the query condition.
+    '$[]', //Acts as a placeholder to update all elements in an array for the documents that match the query condition.
+    '$[<identifier>]', //Acts as a placeholder to update all elements that match the arrayFilters condition for the documents that match the query condition.
+    '$addToSet', //Adds elements to an array only if they do not already exist in the set.
+    '$pop', //Removes the first or last item of an array.
+    '$pull', //Removes all array elements that match a specified query.
+    '$push', //Adds an item to an array.
+    '$pullAll', //Removes all matching values from an array.
+    '$each', //Modifies the $push and $addToSet operators to append multiple items for array updates.
+    '$position', //Modifies the $push operator to specify the position in the array to add elements.
+    '$slice', //Modifies the $push operator to limit the size of updated arrays.
+    '$sort', //Modifies the $push operator to reorder documents stored in an array.
+];
 
 const DIRECTIVE_KEY_DEFAULT = "default";
 const DIRECTIVE_KEY_IMMUTABLE = "immutable";
+const DIRECTIVE_KEY_SKIP_VALIDATION = "skipValidation";
 const DIRECTIVE_KEY_VALID = "valid";
 const DIRECTIVE_KEY_FILTER = "filter";
 const DIRECTIVE_KEY_TYPECAST = "typecast";
+const DIRECTIVE_KEY_PRIVATE = 'private';
+const DIRECTIVE_KEY_ON_UPDATE = 'on_update';
 const DIRECTIVE_KEY_GET = "get";
 const DIRECTIVE_KEY_SET = "set";

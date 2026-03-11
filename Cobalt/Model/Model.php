@@ -9,6 +9,8 @@ use Cobalt\Model\Traits\Viewable;
 use Cobalt\Model\Types\Abstracts\ForeignId;
 use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
 use Cobalt\Model\Types\ArrayOfObjectsType;
+use Cobalt\Model\Types\BooleanType;
+use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\StringType;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
@@ -107,11 +109,18 @@ abstract class Model extends GenericModel implements Persistable {
 
     public function __defaultSchema():array {
         return [
-            '__version' => new StringType,
+            '__archived' => new BooleanType,
+            '__version'  => new StringType,
+            '__upgraded' => new DateType,
         ];
     }
 
     public function __showCheckboxes(bool $show = true) {
         $this->__set_index_checkbox_state($show);
+    }
+
+    // Make objects renderable in DB selection pickers
+    function fieldItemTemplate(): string {
+        return "Cobalt/Model/templates/types/gallery-item.php";
     }
 }

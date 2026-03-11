@@ -81,7 +81,10 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
         $this->raw = $ids;
 
         $model = $this->getModel();
-        
+        if($model->__getDownstreamJoinPolicy() === false) {
+            parent::setValue([]);
+            return;
+        }
         // Now that we have all our IDs, let's find the details
         $results = $this->runJoinQuery($model, $ids);
         $unordered = [];

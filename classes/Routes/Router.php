@@ -63,6 +63,7 @@ class Router {
         $contexts = app('context_prefixes');
         //  = array_fill_keys(array_keys($contexts), []);
 
+        global $WEB_ROUTE_CACHE;
         global $ROUTE_TABLE;
         
         foreach($contexts as $context => $data) {
@@ -85,6 +86,8 @@ class Router {
             ];
 
         }
+
+        $WEB_ROUTE_CACHE = [];
 
         $this->router_table_initialized = true;
         // array_push($this->router_table_list, __APP_ROOT__ . "/private/routes/" . $this->route_context . ".php");

@@ -4,6 +4,7 @@ namespace Cobalt\Model\Types\Abstracts;
 
 use Cobalt\Model\Attributes\Directive;
 use Cobalt\Model\Attributes\Prototype;
+use Cobalt\Model\Filters\Issues\FilterIssue;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\HexColorType;
@@ -12,6 +13,7 @@ use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
 use Exception;
+use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\Driver\Cursor;
@@ -91,14 +93,26 @@ abstract class ForeignId extends MixedType {
             }
         }
         
-        $this->raw = $originalValue;
+        $this->setRaw($originalValue);
 
         $model = $this->getModel();
+        if($model->__getDownstreamJoinPolicy() === false) {
+            parent::setValue(null);
+            return;
+        }
         
         // Now that we have all our IDs, let's find the details
         $result = $this->runJoinQuery($model, $originalValue);
         
         parent::setValue($result);
+    }
+
+    public function getRaw() {
+        return $this->raw;
+    }
+
+    public function setRaw($value) {
+        $this->raw = $value;
     }
 
     public function filter($oid) {
@@ -123,7 +137,10 @@ abstract class ForeignId extends MixedType {
         [$data, $attrs] = $this->defaultFieldData($misc);
         // Check if the 'accept' field is set
         $accept = $this->directiveOrNull("accept") ?? "";
-        if($accept) $accept = "accept=\"$accept\"";
+        if($accept) {
+            if(is_array($accept)) $accept = join(",", $accept);
+            $accept = "accept=\"$accept\"";
+        }
         // Check if the tag is not null
         $tag = $tag ?? "object-id";
         // Get the route
@@ -132,8 +149,8 @@ abstract class ForeignId extends MixedType {
         $gallery = "<$tag $attrs $accept max='1' method=\"GET\" action=\"$route\">";
         // Loop through all the objects that belong to this field
         // foreach($this->getValue() as $index => $item) {
-        if($this->raw) {
-            $gallery .= view($this->fieldItemTemplate(), ['item' => $this->getValue(), 'object_id' => $this->raw, 'ordered_list' => $this]);
+        if($this->getRaw()) {
+            $gallery .= view($this->fieldItemTemplate(), ['item' => $this->getValue(), 'object_id' => $this->getRaw(), 'ordered_list' => $this]);
         }
         // }
         $gallery .= "</$tag>";
@@ -150,6 +167,36 @@ abstract class ForeignId extends MixedType {
 
     function __set($name, $value) {
         $this->value->{$name} = $value;
+    }
+
+    /**
+     * This function takes an uploaded file and will throw an ValidationFailed or other Validation error
+     * if the file does not satisfy field directive requirements
+     * @param string $path 
+     * @return void 
+     */
+    protected function filter_attributes_upload(string $path) {
+        
+    }
+
+    /**
+     * This function verifies that the given ObjectID satisfies field directive requirements
+     * @param string|ObjectId $oid 
+     * @return ObjectId 
+     */
+    protected function filter_attributes_objectid(string|ObjectId $oid):ObjectId {
+        if($oid instanceof ObjectId === false ) {
+            if(!$oid) throw new BadRequest("Malformed ObjectId");
+            $oid = new ObjectId($oid);
+        }
+
+        $result = $this->__findOne(['_id' => $oid],[]);
+        if(!$result) throw new FilterIssue("Failed to find the referenced ForeignId");
+
+        $image_mimetype    = $result['meta']['mimetype'];
+        $image_resolution = [$result['meta']['width'], $result['meta']['height']];
+        $this->filter_image($image_mimetype, $image_resolution);
+        return $oid;
     }
 
     // function __isset($name) {

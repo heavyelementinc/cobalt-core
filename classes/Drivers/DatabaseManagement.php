@@ -4,20 +4,27 @@ namespace Drivers;
 
 use ArrayAccess;
 use Cobalt\Maps\GenericMap;
+use Cobalt\Model\Interfaces\Migration;
+use Cobalt\Model\Model;
 use Cobalt\SchemaPrototypes\Basic\UploadResult;
 use Cobalt\SchemaPrototypes\MapResult;
 use Cobalt\SchemaPrototypes\Wrapper\DefaultUploadSchema;
 use DateTime;
 use Error;
 use Exception;
+use Exceptions\HTTP\Error as HTTPError;
+use Generator;
 use Iterator;
 use JsonSerializable;
 use MongoDB\BSON;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\Persistable;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Database;
+use MongoDB\InsertOneResult;
 use MongoDB\Model\BSONDocument;
 use MongoDB\Model\CollectionInfo;
+use MongoDB\UpdateResult;
 
 class DatabaseManagement {
     private $db;
@@ -285,4 +292,122 @@ class DatabaseManagement {
 
         return iterator_to_array_recursive($__dataset);
     }
+
+    /**
+     * 
+     * @param Model $model 
+     * @param bool $dropBeforeInit 
+     * @return InsertOneResult 
+     * @throws mixed 
+     */
+    function initialize(Model $model, bool $dropBeforeInit = false) {
+        if($model instanceof Migration == false) throw new Exception("Model must implement migration");
+        if($dropBeforeInit) {
+            $model->drop();
+        }
+        return $model->__initializeDataset();
+    }
+
+    const CONVERT_TYPE_DONE = 0;
+    const CONVERT_TYPE_SKIP = 1;
+    const CONVERT_TYPE_UPDATE = 2;
+    function convert(Model $model, $honor_skips = true, $version = "latest") {
+        // Loop through each document in the collection
+        $count = $model->count([]);
+        $iterator = $model->find([], [
+            'limit' => $count + 1000,
+            'typeMap' => [
+                'root' => 'array',
+                'document' => 'array',
+                'array' => 'array',
+            ]
+        ]);
+        
+        $implements_migration_interface = $model instanceof Migration;
+        $overrides = [
+            '__pclass' => new \MongoDB\BSON\Binary($model::class, \MongoDB\BSON\Binary::TYPE_USER_DEFINED),
+            '__version' => $model->__getVersion(),
+            '__upgraded' => new UTCDateTime(),
+        ];
+        foreach($iterator as $doc) {
+            $skipped = false;
+            // Filter out any conforming documents
+            if($honor_skips && $doc['__pclass'] && $doc['__pclass']->getData() === $overrides['__pclass']->getData()) {
+                yield ['type' => self::CONVERT_TYPE_SKIP, 'value' => 1, 'doc' => $doc, 'result' => null];
+                $skipped = true;
+            }
+            // Filter out any conforming versions
+            if($honor_skips && $skipped === false && $doc['__version'] && $doc['__version'] === $overrides['__version']) {
+                yield ['type' => self::CONVERT_TYPE_SKIP, 'value' => 1, 'doc' => $doc, 'result' => null];
+            }
+
+            if($skipped === false) {
+                $mutated_doc = $doc;
+                $update = [];
+                // $this->upgrade($model, $mutated_doc, $version, $doc, $count);
+                // For each document, check if the model has __beforeMigrationUpgrade method 
+                if($implements_migration_interface) {
+                    // If it does, run it
+                    $model->__beforeMigrationUpgrade($doc, $mutated_doc, $update, $count, $this);
+                }
+
+                if(count($update)) {
+                    // Get a list of keys in $update that are not known to be valid MongoDB update params
+                    $difference = array_diff(array_keys($update), DATABASE_UPDATE_OPERATORS);
+                    
+                    // If the update has been modified, let's do a quick sanity check
+                    if(count($difference)) {
+                        throw new HTTPError("\$update param contains unknown operators");
+                    }
+                }
+
+                // Upgrade each document's __pclass field
+                $mutated_doc = array_merge($mutated_doc, $overrides);
+                
+                // Set up the $set update directive to include the mutated document.
+                $update['$set'] = array_merge($mutated_doc, $update['$set'] ?? []);
+
+                // Save the changes to the database
+                $result = $model->updateOne(['_id' => $mutated_doc['_id']], $update);
+                
+                // Yield our result
+                yield ['type' => self::CONVERT_TYPE_UPDATE, 'value' => $result->getModifiedCount(), 'doc' => $mutated_doc, 'result' => $result,];
+    
+                // For each document, check if the model has __afterUpgrade method and run it
+                if($implements_migration_interface) {
+                    // If it does, run it
+                    $model->__afterMigrationUpgrade($result, $mutated_doc, $doc, $this);
+                }
+            }
+        }
+
+        return ['type' => self::CONVERT_TYPE_DONE, 'value' => 0, 'doc' => [], 'result' => null];
+    }
+
+    // private function upgrade($model, array &$mutated_doc, int|float $version, array $doc, int $count):void {
+    //     // If version number is null, then we'll assume it's the latest version
+    //     if($mutated_doc['__version'] == null) return;
+    //     // If the version number is one less than $version, return it as it's ready to be upgraded
+    //     if($mutated_doc['__version'] == $version - 1) return;
+    //     $v = $mutated_doc['__version'];
+    //     while(true) {
+    //         if($v == $version - 1) return;
+    //         $m = $this->methodName($v);
+    //         $method_begin = "__beforeMigrationUpgrade$m";
+    //         $method_end = "__afterMigrationUpgrade$m";
+    //         if(method_exists($model, $method_begin)) {
+    //             $model->{$method_begin}($doc, $mutated_doc, $count, $this);
+    //         }
+    //         // if(method_exists($model, $method_end)) {
+    //         //     $model->{$method_end}()
+    //         // }
+    //     }
+    //     // return $document;
+    // }
+
+    // private function methodName(int|float|string $version) {
+    //     $version = (string)$version;
+    //     return str_replace(".", "_", $version);
+    // }
+
 }

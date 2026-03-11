@@ -26,6 +26,8 @@ export class ObjectGallery extends ICustomInput {
         this.uploadField.max = this.max;
 
         const picker = document.createElement("object-picker");
+        picker.innerText = "Add Existing...";
+        picker.title = "Append existing elements to this gallery";
         this.uploadField.appendChild(picker);
         picker.addEventListener("selection", event => {
             this.addObjectsToList(event.detail, true)

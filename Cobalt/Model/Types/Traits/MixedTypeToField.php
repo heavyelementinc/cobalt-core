@@ -173,8 +173,9 @@ trait MixedTypeToField {
     }
 
     // abstract public function options($selected = null): string;
-
+    #[Prototype]
     protected function inputAutocomplete($classes = "", $misc = []) {
+        $misc['allow-custom'] = $misc['allow_custom'] ?? ($this->directiveOrNull('allow_custom')) ? "allow-custom" : "";
         return $this->select($classes, $misc, "input-autocomplete");
     }
 

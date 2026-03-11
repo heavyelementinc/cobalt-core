@@ -2,6 +2,8 @@
 
 namespace Cobalt\Controllers\Traits;
 
+use Cobalt\Maps\Exceptions\DirectiveException;
+use Cobalt\Model\Directives\SearchableDirective;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\Regex;
 
@@ -113,9 +115,10 @@ trait SearchableModel {
     }
 
     final protected function get_search_field() {
-        QUERY_PARAM_COMPARISON_STRENGTH;
-
-        return "<input type=\"search\" name=\"".QUERY_PARAM_SEARCH."\" value=\"".htmlspecialchars($_GET[QUERY_PARAM_SEARCH])."\" placeholder=\"Search\">
+        // QUERY_PARAM_COMPARISON_STRENGTH;
+        if(!count($this->searchableFields)) return "";
+        return "<help-span id=\"search-help\" value=\"@field:somevalue,@field2.child:value2,@field3:value\"></help-span>
+        <input type=\"search\" name=\"".QUERY_PARAM_SEARCH."\" value=\"".htmlspecialchars($_GET[QUERY_PARAM_SEARCH])."\" placeholder=\"Search\">
         <button type=\"submit\" native><i name=\"magnify\"></i></button>
         <inline-menu>
             <label><input type=\"checkbox\" name=\"".QUERY_PARAM_SEARCH_CASE_SENSITVE."\"".(($_GET[QUERY_PARAM_SEARCH_CASE_SENSITVE] === 'on') ? " checked=\"checked\"": "")."> Case Sensitve</label>
@@ -124,10 +127,16 @@ trait SearchableModel {
     }
 
     final protected function get_searchable(string $field, array $directives) {
-        $index = $directives['index'] ?? [];
-        $searchable = $index['searchable'] ?? false;
-        if(is_callable($searchable)) $searchable = $searchable($field, $directives);
-        if($searchable === true) $this->searchableFields[$field] = "text";
+        $searchable = $directives['searchable'] ?? $directives['index']['searchable'] ?? null;
+        if($searchable === null) return;
+        if($searchable instanceof SearchableDirective === false) {
+            throw new DirectiveException("All searchable fields must explicitly define an instance of SearchableDirective");
+        }
+
+        // $index = $directives['index'] ?? [];
+        // $searchable = $index['searchable'] ?? false;
+        // if(is_callable($searchable)) $searchable = $searchable($field, $directives);
+        if($searchable->getValue() === true) $this->searchableFields[$field] = $searchable->getSearchType();
         return $searchable;
     }
 }

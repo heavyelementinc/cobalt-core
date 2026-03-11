@@ -18,11 +18,14 @@ use MongoDB\BSON\Document;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
+use Validation\Exceptions\ValidationContinue;
+use Validation\Exceptions\ValidationSkip;
 
 class MixedType implements Stringable, ArrayAccess, IMixedType {
     const DEFAULT = DIRECTIVE_KEY_DEFAULT;
     const IMMUTABLE = DIRECTIVE_KEY_IMMUTABLE;
     const VALID = DIRECTIVE_KEY_VALID;
+    const SKIP_VALIDATION = DIRECTIVE_KEY_SKIP_VALIDATION;
     const FILTER = DIRECTIVE_KEY_FILTER;
     const TYPECAST = DIRECTIVE_KEY_TYPECAST;
     const GET = DIRECTIVE_KEY_GET;
@@ -115,10 +118,17 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
     }
 
     public function pre_filter($value):mixed {
+        if($this->directiveOrNull(self::SKIP_VALIDATION)) {
+            throw new ValidationSkip("Validation was skipped. Accepting raw inputs.");
+        }
         if($this->hasDirective(self::TYPECAST)) {
             return compare_and_juggle($this->getDirective(self::TYPECAST),$value);
         }
-        return $this->typecast($value);
+        $value = $this->typecast($value);
+        if($this->hasDirective(DIRECTIVE_KEY_FILTER)) {
+            $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
+        }
+        return $value;
     }
 
     /**
@@ -207,6 +217,9 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
 
     public function onUpdateConfirmed($value):void {
         update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['value' => $this->value]);
+        if($this->hasDirective(DIRECTIVE_KEY_ON_UPDATE)) {
+            $this->getDirective(DIRECTIVE_KEY_ON_UPDATE, $value);
+        }
     }
 
     /**

@@ -82,6 +82,13 @@ label[for='user-menu-bar-controller'] {
         display: flex;
         align-items: center;
         gap: 0.5em;
+        > * {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            
+        }
     }
     .cobalt-user--profile-display img {
         height: 1em;

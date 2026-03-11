@@ -39,6 +39,9 @@
         }
     ?>
     <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+
     <style>
         slide-show {
             --direction: 1;
@@ -128,6 +131,9 @@
 </head>
 
 <body id="{{body_id}}" class="{{body_class}}">
+    <?php
+        
+    ?>
     <a id="sr-skip-to-content" href="#{{main_id}}" class="sr-only">Skip to content</a>
     <div id="sr-announce" class="sr-only" aria-live="assertive"></div>
     <noscript>

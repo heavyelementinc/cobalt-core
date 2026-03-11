@@ -80,7 +80,7 @@ trait SharedFilterEnums {
     #[Prototype]
     public function options($selected = null): string {
         $valid = $this->getValid();
-        
+
         if($selected) {
             // if($this->hasDirective('allow_custom') && $this->getDirective("allow_custom")) $val = $selected;
             if (key_exists($selected, $valid)) $val = $selected;

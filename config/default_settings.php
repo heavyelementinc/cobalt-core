@@ -2089,6 +2089,13 @@ $settings = [
         'SocialMedia_shown' => [
             'default' => [],
         ],
+    /** DOCUMENTATION */
+        'Documentation_enable_in_userbar' => [
+            'default' => true,
+        ],
+        // 'Documentation_enable_public' => [
+        //     'default' => false // unimplemented
+        // ],
     /** WEBMENTION */
         'Webmentions_enable_recieving' => [
             'default' => true,

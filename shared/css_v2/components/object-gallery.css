@@ -30,13 +30,13 @@ object-gallery,file-gallery,foreign-id,file-id {
         }
 
         input[type='file'] {
-            height: 0px;
+            /* height: 0px;
             width: 0px;
-            border: 0px !important;
+            border: 0px !important; */
             background: transparent;
             display: inline-block;
-            margin: 0px;
-            padding: 0px;
+            /* margin: 0px; */
+            /* padding: 0px; */
         }
 
         &:has(object-picker, label.button) {
@@ -186,6 +186,16 @@ gallery-item {
         display: inline-block;
         height: 100%;
         width: 100%;
+    }
+    h2 {
+        font-size: 1.1em;
+        margin-bottom: 0;
+    }
+    h2, code, span, small {
+        white-space: normal;
+        display: block;
+        word-break: break-all;
+        text-align: left;
     }
     &:has(:checked) {
         /* background-color: var(--primary-color-1);

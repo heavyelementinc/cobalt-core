@@ -154,4 +154,9 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
         return false;
     }
 
+    #[Directive]
+    public function define_allow_custom($function):MixedType {
+        $this->__defineDirective('allow_custom', $function);
+        return $this;
+    }
 }

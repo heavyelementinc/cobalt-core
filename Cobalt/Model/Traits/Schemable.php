@@ -72,7 +72,6 @@ trait Schemable {
 
     public function __defaultSchema():array {
         return [
-            '__archived' => new BooleanType
         ];
     }
 

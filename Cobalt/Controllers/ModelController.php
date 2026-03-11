@@ -1,6 +1,7 @@
 <?php
 namespace Cobalt\Controllers;
 
+use Cobalt\Controllers\Interfaces\BatchOperations;
 use Cobalt\Controllers\Traits\CreateableModel;
 use Cobalt\Controllers\Traits\DestroyableModel;
 use Cobalt\Controllers\Traits\EditableModel;
@@ -119,6 +120,9 @@ abstract class ModelController {
                 $options['destroy'] ?? [],
                 "route_details_destroy")
             );
+            // if(static implements BatchOperations) {
+            Route::post("$mutant/batch/{id}", "$class@__batchIdOperation", static::route_details([],[],"route_details_update"));
+            // }
             
             set_crudable_flag($class, CRUDABLE_CONFIG_APIV1);
         }

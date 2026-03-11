@@ -70,4 +70,8 @@ class ImageArrayType extends OrderedListOfForeignIds {
             }
         ];
     }
+
+    function fieldItemTemplate(): string {
+        return "Cobalt/Model/templates/types/image-type.php";
+    }
 }

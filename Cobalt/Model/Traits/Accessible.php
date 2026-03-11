@@ -89,7 +89,7 @@ trait Accessible {
      * @param array $options 
      * @return int 
      */
-    final function count($filter, $options = []):int {
+    final function count($filter = [], $options = []):int {
         $this->__initAccessible();
         benchmark_reads();
         return $this->collection->count($filter, $options);
@@ -148,5 +148,10 @@ trait Accessible {
         $cursor = $this->collection->aggregate($pipeline, $options);
         benchmark_reads();
         return $cursor;
+    }
+
+    final function drop() {
+        $this->__initAccessible();
+        $this->collection->drop();
     }
 }
