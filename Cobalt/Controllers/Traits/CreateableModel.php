@@ -65,6 +65,7 @@ trait CreateableModel {
         // Now, let's insert our content into the database.
         $result = $schema->insertOne($mutant);
         $insertedId = $result->getInsertedId();
+        $this->post_create($schema, $insertedId, $result);
         if(method_exists($this, "postCreate")) $this->postCreate($result, $insertedId, $result);
         // Let's check if we need to grab a route and redirect (if this item is updatable)
         $route = route("$this->name@__edit", [(string)$insertedId]);
