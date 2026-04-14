@@ -1,6 +1,3 @@
-<?php
-/** @var Cobalt\Auth\UserAccounts\UserPersistance $doc */
-?>
 <hgroup>
     <h1>{{doc.uname}}</h1>
     <small>{{doc._id}}</small>

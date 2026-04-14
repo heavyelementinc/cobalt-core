@@ -265,32 +265,32 @@ if(app("API_contact_form_enabled") && __APP_SETTINGS__["Contact_form_on_success_
     // Submissions::admin(null, [
     //     'anchor' => 'Contact Form',
     // ]);
-    ContactForm::admin(null, [
-        'index' => [
-            'anchor' => [
-                'name' => "Contact Form",
-                'icon' => 'chat-alert-outline',
-            ],
-            'navigation' => ['admin_panel'],
-            'unread' => function () {
-                return (new ContactManager())->get_unread_count_for_user(session());
-            },
-            'handler' => '/core/contact-form.js'
-        ]
-    ]);
-    // Submissions::admin(null, [
+    // ContactForm::admin(null, [
     //     'index' => [
     //         'anchor' => [
     //             'name' => "Contact Form",
     //             'icon' => 'chat-alert-outline',
     //         ],
     //         'navigation' => ['admin_panel'],
-    //         // 'unread' => function () {
-    //         //     return (new ContactManager())->get_unread_count_for_user(session());
-    //         // },
-    //         // 'handler' => '/core/contact-form.js'
+    //         'unread' => function () {
+    //             return (new ContactManager())->get_unread_count_for_user(session());
+    //         },
+    //         'handler' => '/core/contact-form.js'
     //     ]
     // ]);
+    Submissions::admin(null, [
+        // 'index' => [
+        //     'anchor' => [
+        //         'name' => "Contact Form",
+        //         'icon' => 'chat-alert-outline',
+        //     ],
+        //     'navigation' => ['admin_panel'],
+        //     // 'unread' => function () {
+        //     //     return (new ContactManager())->get_unread_count_for_user(session());
+        //     // },
+        //     // 'handler' => '/core/contact-form.js'
+        // ]
+    ]);
     // Route::get("/contact-form/{id}", "ContactForm@read", ['permission' => 'Contact_form_submissions_access']);
 }
 

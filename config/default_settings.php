@@ -440,7 +440,7 @@ $settings = [
             ]
         ],
         "Contact_form_validation_classname" => [
-            "default" => "\\Contact\\Persistance"
+            "default" => "\\Cobalt\\ContactForm\\Model\\FormSubmission"
         ],
         "Contact_form_anti_spam_technique" => [
             "default" => "captcha",

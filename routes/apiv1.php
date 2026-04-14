@@ -72,12 +72,12 @@ if (app('Web_main_content_via_api')) {
 }
 
 if (app('API_contact_form_enabled')) {
-    // Submissions::apiv1();
+    Submissions::apiv1();
     Route::post("/contact", "Cobalt\\ContactForm\\Controllers\\Submissions@public_form_submission");
     // Route::post("/contact", "ContactForm@contact_submit");
     // Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
     // Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
-    ContactForm::apiv1();
+    // ContactForm::apiv1();
 }
 
 if (app("CobaltEvents_enabled")) {
