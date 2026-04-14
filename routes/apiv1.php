@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\EventListings\Controllers\Events;
 use Routes\Options;
@@ -13,58 +14,8 @@ if(app("UGC_enable_user_generated_content")) {
 
 /** API routes for authorization */
 if (app('Auth_logins_enabled')) {
-    /** Login and logout routes */
-    Route::post("/login", "Login@handle_login");
-    Route::post("/login/email", "Login@handle_email_login_stage_1");
-    Route::get("/logout", "Login@handle_logout");
-    /** User update routes */
-    Route::s_put("/create-user", "UserAccounts@create_user", ['permission' => 'Auth_allow_creating_users']);
-
-    if(app("Auth_allow_password_reset")) {
-        Route::put("/password-reset/request", "Login@api_password_reset_username_endpoint");
-        Route::put("/password-reset/{token}", "Login@api_password_reset_password_validation");
-    }
-    
-    if(app("Auth_account_creation_enabled")){
-        Route::put("/account-creation", "UserAccounts@account_creation");
-    }
-    
-    Route::s_post("/user/me/", "UserAccounts@update_me");
-    Route::s_put("/user/me/push",          "UserAccounts@update_my_push");
-    Route::s_post("/user/me/push/enrollment/{state}","UserAccounts@update_my_push_enrollment");
-    if(app("TwoFactorAuthentication_enabled")) {
-        Route::s_put("/me/totp/enroll",    "UserAccounts@totp_enroll");
-        Route::s_delete("/me/totp/unenroll", "UserAccounts@totp_unenroll");
-    }
-    // Route::s_delete("/user/{id}/avatar",   "UserAccounts@delete_avatar");
-    Route::s_put("/core-user-accounts/{id}/permissions", "CoreUserAccounts@update_permissions", ['permission' => 'Auth_allow_modifying_user_permissions']);
-    // Route::s_put("/user/{id}/update",      "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
-    Route::s_put("/user/{id}/push",        "UserAccounts@update_push",        ['permission' => 'Auth_allow_editing_users']);
-    // Route::s_put("/user/{id}/push/enrollment", "UserAccounts@update_push_enrollment", ['permission' => 'Auth_allow_editing_users']);
-    // Route::s_put("/core-user-accounts/{id}/password",    "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
-    // Route::s_post("/user/{id}/avatar",     "UserAccounts@update_basics",      ['permission' => 'Auth_allow_editing_users']);
-    Route::s_put("/user/password",         "UserAccounts@change_my_password", ['permission' => 'self']);
-    // Route::s_delete("/user/{id}/delete",   "UserAccounts@delete_user",        ['permission' => 'Auth_allow_deleting_users']);
-
-    CoreUserAccounts::apiv1();
-
-    Route::s_put("/settings/update/", "CoreSettingsPanel@update", [
-        'permission' => 'Auth_modify_cobalt_settings'
-    ]);
-
-    Route::s_put("/settings/theme/update", "CoreSettingsPanel@theme_update",[
-        'permission' => 'Auth_modify_cobalt_settings'
-    ]);
-
-    Route::s_post("/settings/update/", "CoreSettingsPanel@updateLogo", [
-        'permission' => 'Auth_modify_cobalt_settings'
-    ]);
-
-    Route::s_put("/settings/{name}/default/", "CoreSettingsPanel@reset_to_default", [
-        'permission' => 'Auth_modify_cobalt_settings'
-    ]);
-
-    Route::s_delete("/sessions/{id}", "UserAccounts@log_out_session_by_id");
+    Users::apiv1();
+    Users::post((new Options('/login', 'api_login_handler')));
 }
 
 if (app('Web_main_content_via_api')) {
@@ -74,21 +25,11 @@ if (app('Web_main_content_via_api')) {
 if (app('API_contact_form_enabled')) {
     Submissions::apiv1();
     Route::post("/contact", "Cobalt\\ContactForm\\Controllers\\Submissions@public_form_submission");
-    // Route::post("/contact", "ContactForm@contact_submit");
-    // Route::s_put("/contact/read-status/{id}", "ContactForm@read_status", ['permission' => 'Contact_form_submissions_access']);
-    // Route::s_delete("/contact/delete/{id}", "ContactForm@delete", ['permission' => 'Contact_form_submissions_modify']);
-    // ContactForm::apiv1();
+
 }
 
 if (app("CobaltEvents_enabled")) {
-    // Route::get("/cobalt-events/current", "EventsController@current");
-    // Route::s_put("/cobalt-events/update/{id}?", "EventsController@update_event", [
-    //     'permission' => 'CobaltEvents_crud_events'
-    // ]);
-    // Route::s_delete("/cobalt-events/{id}", "EventsController@delete_event", [
-    //     'permission' => 'CobaltEvents_crud_events'
-    // ]);
-Events::apiv1();
+    Events::apiv1();
 }
 
 
@@ -131,10 +72,6 @@ if(app("enable_debug_routes")) {
 
     Route::get("/header-tests/{response}", "DebugHeaders@response");
     Route::post("/proto/", "SchemaDebug@filter_test");
-}
-
-if(__APP_SETTINGS__['PaymentGateways_enabled']) {
-    Route::s_put("/settings/payment-gateways/{id}", "CoreApi@update_gateway_data", ['permission' => '']);
 }
 
 if(app("Mailchimp_default_list_id")) {

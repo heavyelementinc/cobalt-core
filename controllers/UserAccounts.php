@@ -3,7 +3,7 @@
 use Auth\AdditionalUserFields;
 use Auth\MultiFactorManager;
 use Auth\SessionManager;
-use \Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserPersistance;
 use Auth\UserSchema;
 use \Auth\UserValidate;

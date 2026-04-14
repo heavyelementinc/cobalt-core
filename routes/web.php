@@ -1,5 +1,6 @@
 <?php
 
+use Cobalt\Auth\Users\Controllers\Users;
 use Routes\Options;
 use Routes\Route;
 
@@ -58,19 +59,9 @@ if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {
 
 /** If authentications are enabled, these routes should be added to the table */
 if (app("Auth_logins_enabled")) {
-    /** Basic login page */
-    Route::get(app("Auth_login_page"), "Login@login_form");
-    Route::get("/login/email", "Login@email_sent", ['sitemap' => ['ignore' => true]]);
-    // Route::get("/preferences/password-reset-required/", "UserAccounts@change_my_password");
-    // /** Admin panel (TODO: Implement admin panel) */
-    // Route::get(app("Admin_panel_prefix"), "CoreController@admin_panel",['permission' => 'Admin_panel_access']);
-
-    // Route::get("/user/menu", "UserAccounts@get_user_menu");
+    // Redirect anyone coming to the "/admin" page (without a trailing slash)
     Route::get("/admin", "CoreController@admin_redirect");
-    Route::get("/login/password-reset", "Login@password_reset_initial_form", [
-        'sitemap' => ['ignore' => true]
-    ]);
-    Route::get("/login/password-reset/{token}", "Login@password_reset_token_form");
+    Users::get((new Options('/login', 'login_form')));
 }
 
 if (__APP_SETTINGS__['Contact_form_public_routes_enabled'] && __APP_SETTINGS__['API_contact_form_enabled']) {

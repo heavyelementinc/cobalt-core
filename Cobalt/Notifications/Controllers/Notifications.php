@@ -1,7 +1,7 @@
 <?php
 namespace Cobalt\Notifications\Controllers;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Notifications\Classes\PushNotifications;
 use Cobalt\Notifications\Models\NotificationAddresseeSchema;

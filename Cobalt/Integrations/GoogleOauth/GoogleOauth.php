@@ -2,7 +2,7 @@
 
 namespace Cobalt\Integrations\GoogleOauth;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Integrations\Config;
 use Cobalt\Integrations\OauthBase;
 use DateInterval;

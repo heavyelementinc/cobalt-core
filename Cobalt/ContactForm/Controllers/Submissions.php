@@ -2,7 +2,7 @@
 
 namespace Cobalt\ContactForm\Controllers;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\ContactForm\Model\AdditionalContactFields;
 use Cobalt\ContactForm\Model\FormSubmission;
 use Cobalt\Controllers\ModelController;

@@ -2,7 +2,7 @@
 
 namespace Cobalt\Integrations\Final\YouTube;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Integrations\Config as IntegrationsConfig;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\SchemaPrototypes\Basic\EnumResult;

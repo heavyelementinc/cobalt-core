@@ -1,7 +1,7 @@
 <?php
 
-use Auth\Authentication;
 use Auth\UserCRUD;
+use Cobalt\Auth\Users\Authentication;
 use Cobalt\Token;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\MethodNotAllowed;

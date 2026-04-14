@@ -1,7 +1,7 @@
 <?php
 
 use Auth\SessionManager;
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserPersistance;
 use Cobalt\Extensions\Extensions;
 use Cobalt\Maps\GenericMap;

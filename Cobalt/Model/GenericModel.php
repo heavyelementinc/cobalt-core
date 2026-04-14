@@ -100,7 +100,7 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
             return;
         }
         $reserved = $this->__reservedFieldNames();
-        if(in_array($property, $reserved)) throw new ReservedFieldName("Cannot set $property as the name is reserved!");
+        if(in_array($property, $reserved)) throw new ReservedFieldName("Cannot set field `$property` since the name is reserved!");
         $ignored = ['__pclass'];
         if(in_array($property, $ignored)) return;
         

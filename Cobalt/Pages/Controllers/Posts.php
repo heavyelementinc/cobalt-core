@@ -2,7 +2,7 @@
 
 namespace Cobalt\Pages\Controllers;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Pages\Controllers\AbstractPageController;
 use Cobalt\Pages\Classes\PostManager;

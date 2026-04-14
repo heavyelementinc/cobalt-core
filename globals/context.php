@@ -11,6 +11,9 @@
  * @license cobalt-core/license
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
+
+use Cobalt\Auth\Users\Authentication;
+
 benchmark_start("router_setup");
 ob_start();
 
@@ -21,7 +24,7 @@ $route_context = Routes\Route::get_router_context($_SERVER['REQUEST_URI']);
 if(getenv('HTTP2')) require_once __ENV_ROOT__ . "/globals/http2.php";
 try {
     /** @global $auth Access the Authentication class */
-    $auth = new Auth\Authentication();
+    $auth = new Authentication();
 } catch (Exception $e) {
     kill($e->getMessage());
 }

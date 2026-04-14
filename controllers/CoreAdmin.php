@@ -1,7 +1,9 @@
 <?php
 
 use Auth\SessionManager;
+use Cobalt\Auth\Users\UserCRUD;
 use \Auth\UserSchema;
+use Cobalt\Auth\Users\Models\User;
 use MongoDB\BSON\ObjectId;
 use Cobalt\Payments\PaymentGateway;
 use Cobalt\Payments\PaymentGatewaySchema;
@@ -15,7 +17,7 @@ class CoreAdmin {
         add_vars([
             'title' => "Admin Panel",
             'contact_manager' => (new ContactManager())->get_unread_count_for_user(session()),
-            'user_accounts' => (new \Auth\UserCRUD())->count([]),
+            'user_accounts' => (new User())->count([]),
             'events' => (new EventManager())->getAdminWidget(),
             'plugin_count' => Extensions::get_active_count(),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
@@ -54,7 +56,7 @@ class CoreAdmin {
     }
 
     function individual_user_management_panel($id) {
-        $ua = new \Auth\UserCRUD();
+        $ua = new UserCRUD();
         $user = $ua->getUserById($id);
         if (!$user) throw new \Exceptions\HTTP\NotFound("That user doesn't exist.", true, ['template' => 'errors/404_invalid_user.html']);
 

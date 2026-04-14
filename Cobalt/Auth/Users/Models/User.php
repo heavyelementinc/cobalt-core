@@ -7,7 +7,9 @@ use Cobalt\Auth\UserAccounts\Types\UserIntegrations;
 use Cobalt\Auth\UserAccounts\Types\UserPreferences;
 use Cobalt\Auth\UserAccounts\Types\UserSocialAccounts;
 use Cobalt\Auth\Users\Controllers\Users;
+use Cobalt\Auth\Users\Traits\Permissions;
 use Cobalt\Controllers\ModelController;
+use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Interfaces\Migration;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\ArrayType;
@@ -23,11 +25,14 @@ use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\StringType;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
+use DateTime;
 use Drivers\DatabaseManagement;
+use Exceptions\HTTP\NotFound;
 use MongoDB\UpdateResult;
 use PSpell\Dictionary;
 
 class User extends Model implements Migration {
+    use Permissions;
     var $additional = null;
 
     public function defineController(): ModelController {
@@ -50,7 +55,10 @@ class User extends Model implements Migration {
 
         $fields = [
             'uname' => [ // ☑️
-                new StringType
+                new StringType,
+                'tag' => function () {
+                    return "<div class='cobalt-user--profile-display'>".embed_image($this->avatar).$this->name()." </div>";
+                }
             ],
             'fname' => [ // ☑️
                 new StringType
@@ -92,7 +100,7 @@ class User extends Model implements Migration {
                 new ArrayType
             ],
             'permissions' => [ // ☑️
-                new ArrayType
+                new DictionaryType
             ],
             'is_root' => [ // ☑️
                 new BooleanType
@@ -169,4 +177,16 @@ class User extends Model implements Migration {
         
     }
 
+    // #[Prototype]
+    // function tag() {
+        
+    // }
+    
+    #[Prototype]
+    function name():string {
+        if($this->fname && $this->lname) {
+            return "$this->fname ".$this->lname->value[0] .".";
+        }
+        return $this->uname->value;
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace Cobalt\Notifications\Classes;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Minishlink\WebPush\Subscription;

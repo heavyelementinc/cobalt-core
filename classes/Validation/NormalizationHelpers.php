@@ -2,7 +2,7 @@
 
 namespace Validation;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserSchema;
 use Cobalt\Style\Color;
 use DOMDocument;

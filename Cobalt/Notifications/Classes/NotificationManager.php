@@ -2,7 +2,7 @@
 
 namespace Cobalt\Notifications\Classes;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserPersistance;
 use Cobalt\Model\Types\UserIdType;
 use Cobalt\Notifications\Models\NotificationSchema;

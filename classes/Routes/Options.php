@@ -91,7 +91,7 @@ class Options implements Iterator, JsonSerializable {
 
     private function generate_real_data() {
         $this->real_path = $this->get_context_root() . $this->original_path;
-        $this->real_regex = Route::convert_path_to_regex_pattern($this->real_path);
+        $this->real_regex = Route::convert_path_to_regex_pattern($this->original_path);
     }
 
     public function get_context_root():string {

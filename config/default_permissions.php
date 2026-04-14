@@ -1,304 +1,340 @@
 <?php
-/** @param array{array{group:string,label:string,dangerous:bool,default:bool,display:bool,ring:int}} $permissions */
-$permissions = [
-    "self" => [
-        "group" => "Self",
-        "label" => "Able to modify basic info for their own account.<help-span value='This includes first/last, username, email address, and other info.'></help-span>",
-        "dangerous" => true,
-        "default" => true,
-        "display" => false,
-        "ring" => 3
-    ],
-    "Admin_panel_access" => [
-        "group" => "Admin",
-        "name" => "Admin Panel Access",
-        "label" => "Access to the admin panel.<help-span value='Access to the /admin section of this Cobalt application.'></help-span>",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Auth_modify_cobalt_settings" => [
-        "group" => "Admin",
-        "name" => "Modify Cobalt Settings",
-        "label" => "Modify Cobalt settings.<help-span value='Access to the Cobalt Settings panel, able to modify them.'></help-span>",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Contact_form_submissions_access" => [
-        "group" => "Admin",
-        "name" => "Access Contact Form Submissions",
-        "label" => "Allows the user to access submissions to the contact form",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 3
-    ],
-    "Contact_form_submissions_delete" => [
-        "group" => "Admin",
-        "name" => "Delete Contact Form Submissions",
-        "label" => "Allows the user to delete submissions to the contact form",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 3
-    ],
-    "Debug_access" => [
-        "group" => "Admin",
-        "name" => "Debug Access",
-        "label" => "Access to debug tools for web developers.<help-span value='Most people do NOT need this.'></help-span>",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Post_allowed_author" => [
-        "group" => "Posts",
-        "label" => "Allows user to be credited a Post an author",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 3
-    ],
-    "Post_index" => [
-        "group" => "Posts",
-        "label" => "Access to the Posts index page <help-span value='This is a fairly useless permission without the ability to edit'></help-span>",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Post_create" => [
-        "group" => "Posts",
-        "label" => "Create new posts",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Post_update" => [
-        "group" => "Posts",
-        "label" => "Update existing posts",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Post_destroy" => [
-        "group" => "Posts",
-        "label" => "Delete Posts",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Post_read" => [
-        "group" => "Posts",
-        "label" => "Read Posts",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Posts_manage_posts" => [
-        "group" => "Posts",
-        "label" => "Allows the user to manage posts (but not publish them).",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 3
-    ],
-    "Posts_publish_posts" => [
-        "group" => "Posts",
-        "label" => "Allows the user to publish posts (but not edit them).",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 3
-    ],
-    "Posts_enable_privileged_fields" => [
-        "group" => "Posts",
-        "label" => "Allows the user to access privileged Page/Post fields.",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Pages_allowed_author" => [
-        "group" => "Pages",
-        "label" => "Allows user to appear as an author of pages.",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Pages_create" => [
-        "group" => "Pages",
-        "label" => "Create Pages",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Pages_read" => [
-        "group" => "Pages",
-        "label" => "Read Pages",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Pages_index" => [
-        "group" => "Pages",
-        "label" => "View Page Index",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Pages_update" => [
-        "group" => "Pages",
-        "label" => "Update Pages",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Pages_destroy" => [
-        "group" => "Pages",
-        "label" => "Delete Pages",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Pages_enable_privileged_fields" => [
-        "group" => "Posts",
-        "label" => "Allows the user to access privileged Page/Post fields.",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Auth_allow_creating_users" => [
-        "group" => "Users",
-        "label" => "Able to create new user accounts.",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Auth_allow_editing_users" => [
-        "group" => "Users",
-        "label" => "Access user editing features and change user account info.<help-span value='Modify any user account information besides permissions and groups'></help-span>",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Auth_allow_modifying_user_permissions" => [
-        "group" => "Users",
-        "label" => "Modify user account permissions and add/remove users from groups.",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Auth_allow_deleting_users" => [
-        "group" => "Users",
-        "label" => "Able to delete user accounts",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Addressee_query" => [
-        "group" => "Notifications",
-        "label" => "Able to query for username and first/last name.<help-span value='This is used as part of the notification system.'></help-span>",
-        "dangerous" => false,
-        "default" => true,
-        "ring" => 9
-    ],
-    "Notifications_can_send_notification" => [
-        "group" => "Notifications",
-        "label" => "Able to send a notification",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "Notifications_can_access_any_notification" => [
-        "group" => "Notifications",
-        "label" => "Able to access any notification<help-span value='Typically, a user can only access a notification if they wrote it or it is addressed to them.'></help-span>",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 2
-    ],
-    "CobaltEvents_crud_events" => [
-        "group"  => "Admin",
-        "label"  => "Create, delete, or modify Cobalt Events.",
-        "dangerous" => true,
-        "default" => false
-    ],
-    "Extensions_allow_management" => [
-        "group" => "Extensions",
-        "label" => "Allows the user to manage plugins. This is VERY dangerous.",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-
-    "API_manage_keys" => [
-        "group" => "API",
-        "label" => "Allow the user to manage API keys",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "CRUDControllerPermission" => [
-        "group" => "Users",
-        "label" => "Allow the user to access default CRUD endpoints",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Model_advanced_search_permission" => [
-        "group" => "Users",
-        "label" => "Allows the user to perform advanced queries outside of a given model's searchable fields (dangerous)",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Customizations_create" => [
-        "group" => "Customization",
-        "label" => "Allow the user to create arbitrary customized content (requires the modify privilege as well).",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Customizations_modify" => [
-        "group" => "Customization",
-        "label" => "Allow the user to modify the values of customized content",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Customizations_delete" => [
-        "group" => "Customization",
-        "label" => "Allow the user to delete existing customized content",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Customizations_update_parameters" => [
-        "group" => "Customization",
-        "label" => "Allow the user to modify customized content",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Database_database_export" => [
-        "group" => "Admin",
-        "label" => "Allow the user to export database files",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Database_database_import" => [
-        "group" => "Admin",
-        "label" => "Allow the user to import database files",
-        "dangerous" => true,
-        "default" => false,
-        "ring" => 1
-    ],
-    "Documentation_edit" => [
-        "group" => "Documentation",
-        "label" => "Allows user to edit documentation <help-span value='This can be dangerous if the user can edit sensitive documentation files'></help-span>",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 3
-    ],
-    "Documentation_destroy" => [
-        "group" => "Documentation",
-        "label" => "Allows user to delete documentation <help-span value='This can be dangerous if the user can edit sensitive documentation files'></help-span>",
-        "dangerous" => false,
-        "default" => false,
-        "ring" => 3
-    ],
+use Cobalt\Auth\Permissions\Permission;
+return [
+    (new Permission("self"))
+        ->setName("")
+        ->setGroup("Self")
+        ->setLabel("Able to modify basic info for their own account.")
+        ->setHelp("This includes first/last, username, email address, and other info.")
+        ->setDangerous(true)
+        ->setDefault(true)
+        ->setRing(3),
+    (new Permission("Admin_panel_access"))
+        ->setName("Admin Panel Access")
+        ->setGroup("Admin")
+        ->setLabel("Access to the admin panel.")
+        ->setHelp("Access to the /admin section of this Cobalt application.")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),
+    (new Permission("Auth_modify_cobalt_settings"))
+        ->setName("Modify Cobalt Settings")
+        ->setGroup("Admin")
+        ->setLabel("Modify Cobalt settings.")
+        ->setHelp("Access to the Cobalt Settings panel, able to modify them.")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),
+    (new Permission("Contact_form_submissions_access"))
+        ->setName("Access Contact Form Submissions")
+        ->setGroup("Admin")
+        ->setLabel("Allows the user to access submissions to the contact form")
+        ->setHelp("")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(3),
+    (new Permission("Contact_form_submissions_delete"))
+        ->setName("Delete Contact Form Submissions")
+        ->setGroup("Admin")
+        ->setLabel("Allows the user to delete submissions to the contact form")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(3),    
+    (new Permission("Debug_access"))
+        ->setName("Debug Access")
+        ->setGroup("Admin")
+        ->setLabel("Access to debug tools for web developers.")
+        ->setHelp("Most people do NOT need this.")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Post_allowed_author"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Allows user to be credited a Post an author")
+        ->setHelp("")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(3),    
+    (new Permission("Post_index"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Access to the Posts index page ")
+        ->setHelp("This is a fairly useless permission without the ability to edit")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Post_create"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Create new posts")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Post_update"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Update existing posts")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Post_destroy"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Delete Posts")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Post_read"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Read Posts")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Posts_manage_posts"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Allows the user to manage posts (but not publish them).")
+        ->setHelp("")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(3),    
+    (new Permission("Posts_publish_posts"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Allows the user to publish posts (but not edit them).")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(3),    
+    (new Permission("Posts_enable_privileged_fields"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Allows the user to access privileged Page/Post fields.")
+        ->setHelp("")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Pages_allowed_author"))
+        ->setName("")
+        ->setGroup("Pages")
+        ->setLabel("Allows user to appear as an author of pages.")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Pages_create"))
+        ->setName("")
+        ->setGroup("Pages")
+        ->setLabel("Create Pages")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Pages_read"))
+        ->setName("")
+        ->setGroup("Pages")
+        ->setLabel("Read Pages")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Pages_index"))
+        ->setName("")
+        ->setGroup("Pages")
+        ->setLabel("View Page Index")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Pages_update"))
+        ->setName("")
+        ->setGroup("Pages")
+        ->setLabel("Update Pages")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Pages_destroy"))
+        ->setName("")
+        ->setGroup("Pages")
+        ->setLabel("Delete Pages")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Pages_enable_privileged_fields"))
+        ->setName("")
+        ->setGroup("Posts")
+        ->setLabel("Allows the user to access privileged Page/Post fields.")
+        ->setHelp("")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Auth_allow_creating_users"))
+        ->setName("")
+        ->setGroup("Users")
+        ->setLabel("Able to create new user accounts.")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Auth_allow_editing_users"))
+        ->setName("")
+        ->setGroup("Users")
+        ->setLabel("Access user editing features and change user account info.")
+        ->setHelp("Modify any user account information besides permissions and groups")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Auth_allow_modifying_user_permissions"))
+        ->setName("")
+        ->setGroup("Users")
+        ->setLabel("Modify user account permissions and add/remove users from groups.")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Auth_allow_deleting_users"))
+        ->setName("")
+        ->setGroup("Users")
+        ->setLabel("Able to delete user accounts")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Addressee_query"))
+        ->setName("")
+        ->setGroup("Notifications")
+        ->setLabel("Able to query for username and first/last name.")
+        ->setHelp("This is used as part of the notification system.")
+        ->setDangerous(false)
+        ->setDefault(true)
+        ->setRing(9),    
+    (new Permission("Notifications_can_send_notification"))
+        ->setName("")
+        ->setGroup("Notifications")
+        ->setLabel("Able to send a notification")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("Notifications_can_access_any_notification"))
+        ->setName("")
+        ->setGroup("Notifications")
+        ->setLabel("Able to access any notification")
+        ->setHelp("Typically, a user can only access a notification if they wrote it or it is addressed to them.")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(2),    
+    (new Permission("CobaltEvents_crud_events"))
+        ->setName("")
+        ->setGroup("Admin")
+        ->setLabel("Create, delete, or modify Cobalt Events.")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Extensions_allow_management"))
+        ->setName("")
+        ->setGroup("Extensions")
+        ->setLabel("Allows the user to manage plugins. This is VERY dangerous.")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("API_manage_keys"))
+        ->setName("")
+        ->setGroup("API")
+        ->setLabel("Allow the user to manage API keys")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("CRUDControllerPermission"))
+        ->setName("")
+        ->setGroup("Users")
+        ->setLabel("Allow the user to access default CRUD endpoints")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Model_advanced_search_permission"))
+        ->setName("")
+        ->setGroup("Users")
+        ->setLabel("Allows the user to perform advanced queries outside of a given model's searchable fields (dangerous)")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Customizations_create"))
+        ->setName("")
+        ->setGroup("Customization")
+        ->setLabel("Allow the user to create arbitrary customized content (requires the modify privilege as well).")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Customizations_modify"))
+        ->setName("")
+        ->setGroup("Customization")
+        ->setLabel("Allow the user to modify the values of customized content")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Customizations_delete"))
+        ->setName("")
+        ->setGroup("Customization")
+        ->setLabel("Allow the user to delete existing customized content")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Customizations_update_parameters"))
+        ->setName("")
+        ->setGroup("Customization")
+        ->setLabel("Allow the user to modify customized content")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Database_database_export"))
+        ->setName("")
+        ->setGroup("Admin")
+        ->setLabel("Allow the user to export database files")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Database_database_import"))
+        ->setName("")
+        ->setGroup("Admin")
+        ->setLabel("Allow the user to import database files")
+        ->setHelp("")
+        ->setDangerous(true)
+        ->setDefault(false)
+        ->setRing(1),    
+    (new Permission("Documentation_edit"))
+        ->setName("")
+        ->setGroup("Documentation")
+        ->setLabel("Allows user to edit documentation ")
+        ->setHelp("This can be dangerous if the user can edit sensitive documentation files")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(3),    
+    (new Permission("Documentation_destroy"))
+        ->setName("")
+        ->setGroup("Documentation")
+        ->setLabel("Allows user to delete documentation ")
+        ->setHelp("This can be dangerous if the user can edit sensitive documentation files")
+        ->setDangerous(false)
+        ->setDefault(false)
+        ->setRing(3),
 ];

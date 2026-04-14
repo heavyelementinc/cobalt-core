@@ -2,7 +2,7 @@
 
 namespace Cobalt\SchemaPrototypes\Compound;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\Models\User;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\Exceptions\SchemaExcludesUnregisteredKeys;
 use Cobalt\SchemaPrototypes\SchemaResult;
@@ -21,12 +21,12 @@ use Validation\Exceptions\ValidationFailed;
  */
 class UserIdResult extends SchemaResult {
     use MongoId, Fieldable;
-    protected UserCRUD $userCrud;
+    protected User $userCrud;
     protected $userData = false;
     protected $initialized = false;
 
     function __construct() {
-        $this->userCrud = new UserCRUD();
+        $this->userCrud = new User();
     }
 
     function typecast($id, $type = QUERY_TYPE_CAST_LOOKUP) {
@@ -100,7 +100,7 @@ class UserIdResult extends SchemaResult {
 
     private function initialize():void {
         if($this->initialized === true) return;
-        if(!$this->userCrud) $this->userCrud = new UserCRUD();
+        if(!$this->userCrud) $this->userCrud = new User();
         if($this->value instanceof ObjectId === false && $this->getDirective("nullable")) {
             $this->userData = $this->getDirective("default");
             $this->initialized = true;
@@ -139,7 +139,7 @@ class UserIdResult extends SchemaResult {
             ],
         ];
         if(!key_exists($type, $options)) throw new Exception("$type is an invalid way to look up users");
-        $crud = new UserCRUD();
+        $crud = new User();
 
         $result = [];
         switch($type) {

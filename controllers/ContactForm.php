@@ -1,6 +1,6 @@
 <?php
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Notifications\Classes\PushNotifications;

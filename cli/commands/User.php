@@ -1,10 +1,12 @@
 <?php
 
 use Auth\Permissions;
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\Permissions\Permission;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Notifications\Classes\PushNotifications;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
+use SebastianBergmann\CodeCoverage\Report\PHP;
 
 class User {
     public $help_documentation = [
@@ -55,6 +57,10 @@ class User {
         "notify" => [
             'description' => "[user_id] Send a test notification to a specific user OR all root users",
             'context_required' => true
+        ],
+        "permissions" => [
+            'description' => "[permission_file [, target]] Upgrade app permissions to the new format",
+            'context_required' => true
         ]
     ];
 
@@ -78,7 +84,7 @@ class User {
         if ($email === null) $u['email'] =    readline("Email address .... > ");
         else $u['email'] = $email;
 
-        $crud = new Auth\UserCRUD();
+        $crud = new UserCRUD();
         $result = $crud->createUser($u);
         return "User created with id " . fmt($result['_id'], "i");
     }
@@ -90,12 +96,12 @@ class User {
         $confirm = readline_private("Confirm the new password > ");
 
         if ($pword !== $confirm) throw new Exception("Passwords did not match. Aborting.");
-        $accounts = new Auth\UserCRUD();
+        $accounts = new UserCRUD();
         $user = $accounts->getUserByUnameOrEmail($username);
 
         if ($user === null) throw new Exception("That user doesn't exist.");
 
-        $crud = new Auth\UserCRUD();
+        $crud = new UserCRUD();
         // NOTE: Hashing is taken care of in the UserAccountValidation class
         $result = $crud->updateUser($user['_id'], ['pword' => $pword]);
 
@@ -105,7 +111,7 @@ class User {
 
     function require_reset($uname, $status) {
         $new_status = cli_to_bool($status);
-        $ua = new Auth\UserCRUD();
+        $ua = new UserCRUD();
         $user = $ua->getUserByUnameOrEmail($uname);
         if ($user === null) throw new Exception("Invalid user account");
 
@@ -119,7 +125,7 @@ class User {
 
     function delete($username, $confirm = false) {
         if (!app("Auth_user_accounts_enabled")) throw new Exception("User accounts are not enabled");
-        $accounts = new Auth\UserCRUD();
+        $accounts = new UserCRUD();
         $user = $accounts->getUserByUnameOrEmail($username);
 
         if ($user === null) throw new Exception("That user account doesn't exist");
@@ -135,7 +141,7 @@ class User {
         }
 
         if ($confirm !== true) return fmt("Aborting", "e");
-        $crud = new Auth\UserCRUD();
+        $crud = new UserCRUD();
         $result = $crud->deleteUserById($user['_id']);
         return "Removed user account " . fmt((string)$user['_id'], "i");
     }
@@ -146,7 +152,7 @@ class User {
     }
 
     function list($limit = 50, $skip = 0) {
-        $ua = new Auth\UserCRUD();
+        $ua = new UserCRUD();
         $list = $ua->find([], ['limit' => (int)$limit, 'skip' => (int)$skip]);
         foreach ($list as $user) {
             say("$user[uname]  .... $user[email]\n", 'i');
@@ -171,7 +177,7 @@ class User {
             $p = (key_exists($index, $permissions)) ? $permissions[$index] : null;
             if(!$p) return fmt("Invalid selection", "e");
         }
-        $ua = new Auth\UserCRUD();
+        $ua = new UserCRUD();
         $result = $ua->grant_revoke_permission($u, $p, $v);
         return str_replace($u, fmt($u, 'w', "normal"), substr(json_encode($result),1,-1));
     }
@@ -185,7 +191,7 @@ class User {
     }
 
     private function root_status($u, $value, $success_message) {
-        $ua = new Auth\UserCRUD();
+        $ua = new UserCRUD();
         $user = $ua->getUserByUnameOrEmail($u);
         if ($user === null) throw new Exception("No user found");
         $result = $ua->updateOne(
@@ -211,6 +217,44 @@ class User {
     function expire() {
         $crud = new UserCRUD();
         return $crud->destroy_expired_tokens();
+    }
+
+    function permissions($file = null, $target = null) {
+        if(!$file) $file = __APP_ROOT__ . "/config/permissions.php";
+        if(!file_exists($file)) return "Permissions file does not exist.";
+        require $file;
+        if(!isset($permissions)) return fmt("Malformed permissions file.","e");
+        $code = <<<PHP
+        <?php
+        use Cobalt\\Auth\\Permissions\\Permission;
+        return [
+        PHP;
+        foreach($permissions as $identifier => $value) {
+            $ex = explode("<help-span",$value['label']);
+            $description = $ex[0];
+            $help = $ex[1];
+            if($help) $help = str_replace(
+                ["value='", 'value="', "'></help-span>", "\"></help-span>"],
+                ["","","",""],
+                trim($help)
+            );
+            $ring = $value['ring'] ?? 1;
+            $dangerous = json_encode($value['dangerous']);
+            $default = json_encode($value['default']);
+            $code .= <<<PHP
+                \n    (new Permission("$identifier"))
+                    ->setName("$value[name]")
+                    ->setGroup("$value[group]")
+                    ->setLabel("$description")
+                    ->setHelp("$help")
+                    ->setDangerous($dangerous)
+                    ->setDefault($default)
+                    ->setRing($ring),
+            PHP;
+        }
+
+        if(!$target) $target = $file;
+        file_put_contents($target, "$code\n];");
     }
 
     // function enable_accounts($bool){

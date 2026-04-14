@@ -1,6 +1,7 @@
 <?php
 
 use Auth\UserPersistance;
+use Cobalt\Auth\Users\Models\User;
 use MongoDB\BSON\ObjectId;
 
 function async_cobalt_command($command, $context = true, $log = "/dev/null") {
@@ -78,9 +79,10 @@ function session_exists() {
  *                      Can be null.
  * @return bool true if the user has permission, false otherwise
  */
-function has_permission($perm_name, $group = null, ?UserPersistance $user = null, $throw_no_session = true):bool {
+function has_permission($perm_name, $group = null, ?User $user = null, $throw_no_session = true):bool {
     if(is_cli()) return true;
-    return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
+    return User::hasPermission($user, $perm_name, $throw_no_session);
+    // return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }
 
 /**

@@ -3,7 +3,7 @@
 use Auth\AdditionalUserFields;
 use Auth\MultiFactorManager;
 use Auth\SessionManager;
-use \Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserSchema;
 use \Auth\UserValidate;
 use Cobalt\Notifications\Classes\PushNotifications;

@@ -2,7 +2,7 @@
 
 namespace Cobalt\Notifications;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 
 use Cobalt\SchemaPrototypes\SchemaResult;
 use Cobalt\SchemaPrototypes\Traits\MongoId;

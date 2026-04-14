@@ -1,6 +1,6 @@
 <?php
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 
 function __process_flags(){
     foreach($GLOBALS['commands'] as $i => $cmd){

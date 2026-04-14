@@ -98,7 +98,7 @@ function __cobalt_initialize_create_user($root_user) {
     $root_user['groups'] = ["root"];
 
     // Let's create a new user
-    $crud = new \Auth\UserCRUD();
+    $crud = new \Cobalt\Auth\Users\UserCRUD();
 
     $result = $crud->createUser($root_user);
     try {
