@@ -120,6 +120,8 @@
     @app_settings@
 
     @app_meta@
+    <link rel="canonical" href="<?= htmlspecialchars(get('canonical') ?? get('request')['url']) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars(get('keywords') ?? __APP_SETTINGS__['keywords'] ) ?>"/>
     {{!html_head_binding}}
     @router_table@
     <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{versionHash}}">

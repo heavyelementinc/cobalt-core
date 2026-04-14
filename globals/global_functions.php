@@ -190,10 +190,12 @@ function class_loader($path, $originalName, $stage) {
         }
         exit;
     } catch (Exception $e) {
+        if(!__APP_SETTINGS__['Cobalt_autoload_exit_on_failure']) return;
         print("Exception in stage $stage when loading " . obfuscate_path_name($e->getFile()) . ' ' . $e->getLine());
         print("\n".$e->getMessage() );
         exit;
     } catch (Error $e) {
+        if(!__APP_SETTINGS__['Cobalt_autoload_exit_on_failure']) return;
         print("<pre>");
         $file = obfuscate_path_name($e->getFile()) . ': ' . $e->getLine();
         if (app('debug')) {
@@ -305,6 +307,16 @@ function add_vars($vars):void {
  */
 function set(string $name, mixed $value):void {
     add_vars([$name => $value]);
+}
+
+/**
+ * Gets a single value from web processor vars or null if undefined
+ * @param string $name 
+ * @return mixed|string 
+ */
+function get(string $name) {
+    if(key_exists($name, $GLOBALS['WEB_PROCESSOR_VARS'])) return $GLOBALS['WEB_PROCESSOR_VARS'][$name];
+    return null;
 }
 
 /**
