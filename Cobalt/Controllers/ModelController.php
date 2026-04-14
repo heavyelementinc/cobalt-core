@@ -20,7 +20,7 @@ use MongoDB\Model\BSONDocument;
 use Routes\Route;
 use TypeError;
 
-abstract class ModelController {
+abstract class ModelController extends Controller {
     use IndexableModel, SearchableModel, SortableModel, EditableModel, CreateableModel, ReadableModel, UpdateableModel, DestroyableModel;
     public $name;
     public string $friendly_name;
