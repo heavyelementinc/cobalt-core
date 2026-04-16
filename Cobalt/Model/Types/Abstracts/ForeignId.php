@@ -12,6 +12,7 @@ use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
+use Error;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
@@ -116,6 +117,7 @@ abstract class ForeignId extends MixedType {
     }
 
     public function filter($oid) {
+        if(is_array($oid) && key_exists('id', $oid)) $oid = $oid['id'];
         if(!$oid) throw new ValidationIssue('$oid must not be blank!');
         try {
             $_id = new ObjectId($oid);
@@ -125,7 +127,6 @@ abstract class ForeignId extends MixedType {
         
         return $_id;
     }
-
 
     public function onUpdateConfirmed($value):void {
         update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['outerHTML' => $this->field()]);
@@ -150,6 +151,7 @@ abstract class ForeignId extends MixedType {
         // Loop through all the objects that belong to this field
         // foreach($this->getValue() as $index => $item) {
         if($this->getRaw()) {
+            // $metaAction = $this->model->defineController()->get_route_replace("__updateMeta", [$this->model->_id, $this->fieldName, $this->_id]);
             $gallery .= view($this->fieldItemTemplate(), ['item' => $this->getValue(), 'object_id' => $this->getRaw(), 'ordered_list' => $this]);
         }
         // }

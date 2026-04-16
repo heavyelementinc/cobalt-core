@@ -130,7 +130,7 @@ trait SearchableModel {
         $searchable = $directives['searchable'] ?? $directives['index']['searchable'] ?? null;
         if($searchable === null) return;
         if($searchable instanceof SearchableDirective === false) {
-            throw new DirectiveException("All searchable fields must explicitly define an instance of SearchableDirective");
+            throw new DirectiveException("Field `$field` must explicitly define an instance of SearchableDirective");
         }
 
         // $index = $directives['index'] ?? [];

@@ -15,6 +15,7 @@ export class ObjectGallery extends ICustomInput {
     connectedCallback() {
         this.initObjectPicker();
         this.initDragAndDrop();
+        this.initActionMenu();
         if(this.constructor.name === "ObjectGallery") this.customInputReady.resolve(true);
     }
     
@@ -176,11 +177,18 @@ export class ObjectGallery extends ICustomInput {
         const items = this.querySelectorAll(this.ITEM_QUERY);
         let value = [];
         for(const el of items) {
-            value.push(el.dataset.id);
+            value.push(el.value);
         }
         return value;
     }
 
+    initActionMenu() {
+        const menu = this.querySelector("action-menu");
+        if(!menu) return;
+        // menu.addEventListener("promptdata", e => {
+        //     this.dispatchEvent(new Event("change"));
+        // });
+    }
 }
 
 export class FileGallery extends ObjectGallery {
@@ -218,6 +226,23 @@ export class GalleryItem extends HTMLElement {
     constructor() {
         super();
     }
+    _props = {
+        meta: {}
+    }
+    get value() {
+        const object = {
+            ...this.dataset,
+            ...this._props.meta
+        };
+        return object;
+    }
+
+    set value(val) {
+        if(typeof val !== "object") return;
+        if(Array.isArray(val)) return;
+        this._props.meta = {...this._props.meta, ...val};
+    }
+
     get container() {
         return this.closest("object-gallery,file-gallery,foreign-id,file-id");
     }
@@ -236,6 +261,23 @@ export class GalleryItem extends HTMLElement {
             const target = this.parentNode;
             this.parentNode.removeChild(this);
             target.dispatchEvent(new Event("change",{bubbles: true}));
+        });
+
+        const actionMenu = this.querySelector('action-menu');
+        if(!actionMenu) return;
+        // actionMenu.addEventListener("click", e => {
+        //     e.preventDefault();
+        //     actionMenu.open();
+        // });
+
+        this.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            actionMenu.open();
+        });
+
+        actionMenu.addEventListener("promptdata", event => {
+            this.value = event.detail.promptData;
+            this.dispatchEvent(new Event("change", {bubbles: true}));
         });
     }
 }

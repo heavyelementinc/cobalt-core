@@ -35,8 +35,12 @@ class ImageArrayType extends OrderedListOfForeignIds {
             }
             $this->operator = '$addToSet';
         }
+        $array_of_id_strings = [];
+        foreach($oids as $key => $value) {
+            array_push($array_of_id_strings, $this->handle_incoming_commands($value));
+        }
         
-        return parent::filter($oids);
+        return parent::filter($array_of_id_strings);
     }
 
     function filter_attributes_objectid($oids):array {

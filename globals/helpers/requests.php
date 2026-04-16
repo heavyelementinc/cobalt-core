@@ -394,3 +394,7 @@ function normalize_uploaded_files(array $files):array {
     }
     return $newArray;
 }
+
+function geocode_address(string $address, string $token) {
+    return json_decode(file_get_contents("https://maps.googleapis.com/maps/api/geocode/json?address={$address}&key={$token}"), true);
+}

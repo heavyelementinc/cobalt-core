@@ -5,6 +5,7 @@ namespace Cobalt\Model\Types\Traits;
 use Cobalt\Model\Model;
 use Drivers\BinaryStorage;
 use Exception;
+use Exceptions\HTTP\BadRequest;
 use League\ColorExtractor\Color as ColorExtractorColor;
 use League\ColorExtractor\ColorExtractor;
 use League\ColorExtractor\Palette;
@@ -216,4 +217,43 @@ trait FileHandler {
         return false;
     }
 
+    
+    public function handle_incoming_commands(string|array $data) {
+        if(!is_array($data)) return $data;
+        if(!key_exists('id', $data)) throw new Exception('Objects must contain an id!');
+        
+        // Only handle supported requests
+        if(key_exists("filename", $data)) {
+            $this->updateMeta(new ObjectId($data['id']), 'filename', $data['filename']);
+        }
+        if(key_exists("alt", $data)) {
+            $this->updateMeta(new ObjectId($data['id']), 'alt', $data['alt']);
+        }
+        return $data['id'];
+    }
+
+    public function updateMeta(ObjectId $oid, string $field, string $value) {
+
+        switch($field) {
+            case "filename":
+                return $this->renameFile($oid, $value);
+            case "alt":
+                return $this->__alt($oid, $value);
+        }
+        throw new Exception("Unsupported meta update");
+    }
+    public function renameFile($oid, $value) {
+        $search = ["/", " ", ".", "'",];
+        $replace = ["", "_",  "",  "",];
+        $existing = $this->__collection->findOne(['_id' => $oid]);
+        $oldName = pathinfo($existing['filename']);
+        $ext = mime_content_type_to_extension($existing['meta']['mimetype']) ?? $oldName['extension'];
+        $path = ($oldName['pathname']) ? $oldName['pathname'] . "/" : "";
+        $newName = $path. str_replace($search, $replace, $value) . (($ext) ? ".$ext" : "");
+        $canonicalizedPath = realpath($newName);
+        if(!$canonicalizedPath) $canonicalizedPath = $newName;
+        $count = $this->__collection->count(['filename' => $canonicalizedPath]);
+        if($count) throw new BadRequest("Cannot rename file. That filename already exists!", true);
+        return $this->__rename($oid, $canonicalizedPath);
+    }
 }

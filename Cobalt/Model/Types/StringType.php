@@ -48,7 +48,7 @@ class StringType extends MixedType {
 
     function str_replace($value) {
         if(!$this->hasDirective('str_replace')) return $value;
-        $directive = $this->getDirective();
+        $directive = $this->getDirective('str_replace');
         return str_replace($directive[0], $directive[1], $value);
     }
 

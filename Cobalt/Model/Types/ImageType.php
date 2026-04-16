@@ -51,7 +51,8 @@ class ImageType extends ForeignId {
             $filename = $this->filename($arr);
             $oid = $this->__store($arr['tmp_name'], $filename);
         } else {
-            $oid = $this->filter_attributes_objectid($oid);
+            
+            $oid = $this->filter_attributes_objectid($this->handle_incoming_commands($oid));
         }
         if(!$oid) throw new BadRequest("Failed to upload image to database");
 

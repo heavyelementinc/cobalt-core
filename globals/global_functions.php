@@ -819,11 +819,16 @@ function juggler(string $canonincal, mixed $value) {
 function get_extension_from_file($file_path, $file_name = null, $trust_filename = false) {
     if($file_name && $trust_filename) return pathinfo($file_name, PATHINFO_EXTENSION);
     if(!file_exists($file_path)) return false;
-    $ext = explode("/", mime_content_type($file_path));
+    
+    // get_usable_mime_array();
+    return mime_content_type(mime_content_type($file_path));
+}
+
+function mime_content_type_to_extension($mimetype, $type = "audio") {
+    $ext = explode("/", $mimetype);
     $type = $ext[0];
     $ext = $ext[1];
     if(substr($ext, 0, 2) == "x-") $ext = substr($ext, 2);
-    // get_usable_mime_array();
     return match($ext) {
         "svg+xml" => "svg",
         "abiword" => "abw",
