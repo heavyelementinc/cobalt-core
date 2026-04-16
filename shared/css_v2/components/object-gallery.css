@@ -213,3 +213,27 @@ gallery-item {
         display: none;
     }
 }
+
+.object-gallery--meta-editor {
+    border: 1px solid var(--input-disabled-border);
+    border-radius: var(--margin-s);
+    padding: 0;
+    ul.list-panel {
+        border: unset;
+    }
+    button {
+        width: 50%;
+        border: 1px solid transparent;
+        border-top: 1.5px solid var(--input-disabled-border);
+        border-radius: unset;
+        &[type='submit'] {
+            background: var(--project-color-acknowledge);
+            &:hover {
+                background: hsl(from var(--project-color-acknowledge) h s calc(l * 1.4))
+            }
+        }
+        &:hover {
+            border: 1.5px solid transparent;
+        }
+    }
+}

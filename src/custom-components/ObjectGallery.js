@@ -265,19 +265,82 @@ export class GalleryItem extends HTMLElement {
 
         const actionMenu = this.querySelector('action-menu');
         if(!actionMenu) return;
-        // actionMenu.addEventListener("click", e => {
-        //     e.preventDefault();
-        //     actionMenu.open();
-        // });
-
-        this.addEventListener("contextmenu", e => {
+        actionMenu.addEventListener("click", e => {
             e.preventDefault();
-            actionMenu.open();
+            // actionMenu.open();
+            this.createMetaEditor(actionMenu);
         });
 
         actionMenu.addEventListener("promptdata", event => {
             this.value = event.detail.promptData;
             this.dispatchEvent(new Event("change", {bubbles: true}));
         });
+
+        this.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            // actionMenu.open();
+            // dialog.open();
+            this.createMetaEditor(actionMenu)
+        });
+    }
+
+    metaEditor = null;
+
+    createMetaEditor(actionMenu) {
+        this.metaEditor = document.createElement("dialog");
+        this.metaEditor.classList.add("object-gallery--meta-editor");
+        document.body.appendChild(this.metaEditor);
+
+        this.metaEditor.addEventListener("close", () => {
+            this.metaEditor.parentNode.removeChild(this.metaEditor);
+        });
+
+        const form = document.createElement("form");
+        this.metaEditor.appendChild(form);
+        const listPanel = document.createElement("ul");
+        listPanel.classList.add("list-panel");
+        form.appendChild(listPanel);
+        for(const option of actionMenu.querySelectorAll("option")) {
+            const li = document.createElement("li");
+            li.innerHTML = `<label>${option.getAttribute("title")}</label>`;
+            const input = document.createElement("input");
+            switch(option.getAttribute("name")) {
+                case "accent_color":
+                case "contrast_color":
+                    input.type = "color";
+                    break;
+                default:
+                    input.type = "text";
+                    break;
+            }
+            input.name = option.getAttribute("name");
+            input.value = option.getAttribute("value");
+            li.appendChild(input);
+            listPanel.appendChild(li);
+        }
+        const closebtn = document.createElement("button");
+        closebtn.innerText = "Cancel";
+        form.appendChild(closebtn);
+        closebtn.addEventListener("click", e => {
+            e.preventDefault();
+            this.metaEditor.parentNode.removeChild(this.metaEditor);
+        });
+
+        const btn = document.createElement("button");
+        btn.type = "submit";
+        btn.innerText = "Submit";
+        form.appendChild(btn);
+
+        form.addEventListener("submit", e => {
+            const inputs = form.querySelectorAll("input");
+            const value = {};
+            for(const el of inputs){ 
+                value[el.name] = el.value;
+            }
+            this.value = value;
+            this.metaEditor.parentNode.removeChild(this.metaEditor)
+            this.dispatchEvent(new Event("change", {bubbles: true}));
+        });
+        this.metaEditor.showModal();
     }
 }
