@@ -121,4 +121,12 @@ class DateType extends MixedType {
         return "<code class=\"utc-date\">".$this->display()."</code>";
     }
 
+
+    public function onUpdateConfirmed($value):void {
+        if($value instanceof UTCDateTime) $value = $value->toDateTime()->format(self::FORMAT_SHORTHANDS['datetime-local']);
+        update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['value' => $value]);
+        if($this->hasDirective(DIRECTIVE_KEY_ON_UPDATE)) {
+            $this->getDirective(DIRECTIVE_KEY_ON_UPDATE, $value);
+        }
+    }
 }
