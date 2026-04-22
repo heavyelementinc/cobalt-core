@@ -69,6 +69,9 @@ class InputDateTime extends HTMLElement {
 
     parseValue(val) {
         if(val instanceof Date) return val;
+        if("$date" in val && "$numberLong" in val.$date) {
+            return this.fromMilliseconds(val.$date.$numberLong);
+        }
         switch(this.from) {
             case "string":
                 return this.fromString(val);

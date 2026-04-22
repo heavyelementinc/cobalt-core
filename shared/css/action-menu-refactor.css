@@ -169,7 +169,7 @@ action-menu {
         align-items: center;
         min-width: 13ch;
         color: black;
-        border: none;
+        border: 1.5px solid transparent;
     }
 
     .action-menu-wrapper menu button:hover {
@@ -188,6 +188,7 @@ action-menu {
 
     .action-menu-wrapper menu label {
         flex-grow: 1;
+        margin: unset;
     }
 
     .action-menu-wrapper menu .throbber {

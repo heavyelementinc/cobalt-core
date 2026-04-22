@@ -45,6 +45,10 @@ class ActionMenuElement extends CustomButton {
         this.menu.addEventListener("actionmenuselect", event => {
             this.dispatchEvent(new CustomEvent("actionmenuselect", {detail: event.detail}));
         });
+        
+        this.menu.addEventListener("promptdata", event => {
+            this.dispatchEvent(new CustomEvent("promptdata", event));
+        })
     }
 
     disconnectedCallback() {
@@ -137,9 +141,11 @@ class ActionMenuElement extends CustomButton {
 
         action.label = opt.innerHTML ?? "Default";
         action.icon = icon;
+        action.type = opt.getAttribute("type") ?? 'option';
         
         action.button.addEventListener("click", event => {
             if(this.stopPropagation) event.stopPropagation();
+            if(event.defaultPrevented) return;
             this.triggerEvent(opt, "click", event, false, action)
         });
         action.button.addEventListener("load", event => {
@@ -161,7 +167,7 @@ class ActionMenuElement extends CustomButton {
             action.target = opt.getAttribute("target");
         }
 
-        if(opt.hasAttribute("action")) {
+        if(action.type !== "prompt" && opt.hasAttribute("action")) {
             let json = opt.getAttribute("value") ?? "{}";
             action.requestAction = opt.getAttribute("action");
             action.requestMethod = opt.getAttribute("method") ?? "POST";

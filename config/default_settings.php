@@ -690,6 +690,9 @@ $settings = [
         "HTTP_error_body_id" => [
             "default" => "cobalt_http_error"
         ],
+        "Cobalt_autoload_exit_on_failure" => [
+            'default' => true
+        ],
     /** SEARCH AND SEO */
         "keywords" => [
             "default" => "",

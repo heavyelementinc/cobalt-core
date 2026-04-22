@@ -106,6 +106,8 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
         foreach($oids as $val) {
             if(!$val) throw new ValidationIssue("Contains invalid file IDs");
             try {
+                // Unwind ObjectId stored in an array
+                if(is_array($val) && key_exists('id', $val)) $val = $val['id'];
                 $value[] = new ObjectId($val);
             } catch (Exception $e) {
                 throw new ValidationIssue("`$val` was not a valid ObjectId");

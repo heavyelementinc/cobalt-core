@@ -110,7 +110,7 @@ gallery-item {
         width: 100%;
         user-select: none;
     }
-    > button {
+    > button, > action-menu[role='button'] {
         float: right;
         position: absolute;
         right: 5px;
@@ -134,12 +134,19 @@ gallery-item {
     &[mime-type] > button {
         position: absolute;
     }
-    action-menu {
+    action-menu[role='button'] {
         position: absolute;
-        top: 0;
+        bottom: 0;
         right: 0;
-        background: unset;
-        font-size: .5em;
+        background-color: unset;
+        padding: unset;
+        border: none;
+        &:hover {
+            color: black;
+        }
+        &:before {
+            content: "\F01D9"
+        }
     }
     &.object-gallery--visually-hidden {
         opacity: 0.2;
@@ -204,5 +211,29 @@ gallery-item {
     }
     a, action-menu, button {
         display: none;
+    }
+}
+
+.object-gallery--meta-editor {
+    border: 1px solid var(--input-disabled-border);
+    border-radius: var(--margin-s);
+    padding: 0;
+    ul.list-panel {
+        border: unset;
+    }
+    button {
+        width: 50%;
+        border: 1px solid transparent;
+        border-top: 1.5px solid var(--input-disabled-border);
+        border-radius: unset;
+        &[type='submit'] {
+            background: var(--project-color-acknowledge);
+            &:hover {
+                background: hsl(from var(--project-color-acknowledge) h s calc(l * 1.4))
+            }
+        }
+        &:hover {
+            border: 1.5px solid transparent;
+        }
     }
 }

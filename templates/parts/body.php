@@ -25,6 +25,7 @@
     {{!webmention}}
     @fonts_tag();
     <link href='<?=to_base_url("/core-content/css/material-design/css/material.min.css")?>?{{app.verion}}' rel="stylesheet">
+    <!-- <link rel="stylesheet" href = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" /> -->
     <?php
         use Cobalt\EventListings\Models\Event;
         use Handlers\WebHandler;
@@ -41,6 +42,7 @@
     <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
     <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+    <!-- <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script> -->
 
     <style>
         slide-show {
@@ -120,6 +122,8 @@
     @app_settings@
 
     @app_meta@
+    <link rel="canonical" href="<?= htmlspecialchars(get('canonical') ?? get('request')['url']) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars(get('keywords') ?? __APP_SETTINGS__['keywords'] ) ?>"/>
     {{!html_head_binding}}
     @router_table@
     <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{versionHash}}">

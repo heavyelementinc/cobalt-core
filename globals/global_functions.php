@@ -190,10 +190,12 @@ function class_loader($path, $originalName, $stage) {
         }
         exit;
     } catch (Exception $e) {
+        if(!__APP_SETTINGS__['Cobalt_autoload_exit_on_failure']) return;
         print("Exception in stage $stage when loading " . obfuscate_path_name($e->getFile()) . ' ' . $e->getLine());
         print("\n".$e->getMessage() );
         exit;
     } catch (Error $e) {
+        if(!__APP_SETTINGS__['Cobalt_autoload_exit_on_failure']) return;
         print("<pre>");
         $file = obfuscate_path_name($e->getFile()) . ': ' . $e->getLine();
         if (app('debug')) {
@@ -305,6 +307,16 @@ function add_vars($vars):void {
  */
 function set(string $name, mixed $value):void {
     add_vars([$name => $value]);
+}
+
+/**
+ * Gets a single value from web processor vars or null if undefined
+ * @param string $name 
+ * @return mixed|string 
+ */
+function get(string $name) {
+    if(key_exists($name, $GLOBALS['WEB_PROCESSOR_VARS'])) return $GLOBALS['WEB_PROCESSOR_VARS'][$name];
+    return null;
 }
 
 /**
@@ -807,11 +819,16 @@ function juggler(string $canonincal, mixed $value) {
 function get_extension_from_file($file_path, $file_name = null, $trust_filename = false) {
     if($file_name && $trust_filename) return pathinfo($file_name, PATHINFO_EXTENSION);
     if(!file_exists($file_path)) return false;
-    $ext = explode("/", mime_content_type($file_path));
+    
+    // get_usable_mime_array();
+    return mime_content_type(mime_content_type($file_path));
+}
+
+function mime_content_type_to_extension($mimetype, $type = "audio") {
+    $ext = explode("/", $mimetype);
     $type = $ext[0];
     $ext = $ext[1];
     if(substr($ext, 0, 2) == "x-") $ext = substr($ext, 2);
-    // get_usable_mime_array();
     return match($ext) {
         "svg+xml" => "svg",
         "abiword" => "abw",

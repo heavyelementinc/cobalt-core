@@ -2,6 +2,7 @@
  * @emits actionmenustate
  * @emits actionmenurequest
  * @emits actionmenuselect
+ * @emits promptdata
  */
 class ActionMenu extends EventTarget {
     constructor(button = null, type = null) {
@@ -167,6 +168,11 @@ class ActionMenu extends EventTarget {
                 case "href":
                     window.Cobalt.router.location = action.href;
                     break;
+                case "prompt":
+                    this.close();
+                    value = await action.prompt();
+                    if(value) this.dispatchEvent(new CustomEvent("promptdata", {detail: {action, promptData: value}, bubbles: true}));
+                    break;
                 case "request":
                     value = await this.handleRequest(action, event)
                     break;
@@ -321,6 +327,9 @@ class RegisteredAction {
         }
 
         this.props = {
+            /** @prop {HTMLOptionElement} option */
+            option: null,
+            type: null,
             menu: menu,
             index: index,
             href: null,
@@ -354,6 +363,7 @@ class RegisteredAction {
     }
 
     getType() {
+        if(this.type == "prompt") return "prompt";
         if(this.href) return "href";
         const callback = "callback";
         if(!this.requestMethod) return callback;
@@ -361,12 +371,21 @@ class RegisteredAction {
         return "request";
     }
 
+    /** @prop {HTMLOptionElement} option */
     get option() {
         return this.props.option;
     }
 
     set option(reference) {
         this.props.option = reference;
+    }
+
+    get type() {
+        return this.props.type;
+    }
+
+    set type(value) {
+        this.props.type = value;
     }
 
     get button() {
@@ -448,6 +467,20 @@ class RegisteredAction {
 
     set callback(value) {
         return this.props.callback = value;
+    }
+
+    async prompt() {
+        const value = await modalInput(this.option.title, {
+            okay: this.option.getAttribute("okay") ?? "Okay",
+            cancel: this.option.getAttribute("cancel") ?? "Cancel",
+            pattern: this.option.getAttribute("pattern") ?? "",
+            value: this.option.value,
+        });
+        if(value) {
+            let option = {};
+            option[this.option.getAttribute("name")] = value;
+            return option;
+        }
     }
 
     actionActivated(originalEvent) {

@@ -15,6 +15,7 @@ export class ObjectGallery extends ICustomInput {
     connectedCallback() {
         this.initObjectPicker();
         this.initDragAndDrop();
+        this.initActionMenu();
         if(this.constructor.name === "ObjectGallery") this.customInputReady.resolve(true);
     }
     
@@ -176,11 +177,18 @@ export class ObjectGallery extends ICustomInput {
         const items = this.querySelectorAll(this.ITEM_QUERY);
         let value = [];
         for(const el of items) {
-            value.push(el.dataset.id);
+            value.push(el.value);
         }
         return value;
     }
 
+    initActionMenu() {
+        const menu = this.querySelector("action-menu");
+        if(!menu) return;
+        // menu.addEventListener("promptdata", e => {
+        //     this.dispatchEvent(new Event("change"));
+        // });
+    }
 }
 
 export class FileGallery extends ObjectGallery {
@@ -218,6 +226,23 @@ export class GalleryItem extends HTMLElement {
     constructor() {
         super();
     }
+    _props = {
+        meta: {}
+    }
+    get value() {
+        const object = {
+            ...this.dataset,
+            ...this._props.meta
+        };
+        return object;
+    }
+
+    set value(val) {
+        if(typeof val !== "object") return;
+        if(Array.isArray(val)) return;
+        this._props.meta = {...this._props.meta, ...val};
+    }
+
     get container() {
         return this.closest("object-gallery,file-gallery,foreign-id,file-id");
     }
@@ -237,5 +262,85 @@ export class GalleryItem extends HTMLElement {
             this.parentNode.removeChild(this);
             target.dispatchEvent(new Event("change",{bubbles: true}));
         });
+
+        const actionMenu = this.querySelector('action-menu');
+        if(!actionMenu) return;
+        actionMenu.addEventListener("click", e => {
+            e.preventDefault();
+            // actionMenu.open();
+            this.createMetaEditor(actionMenu);
+        });
+
+        actionMenu.addEventListener("promptdata", event => {
+            this.value = event.detail.promptData;
+            this.dispatchEvent(new Event("change", {bubbles: true}));
+        });
+
+        this.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            // actionMenu.open();
+            // dialog.open();
+            this.createMetaEditor(actionMenu)
+        });
+    }
+
+    metaEditor = null;
+
+    createMetaEditor(actionMenu) {
+        this.metaEditor = document.createElement("dialog");
+        this.metaEditor.classList.add("object-gallery--meta-editor");
+        document.body.appendChild(this.metaEditor);
+
+        this.metaEditor.addEventListener("close", () => {
+            this.metaEditor.parentNode.removeChild(this.metaEditor);
+        });
+
+        const form = document.createElement("form");
+        this.metaEditor.appendChild(form);
+        const listPanel = document.createElement("ul");
+        listPanel.classList.add("list-panel");
+        form.appendChild(listPanel);
+        for(const option of actionMenu.querySelectorAll("option")) {
+            const li = document.createElement("li");
+            li.innerHTML = `<label>${option.getAttribute("title")}</label>`;
+            const input = document.createElement("input");
+            switch(option.getAttribute("name")) {
+                case "accent_color":
+                case "contrast_color":
+                    input.type = "color";
+                    break;
+                default:
+                    input.type = "text";
+                    break;
+            }
+            input.name = option.getAttribute("name");
+            input.value = option.getAttribute("value");
+            li.appendChild(input);
+            listPanel.appendChild(li);
+        }
+        const closebtn = document.createElement("button");
+        closebtn.innerText = "Cancel";
+        form.appendChild(closebtn);
+        closebtn.addEventListener("click", e => {
+            e.preventDefault();
+            this.metaEditor.parentNode.removeChild(this.metaEditor);
+        });
+
+        const btn = document.createElement("button");
+        btn.type = "submit";
+        btn.innerText = "Submit";
+        form.appendChild(btn);
+
+        form.addEventListener("submit", e => {
+            const inputs = form.querySelectorAll("input");
+            const value = {};
+            for(const el of inputs){ 
+                value[el.name] = el.value;
+            }
+            this.value = value;
+            this.metaEditor.parentNode.removeChild(this.metaEditor)
+            this.dispatchEvent(new Event("change", {bubbles: true}));
+        });
+        this.metaEditor.showModal();
     }
 }

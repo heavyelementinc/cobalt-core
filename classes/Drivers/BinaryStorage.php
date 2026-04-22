@@ -12,6 +12,7 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use MongoDB\UpdateResult;
 
 trait BinaryStorage {
     protected string $__db;
@@ -145,6 +146,27 @@ trait BinaryStorage {
         $this->__initialized = true;
     }
 
+    public function __rename(ObjectId $id, string $name):UpdateResult {
+        return $this->__collection->updateOne(
+            ['_id' => $id], 
+            [
+                '$set' => [
+                    'filename' => $name
+                ]
+            ]
+        );
+    }
+
+    public function __alt(ObjectId $id, string $name):UpdateResult {
+        return $this->__collection->updateOne(
+            ['_id' => $id], 
+            [
+                '$set' => [
+                    'alt' => $name
+                ]
+            ]
+        );
+    }
 
     private function getImageMetadata($path_to_file, $mime_type = null) {
         if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
