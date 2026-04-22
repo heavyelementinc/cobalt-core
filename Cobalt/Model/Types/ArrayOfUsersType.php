@@ -2,6 +2,7 @@
 namespace Cobalt\Model\Types;
 
 use Cobalt\Auth\Users\Models\User;
+use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\ForeignId;
 use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
@@ -26,6 +27,16 @@ class ArrayOfUsersType extends OrderedListOfForeignIds {
 
     public function fieldItemTemplate(): string {
         return "Cobalt/Auth/Users/templates/users/object-picker.php";
+    }
+
+    #[Prototype]
+    public function display(): mixed {
+        $html = [];
+        /** @var User $user */
+        foreach($this->value as $user) {
+            $html[] = $user->name();
+        }
+        return join(", ",$html);
     }
 
 }

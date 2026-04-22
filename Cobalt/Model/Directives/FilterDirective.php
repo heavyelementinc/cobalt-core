@@ -24,6 +24,12 @@ use ReflectionFunction;
  */
 class FilterDirective extends AbstractDirective {
     private Closure $filter;
+    /**
+     * 
+     * @param Closure $filter 
+     * @return void 
+     * @throws mixed 
+     */
     function __construct(Closure $filter) {
         $funcReflection = new ReflectionFunction($filter);
         $argsReflection = $funcReflection->getParameters();

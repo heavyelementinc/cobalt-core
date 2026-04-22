@@ -77,9 +77,12 @@ input-user-array {
                 border-radius: unset;
                 margin: 0;
                 height: 100%;
+                float: right;
+                max-width: 1ch;
+                max-height: 1ch;
             }
             & input[type='button']:hover {
-                background-color:var(--input-invalid-background);
+                background-color:var(--input-invalid-background, red);
                 color:white;
             }
         }

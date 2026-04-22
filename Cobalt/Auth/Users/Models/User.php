@@ -10,8 +10,10 @@ use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\Auth\Users\Traits\Permissions;
 use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Attributes\Prototype;
+use Cobalt\Model\Directives\SearchableDirective;
 use Cobalt\Model\Interfaces\Migration;
 use Cobalt\Model\Model;
+use Cobalt\Model\Types\ArrayOfPermissionsType;
 use Cobalt\Model\Types\ArrayType;
 use Cobalt\Model\Types\BinaryType;
 use Cobalt\Model\Types\BlockType;
@@ -23,6 +25,7 @@ use Cobalt\Model\Types\FakeType;
 use Cobalt\Model\Types\ImageType;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
+use Cobalt\Model\Types\PasswordHashType;
 use Cobalt\Model\Types\StringType;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use DateTime;
@@ -58,30 +61,64 @@ class User extends Model implements Migration {
                 new StringType,
                 'tag' => function () {
                     return "<div class='cobalt-user--profile-display'>".embed_image($this->avatar).$this->name()." </div>";
+                },
+                'index' => [
+                    'title' => 'Username'
+                ],
+                'searchable' => new SearchableDirective(true),
+                'placeholder' => 'Username',
+                'label' => 'Username',
+                'onUpdate' => function () {
+                    update(".name-tag", [
+                        'innerHTML' => $this->name("F L")
+                    ]);
                 }
             ],
             'fname' => [ // ☑️
-                new StringType
+                new StringType,
+                'index' => [
+                    'title' => 'First Name'
+                ],
+                'searchable' => new SearchableDirective(true),
+                'placeholder' => 'First Name',
+                'onUpdate' => function () {
+                    update(".name-tag", [
+                        'innerHTML' => $this->name("F L")
+                    ]);
+                }
             ],
             'lname' => [ // ☑️
-                new StringType
+                new StringType,
+                'index' => [
+                    'title' => 'First Name'
+                ],
+                'searchable' => new SearchableDirective(true),
+                'placeholder' => 'Last Name',
+                'onUpdate' => function () {
+                    update(".name-tag", [
+                        'innerHTML' => $this->name("F L")
+                    ]);
+                }
             ],
             // 'name' => [
             //     new StringType
             // ],
             
             'pword' => [ // ☑️
-                new StringType,
+                new PasswordHashType,
+                'label' => 'Password'
             ],
 
             'email' => [ // ☑️
-                new EmailAddressType
+                new EmailAddressType,
+                'label' => 'Email Address',
+                'index' => [],
             ],
             'avatar' => [ // ☑️
                 new ImageType
             ],
             'flags' => [ // ☑️
-                new DictionaryType
+                new BinaryType
             ],
             'state' => [
                 new BinaryType
@@ -100,10 +137,20 @@ class User extends Model implements Migration {
                 new ArrayType
             ],
             'permissions' => [ // ☑️
-                new DictionaryType
+                new ArrayOfPermissionsType,
+                // 'index' => [
+                //     'display' => function () {
+                //         return $this->permissions?->length ?? 0;
+                //     }
+                // ]
             ],
             'is_root' => [ // ☑️
-                new BooleanType
+                new BooleanType,
+                'index' => [
+                    'display' => function ($value) {
+                        return ($value) ? "Root" : "User";
+                    }
+                ]
             ],
             'public_name' => [
                 new StringType
@@ -168,6 +215,7 @@ class User extends Model implements Migration {
 
     public function __beforeMigrationUpgrade(array $doc, array &$mutated_doc, array &$update, int $count, DatabaseManagement $manager): void
     {
+        $mutated_doc['avatar'] = $doc['avatar']['media']['id'];
         unset($mutated_doc['__v']);
         $update['$unset'] = ['__v' => 1];
     }
@@ -182,11 +230,49 @@ class User extends Model implements Migration {
         
     // }
     
+    /**
+     * Valid format characters are:
+     *  * `F` - First name
+     *  * `f` - First initial
+     *  * `L` - Last name
+     *  * `l` - Last initial
+     *  * `U` - Username
+     *  * `u` - Username initial
+     * @param string $format 
+     * @return string 
+     */
     #[Prototype]
-    function name():string {
-        if($this->fname && $this->lname) {
-            return "$this->fname ".$this->lname->value[0] .".";
+    function name(string $format = "F l."):string {
+        // Quick and dirty optimization. If the format string is the default
+        // value, then we should return the value
+        if($format === "F l.") {
+            if($this->fname && $this->lname) {
+                return "$this->fname ".$this->lname->value[0] .".";
+            }
+            return $this->uname;
         }
-        return $this->uname->value;
+        $name = str_replace(
+         ['f',                   'F',          'l',                    'L',           'u',                    'U'],
+        [$this->fname->value[0], $this->fname, $this->lname->value[0], $this->lname, $this->uname->value[0], $this->uname],
+        $format
+        );
+        $trimmed = trim($name);
+        if(!$trimmed || $trimmed === ".") {
+            return $this->uname;
+        }
+        return $name;
+    }
+
+    function getUsersByPermission(array $permissions = []) {
+        return $this->find([
+            '$or' => [
+                ['is_root' => true],
+                ['permissions' => ['$in' => $permissions]]
+            ]
+        ]);
+    }
+
+    function getUsersByGroup(array $groups = []) {
+        return $this->find(['groups' => ['$in' => $groups]]);
     }
 }

@@ -40,8 +40,8 @@ class Authentication {
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
         $this->model = new User();
-        $this->session = new CurrentSession();
         $this->permissions = new Permissions();
+        $this->session = new CurrentSession();
         if(!isset($this->session->session->user_id)) return $this;
 
         $this->user = $this->model->findOne(['_id' => $this->session->session->user_id]);

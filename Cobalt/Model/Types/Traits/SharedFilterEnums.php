@@ -30,8 +30,9 @@ trait SharedFilterEnums {
 
     #[Prototype]
     public function display(): mixed {
-        $valid = [];
-        if($this->hasDirective("valid")) $valid = $this->getDirective("valid");
+        if($this->hasDirective("valid") == false) return $this->value;
+        
+        $valid = $this->getDirective("valid");
         
         if(empty($valid ?? [])) return $this->value;
         // if((is_string($this->value) || is_int($this->value)) && key_exists($this->value, $valid)) return $valid[$this->value];

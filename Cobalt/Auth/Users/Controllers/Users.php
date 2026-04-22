@@ -10,6 +10,17 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
 
 class Users extends ModelController {
+    static $api_read_permission          = "Auth_allow_editing_users";
+    static $api_create_permission        = "Auth_allow_editing_users";
+    static $api_update_permission        = "Auth_allow_editing_users";
+    static $api_destroy_permission       = "Auth_allow_editing_users";
+    static $api_multidestroy_permission  = "Auth_allow_editing_users";
+    static $api_batch_archive_permission = "Auth_allow_editing_users";
+    static $api_archive_permission       = "Auth_allow_editing_users";
+    static $admin_index                  = "Auth_allow_editing_users";
+    static $admin_new_document           = "Auth_allow_editing_users";
+    static $admin_edit                   = "Auth_allow_editing_users";
+
     public static function defineModel(): Model {
         return new User();
     }
@@ -21,7 +32,7 @@ class Users extends ModelController {
     public function destroy(Model|BSONDocument $document): array {
         return [
             'dangerous' => true,
-            'message' => "Are you sure you want to delete <strong>$document->uname</strong>?",
+            'message' => "Are you sure you want to delete user `<strong>$document->uname</strong>`?",
             'okay' => "Yes",
             'post' => $_POST,
         ];
@@ -49,6 +60,10 @@ class Users extends ModelController {
                 '_id' => new ObjectId($_SESSION[self::LOGIN_USER_ID_KEY])
             ]);
         }
+    }
+
+    public function userSelfService() {
+        
     }
 
     public function login_form() {

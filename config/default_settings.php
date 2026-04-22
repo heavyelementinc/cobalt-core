@@ -415,8 +415,7 @@ $settings = [
             ],
             'validate' => [
                 'options' => function () {
-                    global $auth;
-                    return $auth->permissions->get_valid_permissions();
+                    return auth()->getPermissionSingleton()->getValidPermissions();
                 }
             ]
         ],

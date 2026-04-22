@@ -13,9 +13,7 @@ trait Permissions {
             if($throwOnFail) throw new Unauthorized("Session does not exist");
             return false;
         }
-        /** @var Authentication $auth */
-        global $auth;
-        $permissionSingleton = $auth->getPermissionSingleton();
+        $permissionSingleton = auth()->getPermissionSingleton();
         // Check if this permission exists
         $isValidPermissionId = $permissionSingleton->isValidPermissionIdentifier($permission);
         if(!$isValidPermissionId) throw new PermissionException("Invalid permission identifier");
@@ -23,10 +21,14 @@ trait Permissions {
         // If the permission does exist, let's check if this user is root
         if($user->is_root->value === true) return true;
 
+        return self::explicitPermission($user, $permission);
+    }
+
+    static function explicitPermission(?User $user, string $permission) {
         // If the user is not root, let's check if they have the permission
-        if(!$user->permissions->key_exists($permission)) return false;
+        if(!key_exists($permission, $user->__dataset['permissions']->getValue()->__dataset ?? [])) return false;
         
-        return $user->permissions[$permission]->value;
+        return $user->__dataset['permissions']->getValue()->__dataset[$permission]->getValue();
     }
 
     function findUsersByPermission(string|array $permission, bool $permissionType = true) {

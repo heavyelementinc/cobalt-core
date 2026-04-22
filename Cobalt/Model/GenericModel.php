@@ -170,7 +170,9 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     /*************** ITERATOR ACCESS ***************/
     private int $index = 0;
     public function current(): mixed {
-        return $this->__dataset[$this->key()];
+        $key = $this->key();
+        $current = $this->{$key};
+        return $current;
     }
 
     public function next(): void {
@@ -178,12 +180,12 @@ class GenericModel implements ArrayAccess, Iterator, Traversable, JsonSerializab
     }
 
     public function key(): mixed {
-        return array_keys($this->__dataset)[$this->index];
+        return array_keys($this->readSchema())[$this->index];
     }
 
     public function valid(): bool {
         if($this->index < 0) return false;
-        if(count($this->__dataset) < $this->index) return true;
+        if(count($this->readSchema()) > $this->index) return true;
         return false;
     }
 

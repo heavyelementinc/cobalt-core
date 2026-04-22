@@ -14,7 +14,7 @@ class Import extends DatabaseManagement {
     private string $currentCollection = "";
     private int $importedForCollection = 0;
 
-    public function import(string $filename, bool $talk = false, bool $caution = true) {
+    public function import(string $filename, bool $talk = false, bool $caution = true, array $collectionsToImport = []) {
         $this->benchmark_start = microtime(true);
         // Confirm we're in CLI mode
         if($talk) $talk = function_exists('say');
@@ -56,7 +56,7 @@ class Import extends DatabaseManagement {
         // we're going to use to import our data.
         switch($this->meta['exportVersion']) {
             case self::EXPORT_VERSION_2_0:
-                $this->import_2_0($handle, $db, $results, $talk, $caution);
+                $this->import_2_0($handle, $db, $results, $talk, $caution, $collectionsToImport);
                 break;
         }
 
@@ -127,23 +127,27 @@ class Import extends DatabaseManagement {
         return $meta_decoded;
     }
 
-    private function import_2_0($handle, Database $db, array &$results, bool $talk, bool $caution) {
+    private function import_2_0($handle, Database $db, array &$results, bool $talk, bool $caution, array $collectionsToImport = []) {
         $has_passed_sanity_check = $this->import_archive_sanity_check_2_0($handle, $talk, $caution);
         if(!$has_passed_sanity_check) {
             // throw new Error("Corrupted archive");
             return;
         }
         // return;
-        $bootstrap_complete = $this->import_bootstrap_2_0($db, $talk, $caution);
+        $bootstrap_complete = $this->import_bootstrap_2_0($db, $talk, $caution, $collectionsToImport);
         if(!$bootstrap_complete) return 0;
         
         // Read each line
         while(true) {
             $next = fgets($handle);
             if(!$next) break;
-            $result = $this->import_line_from_file_2_0($next, $db, $talk, $caution);
+            $result = $this->import_line_from_file_2_0($next, $db, $talk, $collectionsToImport);
             if($result === self::IMPORT__LINE_SUCCESS) {
                 $results['insertedTotal'] += 1;
+                continue;
+            }
+            if($result === self::IMPORT__LINE_SKIPPED) {
+                $results['skippedTotal'] += 1;
                 continue;
             }
             if($result === self::IMPORT__LINE_META) break;
@@ -211,8 +215,9 @@ class Import extends DatabaseManagement {
         return true;
     }
 
-    private function import_bootstrap_2_0(Database $db, bool $talk, bool $caution):bool {
+    private function import_bootstrap_2_0(Database $db, bool $talk, bool $caution, array $collectionsToImport = []):bool {
         $collections_to_drop = array_keys($this->meta['collectionDetails']);
+        if(!empty($collectionsToImport)) $collections_to_drop = $collectionsToImport;
         if($caution) {
             if(!$talk) throw new Exception("`caution` must be set through a CLI session");
             if($caution) {
@@ -250,8 +255,11 @@ class Import extends DatabaseManagement {
         return true;
     }
 
-    private function import_line_from_file_2_0(string $line, Database $db, bool $talk = false):int {
+    private function import_line_from_file_2_0(string $line, Database $db, bool $talk = false, array $collectionsToImport = []):int {
         $content = json_decode($line, true);
+        if(!empty($collectionsToImport) && !in_array($content['col'], $collectionsToImport)) {
+            return self::IMPORT__LINE_SKIPPED;
+        }
         $reason = "";
         if(self::is_line_meta_entry($content, $reason)) return self::IMPORT__LINE_META;
         $collection = $db->{$content['col']};

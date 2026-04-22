@@ -13,6 +13,9 @@ class Authentication {
     
     function __construct(){
         $this->permissions = new PermissionManager();
+    }
+
+    public function restoreSession() {
         // Find the current session
         $this->session = (new Session())->findOne([
             'token_session' => $_COOKIE[Session::SESSION_COOKIE_KEY]
@@ -26,6 +29,10 @@ class Authentication {
     // Returns the current session data if it exists, or null otherwise.
     public function getSession():?Session {
         return $this->session;
+    }
+
+    public function isUserLoggedIn():bool {
+        return $this->getCurrentSessionUser() instanceof User;
     }
 
     // The goal is to support multiple user logins at once

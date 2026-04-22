@@ -722,6 +722,7 @@ input-password {
 
 select {
     appearance: base-select;
+    display: inline-flex;
     &::picker-icon {
         content: "\F0140";
         color: var(--input-element-border);

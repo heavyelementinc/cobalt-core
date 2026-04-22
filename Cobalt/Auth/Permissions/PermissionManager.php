@@ -7,8 +7,10 @@ use Cobalt\Auth\Permissions\Exceptions\PermissionException;
 class PermissionManager {
     const ENV_PERMISSIONS = __ENV_ROOT__ . "/config/default_permissions.php";
     const APP_PERMISSIONS = __APP_ROOT__ . "/config/permissions.php";
+
     /** @property array<Permission> $permissions */
     protected array $permissions = [];
+    protected array $valid = [];
 
     function __construct(){
         $this->initializePermissions();
@@ -22,6 +24,13 @@ class PermissionManager {
         global $PERMISSIONS;
         $permission = $PERMISSIONS ?? [];
         $this->permissions = array_merge($env, $permission, $app);
+        /**
+         * @var string $key
+         * @var Permission $val
+         */
+        foreach($permission as $key => $val) {
+            $this->valid[$key] = $val->getName();
+        }
     }
 
     private function loadPermissionFile(string $file, bool $required = false):array {
@@ -60,9 +69,20 @@ class PermissionManager {
         return $this->permissions;
     }
 
+    /**
+     * This function returns 'valid' set of permissions used in the typical
+     * MixedType 'valid' directive format
+     * @return array
+     */
+    function getValidPermissions():array {
+        return $this->valid;
+    }
+
     function getPermission(string $identifier):?Permission {
         if(!key_exists($identifier, $this->permissions)) return null;
         return $this->permissions[$identifier];
     }
+
+    
 
 }

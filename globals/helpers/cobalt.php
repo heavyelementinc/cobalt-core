@@ -1,7 +1,10 @@
 <?php
 
 use Auth\UserPersistance;
+use Cobalt\Auth\Users\Authentication;
+use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\Auth\Users\Models\User;
+use Cobalt\Model\Types\MixedType;
 use MongoDB\BSON\ObjectId;
 
 function async_cobalt_command($command, $context = true, $log = "/dev/null") {
@@ -30,8 +33,8 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
  * @return mixed Session object, session property, or null if session does not 
  *               exist
  */
-function session($info = null) {
-    global $session;
+function session($info = null):mixed {
+    $session = user();
     if(is_cli()) {
         
         // $session = new UserPersistance([
@@ -48,13 +51,23 @@ function session($info = null) {
     }
     if (!isset($session)) return null;
     if ($info === null) return $session ?? null;
-    if (key_exists($info, $session->__dataset ?? [])) return $session->{$info}?->getValue() ?? null;
+    if (!isset($info, $session)) throw new Exception("Field `$info` does not exist");
+    if ($session->{$info} instanceof MixedType) return $session->{$info}->raw;
     return lookup_js_notation($info, $session, true);
-    throw new Exception("Field $info does not exist");
+}
+
+function user():?User {
+    return auth()->getCurrentSessionUser();
+}
+
+function auth():Authentication {
+    /** @var Cobalt\Auth\Users\Authentication $auth */
+    global $auth;
+    return $auth;
 }
 
 function session_refresh() {
-    $GLOBALS['auth'] = new \Auth\Authentication();
+    $GLOBALS['auth'] = new Authentication();
 }
 
 /**
@@ -63,9 +76,10 @@ function session_refresh() {
  * @return bool
  */
 function session_exists() {
-    if (isset($GLOBALS['session']) && $GLOBALS['session'] === null) return false;
-    if (isset($GLOBALS['session'])) return true;
-    return false;
+    return auth()->isUserLoggedIn();
+    // if (isset($isUserLoggedIn) && $GLOBALS['session'] === null) return false;
+    // if (isset($GLOBALS['session'])) return true;
+    // return false;
 }
 
 
@@ -81,6 +95,7 @@ function session_exists() {
  */
 function has_permission($perm_name, $group = null, ?User $user = null, $throw_no_session = true):bool {
     if(is_cli()) return true;
+    if($user === null) $user = user();
     return User::hasPermission($user, $perm_name, $throw_no_session);
     // return $GLOBALS['auth']->has_permission($perm_name, $group, $user, $throw_no_session);
 }

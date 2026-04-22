@@ -107,7 +107,7 @@ class UserIdResult extends SchemaResult {
             return;
         }
         try {
-            $this->userData = $this->userCrud->getUserById($this->value);
+            $this->userData = $this->userCrud->findOne(['_id' => $this->value]);
         } catch (\Exception $e) {
 
         }

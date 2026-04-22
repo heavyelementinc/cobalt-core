@@ -220,6 +220,7 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
         if($this->hasDirective(DIRECTIVE_KEY_ON_UPDATE)) {
             $this->getDirective(DIRECTIVE_KEY_ON_UPDATE, $value);
         }
+        $this->directiveOrNull('onUpdate');
     }
 
     /**

@@ -108,12 +108,6 @@ trait Filterable {
                 if($pattern) $this->testPattern($result, $value, $pattern);
             }
 
-            // This is disabled because the filter directive is called later
-            // if($result->hasDirective('filter')) {
-                // $filterDirective = $result->getDirective('filter', $value);
-                // if($filterDirective instanceof FilterDirective == false) throw new TypeError("$field's filter directive must be of type \\Cobalt\\Model\\Directives\\FilterDirective");
-                // $filterDirective->getValue($value);
-            // }
             $validated = $result->filter($result->pre_filter($value));
             if($result->hasDirective('set')) {
                 $result->getDirective('set', $validated);

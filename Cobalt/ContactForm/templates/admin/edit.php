@@ -8,11 +8,16 @@
     </action-menu>
 </hgroup>
 <ul class="list-panel">
+    <li>
+        <label>Name</label>
+        {{doc.name}}
+    </li>
     <?php
         use Cobalt\Model\Types\MixedType;
         $details = "";
         /** @var MixedType $value */
         foreach($doc as $field => $value) {
+            if($value instanceof MixedType === false) continue;
             $f = $value->getLabel();
             $v = "";
             switch($field) {
@@ -21,12 +26,13 @@
                 case "read":
                     continue 2;
                 case "email":
-                    $v = "<a href='mailto:$value->email?subject=RE:".__APP_SETTINGS__['short_name']."+Contact+Form'>$value->email</a>";
+                    $v = "<a href='mailto:$value?subject=RE:".urlencode(__APP_SETTINGS__['short_name'])."+Contact+Form'>$value</a>";
                     break;
                 default:
                     $v = $value->display();
                     break;
             }
+            if(!$v) continue;
             $details .= <<<HTML
                 <li>
                     $f
@@ -39,10 +45,17 @@
 </ul>
 <details>
     <summary>Seen by</summary>
-    {{!doc.read}}
+    {{doc.read.display()}}
 </details>
 
 <h2>Message</h2>
 <blockquote>
     {{doc.additional.md()}}
 </blockquote>
+<style>
+    main {
+        ul.list-panel label {
+            width: 12ch;
+        }
+    }
+</style>

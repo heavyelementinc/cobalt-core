@@ -25,6 +25,7 @@ if(getenv('HTTP2')) require_once __ENV_ROOT__ . "/globals/http2.php";
 try {
     /** @global $auth Access the Authentication class */
     $auth = new Authentication();
+    $auth->restoreSession();
 } catch (Exception $e) {
     kill($e->getMessage());
 }
