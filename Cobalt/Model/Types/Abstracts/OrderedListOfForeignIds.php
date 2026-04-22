@@ -142,6 +142,11 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
         return $gallery;
     }
 
+    #[Prototype]
+    function push($value) {
+        // $this->
+    }
+
     private int $index = 0;
     public function current(): mixed {
         return $this->value[$this->index];

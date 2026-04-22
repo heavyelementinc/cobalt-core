@@ -1,6 +1,6 @@
 <?php
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Notifications\Models\NotificationSchema;
 use Cobalt\Notifications\Notification;

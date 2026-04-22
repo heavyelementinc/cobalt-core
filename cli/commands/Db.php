@@ -33,10 +33,12 @@ class Db
         $db->export($filename, false, true, true, [], $GLOBALS['export_collections'] ?? null);
     }
 
-    function import($filename)
+    function import($filename, string $import = "")
     {
+        $import = explode(",", $import);
+        
         $db = new Import();
-        $db->import($filename, true);
+        $db->import($filename, true, true, $import);
     }
 
 

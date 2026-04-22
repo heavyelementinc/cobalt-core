@@ -147,7 +147,8 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
         return explode(",", $value);
     }
 
-    public function includes($value){
+    public function includes($value):bool {
+        
         foreach($this->value as $index => $val) {
             if($val->value == $value) return true;
         }

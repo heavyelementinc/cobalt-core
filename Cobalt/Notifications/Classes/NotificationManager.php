@@ -2,7 +2,7 @@
 
 namespace Cobalt\Notifications\Classes;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserPersistance;
 use Cobalt\Model\Types\UserIdType;
 use Cobalt\Notifications\Models\NotificationSchema;
@@ -66,7 +66,7 @@ class NotificationManager extends \Drivers\Database {
     }
 
     private function buildQueryAndOptions(?ObjectId $user, $seenStatus, array $options = []) {
-        if($user === null) $user = session('_id');
+        if($user === null) $user = user()->_id;
         $id = new ObjectId($user);
 
         $query = [

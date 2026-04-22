@@ -10,10 +10,11 @@
  * @copyright 2021 - Heavy Element, Inc.
  */
 
-namespace Auth;
+namespace Cobalt\Auth\Users;
 
 use Auth\UserValidate;
 use Auth\UserSchema;
+use Cobalt\Auth\Users\Models\User;
 use Cobalt\Token;
 use DateTime;
 use Exceptions\HTTP\BadRequest;
@@ -108,7 +109,7 @@ class UserCRUD extends \Drivers\Database {
         return iterator_to_array($this->find(['is_root' => true]));
     }
 
-    final function findUserByToken(string $name, string $token):?UserPersistance {
+    final function findUserByToken(string $name, string $token):?User {
         $result = $this->findOne([
             'token.name' => $name,
             'token.value' => $token,
@@ -125,22 +126,22 @@ class UserCRUD extends \Drivers\Database {
         return $result;
     }
 
-    final function updateUser($id, $request) {
-        $val = new UserPersistance();
-        $mutant = $val->__validate($request);
+    final function updateUser($id, $request):User{
+        $val = new User();
+        $mutant = $val->__filter($request);
         $result = $this->updateOne(
             ['_id' => $this->__id($id)],
             ['$set' => $mutant]
         );
         if ($result->getModifiedCount() !== 1) throw new HTTPException("Failed to update fields", true);
-        return new UserPersistance($mutant);
+        return $mutant;
     }
 
     final function createUser($request, $mode = "require") {
-        $val = new UserPersistance();
+        $val = new User();
 
         // $val->setMode($mode);
-        $mutant = $val->__validate($request);
+        $mutant = $val->__filter($request);
         $flags = [];
         $flag = "flags.";
         $len = strlen($flag);

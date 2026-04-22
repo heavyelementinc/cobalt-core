@@ -14,6 +14,7 @@ use Cobalt\Controllers\Traits\SearchableModel;
 use Cobalt\Controllers\Traits\SortableModel;
 use Cobalt\Controllers\Traits\UpdateableModel;
 use MongoDB\Model\BSONDocument;
+use Routes\Options;
 use Routes\Route;
 use TypeError;
 
@@ -166,40 +167,6 @@ abstract class ModelController extends Controller {
             ));
             set_crudable_flag($class, CRUDABLE_CONFIG_ADMIN);
         }
-
-        static function route_details(array $default_values, array $details, string $callable) {
-            $callable_results = static::$callable($details);
-            return array_merge($default_values, $callable_results, $details);
-        }
-
-        static function generate_prefix($supplied):string {
-            if($supplied) {
-                if($supplied[0] !== "/") $supplied = "/$supplied";
-                return $supplied;
-            }
-            $supplied = (new \ReflectionClass(static::className()))->getShortName();
-            $prefix = preg_replace('/([A-Z])/', '-$1',$supplied);
-            if($prefix[0] == "-") $prefix = substr($prefix, 1);
-            return "/" . strtolower($prefix);
-        }
-
-        static function permissions(?array $permissions) {
-            $merged = $permissions ?? [];
-            return $merged;
-        }
-
-        static function className() {
-            return static::class;
-        }
-
-
-    static function generate_friendly_name(?string $supplied = null):string {
-        if($supplied) return $supplied;
-        $supplied = (new \ReflectionClass(static::className()))->getShortName();
-        $prefix = preg_replace('/([A-Z])/', ' $1',$supplied);
-        if($prefix[0] == "-") $prefix = substr($prefix, 1);
-        return trim($prefix);
-    }
     
     function __set_action_menu(int $state) {
         $this->index_display_action_menu = $state;
@@ -219,4 +186,5 @@ abstract class ModelController extends Controller {
 
         return "<action-menu type=\"$type\">$html</action-menu>";
     }
+
 }

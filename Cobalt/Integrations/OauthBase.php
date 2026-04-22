@@ -1,7 +1,7 @@
 <?php
 namespace Cobalt\Integrations;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use DateTime;
 use Exception;
 use Exceptions\HTTP\BadRequest;

@@ -11,7 +11,7 @@ class AdditionalContactFields {
      * Model schemas.
      * @return array 
      */
-    public function defineSchema():array {
+    public function __get_additional_schema():array {
         return [];
     }
 

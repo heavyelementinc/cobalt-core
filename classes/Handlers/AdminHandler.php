@@ -24,7 +24,7 @@ class AdminHandler extends WebHandler {
     public string $userbar_admin_panel   = "<a href=\"".__APP_SETTINGS__['cobalt_base_path']."/\">".__APP_SETTINGS__['app_short_name']."</a>";
 
     function auth_panel() {
-        if (!session_exists()) return "";
+        // if (!session_exists()) return "";
         
         // $session = session();
 

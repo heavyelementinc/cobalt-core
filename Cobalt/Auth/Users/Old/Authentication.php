@@ -5,8 +5,12 @@
  * 
  */
 
-namespace Auth;
+namespace Cobalt\Auth\Users;
 
+use Auth\CurrentSession;
+use Auth\Permissions;
+use Cobalt\Auth\Users\UserCRUD;
+use Cobalt\Auth\Users\Models\User;
 use Cobalt\SchemaPrototypes\Basic\ArrayResult;
 use Cobalt\Token;
 use DateTime;
@@ -31,14 +35,16 @@ class Authentication {
         'password_reset' => "Your password has been reset. Please sign in.",
     ];
 
+    private User $model;
+
     function __construct() {
         if (!app("Auth_user_accounts_enabled")) return false;
-
-        $this->session = new CurrentSession();
+        $this->model = new User();
         $this->permissions = new Permissions();
-        if (isset($this->session->session->user_id)) $ua = new UserCRUD();
-        else return $this;
-        $this->user = $ua->getUserById($this->session->session->user_id);
+        $this->session = new CurrentSession();
+        if(!isset($this->session->session->user_id)) return $this;
+
+        $this->user = $this->model->findOne(['_id' => $this->session->session->user_id]);
         if (!$this->user) {
             $GLOBALS['session'] = null;
             return $this;
@@ -52,7 +58,7 @@ class Authentication {
     function login_user($username, #[SensitiveParameter] $password, $stay_logged_in = false, $skip_password_check = false) {
         $stock_message = "Invalid credentials.";
         /** Get our user by their username or email address */
-        $ua = new UserCRUD();
+        $ua = $this->model;
         $user = $ua->getUserByUnameOrEmail($username);
 
         /** If we don't have a user account after our query has run, then the client
@@ -167,7 +173,7 @@ class Authentication {
         $uname = $email;
         if(!$uname) throw new BadRequest("Username field was not specified","Username is missing");
 
-        $crud = new UserCRUD();
+        $crud = new User();
         $user = $crud->getUserByUnameOrEmail($uname);
         if(!$user) {
             sleep(1);

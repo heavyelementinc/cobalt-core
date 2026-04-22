@@ -16,4 +16,16 @@ class EmailAddressType extends StringType {
     protected function field(string $class = "", array $misc = [], ?string $tag = null): string {
         return $this->input("", ['type' => 'email'], "input");
     }
+
+    protected function getUsername():string {
+        return explode("@", $this->value)[0];
+    }
+
+    protected function getHostname():string {
+        return explode("@", $this->value)[1];
+    }
+
+    protected function hasTag() {
+        return (explode("+", $this->getUsername())[1]) ? true : false;
+    }
 }

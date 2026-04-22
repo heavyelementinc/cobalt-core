@@ -18,6 +18,7 @@
  * @copyright 2023 - Heavy Element, Inc.
  */
 
+use Cobalt\Auth\Session\Models\Session;
 use Cobalt\UTMTracker\UTMHandler;
 
 ob_start();
@@ -166,7 +167,7 @@ if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
 //     }
 // }
 
-session_name("COBALTID");
+session_name(Session::SESSION_COOKIE_KEY);
 // $sameSite = "Lax";
 // $referer = str_replace(['https://', 'http://'], '', getHeader('referer', null, true, false) ?? $_SERVER['HTTP_REFERER']);
 // if(in_array($referer, __APP_SETTINGS__['API_CORS_allowed_origins'])) {

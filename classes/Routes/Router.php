@@ -170,7 +170,7 @@ class Router {
         /** Let's remove the query string from the incoming request URI and decode 
          * any special characters in our URI.
          */
-        $this->uri = urldecode(str_replace(["?" . $query], "", $route));
+        $this->uri = urldecode(str_replace("?" . $query, "", $route));
         if ($context !== "web") {
             $this->context_prefix = app("context_prefixes")[$context]['prefix'];
             $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);

@@ -20,6 +20,10 @@ class Upgrade{
             'description' => "[<branch-name>] Upgrades only your application",
             'context_required' => true,
         ],
+        'permissions' => [
+            'description' => "[<filename>] Upgrade an old permissions file",
+            'context_required' => true,
+        ],
     ];
 
     function core($branch = null) {
@@ -36,6 +40,53 @@ class Upgrade{
         $result = $this->app($app_branch);
         $result .= "\n" . $this->core($core_branch);
         return $result;
+    }
+
+    function permissions(?string $file = null) {
+        if(!$file) $file = __APP_ROOT__ . "/config/permissions.php";
+        $p = include $file;
+
+        if($p !== 1) {
+            return "It looks like this file has already been updated.";
+        }
+
+        if(!isset($permissions)) {
+            return "It looks like this file has already been updated.";
+        }
+
+        $php = <<<PHP
+            <?php
+                use Cobalt\Auth\Permissions\Permission;
+                // Upgraded
+                return [
+
+        PHP;
+
+        foreach($permissions as $key => $value) {
+            $name      = json_encode($value['name'] ?? "");
+            $group     = json_encode($value['group'] ?? "");
+            $label     = json_encode($value['label'] ?? "");
+            $help      = json_encode($value['help'] ?? "");
+            $dangerous = json_encode($value['dangerous'] ?? true);
+            $default   = json_encode($value['default'] ?? false);
+            $ring      = json_encode($value['ring'] ?? 3);
+            $php .= <<<HTML
+                (new Permission("$key"))
+                        ->setName($name)
+                        ->setGroup($group)
+                        ->setLabel($label)
+                        ->setHelp($help)
+                        ->setDangerous($dangerous)
+                        ->setDefault($default)
+                        ->setRing($ring),
+                
+            HTML;
+        }
+
+        $php .= "\n];";
+        
+        copy($file, "$file.bk");
+        file_put_contents($file, $php);
     }
 
 

@@ -19,8 +19,11 @@ interface Migration {
     public function __initializeDataset();
     
     /**
-     * Before a document can be migrated, it needs to be mutated in some way.
+     * Before a document can be migrated, it may need to be mutated in some way.
      * The __beforeMigrationUpgrade method gives you the ability to do this.
+     * If the document just needs to be upgraded to the new class, leave this
+     * function empty.
+     * 
      * @param array $doc the raw data in the database
      * @param array &$mutated_doc the document that will be updated
      * @param array{$set:array,$unset:array,$inc:array,$min:array,$max:array,$mul,$rename:array,$setOnInsert:array,$currentDate:array} &$update

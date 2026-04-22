@@ -2,7 +2,7 @@
 
 namespace Cobalt\Auth\UserAccounts\Testing;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Auth\UserAccounts\UserPersistance;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;

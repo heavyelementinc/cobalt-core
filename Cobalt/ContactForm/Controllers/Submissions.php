@@ -2,7 +2,7 @@
 
 namespace Cobalt\ContactForm\Controllers;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\ContactForm\Model\AdditionalContactFields;
 use Cobalt\ContactForm\Model\FormSubmission;
 use Cobalt\Controllers\ModelController;
@@ -11,6 +11,7 @@ use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Notifications\Classes\PushNotifications;
 use Cobalt\Notifications\Models\NotificationSchema;
 use Contact\ContactManager;
+use Contact\Persistance;
 use Error;
 use Exception;
 use Exceptions\HTTP\BadRequest;
@@ -94,9 +95,13 @@ class Submissions extends ModelController {
 
     private function stage1($data) {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
-        /** @var Persistance */
         $persistance = new $className();
-        $mutant = $persistance->__validate($data);
+        if($persistance instanceof FormSubmission) {
+            $mutant = $persistance->__filter($data);
+        } else if ($persistance instanceof Persistance) {
+            /** @var Persistance */
+            $mutant = $persistance->__validate($data);
+        }
         $mutant->ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
         $mutant->token = $_SERVER["HTTP_X_CSRF_MITIGATION"];
         $mutant->date  = new \MongoDB\BSON\UTCDateTime();
@@ -113,11 +118,11 @@ class Submissions extends ModelController {
         }
     }
 
-    const ERROR_EMAIL         = 0b001;
-    const ERROR_DETAILS       = 0b010;
-    const ERROR_IS_HUMAN      = 0b100;
-    const ERROR_EMAIL_FAILED  = 0b1000;
-    const ERROR_SYSTEM_FAILED = 0b10000;
+    const ERROR_EMAIL         = 0b000001;
+    const ERROR_DETAILS       = 0b000010;
+    const ERROR_IS_HUMAN      = 0b000100;
+    const ERROR_EMAIL_FAILED  = 0b001000;
+    const ERROR_SYSTEM_FAILED = 0b010000;
     const ERROR_PUSH_FAILED   = 0b100000;
 
     private function stage2($data) {
@@ -218,7 +223,7 @@ class Submissions extends ModelController {
             'subject' => 'New Contact Form Submission',
             'body' => "**$mutant->name** filled out your contact form:\n\n".trim(substr($mutant->additional,0, 100)),
             'action' => [
-                'href' => "/admin/contact-form/edit/$href"//route("Cobalt\\ContactForm\\Controllers\\Submissions@__edit",[$href])
+                'href' => "/admin/submissions/edit/$href"//route("Cobalt\\ContactForm\\Controllers\\Submissions@__edit",[$href])
             ],
             'type' => 0,
         ]);
@@ -232,7 +237,7 @@ class Submissions extends ModelController {
         try {
             $result = $backend->insertOne($mutant);
             $id = $result->getInsertedId();
-            $action = "/admin/contact-form/".(string)$id;
+            $action = "/admin/submissions/".(string)$id;
             $method = "GET";
         } catch (\Exception $e) {
             throw new ServiceUnavailable("An unknown error occurred");

@@ -1,6 +1,6 @@
 <?php
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\EventListings\Models\Event;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -415,8 +415,7 @@ $settings = [
             ],
             'validate' => [
                 'options' => function () {
-                    global $auth;
-                    return $auth->permissions->get_valid_permissions();
+                    return auth()->getPermissionSingleton()->getValidPermissions();
                 }
             ]
         ],
@@ -440,7 +439,7 @@ $settings = [
             ]
         ],
         "Contact_form_validation_classname" => [
-            "default" => "\\Contact\\Persistance"
+            "default" => "\\Cobalt\\ContactForm\\Model\\FormSubmission"
         ],
         "Contact_form_anti_spam_technique" => [
             "default" => "captcha",

@@ -310,7 +310,7 @@ trait IndexableModel {
      * @return mixed|string 
      */
     public function get_index_view($cell, &$mutableRoute, $doc, $schema) {
-        $undefined = "<span style='opacity: .6;font-style:italic'>Undefined $cell[name]</span>";
+        $undefined = "<span style='opacity: .6;font-style:italic'>Undefined ".($schema[$cell['name']]['index']['title'] ?? $cell['name'])."</span>";
         if(!isset($schema[$cell['name']]['index']['view'])) {
             if (method_exists($doc->{$cell['name']}, 'defaultIndexView')) {
                 return $doc->{$cell['name']}->defaultIndexView();
@@ -469,8 +469,8 @@ trait IndexableModel {
             'name' => $field,
             'title' => $this->get_title($field, $directives),
             'order' => $this->get_order($field, $directives),
-            'sort' => $this->get_sort($field, $directives),
-            'view' => $this->get_view($field, $directives),
+            'sort'  => $this->get_sort($field, $directives),
+            'view'  => $this->get_view($field, $directives),
             'searchable' => $this->get_searchable($field, $directives),
             'filterable' => <<<HTML
             <form class="hbox crudable-hypermedia--filterable-item" style="gap: 0.6em; align-items: center;">
@@ -511,8 +511,6 @@ trait IndexableModel {
         if(is_callable($sort)) return $sort($field, $directives);
         return $sort;
     }
-
-
 
     final protected function get_filterable(string $field, array $directives) {
         $index = $directives['index'] ?? [];

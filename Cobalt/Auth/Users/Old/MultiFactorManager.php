@@ -1,8 +1,10 @@
 <?php
 
-namespace Auth;
+namespace Cobalt\Auth\Users;
 
+use Cobalt\Auth\Users\UserCRUD;
 use chillerlan\QRCode\QRCode;
+use Cobalt\Auth\Users\Models\User;
 use Exception;
 use Exceptions\HTTP\Unauthorized;
 use RobThree\Auth\TwoFactorAuth;
@@ -10,7 +12,7 @@ use SensitiveParameter;
 
 class MultiFactorManager {
     const TOTP_MIN_BACKUPS = 4;
-    function get_multifactor_enrollment(UserPersistance $user) {
+    function get_multifactor_enrollment(User $user) {
 
         if(!app("TwoFactorAuthentication_enabled")) return $this->get_not_supported_stub();
         if($user->tfa->enabled) return $this->get_already_enrolled_stub();
@@ -55,7 +57,7 @@ class MultiFactorManager {
         return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>This Cobalt app has Two-Factor Authentication disabled. Please contact your system administrator to enable TOTP support</p></fieldset>";
     }
 
-    function enroll_user(UserPersistance $user, #[SensitiveParameter] string $passwd) {
+    function enroll_user(User $user, #[SensitiveParameter] string $passwd) {
         if(!$this->verify_otp($user, $passwd)) throw new Unauthorized("OTP verification failed","There was an error validating the provided one-time password");
         $crud = new UserCRUD();
         $backups = $this->generate_backup_codes();
@@ -74,12 +76,12 @@ class MultiFactorManager {
         return $backups;
     }
 
-    function verify_otp(UserPersistance $user, string $passwd) {
+    function verify_otp(User $user, string $passwd) {
         $tfa = new TwoFactorAuth();
         return $tfa->verifyCode($user->__dataset['tfa']['secret'], $passwd);
     }
 
-    function verify_backup_code(UserPersistance $user, string $backup) {
+    function verify_backup_code(User $user, string $backup) {
         foreach($user->__dataset['tfa']['backups'] as $index => $hash) {
             if(password_verify($backup, $hash)) {
                 $crud = new UserCRUD();
@@ -95,7 +97,7 @@ class MultiFactorManager {
         return false;
     }
 
-    function unenroll_user(UserPersistance $user) {
+    function unenroll_user(User $user) {
         $crud = new UserCRUD();
 
         $result = $crud->updateOne(['_id' => $user->_id],[

@@ -114,6 +114,12 @@ class Route {
             $options = $options->jsonSerialize();
         }
 
+        // $upgradedRoute = new Options($path, $controller);
+        // if(key_exists('handler', $options)) $upgradedRoute->set_handler($options['handler']);
+        // if(key_exists(''))
+
+        
+
         /** Okay, let's first suss out our variable names */
         $var_names = [];
         $search = "%\{(" . self::$preg_quote . ")\}%";

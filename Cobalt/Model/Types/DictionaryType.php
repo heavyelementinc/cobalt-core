@@ -12,4 +12,8 @@ class DictionaryType extends ModelType {
     //     if($tag === null) $tag = "input-switch";
     //     return $this->inputSwitch($class, $misc, $tag);
     // }
+    #[Prototype]
+    protected function key_exists(string $key) {
+        return $this->value->offsetExists($key);
+    }
 }

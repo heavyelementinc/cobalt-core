@@ -2,7 +2,7 @@
 
 namespace Cobalt\Integrations\Final\YouTube;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Integrations\OauthBase;
 use Cobalt\Integrations\Config;
 use DateTime;

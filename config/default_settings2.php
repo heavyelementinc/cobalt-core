@@ -1,6 +1,6 @@
 <?php
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\EventListings\Models\Event;
 use Cobalt\Settings\Define\DefineSettings;
 use Cobalt\Settings\Define\FieldTypes;

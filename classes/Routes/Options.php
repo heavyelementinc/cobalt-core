@@ -68,6 +68,11 @@ class Options implements Iterator, JsonSerializable {
         // $this->set_context($GLOBALS['ROUTER_TABLE_ADDRESS']);
     }
 
+    /**
+     * Sets the path, the matching pattern, and the variable names
+     * @param string $value 
+     * @return Options 
+     */
     public function set_path(string $value):self {
         $this->original_path = $value;
         preg_match_all(self::VAR_REGEX, $this->original_path, $this->var_names);
@@ -75,6 +80,11 @@ class Options implements Iterator, JsonSerializable {
         return $this;
     }
 
+    /**
+     * Sets the context for the current route along with the prefix
+     * @param string $context 
+     * @return void 
+     */
     public function set_context(string $context) {
         $this->context = $context;
         $this->context_prefix = __APP_SETTINGS__['context_prefixes'][$context]['prefix'];
@@ -128,6 +138,11 @@ class Options implements Iterator, JsonSerializable {
         return $this;
     }
 
+    /**
+     * Sets the name of the controller
+     * @param string $value 
+     * @return Options 
+     */
     public function set_controller(string $value):self {
         // $arr = explode("@",$value);
         // $this->controller['controller'] = $arr[0];
@@ -140,11 +155,18 @@ class Options implements Iterator, JsonSerializable {
         return $this->controller;
     }
 
+    /**
+     * Set the `.js` file that handles any frontend logic for this route.
+     * @param string $value 
+     * @return Options 
+     */
     public function set_handler(string $value):self {
         $files = [
             $value,
+            __APP_ROOT__ . "/$value",
             __APP_ROOT__ . "/controllers/client/$value",
             __APP_ROOT__ . "/private/controllers/client/$value",
+            __ENV_ROOT__ . "/$value",
             __ENV_ROOT__ . "/controllers/client/$value",
         ];
         if(!files_exist($files)) throw new RouteConfigError("`$value` handler does not exist!");
@@ -184,6 +206,7 @@ class Options implements Iterator, JsonSerializable {
     }
 
     /**
+     * Sets up the sitemap directives
      * @param array{ignore: bool, children: callable, lastmod: callable} $value
      * @return Options 
      */

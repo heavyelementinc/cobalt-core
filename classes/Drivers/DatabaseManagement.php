@@ -51,6 +51,7 @@ class DatabaseManagement {
     const IMPORT__LINE_SUCCESS = 0;
     const IMPORT__LINE_FAILED = 1;
     const IMPORT__LINE_META = 2;
+    const IMPORT__LINE_SKIPPED = 3;
 
 
     public function export($file = null, bool $asArchive = false, $talk = false, $ignored = true, $extraIgnored = [], $onlyExport = null) {

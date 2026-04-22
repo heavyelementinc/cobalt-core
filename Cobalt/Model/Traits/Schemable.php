@@ -125,8 +125,11 @@ trait Schemable {
         $this->__index_checkbox_state = $value;
     }
 
-    public function readSchema() {
-        return $this->__schema;
+    public function readSchema($includePrivateFields = false) {
+        if($includePrivateFields) return $this->schema;
+        return array_filter($this->__schema, function($key) {
+            return ($key[0] === "_" && $key[1] === "_") ? false : true;
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     public function getData(): array|stdClass|Document {

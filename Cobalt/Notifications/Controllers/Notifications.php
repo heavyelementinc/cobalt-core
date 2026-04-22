@@ -1,7 +1,7 @@
 <?php
 namespace Cobalt\Notifications\Controllers;
 
-use Auth\UserCRUD;
+use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Notifications\Classes\PushNotifications;
 use Cobalt\Notifications\Models\NotificationAddresseeSchema;
@@ -52,8 +52,8 @@ class Notifications extends Controller {
         $note = $this->ntfy->findOneAsSchema([
             '_id' => new ObjectId($id),
             '$or' => [
-                ['for.user.id' => session('_id')],
-                ['from' => session('_id')]
+                ['for.user.id' => user()->_id],
+                ['from' => user()->_id]
             ]
         ]);
 
@@ -121,7 +121,7 @@ class Notifications extends Controller {
         $note = $this->ntfy->findOne(['_id' => $_id]);
         if(!$note) throw new NotFound(ERROR_RESOURCE_NOT_FOUND);
 
-        $modified = $this->ntfy->setReadState($_id, session('_id'), $value, $key);
+        $modified = $this->ntfy->setReadState($_id, user()->_id, $value, $key);
         update("[data-id='$id']", [
             'setAttribute' => [
                 'seen' => $value,
@@ -136,11 +136,11 @@ class Notifications extends Controller {
         $note->subject = "Hello, World";
         $note->body = "Here's some **markdown** to use for a test";
         $note->from = null;
-        $note->for = [session()['_id']];
+        $note->for = [session()->_id];
         $note->action = [
             'route' => 'CoreAdmin@individual_user_management_panel',
             'params' => [
-                session()['_id']
+                session()->_id
             ]
         ];
         $note->sent = new UTCDateTime();
@@ -231,8 +231,8 @@ class Notifications extends Controller {
         $note = $this->ntfy->findOneAsSchema([
             '_id' => new ObjectId($id),
             '$or' => [
-                ['from' => session('_id')],
-                ['for.user.id' => session('_id')],
+                ['from' => user()->_id],
+                ['for.user.id' => user()->_id],
             ]
         ]);
         if(!$note) throw new NotFound("Specified resource was not found");
@@ -254,6 +254,6 @@ class Notifications extends Controller {
     }
 
     function push_test() {
-        return $this->pushNotification(session()['_id']);
+        return $this->pushNotification(user()->_id);
     }
 }

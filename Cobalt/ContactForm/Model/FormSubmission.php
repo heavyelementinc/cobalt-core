@@ -3,19 +3,24 @@ namespace Cobalt\ContactForm\Model;
 
 use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\Controllers\ModelController;
+use Cobalt\Model\Interfaces\Migration;
 use Cobalt\Model\Model;
+use Cobalt\Model\Types\ArrayOfUsersType;
 use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\EmailAddressType;
 use Cobalt\Model\Types\EnumType;
 use Cobalt\Model\Types\MarkdownType;
 use Cobalt\Model\Types\StringType;
 use Cobalt\Model\Types\UserIdType;
+use Drivers\DatabaseManagement;
+use MongoDB\UpdateResult;
 
-class FormSubmission extends Model {
+class FormSubmission extends Model implements Migration {
+    
     public function defineSchema(array $schema = []): array {
         $this->__set_index_checkbox_state(has_permission("Contact_form_submissions_delete", null, null, false));
         $addtl = new AdditionalContactFields();
-        $fields = $addtl->defineSchema();
+        $fields = $addtl->__get_additional_schema();
         $schema = [
             "name" => [
                 new StringType,
@@ -56,7 +61,7 @@ class FormSubmission extends Model {
                 'char_limit' => 1800
             ],
             "read" => [
-                new UserIdType,
+                new ArrayOfUsersType(),
                 'getUsers' => function ($val, $ref) {
                     if(!has_permission('Contact_form_submissions_modify', null, null, false)) return "";
                     return $ref->eachToView("{{doc.uname}}");
@@ -85,6 +90,8 @@ class FormSubmission extends Model {
                 ]
             ],
             "ip" => new StringType,
+            "token" => new StringType,
+            "type" => new StringType,
         ];
         $schema += $fields;
         return $schema;
@@ -99,7 +106,20 @@ class FormSubmission extends Model {
     }
 
     public function getCollectionName($string = null): string {
-        return "ContactFormSubmissions";
+        return "CobaltContactForm";
+    }
+
+
+    public function __initializeDataset() {
+        throw new \Exception('Not implemented');
+    }
+
+    public function __beforeMigrationUpgrade(array $doc, array &$mutated_doc, array &$update, int $count, DatabaseManagement $manager): void {
+        
+    }
+
+    public function __afterMigrationUpgrade(UpdateResult $result, array $mutated_doc, array $doc, DatabaseManagement $manager): void {
+        
     }
 
 }
