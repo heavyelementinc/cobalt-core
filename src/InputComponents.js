@@ -262,6 +262,16 @@ class DisplayDate extends HTMLElement {
         return this.getAttribute("value") ?? this.innerText ?? null;
     }
 
+    set value(val) {
+        this.date = val;
+        this.execute();
+    }
+
+    get format() {
+        const fmt = this.getAttribute("format");
+        return this.formatKeywords[fmt] ?? fmt ?? this.formatKeywords.default;
+    }
+
     connectedCallback() {
         this.date = this.value;
         if(!this.date) return;
@@ -283,7 +293,7 @@ class DisplayDate extends HTMLElement {
         if (this.relative === "true" || this.getAttribute("format") === "relative") {
             return this.startRelativeTime();
         }
-        if(!this.date) return;
+        if(!this.date) return this.innerHTML = "";
         let date = new DateConverter(this.date, this.format);
         this.innerText = date.format();
     }

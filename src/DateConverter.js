@@ -53,15 +53,18 @@ class DateConverter {
 
         switch (typeof date) {
             case "string":
-                if (/^\d+$/.test(date)) {
-                    date = Number(date);
-                    break;
-                } else {
+                if (date[0] === "{") {
                     date = Number(JSON.parse(date).$date.$numberLong);
                     try {
                     } catch (error) {
                         console.log(error);
                     }
+                    break;
+                } else if(/^\d+$/.test(date)) {
+                    date = Number(date);
+
+                } else {
+                    date = date;
                 }
                 break;
             case "object":
