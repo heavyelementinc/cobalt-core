@@ -80,6 +80,10 @@ export default class ICustomInput extends HTMLElement {
         return this.getAttribute("datalist");
     }
 
+    get list() {
+        return this.querySelector(`#${this.getAttribute("list")}`);
+    }
+
     _validity = {
         badInput: false,
         customError: false,
@@ -127,7 +131,7 @@ export default class ICustomInput extends HTMLElement {
      * @returns {null|HTMLDatalist}
      */
     getDatalist() {
-        let datalist = document.getElementById(this.datalist);
+        let datalist = document.getElementById(this.querySelector("datalist"));
         if(!datalist) {
             datalist = document.createElement("datalist");
             const options = this.querySelectorAll("option");

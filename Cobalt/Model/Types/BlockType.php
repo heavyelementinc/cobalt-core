@@ -11,10 +11,20 @@ use DOMElement;
 use DOMNode;
 use Drivers\FileSystem;
 use Exception;
+use Exceptions\HTTP\NotImplemented;
 use MongoDB\BSON\Persistable;
 use ParsedownExtra;
 use Validation\Exceptions\ValidationIssue;
 
+/**
+ * @method length():int
+ * @method display():string
+ * @method field(string $class, array $misc = [], ?string $tag):string
+ * @method tableOfContents():string
+ * @method timeToRead(string $format = "round"):string
+ * @method render():string
+ * @package Cobalt\Model\Types
+ */
 class BlockType extends MixedType {
     protected string $type = "block-editor";
     protected bool $asHTML = true;
@@ -208,6 +218,10 @@ class BlockType extends MixedType {
             $block['data']['url'] = "/res/fs/" . $aesthetic_name;
         }
         return $block;
+    }
+
+    function render() {
+        return $this->__toString();
     }
 
     function __toString(): string {
@@ -405,20 +419,45 @@ class BlockType extends MixedType {
         ";
     }
 
-    public function from_html(DOMDocument $html, DateTime $modified):array {
+    static function from_markdown(string $markdown, bool $untrusted, DateTime $modified):array {
+        $parsed = from_markdown($markdown, $untrusted);
+        $dom = new DOMDocument();
+        $dom->loadHTML($parsed);
+        return self::from_html($dom, $modified);
+    }
+
+    static function from_html(DOMDocument $html, DateTime $modified):array {
         $document = [
             'time' => $modified->format("u"),
             'blocks' => [
 
             ]
         ];
-        foreach($html as $el) {
-
+        foreach($html->childNodes[1]->childNodes[0]->childNodes as $el) {
+            switch($el->tagName) {
+                case "h1":
+                case "h2":
+                case "h3":
+                case "h4":
+                case "h5":
+                    self::__parse_header($el, $document['blocks']);
+                    break;
+                case "p":
+                    self::__parse_paragraph($el, $document['blocks']);
+                    break;
+                case "ol":
+                case "ul":
+                    self::__parse_list($el, $document['blocks']);
+                    break;
+                case "img":
+                    self::__parse_img($el, $document['blocks']);
+                    break;
+            }
         }
         return $document;
     }
 
-    private function __parse_paragraph(DOMElement $el, array &$blocks) {
+    static function __parse_paragraph(DOMElement $el, array &$blocks) {
         $blocks[] = [
             'id' => random_string(10),
             'type' => 'paragraph',
@@ -428,7 +467,7 @@ class BlockType extends MixedType {
         ];
     }
 
-    private function __parse_header(DOMElement $el, array &$blocks) {
+    static function __parse_header(DOMElement $el, array &$blocks) {
         $blocks[] = [
             'id' => random_string(10),
             'type' => 'header',
@@ -446,34 +485,14 @@ class BlockType extends MixedType {
         ];
     }
 
-    // private function __parse_list(DOMElement $el, array &$blocks) {
-    //     $listItems = [];
-    //     foreach($el->childNodes as $node) {
-    //         $listItems[] = $node->textContent;
-    //     }
-    //     $blocks[] = [
-    //         'id' => random_string(10),
-    //         'type' => 'list',
-    //         'data' => [
-    //             'type' => match($el->nodeName) {
-    //                 'ul' => 'unordered',
-    //                 'ol' => 'ordered',
-    //             },
-    //             'items' => $listItems
-    //         ]
-    //     ];
-    // }
+    static function __parse_list(DOMElement $el, array &$blocks) {
 
-    private function __parse_list(DOMElement $el, array &$blocks) {
-        // $listItems = [];
-        // foreach($el->childNodes as $node) {
-        //     $listItems[] = $node->textContent;
-        // }
         $recursive = function (DOMElement $el, array &$block, Closure $recursive) {
             $items = [];
             
             foreach($el->childNodes as $item) {
-                $recursive($item, $items, $recursive);
+                if($items instanceof DOMElement) continue;
+                // $recursive($item, $items, $recursive);
             }
             $block[] = [
                 'content' => $el->ownerDocument->saveHTML($el),
@@ -495,7 +514,7 @@ class BlockType extends MixedType {
         ];
     }
 
-    private function __parse_img(DOMElement $el, array &$blocks) {
+    static function __parse_img(DOMElement $el, array &$blocks) {
         $attrs = $el->attributes;
         $blocks[] = [
             'id' => random_string(10),
@@ -510,5 +529,17 @@ class BlockType extends MixedType {
                 'caption' => ""
             ]
         ];
+    }
+
+    static function __parse_pre(DOMElement $el, array &$blocks):void {
+        $attrs = $el->attributes;
+        $blocks[] = [
+            'id' => random_string(10),
+            'type' => 'pre',
+            'data' => [
+
+            ]
+        ];
+        throw new NotImplemented("&lt;pre&gt; blocks aren't implemented!");
     }
 }

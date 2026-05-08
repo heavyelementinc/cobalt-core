@@ -819,3 +819,43 @@ input-radio {
 match-update {
     display: none;
 }
+
+date-span {
+  height: 1lh;
+  &:empty {
+    width: 10ch;
+    background: rgb(from currentColor r g b / .5);
+    display: inline-block;
+    &[format="m/d/Y"],
+    &[format="default"] {
+        width: 10ch;
+    }
+    &[format="l, F jS Y g:i A"],
+    &[format="verbose"] {
+        /* width: calc(9ch + 2ch + 9ch + 1ch + 4ch + 1ch + 4ch + 2ch + 1ch + 2ch + 1ch + 2ch); */
+        width: 38ch;
+    }
+    &[format="l, F jS Y"],
+    &[format="long"] {
+        /* width: calc(9ch + 2ch + 9ch + 1ch + 4ch + 1ch + 4ch); */
+        width: 30ch;
+    }
+    &[format="F jS Y g:i A"],
+    &[format="datetime"] {
+        /* width: calc(9ch + 1ch + 4ch + 1ch + 4ch); */
+        width: 19ch;
+    }
+    &[format="g:i a"],
+    &[format="12-hour"] {
+        width: 8ch;
+    }
+    &[format="H:i"],
+    &[format="24-hour"] {
+        width: 5ch;
+    }
+    &[format="g:i:s A"],
+    &[format="seconds"] {
+        width: 11ch;
+    }
+  }
+}

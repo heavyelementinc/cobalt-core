@@ -4,12 +4,14 @@ namespace Cobalt\Notifications\Classes;
 
 use Cobalt\Auth\Users\UserCRUD;
 use Auth\UserPersistance;
+use Cobalt\Auth\Users\Models\User;
 use Cobalt\Model\Types\UserIdType;
 use Cobalt\Notifications\Models\NotificationSchema;
 use Cobalt\SchemaPrototypes\Compound\UserIdResult;
 use DateInterval;
 use DateTime;
 use Exceptions\HTTP\BadRequest;
+use Iterator;
 use Mail\SendMail;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
@@ -179,7 +181,7 @@ class NotificationManager extends \Drivers\Database {
     }
 
     static function getAddresseesByPermission(string|array $permissions, bool $state = true, ?array $options = null) {
-        $crud = new UserCRUD();
+        $crud = new User();
         $users = $crud->getUsersByPermission($permissions, $state, array_merge([
             'limit' => 50,
             'projection' => ['_id' => 1]
@@ -187,7 +189,7 @@ class NotificationManager extends \Drivers\Database {
         return static::convertUserResultsToRecipientUserStructure($users);
     }
 
-    static function convertUserResultsToRecipientUserStructure(array|Cursor $users) {
+    static function convertUserResultsToRecipientUserStructure(array|Iterator $users) {
         $result = [];
         foreach($users as $u) {
             $id = null;

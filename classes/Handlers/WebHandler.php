@@ -22,6 +22,7 @@ namespace Handlers;
 
 use \Cache\Manager as CacheManager;
 use Closure;
+use Cobalt\Documentation\Model\Documentation;
 use Cobalt\Extensions\Extensions;
 use Cobalt\Manifests\Classes\Item;
 use Cobalt\Manifests\Classes\ManifestManager;
@@ -120,6 +121,15 @@ class WebHandler extends RequestHandler {
             if($directives['headers'] instanceof Closure == false) throw new TypeError("The headers directive must be an instance of `Closure`");  
             call_user_func($directives['headers'],[$route, $directives]);
         }
+        if(__APP_SETTINGS__['Documentation_enable_in_userbar'] && session()) {
+            $docs = new Documentation();
+            $count = $docs->countDocsByControllerName($directives['controller']);
+            set("documentation_count", $count);
+            update(".documentation_count", [
+                'innerHTML' => $count,
+                'setAttribute' => ['data-value' => $count]
+            ]);
+        }
         if($isOptions) exit;
         return true;
     }
@@ -186,7 +196,6 @@ class WebHandler extends RequestHandler {
             'code' => $e->status_code,
             'data' => $data,
             'body_id' => app("HTTP_error_body_id"),
-            'keywords' => __APP_SETTINGS__['keywords'],
         ]);
 
         // Check if the template exists

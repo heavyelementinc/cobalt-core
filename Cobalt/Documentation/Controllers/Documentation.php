@@ -5,7 +5,11 @@ namespace Cobalt\Documentation\Controllers;
 use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Model;
 use Cobalt\Documentation\Model\Documentation as ModelDocumentation;
+use Exceptions\HTTP\BadRequest;
+use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
+use Routes\Router;
 
 class Documentation extends ModelController {
 
@@ -37,4 +41,38 @@ class Documentation extends ModelController {
         ];
     }
 
+    public function list() {
+        $route = parse_url($_GET['path'], PHP_URL_PATH);
+        if(!$route) throw new BadRequest("Invalid referrer");
+        
+        // Prepare our new context
+        $context = \Routes\Route::get_router_context($route);
+        $router = new Router($context, "get");
+        // Import existing routes and other balogna
+        $router->get_routes();
+        // Discover routes
+        $details = $router->discover_route($route, null);
+        
+        // Look up the router by controller details
+        $result = $this->model->findDocsByControllerName($details[1]['controller'], ['projection' => ['title' => 1]]);
+        if(!$result) throw new NotFound("No matching documents found", true);
+        $html = "";
+        foreach($result as $doc) {
+            $html .= "<li><a href=\"/documentation/read/$doc->_id\">$doc->title</a></li>";
+        }
+        add_vars(['title' => 'Documentation']);
+        return <<<HTML
+            <h1>Documentation</h1>
+            <ul>$html</ul>
+            HTML;
+    }
+
+    public function individual($id) {
+        $_id = new ObjectId($id);
+        /** @var ModelDocumentation $result */
+        $result = $this->model->findOne(['_id' => $_id]);
+        if(!$result) throw new NotFound("Not found", true);
+        add_vars(["title" => "$result->title"]);
+        return "<article><header><h1>$result->title</h1>Last Modified: <date-span value='".($result->body->lastModified("c"))."' from='c'></date-span></header>". view_from_string($result->body->render(), []) . "</article>";
+    }
 }

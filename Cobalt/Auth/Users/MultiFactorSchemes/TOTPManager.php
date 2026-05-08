@@ -1,8 +1,7 @@
 <?php
 
-namespace Cobalt\Auth\Users;
+namespace Cobalt\Auth\Users\MultiFactorSchemes;
 
-use Cobalt\Auth\Users\UserCRUD;
 use chillerlan\QRCode\QRCode;
 use Cobalt\Auth\Users\Models\User;
 use Exception;
@@ -10,26 +9,26 @@ use Exceptions\HTTP\Unauthorized;
 use RobThree\Auth\TwoFactorAuth;
 use SensitiveParameter;
 
-class MultiFactorManager {
+class TOTPManager {
     const TOTP_MIN_BACKUPS = 4;
-    function get_multifactor_enrollment(User $user) {
+    function get_totp_multifactor_enrollment(User $user) {
 
-        if(!app("TwoFactorAuthentication_enabled")) return $this->get_not_supported_stub();
-        if($user->tfa->enabled) return $this->get_already_enrolled_stub();
+        if(!app("TwoFactorAuthentication_enabled")) return $this->get_totp_not_supported_stub();
+        if($user->tfa->enabled->value) return $this->get_totp_already_enrolled_stub();
 
         $secret = null;
-        if(isset($user->__dataset['tfa']['secret'])) $secret = $user->__dataset['tfa']['secret'];
+        if(isset($user->__dataset['tfa']['totp']['secret'])) $secret = $user->__dataset['tfa']['totp']['secret'];
 
         $tfa = new TwoFactorAuth();
         if(!$secret) {
             $secret = $tfa->createSecret();
-            $crud = (new UserCRUD())->updateOne(
+            $crud = $user->updateOne(
                 ['_id' => $user['_id']],
                 ['$set' => [
-                    'tfa' => [
+                    'tfa.totp' => [
                         'enabled' => false,
                         'secret' => $secret
-                        ]
+                    ]
                 ]]
             );
             if($crud->getModifiedCount() !== 1) throw new Exception("Could not store secret for user");
@@ -43,9 +42,9 @@ class MultiFactorManager {
         ]);
     }
 
-    function get_already_enrolled_stub() {
+    function get_totp_already_enrolled_stub() {
         $backup_warning = "";
-        $backup_count = count(session()->__dataset['tfa']['backups']);
+        $backup_count = count(session()->__dataset['tfa']['totp']['backups']);
         $diff = self::TOTP_MIN_BACKUPS - $backup_count;
         if($backup_count < self::TOTP_MIN_BACKUPS) {
             $backup_warning = "<p style='background: var(--issue-color-1);color:var(--issue-color-1-fg);max-width:45ch;display: block; margin-bottom: var(--margin-m);padding: var(--margin-m);font-size: small'>".sprintf(AUTH_TOTP_CODE_CONSUMED_WARNING, $diff, plural($diff))."</p>";
@@ -53,14 +52,14 @@ class MultiFactorManager {
         return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>You're enrolled in TOTP 2FA!</p><async-button link method='DELETE' action='/api/v1/me/totp/unenroll'>Remove TOTP</async-button>$backup_warning</fieldset>";
     }
 
-    function get_not_supported_stub() {
+    function get_totp_not_supported_stub() {
         return "<fieldset id='enrollment-pane'><legend>Two-Factor Authentication</legend><p>This Cobalt app has Two-Factor Authentication disabled. Please contact your system administrator to enable TOTP support</p></fieldset>";
     }
 
-    function enroll_user(User $user, #[SensitiveParameter] string $passwd) {
-        if(!$this->verify_otp($user, $passwd)) throw new Unauthorized("OTP verification failed","There was an error validating the provided one-time password");
-        $crud = new UserCRUD();
-        $backups = $this->generate_backup_codes();
+    function totp_enroll_user(User $user, #[SensitiveParameter] string $passwd) {
+        if(!$this->totp_verify_otp($user, $passwd)) throw new Unauthorized("OTP verification failed","There was an error validating the provided one-time password");
+        $crud = $user;
+        $backups = $this->totp_generate_backup_codes();
         $passwords = [];
         foreach($backups as $b) {
             $passwords[] = password_hash($b, PASSWORD_BCRYPT);
@@ -76,18 +75,18 @@ class MultiFactorManager {
         return $backups;
     }
 
-    function verify_otp(User $user, string $passwd) {
+    function totp_verify_otp(User $user, string $passwd) {
         $tfa = new TwoFactorAuth();
-        return $tfa->verifyCode($user->__dataset['tfa']['secret'], $passwd);
+        return $tfa->verifyCode($user->__dataset['tfa']['totp']['secret'], $passwd);
     }
 
-    function verify_backup_code(User $user, string $backup) {
-        foreach($user->__dataset['tfa']['backups'] as $index => $hash) {
+    function totp_verify_backup_code(User $user, string $backup) {
+        foreach($user->__dataset['tfa']['totp']['backups'] as $index => $hash) {
             if(password_verify($backup, $hash)) {
-                $crud = new UserCRUD();
+                $crud = $user;
                 $crud->updateOne(['_id' => $user->_id], ['$pull' => ['tfa.backups' => $hash]]);
-                if(count($user->__dataset['tfa']['backups']) === 1) {
-                    $this->unenroll_user($user);
+                if(count($user->__dataset['tfa']['totp']['backups']) === 1) {
+                    $this->totp_unenroll_user($user);
                     redirect("/login/?reset&message=backups_exhausted");
                     return false;
                 }
@@ -97,8 +96,8 @@ class MultiFactorManager {
         return false;
     }
 
-    function unenroll_user(User $user) {
-        $crud = new UserCRUD();
+    function totp_unenroll_user(User $user) {
+        $crud = $user;
 
         $result = $crud->updateOne(['_id' => $user->_id],[
             '$set' => [
@@ -110,15 +109,15 @@ class MultiFactorManager {
         return $result->getModifiedCount();
     }
 
-    function generate_backup_codes() {
+    function totp_generate_backup_codes() {
         $codes = [];
         for($i = 1; $i <= self::TOTP_MIN_BACKUPS; $i++) {
-            $codes[] = $this->generate_backup_code();
+            $codes[] = $this->totp_generate_backup_code();
         }
         return $codes;
     }
     
-    function generate_backup_code() {
+    function totp_generate_backup_code() {
         return random_string(8, "0123456789ABCDEFGHJKLMNPRSTUVWXYZ");
     }
 }

@@ -161,6 +161,8 @@ trait MixedTypeToField {
         if($tag === "select") {
             $selected = "<button><selectedcontent></selectedcontent></button>\n";
             $options = $this->options();
+        } else if ($tag === "input-array") {
+            $options = $this->options();
         } else {
             $name = $this->datalist_name();
             $datalist = $this->datalist(name: $name);

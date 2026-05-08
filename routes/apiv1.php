@@ -2,6 +2,7 @@
 
 use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\ContactForm\Controllers\Submissions;
+use Cobalt\Documentation\Controllers\Documentation;
 use Cobalt\EventListings\Controllers\Events;
 use Routes\Options;
 use Routes\Route;
@@ -16,6 +17,10 @@ if(app("UGC_enable_user_generated_content")) {
 if (app('Auth_logins_enabled')) {
     Users::apiv1();
     Users::post((new Options('/login', 'api_login_handler')));
+    Users::get((new Options("/logout", "api_logout")));
+    Users::get((new Options("/session/authenticated/", "api_list_authenticated_users")));
+    Users::put((new Options("/session/switch/{index}", "api_switch_to_authenticated_user")));
+    Users::delete((new Options("/session/{id}/delete/", "delete_session")));
 }
 
 if (app('Web_main_content_via_api')) {
@@ -119,9 +124,7 @@ if(__APP_SETTINGS__['LandingPages_enabled']) {
 }
 
 if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
-    \Cobalt\Documentation\Controllers\Documentation::apiv1(null, []);
-    Route::s_post("/documentation/list/",     "\\Cobalt\\Documentation\\Controllers\\Documentation@list");
-    Route::s_post("/documentation/read/{id}", "\\Cobalt\\Documentation\\Controllers\\Documentation@read");
+    Documentation::apiv1(null, []);
 }
 
 if(__APP_SETTINGS__['Block_Editor_endpoints']) {

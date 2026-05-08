@@ -59,9 +59,9 @@ trait UserBar {
         $panel .= ($settings) ? "<a class='admin-panel--settings-link' href='$settings' rel='Settings Panel' title='Settings Panel'><i name='cog'></i><span class='contextual contextual--hover'>Settings</span></a>" : "";
         if(app("Documentation_enable_in_userbar")) {
             $docs = new Documentation();
-            $panel .= $docs->renderButton() . $docs->renderDialog();
+            $panel .= $docs->renderButton();// . $docs->renderDialog();
         }
-        $usercontainer = view('/admin/users/session-panel.html',[]);
+        $usercontainer = view('/admin/users/session-panel.php',[]);
         $after_bar = $this->userbar_end();
         return $menu . <<<HTML
             </ul>

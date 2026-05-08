@@ -277,7 +277,19 @@ class ClientRouter extends EventTarget{
             return;
         }
 
-        this.updateContent(result);
+        // Let's check if the client supports ViewTransitions
+        if("startViewTransition" in document) {
+            let pageTransitionPromise = document.startViewTransition(() => {
+                // If it does, let the API fire the updateContent callback
+                // when it's ready
+                this.updateContent(result);
+            });
+            // Wait for the ViewTransition API to finish
+            await pageTransitionPromise.updateCallbackDone;
+        } else {
+            // Otherwise, we'll just update the content ourselves!
+            this.updateContent(result);
+        }
         const scrollState = this.updateScroll();
         if(!this.allowStateChange) {
             this.setPushStateMode();

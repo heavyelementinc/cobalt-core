@@ -389,6 +389,8 @@ function guidv4($data = null) {
 
 function url_fragment_sanitize(string $value):string {
     $mutant = strtolower($value);
+    // Strip apostrophes
+    $mutant = preg_replace("/'/", "", $mutant);
     // Remove any character that isn't alphanumerical and replace it with a dash
     $mutant = preg_replace("/([^a-z0-9])/", "-", $mutant);
     // Remove any consecutive dash
@@ -542,6 +544,9 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
 function get_image_url(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc):string {
     if($doc instanceof ObjectId) $doc = get_image_details($doc);
     $missing_image = '/core-content/img/image-missing.webp';
+    if($doc instanceof ImageType) {
+        $missing_image = $doc->directiveOrNull("placeholder");
+    }
     if($doc === null) $doc = ['filename' => null,'meta' => ['height' => 300, 'width' => 300, 'accent_color' => '#efefef', 'contrast_color' => '#000000']];
     $filename = ($doc['filename']) ? $doc['filename'] : $missing_image;
     if($filename !== $missing_image) {

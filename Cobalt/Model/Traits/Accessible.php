@@ -1,6 +1,7 @@
 <?php
 namespace Cobalt\Model\Traits;
 
+use Cobalt\DBManagement\CobaltCursor;
 use Error;
 use Exception;
 use MongoDB\Client;
@@ -11,6 +12,7 @@ use MongoDB\Driver\Cursor;
 use MongoDB\InsertManyResult;
 use MongoDB\InsertOneResult;
 use MongoDB\UpdateResult;
+use PDO;
 
 trait Accessible {
     private array $TYPE_MAP = [
@@ -20,10 +22,12 @@ trait Accessible {
         //     'array' => 'array'
         // ]
     ];
-    public ?Client $client = null;
+    public null|Client|PDO $client = null;
     public ?Database $db;
     public ?Collection $collection;
     public string $collectionSpecifiedAtConstruction;
+
+    private array $query = [];
     
 
     abstract function getCollectionName($string = null):string;
@@ -35,10 +39,33 @@ trait Accessible {
      */
     protected function __initAccessible($database = null, $collection = null):void {
         if($this->client) return;
+        switch(config()['db_driver']) {
+            case DATABASE_DRIVER_MONGODB:
+                $this->__initMongoDB($database, $collection);
+                break;
+            case DATABASE_DRIVER_POSTGRES:
+                $this->__initPostgres();
+                break;
+            default:
+                throw new Exception("Driver type `".config()['db_driver']."` is not a recognized or supported driver");
+        }
+    }
+    
+    protected function __initMongoDB($database = null, $collection = null) {
         if(!$collection) $collection = $this->getCollectionName();
         $this->client = db_cursor($collection, $database, true);
         $this->db = $this->client->{$database ?? config()['database']};
         $this->collection = $this->db->{$collection};
+    }
+
+    protected function __initPostgres($database = null, $table = null) {
+        $host = config()['db_addr'];
+        $user = config()['db_usr'];
+        $pass = config()['db_pwd'];
+        $database = config()['database'];
+
+        $dsn = "postgres:host=$host;dbname=$database";
+        $this->client = new PDO($dsn, $user, $pass);
     }
 
     /* CREATE */
@@ -56,6 +83,20 @@ trait Accessible {
         return $cursor;
     }
 
+    function queryBuilder($filter, array $options = []) {
+        $table = $this->getCollectionName();
+        $transformed_filters = [];
+        foreach($filter as $field => $value) {
+            $transformed_filters[] = "$field = :$field";
+        }
+        
+        $transformed_options = [];
+        foreach($options as $field => $value) {
+            $transformed_options[] = "";
+        }
+        
+        $sql = "SELECT * FROM $table WHERE ".implode(" && ",$transformed_filters);
+    }
 
     /* READ */
     final function findOne($filter, array $options = []):array|object|null {
@@ -72,11 +113,17 @@ trait Accessible {
         return $this->collection->findOneAndUpdate($filter, $update, $options);
     }
 
-    final function find($filter = [], array $options = []):Cursor {
+    final function find($filter = [], array $options = []):?CobaltCursor {
         $this->__initAccessible();
         benchmark_reads();
         $options += $this->TYPE_MAP;
-        return $this->collection->find($filter, $options);
+        if($this->client instanceof Client) {
+            $cursor = $this->collection->find($filter, $options);
+            if($cursor) return new CobaltCursor($cursor);
+            return null;
+        } else {
+            throw new Exception(config()['db_driver']." is not implemented!");
+        }
     }
 
     final function findAndModify($filter = [], array $options = []) {
@@ -92,7 +139,8 @@ trait Accessible {
     final function count($filter = [], $options = []):int {
         $this->__initAccessible();
         benchmark_reads();
-        return $this->collection->count($filter, $options);
+        if($this->client instanceof Client) return $this->collection->count($filter, $options);
+        return 0;
     }
 
     final function countDocuments($filter, $options = []):int {

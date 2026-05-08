@@ -22,7 +22,7 @@ class MatchUpdate extends HTMLElement {
 
         for(const opt of this.hydratedOptions) {
             this.applyListeners(opt);
-        }        
+        }
     }
 
     applyListeners(option) {
@@ -97,7 +97,7 @@ class MatchOption {
                 evaluatedAsTrue = this.value == value;
                 break;
         }
-        if(evalutedAsTrue) {
+        if(evaluatedAsTrue) {
             const updater = new UpdateOperation(this.form);
             const instructions = JSON.parse(this.option.innerText);
             updater.exec(instructions);

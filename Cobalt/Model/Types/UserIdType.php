@@ -46,8 +46,43 @@ class UserIdType extends ForeignId {
         return $this->cached;
     }
 
+    /**
+     * @param int $limit 
+     * @param int $skip 
+     * @param string $sortField 
+     * @param int $sortDirection 
+     * @param string $search 
+     * @return array {cursor: ?Cursor, count: int}
+     */
+    public function queryForObjects(int $limit, int $skip, string $sortField = "_id", int $sortDirection = -1, string $search = "", bool $excludeCurrent = true): array {
+        // if($search)
+        $query = [];
+        if($excludeCurrent) {
+            $query['_id'] = ['$nin' => $this->raw];
+        }
+        $options = ['limit' => (int)$limit, 'skip' => (int)$skip, 'sort' => [$sortField => $sortDirection]];
+        $model = $this->getModel();
+        
+        // If permissions
+        if($this->hasDirective('permissions')) {
+            $permissions = $this->getDirective('permissions');
+            if(!is_array($permissions)) $permissions = [$permissions];
+            $query['permissions'] = ['$in' => $permissions];
+        }
+        // If groups directive exists, query for groups
+        if($this->hasDirective('groups')) {
+            $groups = $this->getDirective('groups');
+            if(!is_array($groups)) $groups = [$groups];
+            $query['$or']['groups'][] = ['$in' => $groups];
+        }
+        return [
+            'cursor' => $model->find($query, $options),
+            'count' => $model->count($query, $options)
+        ];
+    }
+
     #[Prototype]
     protected function get_filter_field($param_value, $param_name, $cast_type) {
-        return "$param_value->fname ".$param_value->lname->value[0] .".";
+        return $param_value->name();// "$param_value->fname ".$param_value->lname->value[0] .".";
     }
 }

@@ -16,7 +16,7 @@ interface Migration {
     /**
      * @return array{insertOneResult:InsertOneResult,totalDocuments:int}
      */
-    public function __initializeDataset();
+    public function __initializeDataset(int &$count);
     
     /**
      * Before a document can be migrated, it may need to be mutated in some way.

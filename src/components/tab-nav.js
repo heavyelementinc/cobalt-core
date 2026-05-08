@@ -1,4 +1,4 @@
-/** TabNav - The Cobalt Engine Tabbed Navigation webcomponent
+/** TabNav - The Cobalt Engine Tabbed Navigation WebComponent
  */
 
  class TabNav extends HTMLElement {

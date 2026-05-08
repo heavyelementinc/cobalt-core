@@ -5,7 +5,7 @@
  * 
  */
 
-namespace Cobalt\Auth\Users;
+namespace Cobalt\Auth\Users\Old;
 
 use Auth\CurrentSession;
 use Auth\Permissions;

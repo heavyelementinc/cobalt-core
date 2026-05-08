@@ -3,6 +3,7 @@
 use Auth\Permissions;
 use Cobalt\Auth\Users\Permissions\Permission;
 use Cobalt\Auth\Users\UserCRUD;
+use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Notifications\Classes\PushNotifications;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;

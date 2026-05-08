@@ -8,7 +8,6 @@
  *   * pattern - [""] the pattern for custom elements to be matched against
  */
 class InputArray extends AutoCompleteInterface {
-    
     constructor() {
         super();
         this.TAG_CLASS = "input-array--tag";
@@ -97,6 +96,9 @@ class InputArray extends AutoCompleteInterface {
     }
 
     get options() {
+        if(this.hasAttribute("datalist")) {
+            return document.querySelector(`datalist#${this.getAttribute('datalist')}`).children;
+        }
         return this.querySelectorAll("option");
     }
 
@@ -195,26 +197,30 @@ class InputArray extends AutoCompleteInterface {
     // === SELECTION METHODS === 
 
     selectOption(value) {
-        let el = this.querySelector(`option[value="${value}"]`);
+        for(const el of this.options) {
+            if(el?.value !== value) continue;
+            this.drawTag(el);
+            el.setAttribute("selected", "selected");
+            return;
+        }
         if(el === null) this.drawCustomTag(value, true);
-        else this.drawTag(el);
-        el.setAttribute("selected","selected");
     }
 
     // Called when removing the option from the array
     deselectOption(value) {
-        let el = this.querySelector(`option[value='${value}']`);
-        if(!el) return;
-        el.removeAttribute("selected");
-        this.removeTag(el);
-        setTimeout(() => {
-            // Why are we setting a timeout before dispatching this event? 
-            // Well, it's because if we send the change event synchronously
-            // `el` will still register as `selected` and therefore it will be
-            // included in this.value output. So we wait 20ms before dispatching
-            // the change event. This sucks. TODO fix this hacky bullshit.
-            this.dispatchEvent(new Event("change", {target: this, bubbles: true}));
-        }, 20)
+        for(const el of this.options) {
+            if(el?.value !== value) continue;
+            el.removeAttribute('selected');
+            this.removeTag(el);
+            setTimeout(() => {
+                // Why are we setting a timeout before dispatching this event? 
+                // Well, it's because if we send the change event synchronously
+                // `el` will still register as `selected` and therefore it will be
+                // included in this.value output. So we wait 20ms before dispatching
+                // the change event. This sucks. TODO fix this hacky bullshit.
+                this.dispatchEvent(new Event("change", {target: this, bubbles: true}));
+            }, 20)
+        }
     }
 
 
@@ -288,7 +294,6 @@ class InputArray extends AutoCompleteInterface {
 }
 
 customElements.define("input-array", InputArray);
-
 
 
 class InputUserArray extends InputArray {
@@ -380,6 +385,7 @@ class InputUserArray extends InputArray {
 }
 
 customElements.define("input-user-array", InputUserArray);
+
 
 class InputUser extends AutoCompleteInterface {
 

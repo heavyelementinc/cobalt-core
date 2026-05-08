@@ -38,7 +38,7 @@ class Authentication {
     // The goal is to support multiple user logins at once
     public function getCurrentSessionUser():?User {
         // Get the current index of the logged in user
-    $index = $this->session?->current_index->value ?? 0;
+        $index = $this->session?->current_index->value ?? 0;
         // Returns either the currently indexed user or null
         return $this->session?->represents[$index] ?? null;
     }

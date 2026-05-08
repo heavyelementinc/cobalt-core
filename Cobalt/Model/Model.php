@@ -3,6 +3,7 @@
 namespace Cobalt\Model;
 
 use Cobalt\Controllers\ModelController;
+use Cobalt\DBManagement\CobaltCursor;
 use Cobalt\Model\Traits\Accessible;
 use Cobalt\Model\Traits\Schemable;
 use Cobalt\Model\Traits\Viewable;

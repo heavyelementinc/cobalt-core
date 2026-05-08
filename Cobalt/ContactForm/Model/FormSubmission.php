@@ -110,7 +110,7 @@ class FormSubmission extends Model implements Migration {
     }
 
 
-    public function __initializeDataset() {
+    public function __initializeDataset(int &$count) {
         throw new \Exception('Not implemented');
     }
 

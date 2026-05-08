@@ -12,8 +12,20 @@ use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
 use DateTime;
+use Exception;
+use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\UTCDateTime;
 
+/**
+ * @property StringType $token_session
+ * @property StringType $ip_address
+ * @property ModelType $details
+ * @property DateType $expires
+ * @property BooleanType $persist
+ * @property ArrayOfUsersType $represents
+ * @property NumberType $current_index
+ * @package Cobalt\Auth\Session\Models
+ */
 class Session extends Model {
     const SESSION_COOKIE_KEY = "cobalt_token";
     public function defineSchema(array $schema = []): array {
@@ -47,6 +59,23 @@ class Session extends Model {
         return "CobaltSessions";
     }
 
+    /**
+     * @return array<User>
+     */
+    public function getArrayOfUsers():array {
+        return $this->represents->value;
+    }
+
+    public function setCurrentUserIndex(int $index) {
+        if($index > ($this->represents->length() - 1)) throw new Exception("Out of range");
+        $this->current_index = $index;
+        $this->updateOne([
+            '_id' => $this->_id
+        ],[
+            '$set' => $this
+        ]);
+    }
+
     public function logInUser(User $user) {
         $this->represents->push($user);
         $this->current_index = $this->represents->length() - 1;
@@ -54,9 +83,26 @@ class Session extends Model {
     }
 
     public function logOutUser(User $user) {
-        $this->represents->slice($user);
-        $this->current_index = 0;
-        $this->updateOne(['_id' => $this->_id], ['$set' => $this]);
+        $found = false;
+        foreach($this->represents as $k => $u) {
+            if((string)$u->_id === (string)$user->_id) {
+                $this->represents->splice($k, 1);
+                $found = true;
+                break;
+            }
+        }
+
+        if($found === false) throw new NotFound("That user is not logged in to this session!");
+
+        // Check if there are still users signed in to this session.
+        if($this->represents->length() >= 1) {
+            // If there are, let's default to the first user
+            $this->current_index = 0;
+            // Then we'll update the current field.
+            return $this->updateOne(['_id' => $this->_id], ['$set' => $this]);
+        }
+        // Otherwise, we'll clean up the session.
+        return $this->deleteOne(["_id" => $this->_id]);
     }
 
     static function newSession(User $user):Session {

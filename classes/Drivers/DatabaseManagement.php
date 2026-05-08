@@ -306,7 +306,9 @@ class DatabaseManagement {
         if($dropBeforeInit) {
             $model->drop();
         }
-        return $model->__initializeDataset();
+        $count = 0;
+        $model->__initializeDataset($count);
+        return "Initialized $count documents";
     }
 
     const CONVERT_TYPE_DONE = 0;

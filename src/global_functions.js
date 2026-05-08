@@ -966,10 +966,15 @@ function dateFromObjectId(objectId) {
 }
 
 class Deferred {
+    PROMISE_REJECTED = 0;
+    PROMISE_PENDING  = 1;
+    PROMISE_RESOLVED = 2;
+    
     _props = {
         promise: null, 
         resolve: (value) => {},
-        reject: (message) => {}
+        reject: (message) => {},
+        state: this.PROMISE_PENDING,
     }
     constructor(callback = () => {}) {
         this._props.promise = new Promise(async (resolve, reject) => {
@@ -980,16 +985,22 @@ class Deferred {
         });
     }
 
+    get state() {
+        return this._props.state;
+    }
+
     get promise() {
         return this._props.promise;
     }
 
-    get resolve() {
-        return this._props.resolve;
+    resolve(value) {
+        this._props.state = this.PROMISE_RESOLVED;
+        return this._props.resolve(value);
     }
 
-    get reject() {
-        return this._props.reject;
+    reject(message) {
+        this._props.state = this.PROMISE_REJECTED;
+        return this._props.reject(message);
     }
 
     async await() {

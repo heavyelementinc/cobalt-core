@@ -231,6 +231,12 @@ class Route {
             $GLOBALS['ROUTE_LOOKUP_CACHE'][$controller] = $real_path;
         }
 
+        if(__APP_SETTINGS__['context_prefixes'][$router_table_address]['mode'] === "text/html") {
+            if(!key_exists($controller, $GLOBALS['HTML_ROUTE_CACHE'] ?? [])) {
+                $GLOBALS['HTML_ROUTE_CACHE'][$controller] = $real_path;
+            }
+        }
+
         if(!empty($GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex]['navigation'])) self::map_route_groups($GLOBALS['ROUTE_TABLE'][$router_table_address][$type][$regex]);
     }
 

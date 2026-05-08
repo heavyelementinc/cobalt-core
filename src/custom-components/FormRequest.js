@@ -168,6 +168,8 @@ export default class FormRequest extends ProgressWizard {
                 return "form";
             case "autosave":
                 return true;
+            case "enter":
+                return "enter";
         }
         // If we don't have an explicit autosave attribute set, we should 
         // check if this form-request contains a submit button.
@@ -180,6 +182,9 @@ export default class FormRequest extends ProgressWizard {
         switch(value) {
             case "form":
                 this.setAttribute("autosave", "form");
+                break;
+            case "enter":
+                this.setAttribute("autosave", "enter");
                 break;
             default: 
                 this.setAttribute("autosave","autosave");
@@ -307,7 +312,7 @@ export default class FormRequest extends ProgressWizard {
     onkeydown(event) {
         switch(event.key) {
             case "Enter":
-                if(this.getAttribute("autosave") !== "enter") return;
+                if(this.autosave !== "enter") return;
                 this.dispatchEvent(new CustomEvent("submission", {detail: {type: "keyup", formData: this.buildSubmission()}}));
                 break;
             case "s":

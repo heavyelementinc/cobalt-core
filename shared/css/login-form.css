@@ -154,3 +154,64 @@ modal-box#login-modal>section {
     width: 100vw;
   }
 }
+
+.switch-user-button {
+  border: 1.5px solid transparent;
+  background: transparent;
+}
+
+#switchUser .modal-body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  h2 {
+    width: 100%;
+    margin-top: 0;
+    text-align: center;
+  }
+}
+
+.user-login--avatar-button {
+  display: flex;
+  gap: .5lh;
+  flex-direction: column;
+  margin-bottom: 0;
+  position: relative;
+  scale: 1;
+  transition: scale .3s;
+  &:hover {
+    scale: 1.05;
+  }
+  img {
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+  label {
+    max-width: 100px;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .unread {
+    position: absolute;
+    right: .25lh;
+    top: .25lh;
+    height: 1.5lh;
+    width: 1.5lh;
+    /* padding: .4lh; */
+    background: red;
+    border-radius: 50%;
+    color: white;
+    display: grid;
+    place-items: center;
+    font-family: sans-serif;
+    &:empty{
+      display: none;
+    }
+  }
+}

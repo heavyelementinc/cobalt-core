@@ -33,7 +33,7 @@ try {
 $_REQUEST['url'] = server_name() . $_SERVER['REQUEST_URI'];
 $_REQUEST['url'] .= ($_SERVER['QUERY_STRING']) ? "?$_SERVER[QUERY_STRING]" : "";
 
-$WEB_PROCESSOR_VARS = array_merge($WEB_PROCESSOR_VARS, [
+$WEB_PROCESSOR_VARS = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], [
     'app'  => __APP_SETTINGS__,
     'get'  => $_GET,
     'post' => $_POST,

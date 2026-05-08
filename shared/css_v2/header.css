@@ -65,6 +65,25 @@ label[for='user-menu-bar-controller'] {
             }
         }
     }
+    #documentation-dialog-button {
+        position: relative;
+    }
+    .documentation-count {
+        position: absolute;
+        bottom: -3px;
+        right: -6px;
+        width: 14px;
+        height: 14px;
+        display: grid;
+        place-items: center;
+        background: black;
+        color: white;
+        border: 2px solid var(--user-menu-bg-color);
+        border-radius: 50%;
+        font-size: 0.5em;
+        box-sizing: border-box;
+        font-weight: bold;
+    }
     notify-button {
         color: var(--user-menu-fg-color);
     }

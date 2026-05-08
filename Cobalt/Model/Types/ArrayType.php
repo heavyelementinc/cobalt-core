@@ -16,6 +16,10 @@ use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
 
+/**
+ * @method delimiter
+ * @package Cobalt\Model\Types
+ */
 class ArrayType extends MixedType implements ArrayAccess, Stringable {
     use Hydrateable;
 
@@ -49,7 +53,7 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
     }
 
     public function __toString(): string {
-        return implode(", ", $this->serialize());
+        return implode($this->directiveOrNull("delimiter") ?? ", ", $this->serialize());
     }
 
     public function serialize() {

@@ -1,19 +1,19 @@
 <section id="login-form-container" class="login-form-container">
     <section class="login-hero-sidebar" style="background-image: url('{{app.login-hero-sidebar}}')"></section>
     <h1>Two-factor Authentication (2FA)</h1>
-    <span class="error">{{!message}}</span>
+    <span class="error">{{!errors}}</span>
     <form-request id="login-form" 
         method="POST" complete="refresh" autosave="enter" @csrf_attribute();
         action="/api/v1/login/?<?= SESSION_RESUME_PARAM ?>=<?= urlencode($_GET[SESSION_RESUME_PARAM] ?? "")?>" 
         >
         <div class="username" __custom-input="true">
-            {{!user.name.tag()}}
+            {{!user.uname.tag()}} 
         </div>
         <div class="hbox">
             <a href="/login/?reset">Not you?</a>
         </div>
         <label>Two-factor Auth Code <help-span value="Use your TOTP App (Google Authenticator, FreeOTP, etc) to get a one-time password and enter it here."></help-span></label>
-        <input type="string" name="totp" autofocus>
+        <input type="string" name="totp" autofocus <?= ($errors) ? "invalid='invalid'" : "" ?>>
         <div class="hbox">
             <help-span value="If you've lost access to your authenticator app, you can enter one of your backup codes in the box above.">I don't have my app!</help-span>
         </div>

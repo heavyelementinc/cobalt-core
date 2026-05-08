@@ -3,16 +3,19 @@
 namespace Cobalt\Model\Types\Abstracts;
 
 use ArrayAccess;
+use Cobalt\DBManagement\CobaltCursor;
 use Cobalt\Model\Model;
 use Exception;
 use MongoDB\BSON\ObjectId;
 use Validation\Exceptions\ValidationIssue;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Types\MixedType;
+use Cobalt\Model\Types\Traits\ArrayPrototypes;
 use Iterator;
 use MongoDB\Driver\Cursor;
 
 abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
+    use ArrayPrototypes;
     public array $raw = [];
 
     abstract function getModel(): Model;
@@ -41,7 +44,7 @@ abstract class OrderedListOfForeignIds extends MixedType implements Iterator {
     }
 
     // If needed, you can override this functionality (as we do with the ImageArrayType)
-    public function runJoinQuery(Model $model, array $ids): ?Cursor {
+    public function runJoinQuery(Model $model, array $ids): null|CobaltCursor|Cursor {
         return $model->find(['_id' => ['$in' => $ids]], ['limit' => count($ids)]);
     }
     

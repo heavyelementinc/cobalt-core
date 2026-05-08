@@ -101,7 +101,7 @@ modal-button-row {
   modal-button-row button {
       flex-grow: 1;
       border-radius: 0;
-      border: none;
+      border: 1.5px solid transparent;
       min-height: 2rem;
       padding: .7rem 0;
       font-weight: bold;

@@ -63,6 +63,9 @@ function user():?User {
 function auth():Authentication {
     /** @var Cobalt\Auth\Users\Authentication $auth */
     global $auth;
+    if(!$auth) {
+        $auth = new Authentication();
+    }
     return $auth;
 }
 

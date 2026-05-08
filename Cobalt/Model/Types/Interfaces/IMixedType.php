@@ -2,7 +2,7 @@
 
 namespace Cobalt\Model\Types\Interfaces;
 
-use Cobalt\DefinedModel\GenericModel;
+use Cobalt\Model\GenericModel;
 
 interface IMixedType {
     public function setName(string $value):void;

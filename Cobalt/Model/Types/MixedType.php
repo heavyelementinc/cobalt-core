@@ -3,8 +3,6 @@
 namespace Cobalt\Model\Types;
 
 use ArrayAccess;
-use Cobalt\DefinedModel\DefinedModel;
-use Cobalt\DefinedModel\GenericModel as NewGenericModel;
 use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\Exceptions\Undefined;
 use Cobalt\Model\GenericModel;
@@ -38,24 +36,24 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
     // protected string $name;
     protected string $fieldName = "";
     protected bool $hasModel = false;
-    protected GenericModel|NewGenericModel $model;
-    protected NewGenericModel $rootModel;
-    protected NewGenericModel $parentModel;
+    protected GenericModel $model;
+    protected GenericModel $rootModel;
+    protected GenericModel $parentModel;
 
-    public function setParentModel(NewGenericModel $model) {
+    public function setParentModel(GenericModel $model) {
         $this->parentModel = $model;
         $this->model = $model;
     }
 
-    public function getParentModel(): NewGenericModel {
+    public function getParentModel(): GenericModel {
         return $this->parentModel;
     }
 
-    public function setRootModel(NewGenericModel $model) {
+    public function setRootModel(GenericModel $model) {
         $this->rootModel = $model;
     }
 
-    public function getRootModel(): NewGenericModel {
+    public function getRootModel(): GenericModel {
         return $this->rootModel;
     }
 
@@ -91,7 +89,7 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
         return $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
     }
 
-    public function setModel(GenericModel|NewGenericModel $model):void {
+    public function setModel(GenericModel $model):void {
         $this->model = $model;
     }
 

@@ -27,6 +27,9 @@ $PACKAGES = ['js' => [], 'css' => []];
 global $ROUTE_LOOKUP_CACHE;
 $ROUTE_LOOKUP_CACHE = [];
 
+global $HTML_ROUTE_CACHE;
+$HTML_ROUTE_CACHE = [];
+
 global $PUBLIC_SETTINGS;
 $PUBLIC_SETTINGS = [];
 
@@ -109,6 +112,9 @@ function bind($binding_name, $value) {
     else $GLOBALS['WEB_PROCESSOR_VARS'][$binding_name] .= $value;
 }
 
+const DATABASE_DRIVER_MONGODB  = "MongoDB";
+const DATABASE_DRIVER_POSTGRES = "Postgres";
+
 const FLOATING_SAVE_BUTTON = '<button type="submit" class="floater floater--save-item"><i name="%s"></i> %s</button>';
 
 const REQUEST_ENCODE_JSON = 1;
@@ -171,6 +177,7 @@ const SESSION_STAY_LOGGED_IN = "__stay_logged_in";
 const SESSION_TFA_STATE = "__tfa_state";
 const SESSION_RESUME_PARAM = "resume";
 const SESSION_MESSAGE_PARAM = "message";
+const SESSION_CONTINUE_PARAM = "continue";
 const TFA_STATE_DISABLED = 0;
 const TFA_STATE_ENABLED = 1;
 

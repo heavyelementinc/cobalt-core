@@ -36,7 +36,7 @@ use TypeError;
 /**
  * GenericModels may be accessed using the -> syntax *or* accessed as an array.
  *  * Accessing using the $model->key syntax will return an instance of the MixedType with the value, originalValue, its prototype methods, etc.
- *  * Accessing using the $model->['key'] syntax will return the literal value of the MixedType as if you accessed $model->key->value
+ *  * Accessing using the $model['key'] syntax will return the literal value of the MixedType as if you accessed `$model->key->value`
  * 
  *  * `set()` - [&$validated, [$value]]
  * @package Cobalt\Model

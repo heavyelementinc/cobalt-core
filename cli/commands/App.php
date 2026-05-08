@@ -19,7 +19,7 @@ class App {
         'info' => [
             'description' => 'Display version information',
             'context_required' => true,
-        ]
+        ],
     ];
 
     public function rebuild($delete = false) {

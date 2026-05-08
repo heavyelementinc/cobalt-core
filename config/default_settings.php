@@ -2149,6 +2149,18 @@ $settings = [
                             "html_class" => "admin-panel"
                         ]
                     ],
+                    "documentation" => [
+                        "processor" => "Handlers\\DocumentationHandler",
+                        "prefix" => "/documentation/",
+                        "exception_mode" => "web",
+                        "mode" => "text/html",
+                        "session_refresh" => true,
+                        "api_access" => true,
+                        "router_boundry" => true,
+                        "vars" => [
+                            "html_class" => "documentation"
+                        ]
+                    ],
                     "debug" => [
                         "processor" => "Handlers\\WebHandler",
                         "prefix" => "/debug/",

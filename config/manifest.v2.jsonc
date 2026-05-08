@@ -195,6 +195,11 @@
         "package": "deferred"
     },
     {
+        "href":"Documentation.js",
+        "contexts": ["common"],
+        "package": "deferred"
+    },
+    {
         "href":"components/horizontal-scroll.js",
         "contexts": ["common"],
         "package": "deferred"
