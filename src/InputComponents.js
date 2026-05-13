@@ -288,7 +288,6 @@ class DisplayDate extends HTMLElement {
         return this.getAttribute("value") || this.innerText || null
     }
 
-
     execute() {
         if (this.relative === "true" || this.getAttribute("format") === "relative") {
             return this.startRelativeTime();
