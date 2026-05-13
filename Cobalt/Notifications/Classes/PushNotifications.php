@@ -2,7 +2,7 @@
 
 namespace Cobalt\Notifications\Classes;
 
-use Cobalt\Auth\Users\UserCRUD;
+use Cobalt\Auth\Users\Models\User;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Minishlink\WebPush\Subscription;
@@ -118,7 +118,7 @@ class PushNotifications {
     }
 
     function fetch_recipients(array $permissions) {
-        $crud = new UserCRUD();
+        $crud = new User();
         $query = [
             ['_id' => []],
         ];
@@ -180,7 +180,7 @@ class PushNotifications {
     
 
     final function enrollPushKeys($userId, $key_data) {
-        $ua = new UserCRUD();
+        $ua = new User();
         if($userId instanceof ObjectId === false) $userId = new ObjectId($userId);
         $user = $ua->findOne(['_id' => $userId]);
         if(!$user) throw new NotFound("Invalid resource");
@@ -200,7 +200,7 @@ class PushNotifications {
     }
 
     final function revokePushKeys($userId, $key_data) {
-        $ua = new UserCRUD();
+        $ua = new User();
         if($userId instanceof ObjectId === false) $userId = new ObjectId($userId);
         $user = $ua->findOne(['_id' => $userId]);
         if(!$user) throw new NotFound("Invalid resource");

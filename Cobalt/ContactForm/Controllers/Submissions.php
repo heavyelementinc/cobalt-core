@@ -2,7 +2,7 @@
 
 namespace Cobalt\ContactForm\Controllers;
 
-use Cobalt\Auth\Users\UserCRUD;
+use Cobalt\Auth\Users\Models\User;
 use Cobalt\ContactForm\Model\AdditionalContactFields;
 use Cobalt\ContactForm\Model\FormSubmission;
 use Cobalt\Controllers\ModelController;
@@ -97,16 +97,18 @@ class Submissions extends ModelController {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
         $persistance = new $className();
         if($persistance instanceof FormSubmission) {
+            /** @var FormSubmission $mutant */
             $mutant = $persistance->__filter($data);
-        } else if ($persistance instanceof Persistance) {
+        } else {
+            throw new Exception("Invalid version");
             /** @var Persistance */
-            $mutant = $persistance->__validate($data);
+            // $mutant = $persistance->__validate($data);
         }
         $mutant->ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
         $mutant->token = $_SERVER["HTTP_X_CSRF_MITIGATION"];
         $mutant->date  = new \MongoDB\BSON\UTCDateTime();
 
-        $_SESSION['__contact_form_submission'] = $mutant->jsonSerialize();
+        $_SESSION['__contact_form_submission'] = $mutant->bsonSerialize();
 
         if(__APP_SETTINGS__['Contact_form_anti_spam_technique'] == "stepped-click") {
             update("@form", [
@@ -128,9 +130,10 @@ class Submissions extends ModelController {
     private function stage2($data) {
         $this->throttleCatch();
 
-        /** @var Persistance */
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
-        $persistance = new $className($_SESSION['__contact_form_submission']);
+        /** @var \Cobalt\ContactForm\Model\FormSubmission $persistance */
+        $persistance = new $className();
+        $persistance->bsonUnserialize($_SESSION['__contact_form_submission']);
         $error = 0;
         // $mutant = $persistance->__validate($_SESSION['__contact_form_submission']);
         // if($data['email']) $error += self::ERROR_EMAIL;
@@ -183,11 +186,13 @@ class Submissions extends ModelController {
             'next' => view("Cobalt/ContactForm/templates/web/stage-3--contact-complete.php")
         ]);
         $fields = new AdditionalContactFields();
-        $fields->onSubmit();
+        if(method_exists($fields, 'onSubmit')) {
+            $fields->onSubmit();
+        }
     }
 
     private function getRecipients() {
-        $crud = new UserCRUD();
+        $crud = new User();
         $users = $crud->getUsersByPermission(__APP_SETTINGS__['Contact_form_user_permissions_to_notify']);
         return $users;
     }
@@ -201,7 +206,7 @@ class Submissions extends ModelController {
         try {
             $subject = "New contact form submission";
             if (key_exists("subject", $_POST)) $subject = "Webform: \"" . strip_tags($_POST['subject'] . "\"");
-            $crud = new UserCRUD();
+            $crud = new User();
             $users = $crud->getUsersByPermission(app("API_contact_form_recipients"));
             $addresses = [];
             foreach($users as $user) {
@@ -214,7 +219,7 @@ class Submissions extends ModelController {
         return $mutant;
     }
 
-    private function contactNotify($mutant, $href) {
+    private function contactNotify(FormSubmission $mutant, $href) {
         $ntfy = new NotificationManager();
         $to = NotificationManager::getAddresseesByPermission("Contact_form_submissions_access");
         $notification = new NotificationSchema([
@@ -231,11 +236,9 @@ class Submissions extends ModelController {
     }
 
     
-    private function contactPanel($mutant) {
-        $backend = new ContactManager();
-
+    private function contactPanel(FormSubmission $mutant) {
         try {
-            $result = $backend->insertOne($mutant);
+            $result = $mutant->insertOne($mutant);
             $id = $result->getInsertedId();
             $action = "/admin/submissions/".(string)$id;
             $method = "GET";
