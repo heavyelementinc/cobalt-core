@@ -217,8 +217,11 @@ trait MixedTypeToField {
         if($pattern) $pattern = " pattern=\"".htmlentities($pattern)."\"";
         $prerequisites = "";
         if($this->hasDirective("prerequisites")) $prerequisites = $this->getDirective("prerequisites",$this);
-        
-        return "<$tag class=\"$classes\" $attrs".$pattern.">".$this->getValue()."</$tag>$prerequisites";
+        $fineprint = "";
+        if($this->hasDirective("min")) $fineprint .= "<span>Minimum of <strong>".$this->getDirective("min")."</strong> characters.</span>";
+        if($this->hasDirective("max")) $fineprint .= "<span>Maximum of <strong>".$this->getDirective("max")."</strong> characters.</span>";
+        if($fineprint) $fineprint = "<small>$fineprint</small>";
+        return "<$tag class=\"$classes\" $attrs".$pattern.">".$this->getValue()."</$tag>$fineprint"."$prerequisites";
     }
 
     protected function markdownarea($classes, $misc = []) {

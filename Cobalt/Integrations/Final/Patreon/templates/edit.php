@@ -30,5 +30,9 @@
             <label>Refresh Token</label>
             <input name="refresh_token" value="{{config.refresh_token}}">
         </li>
+        <li>
+            <label>Sleep Interval</label>
+            <input type="number" name="sleep_interval" value="{{config.sleep_interval}}">
+        </li>
     </ul>
 </form-request>

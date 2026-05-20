@@ -3,6 +3,7 @@
 namespace Cobalt\Integrations\Final\Patreon;
 
 use Cobalt\Integrations\Config;
+use Cobalt\SchemaPrototypes\Basic\NumberResult;
 use Cobalt\SchemaPrototypes\Basic\StringResult;
 use Drivers\Database;
 
@@ -14,6 +15,10 @@ class PatreonConfig extends Config {
             'client_secret' => new StringResult,
             'access_token'  => new StringResult,
             'refresh_token' => new StringResult,
+            'sleep_interval' => [
+                new NumberResult,
+                'default' => .1
+            ]
         ];
     }
 

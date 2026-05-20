@@ -12,9 +12,12 @@ class Captcha {
     private int $characterCount = 6;
     private int $randomDots = 50;
     private int $randomLines = 25;
+    private bool $includeMath = true;
 
     const SESSION_CAPTCHA_KEY = "___SESSION_CAPTCHA_KEY";
     const HEADER_FIELD_NAME = "X-Captcha";
+    const SESSION_CAPTCHA_MATH_KEY = "___SESSION_MATH_PROBLEM";
+    const SESSION_CAPTCHA_MATH_EXPIRES = "___SESSION_MATH_EXPIRES";
 
     function __construct(
         $textColor = "6d87cf",
@@ -23,7 +26,8 @@ class Captcha {
         $captchaWidth = 140,
         $totalCharacters = 6,
         $randomDots = 50,
-        $randomLines = 25
+        $randomLines = 25,
+        $includeMath = true
     ) {
         $this->setTextColor($textColor);
         $this->setNoiseColor($noiseColor);
@@ -32,6 +36,21 @@ class Captcha {
         $this->setCharCount($totalCharacters);
         $this->setDotCount($randomDots);
         $this->setLineCount($randomLines);
+        $this->includeMath($includeMath);
+    }
+
+    public function includeMath(bool $math) {
+        $this->includeMath = $math;
+        if(!is_array($_SESSION[self::SESSION_CAPTCHA_MATH_KEY])) {
+            $_SESSION[self::SESSION_CAPTCHA_MATH_KEY] = [random_int(5, 35), random_int(5, 35)];
+        }
+    }
+
+    public function validateMath($submitted_field):bool {
+        if(is_numeric($submitted_field)) $value = filter_var($submitted_field, FILTER_SANITIZE_NUMBER_INT);
+        $solved = $value == array_sum($_SESSION[self::SESSION_CAPTCHA_MATH_KEY]);
+        if($solved) unset($_SESSION[self::SESSION_CAPTCHA_MATH_KEY]);
+        return $solved;
     }
 
     public function validate($submitted_field):bool {

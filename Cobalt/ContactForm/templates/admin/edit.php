@@ -58,4 +58,8 @@
             width: 12ch;
         }
     }
+    .list-panel label {
+        font-weight: bold;
+        font-family: mono;
+    }
 </style>

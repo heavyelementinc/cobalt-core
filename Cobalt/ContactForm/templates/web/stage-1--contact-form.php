@@ -22,7 +22,12 @@
   </fieldset>
   <fieldset>
     <label>What are you contacting us about?</label>
-    <textarea name="additional" placeholder="Additional information" maxlength="1800"></textarea>
+    <?php
+      use Cobalt\ContactForm\Model\FormSubmission;
+      $model = new FormSubmission;
+    ?>
+    <textarea name="additional" placeholder="Additional information" maxlength="<?= $model->additional->directiveOrNull('max') ?? 450 ?>"></textarea>
+    <?= ($model->additional->hasDirective('max')) ? "<small class='max'>Max of ".$model->additional->getDirective('max')." characters.</small>": ""; ?>
   </fieldset>
   <div class="error" style="flex-grow:1"></div>
   <button type="submit">Submit</button>

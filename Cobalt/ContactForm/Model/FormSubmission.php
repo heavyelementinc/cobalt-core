@@ -58,7 +58,7 @@ class FormSubmission extends Model implements Migration {
             ],
             "additional" => [
                 new MarkdownType,
-                'char_limit' => 1800
+                'max' => 450
             ],
             "read" => [
                 new ArrayOfUsersType(),
@@ -70,15 +70,15 @@ class FormSubmission extends Model implements Migration {
                     if($val) return "read";
                     return "unread";
                 },
-                'index' => [
-                    'title' => 'Read Status',
-                    'order' => 3,
-                    'sortable' => false,
-                    'view' => function () {
-                        if(in_array(session("_id"), $this->read->value ?? [])) return "Read";
-                        return "Unread";
-                    }
-                ]
+                // 'index' => [
+                //     'title' => 'Read Status',
+                //     'order' => 3,
+                //     'sortable' => false,
+                //     'view' => function () {
+                //         if(in_array(session("_id"), $this->read->value ?? [])) return "Read";
+                //         return "Unread";
+                //     }
+                // ]
             ],
             "date" => [
                 new DateType,
@@ -89,7 +89,10 @@ class FormSubmission extends Model implements Migration {
                     // 'view' => fn () => $this->date->format("c")
                 ]
             ],
-            "ip" => new StringType,
+            "ip" => [
+                new StringType,
+                'label' => 'IP Address'
+            ],
             "token" => new StringType,
             "type" => new StringType,
         ];

@@ -85,6 +85,7 @@ class Patreon extends Base {
         if($cursor !== null) $query['page[cursor]'] = $cursor;
         $url = "https://www.patreon.com/api/oauth2/v2/campaigns/$campaign/members?" . http_build_query($query);
         $response = $this->fetch('get', $url);
+        sleep($this->config?->sleep_interval?->getValue() ?? .1); // Let's not hit the Patreon API throttling limit.
         return $response;
     }
 
