@@ -18,6 +18,10 @@ class PatreonConfig extends Config {
             'sleep_interval' => [
                 new NumberResult,
                 'default' => .1
+            ],
+            'member_cursor_limit' => [
+                new NumberResult,
+                'default' => 1000
             ]
         ];
     }

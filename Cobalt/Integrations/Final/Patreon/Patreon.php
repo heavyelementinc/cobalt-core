@@ -13,6 +13,9 @@ use SensitiveParameter;
 
 class Patreon extends Base {
 
+    public bool $honorRateLimit = true;
+    private bool $rateLimitOnNextCall = false;
+
     const STATUS__ACTIVE_PATRON = "active_patron";
     const STATUS__FORMER_PATRON = "former_patron";
 
@@ -45,6 +48,7 @@ class Patreon extends Base {
         print("\n");
         return $result;
     }
+
     const MEMBER_SCOPE__MEMBER  = 0b0001;
     const MEMBER_SCOPE__TIER    = 0b0010;
     const MEMBER_SCOPE__USER    = 0b0100;
@@ -52,6 +56,10 @@ class Patreon extends Base {
     private function fetchPage(?string $cursor = null, int $scopes = self::MEMBER_SCOPE__MEMBER +
     self::MEMBER_SCOPE__TIER +
     self::MEMBER_SCOPE__USER) {
+        if($this->honorRateLimit && $this->rateLimitOnNextCall) {
+            sleep($this->config?->sleep_interval?->getValue() ?? .1); // Let's not hit the Patreon API throttling limit.
+        }
+        $this->rateLimitOnNextCall = true;
         $query = ['include' => implode(",", ["currently_entitled_tiers","address","user",])];
         if($scopes & self::MEMBER_SCOPE__MEMBER == self::MEMBER_SCOPE__MEMBER) {
             $query['fields[member]'] = implode(",", [
@@ -83,9 +91,9 @@ class Patreon extends Base {
         // }
         $campaign = $this->config->campaign_id;
         if($cursor !== null) $query['page[cursor]'] = $cursor;
+        $query['page[count]'] = $this->config?->member_cursor_limit?->getValue() ?? 1000;
         $url = "https://www.patreon.com/api/oauth2/v2/campaigns/$campaign/members?" . http_build_query($query);
         $response = $this->fetch('get', $url);
-        sleep($this->config?->sleep_interval?->getValue() ?? .1); // Let's not hit the Patreon API throttling limit.
         return $response;
     }
 
@@ -104,7 +112,7 @@ class Patreon extends Base {
     self::CAMPAIGN_SCOPE__GOALS
     ) {
         $cli = function_exists("say");
-        if($cli) print("Fetching campaign data...");
+        if($cli) print("Fetching Patreon campaign details (campaign_id: ".fmt($this->config->campaign_id,"i").")...");
         
         $query = [
             'include' => ['creator'],
