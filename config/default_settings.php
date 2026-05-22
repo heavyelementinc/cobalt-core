@@ -733,7 +733,6 @@ $settings = [
         "opengraph_description" => [
             "default" => "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io",
         ],
-        
         "fb_app_id" => [
             "default" => "",
             "meta" => [
@@ -1283,6 +1282,10 @@ $settings = [
                 "type" => "bool"
             ]
         ],
+        'Customizations_allow_prefetching' => [
+            'default' => true,
+        ],
+        
         "error_on_missing_customization" => [
             "default" => true,
             "directives" => [],
@@ -1365,6 +1368,26 @@ $settings = [
         "Font_backend" => [
             'default' => FONT_BACKEND_GOOGLE
         ],
+        
+        "Frontend_code_injection_head" => [
+            'default' => "",
+            'meta' => [
+                'group' => GROUP_LOOK_FEEL,
+                'name' => "Frontend Code Injection Head",
+                'help' => "Allows you to inject HTML into the frontend",
+                'type' => 'textarea'
+            ]
+        ],
+        "Frontend_code_injection_footer" => [
+            'default' => "",
+            'meta' => [
+                'group' => GROUP_LOOK_FEEL,
+                'name' => "Frontend Code Injection Header Footer",
+                'help' => "Allows you to inject HTML into the frontend",
+                'type' => 'textarea'
+            ]
+        ],
+        
         "css-vars" => [
             "default" => [],
             "directives" => [

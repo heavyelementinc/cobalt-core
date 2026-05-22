@@ -112,7 +112,7 @@ class Patreon extends Base {
     self::CAMPAIGN_SCOPE__GOALS
     ) {
         $cli = function_exists("say");
-        if($cli) print("Fetching Patreon campaign details (campaign_id: ".fmt($this->config->campaign_id,"i").")...");
+        if($cli) print("Requesting Patreon campaign details (campaign_id: ".fmt($this->config->campaign_id,"i").")...");
         
         $query = [
             'include' => ['creator'],
@@ -194,6 +194,7 @@ class Patreon extends Base {
         $cursor = null;
         $iterations = 0;
         $total = null;
+        if(function_exists("say")) print("Fetching membership details...\r");
         while(true) {
             $response = $this->fetchPage($cursor, $scopes)['response'];
             $total = ceil($response['meta']['pagination']['total'] / count($response['data']));

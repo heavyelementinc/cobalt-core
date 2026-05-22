@@ -21,7 +21,15 @@ class CustomizationManager extends \Drivers\Database {
     public function get_schema_name($doc = []) {
         return '\\Cobalt\\Customization\\CustomSchema';
     }
-    
+   
+    function prefetchCustomNames(array $array):void {
+        if(!__APP_SETTINGS__['Customizations_allow_prefetching']) return;
+        $result = $this->findAllAsSchema(['unique_name' => ['$in' => $array]]);
+        foreach($result as $item) {
+            $this->cache[$item->__dataset['_name']] = $item->value;
+        }
+    }
+
     public function getCustomizationByUniqueName($name, $options = []) {
         // if(key_exists($name, $this->cache)) return $this->cache[$name];
         return $this->findOneAsSchema(['unique_name' => $name], $options);

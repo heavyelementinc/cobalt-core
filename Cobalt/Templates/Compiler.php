@@ -22,6 +22,7 @@ class Compiler {
 
     public function compile() {
         $content = file_get_contents($this->path);
+        $extractedCustomNames = json_encode($this->extractCustomNames($content));
         $now = date("c");
         $mutant = <<<HTML
         <?php
@@ -34,11 +35,19 @@ class Compiler {
             */
             global \$__current_template_debug;
             \$__current_template_debug = "$this->path";
+            
+            \$GLOBALS['WEB_PROCESSOR_VARS']['custom']->prefetchCustomNames($extractedCustomNames);
         ?>$content
         HTML;
         $this->process_functions($content, $mutant);
         $this->process_variables($content, $mutant);
         return $mutant;
+    }
+
+    public function extractCustomNames(string $templateContent):array {
+        $matches = [];
+        preg_match_all("/{{custom.(\w+)|\$custom->(\w+)/", $templateContent, $matches);
+        return $matches[1] ?? [];
     }
 
     public function process_functions($subject, &$result) {

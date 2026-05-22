@@ -43,6 +43,7 @@ class Run extends \Drivers\Database {
             ]
         ]);
         if (function_exists("say")) say("$this->due_task_count of $this->total_task_count tasks will be executed.");
+        cobalt_log('CRONTASK',"$this->due_task_count of $this->total_task_count tasks will be executed.");
         if (!$tasks) return say("No tasks need to be executed", "w");
         foreach ($tasks as $task) {
             $this->task($task);
@@ -88,6 +89,7 @@ class Run extends \Drivers\Database {
             'last_run' => $this->date,
             'log_message' => $task_instance->log_message(),
         ];
+        cobalt_log("CRONTASK", "Completed $task[name] with result \"$result\" in " . $metrics['end'] - $metrics['start'] . " seconds.");
         array_push(
             $this->log,
             $task,

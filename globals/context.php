@@ -13,6 +13,7 @@
  */
 
 use Cobalt\Auth\Users\Authentication;
+use Cobalt\Customization\CustomizationManager;
 
 benchmark_start("router_setup");
 ob_start();
@@ -47,7 +48,7 @@ $WEB_PROCESSOR_VARS = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], [
     'og_template' => "/parts/opengraph/default.html",
     // 'extensions' => extensions(),
     // 'custom' => new CustomizationManager(),
-    'custom' => new Cobalt\Customization\CustomizationManager()
+    'custom' => new CustomizationManager()
 ]);
 // Let's set our processor to 'Web\WebHandler' since we want that to be default
 $processor = "Handlers\WebHandler";
