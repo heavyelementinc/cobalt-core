@@ -14,7 +14,6 @@
 
 use Cobalt\Auth\Users\Authentication;
 use Cobalt\Customization\CustomizationManager;
-
 benchmark_start("router_setup");
 ob_start();
 
@@ -132,6 +131,7 @@ try {
 
     $context_result = $context_processor->_stage_output($router_result);
     $context_processor->_stage_bootstrap['_stage_output'] = true;
+    
     ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
      ob_clean(); // Clear the output buffer

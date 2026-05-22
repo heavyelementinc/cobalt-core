@@ -311,7 +311,7 @@ class WebHandler extends RequestHandler {
         // $header = $this->load_template($this->header_template);
 
         // $mutant = preg_replace("href=['\"]$route['\"]","href=\"$1\" class=\"navigation-current\"",$header);
-        return view($this->header_template) . ($this::class === "Handlers\WebHandler") ? __APP_SETTINGS__['Frontend_code_injection_head'] : "";
+        return view($this->header_template) . (($this::class === "Handlers\WebHandler") ? __APP_SETTINGS__['Frontend_code_injection_head'] : "");
     }
 
     function header_nav() {
@@ -346,7 +346,7 @@ class WebHandler extends RequestHandler {
     var $footer_template = "parts/footer.html";
 
     function footer_content() {
-        return view($this->footer_template) . ($this::class === "Handlers\WebHandler") ? __APP_SETTINGS__['Frontend_code_injection_footer'] : "";
+        return view($this->footer_template) . (($this::class === "Handlers\WebHandler") ? __APP_SETTINGS__['Frontend_code_injection_footer'] : "");
     }
 
     function footer_credits() {
