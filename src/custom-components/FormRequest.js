@@ -661,7 +661,7 @@ class FormRequestData {
     }
 
     filterUntrustedImageResults(item, value) {
-        if(typeof value === "object" && '$__untrustedImageResult__$' in value) {
+        if(value !== null && typeof value === "object" && '$__untrustedImageResult__$' in value) {
             if('url' in value) {
                 value = value.url;
                 return true;
@@ -725,7 +725,10 @@ class FormRequestData {
 
     __getFileList(value) {
         if(value instanceof FileList) return value;
-        if(typeof value === "object" && 'url' in value && value.url instanceof FileList) return value.url;
+        if(value !== null 
+            && typeof value === "object" && 'url' in value 
+            && value.url instanceof FileList
+        ) return value.url;
         return null;
     }
 
