@@ -143,3 +143,5 @@ if(__APP_SETTINGS__['Block_Editor_endpoints']) {
 }
 
 CrudableFiles::apiv1();
+
+Route::s_post('/settings/update/', 'CoreSettingsPanel@update');

@@ -2,12 +2,15 @@
 
 use Cobalt\Model\Types\ImageType;
 use Demyanovs\PHPHighlight\Highlighter;
+use Dom\HTMLDocument;
 use Drivers\UTCDateTime as DriversUTCDateTime;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Validation\Exceptions\ValidationIssue;
+
+use const Dom\HTML_NO_DEFAULT_NS;
 
 function fediverse_href_to_user_tag(string $href) {
     if(!$href) return;
@@ -368,6 +371,25 @@ function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
         $pkey .= $p[$i];
     }
     return $pkey;
+}
+
+function nonce():string {
+    if(!defined('CSP_NONCE')) {
+        define("CSP_NONCE", guidv4());
+        header("Content-Security-Policy: script-src 'self' 'nonce-".CSP_NONCE."'; script-src-elem 'self' 'nonce-".CSP_NONCE."'");
+    }
+    return "nonce=\"".CSP_NONCE."\"";
+}
+
+function upgrade_scripts_to_nonce(string $html):string {
+    if(!$html) return "";
+    if(!defined('CSP_NONCE')) nonce(); // Needed to ensure the CSP_NONCE is defined
+    $dom = HTMLDocument::createFromString($html, HTML_NO_DEFAULT_NS);
+    $scripts = $dom->getElementsByTagName("script");
+    foreach($scripts as $scriptElement) {
+        $scriptElement->setAttribute("nonce", CSP_NONCE);
+    }
+    return $dom->saveHtml();
 }
 
 function guidv4($data = null) {

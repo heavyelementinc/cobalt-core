@@ -1,3 +1,24 @@
+<script <?= nonce() ?>>
+/** @return mixed|array{Cobalt\Settings\Settings::DEFAULT_DEFINITIONS} */
+function app(setting = null) {
+    if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
+    if (setting === null) return document.GLOBAL_SETTINGS;
+    if (setting in document.GLOBAL_SETTINGS) return document.GLOBAL_SETTINGS[setting];
+    throw new Error("Could not find that setting");
+}
+
+function iOS() {
+    if("platform" in navigator === false) return (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    return [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform);
+}
+
 /**
  * @author Gardiner Bryant
  * 
@@ -44,7 +65,7 @@ class CobaltScrollManager {
         }
 
         this.debug = app("Parallax_enable_debug") ?? false;
-
+        this.mutationObserver(document.currentScript.parentNode);
         document.addEventListener("navigationEvent", this.selectElements.bind(this));
         document.addEventListener("scrollManagerUpdate", this.selectElements.bind(this));
 
@@ -55,6 +76,19 @@ class CobaltScrollManager {
         // this.initDebug();
 
         if(app("enable_default_parallax")) this.selectElements();
+    }
+
+    mutationObserver(node) {
+        const observer = new MutationObserver((mutationList) => {
+            // Disable our observer
+            this.OBSERVER.disconnect();
+            // Select new elements
+            this.selectElements();
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            observer.disconnect();
+        });
     }
 
     get allowUpdate() {
@@ -116,13 +150,13 @@ class CobaltScrollManager {
                 case "background-x":
                 case "bg-x":
                     parallaxElement = new ParallaxBackgroundXElement(e, settings);
-                    if(!parallaxElement.enabled) continue;
+                    if(!parallaxElement.enabled) return;
                     break;
                 case "background":
                 case "bg":
                 default:
                     parallaxElement = new ParallaxBackgroundElement(e,settings);
-                    if(!parallaxElement.enabled) continue;
+                    if(!parallaxElement.enabled) return;
                     break;
             }
             this.scrollAnimatedElements.push(parallaxElement);
@@ -612,3 +646,4 @@ function parallaxState(value) {
     if(!window.parallax) throw new Error("CobaltScrollManager is not initialized.");
     window.parallax.allowUpdate = value
 }
+</script>

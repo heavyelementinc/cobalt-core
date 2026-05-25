@@ -322,18 +322,45 @@ class User extends Model implements Migration
         }
         // Quick and dirty optimization. If the format string is the default
         // value, then we should return the value
-        // if($format === "F l.") {
-        //     if($this->fname && $this->lname) {
-        //         return "$this->fname ".$this->lname->value[0] .".";
-        //     }
-        //     return $this->uname;
-        // }
+        if($format === "F l.") {
+            if($this->fname && $this->lname) {
+                $name = "$this->fname ".$this->lname->value[0] .".";
+            }
+            else $name = $this->uname;
+        } else {
+            $name = "";
+            for($i = 0; $i <= strlen($format); $i++) {
+                switch($format[$i]) {
+                    case "F":
+                        $name .= "$this->fname";
+                        break;
+                    case "f":
+                        $name .= $this->fname->value[0];
+                        break;
+                    case "L":
+                        $name .= "$this->lname";
+                        break;
+                    case "l":
+                        $name .= $this->lname->value[0];
+                        break;
+                    case "U":
+                        $name .= "$this->uname";
+                        break;
+                    case "u":
+                        $name .= $this->uname->value[0];
+                        break;
+                    default:
+                        $name .= $format[$i];
+                        break;
+                }
+            }
+        }
 
-        $name = str_replace(
-            ['F',          'f',                    'L',          'l',                     'U',         'u',],
-            [$this->fname, $this->fname->value[0], $this->lname, $this->lname->value[0], $this->uname, $this->uname->value[0],],
-            $format
-        );
+        // $name = str_replace(
+        //     ['F',          'f',                    'L',          'l',                     'U',         'u',],
+        //     [$this->fname, $this->fname->value[0], $this->lname, $this->lname->value[0], $this->uname, $this->uname->value[0],],
+        //     $format
+        // );
         $trimmed = trim($name);
         if (!$trimmed || $trimmed === ".") {
             return $this->uname;

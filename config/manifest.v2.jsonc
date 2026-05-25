@@ -279,10 +279,10 @@
     //     "contexts": ["common"],
     //     "package": "deferred"
     // },
-    {
-        "href":"CobaltScrollManager.js",
-        "contexts": ["common"]
-    },
+    // {
+    //     "href":"CobaltScrollManager.js",
+    //     "contexts": ["common"]
+    // },
     {
         "href":"PushNotifications.js",
         "contexts": ["common"]

@@ -277,7 +277,6 @@ class DisplayDate extends HTMLElement {
         if(!this.date) return;
         // this.format = this.getAttribute("format") || this.formatKeywords.default;
         if ((this.getAttribute("format") || "default") in this.formatKeywords) this.format = this.formatKeywords[this.format];
-        else this.format = this.getAttribute("format");
         this.relative = this.getAttribute("relative") || "false";
 
         if (typeof this.date !== "string") this.date = this.date.$date.$numberLong;
@@ -336,7 +335,6 @@ class DisplayDate extends HTMLElement {
     }
 
     change_handler_format(newValue) {
-        this.format = newValue;
         if ((newValue || "default") in this.formatKeywords) this.format = this.formatKeywords[newValue];
         this.execute();
     }

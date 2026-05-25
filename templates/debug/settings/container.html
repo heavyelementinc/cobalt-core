@@ -72,7 +72,7 @@
         color: #888
     }
 </style>
-<script>
+<script @nonce();>
     const buttons = document.querySelectorAll("#list a");
     buttons.forEach(e => {
         e.addEventListener("click", evt => {

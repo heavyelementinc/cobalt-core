@@ -21,7 +21,7 @@
 <div class="sortable-block">9</div>
 </div>
 
-<script>
+<script @nonce();>
     window.addEventListener("DOMContentLoaded",() => {
         const list = document.querySelector("#sortable");
         const sortable = new Sortable(list.children, list.children, list);

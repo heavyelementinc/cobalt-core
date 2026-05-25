@@ -25,7 +25,7 @@ class BlockResult extends SchemaResult {
         if($this->getDirective("immutable")) $misc['readonly'] = 'readonly';
         [$misc, $attrs] = $this->defaultFieldData($misc);
         $html = "<$tag class=\"$class\" $attrs>";
-        $html .= "<script type=\"application/json\">".json_encode($this->getRaw())."</script>";
+        $html .= "<script type=\"application/json\" ". nonce().">".json_encode($this->getRaw())."</script>";
         $html .= "</$tag>";
         return $html;
     }

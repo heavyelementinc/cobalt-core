@@ -5,6 +5,8 @@ cobalt-carousel {
     justify-content: center;
     align-items: center;
     container: cobalt-carousel size;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
     /* position: relative; */
 }
 

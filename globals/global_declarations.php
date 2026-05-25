@@ -1,5 +1,6 @@
 <?php
 // require_once __ENV_ROOT__ . "/config/default_settings.php";
+
 global $TEMPLATE_PATHS;
 $TEMPLATE_PATHS = [
     __APP_ROOT__,

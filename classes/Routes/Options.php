@@ -178,7 +178,7 @@ class Options implements Iterator, JsonSerializable {
         return $this->handler;
     }
 
-    /** @var array{[label: string, href: string, icon: string, order: int, attributes: mixed]} */
+    /** @var array{key:string:[label:string, href: string, icon: string, order: int, attributes: mixed]} */
     public function set_navigation(array $value):self{
         $this->navigation = [];
         foreach($value as $group => $nav) {

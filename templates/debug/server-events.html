@@ -2,7 +2,7 @@
     <div>Number of pings: <span id="ping-counter">0</span></div>
     <div id="event-stream"></div>
 </div>
-<script>
+<script @nonce();>
     var eventSource = new EventSource("/streams/hello-world", { withCredentials: true });
     var stream = document.querySelector("#event-stream");
     var pings = document.querySelector("#ping-counter")

@@ -6,14 +6,6 @@ function isRegisteredWebComponent(tag) {
     return !!customElements.get(tag.toLowerCase());
 }
 
-/** @return mixed|array{Cobalt\Settings\Settings::DEFAULT_DEFINITIONS} */
-function app(setting = null) {
-    if ("GLOBAL_SETTINGS" in document === false) document.GLOBAL_SETTINGS = JSON.parse(document.querySelector("#app-settings").innerText);
-    if (setting === null) return document.GLOBAL_SETTINGS;
-    if (setting in document.GLOBAL_SETTINGS) return document.GLOBAL_SETTINGS[setting];
-    throw new Error("Could not find that setting");
-}
-
 function random_string(length = 8, validChars = null) {
     let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     if (validChars) chars = validChars;
@@ -810,17 +802,7 @@ function cssUnitToNumber(cssValue, target = null) {
     return cssToPixel(cssValue, target, false)
 }
 
-function iOS() {
-    if("platform" in navigator === false) return (navigator.userAgent.includes("Mac") && "ontouchend" in document);
-    return [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod'
-    ].includes(navigator.platform);
-}
+
 
 /** Returns a boolean value if the viewport is smaller than 35em
  * @returns {boolean}

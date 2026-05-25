@@ -3,9 +3,11 @@
 use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\EventListings\Controllers\Events;
+use Cobalt\Settings\Controllers\Settings;
 use Contact\ContactManager;
 use Routes\Options;
 use Routes\Route;
+use Symfony\Component\Console\Attribute\Option;
 
 Route::get("/", "CoreAdmin@index", [
     'name' => 'Dashboard',
@@ -43,11 +45,20 @@ if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
  * 
  */
 
-    /** Control Panel and Settings Editor */
 
-    Route::get("/settings/", "CoreAdmin@settings_index", [
-        'anchor' => ['name' => 'Cobalt Settings', 'icon' => 'gear']
-    ]);
+    // Route::get("/settings/", "CoreAdmin@settings_index", [
+    //     'anchor' => ['name' => 'Cobalt Settings', 'icon' => 'gear']
+    // ]);
+
+    /** Control Panel and Settings Editor */
+    Settings::get((new Options("/settings/", 'settings_index'))
+        // ->set_navigation([
+        //     [
+        //         'name' => 'Cobalt Settings', 
+        //         'icon' => 'gear'
+        //     ]
+        // ])
+    );
 
 /** 
 *  ========================================================
@@ -133,15 +144,16 @@ if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
         // );
         Users::get((new Options('/me/', 'userSelfService')));
         Users::admin(options: [
-            // 'index' => [
-            //     'permission' => 'Auth_allow_editing_users',
-            //     'anchor' => [
-            //         'name' => 'Users',
-            //         'icon' => 'account-group-outline',
-            //         'icon_color' => '#FF5964',
-            //     ],
-            //     'navigation' => 'application_settings'
-            // ]
+            'index' => [
+                'permission' => 'Auth_allow_editing_users',
+                'navigation' => [
+                    'application_settings' => [
+                        'name' => 'Users',
+                        'icon' => 'account-group-outline',
+                        'icon_color' => '#FF5964',
+                    ]
+                ],
+            ]
         ]);
         // CoreUserAccounts::admin(null, [
         //     'index' => [

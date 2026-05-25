@@ -222,7 +222,7 @@ class Item implements Persistable{
 
     public function get_script_tag(&$packages) {
         if(in_array(self::INLINE_FILE_CONTENT, $this->contexts)) {
-            return "<script>".$this->read_content()."</script>";
+            return "<script ".nonce().">".$this->read_content()."</script>";
         }
         $module = "";
         if($this->module) $module = " type=\"module\"";
@@ -233,7 +233,7 @@ class Item implements Persistable{
         if($this->version > 1) $version = "v$this->version/";
         $pkg = "/core-content/js/$version"."$this->href";
         // header("Link: <$pkg?".__APP_SETTINGS__['version'].">; rel=preload; as=script", false);
-        return "<script src=\"".to_base_url("$pkg?{{versionHash}}")."\"$module"."$registered></script>";
+        return "<script src=\"".to_base_url("$pkg?{{versionHash}}")."\"$module"."$registered ".nonce()."></script>";
     }
 
     public function get_css_tag(&$packages) {

@@ -251,7 +251,7 @@ class WebHandler extends RequestHandler {
 
     function app_settings() {
         $GLOBALS['PUBLIC_SETTINGS']['trusted_host'] = in_array($_SERVER['HTTP_HOST'], __APP_SETTINGS__['API_CORS_allowed_origins']);
-        $settings = "<script id=\"app-settings\" type=\"application/json\">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
+        $settings = "<script id=\"app-settings\" type=\"application/json\" ".nonce().">" . json_encode($GLOBALS['PUBLIC_SETTINGS']) . "</script>";
         $settings .= $this->getRouteBoundaries();
         if(__APP_SETTINGS__['manifest_engine'] === 1) {
             $theme = new ThemeManager(__APP_SETTINGS__['color_primary'] ?? "#004BA8", __APP_SETTINGS__['color_background'] ?? "#EFEFEF", __APP_SETTINGS__['color_mixed_percentage'] ?? 50);
@@ -296,7 +296,7 @@ class WebHandler extends RequestHandler {
             $trailing_slash = ($data['prefix'][strlen($data['prefix'] ?? "") - 1] === "/") ? "?" : "";
             $boundaries["^".preg_quote($data['prefix'] ?? "")."$trailing_slash"] = $data['prefix'];
         }
-        return "<script id='route-boundaries' type='application/json'>" . json_encode($boundaries) . "</script>";
+        return "<script id='route-boundaries' type='application/json' ". nonce().">" . json_encode($boundaries) . "</script>";
     }
 
     var $header_template = "parts/header.html";
@@ -413,7 +413,7 @@ class WebHandler extends RequestHandler {
             $cache->set($table_content, false);
         } else $table_content = $cache->get();
 
-        return "<script>$table_content</script>";
+        return "<script ".nonce().">$table_content</script>";
     }
 
 
@@ -440,7 +440,7 @@ class WebHandler extends RequestHandler {
         // Load packages from manifest
         foreach (app("js.$this->meta_selector") as $package) {
             if ($generate_script_content === false) {
-                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{versionHash}}\"></script>";
+                $script_tags .= "<script src=\"".$this->get_script_pathname_from_manifest_entry($package)."?{{versionHash}}\" ".nonce()."></script>";
             } else {
                 $files = files_exist([
                     __APP_ROOT__ . "/src/$package",
@@ -454,13 +454,13 @@ class WebHandler extends RequestHandler {
         foreach ($GLOBALS['PACKAGES']['js'] as $public => $private) {
             if (!file_exists($private)) continue;
             if ($generate_script_content) {
-                $script_tags .= "<script src='$public?{{versionHash}}'></script>";
+                $script_tags .= "<script src='$public?{{versionHash}}' ".nonce()."></script>";
             } else {
                 $compiled .= "\n\n" . file_get_contents($private);
             }
         }
         
-        if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\"></script>";
+        if ($script_tags === "") $script_tags = "<script src=\"/core-content/js/package.js?{{versionHash}}\" ".nonce()."></script>";
 
         if ($compiled !== "") {
             $minifier = new \MatthiasMullie\Minify\JS();

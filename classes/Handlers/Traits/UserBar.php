@@ -4,6 +4,7 @@ namespace Handlers\Traits;
 use Cobalt\Extensions\Extensions;
 use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Documentation\Model\Documentation;
+use Cobalt\Settings\Controllers\Settings;
 use Handlers\AdminHandler;
 
 trait UserBar {
@@ -47,7 +48,7 @@ trait UserBar {
             $menu .= "<li id='userbar-$type' class=\"userbar--button-container\">$html</li>";
         }
 
-        $settings = route("CoreAdmin@settings_index");
+        $settings = Settings::get_route_href('settings_index');// route("CoreAdmin@settings_index");
         global $USER_BAR_CUSTOMS;
         $customize = route("Customizations@index") . urlencode(implode(";",$USER_BAR_CUSTOMS));
         $panel = "";

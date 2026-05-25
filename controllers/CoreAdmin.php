@@ -130,22 +130,6 @@ class CoreAdmin {
         return view("plugins/individual.html");
     }
 
-    function settings_index() {
-        add_vars([
-            'title' => "Settings Panel",
-            'presentation_settings' => get_route_group('presentation_settings', ['with_icon' => true]),
-            'application_settings'  => get_route_group("application_settings",['with_icon' => true]),
-            'advanced_settings'     => get_route_group('advanced_settings', ['with_icon' => true]),
-            // 'access_panel'         => get_route_group("access_panel",['with_icon' => true]),
-            // 'public_settings_panel'   => get_route_group("public_settings_panel",['with_icon' => true]),
-        ]);
-
-        return view("Cobalt/Settings/templates/settings/control-panel.php");
-    }
-
-    function app_settings() {
-        return view("Cobalt/Settings/templates/settings/basic-settings.php");
-    }
 
     function cron_panel() {
         $cron = new \Cron\Run();

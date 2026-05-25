@@ -11,6 +11,7 @@ const SUBGROUP_BASIC_GENERAL = "General";
 const SUBGROUP_BASIC_DETAILS = "Details";
 const GROUP_CACHE_DEBUG = "Cache &amp; Debug";
 const GROUP_LOOK_FEEL = "Look &amp; Feel";
+const GROUP_USERBAR = "Userbar";
 const GROUP_CONTACT = "Contact Form";
 const GROUP_FEATURES = "Features";
 const GROUP_SEO = "Search &amp; SEO";
@@ -1369,22 +1370,25 @@ $settings = [
             'default' => FONT_BACKEND_GOOGLE
         ],
         
-        "Frontend_code_injection_head" => [
+        "Web_embedded_content_in_header" => [
             'default' => "",
             'meta' => [
                 'group' => GROUP_LOOK_FEEL,
+                'subgroup' => 'Customization',
                 'name' => "Frontend Code Injection Head",
-                'help' => "Allows you to inject HTML into the frontend",
+                'help' => "Allows you to inject HTML into the frontend of the site at the end of the &gt;head&lt; tag",
                 'type' => 'textarea'
             ]
         ],
-        "Frontend_code_injection_footer" => [
+        "Web_embedded_content_after_footer" => [
             'default' => "",
             'meta' => [
                 'group' => GROUP_LOOK_FEEL,
-                'name' => "Frontend Code Injection Header Footer",
-                'help' => "Allows you to inject HTML into the frontend",
-                'type' => 'textarea'
+                'subgroup' => 'Customization',
+                'name' => "Frontend Code Injection Footer",
+                'help' => "Allows you to inject HTML into the frontend of the site after the footer content",
+                'type' => 'textarea',
+
             ]
         ],
         
@@ -1602,15 +1606,16 @@ $settings = [
     /** WEB */
         "Web_include_app_branding" => [
             "default" => true,
-            "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "subgroup" => SUBGROUP_BASIC_GENERAL,
-                "name" => "Include logo in Web masthead?",
-                "type" => "input-switch"
-            ],
-            "validation" => [
-                "type" => "bool"
-            ]
+            // "meta" => [
+            //     "group" => GROUP_USERBAR,
+            //     "subgroup" => SUBGROUP_BASIC_GENERAL,
+            //     "name" => "Include logo in Web masthead?",
+                
+            //     "type" => "input-switch"
+            // ],
+            // "validation" => [
+            //     "type" => "bool"
+            // ]
         ],
         "Web_privacy_policy" => [
             "default" => "",

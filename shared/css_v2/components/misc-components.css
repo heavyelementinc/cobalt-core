@@ -438,3 +438,7 @@ image-editor {
         }
     }
 }
+
+number-reveal {
+    font-variant-numeric: tabular-nums;
+}
