@@ -79,12 +79,16 @@ class CobaltScrollManager {
     }
 
     mutationObserver(node) {
+        // if(!this.allowUpdate) return;
         const observer = new MutationObserver((mutationList) => {
+            console.log("Mutation happened");
             // Disable our observer
             this.OBSERVER.disconnect();
             // Select new elements
             this.selectElements();
         });
+        let options = {attributes: true, childList: true};
+        observer.observe(node, options);
 
         document.addEventListener("DOMContentLoaded", () => {
             observer.disconnect();

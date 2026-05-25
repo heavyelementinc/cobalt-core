@@ -373,10 +373,30 @@ function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
     return $pkey;
 }
 
+$CSP = [
+    'script-src' => [
+        'self'
+    ],
+    'frame-ancestors' => [
+        'none'
+    ]
+];
+
+function csp_add(string $type, string $value) {
+    global $CSP;
+    if(!key_exists($type, $CSP)) $CSP[$type] = [];
+    $CSP[$type][] = $value;
+}
+
+function cps_replace(string $type, string $value) {
+    global $CSP;
+    $CSP[$type] = [$value];
+}
+
 function nonce():string {
     if(!defined('CSP_NONCE')) {
         define("CSP_NONCE", guidv4());
-        header("Content-Security-Policy: script-src 'self' 'nonce-".CSP_NONCE."'; script-src-elem 'self' 'nonce-".CSP_NONCE."'");
+        header("Content-Security-Policy: script-src 'self' 'nonce-".CSP_NONCE."'; script-src-elem 'nonce-".CSP_NONCE."';");
     }
     return "nonce=\"".CSP_NONCE."\"";
 }
