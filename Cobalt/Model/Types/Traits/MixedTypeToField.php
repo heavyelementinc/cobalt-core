@@ -160,9 +160,9 @@ trait MixedTypeToField {
         $datalist_attr = "";
         if($tag === "select") {
             $selected = "<button><selectedcontent></selectedcontent></button>\n";
-            $options = $this->options();
+            $options = $this->options($misc['value'] ?? null);
         } else if ($tag === "input-array") {
-            $options = $this->options();
+            $options = $this->options($misc['value'] ?? null);
         } else {
             $name = $this->datalist_name();
             $datalist = $this->datalist(name: $name);
