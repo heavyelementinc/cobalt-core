@@ -3,7 +3,7 @@ class ImageResult extends HTMLElement {
         super();
         this.setAttribute("__custom-input", true);
         this.fileField = this.querySelector("input[type='file']");
-        this.fileField.name = this.name;
+        // this.fileField.name = this.name;
         this.colorField = this.querySelector("input[type='color']");
         this.altField = this.querySelector("input.alt-text");
         
@@ -21,7 +21,9 @@ class ImageResult extends HTMLElement {
     }
 
     get value() {
-        const val = {};
+        const val = {
+            $__untrustedImageResult__$: true
+        };
         if(this.fileField.files.length >= 1) {
             val.url = this.getFileFieldValue();
         }
@@ -33,8 +35,8 @@ class ImageResult extends HTMLElement {
     set value(val) {
         this.setHeightWidth(val ?? {})
         this.setUrl(val ?? {});
-        if("accent" in val) this.colorField.value = val.accent;
-        if("alt" in val) this.altField.value = val.alt;
+        // if("accent" in val) this.colorField.value = val.accent;
+        // if("alt" in val) this.altField.value = val.alt;
     }
 
     get name() {

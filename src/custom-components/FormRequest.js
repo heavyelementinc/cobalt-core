@@ -343,13 +343,9 @@ export default class FormRequest extends ProgressWizard {
         const evt_target = event?.target.closest("button,input");
         const formData = new FormRequestData(this, evt_target ?? null);
         for(const element of targets) {
-            if(element.disabled === true) continue;
+            if(element?.disabled === true) continue;
+            if(element?.readonly === true) continue;
             const name = element.name ?? element.getAttribute("name");
-            // TODO: Retire IMAGE-RESULT tags and remove this hack.
-            if(element.tagName === "IMAGE-RESULT" || element.closest("image-result") !== null) {
-                formData.delete(name);
-                continue;
-            }
             const value = this.getFormElementValue(element, event);
             formData.set(name, value);
         }
@@ -488,12 +484,12 @@ export default class FormRequest extends ProgressWizard {
             return tmp_value;
         }
         // TODO: Retire IMAGE-RESULT tags and remove this bullshit hack
-        if(field.tagName === "IMAGE-RESULT") {
-            if(event.detail.target && event.detail.target.type === "file" || event.detail.target.type === "files") {
-                return event.originalTarget.files;
-            }
-            return null;
-        }
+        // if(field.tagName === "IMAGE-RESULT") {
+        //     if(event.detail.target && event.detail.target.type === "file" || event.detail.target.type === "files") {
+        //         return event.originalTarget.files;
+        //     }
+        //     return null;
+        // }
         return field.value;
     }
 
@@ -650,14 +646,42 @@ class FormRequestData {
      */
     append(item, value) {
         if(item.disabled === true) return;
+        if(!this.filterUntrustedImageResults(item, value)) return;
+        
         // Let's check if we have a FileList
-        if(value instanceof FileList) this.__hasFileList__ = true;
+        const list = this.__getFileList(value);
+        if(list instanceof FileList && list.length >= 1) this.__hasFileList__ = true;
+
         if(item in this.__formData__ === false) {
             this.__formData__[item] = [value];
             return;
         }
         if(!Array.isArray(fieldValue)) this.__formData__[item] = [fieldValue];
         this.__formData__[item].push(value);
+    }
+
+    filterUntrustedImageResults(item, value) {
+        if(typeof value === "object" && '$__untrustedImageResult__$' in value) {
+            if('url' in value) {
+                value = value.url;
+                return true;
+            }
+            console.warn("FormRequestData automatically filters out IMAGE-RESULT fields which do not contain files to upload");
+            return false;
+        }
+        return true;
+        // TODO: Retire IMAGE-RESULT tags and remove this hack.
+        // if(element.tagName === "IMAGE-RESULT" || element.closest("image-result") !== null) {
+        //     // Filter out any IMAGE-RESULT tags if their value doesn't 
+        //     // return a populated FileList
+        //     if(typeof element.value === "object") {
+        //         if('url' in element.value === false
+        //         || element.value.url.length == 0) {
+        //             formData.delete(name);
+        //             continue;
+        //         }
+        //     }
+        // }
     }
 
     /**
@@ -693,8 +717,16 @@ class FormRequestData {
     
     /** A private method to unify setting a value */
     __set(item, value) {
+        if(!this.filterUntrustedImageResults(item, value)) return;
         this.__formData__[item] = value;
-        if(value instanceof FileList) this.__hasFileList__ = true;
+        const list = this.__getFileList(value);
+        if(list instanceof FileList && list.length >= 1) this.__hasFileList__ = true;
+    }
+
+    __getFileList(value) {
+        if(value instanceof FileList) return value;
+        if(typeof value === "object" && 'url' in value && value.url instanceof FileList) return value.url;
+        return null;
     }
 
     /**
@@ -761,9 +793,10 @@ class FormRequestData {
             if(Array.isArray(data)) {
                 this.__handleNestedFileLists(formData, name, data, mutable, magicFilesString);
             }
-            if(data instanceof FileList !== true) continue;
+            if(this.__getFileList(data) instanceof FileList !== true) continue;
+            // if(data instanceof FileList !== true) continue;
             mutable[name] = magicFilesString;
-            this.__handleFileList(formData, name, data);
+            this.__handleFileList(formData, name, this.__getFileList(data));
         }
         formData.append("json_payload", JSON.stringify(mutable));
         return formData;
