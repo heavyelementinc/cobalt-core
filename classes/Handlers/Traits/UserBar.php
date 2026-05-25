@@ -64,6 +64,7 @@ trait UserBar {
         }
         $usercontainer = view('/admin/users/session-panel.php',[]);
         $after_bar = $this->userbar_end();
+        $nonce = (__APP_SETTINGS__['Disable_umami_for_logged_in_users']) ? "<script ".nonce().">localStorage.setItem('umami.disabled', 1);</script>" : "";
         return $menu . <<<HTML
             </ul>
         </nav>
@@ -72,6 +73,7 @@ trait UserBar {
             $usercontainer
         </div>
         $after_bar
+        $nonce
         </div>
         HTML;
     }

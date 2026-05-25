@@ -1604,6 +1604,9 @@ $settings = [
         ],
         
     /** WEB */
+        "Disable_umami_for_logged_in_users" => [
+            'default' => true
+        ],
         "Web_include_app_branding" => [
             "default" => true,
             // "meta" => [
