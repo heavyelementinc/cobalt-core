@@ -91,6 +91,10 @@ $sanity_check = [
         return in_array($value, DateTimeZone::listIdentifiers(DateTimeZone::ALL));
     },
     'mode'            => fn ($val) => in_array($val, [COBALT_MODE_DEVELOPMENT, COBALT_MODE_PRODUCTION]),
+    'CSP_allowed_frame_ancestors' => false,
+    'CSP_allowed_font_origins'    => false,
+    'CSP_allowed_script_origins'  => false,
+    'CSP_allowed_script_elem_origins' => false
 ];
 
 // Default values allow the config file to omit any value with the following
@@ -107,6 +111,23 @@ $default_values = [
     'timezone'        => 'America/New_York',
     'log_level'       => COBALT_LOG_ERROR,
     'mode'            => COBALT_MODE_PRODUCTION,
+    'CSP_allowed_frame_ancestors' => [
+        'self'
+    ],
+    'CSP_allowed_font_origins' => [
+        "'self'",
+        'fonts.googleapis.com',
+        'fonts.gstatic.com'
+    ],
+    'CSP_allowed_script_origins' => [
+        "'self'",
+        "cdn.jsdelivr.net"
+        // "'strict-dynamic'"
+    ],
+    'CSP_allowed_script_elem_origins' => [
+        "'self'",
+        "cdn.jsdelivr.net"
+    ],
 ];
 
 foreach($sanity_check as $key => $value) {

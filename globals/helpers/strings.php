@@ -373,15 +373,6 @@ function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
     return $pkey;
 }
 
-$CSP = [
-    'script-src' => [
-        'self'
-    ],
-    'frame-ancestors' => [
-        'none'
-    ]
-];
-
 function csp_add(string $type, string $value) {
     global $CSP;
     if(!key_exists($type, $CSP)) $CSP[$type] = [];
@@ -393,12 +384,47 @@ function cps_replace(string $type, string $value) {
     $CSP[$type] = [$value];
 }
 
-function nonce():string {
-    if(!defined('CSP_NONCE')) {
-        define("CSP_NONCE", guidv4());
-        header("Content-Security-Policy: script-src 'self' 'nonce-".CSP_NONCE."'; script-src-elem 'nonce-".CSP_NONCE."';");
+function csp_flush() {
+    $directives = "";
+    foreach($GLOBALS['CSP'] as $directive => $values) {
+        $directives .= "$directive ".implode(' ', $values)."; ";
     }
-    return "nonce=\"".CSP_NONCE."\"";
+    return $directives;
+}
+
+$NONCES = [];
+const NONCE_SCRIPT_SRC = 0;
+const NONCE_SCRIPT_SRC_ELEM = 1;
+const NONCE_SCRIPT_SRC_ATTR = 2;
+function nonce(int $type = NONCE_SCRIPT_SRC):string {
+    if(__APP_SETTINGS__['Enable_Content_Security_Policy_Nonce'] == false) return "";
+    
+    switch($type) {
+        case NONCE_SCRIPT_SRC_ELEM:
+        case NONCE_SCRIPT_SRC_ATTR:
+            $type = NONCE_SCRIPT_SRC;
+            break;
+    }
+
+    if(!key_exists($type, $GLOBALS['NONCES'])) {
+        $GLOBALS['NONCES'][$type] = str_replace('.','',uniqid('',true));
+        switch($type) {
+            case NONCE_SCRIPT_SRC:
+            case NONCE_SCRIPT_SRC_ELEM:
+            case NONCE_SCRIPT_SRC_ATTR:
+                csp_add('script-src',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
+                csp_add('script-src-elem',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
+                csp_add('script-src-attr',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
+                break;
+                break;
+        }
+    }
+    // if(!defined("CSP_NONCE_$type")) {
+    //     define("CSP_NONCE_$type", str_replace('.','',uniqid('',true)));
+
+    //     header("Content-Security-Policy: script-src 'self' 'nonce-".CSP_NONCE."'; script-src-elem 'nonce-".CSP_NONCE."';");
+    // }
+    return "nonce=\"{$GLOBALS['NONCES'][$type]}\"";
 }
 
 function upgrade_scripts_to_nonce(string $html):string {
@@ -407,7 +433,7 @@ function upgrade_scripts_to_nonce(string $html):string {
     $dom = HTMLDocument::createFromString($html, HTML_NO_DEFAULT_NS);
     $scripts = $dom->getElementsByTagName("script");
     foreach($scripts as $scriptElement) {
-        $scriptElement->setAttribute("nonce", CSP_NONCE);
+        $scriptElement->setAttribute("nonce", $GLOBALS['NONCES'][NONCE_SCRIPT_SRC]);
     }
     return $dom->saveHtml();
 }

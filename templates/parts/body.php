@@ -127,7 +127,7 @@
     {{!html_head_binding}}
     @router_table@
     <link rel="apple-touch-icon" href="{{app.logo.media.filename}}?{{versionHash}}">
-    <script @nonce();>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?>>
         window.__ = JSON.parse(atob('@get_exportables_as_json(true);'));
     </script>
     <?= (__APP_SETTINGS__['CobaltEvents_enabled']) ? "<script id=\"cobalt-events\" type=\"application/json\" @nonce();>" . json_encode((new Event())->getPublicListing()) . "</script>" : "<script id=\"cobalt-events\" type=\"application/json\" @nonce();>null</script>" ?>
@@ -175,19 +175,19 @@
     <script @nonce();>
         window.asyncScripts = [];
     </script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.2/dist/editorjs.umd.min.js"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
-    <script @nonce(); onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src='@to_base_url("/core-content/js/editorjs/simpleimage.js");'></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.2/dist/editorjs.umd.min.js"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+    <script <?= nonce(NONCE_SCRIPT_SRC_ELEM) ?> onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" defer src='@to_base_url("/core-content/js/editorjs/simpleimage.js");'></script>
     <!-- <script onload="window.asyncScripts.push(new Promise(resolve=>resolve(this)))" src=""></script> -->
 
     @script_content@

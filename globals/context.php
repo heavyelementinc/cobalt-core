@@ -17,6 +17,14 @@ use Cobalt\Customization\CustomizationManager;
 benchmark_start("router_setup");
 ob_start();
 
+$CSP = [
+    'frame-ancestors' => config()['CSP_allowed_frame_ancestors'],
+    'font-src'        => config()['CSP_allowed_font_origins'],
+    'script-src'      => config()['CSP_allowed_script_origins'],
+    'script-src-elem' => __APP_SETTINGS__['CSP_allowed_script_elem_origins'],
+    'srcipt-src-attr' => [],
+];
+
 /** We need to determine which routing tables we need to load 
  * @global $route_context Stores the value of the route context
  */
@@ -152,6 +160,9 @@ benchmark_end("controller_execution");
 ob_clean();
 // Let's finally output the result:
 if($context_result !== null) {
+    if(__APP_SETTINGS__['Enable_Content_Security_Policy_Nonce']) {
+        header("Content-Security-Policy: " .csp_flush());
+    }
     echo $context_result;
     $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_END] = microtime(true) * 1000;
     $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_DELTA] = $BENCHMARK_RESULTS['env_invoke']['end'] - $BENCHMARK_RESULTS['env_invoke']['start'];
