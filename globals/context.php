@@ -161,7 +161,7 @@ ob_clean();
 // Let's finally output the result:
 if($context_result !== null) {
     if(__APP_SETTINGS__['Enable_Content_Security_Policy_Nonce']) {
-        header("Content-Security-Policy: " .csp_flush());
+        csp_flush();
     }
     echo $context_result;
     $BENCHMARK_RESULTS['env_invoke'][DB_BENCH_END] = microtime(true) * 1000;

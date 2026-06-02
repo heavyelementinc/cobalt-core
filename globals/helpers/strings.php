@@ -384,21 +384,27 @@ function cps_replace(string $type, string $value) {
     $CSP[$type] = [$value];
 }
 
-function csp_flush() {
+/**
+ * Sends CSP header if a nonce value has been established
+ * @return void;
+ */
+function csp_flush():void {
+    if(!$GLOBALS['NONCE_CALLED_AT_LEAST_ONCE']) return;
     $directives = "";
     foreach($GLOBALS['CSP'] as $directive => $values) {
-        $directives .= "$directive ".implode(' ', $values)."; ";
+        $directives .= "$directive ".implode(' ', $values ?? [])."; ";
     }
-    return $directives;
-}
 
+    header("Content-Security-Policy: $directives");
+}
+$NONCE_CALLED_AT_LEAST_ONCE = false;
 $NONCES = [];
 const NONCE_SCRIPT_SRC = 0;
 const NONCE_SCRIPT_SRC_ELEM = 1;
 const NONCE_SCRIPT_SRC_ATTR = 2;
 function nonce(int $type = NONCE_SCRIPT_SRC):string {
     if(__APP_SETTINGS__['Enable_Content_Security_Policy_Nonce'] == false) return "";
-    
+    $GLOBALS['NONCE_CALLED_AT_LEAST_ONCE'] = true;
     switch($type) {
         case NONCE_SCRIPT_SRC_ELEM:
         case NONCE_SCRIPT_SRC_ATTR:
