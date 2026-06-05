@@ -1416,6 +1416,12 @@ $settings = [
                 "type" => "boolean"
             ]
         ],
+        "use_mutation_observer_bootstrap" => [
+            'default' => true,
+            'directives' => [
+                'public' => true,
+            ]
+        ],
 
         /* The name of the designer as well as their website and title text */
         "designer" => [

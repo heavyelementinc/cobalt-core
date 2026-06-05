@@ -1,0 +1,28 @@
+<hgroup>
+    <h1>{{title}}</h1>
+    <action-menu>
+        <option method="DELETE" action="/api/v1/integrations/{{name}}/reset">Reset</option>
+    </action-menu>
+</hgroup>
+<label>Receive Endpoint</label>
+<!-- <copy-span value="{{receiveEndpoint}}"></copy-span> -->
+<form-request method="POST" action="/api/v1/integrations/{{name}}/update">
+    <ul class="list-panel">
+        <li>
+            <label>Umami Domain Name</label>
+            <input-password name="instance_url" value="{{config.instance_url}}"></input-password>
+        </li>
+        <li>
+            <label>Username</label>
+            <input name="username" value="{{config.username}}">
+        </li>
+        <li>
+            <label>Password</label>
+            <input-password name="password" value="{{config.password}}"></input-password>
+        </li>
+        <li>
+            <label>Token</label>
+            <pre name="token">{{config.token}}</pre>
+        </li>
+    </ul>
+</form-request>

@@ -159,7 +159,7 @@ class CobaltScrollManager {
         }
 
         this.debug = app("Parallax_enable_debug") ?? false;
-        this.mutationObserver(document.currentScript.parentNode);
+        if(app("use_mutation_observer_bootstrap")) this.mutationObserver(document.currentScript.parentNode);
         document.addEventListener("navigationEvent", this.selectElements.bind(this));
         document.addEventListener("scrollManagerUpdate", this.selectElements.bind(this));
 
@@ -175,6 +175,7 @@ class CobaltScrollManager {
     mutationObserver(node) {
         // if(!this.allowUpdate) return;
         const observer = new MutationObserver((mutationList) => {
+            // debugger;
             // Disable our observer
             this.OBSERVER.disconnect();
             // Select new elements
