@@ -87,6 +87,14 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
         unset($this->value[$offset]);
     }
 
+    public function onUpdateConfirmed($value):void {
+        update("[name='".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."']", ['value' => $value]);
+        if($this->hasDirective(DIRECTIVE_KEY_ON_UPDATE)) {
+            $this->getDirective(DIRECTIVE_KEY_ON_UPDATE, $value);
+        }
+        $this->directiveOrNull('onUpdate');
+    }
+
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
         if($this->hasDirective("field")) return $this->getDirective("field", $class, $misc, $tag);
@@ -101,7 +109,8 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
 
         // If no tag has been assigned, let's default
         if($tag === null) {
-            $tag = ($this->hasDirective("valid") && $this->getDirective("valid")) ? "input-tag-select" : "input-array";
+            // $tag = ($this->hasDirective("valid") && $this->getDirective("valid")) ? "input-tag-select" : "input-array";
+            $tag = "input-array";
         }
 
         return $this->inputArray($class, $misc, $tag);

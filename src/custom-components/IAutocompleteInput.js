@@ -6,7 +6,7 @@ export default class IAutocompleteInput extends ICustomInput {
         super();
     }
     get list() {
-        return this.getAttribute("list");
+        return this.getAttribute("list") ?? this.getAttribute("datalist");
     }
 
     get datalist() {

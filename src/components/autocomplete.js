@@ -477,4 +477,4 @@ class AutoComplete extends HTMLElement {
 
 }
 
-customElements.define("input-autocomplete", AutoComplete);
+// customElements.define("input-autocomplete", AutoComplete);

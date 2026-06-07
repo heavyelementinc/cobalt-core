@@ -1,18 +1,20 @@
-input-autocomplete[__custom-input="true"] {
+input-autocomplete {
   display: inline-block;
   border: unset;
   padding: unset;
 }
 
-input-autocomplete > input[type='search'] {
+input-autocomplete[cobalt-component='cobalt-component'] > input[type='search'][list] {
   width: 100%;
   box-sizing: border-box;
+  border: 0;
 }
 
-input-autocomplete.invalid > input[type='search'] {
+input-autocomplete.invalid {
   background: var(--project-color-input-invalid-bg);
   border: 1px solid var(--project-color-input-invalid-border);
-}  
+}
+
 input-autocomplete option {
   display: none;
 }

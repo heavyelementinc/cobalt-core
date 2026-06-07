@@ -84,6 +84,10 @@ export default class ICustomInput extends HTMLElement {
         return this.querySelector(`#${this.getAttribute("list")}`);
     }
 
+    get validity() {
+        return this._validity;
+    }
+
     _validity = {
         badInput: false,
         customError: false,

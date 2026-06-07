@@ -31,6 +31,9 @@ import { ForeignId, FileId } from "./ForeignId.js";
 customElements.define("foreign-id", ForeignId);
 customElements.define("file-id", FileId);
 
+import InputAutocomplete from "./InputAutocomplete.js";
+customElements.define("input-autocomplete", InputAutocomplete);
+
 import ObjectPicker from "./ObjectPicker.js";
 customElements.define("object-picker", ObjectPicker);
 
