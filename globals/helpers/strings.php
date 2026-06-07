@@ -402,6 +402,21 @@ $NONCES = [];
 const NONCE_SCRIPT_SRC = 0;
 const NONCE_SCRIPT_SRC_ELEM = 1;
 const NONCE_SCRIPT_SRC_ATTR = 2;
+
+function get_nonce_value(int $type = NONCE_SCRIPT_SRC):string {
+    $GLOBALS['NONCES'][$type] = str_replace('.','',uniqid('',true));
+    switch($type) {
+        case NONCE_SCRIPT_SRC:
+        case NONCE_SCRIPT_SRC_ELEM:
+        case NONCE_SCRIPT_SRC_ATTR:
+                csp_add('script-src-elem',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
+            csp_add('script-src',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
+            csp_add('script-src-attr',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
+            break;
+    }
+    return $GLOBALS['NONCES'][$type];
+}
+
 function nonce(int $type = NONCE_SCRIPT_SRC):string {
     if(__APP_SETTINGS__['Enable_Content_Security_Policy_Nonce'] == false) return "";
     $GLOBALS['NONCE_CALLED_AT_LEAST_ONCE'] = true;
@@ -413,17 +428,7 @@ function nonce(int $type = NONCE_SCRIPT_SRC):string {
     }
 
     if(!key_exists($type, $GLOBALS['NONCES'])) {
-        $GLOBALS['NONCES'][$type] = str_replace('.','',uniqid('',true));
-        switch($type) {
-            case NONCE_SCRIPT_SRC:
-            case NONCE_SCRIPT_SRC_ELEM:
-            case NONCE_SCRIPT_SRC_ATTR:
-                csp_add('script-src',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
-                csp_add('script-src-elem',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
-                csp_add('script-src-attr',"'nonce-" . $GLOBALS['NONCES'][$type] . "'");
-                break;
-                break;
-        }
+        get_nonce_value($type);
     }
     // if(!defined("CSP_NONCE_$type")) {
     //     define("CSP_NONCE_$type", str_replace('.','',uniqid('',true)));
@@ -593,11 +598,18 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
     if($doc instanceof ObjectId) $doc = get_image_details($doc);
     if(is_null($doc) && $docid instanceof ObjectId) $doc = get_image_details($docid);
     $filename = get_image_url($doc);
-    $alt      = htmlspecialchars($doc['alt'] ?? $doc['meta']['alt'] ?? pathinfo($filename, PATHINFO_FILENAME));
-    $height   = $doc['meta']['height'];
-    $width    = $doc['meta']['width'];
-    $accent   = $attributes['accent_color'] ?? $doc['meta']['accent_color'];
-    $contrast = $attributes['contrast_color'] ?? $doc['meta']['contrast_color'];
+    
+    // Handle alt tags
+    $alt      = $attributes['alt'] ?? $doc['alt'];
+    if(!$alt) $alt = $doc['meta']['alt']; // Legacy! Is this still needed?
+    if(!$alt) pathinfo($filename, PATHINFO_FILENAME);
+    $alt = htmlspecialchars($alt);
+
+    // Handle other details
+    $height   = htmlspecialchars($doc['meta']['height']);
+    $width    = htmlspecialchars($doc['meta']['width']);
+    $accent   = htmlspecialchars($attributes['accent_color'] ?? $doc['meta']['accent_color']);
+    $contrast = htmlspecialchars($attributes['contrast_color'] ?? $doc['meta']['contrast_color']);
     $data_id  = ($docid) ? " data-id=\"$docid\"" : "";
     if($doc instanceof ImageType && $doc->directiveOrNull('transparent')) {
         $attributes['transparent'] = "true";
@@ -610,7 +622,7 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
     return <<<HTML
     <img src="$filename"$data_id alt="$alt" 
         height="$height" width="$width" loading="lazy"
-        accent-color="$accent" contrast-color="$contrast"$attrs
+        accent-color="$accent" contrast-color="$contrast"@nonce(); $attrs
     >
     HTML;
 }
