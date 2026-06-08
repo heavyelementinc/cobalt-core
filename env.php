@@ -44,7 +44,7 @@ $app_root = "";
 // Go up one directory so we're not in the public space
 if (!empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) $app_root = $_SERVER['CONTEXT_DOCUMENT_ROOT'] . "/../";
 // Rely on the Cobalt CLI to mandate the path to our app
-else if (defined("__CLI_ROOT__")) $app_root = __CLI_ROOT__;
+else if (defined("__CLI_ROOT__")) $app_root = $_SERVER['flags']['app'];
 else if (key_exists("unit_test", $GLOBALS)) $app_root = $GLOBALS['unit_test'];
 else {
     header(INTERNAL_SERVER_ERROR);

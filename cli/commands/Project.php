@@ -2,7 +2,7 @@
 
 use Handlers\WebHandler;
 
-require_once __CLI_ROOT__ . "/dependencies/new_project.php";
+require_once __ENV_ROOT__ . "/cli/dependencies/new_project.php";
 
 class Project {
     public $help_documentation = [
