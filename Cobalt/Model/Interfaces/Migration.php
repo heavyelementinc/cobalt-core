@@ -14,9 +14,11 @@ use MongoDB\UpdateResult;
  */
 interface Migration {    
     /**
-     * @return array{insertOneResult:InsertOneResult,totalDocuments:int}
+     * This function should yield each document to be inserted into the database
+     * as an array
+     * @return Generator<array>
      */
-    public function __initializeDataset(int &$count);
+    public function __initializeDataset(int &$count):Generator;
     
     /**
      * Before a document can be migrated, it may need to be mutated in some way.

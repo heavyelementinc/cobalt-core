@@ -23,4 +23,8 @@ class AdditionalContactFields {
     public function onSubmit():void {
 
     }
+
+    function __get_additional_fields():string {
+        return "";
+    }
 }

@@ -23,6 +23,7 @@ use DOMDocument;
 use Override;
 use Drivers\DatabaseManagement;
 use Exception;
+use Generator;
 use MongoDB\UpdateResult;
 
 /**
@@ -125,10 +126,12 @@ class Documentation extends Model implements Migration {
     }
 
     #[Override]
-    public function __initializeDataset(int &$count)
+    public function __initializeDataset(int &$count):Generator
     {
         include __DIR__ . "/../builtins.php";
-        $this->insertMany($GLOBALS['built_ins']);
+        foreach($GLOBALS['built_ins'] as $doc) {
+            yield $doc;
+        }
     }
 
     #[Override]

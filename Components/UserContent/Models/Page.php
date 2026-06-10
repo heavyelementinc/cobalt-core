@@ -18,6 +18,7 @@ use Cobalt\Model\Types\StringType;
 use Cobalt\Model\Types\UserIdType;
 use Cobalt\SchemaPrototypes\Compound\MarkdownResult;
 use Drivers\DatabaseManagement;
+use Generator;
 use MongoDB\UpdateResult;
 use Symfony\Component\String\TruncateMode;
 
@@ -290,7 +291,7 @@ class Page extends Model implements Migration {
         return "userContentPages";
     }
 
-    public function __initializeDataset(int &$count)
+    public function __initializeDataset(int &$count):Generator
     {
         throw new \Exception('Not implemented');
     }

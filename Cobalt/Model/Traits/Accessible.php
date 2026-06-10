@@ -113,6 +113,13 @@ trait Accessible {
         return $this->collection->findOneAndUpdate($filter, $update, $options);
     }
 
+    /**
+     * 
+     * @param array $filter 
+     * @param array $options 
+     * @return null|CobaltCursor
+     * @throws Exception 
+     */
     final function find($filter = [], array $options = []):?CobaltCursor {
         $this->__initAccessible();
         benchmark_reads();

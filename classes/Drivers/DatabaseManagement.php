@@ -298,17 +298,17 @@ class DatabaseManagement {
      * 
      * @param Model $model 
      * @param bool $dropBeforeInit 
-     * @return InsertOneResult 
+     * @return Generator 
      * @throws mixed 
      */
-    function initialize(Model $model, bool $dropBeforeInit = false) {
+    function initialize(Model $model, bool $dropBeforeInit = false, &$count = 0):Generator {
         if($model instanceof Migration == false) throw new Exception("Model must implement migration");
         if($dropBeforeInit) {
+            $count = $model->countDocuments([]);
             $model->drop();
+            printf(fmt("\nDropped %s documents\n\n", "e"), $count);
         }
-        $count = 0;
-        $model->__initializeDataset($count);
-        return "Initialized $count documents";
+        return $model->__initializeDataset($count);
     }
 
     const CONVERT_TYPE_DONE = 0;

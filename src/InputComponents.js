@@ -400,6 +400,7 @@ class HelpSpan extends HTMLElement {
     attach() {
         document.body.appendChild(this.message);
         this.message.classList.add(this.articleShown);
+        this.ariaLabel = this.value;
         // this.message.style.top = this.top();
     }
 

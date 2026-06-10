@@ -111,11 +111,13 @@ class Submissions extends ModelController {
         $_SESSION['__contact_form_submission'] = $mutant->bsonSerialize();
 
         if(__APP_SETTINGS__['Contact_form_anti_spam_technique'] == "stepped-click") {
+            $_SESSION['__contactform_benchmark'] = microtime(true);
             update("@form", [
                 'next' => view("Cobalt/ContactForm/templates/web/stage-2--stepped-click.php")
             ]);
         }
         if(__APP_SETTINGS__['Contact_form_anti_spam_technique'] == "captcha") {
+            $_SESSION['__contactform_benchmark'] = microtime(true);
             captcha_check("Please confirm you're human", array_merge($_POST, ['is_human' => 'false']));
         }
     }
@@ -133,7 +135,11 @@ class Submissions extends ModelController {
         $className = __APP_SETTINGS__['Contact_form_validation_classname'];
         /** @var \Cobalt\ContactForm\Model\FormSubmission $persistance */
         $persistance = new $className();
-        $persistance->bsonUnserialize($_SESSION['__contact_form_submission']);
+        $persistance->bsonUnserialize([
+            ...$_SESSION['__contact_form_submission'],
+            'benchmark' => microtime(true) - $_SESSION['__contactform_benchmark'],
+            'referrer'    => $_SERVER['HTTP_REFERER'],
+        ]);
         $error = 0;
         // $mutant = $persistance->__validate($_SESSION['__contact_form_submission']);
         // if($data['email']) $error += self::ERROR_EMAIL;

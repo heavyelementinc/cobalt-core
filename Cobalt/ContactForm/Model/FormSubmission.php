@@ -13,6 +13,7 @@ use Cobalt\Model\Types\MarkdownType;
 use Cobalt\Model\Types\StringType;
 use Cobalt\Model\Types\UserIdType;
 use Drivers\DatabaseManagement;
+use Generator;
 use MongoDB\UpdateResult;
 
 class FormSubmission extends Model implements Migration {
@@ -95,6 +96,8 @@ class FormSubmission extends Model implements Migration {
             ],
             "token" => new StringType,
             "type" => new StringType,
+            'benchmark' => new StringType,
+            'referrer' => new StringType,
         ];
         $schema += $fields;
         return $schema;
@@ -113,7 +116,7 @@ class FormSubmission extends Model implements Migration {
     }
 
 
-    public function __initializeDataset(int &$count) {
+    public function __initializeDataset(int &$count):Generator {
         throw new \Exception('Not implemented');
     }
 

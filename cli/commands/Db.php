@@ -121,17 +121,36 @@ class Db
             return $this->failed_instantiation($e);
         }
 
-        $dropBeforeInit = cli_to_bool(readline("Do you want to drop the ".$model->getCollectionName()." collection before continuing? (y/N)"));
+        print("Do you want to ".fmt("drop the collection","e")." \"".fmt($model->getCollectionName(), "i")."\" before continuing? ");
+        $dropBeforeInit = readline("(y)es, (n)o, (A)bort ");
+        if($dropBeforeInit === "" || $dropBeforeInit === "a" || $dropBeforeInit === "A") {
+            if($dropBeforeInit === "") say("You need to type either 'y' or 'n' to continue.",'i');
+            say("No changes were made.");
+            return;
+        }
+        $dropBeforeInit = cli_to_bool($dropBeforeInit);
         $db = new DatabaseManagement();
+        $totalCount = 0;
         $insertedCount = 0;
+        $errCount = 0;
         /** @var array $item */
-        foreach($db->initialize($model, $dropBeforeInit) as $item) {
-            $chars = strlen($item['totalDocuments']);
-            $ic = $item['insertOneResult']->getInsertedCount();
-            $insertedCount += $ic;
-            print("\r");
-            $p = fmt(str_pad($insertedCount, $chars, " ", STR_PAD_LEFT), "s");
-            print(" $p " . fmt($item['totalDocuments'], "i") . " documents created");
+        foreach($db->initialize($model, $dropBeforeInit, $totalCount) as $item) {
+            try {
+                if($item instanceof $model !== true) {
+                    $data = $item;
+                    $item = new $model();
+                    $item->bsonUnserialize($data);
+                }
+                $result = $model->insertOne($item);
+                $insertedCount += $result->getInsertedCount();
+            } catch(Exception|Error $e) {
+                $errCount += 1;
+            }
+            printf("Inserted %s of %s documents%s\r", 
+                fmt("$insertedCount", "s"),
+                fmt("$totalCount", "i"),
+                ($errCount == 0) ? "" : fmt(" $errCount errors", "e")
+            );
         }
         print("\n");
         $delta = microtime(true) - $t;

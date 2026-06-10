@@ -34,6 +34,7 @@ use Cobalt\SchemaPrototypes\Basic\StringResult;
 use DateTime;
 use Drivers\DatabaseManagement;
 use Exceptions\HTTP\NotFound;
+use Generator;
 use MongoDB\UpdateResult;
 use PSpell\Dictionary;
 
@@ -271,7 +272,7 @@ class User extends Model implements Migration
         return "users";
     }
 
-    public function __initializeDataset(int &$count)
+    public function __initializeDataset(int &$count):Generator
     {
         throw new \Exception('Not implemented');
     }

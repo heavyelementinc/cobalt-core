@@ -822,6 +822,7 @@ match-update {
 
 date-span {
   height: 1lh;
+  font-variant-numeric: tabular-nums;
   &:empty {
     width: 10ch;
     background: rgb(from currentColor r g b / .5);
