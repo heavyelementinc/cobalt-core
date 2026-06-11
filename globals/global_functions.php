@@ -15,6 +15,7 @@
 use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
 use Cobalt\DefinedModel\DefinedModel;
+use Cobalt\Exceptions\CobaltAutoloadFailure;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Model\Exceptions\Undefined;
@@ -118,7 +119,7 @@ function cobalt_autoload_fallback($class) {
     }
 
     // Throw an error if we don't have a load candidate
- if ($load === null) throw new Exception("Could not load $class");
+ if ($load === null) throw new CobaltAutoloadFailure($class, "Could not load $class");
 
     // If the path key exists, process the strings and require the file
     if (key_exists('path', $load)) {

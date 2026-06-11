@@ -139,7 +139,7 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
         if($this->hasDirective(self::VALID)) {
             $this->getDirective(self::VALID);
         }
-        // if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
+        if($this->hasDirective(DIRECTIVE_KEY_FILTER)) $value = $this->getDirective(DIRECTIVE_KEY_FILTER, $value);
         return $value;
     }
 

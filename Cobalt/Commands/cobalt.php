@@ -41,6 +41,9 @@ if(key_exists('app', $_SERVER['flags'])) {
     define("__CLI_ROOT__", __DIR__ . "/../../");
 }
 
+define("COBALT_COMMAND_SUCCESS", 0);
+define("COBALT_COMMANT_UNKNOWN_ERR", -1);
+
 // Do something with global flags
 // require __DIR__ . "/dependencies/global-flags.php";
 
@@ -49,4 +52,7 @@ require __CLI_ROOT__ . "/../cobalt-core/env.php";
 
 $parser = new CommandParser();
 $parser->load_files();
-$parser->exec($_SERVER['command'], $_SERVER['flags']);
+$result = $parser->exec($_SERVER['command'], $_SERVER['flags']);
+if($result > COBALT_COMMAND_SUCCESS) {
+    say("An error occurred", 'e');
+}

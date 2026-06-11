@@ -7,9 +7,15 @@ use Iterator;
 use Override;
 
 class CommandList implements Iterator, Countable {
-    
+    private int $maxCommandCharLenth = 0;
     public function add(CommandItem $item) {
-        $this->items[$item->getName()] = $item;
+        $name = $item->getName();
+        $this->maxCommandCharLenth = max($this->maxCommandCharLenth, strlen($name));
+        $this->items[$name] = $item;
+    }
+
+    public function getMaxCommandCharLenth():int {
+        return $this->maxCommandCharLenth;
     }
 
     public function findByCommandName(string $name):?CommandItem {
@@ -38,7 +44,7 @@ class CommandList implements Iterator, Countable {
 
     #[Override]
     public function valid(): bool {
-        return key_exists($this->index, $this->key());
+        return key_exists($this->key(), $this->items);
     }
 
     #[Override]

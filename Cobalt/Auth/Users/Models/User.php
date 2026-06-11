@@ -37,6 +37,7 @@ use Exceptions\HTTP\NotFound;
 use Generator;
 use MongoDB\UpdateResult;
 use PSpell\Dictionary;
+use Validation\Exceptions\ValidationIssue;
 
 /**
  * @property StringType $uname
@@ -121,6 +122,13 @@ class User extends Model implements Migration
                     update(".name-tag", [
                         'innerHTML' => $this->name("F L")
                     ]);
+                },
+                'filter' => function ($value) {
+                    if($this->findOne(['uname' => $value])) {
+                        throw new ValidationIssue("Username already exists");
+                    }
+
+                    return $value;
                 }
             ],
             'fname' => [

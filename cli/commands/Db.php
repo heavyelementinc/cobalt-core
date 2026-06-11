@@ -8,8 +8,7 @@ use Drivers\DatabaseManagement;
  * The `database` command offers a CLI interface for importing and exporting the database.
  * @package cli_command
  */
-class Db
-{
+class Db {
     public $help_documentation = [
         'export' => [
             'description' => "[filename] Export a database backup. Reads --export= flag (comma-delimited list)",

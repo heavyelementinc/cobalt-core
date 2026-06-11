@@ -1,12 +1,3 @@
-<?php
-if(file_exists("./core/cli/cobalt.php")) {
-    require_once "./core/cli/cobalt.php";
-    exit;
-}
-
-if(file_exists("../cobalt-core/cli/cobalt.php")) {
-    require_once "./cobalt-core/cli/cobalt.php";
-    exit;
-}
-
-print("Failed to locate Cobalt environment");
+#!/bin/bash
+BASEDIR=$(dirname $(readlink -f "$0"))
+php "$BASEDIR/../cobalt-core/Cobalt/Commands/cobalt.php" "--app=$BASEDIR" $@

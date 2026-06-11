@@ -1,3 +1,5 @@
+const { timers } = require("jquery");
+
 class RouteObject {
     constructor(route) {
         window.router_entities = {};
@@ -363,7 +365,7 @@ class ClientRouter extends EventTarget{
     navigationFinalize(route, pageData) {
         document.body.classList.remove();
         this.progressBar.classList.remove("navigation-start");
-        this.dispatchEvent(new CustomEvent("load", {detail: {route, pageData}}));
+        this.dispatchLoadEvent(route, pageData);
         document.dispatchEvent(new CustomEvent("navigationEvent")); // Backwards compatibility
         
         const navLinks = document.querySelectorAll("nav a");
@@ -383,6 +385,11 @@ class ClientRouter extends EventTarget{
             if(match.length <= 0) continue;
             i.classList.add("navigation--current");
         }
+    }
+
+    dispatchLoadEvent(route, pageData) {
+        this.dispatchEvent(new CustomEvent("load", {detail: {route, pageData}}));
+        document.dispatchEvent(new CustomEvent("load"), {detail: {route, pageData}});
     }
 
     updateContent(pageData, query = this.updateTarget) {

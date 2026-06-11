@@ -47,7 +47,7 @@ class Import extends DatabaseManagement {
 
         try {
             // Let's start by fetching our export metadata:
-            $this->meta = Import::import_read_meta_from_file($handle, $results, $talk, $caution);
+            $this->meta = $this->import_read_meta_from_file($handle, $results, $talk, $caution);
         } catch (NoMetadataFound $e) {
             return $this->import_1_0($filename, $talk, $caution, $results);
         }
@@ -73,7 +73,7 @@ class Import extends DatabaseManagement {
 
     }
 
-    static function import_read_meta_from_file($handle, array &$results, bool $talk, bool $caution):array {
+    function import_read_meta_from_file($handle, array &$results, bool $talk, bool $caution):array {
         // Move pointer to EOF
         fseek($handle, 0, SEEK_END);
         
@@ -118,7 +118,7 @@ class Import extends DatabaseManagement {
             say("Collections reported: " . fmt(count($meta_decoded['collectionDetails']),'w'));
             say("Documents reported: ".fmt($meta_decoded['totalDocuments'],'w'));
             say("Exported from ".fmt($meta_decoded['databaseName'],'w'));
-            say("Importing into ".fmt(config()['database'],'w'));
+            say("Importing into ".fmt($this->db->getDatabaseName(),'w'));
         }
         
         // Reset the pointer to the start of file

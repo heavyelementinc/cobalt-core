@@ -1,5 +1,29 @@
 <?php
 
+use Cobalt\Model\Types\MixedType;
+use Validation\Exceptions\ValidationIssue;
+
+function filter_readline(string $prompt, MixedType $type):string|int {
+    $readline = readline($prompt);
+    try{ 
+        $type->__filter($readline);
+    } catch(ValidationIssue $e) {
+        say(str_replace("<br>", "\n", $e->getMessage()),"e");
+        return filter_readline($prompt, $type);
+    }
+    return $readline;
+}
+
+function filter_readline_private(string $prompt, MixedType $type):string|int {
+    $readline = readline_private($prompt);
+    try{ 
+        $type->__filter($readline);
+    } catch(ValidationIssue $e) {
+        say(str_replace("<br>", "\n", $e->getMessage()),"e");
+        return filter_readline_private($prompt, $type);
+    }
+    return $readline;
+}
 
 function readline_private(string $prompt) {
     if (preg_match('/^win/i', PHP_OS)) {

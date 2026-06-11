@@ -3,6 +3,7 @@
 namespace Drivers;
 
 use ArrayAccess;
+use Cobalt\Exceptions\CobaltAutoloadFailure;
 use Cobalt\Maps\GenericMap;
 use Cobalt\Model\Interfaces\Migration;
 use Cobalt\Model\Model;
@@ -25,14 +26,16 @@ use MongoDB\InsertOneResult;
 use MongoDB\Model\BSONDocument;
 use MongoDB\Model\CollectionInfo;
 use MongoDB\UpdateResult;
+use stdClass;
+use Override;
 
 class DatabaseManagement {
-    private $db;
+    protected Database $db;
 
     const IGNORED = ["sessions","cron"];
 
-    function __construct() {
-        $this->db = db_cursor('database', null, false, true);
+    function __construct(string $collection = 'database', ?string $database = null) {
+        $this->db = db_cursor($collection, $database, false, true);
     }
 
     public function collections() {
@@ -76,7 +79,7 @@ class DatabaseManagement {
             'exportedAt' => null,
             'exportVersion' => self::EXPORT_VERSION,
             'collectionDetails' => [],
-            'databaseName' => config()['database'],
+            'databaseName' => $this->db->getDatabaseName(),
         ];
         foreach($collections as $collection) {
             $name = $collection->getName();
@@ -106,7 +109,7 @@ class DatabaseManagement {
         $benchmark_end = time();
         if($talk) {
             printf("Exported database in %s\n", fmt(($benchmark_end - $benchmark_start) . " seconds"));
-            printf("Exported to %s\n", fmt($backup_path,"w"));
+            printf("%s\n", fmt($backup_path,"w"));
         }
     }
 
@@ -118,6 +121,31 @@ class DatabaseManagement {
             'exported' => 0,
             'count' => $count,
         ];
+        try {
+            $this->classLoop($name, $count, $collection, $handle, $talk, $meta);
+        } catch(CobaltAutoloadFailure $e) {
+            $newClass = new class implements Persistable {
+                private array $storage = [];
+                #[Override]
+                public function bsonSerialize(): array|stdClass|Document
+                {
+                    return $this->storage;
+                }
+
+                #[Override]
+                public function bsonUnserialize(array $data): void
+                {
+                    $this->storage = $data;
+                }
+            };
+            $newClassName = get_class($newClass);
+            class_alias($newClassName, $e->getClassName(), false);
+            $this->classLoop($name, $count, $collection, $handle, $talk, $meta);
+        }
+        if($talk) print("\n");
+    }
+
+    private function classLoop(string $name, int $count, $collection, $handle, bool $talk, array &$meta) {
         $cursor = $this->db->{$name}->find([],[
             'limit' => $count + 1000, // Find all documents in the collection
             // 'projection' => ['__pclass' => 0] // Let's recover the actual BSON
@@ -131,10 +159,9 @@ class DatabaseManagement {
             $this->export_document($handle, $name, $document, $meta, $collection);
             if($talk) print("\rExporting document ".str_pad($i + 1,strlen($count), "0")." of $count from collection ".fmt($name, "i"));
         }
-        if($talk) print("\n");
     }
 
-    private function export_document($handle, string $name, array $BSONDocument, &$meta, CollectionInfo $collection) {
+    private function export_document($handle, string $name, array $BSONDocument, array &$meta, CollectionInfo $collection) {
         // Let's normalize our inputs
         $doc = $BSONDocument;
         

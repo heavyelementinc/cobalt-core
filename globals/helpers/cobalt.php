@@ -36,7 +36,7 @@ function cobalt_command($command, $context = true, $stripControlCharacters = fal
 function session($info = null):mixed {
     $session = user();
     if(is_cli()) {
-        
+        return null;
         // $session = new UserPersistance([
         //     '_id' => new ObjectId(),
         //     'fname' => 'Cobalt',

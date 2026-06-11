@@ -3,6 +3,9 @@
 namespace Cobalt\Commands\Classes;
 
 use Closure;
+use Cobalt\Commands\Attributes\Description;
+use ReflectionClass;
+use ReflectionMethod;
 
 class CommandItem {
     private string $name;
@@ -17,6 +20,25 @@ class CommandItem {
         $this->setName($name);
         if(!$method) $method = $name;
         $this->setFunction($method);
+    }
+
+    public function renderCommandDetails(int $cmdPadding) {
+        print(" " . fmt(str_pad($this->name, $cmdPadding + 2),"i"));
+        print($this->getDescription());
+        print("\n");
+    }
+
+    public function exec(array $arguments, array $flags):int {
+        // Handle delta functions
+        if($this->function instanceof Closure) {
+            return call_user_func($this->function, ...$arguments);
+        }
+
+        // Handle flag preprocessing, if necessary
+        if(isset($this->instance) && $this->instance instanceof CommandInterface) {
+            $this->instance->handleFlags($flags, $this, $this->function, $arguments);
+        }
+        return $this->instance->{$this->function}(...$arguments);
     }
 
     function getName():string {
@@ -34,7 +56,7 @@ class CommandItem {
         if($value instanceof Closure) {
             $this->doesMethodExist = true;
         } else if(isset($this->instance)) {
-            if(property_exists($this->instance, $value)) {
+            if(method_exists($this->instance, $value)) {
                 $this->doesMethodExist = true;
             }
         }
@@ -46,7 +68,7 @@ class CommandItem {
         return $this->instance;
     }
     function setInstance(Object $value):CommandItem {
-        if(isset($this->function) && property_exists($value, $this->function)) {
+        if(isset($this->function) && method_exists($value, $this->function)) {
             $this->doesMethodExist = true;
         }
         $this->instance = $value;
@@ -62,6 +84,14 @@ class CommandItem {
     }
 
     function getDescription():string {
+        if(!$this->description && $this->doesMethodExist && is_string($this->function)) {
+            $reflection = new ReflectionMethod($this->instance, $this->function);
+            $attrs = $reflection->getAttributes();
+            foreach($attrs as $attr) {
+                if($attr->name === "Cobalt\\Commands\\Attributes\\Description") return $attr->newInstance()->description;
+            }
+            return "";
+        }
         return $this->description;
     }
     function setDescription(string $value):CommandItem {
