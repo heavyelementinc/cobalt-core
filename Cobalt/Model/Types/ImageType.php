@@ -169,6 +169,14 @@ class ImageType extends ForeignId {
         return parent::getLabel($includeHtml, $small_text);
     }
 
+    #[Prototype]
+    protected function getColor($type = "accent") {
+        match($type) {
+            'contrast' => $this->value['meta']['contrast_color'],
+            default => $this->value['meta']['accent_color']
+        };
+    }
+
     function fieldItemTemplate(): string {
         return "Cobalt/Model/templates/types/image-type.php";
     }

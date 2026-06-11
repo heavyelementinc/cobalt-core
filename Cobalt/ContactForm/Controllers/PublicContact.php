@@ -2,7 +2,9 @@
 
 namespace Cobalt\ContactForm\Controllers;
 
-class PublicContact {
+use Cobalt\Controllers\Controller;
+
+class PublicContact extends Controller {
     public function form() {
         return view("Cobalt/ContactForm/templates/web/stage-1--contact-form.php");
     }

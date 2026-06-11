@@ -1,7 +1,8 @@
 <?php
 use Cobalt\Extensions\Extensions;
 try {
-    define("EXTENSION_MANAGER", new Extensions());
+    $safe_mode = key_exists('safe-mode', $_SERVER['flags'] ?? []);
+    define("EXTENSION_MANAGER", new Extensions($safe_mode));
 } catch (\MongoDB\Driver\Exception\ConnectionTimeoutException $e) {
     kill("No database connection available. Check your config.php file.");
 }

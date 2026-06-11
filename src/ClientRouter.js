@@ -1,5 +1,3 @@
-const { timers } = require("jquery");
-
 class RouteObject {
     constructor(route) {
         window.router_entities = {};

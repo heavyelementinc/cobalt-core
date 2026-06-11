@@ -117,23 +117,23 @@
         gap: 0 1em;
         margin-bottom: 0;
         border: none;
-    }
-    img.avatar {
-        height: var(--avatar-size);
-        width: var(--avatar-size);
-        grid-row: 1 / span 2;
-        grid-column: 1 / span 1;
-        border-radius: var(--avatar-half-height);
-    }
-    h1 {
-        text-align: left;
-        font-size: 1.2em;
-        margin: 0;
-        grid-row: 1 / span 1;
-        grid-column: 2 / span 1;
-    }
-    article {
-        max-width: 50ch;
+        img.avatar {
+            height: var(--avatar-size);
+            width: var(--avatar-size);
+            grid-row: 1 / span 2;
+            grid-column: 1 / span 1;
+            border-radius: var(--avatar-half-height);
+        }
+        h1, h2 {
+            text-align: left;
+            font-size: 1.2em;
+            margin: 0;
+            grid-row: 1 / span 1;
+            grid-column: 2 / span 1;
+        }
+        article {
+            max-width: 50ch;
+        }
     }
 }
 
@@ -146,10 +146,12 @@ star-rating {
     grid-column: 2 / span 1;
     width: fit-content;
     color: var(--review-star-color, #feb95f);
-    :where(star) {
+    list-style: none;
+    :where(star, li) {
         font-family: "Material Design Icons", sans-serif;
         /* opacity: .5; */
         width: 1.6ch;
+        list-style: none;
         &::before{
             content: "\F04D2";
         }

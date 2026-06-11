@@ -170,6 +170,7 @@ class Extensions extends \Drivers\Database {
     }
 
     public function initialize_extension($manifest) {
+        if($this->safe_mode) return;
         require_once "$manifest[install_path]/$manifest[entrypoint]";
         $extension_literal = "\\Cobalt\\Extensions\\$manifest[class]";
         $count = count($this->initialized_extensions);

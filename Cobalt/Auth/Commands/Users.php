@@ -79,10 +79,14 @@ class Users extends CommandInterface {
         }
         try {
             $filtered = $f->filter($value);
-            $u->updateOne(['_id' => $user->_id],['$set' => [$field => $value]]);
+            $r = $u->updateOne(['_id' => $user->_id],['$set' => [$field => $value]]);
         } catch(ValidationIssue $e) {
             throw new Exception($e->getMessage());
         }
+        if($r->getModifiedCount() < 1) {
+            throw new Exception("User was not modified. Was the value already set?");
+        }
+        say("$user->uname was modified");
         return COBALT_COMMAND_SUCCESS;
     }
 
@@ -97,7 +101,11 @@ class Users extends CommandInterface {
                 return COBALT_COMMAND_SUCCESS;
             }
         }
-        $u->deleteOne(['_id' => $user->_id]);
+        $r = $u->deleteOne(['_id' => $user->_id]);
+        if($r->getDeletedCount() < 1) {
+            throw new Exception("User was not deleted");
+        }
+        say("User $user->uname was deleted");
         return COBALT_COMMAND_SUCCESS;
     }
 
@@ -158,7 +166,11 @@ class Users extends CommandInterface {
             say("That username does not exist.", "e");
         }
         $validated = $u->__filter(['pword' => readline("New password: ")]);
-        $u->updateOne(['_id' => $result['_id']], ['$set' => $validated]);
+        $r = $u->updateOne(['_id' => $result['_id']], ['$set' => $validated]);
+        if($r->getModifiedCount() < 1) {
+            throw new Exception("The password was not updated");
+        }
+        say("$result->uname's password was modified");
         return COBALT_COMMAND_SUCCESS;
     }
 
@@ -168,8 +180,17 @@ class Users extends CommandInterface {
         $result = $u->findOne(['uname' => $user]);
         if(!$result) {
             say("That username does not exist.", "e");
+            return;
         }
-        $result->updateOne(['_id' => $u->_id], ['$set' => ['is_root' => true]]);
+        if($result->is_root->value === false) {
+            say("User \"$user\" ($result->_id) was already a root user. No change was made.");
+            return COBALT_COMMAND_SUCCESS;
+        }
+        $r = $u->updateOne(['_id' => $result->_id], ['$set' => ['is_root' => true]]);
+        if($r->getModifiedCount() < 1) {
+            throw new Exception("Failed to update \"$user\" with uid: $result->_id");
+        }
+        say("Gave \"$user\" ($result->_id) root privileges");
         return COBALT_COMMAND_SUCCESS;
     }
 
@@ -180,7 +201,15 @@ class Users extends CommandInterface {
         if(!$result) {
             say("That username does not exist.", "e");
         }
-        $result->updateOne(['_id' => $u->_id], ['$set' => ['is_root' => false]]);
+        if($result->is_root->value === false) {
+            say("User \"$user\" ($result->_id) was explicitly not a root user. No change was made.");
+            return COBALT_COMMAND_SUCCESS;
+        }
+        $r = $result->updateOne(['_id' => $result->_id], ['$set' => ['is_root' => false]]);
+        if($r->getModifiedCount() < 1) {
+            throw new Exception("Failed to update \"$user\" with uid: $result->_id");
+        }
+        say("Removed \"$user\" ($result->_id) root permission");
         return COBALT_COMMAND_SUCCESS;
     }
 }
