@@ -44,7 +44,7 @@ function maybe_with($template, $vars = []) {
  */
 function view(string $template, array $vars = [], bool $absolute_path = false):string {
     if(__APP_SETTINGS__['Render_use_v2_engine']) {
-        $render = new Render();
+    $render = new Render();
         $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
         $render->getBodyFromTemplate($template);
     } else {

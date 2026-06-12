@@ -1,6 +1,6 @@
 <?php
 
-namespace Cobalt\Models\Directives;
+namespace Cobalt\Model\Directives;
 
 use Closure;
 use Cobalt\Model\Directives\Abstracts\AbstractDirective;
@@ -27,17 +27,18 @@ class MutateDirective extends AbstractDirective {
     function __construct(Closure $filter) {
         $funcReflection = new ReflectionFunction($filter);
         $argsReflection = $funcReflection->getParameters();
-        if(!$argsReflection[0]->isPassedByReference()) {
-            throw new Error("The first argument must be passed by reference!");
-        }
+        // if(!$argsReflection[0]->isPassedByReference()) {
+        //     throw new Error("The first argument must be passed by reference!");
+        // }
         $returnType = $funcReflection->getReturnType();
-        if((string)$returnType !== "void") {
-            throw new Error("The filter closure must explicitly define a return type of `void`!");
+        if((string)$returnType !== "mixed") {
+            throw new Error("This closure must explicitly define a return type of `mixed`!");
         }
         $this->filter = $filter;
     }
 
-    public function getValue(&...$args): mixed {
-        return call_user_func_array($this->filter, $args);
+    public function getValue(...$args): mixed {
+        $result = call_user_func_array($this->filter, func_get_args());
+        return $result;
     }
 }

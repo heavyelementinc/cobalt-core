@@ -13,8 +13,8 @@ use Override;
  */
 class CronManager {
     use Accessible;
-    const COBALT_CORE_TASK_FILE = __DIR__ . "/CoreTasks.php";
-    const COBALT_APP_TASK_FILE  = __APP_ROOT__ . "/Tasks.php";
+    const COBALT_CORE_TASK_FILE = __DIR__ . "/core_tasks.php";
+    const COBALT_APP_TASK_FILE  = __APP_ROOT__ . "/config/cron/tasks.php";
 
     #[Override]
     public function getCollectionName($string = null): string {
@@ -26,7 +26,7 @@ class CronManager {
      */
     function load_tasks():array {
         $tasks = $this->get_task_file(self::COBALT_CORE_TASK_FILE);
-        $tasks += $this->get_task_file(self::COBALT_APP_TASK_FILE);
+        $tasks += $this->get_task_file(self::COBALT_APP_TASK_FILE, false);
         return $tasks;
     }
 
@@ -59,27 +59,30 @@ class CronManager {
         }
         foreach($tasks as $task) {
             // $details = $task->crontask_details();
-            $start = microtime(true);
-            try {
-                $task->crontask_setup();
-                $status = $task->crontask_execute($this);
-                $task->crontask_post($status);
-                $end = microtime(true);
-            } catch (Exception $e) {
-                $end = microtime(true);
-                cobalt_log('TASK_EXEC', $task::class . " failed with the following exception: ". $e->getMessage());
-                continue;
-            } catch (Error $e) {
-                cobalt_log('TASK_EXEC', $task::class . " failed with the following error: ". $e->getMessage());
-                continue;
-            }
+            $this->runCronTask($task);
+        }
+    }
 
-            if($status >= 1) {
-                cobalt_log('TASK_EXEC', $task::class . " failed with the following failure state: ".$task->crontask_status_lookup($status));
-            } else {
-                cobalt_log('TASK_EXEC', $task::class . " completed successfully in ".($start - $end)." seconds");
-            }
+    function runCronTask(ICronTask $task) {
+        $start = microtime(true);
+        try {
+            $task->crontask_setup();
+            $status = $task->crontask_execute($this);
+            $task->crontask_post($status);
+            $end = microtime(true);
+        } catch (Exception $e) {
+            $end = microtime(true);
+            cobalt_log('TASK_EXEC', $task::class . " failed with the following exception: ". $e->getMessage());
+            return;
+        } catch (Error $e) {
+            cobalt_log('TASK_EXEC', $task::class . " failed with the following error: ". $e->getMessage());
+            return;
+        }
 
+        if($status >= 1) {
+            cobalt_log('TASK_EXEC', $task::class . " failed with the following failure state: ".$task->crontask_status_lookup($status));
+        } else {
+            cobalt_log('TASK_EXEC', $task::class . " completed successfully in ".($start - $end)." seconds");
         }
     }
 }

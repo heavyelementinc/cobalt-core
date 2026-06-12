@@ -31,7 +31,8 @@ class FormSubmission extends Model implements Migration {
                     'order' => 0,
                     'sort' => -1,
                     'view' => fn () => $this->name
-                ]
+                ],
+                'required' => true,
             ],
             "organization" => [
                 new StringType,
@@ -47,7 +48,8 @@ class FormSubmission extends Model implements Migration {
                 'index' => [
                     'title' => 'Email',
                     'order' => 2,
-                ]
+                ],
+                'required' => true,
             ],
             "phone" => new StringType,
             "preferred" => [

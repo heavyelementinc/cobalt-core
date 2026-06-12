@@ -6,6 +6,7 @@ use Routes\Options;
 use Routes\Route;
 
 class Controller {
+    
     static function route_details(array $default_values, array $details, string $callable) {
         $callable_results = static::$callable($details);
         return array_merge($default_values, $callable_results, $details);

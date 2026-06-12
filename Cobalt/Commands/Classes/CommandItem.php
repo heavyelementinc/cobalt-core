@@ -12,14 +12,16 @@ class CommandItem {
     private Object $instance;
     private string|Closure $function = "";
     private bool $doesMethodExist = false;
+    private bool $isDefault = false;
     private array $flags = [];
     private string $description = "";
 
-    function __construct(Object $instance, string $name, ?string $method = null){
+    function __construct(Object $instance, string $name, ?string $method = null, bool $default = false){
         $this->setInstance($instance);
         $this->setName($name);
         if(!$method) $method = $name;
         $this->setFunction($method);
+        $this->setIsDefault($default);
     }
 
     public function renderCommandDetails(int $cmdPadding) {
@@ -39,6 +41,14 @@ class CommandItem {
             $this->instance->handleFlags($flags, $this, $this->function, $arguments);
         }
         return $this->instance->{$this->function}(...$arguments);
+    }
+
+    function getIsDefault():bool {
+        return $this->isDefault;
+    }
+
+    function setIsDefault(bool $default) {
+        $this->isDefault = $default;
     }
 
     function getName():string {

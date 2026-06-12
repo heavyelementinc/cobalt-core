@@ -159,7 +159,11 @@ class Render {
         if(strtolower($extension) === "php") {
             $is_native_template = true;
         }
+        // if($absolute_path && file_exists($template_path)) {
+        //     // Do nothing. We're good to go.
+        // }
         // Check if we need to replace our template path with he appropriate CORE or APP path
+        // else 
         if ($template_path[0] === "_") {
             $template_path = str_replace(
                 ["__CORE__", "__APP__"],

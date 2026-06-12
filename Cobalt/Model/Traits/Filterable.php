@@ -9,7 +9,7 @@ use Cobalt\Model\Directives\SetDirective;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
-use Cobalt\Models\Directives\MutateDirective;
+use Cobalt\Model\Directives\MutateDirective;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Error;
 use MongoDB\Model\BSONArray;
@@ -95,8 +95,10 @@ trait Filterable {
         try {
             if($result->hasDirective('mutate')) {
                 $mutateDirective = $result->directiveInstance('mutate');
-                if($mutateDirective instanceof MutateDirective == false) throw new TypeError("$field's mutate directive must be of type \\Cobalt\\Models\\Directives\\MutateDirective");
-                $mutateDirective->getValue($value);
+                if($mutateDirective instanceof MutateDirective == false) {
+                    throw new TypeError("$field's mutate directive must be of type " . MutateDirective::class);
+                }
+                $value = $mutateDirective->getValue($value);
             }
             if($value === null || $value === "") {
                 if($result->isRequired()) throw new ValidationIssue("This field is required");

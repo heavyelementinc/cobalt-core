@@ -59,8 +59,12 @@ class Render {
         $this->body = $body;
     }
 
-    public function getBodyFromTemplate(string $templatePath) {
+    public function getBodyFromTemplate(string $templatePath, bool $allowAbsolute = false) {
+        // if($allowAbsolute && file_exists($templatePath)) {
+        //     $file = $templatePath;
+        // } else {
         $file = find_one_file($GLOBALS['TEMPLATE_PATHS'], $templatePath);
+        // }
         if(!$file) throw new NotFound("Specified template does not exist.");
         $this->filename = $file;
         $this->setBody(file_get_contents($file));

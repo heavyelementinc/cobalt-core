@@ -33,7 +33,7 @@ class SetDirective extends AbstractDirective {
     }
 
     public function getValue(&...$args): mixed {
-        return call_user_func_array($this->value, $args);
+        return call_user_func_array($this->value, func_get_args());
     }
 
     /**
