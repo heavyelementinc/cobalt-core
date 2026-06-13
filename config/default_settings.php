@@ -1427,9 +1427,9 @@ $settings = [
         "designer" => [
             "default" => [
                 "prefix" => "Designed by",
-                "name" =>   "Heavy Element, Inc.",
+                "name" =>   "Heavy Element",
                 "href" =>   "https://heavyelement.com/",
-                "title" =>  "Midcoast Maine's Premier Web & Media & Software Media Studio"
+                "title" =>  "Midcoast Maine's Premier Media Production Studio"
             ],
             // "meta" => [
             //     "group" => GROUP_BASIC,

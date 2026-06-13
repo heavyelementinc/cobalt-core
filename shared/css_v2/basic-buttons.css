@@ -11,8 +11,9 @@
 :where(.button),
 :where(a.button),
 [role='button'],
-.floater,
-a.floater--new-item
+.floater.floater.floater,
+a:is(.floater--save-item.floater--save-item,.floater--new-item.floater--new-item),
+button:is(.floater--save-item.floater--save-item,.floater--new-item.floater--new-item)
 {
     --_anchor-element-color: var(--primary-color-1-fg);
     --_anchor-element-background: var(--primary-color-1);

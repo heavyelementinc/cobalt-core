@@ -454,7 +454,7 @@ input-object-array {
     margin-left:auto;
   }
 
-
+/* 
 .floater--new-item{
   position:fixed;
   display: flex;
@@ -477,7 +477,7 @@ a.floater--new-item{
 
   .floater--new-item:hover{
     background:var(--project-color-button-hover);
-    /* color:var(--project-color-button-hover-text); */
+    color:var(--project-color-button-hover-text);
   }
 
   .floater--new-item:visited {
@@ -492,7 +492,7 @@ a.floater--new-item{
     content: "+";
     font-weight: bolder;
     font-size: 2.5rem;
-  }
+  } */
 
 progress-bar {
   display: block;

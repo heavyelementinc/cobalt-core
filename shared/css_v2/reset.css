@@ -33,6 +33,15 @@ body {
     }
 }
 
+/** Default colors for a link that are easily overridable **/
+:where(a) {
+    --_anchor-element-color: var(--primary-color-1);
+    --_anchor-hover-color: var(--primary-color-0);
+    --_anchor-active-color: var(--primary-color-2);
+    --_anchor-visited-color: var(--_anchor-element-color);
+}
+
+/** Default link styles **/
 a:not(.button) {
     color: var(--_anchor-element-color, inherit);
     font-weight: bold;
@@ -41,7 +50,7 @@ a:not(.button) {
         color: var(--_anchor-visited-color, inherit);
         /* color: color-mix(in hsl, var(--_anchor-visited-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
     }
-    &:hover {
+    &:hover, &:focus, &:focus-visible, &:focus-visible {
         color: var(--_anchor-hover-color, inherit);
         /* color: color-mix(in hsl, var(--_anchor-hover-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
         text-decoration: underline;
@@ -52,7 +61,7 @@ a:not(.button) {
     }
 }
 
-button[link],
+/* button[link], */
 help-span:where(:not(:empty)) {
     --_anchor-element-color: var(--primary-color-1);
     --_anchor-hover-color: var(--primary-color-0);
@@ -83,7 +92,7 @@ help-span:where(:not(:empty)) {
     }
 }
 
-button[link],
+/* button[link],
 button[link]:hover {
     font-size: 1em;
     border: 0;
@@ -93,7 +102,7 @@ button[link]:hover {
     text-align: inherit;
     cursor: pointer;
     width: fit-content;
-}
+} */
 
 
 /* p, */
