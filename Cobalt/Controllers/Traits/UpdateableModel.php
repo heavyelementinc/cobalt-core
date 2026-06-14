@@ -3,7 +3,9 @@
 namespace Cobalt\Controllers\Traits;
 
 use Cobalt\Controllers\Interfaces\BatchOperations;
+use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
+use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use MongoDB\BSON\ObjectId;
@@ -60,12 +62,16 @@ trait UpdateableModel {
     abstract function edit($document):string;
 
     final public function __update($id): Model|BSONDocument {
-        $query = ['_id' => new ObjectId($id)];
+        $_id = new ObjectId($id);
+        $query = ['_id' => $_id];
         
         /** @var Model */
         $schema = $this->model->findOne($query);
         if(!$schema) throw new NotFound("No documents matched request", "Not found");
-        $data = $this->update($_POST, $id, $schema);
+
+        // We need to undot our array so we can filter it.
+        $mutant = $_POST;//array_undot($_POST);
+        $data = $this->update($mutant, $id, $schema);
         
         // $schema = new $this->model([]);
         
@@ -122,4 +128,6 @@ trait UpdateableModel {
         }
         throw new RouteNotFoundException("Specified BatchIdOperation does not exist on this controller.");
     }
+
+    abstract public function __read(ObjectId|string $id): GenericModel|BSONDocument|null;
 }

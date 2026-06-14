@@ -28,7 +28,7 @@ trait ReadableModel {
         return $document;
     }
 
-    final public function __read(ObjectId|string $id): GenericModel|BSONDocument|null {
+    public function __read(ObjectId|string $id): GenericModel|BSONDocument|null {
         $result = $this->model->findOne(['_id' => new ObjectId($id)]);
         if(!$result) throw new NotFound("No records match that request");
         return $this->read($result);

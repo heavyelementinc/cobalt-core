@@ -79,6 +79,7 @@ trait Filterable {
     }
 
     protected function __validate_field($field, $value) {
+        if(!$field) return; // Filter out empty field names
         $result = lookup($field, $this);
 
         // If the $fieldType doesn't exist and we don't accept unregistered keys, throw an error

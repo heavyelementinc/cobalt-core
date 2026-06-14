@@ -17,7 +17,10 @@ import { TagSelect } from "./TagSelect.js";
 customElements.define("input-tag-select", TagSelect);
 
 import { InputBinary } from "./InputBinary.js";
-customElements.define("input-binary", InputBinary); 
+customElements.define("input-binary", InputBinary);
+
+import InputModel from "./InputModel.js";
+customElements.define("input-model", InputModel);
 
 import SlideShow from "./SlideShow.js";
 customElements.define("slide-show", SlideShow);

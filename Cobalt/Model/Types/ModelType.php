@@ -8,6 +8,7 @@ use Cobalt\Model\Classes\ValidationResults\MergeResult;
 use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Model;
+use Override;
 
 class ModelType extends MixedType implements ArrayAccess {
     protected bool $__allow_undefined_fields = true;
@@ -95,5 +96,20 @@ class ModelType extends MixedType implements ArrayAccess {
     public function defineSchema(array $schema):ModelType {
         $this->__defineDirective('schema', $schema);
         return $this;
+    }
+
+    #[Override]
+    public function field(string $class = "", array $misc = [], ?string $tag = null): string {
+        $innerHTML = "<fieldset class='fieldset--$this->name'>";
+        foreach($this->value as $field => $model) {
+            $innerHTML .= "<div class='fieldset--item'>".$model->getLabel().$model->field()."</div>";
+        }
+        $innerHTML .= "</fieldset>";
+        // $innerHTML .= "<script type=\"application/json\">".json_encode($this->value)."</script>";
+        return $innerHTML;
+        // return parent::field($class, [
+        //     'innerHTML' => $innerHTML,
+        //     ...$misc
+        // ], "input-model");
     }
 }

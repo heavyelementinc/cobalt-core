@@ -4,6 +4,7 @@ use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\Documentation\Controllers\Documentation;
 use Cobalt\EventListings\Controllers\Events;
+use Components\StructuredData\Controllers\BusinessDetails;
 use Routes\Options;
 use Routes\Route;
 
@@ -145,3 +146,8 @@ if(__APP_SETTINGS__['Block_Editor_endpoints']) {
 CrudableFiles::apiv1();
 
 Route::s_put('/settings/update/', 'CoreSettingsPanel@update');
+
+// BusinessDetails::apiv1();
+// BusinessDetails::post((new Options("/settings/seo/update/", "__update"))
+//     ->set_permission("Auth_modify_cobalt_settings")
+// );

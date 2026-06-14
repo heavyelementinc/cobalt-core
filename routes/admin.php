@@ -4,6 +4,7 @@ use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\EventListings\Controllers\Events;
 use Cobalt\Settings\Controllers\Settings;
+use Components\StructuredData\Controllers\BusinessDetails;
 use Contact\ContactManager;
 use Routes\Options;
 use Routes\Route;
@@ -238,6 +239,17 @@ Route::get("/integrations/", "IntegrationsController@index", [
     'navigation' => ['advanced_settings']
 ]);
 Route::get("/integrations/{class}", "IntegrationsController@token_editor");
+
+// BusinessDetails::get((new Options('/settings/seo/', '__edit'))
+//     ->set_permission('Auth_allow_editing_users')
+//     ->set_navigation([
+//         'application_settings' => [
+//             'name' => 'Organization SEO',
+//             'icon' => 'domain',
+//         ]
+//     ])
+// );
+
 
 /** 
 *  ========================================================

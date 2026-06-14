@@ -119,10 +119,12 @@ export default class ICustomInput extends HTMLElement {
         if(!message) {
             this._validationMessage = "";
             this._validity.customError = false;
+            this.classList.remove("invalid");
             return;
         }
         this._validationMessage = message;
         this._validity.customError = true;
+        this.classList.add("invalid");
     }
 
     isRequiredFulfilled() {

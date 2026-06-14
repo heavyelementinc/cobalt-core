@@ -1611,7 +1611,7 @@ $settings = [
         
     /** WEB */
         "Enable_Content_Security_Policy_Nonce" => [
-            'default' => true,
+            'default' => false,
         ],
         "Disable_umami_for_logged_in_users" => [
             'default' => true

@@ -1,12 +1,11 @@
 <?php
+namespace Cobalt\Model\Types;
 
 use Cobalt\Model\Attributes\Prototype;
 
-namespace Cobalt\Model\Types;
-
 class PhoneNumberType extends MixedType {
     
-    protected function display() {
+    function display(): mixed {
         return $this->format();
     }
 

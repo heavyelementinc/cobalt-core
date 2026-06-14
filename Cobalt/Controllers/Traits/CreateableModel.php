@@ -53,6 +53,9 @@ trait CreateableModel {
     }
 
     final public function __create(): ObjectId {
+        // We undot our array so that we can validate it.
+        // $undot = array_undot($_POST);
+
         // Let's touch the app's code so we can more easily debug and trace stuff
         $data = $this->create($_POST);
         
@@ -61,18 +64,22 @@ trait CreateableModel {
 
         /** @var Model */
         $mutant = $schema->__filter($data);
-        
+
         // Now, let's insert our content into the database.
         $result = $schema->insertOne($mutant);
         $insertedId = $result->getInsertedId();
         $this->post_create($schema, $insertedId, $result);
         if(method_exists($this, "postCreate")) $this->postCreate($result, $insertedId, $result);
         // Let's check if we need to grab a route and redirect (if this item is updatable)
-        $route = route("$this->name@__edit", [(string)$insertedId]);
-        header("X-Redirect: $route");
+        $this->created($insertedId);
 
         // Return our inserted ID
         return $insertedId;
+    }
+
+    function created(mixed $insertedId) {
+        $route = route("$this->name@__edit", [(string)$insertedId]);
+        header("X-Redirect: $route");
     }
 
     final public function __new_document() {

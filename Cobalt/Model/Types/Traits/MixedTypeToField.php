@@ -80,7 +80,12 @@ trait MixedTypeToField {
      */
     protected function input($classes = "", $misc = [], $tag = "input"):string {
         $closingTag = "";
-        if($tag !== "input") $closingTag = "</$tag>";
+        $innerHTML = "";
+        if($tag !== "input") {
+            $innerHTML = $misc['innerHTML'] ?? $this->directiveOrNull("innerHTML");
+            unset($misc['innerHTML']);
+            $closingTag = "</$tag>";
+        }
         
         if($this->hasDirective("private") && $this->getDirective("private")) return "";
         if($this->hasDirective("immutable") && $this->getDirective("immutable")) $misc['readonly'] = "readonly";
@@ -93,7 +98,7 @@ trait MixedTypeToField {
         return "<$tag class=\"$classes\" $attrs value=\"" . str_replace(
             ['"',      "'",      '<',    '>'],
             ['&quot;', '&#039;', '&lt;', "&gt;"],
-            $value) . "\"$pattern>$closingTag";
+            $value) . "\"$pattern>$innerHTML"."$closingTag";
     }
 
     protected function inputColor($classes = "", $misc = [], $tag = "input"): string {
@@ -167,6 +172,7 @@ trait MixedTypeToField {
             $name = $this->datalist_name();
             $datalist = $this->datalist(name: $name);
             $misc['datalist'] = $name;
+            $misc['list'] = $name;
         }
         [$misc, $attrs] = $this->defaultFieldData($misc);
         $prerequisites = "";
