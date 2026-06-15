@@ -119,7 +119,10 @@ class ClientRouter extends EventTarget{
         super();
         this.properties = {
             // location: new RouteObject(window.location.pathname),
-            routeBoundaries: JSON.parse(document.querySelector("#route-boundaries").innerText)
+            routeBoundaries: router_table,// JSON.parse(document.querySelector("#route-boundaries").innerText)
+            body: new Deferred(),
+            main: new Deferred(),
+            foot: new Deferred(),
         }
         this.lastLocationChangeEvent = {};
         /**
@@ -176,6 +179,21 @@ class ClientRouter extends EventTarget{
 
     set hash(newHash) {
         window.location.hash = newHash;
+    }
+
+    /** @prop {Deferred} body */
+    get body() {
+        return this.properties.body;
+    }
+
+    /** @prop {Deferred} body */
+    get main() {
+        return this.properties.main;
+    }
+
+    /** @prop {Deferred} body */
+    get foot() {
+        return this.properties.foot;
     }
 
     // set hashObject(hash) {
@@ -353,7 +371,9 @@ class ClientRouter extends EventTarget{
 
     setPushStateMode() {
         this.historyMode  = "pushState";
-        this.updateTarget = document.querySelector("main");
+        this.main.then(e => {
+            this.updateTarget = document.querySelector("main");
+        })
         this.updateProperty = "innerHTML";
         this.skipRequest = false;
         this.skipUpdate  = false;
@@ -461,19 +481,26 @@ class ClientRouter extends EventTarget{
         if(this.mode !== "spa") return;
         this.progressBar = document.createElement("progress");
         this.progressBar.classList.add("spa-loading-indicator");
-        document.body.prepend(this.progressBar);
+        this.body.then(() => {
+            document.body.prepend(this.progressBar);
+            document.body.addEventListener("click", this.linkClick.bind(this));
+        });
     }
 
     applyLinkListeners() {
-        const links = document.querySelectorAll("a");
-        for( const link of links ){
-            link.removeEventListener("click", this.linkClick);
-            link.addEventListener("click", this.linkClick);
-        }
+        // const links = document.querySelectorAll("a");
+        // for( const link of links ){
+        //     link.removeEventListener("click", this.linkClick);
+        //     link.addEventListener("click", this.linkClick);
+        // }
     }
 
     linkClick(e) {
-        const target = e.currentTarget || e.target || e.explicitTarget;
+        let target = e.target || e.srcTarget || e.currentTarget || e.explicitTarget;
+        if(target.tagName !== "A") {
+            target = target.closest("a");
+            if(target == null) return false;
+        }
         if(target.getAttribute("href")[0] === "#") return true;
         if(e.ctrlKey) return true;
         if(e.button !== 0) return true;
@@ -522,6 +549,3 @@ class ClientRouter extends EventTarget{
         if(pref("debug_router")) console.warn(message);
     }
 }
-
-window.Cobalt.router = new ClientRouter();
-window.Cobalt.router.location = window.location.toString();

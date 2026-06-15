@@ -20,10 +20,10 @@
         "href": "Cobalt/UpdateOperation.js",
         "contexts": ["common"]
     },
-    {
-        "href":"Cobalt.js",
-        "contexts": ["common"]
-    },
+    // {
+    //     "href":"Cobalt.js",
+    //     "contexts": ["common"]
+    // },
     {
         "href":"Modal.js",
         "contexts": ["common"],
@@ -333,11 +333,11 @@
         "contexts": ["common"], 
         "append": true
     },
-    {
-        "href":"ClientRouter.js",
-        "contexts": ["common"], 
-        "append": true
-    },
+    // {
+    //     "href":"ClientRouter.js",
+    //     "contexts": ["common"], 
+    //     "append": true
+    // },
     /* CSS */
     // {
     //     "href": "material-design/css/material.min.css",

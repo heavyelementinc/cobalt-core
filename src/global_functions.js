@@ -316,19 +316,6 @@ async function dialogView(url) {
     return result;
 }
 
-/**
- * @param string string to test
- * @param pattern  pattern to test
- * @returns bool
- */
-function matches(string, pattern) {
-    let regex = pattern;
-    if(typeof regex === "string") regex = new RegExp(pattern);
-    const match = string.match(regex);
-    if (match === null) return false;
-    if (match.length <= 0) return false;
-    return true;
-}
 
 // async function dialogView(url, close = "Close") {
 //     const dialog = new Dialog({body: "<loading-spinner></loading-spinner>"});
@@ -854,56 +841,6 @@ function upload_field_update(element) {
 function dateFromObjectId(objectId) {
 	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
 }
-
-class Deferred {
-    PROMISE_REJECTED = 0;
-    PROMISE_PENDING  = 1;
-    PROMISE_RESOLVED = 2;
-    
-    _props = {
-        promise: null, 
-        resolve: (value) => {},
-        reject: (message) => {},
-        state: this.PROMISE_PENDING,
-    }
-    constructor(callback = () => {}) {
-        this._props.promise = new Promise(async (resolve, reject) => {
-            this._props.resolve = resolve;
-            this._props.reject = reject;
-            await this.promise;
-            callback(resolve, reject);
-        });
-    }
-
-    get state() {
-        return this._props.state;
-    }
-
-    get promise() {
-        return this._props.promise;
-    }
-
-    resolve(value) {
-        this._props.state = this.PROMISE_RESOLVED;
-        return this._props.resolve(value);
-    }
-
-    reject(message) {
-        this._props.state = this.PROMISE_REJECTED;
-        return this._props.reject(message);
-    }
-
-    async await() {
-        return this.promise;
-    }
-}
-
-
-
-
-
-
-
 
 class Rt {
     get location() {

@@ -25,6 +25,10 @@ class CobaltCore {
             await Promise.all(window.asyncScripts)
             this.resolvers.ready(true);
         })
+        this.router = new ClientRouter();
+        document.addEventListener("DOMContentLoaded", () => {
+            this.router.location = window.location.toString();
+        });
     }
 
     get router() {

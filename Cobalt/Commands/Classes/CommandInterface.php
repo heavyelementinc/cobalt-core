@@ -5,6 +5,7 @@ namespace Cobalt\Commands\Classes;
 use Cobalt\Commands\Traits\ErrorHandler;
 
 abstract class CommandInterface {
+    protected array $flags = [];
     // use ErrorHandler;
     abstract function validCommands():CommandList;
 

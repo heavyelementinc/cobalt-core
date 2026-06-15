@@ -1,5 +1,18 @@
 import ICustomInput from "./ICustomInput.js";
 
+// import EditorJS from 'https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/+esm';
+// import Header from 'https://cdn.jsdelivr.net/npm/@editorjs/header@latest+esm';
+// import Quote from 'https://cdn.jsdelivr.net/npm/@editorjs/quote@latest+esm';
+// import RawTool from 'https://cdn.jsdelivr.net/npm/@editorjs/raw@latest+esm';
+// import ImageTool from 'https://cdn.jsdelivr.net/npm/@editorjs/image@latest+esm'; // ImageTool? SimpleImage?
+// import LinkTool from 'https://cdn.jsdelivr.net/npm/@editorjs/link@latest+esm';
+// import NestedList from 'https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest+esm';
+// import CodeTool from 'https://cdn.jsdelivr.net/npm/@editorjs/code@latest+esm';
+// import Embed from 'https://cdn.jsdelivr.net/npm/@editorjs/embed@latest+esm';
+// import InlineCode from 'https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest+esm';
+// import Table from 'https://cdn.jsdelivr.net/npm/@editorjs/table@latest+esm';
+// import Marker from 'https://cdn.jsdelivr.net/npm/@editorjs/marker@latest+esm';
+
 class BlockButton {
     constructor({data}) {
         this.LABEL_CLASS = "blockbutton--label";
@@ -156,6 +169,7 @@ export default class BlockEditor extends ICustomInput {
     }
 
     async initEditor() {
+        this.appendModules();
         await window.Cobalt.promises.ready;
         await this._restoreSavedData();
         this.__editor__ = new EditorJS({
@@ -253,5 +267,37 @@ export default class BlockEditor extends ICustomInput {
     /** @var object{time: int, blocks: object, version: string} */
     set value(val) {
         this.__editor__.data = val;
+    }
+
+    appendModules() {
+        const modules = [
+            "https://cdn.jsdelivr.net/npm/@editorjs/header@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/link@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js",
+            "https://cdn.jsdelivr.net/npm/@editorjs/raw@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/image@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/embed@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/table@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/marker@latest",
+            "https://cdn.jsdelivr.net/npm/@editorjs/code@latest",
+            "/core-content/js/editorjs/simpleimage.js",
+        ];
+        for(const src of modules) {
+            const deferred = new Deferred();
+            window.asyncScripts.push(deferred.promise);
+            const script = document.createElement("script");
+            script.addEventListener("load", () => {
+                deferred.resolve(true);
+            });
+
+            script.addEventListener("error", () => {
+                deferred.reject();
+            });
+
+            document.body.appendChild(script);
+            script.src = src;
+        }
     }
 }

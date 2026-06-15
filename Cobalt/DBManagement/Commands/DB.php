@@ -21,7 +21,7 @@ use Override;
 use Validation\Exceptions\ValidationIssue;
 
 class DB extends CommandInterface {
-    private array $flags = [];
+    protected array $flags = [];
     #[Override]
     public function validCommands(): CommandList {
         $list = new CommandList();
