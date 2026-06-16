@@ -9,6 +9,7 @@ use Cobalt\Commands\Attributes\Readline;
 use Cobalt\Commands\Classes\CommandInterface;
 use Cobalt\Commands\Classes\CommandItem;
 use Cobalt\Commands\Classes\CommandList;
+use Cobalt\Commands\Exceptions\CommandError;
 use Cobalt\DBManagement\Import;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\MixedType;
@@ -36,7 +37,7 @@ class DB extends CommandInterface {
     #[Override]
     public function handleFlags(array $flags, CommandItem $item, string $method, array $arguments): int {
         if(key_exists("include", $flags) && key_exists("exclude", $flags)) {
-            throw new Exception("Cannot accept both 'include' and 'exclude' flags.");
+            throw new CommandError("Cannot accept both 'include' and 'exclude' flags.");
         }
         if(key_exists('f', $flags) && $flags['f']) $flags['force'] === true;
         $this->flags = [
@@ -56,7 +57,7 @@ class DB extends CommandInterface {
         "--include - A comma-delimited list of collections to import",
     )]
     public function list():int {
-        throw new Exception("Not implemented");
+        throw new CommandError("Not implemented");
     }
 
     #[Description( "[filename] Export a database backup.")]

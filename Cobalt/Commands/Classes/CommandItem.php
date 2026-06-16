@@ -5,7 +5,9 @@ namespace Cobalt\Commands\Classes;
 use Closure;
 use Cobalt\Commands\Attributes\Description;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
+use ReflectionParameter;
 
 class CommandItem {
     private string $name;
@@ -93,6 +95,15 @@ class CommandItem {
         return $this;
     }
 
+    function getLongDescription() {
+        $reflection = new ReflectionMethod($this->instance, $this->function);
+        $attrs = $reflection->getAttributes();
+        foreach($attrs as $attr) {
+            if($attr->name === "Cobalt\\Commands\\Attributes\\LongDescription") return $attr->newInstance()->description;
+        }
+        return $this->getDescription();
+    }
+
     function getDescription():string {
         if(!$this->description && $this->doesMethodExist && is_string($this->function)) {
             $reflection = new ReflectionMethod($this->instance, $this->function);
@@ -107,5 +118,54 @@ class CommandItem {
     function setDescription(string $value):CommandItem {
         $this->description = $value;
         return $this;
+    }
+
+    function renderVerboseCommandDetails():string {
+        $details = [
+            'arguments' => '',
+            'flags' => '',
+        ];
+        $reflection = new ReflectionMethod($this->instance, $this->function);
+        $args = $reflection->getParameters();
+        for($i = count($args); $i >= 0; $i--) {
+            $this->renderArgument($details['arguments'], $args[$i], $i, count($args));
+        }
+        $attrs = $reflection->getAttributes();
+        foreach($attrs as $attr) {
+            switch($attr->name) {
+                case "Cobalt\\Commands\Attributes\\AcceptsFlags":
+                    $details['flags'] = fmt("  Accepts the following flags:\n    ".implode("\n    ", $attr->newInstance()->accepts)."\n", "gray");
+            }
+        }
+        return $details['arguments'] . "\n$details[flags]\n";
+    }
+
+    private function renderArgument(&$string, ?ReflectionParameter $param, int $index, int $max) {
+        if($param == null) return;
+        $name = '$'.$param->getName();
+        if($index + 1 !== $max) $name .= "";
+        $type = "";
+        // if($param->hasType()) $type = $param->getType().": ";
+        // $param->getAttributes();
+        // if($param->)
+        try {
+            $default = "";
+            if($param->isDefaultValueAvailable()) $default = $param->getDefaultValue();
+        } catch(ReflectionException $e) {
+            // $default = false;
+        }
+        $start = "";
+        $stop = "";
+        if($default == false) {
+            $start = "[ ";
+            $stop = "]";
+        }
+        $fmt = "$start"."$type";
+        $string = sprintf(" %s%s%s%s", 
+            fmt($fmt, 'grey',),
+            fmt($name, "b"),
+            $string,
+            fmt(" $stop", 'grey')
+        );
     }
 }

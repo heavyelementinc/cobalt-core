@@ -1,6 +1,7 @@
 <?php
 
 use Cobalt\Commands\CommandParser;
+use Cobalt\Commands\Exceptions\CommandError;
 
 if(posix_getuid() === 0) die("\033[31mThe CLI must not be run as root!\033[0m\n");
 
@@ -52,7 +53,18 @@ require __CLI_ROOT__ . "/../cobalt-core/env.php";
 
 $parser = new CommandParser();
 $parser->load_files();
-$result = $parser->exec($_SERVER['command'], $_SERVER['flags']);
-if($result > COBALT_COMMAND_SUCCESS) {
-    say("An error occurred", 'e');
+try {
+    // Do all our flag execution here
+    require __DIR__ . "/dependencies/handle_builtin_flags.php";
+    
+    // Then we handle our command execution
+    $result = $parser->exec($_SERVER['command'], $_SERVER['flags']);
+    if($result > COBALT_COMMAND_SUCCESS) {
+        say("An error occurred", 'e');
+    }
+} catch(CommandError $err) {
+    // Handle special errors gracefully
+    say($err->getMessage(), $err->getColor());
+} catch(Exception|Error $e) {
+    print(fmt($e->getMessage(), 'normal', 'red')."\n");
 }

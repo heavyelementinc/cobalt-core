@@ -8,10 +8,10 @@ use Cobalt\Commands\Attributes\Readline;
 use Cobalt\Commands\Classes\CommandInterface;
 use Cobalt\Commands\Classes\CommandItem;
 use Cobalt\Commands\Classes\CommandList;
+use Cobalt\Commands\Exceptions\CommandError;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
-use Exception;
 use Override;
 use Validation\Exceptions\ValidationIssue;
 
@@ -66,13 +66,13 @@ class Users extends CommandInterface {
         $u = new User();
         /** @var User $user */
         $user = $u->findOne(['uname' => $username]);
-        if(!$user) throw new Exception("User doesn't exist");
+        if(!$user) throw new CommandError("User doesn't exist");
         if(!key_exists($field, $user->readSchema())) {
-            throw new Exception("Not a valid field");
+            throw new CommandError("Not a valid field");
         }
         $f = $user->readSchema()[$field]['type'];
         if($f instanceof StringType == false && $f instanceof NumberType == false) {
-            throw new Exception("Cannot set this field via the CLI");
+            throw new CommandError("Cannot set this field via the CLI");
         }
         if($f instanceof NumberType) {
             $value = $user->typecast($value);
@@ -81,10 +81,10 @@ class Users extends CommandInterface {
             $filtered = $f->filter($value);
             $r = $u->updateOne(['_id' => $user->_id],['$set' => [$field => $value]]);
         } catch(ValidationIssue $e) {
-            throw new Exception($e->getMessage());
+            throw new CommandError($e->getMessage());
         }
         if($r->getModifiedCount() < 1) {
-            throw new Exception("User was not modified. Was the value already set?");
+            throw new CommandError("User was not modified. Was the value already set?");
         }
         say("$user->uname was modified");
         return COBALT_COMMAND_SUCCESS;
@@ -103,7 +103,7 @@ class Users extends CommandInterface {
         }
         $r = $u->deleteOne(['_id' => $user->_id]);
         if($r->getDeletedCount() < 1) {
-            throw new Exception("User was not deleted");
+            throw new CommandError("User was not deleted");
         }
         say("User $user->uname was deleted");
         return COBALT_COMMAND_SUCCESS;
@@ -168,7 +168,7 @@ class Users extends CommandInterface {
         $validated = $u->__filter(['pword' => readline("New password: ")]);
         $r = $u->updateOne(['_id' => $result['_id']], ['$set' => $validated]);
         if($r->getModifiedCount() < 1) {
-            throw new Exception("The password was not updated");
+            throw new CommandError("The password was not updated");
         }
         say("$result->uname's password was modified");
         return COBALT_COMMAND_SUCCESS;
@@ -188,7 +188,7 @@ class Users extends CommandInterface {
         }
         $r = $u->updateOne(['_id' => $result->_id], ['$set' => ['is_root' => true]]);
         if($r->getModifiedCount() < 1) {
-            throw new Exception("Failed to update \"$user\" with uid: $result->_id");
+            throw new CommandError("Failed to update \"$user\" with uid: $result->_id");
         }
         say("Gave \"$user\" ($result->_id) root privileges");
         return COBALT_COMMAND_SUCCESS;
@@ -207,7 +207,7 @@ class Users extends CommandInterface {
         }
         $r = $result->updateOne(['_id' => $result->_id], ['$set' => ['is_root' => false]]);
         if($r->getModifiedCount() < 1) {
-            throw new Exception("Failed to update \"$user\" with uid: $result->_id");
+            throw new CommandError("Failed to update \"$user\" with uid: $result->_id");
         }
         say("Removed \"$user\" ($result->_id) root permission");
         return COBALT_COMMAND_SUCCESS;

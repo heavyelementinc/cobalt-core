@@ -8,6 +8,9 @@ use Cobalt\Commands\Attributes\Description;
 use Cobalt\Commands\Classes\CommandInterface;
 use Cobalt\Commands\Classes\CommandItem;
 use Cobalt\Commands\Classes\CommandList;
+use Cobalt\Commands\Classes\Updates\Update;
+use Cobalt\Commands\Classes\Updates\UpdateHistory;
+use Cobalt\Commands\Exceptions\CommandError;
 use Cobalt\Extensions\Extensions;
 use Exception;
 use MongoDB\Collection;
@@ -21,7 +24,8 @@ class App extends CommandInterface {
             ->setDescription("Get or set configuration details")
         );
         $list->add(new CommandItem($this, 'cache', 'cache'));
-        $list->add(new CommandItem($this, 'extensions', 'extensions'));
+        $list->add(new CommandItem($this, 'safemode', 'safemode'));
+        $list->add(new CommandItem($this, 'update', 'update'));
         return $list;
     }
 
@@ -32,15 +36,15 @@ class App extends CommandInterface {
     
     #[Description("Get or set configuration details")]
     function config(string $file, mixed $value = null) {
-        throw new Exception("Not implemented");
+        throw new CommandError("Not implemented");
     }
 
     function get(string $setting) {
-        throw new Exception("Not implemented");
+        throw new CommandError("Not implemented");
     }
 
-    #[Description("Disable all extensions")]
-    function extensions(string $subcommand = "disable", string $arg = "all"):int {
+    #[Description("Disables all extensions (requires you to manually re-enable them)")]
+    function safemode(string $subcommand = "disable", string $arg = "all"):int {
         switch($subcommand) {
             default:
                 return $this->disable_extensions($arg);
@@ -48,13 +52,15 @@ class App extends CommandInterface {
     }
 
     private function disable_extensions($arg) {
+        $ext = new Extensions(true);
         switch($arg) {
             case 'all':
+                $ct = $ext->count([]);
+                say("Disabling all $ct extension".plural($ct));
                 break;
             default:
-                throw new Exception("Argument must specify 'all'");
+                throw new CommandError("Argument must specify 'all'");
         }
-        $ext = new Extensions(true);
         // $results = $ext->find(['is_option' => ['$ne' => true]]);
         $ext->collection->drop();
         return COBALT_COMMAND_SUCCESS;
@@ -112,4 +118,58 @@ class App extends CommandInterface {
         
     //     return COBALT_COMMAND_SUCCESS;
     // }
+
+    #[Description("Update your Cobalt app/engine")]
+    #[AcceptsFlags(
+        '-f - Forces the update process',
+        "--app-first - Updates the app before Cobalt core."
+    )]
+    public function update(string $type = "all") {
+        // throw new CommandError("Not implemented");
+        $history = new UpdateHistory();
+        switch($type) {
+            case "app":
+                return $this->updateApp();
+            case "env":
+                return $this->updateEnv();
+            default:
+                $appFirst = isset(flags()['app-first']);
+                if($appFirst) $this->updateApp();
+                $this->updateEnv();
+                if(!$appFirst) $this->updateApp();
+                break;
+        }
+        return COBALT_COMMAND_SUCCESS;
+    }
+
+    private function updateApp():int {
+        $history = new UpdateHistory();
+        return $this->updateHandler($history);
+    }
+
+    private function updateEnv():int {
+        $history = new UpdateHistory();
+        return $this->updateHandler($history);
+    }
+
+    private function updateHandler(UpdateHistory $history) {
+        switch($history->update(!!flags()['f'])) {
+            case Update::STATUS_UPDATED:
+            case Update::STATUS_NOT_MODIFIED:
+                return COBALT_COMMAND_SUCCESS;
+            default:
+                return 1;
+        }
+    }
+
+    public function rollback(int $number) {
+        // switch($type){ 
+        //     case "app":
+        //     case "env":
+
+        // }
+        $history = new UpdateHistory();
+        $result = $history->rollback($number);
+        
+    }
 }

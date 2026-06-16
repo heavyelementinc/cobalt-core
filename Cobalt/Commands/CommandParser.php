@@ -51,21 +51,25 @@ class CommandParser {
 
     function exec(array $command, array $flags) {
         $name = array_shift($command);
+        if(!$name) {
+            say("No command specified. Try using " . fmt("-h", 'w') . " to list available commands");
+            return;
+        }
         // If there's no name, default to "help"
-        if(!$name) $name = "help";
+        // if(!$name) $name = "help";
         if(!key_exists($name, $this->commands)) {
             say("Command not found", "e");
             return self::ERR_COMMAND_NOT_FOUND;
         }
 
         $method = array_shift($command);
-        if($name === "help") {
-            if(!$method) $method = "list";
-            else if($method !== "list") {
-                array_unshift($command, $method);
-                $method = "list";
-            }
-        }
+        // if($name === "help") {
+        //     if(!$method) $method = "list";
+        //     else if($method !== "list") {
+        //         array_unshift($command, $method);
+        //         $method = "list";
+        //     }
+        // }
 
         $cmd = $this->commands[$name];
         
