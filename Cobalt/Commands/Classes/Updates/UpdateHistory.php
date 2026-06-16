@@ -14,7 +14,7 @@ class UpdateHistory implements Iterator {
     private int $index = 0;
     private ?int $currentTarget = null;
     private string $type = '';
-    const DIR = __APP_ROOT__ . "/ignored/updates/history.%s.json";
+    const DIR = __APP_ROOT__ . "/ignored/updates/history.json";
     function __construct() {
         // $this->type = match($type) {
         //     'env' => 'env',
@@ -25,7 +25,7 @@ class UpdateHistory implements Iterator {
     }
 
     function getFilename() {
-        return sprintf(self::DIR, $this->type);
+        return self::DIR;
     }
 
     function init() {
@@ -39,11 +39,9 @@ class UpdateHistory implements Iterator {
                 'app' => new Update( 'app', $values['app']),
                 'env' => new Update( 'env', $values['env']),
             ];
-            if($values['current'] === true) {
-                $this->index = $index;
-                $this->currentTarget = $index;
-            }
         }
+        $this->index = $file['meta']['current'];
+        $this->currentTarget = $file['meta']['current'];
         if(key_exists('current',$file['meta'] ?? [])) {
             $this->currentTarget = $file['meta']['current'] ?? null;
         }
@@ -71,6 +69,9 @@ class UpdateHistory implements Iterator {
 
     public function update(bool $force = false){
         $current = $this->history[$this->currentTarget];
+        foreach($current as $type => $c) {
+            
+        }
         say("Updating 'app' from hash ".$current->jsonSerialize()['currentHash']);
         $update = new Update($this->type, null);
         $update->update($force);
@@ -79,13 +80,14 @@ class UpdateHistory implements Iterator {
         say("Updated $this->type to hash ".$update->jsonSerialize()['currentHash']);
     }
 
-    public function rollback(int $rollback = 1) {
+    public function rollback(int $rollback = 1):int {
         if($this->currentTarget === null) throw new Exception("Current target must be set");
         if($this->currentTarget <= 0) throw new Exception("There's no update history to roll back to.");
         $previous = $this->current();
         $this->setCurrent($this->currentTarget - $rollback);
         $current = $this->current();
         $current->rollback($previous);
+        return COBALT_COMMAND_SUCCESS;
     }
 
     /**
