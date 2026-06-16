@@ -248,7 +248,7 @@ class CoreSettingsPanel extends Controller {
             'title' => "Presentation",
         ]);
 
-        return set_template("/admin/settings/presentation.html");
+        return set_template("Cobalt/Settings/templates/settings/presentation.html");
     }
 
     public function fileManager() {

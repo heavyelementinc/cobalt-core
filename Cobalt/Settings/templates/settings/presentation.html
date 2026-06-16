@@ -94,7 +94,7 @@
                         <i name="rotate-360"></i>
                         <input name="branding_rotation" value="{{app.branding_rotation}}" title="Hue Adjustment">
                     </div>
-                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_branding,branding_increment,branding_rotation', 'name' => "Branding", 'value' => __APP_SETTINGS__['color_branding']]);
+                    @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'color_branding,branding_increment,branding_rotation', 'name' => "Branding", 'value' => __APP_SETTINGS__['color_branding']]);
                 </li>
                 <li>
                     <div>
@@ -112,7 +112,7 @@
                         <i name="rotate-360"></i>
                         <input name="primary_rotation" value="{{app.primary_rotation}}" title="Hue Adjustment">
                     </div>
-                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_primary,primary_increment,primary_rotation', 'name' => "Primary", 'value' => __APP_SETTINGS__['color_primary']]);
+                    @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'color_primary,primary_increment,primary_rotation', 'name' => "Primary", 'value' => __APP_SETTINGS__['color_primary']]);
                 </li>
                 <li>
                     <div>
@@ -130,7 +130,7 @@
                         <i name="rotate-360"></i>
                         <input name="issue_rotation" value="{{app.issue_rotation}}" title="Hue Adjustment">
                     </div>
-                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_issue,issue_increment,issue_rotation', 'name' => "Issue", 'value' => __APP_SETTINGS__['color_issue']]);
+                    @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'color_issue,issue_increment,issue_rotation', 'name' => "Issue", 'value' => __APP_SETTINGS__['color_issue']]);
                 </li>
                 <li>
                     <div>
@@ -148,7 +148,7 @@
                         <i name="rotate-360"></i>
                         <input name="neutral_rotation" value="{{app.neutral_rotation}}" title="Hue Adjustment">
                     </div>
-                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_neutral,neutral_increment,neutral_rotation', 'name' => "Neutral", 'value' => __APP_SETTINGS__['color_neutral']]);
+                    @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'color_neutral,neutral_increment,neutral_rotation', 'name' => "Neutral", 'value' => __APP_SETTINGS__['color_neutral']]);
                 </li>
                 <li>
                     <div>
@@ -166,7 +166,7 @@
                         <i name="rotate-360"></i>
                         <input name="background_rotation" value="{{app.background_rotation}}" title="Hue Adjustment">
                     </div>
-                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_background,background_increment,background_rotation', 'name' => "Background", 'value' => __APP_SETTINGS__['color_background']]);
+                    @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'color_background,background_increment,background_rotation', 'name' => "Background", 'value' => __APP_SETTINGS__['color_background']]);
                 </li>
                 <li>
                     <div>
@@ -184,7 +184,7 @@
                         <i name="rotate-360"></i>
                         <input name="font_body_rotation" value="{{app.font_body_rotation}}" disabled="disabled">
                     </div>
-                    @view("/admin/settings/inputs/reset.html", ['setting' => 'color_font_body', 'name' => "Text Color", 'value' => __APP_SETTINGS__['color_font_body']]);
+                    @view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => 'color_font_body', 'name' => "Text Color", 'value' => __APP_SETTINGS__['color_font_body']]);
                 </li>
                 
                 <!-- <li>
