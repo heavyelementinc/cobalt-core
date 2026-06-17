@@ -5,6 +5,7 @@ use Cobalt\Extensions\Extensions;
 use Cobalt\Notifications\Classes\NotificationManager;
 use Cobalt\Documentation\Model\Documentation;
 use Cobalt\Settings\Controllers\Settings;
+use Exception;
 use Handlers\AdminHandler;
 
 trait UserBar {
@@ -20,6 +21,7 @@ trait UserBar {
         if(__APP_SETTINGS__['Web_include_app_branding']) {
             $logo = app("logo.thumb");
             $meta = $logo['meta'];
+            if(!$logo['filename']) throw new Exception("Masthead is broken.");
             $masthead = "<a href='".to_base_url("/")."' title='Home'><img class='cobalt-masthead' src='".to_base_url($logo['filename'])."' width='$meta[width]' height='$meta[height]' alt=\"".htmlspecialchars(__APP_SETTINGS__['app_name'])." Homepage\"></a>";
         }
         $admin_masthead = str_replace("href=", "is='real' href=", $masthead);

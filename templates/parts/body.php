@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title data-suffix=" | {{app.app_name}}">{{title}} | {{app.app_name}}</title>
     @router_table@
+    @app_settings@
     <?= view('inline/html.php') ?>
     <meta name="description" content="{{app.opengraph_description}}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -112,7 +113,6 @@
     </style>
     @style_meta@
 
-    @app_settings@
 
     @app_meta@
     <link rel="canonical" href="<?= htmlspecialchars(get('canonical') ?? get('request')['url']) ?>">

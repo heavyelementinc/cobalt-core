@@ -34,7 +34,7 @@ trait Hydrateable {
         
         // Now that we have our instance, let's configure it
         $instance->setName($name); // We set up our name first since that's critical
-        $instance->setModel($model); // Then, we point to the instancing model
+        if($model) $instance->setModel($model); // Then, we point to the instancing model
         $instance->setDirectives($directives); // Finally, we set the directives
         // If we can, we'll set our value right now.
         if($value instanceof DoNotSet === false) $instance->setValue($value);

@@ -72,101 +72,8 @@ class CoreSettingsPanel extends Controller {
             $name));
     }
 
-    private function get_setting_table_entry(CobaltSetting $setting, $index, $url) {
-        $template = false;
-        $type = "input";
-        $options = "";
-        switch($setting->meta['type']) {
-            case "input":
-                $template = "/Cobalt/Settings/templates/settings/inputs/input.php";
-                $type = "text";
-                break;
-            case "url":
-                $template = "/Cobalt/Settings/templates/settings/inputs/input.php";
-                $type = "url";
-                break;
-            case "number":
-            case "input-number":
-                $template = "/Cobalt/Settings/templates/settings/inputs/number.php";
-                $type = "number";
-                break;
-            case "textarea":
-                $template = "/Cobalt/Settings/templates/settings/inputs/textarea.php";
-                $type = "text";
-                break;
-            case "password":
-                $template = "/Cobalt/Settings/templates/settings/inputs/password.php";
-                break;
-            case "input-switch":
-            case "boolean":
-            case "bool":
-                $template = "/Cobalt/Settings/templates/settings/inputs/bool.php";
-                break;
-            case "input-array":
-                $template = "/Cobalt/Settings/templates/settings/inputs/array.php";
-                $options = "";
-                $current = array_combine(__APP_SETTINGS__[$index], __APP_SETTINGS__[$index]);
-                $opts = array_merge($current, $this->get_options($setting));
-                foreach($opts as $key => $option) {
-                    $selected = "";
-                    if(in_array($key, $current)) $selected = " selected='selected'";
-                    $options .= "<option value='$option'$selected>$option</option>";
-                }
-                break;
-            case "radio-group":
-                $template = "/Cobalt/Settings/templates/settings/inputs/radio-group.php";
-                $options = "";
-                foreach($this->get_options($setting) as $name => $display) {
-                    $options .= "<label>
-                        <span class='cobalt-radio-group--select-target'>$display</span>
-                        <input type='radio' name='$index' value='$name'>
-                    </label>";
-                }
-                break;
-            case "input-binary":
-                $template = "/Cobalt/Settings/templates/settings/inputs/input-binary.php";
-                $options = "";
-                $opts = $this->get_options($setting);
-                foreach($opts as $key => $option) {
-                    $selected = "";
-                    if($key & __APP_SETTINGS__[$index]) $selected = " selected='selected'";
-                    $options .= "<option value='$key'$selected><span>$option</span></option>";
-                }
-                break;
-            case "select":
-                $template = "/Cobalt/Settings/templates/settings/inputs/select.php";
-                $options = "";
-                foreach($this->get_options($setting) as $valid => $label) {
-                    $checked = "";
-                    if($valid === __APP_SETTINGS__[$index]) $checked = " selected='selected'";
-                    $options .= "<option value='$valid'$checked>$label</option>\n";
-                }
-                break;
-            case "date":
-                $template = "/Cobalt/Settings/templates/settings/inputs/date.php";
-                break;
-        }
-        if($template) return view($template,[
-            'name' => $setting->meta['name'],
-            'setting' => $index,
-            'value' => __APP_SETTINGS__[$index],
-            'default' => $setting->defaultValue,
-            'small' => ($setting->meta['description']) ? "<small>".$setting->meta['description']."</small>" : "",
-            'help' => ($setting->meta['help']) ? "<help-span value=\"".htmlentities($setting->meta['help'])."\"></help-span>" : "",
-            'type' => $type,
-            'disabled' => '',
-            'options' => $options,
-            'reset' => view("Cobalt/Settings/templates/settings/inputs/reset.php", ['setting' => $index, 'name' => $setting->meta['name'], 'value' => __APP_SETTINGS__[$index]]),
-        ]);
-        return "<li>Can't render \"$index\"</li>";
-    }
+    
 
-    private function get_options($setting):array {
-        $option = $setting->validate['options'];
-        if(is_array($option)) return $option;
-        if(is_callable($option)) return $option($setting);
-        return [];
-    }
 
     private function get_input_from_view($setting, $name) {
         $template = $setting->meta['view'];
@@ -193,46 +100,6 @@ class CoreSettingsPanel extends Controller {
         ]);
     }
 
-    public function updateLogo() {
-        $name  = array_keys($_POST)[0];
-        if(empty($_FILES)) throw new BadRequest("Must specify a file");
-        
-        $name = "logo";
-        // $_FILES[$name]['name'][0] = "masthead.png";
-
-        // First, let's find the current masthead
-        $query = ['masthead' => true];
-
-        // $cleanup = __APP_SETTINGS__[$name];
-
-        // Delete the current masthead
-        // if($cleanup) $this->delete($cleanup);
-
-        // Now, let's get ready to insert our new logo
-        $this->fs_filename_path = "/settings/masthead/";
-
-        $content = mime_content_type($_FILES[$name]['tmp_name'][0]);
-
-        // Upload it to the database
-        if($content === "image/svg+xml") {
-            $upload = [
-                'media' => $this->clientUploadFile($name, 0, $query, $_FILES)
-            ];
-            $upload['thumb'] = $upload['media'];
-        } else {
-            $upload = $this->clientUploadImageThumbnail($name, 0, 300, null, $query, $_FILES);
-        }
-        
-        $upload['media']['filename'] = "/res/fs".$upload['media']['filename'];
-        $upload['thumb']['filename'] = "/res/fs".$upload['thumb']['filename'];
-
-        // Set the value 
-        $_POST[$name] = $upload;
-
-        $value = $_POST[$name];
-        return $GLOBALS['app']->update_setting($name, $value);
-    }
-
     public function reset_to_default($name) {
         $split = explode(",",$name);
         $updated = [];
@@ -241,14 +108,6 @@ class CoreSettingsPanel extends Controller {
             $updated[] = $GLOBALS['app']->reset_to_default($name);
         }
         return $updated;
-    }
-
-    public function presentation() {
-        add_vars([
-            'title' => "Presentation",
-        ]);
-
-        return set_template("Cobalt/Settings/templates/settings/presentation.html");
     }
 
     public function fileManager() {

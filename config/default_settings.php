@@ -2,28 +2,42 @@
 
 use Cobalt\Auth\Users\UserCRUD;
 use Cobalt\EventListings\Models\Event;
+use Cobalt\Model\Types\ArrayType;
+use Cobalt\Model\Types\BinaryType;
+use Cobalt\Model\Types\BooleanType;
+use Cobalt\Model\Types\EmailAddressType;
+use Cobalt\Model\Types\EnumType;
+use Cobalt\Model\Types\ImageType;
+use Cobalt\Model\Types\MarkdownType;
+use Cobalt\Model\Types\NumberType;
+use Cobalt\Model\Types\PasswordHashType;
+use Cobalt\Model\Types\RadioType;
+use Cobalt\Model\Types\StringType;
+use Cobalt\Model\Types\TextType;
+use Cobalt\Model\Types\URLType;
 use PHPMailer\PHPMailer\PHPMailer;
 
 const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
 const TEMPLATE_DEBUG_RENDER_TYPES = 0b0010;
-const GROUP_BASIC = "Basic";
+const GROUP_BASIC = "<i name='cog'></i> Basic";
 const SUBGROUP_BASIC_GENERAL = "General";
 const SUBGROUP_BASIC_DETAILS = "Details";
-const GROUP_CACHE_DEBUG = "Cache &amp; Debug";
-const GROUP_LOOK_FEEL = "Look &amp; Feel";
-const GROUP_USERBAR = "Userbar";
-const GROUP_CONTACT = "Contact Form";
-const GROUP_FEATURES = "Features";
-const GROUP_SEO = "Search &amp; SEO";
+const GROUP_CONFIGURATION = "<i name='wrench'></i> Configuration";
+const GROUP_CACHE_DEBUG = "<i name='bug'></i> Cache &amp; Debug";
+const GROUP_LOOK_FEEL = "<i name='palette'></i> Look &amp; Feel";
+const GROUP_USERBAR = "<i name='button-cursor'></i> Userbar";
+const GROUP_CONTACT = "<i name='form-dropdown'></i> Contact Form";
+const GROUP_FEATURES = "<i name='star-circle-outline'></i> Features";
+const GROUP_SEO = "<i name='search-web'></i> Search &amp; SEO";
 const SUBGROUP_SEO_ROBOTS = "Search Engine";
-const GROUP_SMTP = "Mail";
+const GROUP_SMTP = "<i name='email'></i> Mail";
 const SUBGROUP_SMTP_BASIC = "Basic";
-const GROUP_PAGES = "Pages";
+const GROUP_PAGES = "<i name='page-layout-body'></i> Pages";
 const SUBGROUP_PAGES_RSS = "RSS Settings";
-const GROUP_POSTS = "Posts";
+const GROUP_POSTS = "<i name='post-outline'></i> Posts";
 const SUBGROUP_PAGES_POSTS_GENERAL = "General";
 const SUBGROUP_PAGES = "Pages";
-const GROUP_DEV = "Developer";
+const GROUP_DEV = "<i name='developer-board'></i> Developer";
 const SUBGROUP_DEV_JS_PACKAGE = "JavaScript Packaging";
 const SUBGROUP_DEV_CSS_PACKAGE = "CSS Packaging";
 
@@ -48,44 +62,37 @@ const CONTACT_CLIENT_SUCCESS_REDIRECT = 0b0001;
 const CONTACT_CLIENT_SUCCESS_STATUS   = 0b0010;
 const CONTACT_CLIENT_SUCCESS_STAGE    = 0b0100;
 
-$settings = [
+return [
     /** BASIC */
         /* Provide a doman name that we expect to be listening for. This will later 
         be used to add CORS headers. */
         "domain_name" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Domain Name",
+                "description" =>  "The domain name you use to access your Cobalt application.",
                 "group" => GROUP_BASIC,
                 "subgroup" => SUBGROUP_BASIC_GENERAL,
-                "name" => "Domain Name",
-                "description" =>  "The domain name you use to access your Cobalt application.",
-                "type" => "input"
-            ],
-            "validate" => [
                 "confirm" => "If you change this value, you may lose access to this page and will need to manually change the value to regain access.",
-                "filter" => [
-                    "FILTER_VALIDATE_URL" => []
-                ]
             ]
         ],
         "canonical_name" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "description" =>  "This is the host name that will be provided by the server_name() function. If it's not set, it will fall back to the `domain_name` value.",
+                "label" => "Canonical Name",
                 "group" => GROUP_BASIC,
                 "subgroup" => SUBGROUP_BASIC_GENERAL,
-                "name" => "Canonical Name",
                 "alias" => "domain_name",
-                "description" =>  "This is the host name that will be provided by the server_name() function. If it's not set, it will fall back to the `domain_name` value.",
-                "type" => "input"
-            ],
-            "validate" => [
-                "filter" => [
-                    "FILTER_VALIDATE_URL" => []
-                ]
             ]
         ],
         "cobalt_base_path" => [
             "default" => "",
+            "meta" => [
+                "type" => new StringType(),
+            ]
         ],
         "app_name" => [
             // The full name of the application.
@@ -94,11 +101,11 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Application Name",
+                "description" => "The full name of your application. This is used in various places around your app.",
                 "group" => GROUP_BASIC,
                 "subgroup" => SUBGROUP_BASIC_GENERAL,
-                "name" => "Application Name",
-                "description" => "The full name of your application. This is used in various places around your app.",
-                "type" => "input"
             ]
         ],
         /* A shortened name for the application. */
@@ -110,10 +117,10 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
-                "group" => GROUP_BASIC,
-                "name" => "Short Name",
+                "type" => new StringType(),
+                "label" => "Short Name",
                 "description" => "This is a short name that is used in various space-limited places. It inherits from your App Name.",
-                "type" => "input"
+                "group" => GROUP_BASIC,
             ]
         ],
         /* A bespoke name to be listed in the copyright notice */
@@ -122,35 +129,52 @@ $settings = [
             // "meta" => [
             //     "group" => GROUP_BASIC,
             //     "subgroup" => SUBGROUP_BASIC_DETAILS,
-            //     "name" => "Copyright Name",
+            //     "label" => "Copyright Name",
             //     "description" => "This is the name of your application",
-            //     "type" => "input"
+            //     "type" => new StringType()
             // ],
             "directives" => [
                 "alias" => "app_name"
+            ],
+            "meta" => [
+                "type" => new StringType(),
             ]
         ],
         "copyright_notice" => [
             "default" => "All Rights Reserved",
             "meta" => [
-                "group" => GROUP_BASIC,
-                "subgroup" => SUBGROUP_BASIC_DETAILS,
-                "name" => "Copyright Notice",
+                "type" => new MarkdownType(),
+                "label" => "Copyright Notice",
                 "description" => "The copyright notice to used in the footer of your app.",
                 "help" => "The copyright notice is parsed as markdown. Be cautious.",
-                "type" => "textarea"
+                "group" => GROUP_BASIC,
+                "subgroup" => SUBGROUP_BASIC_DETAILS,
             ],
         ],
         /* The version number of our application. Used most frequently as a 
         cache break */
         "version" => [
-            "default" => "0.0"
+            "default" => "0.0",
+            "meta" => [
+                "type" => new StringType(),
+            ]
         ],
         "Timezone" => [
-            "default" => "America/New_York"
+            "default" => "America/New_York",
+            "meta" => [
+                "type" => new StringType(),
+                'valid' => function() {
+                    $timezones = DateTimeZone::listIdentifiers();
+                    $tz = array_fill_keys($timezones, $timezones);
+                    return $tz;
+                }
+            ]
         ],
         "DB_export_directory" => [
-            "default" => "/ignored/db_backups/"
+            "default" => "/ignored/db_backups/",
+            "meta" => [
+                "type" => new StringType(),
+            ]
         ],
 
     /** API ACCESS CONTROL */
@@ -158,36 +182,42 @@ $settings = [
             "default" => [],
             // "meta" => [
             //     "group" => "API",
-            //     "name" => "Allowed Origins",
-            //     "type" => "input-array"
+            //     "label" => "Allowed Origins",
+            //     "type" => new ArrayType()
             // ],
             "directives" => [
                 "push" => [
                     "domain_name"
                 ]
+            ],
+            "meta" => [
+                "type" => new ArrayType(),
             ]
         ],
         // When set to `true`, non-web routes will check if the referer is valid. 
         // If not, it will throw a 400 Unauthorized
         "CORS_restrictive_referer_policy" => [
-            'default' => true
+            'default' => true,
+            "meta" => [
+                "type" => new BooleanType(),
+            ]
         ],
         "API_authentication_mode" => [
-            "default" => "POST" // Set to "header" for legacy mode
+            "default" => "POST", // Set to "header" for legacy mode,
+            "meta" => [
+                "type" => new StringType(),
+            ]
         ],
         "API_remote_gateways_enabled" => [
             "default" => ["GoogleOAuth","Patreon","Mailchimp"],
             "meta" => [
-                "group" => "Configuration",
-                "subgroup" =>"Advanced",
-                "name" => "Enabled APIs",
+                "type" => new ArrayType(),
+                "label" => "Enabled APIs",
                 "description" => "Use the field to control which remote APIs are enabled or disabled.",
-                "type" => "input-array"
+                "group" => GROUP_CONFIGURATION,
+                "subgroup" =>"Advanced",
                 // "view" => "/admin/settings/inputs/default-h1-alignment.html"
-            ],
-            "validate" => [
-                "type" => "array",
-                "options" => [
+                "valid" => [
                     "AmazonPA" => "Amazon Affiliate",
                     "GoogleOAuth" => "Google OAuth",
                     "Mailchimp" => "Mailchimp",
@@ -200,14 +230,20 @@ $settings = [
             ]
         ],
         "API_CORS_enable_other_origins" => [
-            "default" => true
+            "default" => true,
+            "meta" => [
+                "type" => new BooleanType(),
+            ]
         ],
         
         /* The CSRF seed is a secret string that is prepended to the client's 
         session cookie to form a unique "password". This password is then encrypted
         and sent to the client as the CSRF Token. */
         "csrf_seed" => [
-            "default" => ""
+            "default" => "",
+            "meta" => [
+                "type" => new StringType(),
+            ]
         ],
         /* If a route has not specified if it needs a CSRF token, this will be the
         default value supplied for its router table entry */
@@ -226,40 +262,31 @@ $settings = [
         "Notifications_system_enabled" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Enable Cobalt Notifications",
+                "description" => "This allows users to send and receive notifications within Cobalt Engine.",
                 "group" => GROUP_FEATURES,
                 "subgroup" => "Notifications",
-                "name" => "Enable Cobalt Notifications",
-                "description" => "This allows users to send and receive notifications within Cobalt Engine.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Notifications_in_session_panel" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
                 "group" => GROUP_FEATURES,
                 "subgroup" => "Notifications",
-                "name" => "Show notifications in the user's session panel",
+                "label" => "Show notifications in the user's session panel",
                 "description" => "Display a notification button and the notification panel when a user exists.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Notifications_enable_push_notifications" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Enable push notifications",
+                "description" => "This allows registered users to enroll their devices or browsers in push notifications.",
                 "group" => GROUP_FEATURES,
                 "subgroup" => "Notifications",
-                "name" => "Enable push notifications",
-                "description" => "This allows registered users to enroll their devices or browsers in push notifications.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Notifications_collection" => [
@@ -277,21 +304,18 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Enable Event Banners",
+                "description" => "Enables the Event Manager and allows you to schedule private & public popups.",
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
-                "name" => "Enable Event Banners",
-                "description" => "Enables the Event Manager and allows you to schedule private & public popups.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "CobaltEvents_database_collection" => [
             // "meta" => [
             //     "group" => GROUP_LOOK_FEEL,
-            //     "name" => "Database Collection",
-            //     "type" => "input"
+            //     "label" => "Database Collection",
+            //     "type" => new StringType()
             // ],
             "default" => "CobaltEvents"
         ],
@@ -302,30 +326,24 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
-                "group" => GROUP_FEATURES,
-                "subgroup" =>"Events",
-                "name" => "Enable Public Event Index",
+                "type" => new BooleanType(),
+                "label" => "Enable Public Event Index",
                 "description" => "Enable web-side index of specially-marked events",
                 "help" => "To be elligible for display on the Events page, an event must have its `Display on web-side index` flag set to true.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
+                "group" => GROUP_FEATURES,
+                "subgroup" =>"Events",
             ]
         ],
 
         "CobaltEvents_default_public_listing_status" => [
             'default' => Event::INDEX_IFPUBLIC,
             "meta" => [
+                "type" => new EnumType(),
+                "label" => "Default Public Index Behavior",
+                "description" => "Decide how new events will display themselves on the public index (if enabled)",
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
-                "name" => "Default Public Index Behavior",
-                "description" => "Decide how new events will display themselves on the public index (if enabled)",
-                "type" => "select"
-            ],
-            "validate" => [
-                "type" => "string",
-                "options" => [
+                "valid" => [
                     // "notification" => "Notification",
                     Event::INDEX_UNLISTED => "Do not display",
                     Event::INDEX_IFPUBLIC => "Display, if Public",
@@ -340,16 +358,13 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
+                "type" => new RadioType(),
+                "label" => "Default text alignment",
+                "description" => "Cobalt Events will default to the selected text alignment.",
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
-                "name" => "Default text alignment",
-                "description" => "Cobalt Events will default to the selected text alignment.",
-                "type" => "radio-group"
-                // "view" => "/admin/settings/inputs/default-h1-alignment.html"
-            ],
-            "validate" => [
-                "type" => "string",
-                "options" => Event::POPUP_TXT_JUSTIFICATION
+                "valid" => Event::POPUP_TXT_JUSTIFICATION
+
             ]
         ],
 
@@ -357,14 +372,11 @@ $settings = [
         "API_contact_form_enabled" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Enable Contact Form",
+                "description" => "Enable the public-facing contact form.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"General",
-                "name" => "Enable Contact Form",
-                "description" => "Enable the public-facing contact form.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Contact_form_on_success_modes" => [
@@ -373,16 +385,13 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
+                "type" => new BinaryType(),
+                "label" => "Contact Form Success Behavior",
+                "description" => "Cobalt Events will default to the selected text alignment.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"General",
-                "name" => "Contact Form Success Behavior",
-                "description" => "Cobalt Events will default to the selected text alignment.",
-                "type" => "input-binary"
                 // "view" => "/admin/settings/inputs/default-h1-alignment.html"
-            ],
-            "validate" => [
-                "type" => "int",
-                "options" => [
+                "valid" => [
                     CONTACT_SUCCESS_SYSTEM => "<i name='book-open-blank-variant'></i> System<br><small>Store the details in the built-in contact system.</small>",
                     CONTACT_SUCCESS_EMAIL  => "<i name='email-fast'></i> Email<br><small>Send the details of the submission to an email address (specified below).</small>",
                     CONTACT_SUCCESS_NOTIFY => "<i name='bell-badge'></i> Cobalt Notification<br><small>Admins get a notification in the Cobalt Notification system.</small>",
@@ -396,7 +405,7 @@ $settings = [
         "Contact_form_navigation_options" => [
             "default" => [
                 'main_navigation' => [
-                    'name' => "Contact",
+                    "label" => "Contact",
                     'attrs' => ['classes' => 'contact-form-link'],
                     'order' => 999,
                 ]
@@ -408,14 +417,12 @@ $settings = [
         "API_contact_form_recipients" => [
             "default" => ["Contact_form_submissions_access"],
             "meta" => [
+                "type" => new ArrayType(),
+                "label" => "Contact Form Recipients",
+                "description" => "Specify a permission level that will receive a message when the contact form is submitted.",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Confirmation",
-                "name" => "Contact Form Recipients",
-                "description" => "Specify a permission level that will receive a message when the contact form is submitted.",
-                "type" => "input-array"
-            ],
-            'validate' => [
-                'options' => function () {
+                'valid' => function () {
                     return auth()->getPermissionSingleton()->getValidPermissions();
                 }
             ]
@@ -424,15 +431,12 @@ $settings = [
             "default" => "panel",
             // "default" => "notification",
             "meta" => [
+                "type" => new EnumType(),
+                "label" => "Contact Form Backend",
+                "description" => "Select a backend to handle contact form submissions. <em>Admin Panel</em> will store submissions in your database while <em>Email</em> will send a specified user an email.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"General",
-                "name" => "Contact Form Backend",
-                "description" => "Select a backend to handle contact form submissions. <em>Admin Panel</em> will store submissions in your database while <em>Email</em> will send a specified user an email.",
-                "type" => "select"
-            ],
-            "validate" => [
-                "type" => "string",
-                "options" => [
+                "valid" => [
                     // "notification" => "Notification",
                     "panel" => "Admin Panel",
                     "SMTP" => "Email"
@@ -445,15 +449,12 @@ $settings = [
         "Contact_form_anti_spam_technique" => [
             "default" => "captcha",
             "meta" => [
+                "type" => new RadioType(),
+                "label" => "Anti-Spam Technique",
+                "description" => "Specify a technique that will be used to mitigate spam submissions.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Anti-spam",
-                "name" => "Anti-Spam Technique",
-                "description" => "Specify a technique that will be used to mitigate spam submissions.",
-                "type" => "radio-group",
-            ],
-            "validate" => [
-                "type" => "string",
-                "options" => [
+                "valid" => [
                     "none" => "<i name='border-none-variant'></i> None (not recommended)<br><small>Do not enforce a spam mitigation technique.</small>",
                     "stepped-click" => "<i name='check-outline'></i> Status Message<br><small>A simple check to ensure that the user sees and clicks the extra step required to submit their request.</small>",
                     "captcha" => "<i name='alpha-c-box'></i> Captcha<br><small>A deeper check that requires the user to read and submit a traditional captcha.</small>",
@@ -463,28 +464,22 @@ $settings = [
         "Contact_form_submission_throttle_period" => [
             "default" => "2 minutes",
             "meta" => [
-                "group" => GROUP_CONTACT,
-                "subgroup" =>"Anti-spam",
-                "name" => "Submission Throttling",
+                "type" => new StringType(),
+                "label" => "Submission Throttling",
                 "description" => "Contact form submissions will be rate limited over the specified window.",
                 "help" => "How long should the grace period last. Will be converted to a negative number and subtracted from the current time of a given submission.",
-                "type" => "input",
-            ],
-            "validate" => [
-                "type" => "string"
+                "group" => GROUP_CONTACT,
+                "subgroup" =>"Anti-spam",
             ]
         ],
         "Contact_form_submission_throttle_after_max_submissions" => [
             "default" => 900,
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Max Limit",
+                "description" => "Maximum number of submissions during the throttle period.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Anti-spam",
-                "name" => "Max Limit",
-                "description" => "Maximum number of submissions during the throttle period.",
-                "type" => "input",
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
 
@@ -494,57 +489,45 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
+                "type" => new RadioType(),
+                "label" => "Contact Client Success",
+                "description" => "When the client submits a contact form, what should happen?",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Confirmation",
-                "name" => "Contact Client Success",
-                "description" => "When the client submits a contact form, what should happen?",
-                "type" => "radio-group"
-            ],
-            "validate" => [
-                "type" => "string",
-                "options" => [
+                "valid" => [
                     CONTACT_CLIENT_SUCCESS_REDIRECT => "<i name='arrow-right-bold'></i> Redirect<br><small>The client is navigated to a new page (specified below).</small>",
                     CONTACT_CLIENT_SUCCESS_STATUS   => "<i name='message-alert'></i> Status Message<br><small>The client receives a status message.</small>",
                     CONTACT_CLIENT_SUCCESS_STAGE    => "<i name='page-next-outline'></i> Step<br><small></small>",
                 ]
-            ]
+            ],
         ],
         
         "Contact_form_success_message" => [
             "default" => "Confirmed! Your info has been saved and someone should be reaching out to you soon!",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Contact Form Success Message",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Confirmation",
-                "name" => "Contact Form Success Message",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Contact_form_fail_message" => [
             "default" => "It looks like you'll need to try again later.",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Contact Form Failure Message",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Confirmation",
-                "name" => "Contact Form Failure Message",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Contact_form_redirect" => [
             "default" => "/contact/success",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Contact Form Redirect Location",
+                "description" => "When a user submits the public contact form, specify a location they will be redirected to upon success.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Confirmation",
-                "name" => "Contact Form Redirect Location",
-                "description" => "When a user submits the public contact form, specify a location they will be redirected to upon success.",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Contact_form_user_permissions_to_notify" => [
@@ -554,135 +537,102 @@ $settings = [
         "Contact_form_notify_on_new_submission" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Notifications",
+                "description" => "Send admins a notification when new contact submissions are received",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"General",
-                "name" => "Notifications",
-                "description" => "Send admins a notification when new contact submissions are received",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
 
         "PublicContact_name" => [
             "default" => "",
             "meta" => [
-                "group" => GROUP_CONTACT,
+                "type" => new StringType(),
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Name</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
+                "label" => "Publicly displayed contact <b>Name</b>",
+                "group" => GROUP_CONTACT,
             ]
         ],
         "PublicContact_phone" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Phone Number</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Phone Number</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_fax" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Fax Number</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Fax Number</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_email" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Email Address</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Email Address</b>",
-                "type" => "input"
             ],
-            "validate" => [
-                
-            ]
         ],
         "PublicContact_street_address1" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Street Address 1</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Street Address 1</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_street_address2" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Street Address 2</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Street Address 2</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_city" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>City</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>City</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_state" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>State</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>State</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_zip" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Zip Code</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Zip Code</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "PublicContact_country" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Publicly displayed contact <b>Country</b>",
                 "group" => GROUP_CONTACT,
                 "subgroup" => "Public Contact Info",
-                "name" => "Publicly displayed contact <b>Country</b>",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
 
@@ -698,14 +648,11 @@ $settings = [
         "keywords" => [
             "default" => "",
             "meta" => [
+                "type" => new TextType(),
+                "label" => "Keywords",
+                "help" => "A comma-delimited list of keywords included in the head of your document. NOTE: This has little-to-no real-world SEO value.",
                 "group" => GROUP_SEO,
                 "subgroup" => "General",
-                "name" => "Keywords",
-                "help" => "A comma-delimited list of keywords included in the head of your document. NOTE: This has little-to-no real-world SEO value.",
-                "type" => "textarea"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "opengraph" => [
@@ -737,57 +684,51 @@ $settings = [
         "fb_app_id" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Facebook App ID",
                 "group" => GROUP_SEO,
                 "subgroup" => "Opengraph",
-                "name" => "Facebook App ID",
-                "type" => "input"
-            ],
-            "validate" => [
-                
             ]
         ],
         "Robots_txt_config" => [
             "default" => "User-agent: *\nAllow: /\nDisallow: /admin",
             "meta" => [
+                "type" => new TextType(),
+                "label" => "Robots.txt file",
+                "help" => "Each User-agent rule must be followed by distinct 'Allow: /' or 'Disallow: /' rules. One Allow or Disallow rule per route.",
                 "group" => GROUP_SEO,
                 "subgroup" => SUBGROUP_SEO_ROBOTS,
-                "name" => "Robots.txt file",
-                "help" => "Each User-agent rule must be followed by distinct 'Allow: /' or 'Disallow: /' rules. One Allow or Disallow rule per route.",
-                "type" => "textarea"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Robots_txt_block_known_ai_crawlers" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Request AI Web Crawlers Ignore Site",
+                "description" => "This will set up your robots.txt file to deny access to AI web crawlers. Note that this <strong>does not block facebookexternalhit</strong> since that would also break link previews.",
                 "group" => GROUP_SEO,
                 "subgroup" => SUBGROUP_SEO_ROBOTS,
-                "name" => "Request AI Web Crawlers Ignore Site",
-                "description" => "This will set up your robots.txt file to deny access to AI web crawlers. Note that this <strong>does not block facebookexternalhit</strong> since that would also break link previews.",
-                "type" => "input-switch"
             ]
         ],
         "AI_prohibit_scraping_notice" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Ask AI Web Crawlers to Ignore This App",
+                "description" => "This will add &lt;meta&gt; tags to your page, include headers with every request, and create an <code>ai.txt</code> file in the root directory of your app. Some AI bots do not honor these requests.",
                 "group" => GROUP_SEO,
                 "subgroup" => SUBGROUP_SEO_ROBOTS,
-                "name" => "Ask AI Web Crawlers to Ignore This App",
-                "description" => "This will add &lt;meta&gt; tags to your page, include headers with every request, and create an <code>ai.txt</code> file in the root directory of your app. Some AI bots do not honor these requests.",
-                "type" => "input-switch"
             ]
         ],
         "Forbid_AI_webcrawler_access" => [
             "default" => false,
             "meta" => [
-                "group" => GROUP_SEO,
-                "subgroup" => SUBGROUP_SEO_ROBOTS,
-                "name" => "Forbid Access for AI Web Crawlers",
+                "type" => new BooleanType(),
+                "label" => "Forbid Access for AI Web Crawlers",
                 "description" => "This will throw a 403 Forbidden when AI bots crawl your application.",
                 "help" => "This is heavy-handed and may break things.",
-                "type" => "input-switch"
+                "group" => GROUP_SEO,
+                "subgroup" => SUBGROUP_SEO_ROBOTS,
             ]
         ],
 
@@ -799,11 +740,11 @@ $settings = [
                 "env" => "MAIL_USERNAME",
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "SMTP Username",
+                "description" =>  "The username credential used to authenticate with your SMTP service",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "SMTP Username",
-                "type" => "input",
-                "description" =>  "The username credential used to authenticate with your SMTP service",
             ]
         ],
 
@@ -814,15 +755,12 @@ $settings = [
                 "env" => "MAIL_PASSWORD",
             ],
             "meta" => [
+                "type" => new PasswordHashType(),
+                "description" =>  "The password credentials used to authenticate with your SMTP service",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "SMTP Password",
-                "type" => "password",
-                "description" =>  "The password credentials used to authenticate with your SMTP service",
+                "label" => "SMTP Password",
             ],
-            "validate" => [
-                "confirm" => "Are you sure you want to update this password? Doing so will overwrite your current password!"
-            ]
         ],
 
         "Mail_smtp_host" => [
@@ -832,11 +770,11 @@ $settings = [
                 "env" => "MAIL_SMTP_HOST",
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "SMTP Host",
+                "description" =>  "The hostname of your SMTP service",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "SMTP Host",
-                "type" => "input",
-                "description" =>  "The hostname of your SMTP service",
             ]
         ],
 
@@ -847,31 +785,28 @@ $settings = [
                 "env" => "MAIL_PORT",
             ],
             "meta" => [
+                "type" => new NumberType(),
+                "label" => "SMTP Port",
+                "description" =>  "The port number of your SMTP service",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "SMTP Port",
-                "type" => "number",
-                "description" =>  "The port number of your SMTP service",
-            ],
-            "validate" => [
-                "type" => "int"
             ]
         ],
         "Mail_connection_security" => [
             "default" => PHPMailer::ENCRYPTION_STARTTLS,
             "meta" => [
+                'type' => new EnumType(),
+                "label" => "SMTP Connection Type",
+                "description" =>  "The connection security for your SMTP service",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "SMTP Connection Type",
-                "number" => "select",
-                "description" =>  "The connection security for your SMTP service",
-            ],
-            "valid" => [
-                "options" => [
+                "valid" => [
                     PHPMailer::ENCRYPTION_SMTPS => "SSL",
                     PHPMailer::ENCRYPTION_STARTTLS => "TLS",
                     "none" => "None"
                 ]
+            ],
+            "valid" => [
             ]
         ],
         
@@ -883,14 +818,11 @@ $settings = [
                 "description" =>  "",
             ],
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "SMTP Auth Enabled",
+                "description" =>  "Determines if the SMTP connection should use authentication",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "SMTP Auth Enabled",
-                "type" => "input-switch",
-                "description" =>  "Determines if the SMTP connection should use authentication",
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
 
@@ -900,17 +832,12 @@ $settings = [
                 "alias" => "Mail_from_address"
             ],
             "meta" => [
+                "type" => new EmailAddressType(),
+                "label" => "Reply To",
+                "description" =>  "The email address that should be replied to when receiving an email from Cobalt",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "Reply To",
-                "type" => "input",
-                "description" =>  "The email address that should be replied to when receiving an email from Cobalt",
             ],
-            "validate" => [
-                "filter" => [
-                    "FILTER_VALIDATE_EMAIL" => []
-                ]
-            ]
         ],
         "Mail_reply_to_name" => [
             "default" => "",
@@ -918,11 +845,11 @@ $settings = [
                 "alias" => "app_short_name"
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Reply To Name",
+                "description" =>  "The displayed name when receiving an email from Cobalt",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "Reply To Name",
-                "type" => "input",
-                "description" =>  "The displayed name when receiving an email from Cobalt",
             ]
         ],
         
@@ -937,10 +864,10 @@ $settings = [
                 "alias" => "Mail_username"
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "From Address",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "From Address",
-                "type" => "input"
             ]
         ],
         "Mail_from_name" => [
@@ -950,79 +877,67 @@ $settings = [
                 "alias" => "app_short_name"
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "From Name",
                 "group" => GROUP_SMTP,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
-                "name" => "From Name",
-                "type" => "input"
             ]
         ],
 
     /** LANDING PAGE */
         "Landing_page_home_route_options" => [
             "default" => [
-                "anchor" => ["name" => "Home"],
+                "anchor" => ["label" => "Home"],
                 "navigation" => ["main_navigation"]
             ]
         ],
         "LandingPages_enabled" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Langing Page System",
+                "description" => "Enable or disable Cobalt landing pages.",
                 "group" => GROUP_PAGES,
                 "subgroup" => SUBGROUP_PAGES_POSTS_GENERAL,
-                "name" => "Langing Page System",
-                "description" => "Enable or disable Cobalt landing pages.",
-                "type" => "input-switch",
             ]
         ],
         "LandingPage_route_prefix" => [
             "default" => "/",
             "definititon" => "LandingPage_route_prefix",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Route Prefix",
+                "help" => "Your pages will live at this location. It MUST start with a slash and may contain more.&#10;&#10;Changing this setting WILL break existing links to pages.",
                 "group" => GROUP_PAGES,
                 "subgroup" => SUBGROUP_BASIC_GENERAL,
-                "name" => "Route Prefix",
-                "help" => "Your pages will live at this location. It MUST start with a slash and may contain more.&#10;&#10;Changing this setting WILL break existing links to pages.",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "LandingPage_table_of_contents_label" => [
             "default" => "Contents",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Contents Label Headline",
+                "help" =>  "The headline displayed over the Landing Page's Table of Contents",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Presentation",
-                "name" => "Contents Label Headline",
-                "help" =>  "The headline displayed over the Landing Page's Table of Contents",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "LandingPage_table_of_contents_by_default" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Generate a Table Of Contents by default",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Presentation",
-                "name" => "Generate a Table Of Contents by default",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "LandingPage_bio_by_default" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Show a biography of the author by default",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Biography",
-                "name" => "Show a biography of the author by default",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "LandingPages_include_footer_by_default" => [
@@ -1031,52 +946,40 @@ $settings = [
         "LandingPage_bio_default_headline" => [
             "default" => "About the Author",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Default headline for author biography",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Biography",
-                "name" => "Default headline for author biography",
-                "type" => "input"
             ],
-            "validate" => [
-                "type" => "string"
-            ]
         ],
         "LandingPage_allow_custom_css_injection" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Allow Custom CSS Injection",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Presentation",
-                "name" => "Allow Custom CSS Injection",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "LandingPage_related_content_title" => [
             "default" => "Related Pages",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Related Content Default Headline",
+                "help" => "The default headline for the 'Other Content' section.",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Related Content",
-                "name" => "Related Content Default Headline",
-                "help" => "The default headline for the 'Other Content' section.",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string",
                 "confirm" => "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
             ]
         ],
         "LandingPages_show_related" => [
             "default" => true,
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Show related content",
+                "help" => "Include links to related pages by default.",
                 "group" => GROUP_PAGES,
                 "subgroup" => "Related Content",
-                "name" => "Show related content",
-                "help" => "Include links to related pages by default.",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string",
                 "confirm" => "Changing this value will break existing links and search engines will need to crawl your site in order to fix them. Are you sure you want to change this setting?"
             ]
         ],
@@ -1085,37 +988,34 @@ $settings = [
         "Posts_default_enabled" => [
             'default'=> false,
             'meta' => [
-                'group' => GROUP_POSTS,
-                'subgroup' => 'General',
-                'name' => "Posts System",
+                'type' => new BooleanType(),
+                "label" => "Posts System",
                 "description" => "Enable or disable the built-in blogging system.",
                 "help" => "Toggling this setting will not delete posts you've made. It will simply hide them all.",
-                'type' => "input-switch"
+                'group' => GROUP_POSTS,
+                'subgroup' => 'General',
             ]
         ],
         "Posts_index_post_count" => [
             "default" => 9,
             "meta" => [
+                "type" => new NumberType(),
+                "label" => "Post Index Count",
+                "description" => "How many posts per page should be displayed on the public index of posts?",
                 "group" => GROUP_POSTS,
                 "subgroup" => "General",
-                "name" => "Post Index Count",
-                "description" => "How many posts per page should be displayed on the public index of posts?",
-                "type" => "number"
             ]
         ],
 
         "Posts_index_mode" => [
             "default" => POSTS_INDEX_MODE_GRID,
             "meta" => [
+                "type" => new RadioType(),
+                "label" => "Post Index Mode",
+                "description" => "How should your posts index be displaying your posts?",
                 "group" => GROUP_POSTS,
                 "subgroup" => "General",
-                "name" => "Post Index Mode",
-                "description" => "How should your posts index be displaying your posts?",
-                "type" => "radio-group",
-            ],
-            "validate" => [
-                "type" => "string",
-                "options" => [
+                "valid" => [
                     // "notification" => "Notification",
                     POSTS_INDEX_MODE_GRID => "<i name='dots-grid'></i> Display as a \"Grid\"<br><small>Posts appear as a grid of posts displayed as the 'related content' preview.</small>",
                     POSTS_INDEX_MODE_FEED => "<i name='post-outline'></i> Display as a \"Feed\"<br><small>Posts will appear as a linear feed featuring the summary of each post.</small>",
@@ -1123,39 +1023,14 @@ $settings = [
                 ]
             ]
         ],
-
-        // "Posts_date_format" => [
-        //     "default" => "l, F jS Y g:i a",
-        //     "meta" => [
-        //         "group" => GROUP_POSTS,
-        //         "subgroup" => "Posts",
-        //         "name" => "Post Date Format",
-        //         "description" => "How the Post Date is displayed on posts and in the RSS feed.",
-        //         "help" => "This is currently unimplemented",
-        //         "type" => "input"
-        //     ]
-        // ],
-        // "Posts_date_time" => [
-        //     "default" => "g:i a",
-        //     "meta" => [
-        //         "group" => GROUP_POSTS,
-        //         "subgroup" => "Posts",
-        //         "name" => "Post Hour Format",
-        //         "type" => "input"
-        //     ]
-        // ],
-        
         "PostPages_default_aside_visibility" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Sidebar",
+                "description" => "Include a sidebar (with a table of contents) for posts by default",
                 "group" => GROUP_POSTS,
                 "subgroup" => "Default Post Settings",
-                "name" => "Sidebar",
-                "description" => "Include a sidebar (with a table of contents) for posts by default",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "PostPages_default_aside_flags" => [
@@ -1180,7 +1055,7 @@ $settings = [
         ],
         "Posts_public_index_options" => [
             'default'=> [
-                "anchor" => ["name" => "Posts"],
+                "anchor" => ["label" => "Posts"],
                 "navigation" => ["main_navigation"]
             ],
         ],
@@ -1194,14 +1069,12 @@ $settings = [
         "Posts_enable_rss_feed" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Enable Post RSS Feed",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
-                "name" => "Enable Post RSS Feed",
-                "type" => "input-switch"
             ],
-            "validate" => [
-                "type" => "boolean"
-            ]
+            
         ],
         "Posts_rss_feed_name" => [
             "default" => "RSS Feed",
@@ -1209,13 +1082,10 @@ $settings = [
                 "alias" => "app_name"
             ],
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Post RSS Name",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
-                "name" => "Post RSS Name",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Posts_rss_feed_description" => [
@@ -1224,25 +1094,19 @@ $settings = [
                 "alias" => "app_name"
             ],
             "meta" => [
+                "type" => new TextType(),
+                "label" => "Post RSS Feed Description",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
-                "name" => "Post RSS Feed Description",
-                "type" => "textarea"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Posts_rss_feed_path" => [
             "default" => "/posts/feed/",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Post RSS Feed Path",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
-                "name" => "Post RSS Feed Path",
-                "type" => "input"
-            ],
-            "validate" => [
-                "type" => "string"
             ]
         ],
         "Posts_default_index_display" => [
@@ -1251,14 +1115,11 @@ $settings = [
         "Posts_rss_feed_include_unlisted" => [
             'default' => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Announce Unlisted",
+                "description" => "Include \"Unlisted\" Posts in RSS Feed",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
-                "name" => "Announce Unlisted",
-                "description" => "Include \"Unlisted\" Posts in RSS Feed",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
 
@@ -1274,14 +1135,12 @@ $settings = [
             "default" => true,
             "directives" => [],
             "meta" => [
+                "type" => new BooleanType(),
                 "group" => GROUP_LOOK_FEEL,
-                "name" => "Enable Customization Framework",
+                "label" => "Enable Customization Framework",
                 "help" => "Enables customization",
                 "subgroup" => "Customization"
             ],
-            "validate" => [
-                "type" => "bool"
-            ]
         ],
         'Customizations_allow_prefetching' => [
             'default' => true,
@@ -1291,13 +1150,11 @@ $settings = [
             "default" => true,
             "directives" => [],
             "meta" => [
+                'type' => new BooleanType(),
+                "label" => "Error on missing Customzations",
                 "group" => GROUP_LOOK_FEEL,
-                "name" => "Error on missing Customzations",
                 "help" => "When enabled, the CustomizationManager will throw an Exception if a value is missing.",
                 "subgroup" => "Customization"
-            ],
-            "validate" => [
-                "type" => "bool"
             ]
         ],
 
@@ -1325,9 +1182,10 @@ $settings = [
                 ]
             ],
             "meta" => [
+                'type' => new ImageType(),
                 // "group" => "Logo",
                 // "subgroup" => SUBGROUP_BASIC_DETAILS,
-                // "name" => "Logo",
+                // "label" => "Logo",
                 // "view" => "/admin/settings/inputs/logo.html"
             ]
         ],
@@ -1362,7 +1220,7 @@ $settings = [
             ]
             // "meta" => [
             //     "group" => GROUP_LOOK_FEEL,
-            //     "name" => "Default Fonts",
+            //     "label" => "Default Fonts",
             //     "view" => "/admin/settings/inputs/fonts.html"
             // ]
         ],
@@ -1373,22 +1231,21 @@ $settings = [
         "Web_embedded_content_in_header" => [
             'default' => "",
             'meta' => [
+                'type' => new MarkdownType(),
+                "label" => "Frontend Code Injection (End of <code>&lt;head&gt;</code> tag)",
+                'help' => "Allows you to inject HTML into the frontend of the site at the end of the &gt;head&lt; tag",
                 'group' => GROUP_LOOK_FEEL,
                 'subgroup' => 'Customization',
-                'name' => "Frontend Code Injection Head",
-                'help' => "Allows you to inject HTML into the frontend of the site at the end of the &gt;head&lt; tag",
-                'type' => 'textarea'
             ]
         ],
         "Web_embedded_content_after_footer" => [
             'default' => "",
             'meta' => [
+                'type' => new MarkdownType(),
+                "label" => "Frontend Code Injection (End of <code>&lt;footer&gt;</code> tag)",
+                'help' => "Allows you to inject HTML into the frontend of the site after the footer content",
                 'group' => GROUP_LOOK_FEEL,
                 'subgroup' => 'Customization',
-                'name' => "Frontend Code Injection Footer",
-                'help' => "Allows you to inject HTML into the frontend of the site after the footer content",
-                'type' => 'textarea',
-
             ]
         ],
         
@@ -1407,13 +1264,10 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "name" => "Enable Parallax",
+                "type" => new BooleanType(),
                 "help" => "Allows you to specify [parallax-mode=\"\"] attributes on elements in your pages.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
+                "label" => "Enable Parallax",
+                "group" => GROUP_LOOK_FEEL,
             ]
         ],
         "use_mutation_observer_bootstrap" => [
@@ -1427,30 +1281,29 @@ $settings = [
         "designer" => [
             "default" => [
                 "prefix" => "Designed by",
-                "name" =>   "Heavy Element",
+                "label" =>   "Heavy Element",
                 "href" =>   "https://heavyelement.com/",
                 "title" =>  "Midcoast Maine's Premier Media Production Studio"
             ],
             // "meta" => [
             //     "group" => GROUP_BASIC,
             //     "subgroup" => SUBGROUP_BASIC_DETAILS,
-            //     "name" => "Designer Credit",
+            //     "label" => "Designer Credit",
             //     "view" => "/admin/settings/inputs/designer.html"
             // ]
         ],
         
         /* The image displayed when loading a page. */
         "login-hero-sidebar" => [
-            "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "name" => "Sidebar Image",
-                "type" => "input"
-            ],
             "directives" => [
                 "style" => true,
                 "alias" => "logo.media.filename"
             ],
-            "default" => ""
+            "meta" => [
+                "type" => new StringType(),
+                "label" => "Sidebar Image",
+                "group" => GROUP_LOOK_FEEL,
+            ],
         ],
         "manifest_engine" => [
             "default" => 2
@@ -1458,67 +1311,67 @@ $settings = [
         "manifest_v2_package_js_files" => [
             "default" => true,
             "meta" => [
-                "group" => GROUP_DEV,
-                "subgroup" => SUBGROUP_DEV_JS_PACKAGE,
-                "name" => "Enable JS packaging",
+                "type" => new BooleanType(),
+                "label" => "Enable JS packaging",
                 "description" => "Manifest v2 settings",
                 "help" => "This will enable bundling/packaging JavaScript files into a single `package.[context].js`. Applies only in PRODUCTION mode.",
-                "type" => "input-switch"   
+                "group" => GROUP_DEV,
+                "subgroup" => SUBGROUP_DEV_JS_PACKAGE,
             ]
         ],
         "manifest_v2_package_css_files" => [
             "default" => true,
             "meta" => [
-                "group" => GROUP_DEV,
-                "subgroup" => SUBGROUP_DEV_CSS_PACKAGE,
-                "name" => "Enable CSS packaging",
+                "type" => new BooleanType(),
+                "label" => "Enable CSS packaging",
                 "description" => "Manifest v2 settings",
                 "help" => "This will enable bundling/packaging Cascading Style Sheets files into a single `package.[context].css`. Applies only in PRODUCTION mode.",
-                "type" => "input-switch"   
+                "group" => GROUP_DEV,
+                "subgroup" => SUBGROUP_DEV_CSS_PACKAGE,
             ]
         ],
         "manifest_v2_include_filenames" => [
             "default" => true,
             "meta" => [
-                "group" => GROUP_DEV,
-                "subgroup" => "General",
-                "name" => "Include Filenames in Packages",
+                "type" => new BooleanType(),
+                "label" => "Include Filenames in Packages",
                 "description" => "Manifest v2 settings",
                 "help" => "This will include sanitized filenames as comments in compiled packages. Applies only in PRODUCTION mode.",
-                "type" => "input-switch"
+                "group" => GROUP_DEV,
+                "subgroup" => "General",
             ],
         ],
         "manifest_v2_minify_css" => [
             "default" => true,
             "meta" => [
-                "group" => GROUP_DEV,
-                "subgroup" => SUBGROUP_DEV_CSS_PACKAGE,
-                "name" => "Minify CSS Package",
+                "type" => new BooleanType(),
+                "label" => "Minify CSS Package",
                 "description" => "Manifest v2 settings",
                 "help" => "This will strip all unnecessary content from your CSS package. Applies only in PRODUCTION mode.",
-                "type" => "input-switch"
+                "group" => GROUP_DEV,
+                "subgroup" => SUBGROUP_DEV_CSS_PACKAGE,
             ],
         ],
         "manifest_v2_minify_script" => [
             "default" => true,
             "meta" => [
-                "group" => GROUP_DEV,
-                "subgroup" => SUBGROUP_DEV_JS_PACKAGE,
-                "name" => "Minify JS Package",
+                "type" => new BooleanType(),
+                "label" => "Minify JS Package",
                 "description" => "Manifest v2 settings",
                 "help" => "This will strip all unnecessary content from your JS package. Applies only in PRODUCTION mode.",
-                "type" => "input-switch"
+                "group" => GROUP_DEV,
+                "subgroup" => SUBGROUP_DEV_JS_PACKAGE,
             ],
         ],
         "universal_theme" => [
             "default" => false,
             "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "subgroup" => SUBGROUP_BASIC_GENERAL,
-                "name" => "Universal Theme",
+                "type" => new BooleanType(),
+                "label" => "Universal Theme",
                 "description" => "When on, themes will apply to the entire app (including the admin panel).",
                 "help" => "By default, themes do not apply to the admin panel.",
-                "type" => "input-switch"
+                "group" => GROUP_LOOK_FEEL,
+                "subgroup" => SUBGROUP_BASIC_GENERAL,
             ],
         ],
         "default_color_scheme" => [
@@ -1621,9 +1474,9 @@ $settings = [
             // "meta" => [
             //     "group" => GROUP_USERBAR,
             //     "subgroup" => SUBGROUP_BASIC_GENERAL,
-            //     "name" => "Include logo in Web masthead?",
+            //     "label" => "Include logo in Web masthead?",
                 
-            //     "type" => "input-switch"
+            //     "type" => new BooleanType()
             // ],
             // "validation" => [
             //     "type" => "bool"
@@ -1632,17 +1485,17 @@ $settings = [
         "Web_privacy_policy" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Path to Privacy Policy",
                 "group" => GROUP_LOOK_FEEL,
-                "name" => "Path to Privacy Policy",
-                "type" => "input"
             ]
         ],
         "Web_terms_of_service" => [
             "default" => "",
             "meta" => [
+                "type" => new StringType(),
+                "label" => "Path to Terms of Service",
                 "group" => GROUP_LOOK_FEEL,
-                "name" => "Path to Terms of Service",
-                "type" => "input"
             ]
         ],
         "Web_normally_open_pages" => [
@@ -1669,12 +1522,6 @@ $settings = [
         ],
         "Template_debug_state" => [
             "default" => 0
-        ],
-        "Web_embeded_content_in_header" => [
-            "default" => ""
-        ],
-        "Web_embedded_content_after_footer" => [
-            "default" => ""
         ],
 
     /** AUTHENTICATION */
@@ -1793,13 +1640,10 @@ $settings = [
         "Cookie_consent_prompt" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
                 "group" => GROUP_LOOK_FEEL,
-                "name" => "Cookie Consent Prompt",
-                "type" => "input-switch"
+                "label" => "Cookie Consent Prompt",
             ],
-            "validate" => [
-                "type" => "boolean"
-            ]
         ],
         "loading_spinner" => [
             "default" => "dashes",
@@ -1831,10 +1675,10 @@ $settings = [
             "default" => true,
             "definition" => "Debug",
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Debug status",
                 "group" => GROUP_DEV,
                 "subgroup" => "Debug",
-                "name" => "Debug status",
-                "type" => "input-switch"
             ],
             "validate" => [
                 "type" => "boolean"
@@ -1846,15 +1690,12 @@ $settings = [
                 "config" => "debug_exceptions_publicly"
             ],
             "meta" => [
-                "group" => GROUP_DEV,
-                "subgroup" => "Debug",
-                "name" => "Public Debugging",
+                "type" => new BooleanType(),
+                "label" => "Public Debugging",
                 "description" => "Output detailed exception data publicly via route context handlers. <code style=\"color: var(--issue-color-1)\">DANGEROUS!</code>",
                 "dangerous" => true,
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
+                "group" => GROUP_DEV,
+                "subgroup" => "Debug",
             ]
         ],
         /* Debug routes include things like the WebComponent input tests */
@@ -1864,46 +1705,37 @@ $settings = [
                 "config" => "enable_debug_routes"
             ],
             "meta" => [
+                "type" => new BooleanType(),
                 "group" => GROUP_CACHE_DEBUG,
-                "name" => "Enable debug routes",
-                "type" => "input-switch",
+                "label" => "Enable debug routes",
                 "debug" => true
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
 
         "route_cache_disabled" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Route Cache Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "name" => "Route Cache Disabled",
-                "type" => "input-switch",
                 "debug" => true
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "cached_content_disabled" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Cached Content Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "name" => "Cached Content Disabled",
-                "type" => "input-switch",
                 "debug" => true
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "settings_cache_disabled" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Settings Cahce Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "name" => "Settings Cahce Disabled",
-                "type" => "input-switch",
                 "debug" => true
             ],
             "validate" => [
@@ -1917,13 +1749,10 @@ $settings = [
         "enable_core_content" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Core Content Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "name" => "Core Content Disabled",
-                "type" => "input-switch",
                 "debug" => true
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Parallax_enable_debug" => [
@@ -1932,13 +1761,10 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "name" => "Enable Parallax Debug",
+                "type" => new BooleanType(),
+                "label" => "Enable Parallax Debug",
                 "help" => "Allows the scroll manager to display debug output to help troubleshoot parallax issues.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
+                "group" => GROUP_LOOK_FEEL,
             ]
         ],
         "header_nav_exclude_wrapper" => [
@@ -1950,14 +1776,12 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "name" => "Threshold to apply `scrolled` class to body",
+                "type" => new NumberType(),
+                "label" => "Threshold to apply `scrolled` class to body",
                 "description" => "After the scrollbar leaves scrolls beyond this value, the scroll manager will apply the class .scroll-manager--scroll-constraint-satisfied",
-                "type" => "input-number"
+                "group" => GROUP_LOOK_FEEL,
             ],
-            "validate" => [
-                "type" => "number"
-            ]
+
         ],
         "apply_header_class_scroll_upwards_multiplier"  => [
             "default" => 1,
@@ -1965,54 +1789,43 @@ $settings = [
                 "public" => true
             ],
             "meta" => [
-                "group" => GROUP_LOOK_FEEL,
-                "name" => "`Scrolled` class upwards multiplier",
+                "type" => new NumberType(),
+                "label" => "`Scrolled` class upwards multiplier",
                 "description" => "When scrolling upwards, the \"Threshold to apply `scrolled` class to body\" is multiplied by this value to find the upwards movement threshold",
-                "type" => "input-number"
+                "group" => GROUP_LOOK_FEEL,
             ],
-            "validate" => [
-                "type" => "number"
-            ]
+
         ],
     /** PACKAGING */
         "Package_JS_script_content" => [
             "default" => false,
             "definition" => "Debug",
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Bundle JavaScript Content",
+                "help" => "Compiles all client-side JavaScript into one file. May moderately decrease load times.",
                 "group" => GROUP_DEV,
                 "subgroup" => "Packaging",
-                "name" => "Bundle JavaScript Content",
-                "help" => "Compiles all client-side JavaScript into one file. May moderately decrease load times.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Package_style_content" => [
             "default" => false,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Bundle CSS Content",
+                "help" => "Compiles all CSS files into one. May significantly decrease load times.",
                 "group" => GROUP_DEV,
                 "subgroup" => "Packaging",
-                "name" => "Bundle CSS Content",
-                "help" => "Compiles all CSS files into one. May significantly decrease load times.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         "Package_style_minify" => [
             "default" => true,
             "meta" => [
+                "type" => new BooleanType(),
+                "label" => "Minify Bundled CSS Content",
+                "help" => "When `Package_style_content` is enabled, package.css is minified. May significantly decrease load times.",
                 "group" => GROUP_DEV,
                 "subgroup" => "Packaging",
-                "name" => "Minify Bundled CSS Content",
-                "help" => "When `Package_style_content` is enabled, package.css is minified. May significantly decrease load times.",
-                "type" => "input-switch"
-            ],
-            "validate" => [
-                "type" => "boolean"
             ]
         ],
         
@@ -2037,100 +1850,82 @@ $settings = [
         ],
     
     /** SOCIAL MEDIA */
-        "SocialMedia_email" => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"email\"></i> Email Newsletter",
-                "description" =>  "Used in combination with the Social Media functionality.",
-                "type" => "input"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        "SocialMedia_fediverse" => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"fediverse\"></i> Fediverse",
-                "description" =>  "Used in combination with the Social Media functionality.",
-                "type" => "url"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        "SocialMedia_facebook" => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"facebook\"></i> Facebook",
-                "description" =>  "Used in combination with the Social Media functionality.",
-                "type" => "url"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        'SocialMedia_instagram' => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"instagram\"></i> Instagram",
-                "description" =>  "Used in combination with the Social Media functionality.",
-                "type" => "url"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        'SocialMedia_twitter' => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"twitter\"></i> Twitter",
-                "description" =>  "Used in combination with the Social Media functionality.",
-                "type" => "url"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        'SocialMedia_mastodon' => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"mastodon\"></i> Mastodon",
-                "description" =>  "This should be the URL for your Mastodon account, not the @account@mastodon.social format.",
-                "type" => "url"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        'SocialMedia_pixelfed' => [
-            'default' => '',
-            'meta' => [
-                'group' => 'Basic',
-                'subgroup' => 'Social',
-                'name' => "<i name=\"pixelfed\"></i> Pixelfed",
-                "description" =>  "This should be the URL for your PixelFed account, not the @account@pixelfed.social format.",
-                "type" => "url"
-            ],
-            'validate' => [
-                'type' => 'string'
-            ]
-        ],
-        'SocialMedia_shown' => [
-            'default' => [],
-        ],
+        // "SocialMedia_email" => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new StringType(),
+        //         "label" => "<i name=\"email\"></i> Email Newsletter",
+        //         "description" =>  "Used in combination with the Social Media functionality.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ]
+        // ],
+        // "SocialMedia_fediverse" => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new URLType(),
+        //         "label" => "<i name=\"fediverse\"></i> Fediverse",
+        //         "description" =>  "Used in combination with the Social Media functionality.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ]
+        // ],
+        // "SocialMedia_facebook" => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new URLType(),
+        //         "label" => "<i name=\"facebook\"></i> Facebook",
+        //         "description" =>  "Used in combination with the Social Media functionality.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ]
+        // ],
+        // 'SocialMedia_instagram' => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new URLType(),
+        //         "label" => "<i name=\"instagram\"></i> Instagram",
+        //         "description" =>  "Used in combination with the Social Media functionality.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ]
+        // ],
+        // 'SocialMedia_twitter' => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new URLType(),
+        //         "label" => "<i name=\"twitter\"></i> Twitter",
+        //         "description" =>  "Used in combination with the Social Media functionality.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ],
+        // ],
+        // 'SocialMedia_mastodon' => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new URLType(),
+        //         "label" => "<i name=\"mastodon\"></i> Mastodon",
+        //         "description" =>  "This should be the URL for your Mastodon account, not the @account@mastodon.social format.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ],
+        //     'validate' => [
+        //         'type' => 'string'
+        //     ]
+        // ],
+        // 'SocialMedia_pixelfed' => [
+        //     'default' => '',
+        //     'meta' => [
+        //         "type" => new URLType(),
+        //         "label" => "<i name=\"pixelfed\"></i> Pixelfed",
+        //         "description" =>  "This should be the URL for your PixelFed account, not the @account@pixelfed.social format.",
+        //         'group' => 'Basic',
+        //         'subgroup' => 'Social',
+        //     ],
+        // ],
+        // 'SocialMedia_shown' => [
+        //     'default' => [],
+        // ],
     /** DOCUMENTATION */
         'Documentation_enable_in_userbar' => [
             'default' => true,

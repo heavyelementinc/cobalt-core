@@ -1,13 +1,18 @@
+<?php
+
+use Cobalt\Settings\Controllers\Settings;
+?>
 <hgroup>
     <h1>{{title}}</h1>
 </hgroup>
-<tab-nav>
-    <nav>
-        {{!headings}}
-    </nav>
-    {{!settings}}
-</tab-nav>
-
+<form-request method="POST" action="<?= (new Settings())->get_route_href('update') ?>" autosave="autosave">
+    <tab-nav>
+        <nav>
+            {{!nav}}
+        </nav>
+        {{!settings}}
+    </tab-nav>
+</form-request>
 <style>
     .list-panel {
         width: 100%;

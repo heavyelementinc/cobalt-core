@@ -90,15 +90,24 @@ trait Prototypable {
             $labelStart = "";
             $labelEnd = "";
         }
-        $hasLabel = $this->hasDirective("label");
-        if($hasLabel) return $labelStart.$this->getDirective("label") . $labelEnd;
+
+
         if($small_text) $small_text .= "<br>$small_text";
         if($this->hasDirective('description')) {
             $small_text = $this->getDirective("description").$small_text;//"</small>";
         }
+        $help = "";
+        if($this->hasDirective('help')) {
+            $help = "<help-span value=\"".htmlspecialchars($this->getDirective('help'))."\"></help-span>";
+        }
         if($small_text) $labelEnd .= "<small class=\"form-prototype--field-description\">$small_text</small>";
-        // $split = str_replace([".","_"], " ", $this->{MODEL_RESERVERED_FIELD__FIELDNAME});
-        return $labelStart . prettify_fieldname($this->{MODEL_RESERVERED_FIELD__FIELDNAME}) . $labelEnd;
+        
+        $labelText = "";
+        if($this->hasDirective("label")) $labelText = $this->getDirective('label');
+        else $labelText = prettify_fieldname($this->{MODEL_RESERVERED_FIELD__FIELDNAME});
+        $label = $labelStart . $labelText . $help . $labelEnd;
+        if(!$includeHtml) return strip_tags($label);
+        return $label;
     }
 
     #[Prototype]
@@ -107,5 +116,4 @@ trait Prototypable {
         return false;
     }
 
-    
 }

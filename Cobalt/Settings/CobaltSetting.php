@@ -1,6 +1,9 @@
 <?php
 
 namespace Cobalt\Settings;
+
+use Cobalt\Model\Types\ImageType;
+use Cobalt\Model\Types\MixedType;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
 
 class CobaltSetting {
@@ -15,7 +18,7 @@ class CobaltSetting {
     public $defaultValue;
     public $directives;
     public $defined;
-    public $meta;
+    public ?array $meta;
     public $validate;
     public $user_modified_settings;
     public $allSettings;
@@ -143,4 +146,20 @@ class CobaltSetting {
         return $GLOBALS['CONFIG'][$data];
     }
 
+    function getTypedInstance():?MixedType {
+        if(!key_exists('type', $this->meta)) return null;
+        $arr = $this->meta;
+        /** @var MixedType $type */
+        $type = $this->meta['type'];
+        unset($arr['type']);
+        $type->setName($this->name);
+        if($type instanceof ImageType) {
+            return null;
+            // $type->setValue($_id);
+        } else {
+        $type->setValue($this->get_value());
+        }
+        $type->setDirectives($arr);
+        return $type;
+    }
 }

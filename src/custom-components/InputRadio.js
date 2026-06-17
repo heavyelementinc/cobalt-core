@@ -2,11 +2,11 @@ import ICustomInput from "./ICustomInput.js";
 
 export default class InputRadio extends ICustomInput {
     get value() {
-        return this.datalist.querySelector("[checked='checked']")?.value ?? null;
+        return this.querySelector("input[type='radio']:checked")?.value ?? null;
     }
 
     set value(val) {
-        const candidate = this.datalist.querySelector(`input[value="${val}"]`);
+        const candidate = this.querySelector(`input[value="${val}"]`);
         if(!candidate) throw new Error("Invalid selection");
         candidate.checked = true;
     }
@@ -36,6 +36,14 @@ export default class InputRadio extends ICustomInput {
             checked = " checked='checked'";
         }
         label.innerHTML = `<input type="radio" name="${this.name}" value="${element.value}"${checked}> ${element.innerHTML}`;
+        const radio = label.querySelector("input");
+        if(!radio) throw new Error("Failed to create radio button");
+        radio.addEventListener("change", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            this.dispatchEvent(new Event("change", e));
+        });
         return label;
     }
 }

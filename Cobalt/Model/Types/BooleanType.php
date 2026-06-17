@@ -12,4 +12,9 @@ class BooleanType extends MixedType {
         if($tag === null) $tag = "input-switch";
         return $this->inputSwitch($class, $misc, $tag);
     }
+
+    public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
+        if(is_string($value)) $value = strtolower($value);
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
 }

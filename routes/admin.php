@@ -66,16 +66,10 @@ if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
 *  ================ PRESENTATION SETTINGS =================
 *  ========================================================
 */
-    Route::get("/settings/presentation", "CoreSettingsPanel@presentation",[
-        'permission' => 'Auth_modify_cobalt_settings',
-        'anchor' => [
-            'name' => "Presentation",
-            'icon' => 'palette-swatch-outline',
-            'icon_color' => 'linear-gradient(to bottom, #DA627D, #FF495C 80%)'
-        ],
-        'navigation' => ['presentation_settings'],
-        'handler' => 'admin/presentation.js'
-    ]);
+    Settings::get((new Options("/settings/presentation", "presentation"))
+        ->set_permission('Auth_modify_cobalt_settings')
+        ->add_navigation('presentation_settings', 'Presentation', 'palette-swatch-outline')
+    );
 
     if(app("Customizations_enabled")) {
         Route::get("/customizations/list", "Customizations@list", [
@@ -104,20 +98,6 @@ if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
 
     if (app("CobaltEvents_enabled")) {
         Events::admin();
-        // Route::get("/cobalt-events/edit/{id}?", "EventsController@edit_event", [
-        //     'handler' => 'core/events.js',
-        //     'permission' => "CobaltEvents_crud_events"
-        // ]);
-        // Route::get("/cobalt-events/?...?", "EventsController@list_events", [
-        //     'permission' => "CobaltEvents_crud_events",
-        //     'anchor' => [
-        //         'name' => 'Event Manager',
-        //         'href' => '/cobalt-events/',
-        //         'icon' => 'information-outline',
-        //         'icon_color' => 'linear-gradient(0.5turn, #14BDEB, #9d3cf6 80%)',
-        //     ],
-        //     'navigation' => ['admin_panel', 'presentation_settings']
-        // ]);
     }
     
 /** 
@@ -126,16 +106,11 @@ if(__APP_SETTINGS__['Documentation_enable_in_userbar']) {
 *  ========================================================
 */
 
-    Route::get("/settings/application/","CoreSettingsPanel@settings_index",[
-        'name' => "App Settings",
-        'anchor' => [
-            'name' => 'App Settings',
-            'icon' => "tune-vertical",
-            'icon_color' => "#5CDEFF",
-        ],
-        'navigation' => ['application_settings'],
-        'permission' => "Auth_modify_cobalt_settings"
-    ]);
+    
+    Settings::get((new Options("/settings/application/","app_settings"))
+        ->set_permission("Auth_modify_cobalt_settings")    
+        ->add_navigation('application_settings', 'App Settings', "tune-vertical")
+    );
 
     if (app('Auth_logins_enabled')) {
         // Route::get("/me/", "UserAccounts@me",

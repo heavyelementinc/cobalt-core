@@ -89,11 +89,18 @@ chip-nav {
             }
         }
     }
-    &:not(.tab-nav--hydrated) > :target,
+    &:not(.tab-nav--hydrated)>:target,
     .tab-nav--current-content {
-        display: flex !important;
+        display: flex!important;
+        flex-direction: column;
         visibility: visible;
         box-sizing: border-box;
+        align-items: flex-start;
+        justify-content: flex-start;
+        width: 100%;
+        & > :where(.list-panel, fieldset) {
+            width: 100%;
+        }
     }
 }
 

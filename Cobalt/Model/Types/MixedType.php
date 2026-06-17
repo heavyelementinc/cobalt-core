@@ -17,6 +17,7 @@ use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Stringable;
 use Validation\Exceptions\ValidationContinue;
+use Validation\Exceptions\ValidationIssue;
 use Validation\Exceptions\ValidationSkip;
 
 class MixedType implements Stringable, ArrayAccess, IMixedType {
@@ -135,6 +136,9 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
      * @return mixed Returns the value to the be stored, may be transformed 
      */
     public function filter($value) {
+        if($this->hasDirective("permission") && !has_permission($this->getDirective('permission'))) {
+            throw new ValidationIssue('Your account is not authorized to make this change');
+        }
         if($this->isSet && $this->directiveOrNull(self::IMMUTABLE)) throw new ImmutableTypeError("Cannot modify immutable field '".$this->{MODEL_RESERVERED_FIELD__FIELDNAME}."'");
         if($this->hasDirective(self::VALID)) {
             $this->getDirective(self::VALID);

@@ -119,7 +119,7 @@ class ClientRouter extends EventTarget{
         super();
         this.properties = {
             // location: new RouteObject(window.location.pathname),
-            routeBoundaries: router_table,// JSON.parse(document.querySelector("#route-boundaries").innerText)
+            routeBoundaries: JSON.parse(document.querySelector("#route-boundaries").innerText),
             body: new Deferred(),
             main: new Deferred(),
             foot: new Deferred(),

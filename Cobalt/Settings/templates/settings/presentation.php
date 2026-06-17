@@ -4,7 +4,7 @@
 <tab-nav>
     <nav>
         <a href="#details"><i name="application-settings-outline"></i> Details</a>
-        <a href="#logo"><i name="bow-tie"></i> Logo</a>
+        <!-- <a href="#logo"><i name="bow-tie"></i> Logo</a> -->
         <a href="#theme"><i name="palette"></i> Theme</a>
     </nav>
     <form-request id="details" action="/api/v1/settings/update/" method="PUT" autosave="autosave">
@@ -32,7 +32,7 @@
             </ul>
         </fieldset>
     </form-request>
-    <form-request id="logo" action="/api/v1/settings/update/" method="POST" autosave="autosave" class="hbox">
+    <!-- <form-request id="logo" action="/api/v1/settings/update/" method="POST" autosave="autosave" class="hbox">
         <hgroup><h2><i name="bow-tie"></i> Logo</h2>
         <action-menu title="Options">
             <option method="PUT" action="/api/v1/settings/default/logo">Reset Logo</option>
@@ -41,14 +41,13 @@
             <legend>Upload a New Logo</legend>
             <ul class="list-panel">
                 <li>
-                        <img src="{{app.logo.thumb.filename}}" width="100" height="100" style="object-fit:contain">
-                        <div style="margin-left: 1em">
-                            <label style="display:block">Logo</label>
-                            <div class="hbox">
-                                <input type="file" name="logo">
-                            </div>
+                    <img src="{{app.logo.thumb.filename}}" width="100" height="100" style="object-fit:contain">
+                    <div style="margin-left: 1em">
+                        <label style="display:block">Logo</label>
+                        <div class="hbox">
+                            <input type="file" name="logo">
                         </div>
-                    </form-request>
+                    </div>
                 </li>
             </ul>
         </fieldset>
@@ -58,7 +57,7 @@
                 {{!app.logo.json_pretty}}
             </pre>
         </details>
-    </form-request>
+    </form-request> -->
     <form-request id="theme" action="/api/v1/settings/theme/update/" method="PUT">
         <hgroup><h2><i name="palette"></i> Theme</h2></hgroup>
         <fieldset>

@@ -40,7 +40,7 @@ class ArrayType extends MixedType implements ArrayAccess, Stringable {
                     target: $this->value,
                     field_name: $index,
                     value: $value,
-                    model: $this->model,
+                    model: $this->model ?? null,
                     name: $this->{MODEL_RESERVERED_FIELD__FIELDNAME}.".$index"
                 );
             }

@@ -182,14 +182,27 @@ class Options implements Iterator, JsonSerializable {
     public function set_navigation(array $value):self{
         $this->navigation = [];
         foreach($value as $group => $nav) {
-            $this->navigation[$group] = [
-                'label' => $nav['label'] ?? $nav['name'] ?? throw new RouteConfigError("$group must have a 'label' or 'name' set"),
-            ];
-            if($nav['order'] ?? "") $this->navigation[$group]['order'] = $nav['order'];
-            if($nav['href'] ?? "") $this->navigation[$group]['href'] = $nav['href'] ?? '';
-            if($nav['submenu_group'] ?? "") $this->navigation[$group]['submenu_group'] = $nav['submenu_group'] ?? '';
-            if($nav['view'] ?? "") $this->navigation[$group]['view'] = $nav['view'] ?? '';
+            $this->add_navigation($group,
+                $nav['label'] ?? $nav['name'], 
+                $nav['icon'] ?? '',
+                $nav['href'] ?? '',
+                $nav['order']??null,
+                $nav['submenu_group'] ?? '',
+                $nav['view'] ?? ''
+            );
         }
+        return $this;
+    }
+
+    public function add_navigation(string $groupName, string $label, string $icon = "", string $href = "", ?int $order = null, string $submenu_group = "", string $view = ""):Options {
+        $this->navigation[$groupName] = [
+            'label' => $label
+        ];
+        if($icon) $this->navigation[$groupName]['icon'] = $icon;
+        if($href) $this->navigation[$groupName]['href'] = $href;
+        if($order !== null) $this->navigation[$groupName]['order'] = $order;
+        if($submenu_group) $this->navigation[$groupName]['submenu_group'] = $submenu_group;
+        if($view) $this->navigation[$groupName]['view'] = $view;
         return $this;
     }
 

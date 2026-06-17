@@ -29,11 +29,13 @@ namespace Cobalt\Settings;
 
 use Cobalt\Extensions\Extensions;
 use Cobalt\Manifests\Classes\Item;
+use Cobalt\Model\Types\ImageType;
 use Exception;
 use Cobalt\Settings\Exceptions\AliasMissingDependency;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use MongoDB\UpdateResult;
+use Cobalt\Settings\Settings;
 use Validation\Exceptions\ValidationFailed;
 use Validation\Exceptions\ValidationIssue;
 
@@ -264,9 +266,9 @@ abstract class SettingsAbstract extends \Drivers\Database {
         $this->definitions    = $definitions;
     }
 
-    private function get_php_settings($filename) {
-        require $filename;
-        return $settings;
+    private function get_php_settings(string $filename):array {
+        // require $filename;
+        return include $filename;
     }
 
     private function parseSetting(&$values, &$def, $settings, $filename) {
@@ -462,7 +464,10 @@ abstract class SettingsAbstract extends \Drivers\Database {
 
         $result = $this->updateOne(['_id' => $id], $query);
         $this->bootstrap();
-        return [$name => $this->__settings[$name]];
+        return [
+            'name' => $name,
+            'value' => $value
+        ];
     }
 
     public function push($name, $value) {
@@ -519,68 +524,27 @@ abstract class SettingsAbstract extends \Drivers\Database {
         return ($value === $this->update_settings[$name]->defaultValue);
     }
 
-    function check_type($validation, $name, $value) {
-        $types = [
-            "boolean",
-            "integer",
-            "double",
-            "string",
-            "array",
-        ];
-
-        if(!in_array($validation['type'],$types)) throw new Exception("Invalid type specified for setting");
-        if(gettype($value) !== $validation['type']) throw new ValidationFailed("Invalid datatype");
-    }
-
-    function check_ctype($validation, $name, $value) {
-        $ctypes = [
-            'alnum' => 'ctype_alnum',
-            'alpha' => 'ctype_alpha',
-            'cntrl' => 'ctype_cntrl',
-            'digit' => 'ctype_digit',
-            'graph' => 'ctype_graph',
-            'lower' => 'ctype_lower',
-            'print' => 'ctype_print',
-            'punct' => 'ctype_punct',
-            'space' => 'ctype_space',
-            'upper' => 'ctype_upper',
-            'xdigit' => 'ctype_xdigit',
-        ];
-        if(!$ctypes[$validation['ctype']]($value)) throw new ValidationFailed("Ctype validation failed");
-    }
-
-    function filter($filters, $name, $value) {
-        if(gettype($filters) !== "array") $filters = [$filters => []];
-
-        $mutant = $value;
-        foreach($filters as $filter => $flags) {
-            $f = 0;
-            foreach($flags as $flag) {
-                $f &= constant($flag);
-            }
-            $f &= FILTER_NULL_ON_FAILURE;
-            $mutant = filter_var($mutant, constant($filter), $f);
-            if($mutant === null) throw new ValidationFailed("Filtering process failed.");
-        }
-
-        return $mutant;
-    }
-
     private function validate($name, $value) {
         if(!$this->is_setting($name, $value)) throw new ValidationIssue("Setting is not defined.");
 
-        $v = $this->instances[$name]->validate;
+        /**
+         * @var CobaltSetting $i
+         */
+        $i = $this->instances[$name];
+        $instance = $i->getTypedInstance();
+        if(!$instance) throw new ValidationIssue("Not a modifiable setting.");
 
-        if(method_exists($this->instances[$name], "filter")) {
-            $value = $this->instances[$name]->filter($value);
-        } else {
-            if(isset($v['confirm'])) confirm($v['confirm'], [$name => $value]);
-            if(isset($v['type'])) $this->check_type($v, $name, $value);
-            if(isset($v['ctype'])) $this->check_ctype($v, $name, $value);
-            if(isset(($v['filter']))) $value = $this->filter($v['filter'], $name, $value);
+        $val = $instance->filter($instance->pre_filter($value));
+
+        // In case we update an Image
+        if($instance instanceof ImageType) {
+            $cursor = db_cursor('fs.files');
+            $result = $cursor->findOne(['_id' => $val]);
+            if(!$result) throw new Exception("The file should exist in this database");
+            $val = $result;
         }
 
-        return $value;
+        return $val;
     }
 
 }
