@@ -42,4 +42,9 @@ class CobaltCursor implements Iterator {
         $this->index = 0;
     }
 
+    public function count():?int {
+        if($this->data instanceof CursorInterface) return $this->model->count($this->data?->query->filter, $this->data?->query->options);
+        return count($this->data);
+    }
+
 }

@@ -46,9 +46,12 @@ class Areas extends Controller {
         return $result;
     }
 
-    public static function getCountyOfTown(string $town,?array $towns = null):string {
+    public static function getCountyOfTown(string $town,?array $towns = null):array {
         $towns = $towns ?? include __DIR__ . "/townData.php";
-        return $towns[$town]['county'];
+        if(!key_exists($town, $towns)) throw new NotFound("That town does not exist");
+        $counties = $counties ?? include __DIR__ . "/countyData.php";
+        if(!key_exists($towns[$town]['county'], $counties)) throw new NotFound("That county is invalid");
+        return $counties[$towns[$town]['county']];
     }
 
     public static function getTownsInRegionOfTown(string $town, ?array $towns = null, ?array $counties = null):array {
