@@ -1,3 +1,18 @@
+<?php 
+$umami_tracking_enable = (__APP_SETTINGS__['Umami_enabled']
+    && __APP_SETTINGS__['Umami_tracker_id']
+    && __APP_SETTINGS__['Umami_hostname']);
+if( $umami_tracking_enable ):
+    $umami_hostname = __APP_SETTINGS__['Umami_hostname'];
+    $umami_tracker_id = __APP_SETTINGS__['Umami_tracker_id'];
+?>
+<script defer src="<?= $umami_hostname ?>/script.js" data-website-id="<?= $umami_tracker_id ?>"></script>
+<?php endif;
+
+if($umami_tracking_enable && __APP_SETTINGS__['Umami_enable_replays']):
+?>
+<script defer src="<?= $umami_hostname ?>/recorder.js" data-website-id="<?= $umami_tracker_id ?>" data-sample-rate="<?= __APP_SETTINGS__['Umami_replay_interval'] ?>" data-mask-level="moderate" data-max-duration="<?= __APP_SETTINGS__['Umami_replay_max_duration'] ?>"></script>
+<?php endif ?>
 <script <?= nonce() ?>>
 // Some user agents don't support (or don't enable) JavaScript. Therefore we
 // should keep track of any content that would be hidden because of JS and
@@ -103,8 +118,6 @@ function iOS() {
 function cssUnitToNumber(cssValue, target = null) {
     return cssToPixel(cssValue, target, false)
 }
-
-
 
 /**
  * # string_to_bool

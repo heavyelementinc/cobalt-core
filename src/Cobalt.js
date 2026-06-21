@@ -22,9 +22,8 @@ class CobaltCore {
         this.screenReaderAnnounceArea = document.querySelector("#sr-announce");
         window.dispatchEvent(new CustomEvent("cobaltready"))
         window.addEventListener("DOMContentLoaded", async () => {
-            await Promise.all(window.asyncScripts)
             this.resolvers.ready(true);
-        })
+        });
         this.router = new ClientRouter();
         document.addEventListener("DOMContentLoaded", () => {
             this.router.location = window.location.toString();

@@ -1,0 +1,30 @@
+<h1>{{title}}</h1>
+<flex-table>
+    <flex-row>
+        <flex-header>Project Name</flex-header>
+        <flex-header>Tags</flex-header>
+        <flex-header>Order</flex-header>
+        <flex-header>Image Count</flex-header>
+    </flex-row>
+    {{!projects}}
+</flex-table>
+<a href="/admin/project/new/{{type}}" class="floater--new-item"></a>
+<style>
+    flex-table:empty:after{
+        content: "There are no projects";
+    }
+    flex-row {
+        position: relative;
+    }
+    .facebook-preview {
+        display: none;
+        pointer-events: none;
+    }
+    flex-row:hover .facebook-preview {
+        display: block;
+        position: absolute;
+        top: 100%;
+        z-index: 1000;
+        right: 0;
+    }
+</style>

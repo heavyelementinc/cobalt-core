@@ -28,7 +28,7 @@ class PermissionManager {
          * @var string $key
          * @var Permission $val
          */
-        foreach($permission as $key => $val) {
+        foreach($this->permissions as $key => $val) {
             $this->valid[$key] = $val->getName();
         }
     }

@@ -271,6 +271,7 @@ export default class BlockEditor extends ICustomInput {
 
     appendModules() {
         const modules = [
+            "https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.2/dist/editorjs.umd.min.js",
             "https://cdn.jsdelivr.net/npm/@editorjs/header@latest",
             "https://cdn.jsdelivr.net/npm/@editorjs/link@latest",
             "https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js",

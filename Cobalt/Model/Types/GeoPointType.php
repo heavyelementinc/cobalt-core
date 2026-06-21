@@ -2,6 +2,7 @@
 
 namespace Cobalt\Model\Types;
 
+use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Types\Traits\GeoCommon;
 use Validation\Exceptions\ValidationIssue;
 
@@ -94,5 +95,11 @@ class GeoPointType extends MixedType {
 
     function field(string $class = "", array $misc = [], ?string $tag = null): string {
         return parent::field($class, $misc, $tag);
+    }
+
+
+    #[Prototype]
+    public function display(): mixed {
+        return "<small>Lat: $this->lat, Lng: $this->lng</small>"; 
     }
 }

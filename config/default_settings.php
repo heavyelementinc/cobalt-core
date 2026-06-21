@@ -15,6 +15,8 @@ use Cobalt\Model\Types\RadioType;
 use Cobalt\Model\Types\StringType;
 use Cobalt\Model\Types\TextType;
 use Cobalt\Model\Types\URLType;
+use Cobalt\SchemaPrototypes\Compound\WeakEnumResult;
+use Components\ServiceAreas\Controllers\Areas;
 use PHPMailer\PHPMailer\PHPMailer;
 
 const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
@@ -28,10 +30,11 @@ const GROUP_LOOK_FEEL = "<i name='palette'></i> Look &amp; Feel";
 const GROUP_USERBAR = "<i name='button-cursor'></i> Userbar";
 const GROUP_CONTACT = "<i name='form-dropdown'></i> Contact Form";
 const GROUP_FEATURES = "<i name='star-circle-outline'></i> Features";
-const GROUP_SEO = "<i name='search-web'></i> Search &amp; SEO";
-const SUBGROUP_SEO_ROBOTS = "Search Engine";
-const GROUP_SMTP = "<i name='email'></i> Mail";
-const SUBGROUP_SMTP_BASIC = "Basic";
+const GROUP_SEO = "<i name='search-web'></i> SEO &amp; Analytics";
+const SUBGROUP_SEO_AREA = "SEO Area Details";
+const SUBGROUP_SEO_ROBOTS = "Web Crawlers &amp Bots";
+const SUBGROUP_SEO_UMAMI = "Umami Analytics";
+const SUBGROUP_SMTP_BASIC = "<i name='email'></i> Mail";
 const GROUP_PAGES = "<i name='page-layout-body'></i> Pages";
 const SUBGROUP_PAGES_RSS = "RSS Settings";
 const GROUP_POSTS = "<i name='post-outline'></i> Posts";
@@ -121,6 +124,7 @@ return [
                 "label" => "Short Name",
                 "description" => "This is a short name that is used in various space-limited places. It inherits from your App Name.",
                 "group" => GROUP_BASIC,
+                "subgroup" => SUBGROUP_BASIC_GENERAL,
             ]
         ],
         /* A bespoke name to be listed in the copyright notice */
@@ -167,7 +171,9 @@ return [
                     $timezones = DateTimeZone::listIdentifiers();
                     $tz = array_fill_keys($timezones, $timezones);
                     return $tz;
-                }
+                },
+                "group" => GROUP_CONFIGURATION,
+                "subgroup" => SUBGROUP_BASIC_GENERAL,
             ]
         ],
         "DB_export_directory" => [
@@ -277,6 +283,7 @@ return [
                 "subgroup" => "Notifications",
                 "label" => "Show notifications in the user's session panel",
                 "description" => "Display a notification button and the notification panel when a user exists.",
+                'advanced' => true,
             ]
         ],
         "Notifications_enable_push_notifications" => [
@@ -287,6 +294,7 @@ return [
                 "description" => "This allows registered users to enroll their devices or browsers in push notifications.",
                 "group" => GROUP_FEATURES,
                 "subgroup" => "Notifications",
+                'advanced' => true,
             ]
         ],
         "Notifications_collection" => [
@@ -332,6 +340,7 @@ return [
                 "help" => "To be elligible for display on the Events page, an event must have its `Display on web-side index` flag set to true.",
                 "group" => GROUP_FEATURES,
                 "subgroup" =>"Events",
+                'advanced' => true,
             ]
         ],
 
@@ -346,7 +355,7 @@ return [
                 "valid" => [
                     // "notification" => "Notification",
                     Event::INDEX_UNLISTED => "Do not display",
-                    Event::INDEX_IFPUBLIC => "Display, if Public",
+                    Event::INDEX_IFPUBLIC => "Display, if public",
                     Event::INDEX_ALWAYS => "Display, even if not public"
                 ]
             ]
@@ -396,7 +405,8 @@ return [
                     CONTACT_SUCCESS_EMAIL  => "<i name='email-fast'></i> Email<br><small>Send the details of the submission to an email address (specified below).</small>",
                     CONTACT_SUCCESS_NOTIFY => "<i name='bell-badge'></i> Cobalt Notification<br><small>Admins get a notification in the Cobalt Notification system.</small>",
                     CONTACT_SUCCESS_PUSH   => "<i name='tablet-cellphone'></i> Device/Browser Notification<br><small>Admins get notified via a push notification.</small>",
-                ]
+                ],
+                'advanced' => true,
             ]
         ],
         "Contact_form_public_routes_enabled" => [
@@ -470,6 +480,7 @@ return [
                 "help" => "How long should the grace period last. Will be converted to a negative number and subtracted from the current time of a given submission.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Anti-spam",
+                'advanced' => true,
             ]
         ],
         "Contact_form_submission_throttle_after_max_submissions" => [
@@ -480,6 +491,7 @@ return [
                 "description" => "Maximum number of submissions during the throttle period.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Anti-spam",
+                'advanced' => true,
             ]
         ],
 
@@ -528,6 +540,7 @@ return [
                 "description" => "When a user submits the public contact form, specify a location they will be redirected to upon success.",
                 "group" => GROUP_CONTACT,
                 "subgroup" =>"Confirmation",
+                'advanced' => true,
             ]
         ],
         "Contact_form_user_permissions_to_notify" => [
@@ -655,17 +668,6 @@ return [
                 "subgroup" => "General",
             ]
         ],
-        "opengraph" => [
-            "directives" => [
-                "merge" => [
-                    "type" => "website",
-                    "image" => "/core-content/img/branding/cobalt-logo.svg",
-                    "image_X" => 500,
-                    "image_Y" => 500,
-                    "description" => "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io"
-                ]
-            ]
-        ],
         "opengraph_type" => [
             "default" => "website",
         ],
@@ -680,6 +682,13 @@ return [
         ],
         "opengraph_description" => [
             "default" => "Cobalt engine is a fast, lightweight, and simple MVC-based framework written in PHP. Find out more at heavyelement.io",
+            "meta" => [
+                "type" => new TextType(),
+                "label" => "OpenGraph Description",
+                "help" => "Specify the default text that appears below link previews on sites like Facebook.",
+                "group" => GROUP_SEO,
+                "subgroup" => "General",
+            ]
         ],
         "fb_app_id" => [
             "default" => "",
@@ -708,6 +717,7 @@ return [
                 "description" => "This will set up your robots.txt file to deny access to AI web crawlers. Note that this <strong>does not block facebookexternalhit</strong> since that would also break link previews.",
                 "group" => GROUP_SEO,
                 "subgroup" => SUBGROUP_SEO_ROBOTS,
+                'advanced' => true,
             ]
         ],
         "AI_prohibit_scraping_notice" => [
@@ -718,6 +728,7 @@ return [
                 "description" => "This will add &lt;meta&gt; tags to your page, include headers with every request, and create an <code>ai.txt</code> file in the root directory of your app. Some AI bots do not honor these requests.",
                 "group" => GROUP_SEO,
                 "subgroup" => SUBGROUP_SEO_ROBOTS,
+                'advanced' => true,
             ]
         ],
         "Forbid_AI_webcrawler_access" => [
@@ -729,6 +740,7 @@ return [
                 "help" => "This is heavy-handed and may break things.",
                 "group" => GROUP_SEO,
                 "subgroup" => SUBGROUP_SEO_ROBOTS,
+                'advanced' => true,
             ]
         ],
 
@@ -743,7 +755,7 @@ return [
                 "type" => new StringType(),
                 "label" => "SMTP Username",
                 "description" =>  "The username credential used to authenticate with your SMTP service",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
             ]
         ],
@@ -757,7 +769,7 @@ return [
             "meta" => [
                 "type" => new PasswordHashType(),
                 "description" =>  "The password credentials used to authenticate with your SMTP service",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "label" => "SMTP Password",
             ],
@@ -773,7 +785,7 @@ return [
                 "type" => new StringType(),
                 "label" => "SMTP Host",
                 "description" =>  "The hostname of your SMTP service",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
             ]
         ],
@@ -788,8 +800,9 @@ return [
                 "type" => new NumberType(),
                 "label" => "SMTP Port",
                 "description" =>  "The port number of your SMTP service",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
+                'advanced' => true,
             ]
         ],
         "Mail_connection_security" => [
@@ -798,13 +811,14 @@ return [
                 'type' => new EnumType(),
                 "label" => "SMTP Connection Type",
                 "description" =>  "The connection security for your SMTP service",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
                 "valid" => [
                     PHPMailer::ENCRYPTION_SMTPS => "SSL",
                     PHPMailer::ENCRYPTION_STARTTLS => "TLS",
                     "none" => "None"
-                ]
+                ],
+                'advanced' => true,
             ],
             "valid" => [
             ]
@@ -821,8 +835,9 @@ return [
                 "type" => new BooleanType(),
                 "label" => "SMTP Auth Enabled",
                 "description" =>  "Determines if the SMTP connection should use authentication",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
+                'advanced' => true,
             ]
         ],
 
@@ -835,8 +850,9 @@ return [
                 "type" => new EmailAddressType(),
                 "label" => "Reply To",
                 "description" =>  "The email address that should be replied to when receiving an email from Cobalt",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
+                'advanced' => true,
             ],
         ],
         "Mail_reply_to_name" => [
@@ -848,8 +864,9 @@ return [
                 "type" => new StringType(),
                 "label" => "Reply To Name",
                 "description" =>  "The displayed name when receiving an email from Cobalt",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
+                'advanced' => true,
             ]
         ],
         
@@ -866,8 +883,9 @@ return [
             "meta" => [
                 "type" => new StringType(),
                 "label" => "From Address",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
+                'advanced' => true,
             ]
         ],
         "Mail_from_name" => [
@@ -879,8 +897,9 @@ return [
             "meta" => [
                 "type" => new StringType(),
                 "label" => "From Name",
-                "group" => GROUP_SMTP,
+                "group" => GROUP_CONFIGURATION,
                 "subgroup" => SUBGROUP_SMTP_BASIC,
+                'advanced' => true,
             ]
         ],
 
@@ -1073,6 +1092,7 @@ return [
                 "label" => "Enable Post RSS Feed",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
+                'advanced' => true,
             ],
             
         ],
@@ -1091,7 +1111,7 @@ return [
         "Posts_rss_feed_description" => [
             "default" => "A Cobalt Engine RSS Feed",
             "directives" => [
-                "alias" => "app_name"
+                "alias" => "opengraph_description"
             ],
             "meta" => [
                 "type" => new TextType(),
@@ -1107,6 +1127,7 @@ return [
                 "label" => "Post RSS Feed Path",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
+                'advanced' => true,
             ]
         ],
         "Posts_default_index_display" => [
@@ -1120,6 +1141,7 @@ return [
                 "description" => "Include \"Unlisted\" Posts in RSS Feed",
                 "group" => GROUP_POSTS,
                 "subgroup" => SUBGROUP_PAGES_RSS,
+                'advanced' => true,
             ]
         ],
 
@@ -1139,7 +1161,8 @@ return [
                 "group" => GROUP_LOOK_FEEL,
                 "label" => "Enable Customization Framework",
                 "help" => "Enables customization",
-                "subgroup" => "Customization"
+                "subgroup" => "Customization",
+                'advanced' => true,
             ],
         ],
         'Customizations_allow_prefetching' => [
@@ -1154,7 +1177,8 @@ return [
                 "label" => "Error on missing Customzations",
                 "group" => GROUP_LOOK_FEEL,
                 "help" => "When enabled, the CustomizationManager will throw an Exception if a value is missing.",
-                "subgroup" => "Customization"
+                "subgroup" => "Customization",
+                'advanced' => true,
             ]
         ],
 
@@ -1303,6 +1327,7 @@ return [
                 "type" => new StringType(),
                 "label" => "Sidebar Image",
                 "group" => GROUP_LOOK_FEEL,
+                'advanced' => true,
             ],
         ],
         "manifest_engine" => [
@@ -1372,6 +1397,7 @@ return [
                 "help" => "By default, themes do not apply to the admin panel.",
                 "group" => GROUP_LOOK_FEEL,
                 "subgroup" => SUBGROUP_BASIC_GENERAL,
+                'advanced' => true,
             ],
         ],
         "default_color_scheme" => [
@@ -1488,6 +1514,7 @@ return [
                 "type" => new StringType(),
                 "label" => "Path to Privacy Policy",
                 "group" => GROUP_LOOK_FEEL,
+                'advanced' => true,
             ]
         ],
         "Web_terms_of_service" => [
@@ -1496,6 +1523,7 @@ return [
                 "type" => new StringType(),
                 "label" => "Path to Terms of Service",
                 "group" => GROUP_LOOK_FEEL,
+                'advanced' => true,
             ]
         ],
         "Web_normally_open_pages" => [
@@ -1643,6 +1671,7 @@ return [
                 "type" => new BooleanType(),
                 "group" => GROUP_LOOK_FEEL,
                 "label" => "Cookie Consent Prompt",
+                'advanced' => true,
             ],
         ],
         "loading_spinner" => [
@@ -1708,7 +1737,8 @@ return [
                 "type" => new BooleanType(),
                 "group" => GROUP_CACHE_DEBUG,
                 "label" => "Enable debug routes",
-                "debug" => true
+                "debug" => true,
+                'advanced' => true,
             ]
         ],
 
@@ -1718,7 +1748,8 @@ return [
                 "type" => new BooleanType(),
                 "label" => "Route Cache Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "debug" => true
+                "debug" => true,
+                'advanced' => true,
             ]
         ],
         "cached_content_disabled" => [
@@ -1727,7 +1758,8 @@ return [
                 "type" => new BooleanType(),
                 "label" => "Cached Content Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "debug" => true
+                "debug" => true,
+                'advanced' => true,
             ]
         ],
         "settings_cache_disabled" => [
@@ -1736,7 +1768,8 @@ return [
                 "type" => new BooleanType(),
                 "label" => "Settings Cahce Disabled",
                 "group" => GROUP_CACHE_DEBUG,
-                "debug" => true
+                "debug" => true,
+                'advanced' => true,
             ],
             "validate" => [
                 "type" => "boolean"
@@ -1765,6 +1798,7 @@ return [
                 "label" => "Enable Parallax Debug",
                 "help" => "Allows the scroll manager to display debug output to help troubleshoot parallax issues.",
                 "group" => GROUP_LOOK_FEEL,
+                'advanced' => true,
             ]
         ],
         "header_nav_exclude_wrapper" => [
@@ -1778,8 +1812,9 @@ return [
             "meta" => [
                 "type" => new NumberType(),
                 "label" => "Threshold to apply `scrolled` class to body",
-                "description" => "After the scrollbar leaves scrolls beyond this value, the scroll manager will apply the class .scroll-manager--scroll-constraint-satisfied",
+                "description" => "After the scrollbar leaves scrolls beyond this value, the scroll manager will apply the class <code>.scroll-manager--scroll-constraint-satisfied</code> to the <code>&lt;body&gt;</code> tag.",
                 "group" => GROUP_LOOK_FEEL,
+                'advanced' => true,
             ],
 
         ],
@@ -1793,6 +1828,7 @@ return [
                 "label" => "`Scrolled` class upwards multiplier",
                 "description" => "When scrolling upwards, the \"Threshold to apply `scrolled` class to body\" is multiplied by this value to find the upwards movement threshold",
                 "group" => GROUP_LOOK_FEEL,
+                'advanced' => true,
             ],
 
         ],
@@ -2123,5 +2159,157 @@ return [
         ],
         "Websocket_tick_rate_in_milliseconds" => [
             'default' => 500, // 2 ticks per second
+        ],
+    'ServiceAreas_default_location' => [
+        'default' => 'belfast',
+        'meta' => [
+            'type' => new EnumType(),
+            'label' => "Your company's location",
+            'valid' => fn () => Areas::getValidTowns(),
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+            // 'group' => 
         ]
+    ],
+    'ServiceAreas_serve_counties' => [
+        'default' => [],
+        'meta' => [
+            'type' => new ArrayType(),
+            'label' => "What counties do you service?",
+            'valid' => fn () => Areas::getValidCounties(),
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+        ]
+    ],
+    'ServiceAreas_strings_under_ten_miles' => [
+        'default' => "Plus, we're right next door (just %s miles away)!",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => 'Distance between 10 miles or less',
+            'help' => 'Include a <code>%s</code> placeholder where you want to display the distance in ',
+            'description' => 'What to say when a town landing page is 10 miles or less from your headquarters',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+            'advanced' => true,
+        ]
+    ],
+    'ServiceAreas_strings_between_ten_and_thirty' => [
+        'default' => "Plus, we're practically right next door (just %s miles away)!",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => 'Distance between 10 and 30 miles',
+            'help' => 'Include a <code>%d</code> distance and a <code>%s</code> for the town name.',
+            'description' => 'What to say when a town landing page is between 10 and 30 miles from your headquarters',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+            'advanced' => true,
+        ]
+    ],
+    'ServiceAreas_strings_between_thirty_and_sixty' => [
+        'default' => "Plus, we're just %d miles from you!",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => 'Distance between 30 and 60 miles',
+            'help' => 'Include a <code>%d</code> distance and a <code>%s</code> for the town name.',
+            'description' => 'What to say when a town landing page is between 30 and 60 miles from your headquarters',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+            'advanced' => true,
+        ]
+    ],
+    'ServiceAreas_strings_under_120_miles' => [
+        'default' => "We're just a day trip away (about %d miles).",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => 'Distance under 120 miles',
+            'help' => 'Include a <code>%d</code> distance and a <code>%s</code> for the town name.',
+            'description' => 'What to say when a town landing page is under 120 miles from your headquarters',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+            'advanced' => true,
+        ]
+    ],
+    'ServiceAreas_strings_120_and_over' => [
+        'default' => "We're about %d miles from %s.",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => 'Distance 120 or Greater',
+            'help' => 'Include a <code>%d</code> distance and a %s for the town name.',
+            'description' => 'What to say when a town landing page is 120 miles or greater from your headquarters',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+            'advanced' => true,
+        ]
+    ],
+    'Umami_enabled' => [
+        'default' => false,
+        'meta' => [
+            'type' => new BooleanType(),
+            'name' => "Enable Umami analytics engine",
+            'description' => 'Requires Umami Hostname & Umami Tracker ID to be set.',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+        ]
+    ],
+    'Umami_hostname' => [
+        'default' => 'https://metrics.gardinerbryant.com',
+        'meta' => [
+            'type' => new URLType(),
+            'filter' => function ($val) {
+                $lastChar = strlen($val) - 1;
+                if($val[$lastChar] == "/") return substr($val, 0, -1);
+                return $val;
+            },
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+        ]
+    ],
+    'Umami_tracker_id' => [
+        'default' => '',
+        'meta' => [
+            'type' => new StringType(),
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+        ]
+    ],
+    'Umami_enable_replays' => [
+        'default' => false,
+        'meta' => [
+            'type' => new BooleanType(),
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+        ]
+    ],
+    'Umami_replay_interval' => [
+        'default' => 0.15,
+        'meta' => [
+            'type' => new NumberType(),
+            'step' => 0.01,
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+            'advanced' => true,
+        ]
+    ],
+    'Umami_replay_max_duration' => [
+        'default' => 300000,
+        'meta' => [
+            'type' => new NumberType,
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+            'advanced' => true,
+        ]
+    ],
+    'Umami_cobalt_event_tracking' => [
+        'default' => false,
+        'meta' => [
+            'type' => new BooleanType(),
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_UMAMI,
+            'advanced' => true,
+        ],
+        "directives" => [
+            "public" => true
+        ],
+    ],
+    
 ];

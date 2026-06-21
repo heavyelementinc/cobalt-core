@@ -59,6 +59,7 @@ class Settings extends Controller {
         $settings = new CobaltSettings(COBALT_BOOSTRAP_ALWAYS);
         $s = $settings->get_settings();
         $arr = [];
+        $advanced = [];
         /** @var CobaltSetting $details */
         foreach($settings->instances as $setting => $details) {
             if(!isset($details->meta['group'])) continue;
@@ -70,6 +71,13 @@ class Settings extends Controller {
             if(isset($details->meta['subgroup'])) $subgroup = $details->meta['subgroup'];
             if(!key_exists($group, $arr)) $arr[$group] = [];
             if(!key_exists($subgroup, $arr[$group])) $arr[$group]['General'] = '';
+            if($details->meta['advanced']) {
+                if(!key_exists($group.$subgroup, $advanced)) {
+                    $advanced[$group.$subgroup] = "<details><summary>Advanced</summary><ul class='list-panel'>";
+                }
+                $advanced[$group.$subgroup] .= "<li>".$instance->getLabel() . $instance->field(). "</li>";
+                continue;
+            }
             $arr[$group][$subgroup] .= "<li>".$instance->getLabel() . $instance->field(). "</li>";
         }
         $nav = "";
@@ -80,7 +88,12 @@ class Settings extends Controller {
             $list .= "<div id='$escapedGroup'>";
             foreach($subgroups as $subgroupName => $elements) {
                 if(!$elements) continue;
-                $list .= "<fieldset id='".url_fragment_sanitize($subgroupName)."'><legend>$subgroupName</legend><ul class='list-panel'>$elements</ul></fieldset>";
+                $list .= "<fieldset id='".url_fragment_sanitize(trim(strip_tags($subgroupName)))."'><legend>$subgroupName</legend><ul class='list-panel'>$elements</ul>";
+                if(key_exists($group.$subgroupName, $advanced)) {
+                    $list .= $advanced[$group.$subgroupName] .= "</ul></details>";
+                }
+                $list .= "</fieldset>";
+                
             }
             $list .= "</div>";
         }

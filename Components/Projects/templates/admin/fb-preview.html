@@ -1,0 +1,61 @@
+<aside class="facebook-preview">
+    <div id="facebook-preview">
+        <img src="{{doc.primary}}">
+        <div class="wrapper">
+            <cite>PHFD.CO</cite>
+            <h1><span id="fb-headline-preview">{{doc.name}}</span> | {{app.app_name}}</h1>
+            <div id="fb-blurb-preview">{{doc.blurb}}</div>
+        </div>
+    </div>
+</aside>
+<style>
+    aside {
+        /* height: 110vh; */
+        flex-grow: 1;
+    }
+
+    #facebook-preview {
+        --width: 350px;
+        width: var(--width);
+        overflow:hidden;
+        border-radius: 5px;
+        font-family: 'Arial', sans-serif;
+        background: white;
+        position: sticky;
+        text-decoration: none;
+        display: block;
+    }
+    #facebook-preview .wrapper {
+        padding: 0 11px 11px;
+    }
+
+    #facebook-preview cite {
+        font-style: normal;
+        color: gray;
+        margin-top: 0;
+        font-size: .8em;
+    }
+
+    #facebook-preview img {
+        width: var(--width);
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+    }
+
+    #facebook-preview h1 {
+        font-size: 1.4em;
+        color: black;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    #fb-blurb-preview {
+        display: -webkit-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        color: gray;
+    }
+</style>
