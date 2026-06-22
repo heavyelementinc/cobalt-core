@@ -9,6 +9,10 @@
     --margin-xl: 2rem;
     --margin-xxl: 4rem;
     --margin-xxxl: 6rem;
+    --_anchor-element-color: var(--primary-color-1);
+    --_anchor-hover-color: var(--primary-color-0);
+    --_anchor-active-color: var(--primary-color-2);
+    --_anchor-visited-color: var(--_anchor-element-color);
 }
 
 *,
@@ -33,21 +37,14 @@ body {
     }
 }
 
-/** Default colors for a link that are easily overridable **/
-:where(a) {
-    --_anchor-element-color: var(--primary-color-1);
-    --_anchor-hover-color: var(--primary-color-0);
-    --_anchor-active-color: var(--primary-color-2);
-    --_anchor-visited-color: var(--_anchor-element-color);
-}
 
 /** Default link styles **/
-a:not(.button) {
+:where(a:not(.button)) {
     color: var(--_anchor-element-color, inherit);
     font-weight: bold;
     text-decoration: none;
     &:visited {
-        color: var(--_anchor-visited-color, inherit);
+        color: var(--_anchor-element-color, inherit);
         /* color: color-mix(in hsl, var(--_anchor-visited-color, var(--font-body-color)), var(--font-body-color) var(--_anchor-contrast-mix)); */
     }
     &:hover, &:focus, &:focus-visible, &:focus-visible {

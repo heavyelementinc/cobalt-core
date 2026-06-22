@@ -70,7 +70,7 @@ class Item implements Persistable{
         $this->ingest($data);
     }
 
-    function ingest(array $data) {
+    function ingest(array $data):Item {
         $this->set_href($data['href'], $data['path'] ?? null);
         $this->set_package($data['package'] ?? 'package');
         $this->set_contexts($data['contexts'] ?? []);
@@ -80,9 +80,10 @@ class Item implements Persistable{
         $this->set_version($data['version'] ?? 1);
         $this->set_inline($data['inline'] ?? false);
         $this->set_deferred($data['deferred'] ?? false);
+        return $this;
     }
 
-    public function set_href(string $value, ?string $path = null) {
+    public function set_href(string $value, ?string $path = null):Item {
         $type = null;
         switch (strtolower(pathinfo($value, PATHINFO_EXTENSION))) {
             case "js":
@@ -108,45 +109,55 @@ class Item implements Persistable{
         }
         $this->href = $value;
 
+        return $this;
     }
-    public function set_contexts(array|BSONArray $value) {
+    public function set_contexts(array|BSONArray $value):Item {
         if($value instanceof BSONArray) $value = $value->getArrayCopy();
         // if(in_array("common", $value)) {
         //     unset($value[array_search("commomn", $value)]);
         //     $value = self::COMMON_SHORTHAND_REFERENCE;
         // }
         $this->contexts = $value;
+        return $this;
     }
 
-    public function set_module(bool $value) {
+    public function set_module(bool $value):Item {
         $this->module = $value;
+        return $this;
     }
 
-    public function set_type(ValidTypes $value) {
+    public function set_type(ValidTypes $value):Item {
         $this->type = $value;
+        return $this;
     }
 
-    public function set_append(bool $value) {
+    public function set_append(bool $value):Item {
         $this->append = $value;
+        return $this;
     }
 
-    public function set_version(int $version) {
+    public function set_version(int $version):Item {
         $this->version = $version;
+        return $this;
     }
 
-    public function set_package(string $package) {
+    public function set_package(string $package):Item {
         $this->package = $package;
+        return $this;
     }
 
-    public function set_registered(bool $value) {
+    public function set_registered(bool $value):Item {
         $this->registered = $value;
+        return $this;
     }
 
-    public function set_deferred(bool $value) {
+    public function set_deferred(bool $value):Item {
         $this->deferred = $value;
+        return $this;
     }
-    public function set_inline(bool $value) {
+    public function set_inline(bool $value):Item {
         $this->inline = $value;
+        return $this;
     }
 
     public function get_href():string {

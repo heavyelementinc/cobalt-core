@@ -1807,7 +1807,10 @@ return [
                     "lng" => -69.1852871
                 ]
             ]
-        ]
+        ],
+        "img" => "/core-content/img/towns/Downtown_Rockland.jpg",
+        "dark" => false,
+        "credit" => "<a href=\"https://en.wikipedia.org/wiki/Rockland,_Maine#/media/File:Downtown_Rockland.jpg\">LiamSig - Own work &bull; Rockland Downtown CC BY-SA 4.0/a>",
     ],
     "eliot" => [
         "state" => "me",
@@ -5172,7 +5175,10 @@ return [
                     "lng" => -68.98235199999999
                 ]
             ]
-        ]
+        ],
+        "img" => "/core-content/img/towns/Searsport_Maine.jfif",
+        "dark" => false,
+        "credit" => "<a href=\"https://en.wikipedia.org/wiki/Searsport,_Maine#/media/File:Searsport_Maine.JPG\">Thomsonmg2000 - Own work &bull; Street in Searsport. The Penobscot Marine Museum is across the street, CC0/a>",
     ],
     "windsor" => [
         "state" => "me",
@@ -5685,7 +5691,7 @@ return [
         "mi2" => "39.4",
         "km2" => "102",
         "inc" => "1804",
-        "blurb" => "A bustling inland hub known for Unity Environmental University and the Common Ground Country Fair. It is a center for sustainable living, organic farming, and vibrant community events that draw people from across the state.",
+        "blurb" => "A bustling inland hub known the world over for the Common Ground Country Fair. It is a center for sustainable living, organic farming, and vibrant community events that draw people from across the nation.",
         "geo" => [
             "bounds" => [
                 "northeast" => [
@@ -5712,7 +5718,11 @@ return [
                     "lng" => -69.41684
                 ]
             ]
-        ]
+        ],
+        "img" => "/core-content/img/towns/Unity_Maine.webp",
+        "dark" => false,
+        "credit" => "&copy; Gardiner Bryant 2026",
+
     ],
     "anson" => [
         "state" => "me",
@@ -7857,7 +7867,11 @@ return [
                     "lng" => -69.0823431
                 ]
             ]
-        ]
+        ],
+        "img" => "/core-content/img/towns/Park_Row,_Bayside,_Maine.jpg",
+        "dark" => false,
+        "credit" => "<a href=\"https://en.wikipedia.org/wiki/Northport,_Maine#/media/File:Park_Row,_Bayside,_Maine.jpg\">Seasider53 - Own work &bull; Four of the eleven Victorian cottages lining Park Row CC BY-SA 4.0/a>",
+
     ],
     "tremont" => [
         "state" => "me",

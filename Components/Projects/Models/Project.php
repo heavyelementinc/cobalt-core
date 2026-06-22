@@ -80,12 +80,17 @@ class Project extends Model implements Migration {
             ],
             'teaser' => [
                 new MarkdownType,
+                'label' => 'Teaser Text',
+                'description' => 'Teaser text should offer the visitor some enticing flavor text. Give visitors a reason to want to click on this project! Make sure you use relevant keywords! This should be short and sweet.',
                 'index' => [
                     'title' => 'Teaser'
-                ]
+                ],
+                'max' => 300,
             ],
             'body' => [
                 new BlockType,
+                'label' => 'Body Copy',
+                'description' => "Here's where you can describe this project in as much detail as you'd like. There are no limits to what you can say here. Just make sure you use keywords for your business and mention your service area!",
                 'index' => [
                     'title' => 'Body',
                     'searchable' => new SearchableDirective(true),
@@ -219,6 +224,10 @@ class Project extends Model implements Migration {
                     $this->__modify('county', Areas::getCountyOfTown($val), false);
                     $this->__modify('geo', ['type' => 'Point', 'coordinates' => Areas::getGeoCoordsForTown($val)], false);
                     return $val;
+                },
+                'display' => function ($val) {
+                    $town = Areas::getValidTowns();
+                    return $town[$val]['name'];
                 },
                 'index' => [
                     'filterable' => true,

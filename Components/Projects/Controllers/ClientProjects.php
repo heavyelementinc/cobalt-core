@@ -96,10 +96,11 @@ class ClientProjects extends ModelController {
         if($includeOtherProjects) {
             $other_projects = $this->getIndexListing();
         }
+        
         $first = $project->images[0];
         $lets_chat_button = <<<HTML
         <div class="hbox">
-            <a href="/intake" class="button">Let's Chat</a>
+            <a href="/contact" class="button">Let's Chat</a>
         </div>
         HTML;
         if($includeOtherProjects == false) $lets_chat_button = "";

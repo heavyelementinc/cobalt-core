@@ -1,3 +1,6 @@
+// import NativeCarousel from "./NativeCarousel.js";
+// customElements.define('native-carousel', NativeCarousel);
+
 import BlockEditor from "./BlockEditor.js";
 customElements.define("block-editor", BlockEditor);
 

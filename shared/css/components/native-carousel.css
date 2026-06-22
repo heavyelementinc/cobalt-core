@@ -1,0 +1,68 @@
+cobalt-carousel {
+    --size: 1.25em;
+    --item-width: attr(item-width type(<number> | <percentage>), 80%);
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 1em;
+    position: relative;
+    scrollbar-width: auto;
+    box-sizing: border-box;
+    scroll-timeline: --carousel inline;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    & > * {
+        flex: 0 0 var(--item-width, 80%);
+        scroll-snap-align: center;
+        overflow: clip;
+        overflow-clip-margin: 0px;
+    }
+    @supports selector(::scroll-button(right)) {
+        &::scroll-button(left),&::scroll-button(right) {
+            content:"\F0141";
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            height: var(--size);
+            width: var(--size);
+            font-size: calc(var(--size) * 2);
+            font-family: 'Material Design Icons';
+            border-radius: 50%;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            border: 0;
+        }
+    
+        &::scroll-button(right) {
+            content: "\F0142";
+            right: 0;
+        }
+    }
+    @supports selector(::scroll-marker()) {
+        &::scroll-marker-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5em;
+            padding-top: 1em;
+            position: relative;
+            bottom: 0;
+        }
+        & > *::scroll-marker() {
+            content: "";
+            width: 0.75em;
+            height: 0.75em;
+            border-radius: 50%;
+            background-color: rgb(from currentColor r g b / 0.25);
+            transition: background-color 0.3s ease, scale 0.3s ease;
+            border: 0;
+            &:checked {
+                background-color: rgb(from currentColor r g b / 1);
+                scale: 1.3;
+            }
+        }
+    }
+}

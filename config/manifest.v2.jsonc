@@ -523,6 +523,10 @@
         "version": 2
     },
     {
+        "href":"projects.css",
+        "contexts": ["web"]
+    },
+    {
         "href": "main.css",
         "contexts": ["web"]
     },

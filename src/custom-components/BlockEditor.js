@@ -142,6 +142,7 @@ export default class BlockEditor extends ICustomInput {
     /** @property {EditorJS|null} __editor__ */
     __editor__ = null;
     __synchronousValue__ = {};
+    __modules__ = [];
     data = {};
     constructor() {
         super();
@@ -170,7 +171,7 @@ export default class BlockEditor extends ICustomInput {
 
     async initEditor() {
         this.appendModules();
-        await window.Cobalt.promises.ready;
+        await Promise.all(this.__modules__);
         await this._restoreSavedData();
         this.__editor__ = new EditorJS({
             holder: this,
@@ -287,7 +288,7 @@ export default class BlockEditor extends ICustomInput {
         ];
         for(const src of modules) {
             const deferred = new Deferred();
-            window.asyncScripts.push(deferred.promise);
+            this.__modules__.push(deferred.promise);
             const script = document.createElement("script");
             script.addEventListener("load", () => {
                 deferred.resolve(true);

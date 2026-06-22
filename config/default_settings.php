@@ -1304,10 +1304,10 @@ return [
         /* The name of the designer as well as their website and title text */
         "designer" => [
             "default" => [
-                "prefix" => "Designed by",
-                "label" =>   "Heavy Element",
-                "href" =>   "https://heavyelement.com/",
-                "title" =>  "Midcoast Maine's Premier Media Production Studio"
+                "prefix" => "Design &amp; Hosting by",
+                "name"   =>  "Heavy Element",
+                "href"   =>  "https://heavyelement.com/",
+                "title"  =>  "Midcoast Maine's Premier Media Production Studio"
             ],
             // "meta" => [
             //     "group" => GROUP_BASIC,

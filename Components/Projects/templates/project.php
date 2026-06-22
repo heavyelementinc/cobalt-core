@@ -13,7 +13,17 @@ use Components\Projects\Models\Project;
     <article class="project-sidebar">
         <hgroup>
             <h1>{{doc.name}}</h1>
-            <small>{{doc.date.display()}}</small>
+            <div class="">
+                <?php
+                if(isset($doc->town)) {
+                    $town = $doc->town->display();
+                    echo <<<HTML
+                    <small><i name="map-marker"></i>$town &bull;</small>
+                    HTML;
+                }
+                ?>
+                <small>{{doc.date.format("long")}}</small>
+            </div>
         </hgroup>
         {{!doc.body}}
         {{!lets_chat_button}}

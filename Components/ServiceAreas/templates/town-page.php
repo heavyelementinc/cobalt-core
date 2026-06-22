@@ -6,27 +6,24 @@
  * @var int $distance
  * @var iterable $clientsInRegion
  */
-$img = $county['img'];
-$dark = $county['dark'];
+$img    = $county['img'];
+$dark   = $county['dark'];
 $credit = $county['credit'];
-if ($town['img']) {
-    $img = $town['img'];
-    $dark = $town['dark'];
+if (isset($town['img'])) {
+    $img    = $town['img'];
+    $dark   = $town['dark'];
     $credit = $town['credit'];
 }
 ?>
 
-<section id="content-splash" class="content-splash" style="--_background: url('<?= $img ?>');">
+<section id="content-splash" class="content-splash" style="background-image: url('<?= $img ?>');">
     <div class="content-splash--callout">
-        <!-- <h3 class="section-eyebrow" lazy-reveal lazy-delay="0ms">{{!town}}</h3> -->
         <h1 class="section-title" lazy-reveal lazy-delay="100ms">{{!town.name}}, Maine</h1>
         <article class="em-callout" lazy-reveal lazy-delay="200ms">
             <?= (isset($town['blurb'])) ? from_markdown($town['blurb']) : "Located in Maine's
         $county[descriptor] $county[location] region, $town[name] is a $town[type]
         spanning $town[mi2] square miles." ?>
         </article>
-
-        <!-- <a class="button" href="/contact/">We'll help you tell it</a> -->
     </div>
 </section>
 

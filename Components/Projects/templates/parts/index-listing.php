@@ -2,6 +2,16 @@
     <!-- style="--accent: {{doc.cover_image.getColor()}}; --contrast: {{doc.cover_image.contrast_color}}" -->
     <?= embed_image($doc->cover_image, $doc->cover_image->_id) ?>
     <div class="project--teaser">
+        <div class="">
+            <?php
+            if(isset($doc->town)) {
+                $town = $doc->town->display();
+                echo <<<HTML
+                <small><i name="map-marker"></i>$town</small>
+                HTML;
+            }
+            ?>
+        </div>
         <h2>{{doc.name}}</h2>
         <article>
             {{doc.teaser.md()}}

@@ -131,7 +131,7 @@ class Areas extends Controller {
         $town = $this->townData[$key];
         $countyName = $this->townData[$key]['county'];
 
-        set("title", "Services in $town[name]");
+        set("title", "Services in $town[name], ME");
 
         // Other towns in the area
         // $others = "";
@@ -193,23 +193,28 @@ class Areas extends Controller {
                 '$near' => [
                     '$geometry' => [
                         'type' => 'Point',
-                        'coordinates' => self::getGeoCoordsForTown(__APP_SETTINGS__['ServiceAreas_default_location'], $this->townData),
+                        'coordinates' => self::getGeoCoordsForTown($townKey, $this->townData),
                     ],
                     '$minDistance' => 0,
-                    '$maxDistance' => 1000 * ($town['nearby_clients'] ?? 300)
+                    '$maxDistance' => 1000 * ($town['nearby'] ?? 300)
                 ]
             ]
         ], [
             'limit' => 10
         ]);
 
-        $rendered = "<section>";
+        $rendered = "<section class=\"main-section\"><h2 class='section-title'>Our Projects</h2>";
+        $rendered .= "<article><p>Here you'll find some of our latest projects in and around $town[name]!</p></article>";
+        $rendered .= "<div class=\"project-gallery project-gallery--service-area\">";
+        $hasContent = false;
         /** @var Project $portItem */
         foreach($portfolioInRegion as $portItem) {
-            $portItem .= $portItem->getIndexEntry();
+            $rendered .= $portItem->getIndexEntry();
+            $hasContent = true;
         }
+        if(!$hasContent) return "";
 
-        return $rendered . "</section>";
+        return $rendered . "</div></section>";
     }
 
     static function sitemap() {
