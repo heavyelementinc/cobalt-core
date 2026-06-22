@@ -116,12 +116,12 @@ class Project extends Model implements Migration {
             'primary' => new StringType,
             'cover_image' => [
                 new ImageType,
-                'set' => new SetDirective(function (&$value):void {
+                'set' => function (&$value) {
                     $url = "url('".get_image_url($value)."')";
                     update(".cover-placement-preview", [
                         'style' => ['--_background' => $url]
                     ]);
-                })
+                }
             ],
             'cover_placement_desktop_x' => [
                 new NumberType,
@@ -220,7 +220,9 @@ class Project extends Model implements Migration {
             'town' => [
                 new WeakEnumType,
                 'valid' => fn () => Areas::getValidTowns(),
+                'required' => true,
                 'filter' => function ($val) {
+                    if(!$val) return null;
                     $this->__modify('county', Areas::getCountyOfTown($val), false);
                     $this->__modify('geo', ['type' => 'Point', 'coordinates' => Areas::getGeoCoordsForTown($val)], false);
                     return $val;
