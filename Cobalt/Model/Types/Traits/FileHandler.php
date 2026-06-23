@@ -70,6 +70,10 @@ trait FileHandler {
             $filename = guidv4($filename);
             $addExtension = true;
         }
+        if($count = $this->__count(['filename' => $filename], [])) {
+            $filename = "$filename-$count";
+            $addExtension = true;
+        }
         if($addExtension) {
             $info = pathinfo($arr['name']);
             $filename = "/res/fs/$filename.".strtolower($info['extension']);

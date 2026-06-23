@@ -53,6 +53,10 @@
     --gap: 3ch;
     padding: var(--gap);
     gap: var(--gap);
+    @media only screen and (max-width:35em) {
+        flex-direction: column;
+        padding: unset;
+    }
 }
 
 .project-sidebar {
@@ -66,6 +70,12 @@
     display: grid;
     gap: var(--gap, 3ch);
     grid-template-columns: 1fr 1fr 1fr;
+    @media only screen and (max-width:35em) {
+        width: 100vw;
+        padding: 0 var(--gap, 3ch);
+        display: flex;
+        flex-direction: column;
+    }
 }
 .project--item {
     display: grid;
@@ -125,6 +135,10 @@
     article, p {
         margin: 0;
     }
+    @media only screen and (max-width: 35em) {
+        /* height: 100vw;
+        width: 100vw; */
+    }
 }
 
 
@@ -134,6 +148,9 @@
 .other-projects-container {
     h2 {
         text-align: center;
+    }
+    @media only screen and (max-width: 35em) {
+        width: 100vw;
     }
 }
 

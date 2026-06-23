@@ -7,6 +7,7 @@ use Cobalt\DBManagement\CobaltCursor;
 use Cobalt\Model\Model;
 use Components\Projects\Models\Project;
 use Exceptions\HTTP\NotFound;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Driver\Cursor;
 use MongoDB\Model\BSONDocument;
 
@@ -37,11 +38,12 @@ class ClientProjects extends ModelController {
         ];
     }
 
-    public function publicIndexQuery():null|CobaltCursor {
+    public function publicIndexQuery(?ObjectId $exclude = null):null|CobaltCursor {
+        $query = ['published' => true];
+        if($exclude) $query['_id'] = ['$ne' => $exclude];
+
         return $this->model->find(
-            [
-                'published' => true,
-            ],
+            $query,
             [
                 'limit' => 20,
                 'sort' => ['order' => -1],
@@ -52,8 +54,8 @@ class ClientProjects extends ModelController {
         );
     }
 
-    private function getIndexListing():array {
-        $projects = iterator_to_array($this->publicIndexQuery() ?? []);
+    private function getIndexListing(?ObjectId $exclude = null):array {
+        $projects = iterator_to_array($this->publicIndexQuery($exclude) ?? []);
         $html = "";
         /** @var Project $model */
         foreach($projects as $model) {
@@ -94,7 +96,7 @@ class ClientProjects extends ModelController {
 
         $other_projects = ['',''];
         if($includeOtherProjects) {
-            $other_projects = $this->getIndexListing();
+            $other_projects = $this->getIndexListing($project->_id);
         }
         
         $first = $project->images[0];

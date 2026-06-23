@@ -176,7 +176,8 @@ class Project extends Model implements Migration {
                     if(is_null($this->cover_image->getValue()) && !isset($_POST['cover_image'])) {
                         $this->__modify('cover_image', $value[0], false);
                     }
-                })
+                }),
+                'obscure_filename' => false,
             ],
             'image_count' => [
                 new NumberType
