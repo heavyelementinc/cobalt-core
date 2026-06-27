@@ -603,7 +603,7 @@ function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, 
     $alt      = $attributes['alt'] ?? $doc['alt'];
     if(!$alt) $alt = $doc['meta']['alt']; // Legacy! Is this still needed?
     if(!$alt) pathinfo($filename, PATHINFO_FILENAME);
-    $alt = htmlspecialchars($alt);
+    $alt = htmlspecialchars($alt ?? "");
 
     // Handle other details
     $height   = htmlspecialchars($doc['meta']['height']);

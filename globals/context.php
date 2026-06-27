@@ -21,7 +21,7 @@ $CSP = [
     'frame-ancestors' => config()['CSP_allowed_frame_ancestors'],
     'font-src'        => config()['CSP_allowed_font_origins'],
     'script-src'      => config()['CSP_allowed_script_origins'],
-    'script-src-elem' => __APP_SETTINGS__['CSP_allowed_script_elem_origins'],
+    'script-src-elem' => __APP_SETTINGS__['CSP_allowed_script_elem_origins'] ?? '',
     'srcipt-src-attr' => [],
 ];
 

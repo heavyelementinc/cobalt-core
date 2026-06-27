@@ -4,6 +4,7 @@ use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\ContactForm\Controllers\Submissions;
 use Cobalt\Documentation\Controllers\Documentation;
 use Cobalt\EventListings\Controllers\Events;
+use Cobalt\JobQueue\Controllers\JobStatus;
 use Cobalt\Settings\Controllers\Settings;
 use Components\StructuredData\Controllers\BusinessDetails;
 use Routes\Options;
@@ -149,6 +150,8 @@ CrudableFiles::apiv1();
 Settings::post((new Options('/settings/update/', 'update'))
     ->set_permission('Auth_modify_cobalt_settings')
 );
+
+JobStatus::get((new Options("/jobs/{id}/status", 'status')));
 
 // BusinessDetails::apiv1();
 // BusinessDetails::post((new Options("/settings/seo/update/", "__update"))

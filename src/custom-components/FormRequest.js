@@ -414,7 +414,7 @@ export default class FormRequest extends ProgressWizard {
         
         // Let's wait for any FormRequestData Promises to be fulfilled
         await formRequestData.ready();
-        this.response = await this.api.submit(await formRequestData.value);
+        this.response = await this.api.submit(await formRequestData.value, formRequestData.sizeInBytes);
         return this.response;
     }
 
@@ -474,6 +474,9 @@ export default class FormRequest extends ProgressWizard {
                 case "files":
                 case "file":
                     return field.files;
+                case "check":
+                case "checkbox":
+                    return field.checked;
             }
         }
         if(field.tagName === "SELECT") {
@@ -570,6 +573,7 @@ class FormRequestData {
     __form__ = null;
     __submitter__ = null;
     __hasFileList__ = false;
+    __sizeInBytes__ = 0;
     __uploadSize__ = 0;
 
     constructor(formRequestElement = null, submitterElement = null) {
@@ -616,6 +620,11 @@ class FormRequestData {
             return this.__formData__;
         }
         return this.__read();
+    }
+    
+    // Returns the approximate size of the request to be sent. Not guaranteed!
+    get sizeInBytes() {
+        return this.__uploadSize__ + (JSON.stringify(this.__formData__).length * 8);
     }
 
     get uploadSize() {

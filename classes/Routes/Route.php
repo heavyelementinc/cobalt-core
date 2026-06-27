@@ -6,6 +6,8 @@ use Exceptions\HTTP\Unauthorized;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 
+
+
 class Route {
 
     public static $preg_quote = "[^/?]+";
@@ -17,17 +19,17 @@ class Route {
      * 
      * @param string|Options $pattern A REQUEST_URI to be matched against using Cobalt's route syntax
      * @param string $controller A controller/method pair in the "Controller@method" format
-     * @param array{handler: string, 
+     * @param array{handler:string,
      *   permission: string, 
      *   groups: string, 
-     *   anchor: {
+     *   anchor: array{
      *      name: string,
      *      href: string,
      *      icon: string,
      *      order: int,
      *      attributes: array
      *   },
-     *   navigation: {
+     *   navigation: array{
      *      name: string,
      *      href: string,
      *      icon: string,
@@ -35,7 +37,7 @@ class Route {
      *      attributes: array
      *   },
      *   csrf_required: bool,
-     *   sitemap: {
+     *   sitemap: array{
      *      ignore: bool,
      *      children: callable,
      *      lastmod: callable

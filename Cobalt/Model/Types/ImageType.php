@@ -1,19 +1,25 @@
 <?php
 namespace Cobalt\Model\Types;
 
+use Cobalt\Commands\Exceptions\CommandError;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Filters\Issues\FilterIssue;
+use Cobalt\Model\GenericModel;
+use Cobalt\Model\Interfaces\JobHandler;
+use Cobalt\Model\Interfaces\ServerEvents;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\ForeignId;
 use Cobalt\Model\Types\Traits\FileHandler;
+use Cobalt\JobQueue\Jobs\Job;
 use Error;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use Override;
 
-class ImageType extends ForeignId {
+class ImageType extends ForeignId implements JobHandler {
     use FileHandler;
     
     /** Accept must return an array of valid mimetypes */
@@ -32,6 +38,7 @@ class ImageType extends ForeignId {
     const MIN_RESOLUTION_POLICY_DIRECTIVE = "min_policy";
     const MIN_RESOLUTION_POLICY__ERROR = 0;
     const MIN_RESOLUTION_POLICY__SCALE = 1;
+    const FILE_UPLOAD_INDICATOR = '$_FILES_$';
 
     public function runJoinQuery(Model $model, ?ObjectId $id): null|BSONArray|BSONDocument|Persistable {
         return $this->__findOne(['_id' => $id]);
@@ -39,7 +46,7 @@ class ImageType extends ForeignId {
 
     function filter($oid) {
         $filesKey = $this->{MODEL_RESERVERED_FIELD__FIELDNAME};
-        if($oid === '$_FILES_$' && key_exists($filesKey, $_FILES)) {
+        if($oid === self::FILE_UPLOAD_INDICATOR && key_exists($filesKey, $_FILES)) {
             $files = normalize_uploaded_files($_FILES);
             $count = count($files[$filesKey]);
             if($count == 0 || $count >= 2) throw new BadRequest("Too many images uploaded for $filesKey");
@@ -47,117 +54,18 @@ class ImageType extends ForeignId {
             $arr = $files[$filesKey][0];
 
             $this->filter_attributes_upload($arr['tmp_name']);
-
-            $filename = $this->filename($arr);
-            $oid = $this->__store($arr['tmp_name'], $filename);
+            // TODO: Pre-allocate ObjectId!
+            return null;
+            // $oid = $this->__store($arr['tmp_name'], $filename);
         } else {
-            
             $oid = $this->filter_attributes_objectid($this->handle_incoming_commands($oid));
         }
-        if(!$oid) throw new BadRequest("Failed to upload image to database");
-
+        // update("[name='$this->name']",['classList' => ['add' => ['working']]]);
+        // if(!$oid) throw new BadRequest("Failed to upload image to database");
+        
         return parent::filter($oid);
     }
 
-    /**
-     * This function takes an uploaded file and will throw an ValidationFailed or other Validation error
-     * if the file does not satisfy field directive requirements
-     * @param string $path 
-     * @return void 
-     */
-    protected function filter_attributes_upload(string $path) {
-        $image_mimetype   = mime_content_type($path);
-        $image_resolution = getimagesize($path);
-        $this->filter_image($image_mimetype, $image_resolution);
-    }
-
-    /**
-     * This function verifies that the given ObjectID satisfies field directive requirements
-     * @param string|ObjectId $oid 
-     * @return ObjectId 
-     */
-    protected function filter_attributes_objectid(string|ObjectId $oid):ObjectId {
-        if($oid instanceof ObjectId === false ) {
-            if(!$oid) throw new BadRequest("Malformed ObjectId");
-            $oid = new ObjectId($oid);
-        }
-
-        $result = $this->__findOne(['_id' => $oid],[]);
-        if(!$result) throw new FilterIssue("Failed to find the referenced ForeignId");
-
-        $image_mimetype    = $result['meta']['mimetype'];
-        $image_resolution = [$result['meta']['width'], $result['meta']['height']];
-        $this->filter_image($image_mimetype, $image_resolution);
-        return $oid;
-    }
-
-    protected function filter_image(string $mimetype, string|array $size) {
-        $accepted = $this->directiveOrNull("accept");
-        if(is_array($accepted)) {
-            if(!in_array($mimetype, $accepted)) throw new FilterIssue("Invalid mimetype $mimetype");
-        }
-
-        $max_resolution = $this->directiveOrNull(self::MAX_RESOLUTION_DIRECTIVE);
-        $min_resolution = $this->directiveOrNull(self::MIN_RESOLUTION_DIRECTIVE);
-
-        $failed = 0;
-
-        $failed_max_width  = 0b1;
-        $failed_max_height = 0b01;
-        $failed_min_width  = 0b001;
-        $failed_min_height = 0b0001;
-
-        if($max_resolution) {
-            $max_resolution = $this->normalize_resolution($max_resolution);
-
-            if($size[0] > $max_resolution['width']) $failed += $failed_max_width;
-            if($size[1] > $max_resolution['height']) $failed += $failed_max_height;
-        }
-
-        if($min_resolution) {
-            $min_resolution = $this->normalize_resolution($min_resolution);
-
-            if($size[0] < $min_resolution['width']) $failed = $failed_min_width;
-            if($size[1] < $min_resolution['height']) $failed = $failed_min_height;
-        }
-
-        if($max_resolution && $min_resolution) {
-            if($max_resolution['width'] < $min_resolution['width']) throw new FilterIssue("Impossible width constraints");
-            if($max_resolution['height'] < $min_resolution['height']) throw new FilterIssue("Impossible height constraints");
-        }
-
-        if($failed & $failed_max_width || $failed & $failed_max_height) {
-            $policy = $this->directiveOrNull(self::MIN_RESOLUTION_POLICY_DIRECTIVE);
-            switch($policy) {
-                case null:
-                case self::MIN_RESOLUTION_POLICY__ERROR:
-                    throw new FilterIssue("Image is too small (must be larger than than $min_resolution[width]x$min_resolution[height])");
-                    break;
-                default:
-                    throw new Error("Unknown policy $policy");
-            }
-        }
-        if($failed & $failed_min_width || $failed & $failed_min_height) {
-            $policy = $this->directiveOrNull(self::MAX_RESOLUTION_POLICY_DIRECTIVE);
-            switch($policy) {
-                case null:
-                case self::MAX_RESOLUTION_POLICY__ERROR:
-                    throw new FilterIssue("Image is too large (can be no greater than $max_resolution[width]x$max_resolution[height])");
-                    break;
-                default:
-                    throw new Error("Unknown policy $policy");
-            }
-        }
-    }
-
-    protected function normalize_resolution(string|array $size) {
-        $res = ['width' => null, 'height' => null];
-        if(is_string($size)) $size = explode("x", strtolower($size));
-        if(is_array($size)) {
-            $res['width'] = $size['width'] ?? trim($size[0]);
-            $res['height'] = $size['height'] ?? trim($size[1]);
-        }
-    }
 
     #[Prototype]
     protected function field(string $class = "", array $misc = [], ?string $tag = null):string {
@@ -181,34 +89,37 @@ class ImageType extends ForeignId {
         return "Cobalt/Model/templates/types/image-type.php";
     }
 
-    // public function initDirectives(): array {
-    //     return [
-    //         // 'operator' => function (&$operators, &$field, &$details) {
-    //         //     if($this->operator === '$set') {
-    //         //         $operators[$this->operator][$field] = $details;
-    //         //         return;
-    //         //     }
-    //         //     $operators[$this->operator][$this->{MODEL_RESERVERED_FIELD__FIELDNAME}] = ['$each' => $details];
-    //         // },
-    //         'schema' => [
-    //             // $schema
-    //             'chunkSize' => new NumberType,
-    //             'filename' => new StringType,
-    //             'length' => new NumberType,
-    //             'uploadDate' => new DateType,
-    //             'md5' => new StringType,
-    //             '_v' => new NumberType,
-    //             'meta' => [
-    //                 new ModelType,
-    //                 'schema' => [
-    //                     'width' => new NumberType,
-    //                     'height' => new NumberType,
-    //                     'mimetype' => new StringType,
-    //                     'accent_color' => new HexColorType,
-    //                     'contrast_color' => new HexColorType,
-    //                 ]
-    //             ]
-    //         ]
-    //     ];
-    // }
+    #[Override]
+    public function filter_setup(array &$toValidate, string $key, Job $filterJob, GenericModel $model):void {
+        if($toValidate[$key] === self::FILE_UPLOAD_INDICATOR) {
+            $files = normalize_uploaded_files($_FILES);
+            $this->prep_for_async_storage($files[$key]);
+            $filterJob->addOneToQueue([
+                'file' => $files[$key][0],
+                'name' => $key,
+            ]);
+        }
+    }
+
+    #[Override]
+    public function __job__on_start(object $item, Job $job, int $index) {
+        $filename = $this->filename($item->file);
+        $path = $item->file->tmp_name;
+        if(!file_exists($path)) {
+            $job->updateQueueItem($index, Job::STATUS_ABORTED, 'File missing');
+            throw new CommandError("File is missing");
+        }
+        $id = $this->__store($path, $filename, $item->file->options ?? []);
+        $this->model->updateOne(['_id' => $job->getAdopted()->refid], ['$set' => [$item['name'] => $id]]);
+        unlink($path);
+        $job->updateQueueItem($index, Job::STATUS_FINISHED, "Done");
+        $job->increment();
+
+    }
+
+    #[Override]
+    public function __job__on_complete(object $item, Job $job, int $index) {
+        
+    }
+
 }

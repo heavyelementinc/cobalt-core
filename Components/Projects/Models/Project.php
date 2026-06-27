@@ -52,6 +52,40 @@ class Project extends Model implements Migration {
 
     public function defineSchema(array $schema = []): array {
         $this->__set_index_checkbox_state(true);
+        $format = __APP_SETTINGS__['app_name'];
+        $nap_reminder = <<<HTML
+        <li>Make sure that if you use your company name that it's spelled and 
+            formatted exactly the same way you normally do. Don't abbreviate or 
+            shorten your company name. "<strong>$format</strong>"
+        </li>
+        HTML;
+
+        $image_seo = <<<HTML
+            <details>
+            <summary>SEO Suggestions</summary>
+            <ol>
+                <li>Make each image unique.</li>
+                <li>Right click (or two-finger click, or long-press) to open
+                    the metadata dialog.
+                </li>
+                <li>In the metadata dialog make sure that you:
+                    <ol>
+                        <li>Rename each image so it has relevant keywords.<br>
+                            <small>e.g. <em>remodeled-kitchen-and-restored-countertop</em></small>
+                        </li>
+                        <li>Give each image descriptive text. This is absolutely
+                            critical for having your project page appear in search
+                            results.<br>
+                            <small>e.g. <em>Kitchen remodel and countertop 
+                                restoration in [town name] by {{app.app_name}}
+                            </em></small>
+                        </li>
+                        $nap_reminder
+                    </ol>
+                </li>
+            </ol>
+            </details>
+        HTML;
         return [
             'order' => [
                 new NumberType,
@@ -65,6 +99,30 @@ class Project extends Model implements Migration {
                     'title' => 'Name',
                     'searchable' => new SearchableDirective(true),
                 ],
+                'label' => 'Project name',
+                'description' => <<<HTML
+                <details>
+                    <summary>SEO Suggestions</summary>
+                    <ol>
+                        <li>Avoid using customer names.</li>
+                        <li>Don't be too poetic. Don't be too robotic.</li>
+                        <li>Use a min of 18 characters and a max of 60 characters</li>
+                        <li>Make sure you title this project with the words your 
+                            customer will be searching for when looking 
+                            for your services!<br>
+                            <small style="font-style: italic">e.g. Wallpaper Removal at a Colonial-style Northport Home</small>
+                        </li>
+                        <li>The name should be <em>(but doesn't have to be)</em>
+                            unique to your projects.</li>
+                        <li>When in doubt, follow this formula:<br>
+                            <small><code>[Core Service] + [Location Modifier] + [Customer Detail OR Unique Aspect of Project]</code></small>
+                        </li>
+                    </ol>
+                </details>
+                HTML,
+                'required' => true,
+                'min' => 10,
+                'max' => 100,
                 // 'mutate' => new MutateDirective(function (&$val):void {
                 //     if($this->)
                 // })
@@ -90,7 +148,32 @@ class Project extends Model implements Migration {
             'body' => [
                 new BlockType,
                 'label' => 'Body Copy',
-                'description' => "Here's where you can describe this project in as much detail as you'd like. There are no limits to what you can say here. Just make sure you use keywords for your business and mention your service area!",
+                'description' => <<<HTML
+                <details>
+                    <summary>SEO Suggestions</summary>
+                    <ol>
+                        <li><strong>Tell the story</strong>: Absolute minimum of 40 words
+                            <ol>
+                                <li>Don't just talk about the functional aspect of your project.
+                                    Describe the <em>quality of your work!</em></li>
+                                <li>Explain the "how" and the "why."</li>
+                                <li>Talk about your customers needs &amp; concerns! How you addressed them.</li>
+                                <li>Start to finish: address the beginning, middle, and end!</li>
+                            </ol>
+                        </li>
+                        <li><strong>Locality:</strong> ensure you mention the city, town, or neighborhood (if relevant).</li>
+                        <li><strong>Backlinks:</strong> Include links to relevant service pages.</li>
+                        <li><strong>Keep in mind:</strong> this project <strong>may be the first time
+                            a potential customer interacts with your brand!</strong>
+                            Make a strong first impression!
+                        </li>
+                        <li><strong>Bonus:</strong> Include a quote from the customer as a <code>Quote</code>
+                            element.
+                        </li>
+                        $nap_reminder
+                    </ol>
+                </details>
+                HTML,
                 'index' => [
                     'title' => 'Body',
                     'searchable' => new SearchableDirective(true),
@@ -121,7 +204,8 @@ class Project extends Model implements Migration {
                     update(".cover-placement-preview", [
                         'style' => ['--_background' => $url]
                     ]);
-                }
+                },
+                'description' => $image_seo
             ],
             'cover_placement_desktop_x' => [
                 new NumberType,
@@ -178,6 +262,7 @@ class Project extends Model implements Migration {
                     }
                 }),
                 'obscure_filename' => false,
+                'description' => $image_seo,
             ],
             'image_count' => [
                 new NumberType
@@ -242,7 +327,42 @@ class Project extends Model implements Migration {
             ],
             'geo' => [
                 new GeoPointType
-            ]
+            ],
+            // 'seo_checklist' => [
+            //     new ModelType(),
+            //     'schema' => [
+            //         'title_private' => [
+            //             new CheckboxType,
+            //             'default' => false,
+            //             'label' => "Avoid using customer names.",
+            //         ],
+            //         'title_describe' => [
+            //             new CheckboxType,
+            //             'default' => false,
+            //             'label' => "Don't be too poetic. Don't be too robotic.",
+            //         ],
+            //         'title_length' => [
+            //             new CheckboxType,
+            //             'default' => false,
+            //             'label' => "Use a min of 18 characters and a max of 60 characters",
+            //         ],
+            //         'title_keywords' => [
+            //             new CheckboxType,
+            //             'default' => false,
+            //             'label' => "Make sure you title this project with the words your customer will be searching for when looking for your services!<br><small style=\"font-style: italic\">e.g. Wallpaper Removal at a Colonial-style Northport Home</small>",
+            //         ],
+            //         'title_unique' => [
+            //             new CheckboxType,
+            //             'default' => false,
+            //             'label' => "The name should be <em>(but doesn't have to be)</em> unique to your projects.",
+            //         ],
+            //         'title_formula' => [
+            //             new CheckboxType,
+            //             'default' => false,
+            //             'label' => "When in doubt, follow this formula:<br><small><code>[Core Service] + [Location Modifier] + [Customer Detail OR Unique Aspect of Project]</code></small>",
+            //         ],
+            //     ]
+            // ]
         ];
     }
 

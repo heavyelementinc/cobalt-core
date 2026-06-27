@@ -37,7 +37,7 @@ $tagOptions = $doc->tags->options;
                 <li class="hbox">
                     <div>
                         <div>
-                            <label>Name</label><br>
+                            {{doc.name.getLabel()}}
                             <input name="name" value="{{doc.name}}" for="#name,#fb-headline-preview">
                         </div>
                         <small>

@@ -107,7 +107,7 @@ class ClientProjects extends ModelController {
         HTML;
         if($includeOtherProjects == false) $lets_chat_button = "";
         add_vars([
-            'title' => $project->name,
+            'title' => $project->name->value,
             'doc' => $project,
             'first' => $first,
             'gallery' => $gallery,

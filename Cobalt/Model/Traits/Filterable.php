@@ -10,6 +10,8 @@ use Cobalt\Model\GenericModel;
 use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Directives\MutateDirective;
+use Cobalt\JobQueue\Controllers\JobStatus;
+use Cobalt\JobQueue\Jobs\Job;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Error;
 use MongoDB\Model\BSONArray;
@@ -38,7 +40,16 @@ trait Filterable {
 
     public function __filter(array $toValidate):self {
         if($this->__schema) $this->__defineSchema([]);
-
+        $filterJob = new Job();
+        $filterJob->init($this, $this->_id, 'filter');
+        foreach($toValidate as $field => $value) {
+            /** @var MixedType $instance */
+            $instance = $this->__schema[$field]['type'];
+            $instance->filter_setup($toValidate, $field, $filterJob, $this);
+        }
+        $filterId = null;
+        if($filterJob->length() >= 1) $filterId = $filterJob->queue();
+        
         // $toValidate = array_undot($toValidate);
 
         foreach($toValidate as $field => $value) {
@@ -60,6 +71,9 @@ trait Filterable {
         if(count($this->__issues) !== 0) throw new ValidationFailed("Validation failed.", $this->__issues);
         $this->setData($this->__validatedFields);
         $this->setValidationState(true);
+        // If we have a filterId, we should run run our background process to
+        // upload files to the database, etc.
+        if($filterId) async_run_command("jobs run $filterId");
         return $this;
     }
 

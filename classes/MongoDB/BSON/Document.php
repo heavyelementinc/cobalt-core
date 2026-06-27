@@ -2,6 +2,7 @@
 
 namespace MongoDB\BSON;
 
+use Exception;
 use IteratorAggregate;
 use Serializable;
 use Iterator;
@@ -23,7 +24,7 @@ class Document implements IteratorAggregate, Serializable{
 
     }
     final public function getIterator(): Iterator {
-        return new Iterator();
+        throw new Exception("not implemented");
     }
     final public function has(string $key): bool {
         return !!$key;
@@ -45,5 +46,9 @@ class Document implements IteratorAggregate, Serializable{
     }
     final public function unserialize(string $data): void {
 
+    }
+
+    final public function __get($field) {
+        throw new Exception("Not implemented");
     }
 }

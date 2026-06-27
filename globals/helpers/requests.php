@@ -6,6 +6,7 @@ use Cobalt\Pages\Classes\PageManager;
 use Exceptions\HTTP\Reauthorize;
 use Exceptions\HTTP\Unauthorized;
 use GuzzleHttp\Exception\GuzzleException;
+use MongoDB\BSON\ObjectId;
 use Routes\Exceptions\UnexpectedBasePath;
 use Validation\Exceptions\NoValue;
 
@@ -279,31 +280,6 @@ function createJWT(array $header, array $payload, $secret) {
  */
 function normalize_file_array() {
     return normalize_uploaded_files($_FILES);
-    // $fileUploadArray = $_FILES;
-    // $resultingDataStructure = [];
-    // foreach ($fileUploadArray as $input => $infoArr) {
-    //     $filesByInput = [];
-    //     $nextIndex = count($filesByInput);
-    //     foreach ($infoArr as $key => $valueArr) {
-    //         if (is_array($valueArr)) { // file input "multiple"
-    //             foreach($valueArr as $i=>$value) {
-    //                 $filesByInput[$i][$key] = $value;
-    //             }
-                
-    //         }
-    //         else { // -> string, normal file input
-    //             $filesByInput[] = array_merge($infoArr, ['input_name' => $input]);
-    //             break;
-    //         }
-    //     }
-    //     $filesByInput[$nextIndex]['input_name'] = $input;
-    //     $resultingDataStructure = array_merge($resultingDataStructure,$filesByInput);
-    // }
-    // $filteredFileArray = [];
-    // foreach($resultingDataStructure as $file) { // let's filter empty & errors
-    //     if (!$file['error']) $filteredFileArray[] = $file;
-    // }
-    // return $filteredFileArray;
 }
 
 
@@ -364,8 +340,8 @@ function is_cli() {
 
 /**
  * 
- * @param array $files array{key:array{name:string|array,type:string|array,tmp_name:string|array,error:int|array,size:int|array}}
- * @return array 
+ * @param array<string,array{name:string|array<int,string>,type:string|array<int,string>,tmp_name:string|array<int,string>,error:int|array<int,int>,size:int|array<int,int>}> $files The raw $_FILES superglobal structure.
+ * @return array<string,array{name:string|array,type:string|array,tmp_name:string|array,error:int|array,size:int|array,id:ObjectId|null}>
  */
 function normalize_uploaded_files(array $files):array {
     $newArray = [];
@@ -389,6 +365,7 @@ function normalize_uploaded_files(array $files):array {
                 'tmp_name' => $data['tmp_name'][$index],
                 'error' => $data['error'][$index],
                 'size' => $data['size'][$index],
+                'id' => $data['id'][$index] ?? null,
             ];
         }
     }

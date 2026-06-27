@@ -37,7 +37,7 @@
 }
 
 :where(
-    input:not([type='radio']), 
+    input:not([type='radio'],[type='check'],[type='checkbox']),
     textarea,
     markdown-area,
     select,
@@ -47,7 +47,7 @@
     [role='button'],
     [__custom-input],
     [cobalt-component="cobalt-component"]:not(input-switch)
-), a.button[native]
+), .button[native]
 {
     display: inline-block;
     border: var(--input-element-border-value);
@@ -94,7 +94,7 @@
             color: var(--input-disabled-placeholder);
         }
     }   
-    &:not(input-datetime):has(&) {
+    &:not(input-datetime, [element-features~="descendants"]):has(&) {
         padding: 0;
     }
     & :where(

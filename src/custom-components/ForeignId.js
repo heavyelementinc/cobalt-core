@@ -3,7 +3,7 @@ export default "";
 export class ForeignId extends ObjectGallery {
     get value() {
         const item = this.querySelector(this.ITEM_QUERY);
-        return item.value;
+        return item?.value ?? null;
     }
     initDragAndDrop() {
         // Do nothing. We don't support drag and drop on this item

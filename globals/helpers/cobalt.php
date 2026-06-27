@@ -7,6 +7,21 @@ use Cobalt\Auth\Users\Models\User;
 use Cobalt\Model\Types\MixedType;
 use MongoDB\BSON\ObjectId;
 
+function async_run_command(string $command) {
+    $shell = __APP_ROOT__ . "/cobalt";
+    $pid = shell_exec("nohup nice -n 10 sh $shell $command > /dev/null & printf \"%u\"");
+    return $pid;
+}
+
+function run_command(string $command, $stripControlCharacters = true){
+    // $shell = __ENV_ROOT__ . "/core.sh";
+    $shell = __APP_ROOT__ . "/cobalt";
+    if($stripControlCharacters) $shell .= " --plain-output";
+    $result = shell_exec("sh $shell $command");
+    return $result;
+}
+
+
 function async_cobalt_command($command, $context = true, $log = "/dev/null") {
     $shell = __ENV_ROOT__ . "/core.sh";
     if ($context) $shell = __APP_ROOT__ . "/cobalt.sh";

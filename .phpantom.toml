@@ -1,0 +1,15 @@
+[php]
+# Override the detected PHP version (default: inferred from composer.json, or 8.5).
+# version = "8.5"
+
+[diagnostics]
+# Report member access on subjects whose type could not be resolved.
+# Useful for discovering gaps in type coverage. Off by default.
+# unresolved-member-access = true
+
+[indexing]
+# How PHPantom discovers classes across the workspace.
+#   "composer" (default) - use Composer classmap, self-scan on fallback
+#   "self"    - always self-scan, ignore Composer classmap
+#   "none"    - no proactive scanning, Composer classmap only
+strategy = "self"

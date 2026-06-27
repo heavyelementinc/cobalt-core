@@ -13,8 +13,9 @@ export class ObjectGallery extends ICustomInput {
     }
 
     connectedCallback() {
+        this.setAttribute("element-features","descendants");
         this.initObjectPicker();
-        this.initDragAndDrop();
+        // this.initDragAndDrop();
         this.initActionMenu();
         if(this.constructor.name === "ObjectGallery") this.customInputReady.resolve(true);
     }
@@ -342,5 +343,105 @@ export class GalleryItem extends HTMLElement {
             this.dispatchEvent(new Event("change", {bubbles: true}));
         });
         this.metaEditor.showModal();
+    }
+    
+    initDragAndDrop() {
+        this.setAttribute("draggable", "true");
+        this.addEventListener("dragstart", this.dragStart);
+        this.addEventListener("drag", this.dragAround);
+        this.addEventListener("dragend", this.dragEnd);
+        this.addEventListener("dragenter", this.dragEnter);
+        this.addEventListener("dragleave", this.dragLeave);
+    }
+
+    dragOrientation = ['clientX', 'x', 'width'];
+    dragTarget = null;
+    dropTarget = null;
+    dropAfter = true;
+
+    dragStart(event) {
+        this.dragTarget = event.currentTarget;
+        this.visualDropTarget = this.dragTarget.cloneNode(true);
+        this.visualDropTarget.classList.add("object-gallery--visual-drop-target");
+        document.body.appendChild(this.visualDropTarget);
+
+        this.dragTarget.classList.add(this.VISUALLY_HIDDEN_CLASS);
+
+        this.setAttribute(this.DRAG_IN_PROGRESS, "true");
+    }
+
+    dragEnd(event) {
+        if(this.visualDropTarget && this.visualDropTarget.parentNode) {
+            this.visualDropTarget.parentNode.removeChild(this.visualDropTarget);
+        }
+        if(!this.dragTarget) {
+            console.log("There's no drag target");
+            return this.cleanUpAfterDragEvent();
+        }
+        if(!this.dropTarget) {
+            console.log("There's no drop target");
+            return this.cleanUpAfterDragEvent();
+        }
+        this.dragTarget.classList.remove(this.VISUALLY_HIDDEN_CLASS);
+        let trueDropTarget = this.dropTarget;
+        if(this.dropAfter) {
+            this.dropTarget.nextElementSibling;
+        }
+        console.log(trueDropTarget, this.dropAfter);
+        // this.insertBefore(this.dragTarget, trueDropTarget);
+        this.cleanUpAfterDragEvent();
+
+        this.dispatchEvent(new Event("change",{bubbles: true}));
+    }
+
+    cleanUpAfterDragEvent() {
+        this.dragTarget = null;
+        this.dropTarget = null;
+        this.dropAfter = false;
+        this.setAttribute(this.DRAG_IN_PROGRESS,"");
+        this.dragEnterCounter = 0;
+        this.querySelectorAll(`.${this.DROP_TARGET_CLASS}, .${this.DROP_TARGET_NEXT}`).forEach(el => {
+            el.classList.remove(this.DROP_TARGET_CLASS, this.DROP_TARGET_NEXT);
+        });
+    }
+
+    dragEnterCounter = 0;
+
+    dragEnter(event) {
+        const target = event.currentTarget;
+        this.dragEnterCounter += 1;
+        if(this.dragEnterCounter !== 1) return;
+        this.dropTarget = target;
+        // this.dropTarget.classList.add(this.DROP_TARGET_CLASS);
+    }
+    
+    dragAround(event) {
+        this.visualDropTarget.style.left = `${event.clientX - (this.visualDropTarget.clientWidth / 2)}px`;
+        this.visualDropTarget.style.top = `${event.clientY - (this.visualDropTarget.clientHeight / 2)}px`;
+        // If we haven't dragged over an element, do nothing
+        if(!this.dropTarget) return;
+        
+        const mouse = event[this.dragOrientation[0]];
+        if(mouse === 0) return;
+        const rect = this.dropTarget.getBoundingClientRect();
+        // const relativeCursor = mouse - rect[this.dragOrientation[1]];
+        // const halfElementWidth = rect[this.dragOrientation[2]] / 2;
+        // if(relativeCursor >= halfElementWidth) {
+        //     this.dropAfter = true;
+        //     // this.dropTarget.classList.add(this.DROP_TARGET_NEXT);
+        // } else {
+        //     this.dropAfter = false;
+        //     // this.dropTarget.classList.remove(this.DROP_TARGET_NEXT);
+        // }
+        this.insertBefore(this.dragTarget, (this.dropAfter) ? this.dropTarget.nextSibling : this.dropTarget);
+    }
+
+    dragLeave(event) {
+        const target = event.currentTarget;
+        this.dragEnterCounter += -1;
+        if(this.dragEnterCounter !== 0) return;
+        // this.dropTarget = null;
+        target.classList.remove(this.DROP_TARGET_CLASS, this.DROP_TARGET_NEXT);
+        return true;
     }
 }

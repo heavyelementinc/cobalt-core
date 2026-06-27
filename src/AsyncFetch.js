@@ -40,13 +40,14 @@ class AsyncFetch extends EventTarget {
             'x-confirm': XConfirm,
             'x-reauthorization': XReauth,
             'x-captcha': XCaptcha,
+            'x-job-status': XJobStatus
             // 'x-mitigation-update': 
         }
         this.headerReactions = {};
         this.requestHeaders['X-Mitigation'] = document.querySelector("meta[name='mitigation']").content;
     }
 
-    submit(data = {}) {
+    submit(data = {}, uploadSize = 0) {
         this.data = data;
         return new Promise(async (resolve, reject) => {
             this.reject = reject;
@@ -59,7 +60,11 @@ class AsyncFetch extends EventTarget {
             }
             
             const client = new XMLHttpRequest();
-
+            
+            if(uploadSize >= 200) {
+                this.statusMessage = new StatusMessage({message: "Working...", icon: 'working'});
+                client.upload.onprogress = progress => this._onuploadprogress(progress, client);
+            }
             client.onprogress = progress =>  this._onprogress(progress, client);
             client.onreadystatechange = statechange => this._onreadystatechange(statechange, client);
             client.onload = event => this._onload(event, client, resolve);
@@ -182,6 +187,7 @@ class AsyncFetch extends EventTarget {
                 break;
             case client.HEADERS_RECEIVED:
                 this.setResponseHeaders(client.getAllResponseHeaders());
+                this.dispatchHeaderDirectives();
                 break;
             case client.LOADING:
                 break;
@@ -195,6 +201,10 @@ class AsyncFetch extends EventTarget {
     _onprogress(progress) {
         const client = this._getClient(progress);
         this.dispatchEvent(new CustomEvent("progress", {detail: {client, progress}}));
+    }
+
+    _onuploadprogress(progress, client) {
+        this.statusMessage.progress(progress.loaded, progress.total, "Uploading. Please wait...");
     }
 
     _onerror(error) {
@@ -252,6 +262,9 @@ class AsyncFetch extends EventTarget {
             if(!arr[0]) continue;
             if(!arr[1]) continue;
             this.responseHeaders[arr[0].toLowerCase()] = arr[1].trim();
+        }
+        if('x-server-events' in this.responseHeaders) {
+            
         }
         return this.responseHeaders;
     }
@@ -602,5 +615,54 @@ class XReauth extends HeaderDirective {
         xhr.setRequestHeader("X-Reauthorization", btoa(password));
         const result = await xhr.submit(fulfillment.data.return);
         return result;
+    }
+}
+
+
+class XJobStatus extends HeaderDirective {
+    status;
+    async execute() {
+        const url = this.props.rawContent;
+        const message = this.props.xhrRequest.statusMessage ?? new StatusMessage({message: "Processing. Please wait..."});
+        message.progress(0, 100, "Processing. Please wait...");
+        let intervalsPending = 0;
+        let interval = setInterval(async () => {
+            const api = new AsyncFetch(url, 'GET', {});
+            const details = await api.get();
+            message.progress(details.current,  details.total, "Processing. Please wait...");
+            switch(details.status) {
+                case "inprogress":
+                    intervalsPending = 0;
+                    if(details.current >= details.total) {
+                        clearInterval(interval);
+                        message.update("Finished.");
+                    }
+                    break;
+                case "pending":
+                    intervalsPending += 1;
+                    if(intervalsPending >= 30) {
+                        clearInterval(interval);
+                        message.update("Job took too long to start");
+                    }
+                    break;
+                case "finished":
+                    message.update("Finished.");
+                case "aborted":
+                    message.update(details.status ?? "Something went wrong.", "error");
+                default:
+                    intervalsPending = 0;
+                    clearInterval(interval);
+                    break;
+            }
+        }, 1000);
+    }
+
+    listener(event) {
+        const data = event.data;
+        console.log(data);
+    }
+
+    error(event) {
+        this.status.update('An error occurred', 'error');
     }
 }

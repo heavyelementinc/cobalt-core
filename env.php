@@ -20,6 +20,7 @@
 
 use Cobalt\Auth\Session\Models\Session;
 use Cobalt\UTMTracker\UTMHandler;
+ini_set('display_errors', 'Off');
 
 ob_start();
 const DB_BENCHMARK = 'db_requests';

@@ -32,6 +32,12 @@ class StatusMessage {
         this.element.classList.remove(animClass);
     }
 
+    progress(current, total, message = null) {
+        this.element.classList.add("progressable")
+        this.element.style.setProperty("--progress-bar", `${((current / total) * 100)}%`);
+        if(message) this.update(message);
+    }
+
     async close() {
         window.messageHandler.dismiss({ id: this.id }, {}, false);
     }

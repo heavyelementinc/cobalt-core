@@ -452,8 +452,8 @@ abstract class SettingsAbstract extends \Drivers\Database {
 
 
     /** Update functions */
-    public function update_setting($name, $value) {
-        $value = $this->validate($name, $value);
+    public function update_setting($name, $value, bool $validate = true) {
+        if($validate) $value = $this->validate($name, $value);
         $isDefault = $this->is_default($name, $value);
         $m_time = time();
         $query = ['$set' => [$name => $value, "Meta.max_m_time" => $m_time]];

@@ -44,6 +44,16 @@ message-item {
     @starting-style {
         height: 0;
     }
+    &.progressable:after {
+        content: "";
+        width: var(--progress-bar, 0%);
+        transition: width .1s;
+        height: 1.5ch;
+        background-color: var(--primary-color-1);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
 }
 
     message-item i{

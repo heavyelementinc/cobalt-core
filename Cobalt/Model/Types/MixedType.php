@@ -12,6 +12,7 @@ use Cobalt\Model\Types\Traits\ClientUpdateFilter;
 use Cobalt\Model\Types\Traits\MixedTypeToField;
 use Cobalt\Model\Types\Traits\Prototypable;
 use Cobalt\Model\Types\Traits\SharedFilterEnums;
+use Cobalt\JobQueue\Jobs\Job;
 use MongoDB\BSON\Document;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
@@ -114,6 +115,15 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
     public function typecast($value, $type = QUERY_TYPE_CAST_LOOKUP) {
         if($this->type === "mixed") return $value;
         return compare_and_juggle($this->type, $value);
+    }
+
+    /** Before the filter process, all submitted fields are checked against
+     * the model and any submitted field will be provided here.
+     * 
+     * This allows us to queue items in a ServerSentEvent Job if necessary
+     */
+    public function filter_setup(array &$toValidate, string $key, Job $filterJob, GenericModel $model):void {
+
     }
 
     public function pre_filter($value):mixed {
