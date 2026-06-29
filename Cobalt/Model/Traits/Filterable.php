@@ -39,7 +39,7 @@ trait Filterable {
     abstract protected function hydrate(array &$target, string|int $field_name, $value, ?GenericModel $model = null, $name = null, ?array $directives = [], ?MixedType $instance = null):void;
     abstract public function setData(array|BSONDocument|BSONArray $data): void;
 
-    public Job $__filter_job;
+    public ?Job $__filter_job;
 
     public function __filter(array $toValidate, $queueAtSetup = true):self {
         if($this->__schema) $this->__defineSchema([]);
@@ -76,7 +76,7 @@ trait Filterable {
         return $this;
     }
 
-    public function __filter_setup(array &$toValidate, bool $queueAfterCreation):Job {
+    public function __filter_setup(array &$toValidate, bool $queueAfterCreation):?Job {
         $filterJob = new Job();
         $filterJob->init($this, $this->_id, 'filter');
         foreach($toValidate as $field => $value) {
@@ -87,8 +87,8 @@ trait Filterable {
         }
 
         if($queueAfterCreation) $this->__filter_queue($filterJob);
-
-        return $filterJob;
+        if($filterJob->length() >= 1) return $filterJob;
+        return null;
     }
 
     public function __filter_queue(Job $filterJob):?ObjectId {
