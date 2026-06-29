@@ -14,6 +14,7 @@ use Cobalt\JobQueue\Controllers\JobStatus;
 use Cobalt\JobQueue\Jobs\Job;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Error;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Reflection;
@@ -38,19 +39,13 @@ trait Filterable {
     abstract protected function hydrate(array &$target, string|int $field_name, $value, ?GenericModel $model = null, $name = null, ?array $directives = [], ?MixedType $instance = null):void;
     abstract public function setData(array|BSONDocument|BSONArray $data): void;
 
-    public function __filter(array $toValidate):self {
+    public Job $__filter_job;
+
+    public function __filter(array $toValidate, $queueAtSetup = true):self {
         if($this->__schema) $this->__defineSchema([]);
-        $filterJob = new Job();
-        $filterJob->init($this, $this->_id, 'filter');
-        foreach($toValidate as $field => $value) {
-            /** @var MixedType $instance */
-            $instance = $this->__schema[$field]['type'];
-            $instance->filter_setup($toValidate, $field, $filterJob, $this);
-        }
-        $filterId = null;
-        if($filterJob->length() >= 1) $filterId = $filterJob->queue();
         
         // $toValidate = array_undot($toValidate);
+        $this->__filter_job = $this->__filter_setup($toValidate, $queueAtSetup);
 
         foreach($toValidate as $field => $value) {
             try {
@@ -73,9 +68,35 @@ trait Filterable {
         $this->setValidationState(true);
         // If we have a filterId, we should run run our background process to
         // upload files to the database, etc.
-        if($filterId) async_run_command("jobs run $filterId");
+
+        if($this->__filter_job) {
+            $this->__filter_queue($this->__filter_job);
+            async_run_command("jobs run ".(string)$this->__filter_job->_id);
+        }
         return $this;
     }
+
+    public function __filter_setup(array &$toValidate, bool $queueAfterCreation):Job {
+        $filterJob = new Job();
+        $filterJob->init($this, $this->_id, 'filter');
+        foreach($toValidate as $field => $value) {
+            if($field === "") continue;
+            /** @var MixedType $instance */
+            $instance = $this->__schema[$field]['type'];
+            $instance->filter_setup($toValidate, $field, $filterJob, $this);
+        }
+
+        if($queueAfterCreation) $this->__filter_queue($filterJob);
+
+        return $filterJob;
+    }
+
+    public function __filter_queue(Job $filterJob):?ObjectId {
+        $filterId = null;
+        if($filterJob->length() >= 1) $filterId = $filterJob->queue();
+        return $filterId;
+    }
+
 
     /**
      * Use this in a filter, set, or other CRUD context to modify another field

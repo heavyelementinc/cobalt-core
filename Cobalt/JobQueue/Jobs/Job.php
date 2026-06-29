@@ -25,15 +25,20 @@ class Job {
         return (new JobStatus())->getCollectionName();
     }
 
+    public ObjectId $_id;
     private Model $model;
-    private ObjectId $refid;
+    private ?ObjectId $refid;
     private string $type;
     private array $queue = [];
 
-    function init(Model $model, ObjectId $id, string $type) {
+    function init(Model $model, ?ObjectId $id, string $type) {
         $this->model = $model;
-        $this->refid = $id;
+        $this->set_refid($id);
         $this->type  = $type;
+    }
+
+    function set_refid(?ObjectId $id){
+        $this->refid = $id;
     }
 
     function queue() {
@@ -52,7 +57,7 @@ class Job {
 
         $this->handleJobAuthForSession($id);
         header("X-Job-Status: ". JobStatus::get_route_href("status", [$id]));
-
+        $this->_id = $id;
         return $id;
     }
 
