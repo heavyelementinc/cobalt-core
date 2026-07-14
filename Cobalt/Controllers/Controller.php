@@ -2,6 +2,7 @@
 
 namespace Cobalt\Controllers;
 
+use Exception;
 use Routes\Options;
 use Routes\Route;
 
@@ -77,6 +78,14 @@ class Controller {
         Route::s_put($route);
     }
 
+    /**
+     * This will only return the first route that uses $directiveName
+     * @param string $methodName the "Controller@method" direvitve specified in your router table
+     * @param array $args Any arguments used here will get filled in as values for {variables} in route names from left to right
+     * @param array{method:"get"|"post"|"put"|"delete"|"s_get"|"s_post"|"s_put"|"s_delete",context:string} $context The context to search ("web", "admin", "apiv1", etc.)
+     * @return string 
+     * @throws Exception 
+     */
     static function get_route_href(string $methodName, array $args = [], array $context = [], bool $throw = true) {
         return route(static::className()."@$methodName", $args, $context, $throw);
     }

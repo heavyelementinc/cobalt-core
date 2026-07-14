@@ -6,7 +6,8 @@ return [
         "img"=> "/core-content/img/towns/Belfast,_Maine.jpg",
         "dark"=> false,
         "credit"=> "<a href=\"https://commons.wikimedia.org/w/index.php?curid=47214052\">Centpacrr at en.wikipedia, CC BY-SA 3.0</a>",
-        "blurb"=> "Combining a quirky, artistic vibe with deep agricultural roots, Waldo County is home to the seaside city of Belfast. It's a place where organic farms thrive alongside a busy working waterfront, offering a unique blend of coastal and rural life."
+        "blurb"=> "Combining a quirky, artistic vibe with deep agricultural roots, Waldo County is home to the seaside city of Belfast. It's a place where organic farms thrive alongside a busy working waterfront, offering a unique blend of coastal and rural life.",
+        "include" => false,
     ],
     "Hancock"=> [
         "href"=> "https://en.wikipedia.org/wiki/Hancock_County,_Maine",
@@ -14,7 +15,8 @@ return [
         "img"=> "/core-content/img/towns/Egg_Rock_Light_-_Frenchman_Bay_ME.jpg",
         "dark"=> true,
         "credit"=> "<a href=\"https://commons.wikimedia.org/w/index.php?curid=10597738\">liz west from Boxborough, MA - Egg Rock lighthouse a, CC BY 2.0</a>",
-        "blurb"=> "Boasting Acadia National Park and the popular town of Bar Harbor, Hancock is the jewel of the Maine coast. Its dramatic granite cliffs and scenic harbors draw millions of visitors, while its interior remains a quiet sanctuary of woods and ponds."
+        "blurb"=> "Boasting Acadia National Park and the popular town of Bar Harbor, Hancock is the jewel of the Maine coast. Its dramatic granite cliffs and scenic harbors draw millions of visitors, while its interior remains a quiet sanctuary of woods and ponds.",
+        "include" => false,
     ],
     "Knox"=> [
         "href"=> "https://en.wikipedia.org/wiki/Knox_County,_Maine",
@@ -22,7 +24,8 @@ return [
         "img"=> "/core-content/img/towns/Camden_Maine_October_2021_001.jpg",
         "dark"=> false,
         "credit"=> "<a href=\"https://commons.wikimedia.org/w/index.php?curid=111114850\">King of Hearts - Own work, CC BY-SA 4.0</a>",
-        "blurb"=> "The \"Windjammer Capital of the World,\" Knox County is defined by its maritime tradition. Rockland and Camden serve as bustling hubs for the lobster industry and fine arts, set against a backdrop of mountains that meet the Atlantic Ocean."
+        "blurb"=> "The \"Windjammer Capital of the World,\" Knox County is defined by its maritime tradition. Rockland and Camden serve as bustling hubs for the lobster industry and fine arts, set against a backdrop of mountains that meet the Atlantic Ocean.",
+        "include" => false,
     ],
     "Lincoln"=> [
         "href"=> "https://en.wikipedia.org/wiki/Lincoln_County,_Maine",
@@ -30,7 +33,8 @@ return [
         "img"=> "/core-content/img/towns/BoothbayHarbor.jpg",
         "dark"=> false,
         "credit"=> "<a href=\"https://commons.wikimedia.org/w/index.php?curid=128449201\">Whitehouse27 - Own work, CC BY-SA 4.0</a>",
-        "blurb"=> "Characterized by long, narrow peninsulas and historic villages like Wiscasset and Damariscotta, Lincoln County is quintessential coastal Maine. It's a haven for oyster lovers, antique hunters, and those seeking a slower pace of life by the water."
+        "blurb"=> "Characterized by long, narrow peninsulas and historic villages like Wiscasset and Damariscotta, Lincoln County is quintessential coastal Maine. It's a haven for oyster lovers, antique hunters, and those seeking a slower pace of life by the water.",
+        "include" => false,
     ],
     "Androscoggin"=> [
         "href"=> "https://en.wikipedia.org/wiki/Androscoggin_County,_Maine",

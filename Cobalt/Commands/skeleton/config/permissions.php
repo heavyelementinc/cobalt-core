@@ -1,6 +1,6 @@
 <?php
 /** @param array{array{group:string,label:string,dangerous:bool,default:bool,display:bool,ring:int}} $permissions */
-$permissions = [
+return [
     // // The internal name of the permission
     // "Demo_permissions" => [
     //     // The group this permission belongs to

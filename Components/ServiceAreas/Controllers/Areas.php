@@ -9,7 +9,7 @@ use Cobalt\Model\Model;
 use Components\Portfolio\Model\Client;
 use Components\Portfolio\Model\Portfolio;
 use Components\Projects\Models\Project;
-use Components\Towns\Models\Town;
+use Components\ServiceAreas\Models\Town;
 use Drivers\DatabaseManagement;
 use Exceptions\HTTP\NotFound;
 use MongoDB\Model\BSONDocument;
@@ -233,7 +233,6 @@ class Areas extends Controller {
 
     static function geocode() {
         $data = json_decode(file_get_contents(__DIR__ . "/maine-towns.json"), true);
-        $token = "AIzaSyAm4PRzABImBKYR3YuSBq9v9oj9eoiiDac";
         $token = "";
         $requests = 0;
         foreach($data['munincipalities'] as $key => $town) {

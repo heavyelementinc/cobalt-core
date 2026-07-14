@@ -21,7 +21,13 @@ input-wrapper {
 }
 
 /* input-wrapper, input-text, input-user, input, textarea, input-password, button[native], [role='button'], action-menu, split-field  */
-input, textarea, button[native], async-button[native], a.button[native], [role='button'], [__custom-input] {
+input, 
+textarea, 
+button[native], 
+async-button[native], 
+a.button[native], 
+[role='button'], 
+[__custom-input] {
   border: 1px solid var(--project-color-input-border-nofocus);
   background: var(--project-color-input-background);
   padding: .4rem;
@@ -121,7 +127,10 @@ input:focus, textarea:focus {
   box-shadow: none;
 }
 
-input:disabled, textarea:disabled, markdown-area[aria-disabled="true"], markdown-area[aria-disabled="true"] .CodeMirror {
+input:disabled, 
+textarea:disabled, 
+markdown-area[aria-disabled="true"], 
+markdown-area[aria-disabled="true"] .CodeMirror {
   background: var(--project-color-input-disabled);
 }
 

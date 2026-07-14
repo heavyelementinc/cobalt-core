@@ -1,6 +1,7 @@
 <?php
 
 use Cobalt\Auth\Users\Controllers\Users;
+use Components\ServiceAreas\Controllers\Towns;
 use Routes\Options;
 use Routes\Route;
 
@@ -102,3 +103,6 @@ Route::s_get("/file-picker/", "CrudableFiles@file_picker", [
     'permission' => 'Customizations_modify'
 ]);
 
+if(__APP_SETTINGS__['ServiceAreas_enabled']) {
+    Towns::get((new Options('/services/{area}', 'townListing')));
+}

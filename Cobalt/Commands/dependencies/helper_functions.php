@@ -109,7 +109,7 @@ function say_quietly($str, $type = "normal", $formatted = false) {
 }
 
 function flags() {
-    return $_SERVER['flags'];
+    return $_SERVER[FLAGS_KEY];
 }
 
 /**

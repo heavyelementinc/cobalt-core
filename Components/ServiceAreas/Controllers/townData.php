@@ -1,7 +1,7 @@
 <?php
 return [
     "portland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Portland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Portland,_Maine",
         "type" => "city",
@@ -42,7 +42,7 @@ return [
         'nearby'  => 300,
     ],
     "lewiston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lewiston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lewiston,_Maine",
         "type" => "city",
@@ -81,7 +81,7 @@ return [
         ]
     ],
     "bangor" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bangor",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bangor,_Maine",
         "type" => "city",
@@ -122,7 +122,7 @@ return [
         'nearby'  => 300,
     ],
     "south-portland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "South Portland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/South_Portland,_Maine",
         "type" => "city",
@@ -161,7 +161,7 @@ return [
         ]
     ],
     "auburn" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Auburn",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Auburn,_Maine",
         "type" => "city",
@@ -201,7 +201,7 @@ return [
         ]
     ],
     "biddeford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Biddeford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Biddeford,_Maine",
         "type" => "city",
@@ -240,7 +240,7 @@ return [
         ]
     ],
     "scarborough" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Scarborough",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Scarborough,_Maine",
         "type" => "town",
@@ -279,7 +279,7 @@ return [
         ]
     ],
     "sanford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sanford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sanford,_Maine",
         "type" => "city",
@@ -318,7 +318,7 @@ return [
         ]
     ],
     "brunswick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brunswick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brunswick,_Maine",
         "type" => "town",
@@ -357,7 +357,7 @@ return [
         ]
     ],
     "westbrook" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Westbrook",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Westbrook,_Maine",
         "type" => "city",
@@ -396,7 +396,7 @@ return [
         ]
     ],
     "saco" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Saco",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Saco,_Maine",
         "type" => "city",
@@ -435,7 +435,7 @@ return [
         ]
     ],
     "augusta" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Augusta",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Augusta,_Maine",
         "type" => "city",
@@ -476,7 +476,7 @@ return [
         'nearby'  => 150,
     ],
     "windham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Windham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Windham,_Maine",
         "type" => "town",
@@ -515,7 +515,7 @@ return [
         ]
     ],
     "gorham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Gorham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Gorham,_Maine",
         "type" => "town",
@@ -554,7 +554,7 @@ return [
         ]
     ],
     "waterville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waterville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waterville,_Maine",
         "type" => "city",
@@ -593,7 +593,7 @@ return [
         ]
     ],
     "york" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "York",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/York,_Maine",
         "type" => "town",
@@ -632,7 +632,7 @@ return [
         ]
     ],
     "falmouth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Falmouth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Falmouth,_Maine",
         "type" => "town",
@@ -671,7 +671,7 @@ return [
         ]
     ],
     "kennebunk" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Kennebunk",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Kennebunk,_Maine",
         "type" => "town",
@@ -710,7 +710,7 @@ return [
         ]
     ],
     "wells" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wells",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wells,_Maine",
         "type" => "town",
@@ -749,7 +749,7 @@ return [
         ]
     ],
     "orono" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Orono",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Orono,_Maine",
         "type" => "town",
@@ -788,7 +788,7 @@ return [
         ]
     ],
     "standish" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Standish",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Standish,_Maine",
         "type" => "town",
@@ -827,7 +827,7 @@ return [
         ]
     ],
     "kittery" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Kittery",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Kittery,_Maine",
         "type" => "town",
@@ -866,7 +866,7 @@ return [
         ]
     ],
     "lisbon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lisbon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lisbon,_Maine",
         "type" => "town",
@@ -905,7 +905,7 @@ return [
         ]
     ],
     "brewer" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brewer",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brewer,_Maine",
         "type" => "city",
@@ -944,7 +944,7 @@ return [
         ]
     ],
     "topsham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Topsham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Topsham,_Maine",
         "type" => "town",
@@ -983,7 +983,7 @@ return [
         ]
     ],
     "cape-elizabeth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cape Elizabeth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cape_Elizabeth,_Maine",
         "type" => "town",
@@ -1022,7 +1022,7 @@ return [
         ]
     ],
     "yarmouth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Yarmouth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Yarmouth,_Maine",
         "type" => "town",
@@ -1061,7 +1061,7 @@ return [
         ]
     ],
     "old-orchard-beach" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Old Orchard Beach",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Old_Orchard_Beach,_Maine",
         "type" => "town",
@@ -1100,7 +1100,7 @@ return [
         ]
     ],
     "presque-isle" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Presque Isle",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Presque_Isle,_Maine",
         "type" => "city",
@@ -1139,7 +1139,7 @@ return [
         ]
     ],
     "bath" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bath",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bath,_Maine",
         "type" => "city",
@@ -1179,7 +1179,7 @@ return [
         ]
     ],
     "freeport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Freeport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Freeport,_Maine",
         "type" => "town",
@@ -1218,7 +1218,7 @@ return [
         ]
     ],
     "skowhegan" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Skowhegan",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Skowhegan,_Maine",
         "type" => "town",
@@ -1258,7 +1258,7 @@ return [
         ]
     ],
     "cumberland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cumberland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cumberland,_Maine",
         "type" => "town",
@@ -1297,7 +1297,7 @@ return [
         ]
     ],
     "ellsworth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Ellsworth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Ellsworth,_Maine",
         "type" => "city",
@@ -1337,7 +1337,7 @@ return [
         ]
     ],
     "buxton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Buxton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Buxton,_Maine",
         "type" => "town",
@@ -1376,7 +1376,7 @@ return [
         ]
     ],
     "gray" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Gray",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Gray,_Maine",
         "type" => "town",
@@ -1415,7 +1415,7 @@ return [
         ]
     ],
     "berwick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Berwick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Berwick,_Maine",
         "type" => "town",
@@ -1454,7 +1454,7 @@ return [
         ]
     ],
     "winslow" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Winslow",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Winslow,_Maine",
         "type" => "town",
@@ -1493,7 +1493,7 @@ return [
         ]
     ],
     "waterboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waterboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waterboro,_Maine",
         "type" => "town",
@@ -1532,7 +1532,7 @@ return [
         ]
     ],
     "hampden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hampden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hampden,_Maine",
         "type" => "town",
@@ -1571,7 +1571,7 @@ return [
         ]
     ],
     "farmington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Farmington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Farmington,_Maine",
         "type" => "town",
@@ -1611,7 +1611,7 @@ return [
         ]
     ],
     "south-berwick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "South Berwick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/South_Berwick,_Maine",
         "type" => "town",
@@ -1650,7 +1650,7 @@ return [
         ]
     ],
     "old-town" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Old Town",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Old_Town,_Maine",
         "type" => "city",
@@ -1689,7 +1689,7 @@ return [
         ]
     ],
     "caribou" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Caribou",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Caribou,_Maine",
         "type" => "city",
@@ -1728,7 +1728,7 @@ return [
         ]
     ],
     "belfast" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Belfast",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Belfast,_Maine",
         "type" => "city",
@@ -1770,7 +1770,7 @@ return [
         'show_websites' => true
     ],
     "rockland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Rockland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Rockland,_Maine",
         "type" => "city",
@@ -1813,7 +1813,7 @@ return [
         "credit" => "<a href=\"https://en.wikipedia.org/wiki/Rockland,_Maine#/media/File:Downtown_Rockland.jpg\">LiamSig - Own work &bull; Rockland Downtown CC BY-SA 4.0/a>",
     ],
     "eliot" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Eliot",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Eliot,_Maine",
         "type" => "town",
@@ -1851,7 +1851,7 @@ return [
         ]
     ],
     "fairfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Fairfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Fairfield,_Maine",
         "type" => "town",
@@ -1889,7 +1889,7 @@ return [
         ]
     ],
     "lebanon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lebanon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lebanon,_Maine",
         "type" => "town",
@@ -1927,7 +1927,7 @@ return [
         ]
     ],
     "hermon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hermon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hermon,_Maine",
         "type" => "town",
@@ -1965,7 +1965,7 @@ return [
         ]
     ],
     "oakland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Oakland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Oakland,_Maine",
         "type" => "town",
@@ -2003,7 +2003,7 @@ return [
         ]
     ],
     "winthrop" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Winthrop",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Winthrop,_Maine",
         "type" => "town",
@@ -2041,7 +2041,7 @@ return [
         ]
     ],
     "houlton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Houlton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Houlton,_Maine",
         "type" => "town",
@@ -2080,7 +2080,7 @@ return [
         ]
     ],
     "gardiner" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Gardiner",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Gardiner,_Maine",
         "type" => "city",
@@ -2118,7 +2118,7 @@ return [
         ]
     ],
     "poland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Poland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Poland,_Maine",
         "type" => "town",
@@ -2156,7 +2156,7 @@ return [
         ]
     ],
     "rumford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Rumford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Rumford,_Maine",
         "type" => "town",
@@ -2194,7 +2194,7 @@ return [
         ]
     ],
     "turner" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Turner",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Turner,_Maine",
         "type" => "town",
@@ -2232,7 +2232,7 @@ return [
         ]
     ],
     "new-gloucester" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Gloucester",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Gloucester,_Maine",
         "type" => "town",
@@ -2270,7 +2270,7 @@ return [
         ]
     ],
     "bridgton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bridgton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bridgton,_Maine",
         "type" => "town",
@@ -2308,7 +2308,7 @@ return [
         ]
     ],
     "camden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Camden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Camden,_Maine",
         "type" => "town",
@@ -2348,7 +2348,7 @@ return [
         'nearby'  => 10,
     ],
     "paris" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Paris",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Paris,_Maine",
         "type" => "town",
@@ -2387,7 +2387,7 @@ return [
         ]
     ],
     "waldoboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waldoboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waldoboro,_Maine",
         "type" => "town",
@@ -2426,7 +2426,7 @@ return [
         ]
     ],
     "bar-harbor" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bar Harbor",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bar_Harbor,_Maine",
         "type" => "town",
@@ -2466,7 +2466,7 @@ return [
         'nearby'  => 300,
     ],
     "norway" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Norway",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Norway,_Maine",
         "type" => "town",
@@ -2504,7 +2504,7 @@ return [
         ]
     ],
     "sabattus" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sabattus",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sabattus,_Maine",
         "type" => "town",
@@ -2542,7 +2542,7 @@ return [
         ]
     ],
     "harpswell" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Harpswell",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Harpswell,_Maine",
         "type" => "town",
@@ -2580,7 +2580,7 @@ return [
         ]
     ],
     "north-berwick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "North Berwick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/North_Berwick,_Maine",
         "type" => "town",
@@ -2618,7 +2618,7 @@ return [
         ]
     ],
     "bucksport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bucksport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bucksport,_Maine",
         "type" => "town",
@@ -2657,7 +2657,7 @@ return [
         ]
     ],
     "warren" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Warren",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Warren,_Maine",
         "type" => "town",
@@ -2696,7 +2696,7 @@ return [
         ]
     ],
     "lincoln" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lincoln",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lincoln,_Maine",
         "type" => "town",
@@ -2734,7 +2734,7 @@ return [
         ]
     ],
     "hollis" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hollis",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hollis,_Maine",
         "type" => "town",
@@ -2772,7 +2772,7 @@ return [
         ]
     ],
     "madison" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Madison",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Madison,_Maine",
         "type" => "town",
@@ -2810,7 +2810,7 @@ return [
         ]
     ],
     "glenburn" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Glenburn",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Glenburn,_Maine",
         "type" => "town",
@@ -2848,7 +2848,7 @@ return [
         ]
     ],
     "sidney" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sidney",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sidney,_Maine",
         "type" => "town",
@@ -2886,7 +2886,7 @@ return [
         ]
     ],
     "jay" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Jay",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Jay,_Maine",
         "type" => "town",
@@ -2924,7 +2924,7 @@ return [
         ]
     ],
     "raymond" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Raymond",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Raymond,_Maine",
         "type" => "town",
@@ -2962,7 +2962,7 @@ return [
         ]
     ],
     "lyman" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lyman",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lyman,_Maine",
         "type" => "town",
@@ -3000,7 +3000,7 @@ return [
         ]
     ],
     "vassalboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Vassalboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Vassalboro,_Maine",
         "type" => "town",
@@ -3038,7 +3038,7 @@ return [
         ]
     ],
     "dover-foxcroft" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dover-Foxcroft",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dover-Foxcroft,_Maine",
         "type" => "town",
@@ -3077,7 +3077,7 @@ return [
         ]
     ],
     "china" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "China",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/China,_Maine",
         "type" => "town",
@@ -3115,7 +3115,7 @@ return [
         ]
     ],
     "greene" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Greene",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Greene,_Maine",
         "type" => "town",
@@ -3153,7 +3153,7 @@ return [
         ]
     ],
     "arundel" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Arundel",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Arundel,_Maine",
         "type" => "town",
@@ -3191,7 +3191,7 @@ return [
         ]
     ],
     "oxford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Oxford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Oxford,_Maine",
         "type" => "town",
@@ -3229,7 +3229,7 @@ return [
         ]
     ],
     "durham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Durham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Durham,_Maine",
         "type" => "town",
@@ -3267,7 +3267,7 @@ return [
         ]
     ],
     "millinocket" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Millinocket",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Millinocket,_Maine",
         "type" => "town",
@@ -3305,7 +3305,7 @@ return [
         ]
     ],
     "north-yarmouth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "North Yarmouth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/North_Yarmouth,_Maine",
         "type" => "town",
@@ -3343,7 +3343,7 @@ return [
         ]
     ],
     "fort-kent" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Fort Kent",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Fort_Kent,_Maine",
         "type" => "town",
@@ -3381,7 +3381,7 @@ return [
         ]
     ],
     "monmouth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Monmouth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Monmouth,_Maine",
         "type" => "town",
@@ -3419,7 +3419,7 @@ return [
         ]
     ],
     "naples" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Naples",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Naples,_Maine",
         "type" => "town",
@@ -3457,7 +3457,7 @@ return [
         ]
     ],
     "pittsfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Pittsfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Pittsfield,_Maine",
         "type" => "town",
@@ -3495,7 +3495,7 @@ return [
         ]
     ],
     "limington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Limington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Limington,_Maine",
         "type" => "town",
@@ -3533,7 +3533,7 @@ return [
         ]
     ],
     "madawaska" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Madawaska",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Madawaska,_Maine",
         "type" => "town",
@@ -3571,7 +3571,7 @@ return [
         ]
     ],
     "wilton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wilton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wilton,_Maine",
         "type" => "town",
@@ -3609,7 +3609,7 @@ return [
         ]
     ],
     "winterport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Winterport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Winterport,_Maine",
         "type" => "town",
@@ -3648,7 +3648,7 @@ return [
         ]
     ],
     "orrington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Orrington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Orrington,_Maine",
         "type" => "town",
@@ -3686,7 +3686,7 @@ return [
         ]
     ],
     "dexter" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dexter",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dexter,_Maine",
         "type" => "town",
@@ -3724,7 +3724,7 @@ return [
         ]
     ],
     "wiscasset" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wiscasset",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wiscasset,_Maine",
         "type" => "town",
@@ -3764,7 +3764,7 @@ return [
         ]
     ],
     "west-gardiner" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "West Gardiner",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/West_Gardiner,_Maine",
         "type" => "town",
@@ -3802,7 +3802,7 @@ return [
         ]
     ],
     "casco" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Casco",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Casco,_Maine",
         "type" => "town",
@@ -3840,7 +3840,7 @@ return [
         ]
     ],
     "rockport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Rockport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Rockport,_Maine",
         "type" => "town",
@@ -3879,7 +3879,7 @@ return [
         ]
     ],
     "kennebunkport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Kennebunkport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Kennebunkport,_Maine",
         "type" => "town",
@@ -3917,7 +3917,7 @@ return [
         ]
     ],
     "litchfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Litchfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Litchfield,_Maine",
         "type" => "town",
@@ -3955,7 +3955,7 @@ return [
         ]
     ],
     "richmond" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Richmond",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Richmond,_Maine",
         "type" => "town",
@@ -3993,7 +3993,7 @@ return [
         ]
     ],
     "clinton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Clinton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Clinton,_Maine",
         "type" => "town",
@@ -4031,7 +4031,7 @@ return [
         ]
     ],
     "fryeburg" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Fryeburg",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Fryeburg,_Maine",
         "type" => "town",
@@ -4069,7 +4069,7 @@ return [
         ]
     ],
     "fort-fairfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Fort Fairfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Fort_Fairfield,_Maine",
         "type" => "town",
@@ -4107,7 +4107,7 @@ return [
         ]
     ],
     "norridgewock" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Norridgewock",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Norridgewock,_Maine",
         "type" => "town",
@@ -4145,7 +4145,7 @@ return [
         ]
     ],
     "holden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Holden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Holden,_Maine",
         "type" => "town",
@@ -4183,7 +4183,7 @@ return [
         ]
     ],
     "belgrade" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Belgrade",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Belgrade,_Maine",
         "type" => "town",
@@ -4221,7 +4221,7 @@ return [
         ]
     ],
     "limerick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Limerick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Limerick,_Maine",
         "type" => "town",
@@ -4259,7 +4259,7 @@ return [
         ]
     ],
     "bowdoin" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bowdoin",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bowdoin,_Maine",
         "type" => "town",
@@ -4297,7 +4297,7 @@ return [
         ]
     ],
     "newport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Newport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Newport,_Maine",
         "type" => "town",
@@ -4335,7 +4335,7 @@ return [
         ]
     ],
     "mechanic-falls" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mechanic Falls",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mechanic_Falls,_Maine",
         "type" => "town",
@@ -4373,7 +4373,7 @@ return [
         ]
     ],
     "calais" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Calais",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Calais,_Maine",
         "type" => "city",
@@ -4412,7 +4412,7 @@ return [
         ]
     ],
     "alfred" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Alfred",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Alfred,_Maine",
         "type" => "town",
@@ -4451,7 +4451,7 @@ return [
         ]
     ],
     "milford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Milford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Milford,_Maine",
         "type" => "town",
@@ -4489,7 +4489,7 @@ return [
         ]
     ],
     "woolwich" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Woolwich",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Woolwich,_Maine",
         "type" => "town",
@@ -4527,7 +4527,7 @@ return [
         ]
     ],
     "livermore-falls" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Livermore Falls",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Livermore_Falls,_Maine",
         "type" => "town",
@@ -4565,7 +4565,7 @@ return [
         ]
     ],
     "bowdoinham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bowdoinham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bowdoinham,_Maine",
         "type" => "town",
@@ -4603,7 +4603,7 @@ return [
         ]
     ],
     "boothbay" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Boothbay",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Boothbay,_Maine",
         "type" => "town",
@@ -4642,7 +4642,7 @@ return [
         ]
     ],
     "farmingdale" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Farmingdale",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Farmingdale,_Maine",
         "type" => "town",
@@ -4680,7 +4680,7 @@ return [
         ]
     ],
     "levant" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Levant",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Levant,_Maine",
         "type" => "town",
@@ -4718,7 +4718,7 @@ return [
         ]
     ],
     "shapleigh" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Shapleigh",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Shapleigh,_Maine",
         "type" => "town",
@@ -4756,7 +4756,7 @@ return [
         ]
     ],
     "corinth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Corinth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Corinth,_Maine",
         "type" => "town",
@@ -4794,7 +4794,7 @@ return [
         ]
     ],
     "pittston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Pittston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Pittston,_Maine",
         "type" => "town",
@@ -4832,7 +4832,7 @@ return [
         ]
     ],
     "carmel" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Carmel",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Carmel,_Maine",
         "type" => "town",
@@ -4870,7 +4870,7 @@ return [
         ]
     ],
     "bristol" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bristol",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bristol,_Maine",
         "type" => "town",
@@ -4909,7 +4909,7 @@ return [
         ]
     ],
     "blue hill" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Blue Hill",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Blue_Hill,_Maine",
         "type" => "town",
@@ -4948,7 +4948,7 @@ return [
         ]
     ],
     "chelsea" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Chelsea",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Chelsea,_Maine",
         "type" => "town",
@@ -4986,7 +4986,7 @@ return [
         ]
     ],
     "mexico" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mexico",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mexico,_Maine",
         "type" => "town",
@@ -5024,7 +5024,7 @@ return [
         ]
     ],
     "thomaston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Thomaston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Thomaston,_Maine",
         "type" => "town",
@@ -5063,7 +5063,7 @@ return [
         ]
     ],
     "benton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Benton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Benton,_Maine",
         "type" => "town",
@@ -5101,7 +5101,7 @@ return [
         ]
     ],
     "acton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Acton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Acton,_Maine",
         "type" => "town",
@@ -5139,7 +5139,7 @@ return [
         ]
     ],
     "searsport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Searsport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Searsport,_Maine",
         "type" => "town",
@@ -5181,7 +5181,7 @@ return [
         "credit" => "<a href=\"https://en.wikipedia.org/wiki/Searsport,_Maine#/media/File:Searsport_Maine.JPG\">Thomsonmg2000 - Own work &bull; Street in Searsport. The Penobscot Marine Museum is across the street, CC0/a>",
     ],
     "windsor" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Windsor",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Windsor,_Maine",
         "type" => "town",
@@ -5219,7 +5219,7 @@ return [
         ]
     ],
     "readfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Readfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Readfield,_Maine",
         "type" => "town",
@@ -5257,7 +5257,7 @@ return [
         ]
     ],
     "saint-george" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Saint George",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/St._George,_Maine",
         "type" => "town",
@@ -5296,7 +5296,7 @@ return [
         ]
     ],
     "hallowell" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hallowell",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hallowell,_Maine",
         "type" => "city",
@@ -5334,7 +5334,7 @@ return [
         ]
     ],
     "jefferson" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Jefferson",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Jefferson,_Maine",
         "type" => "town",
@@ -5373,7 +5373,7 @@ return [
         ]
     ],
     "bethel" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bethel",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bethel,_Maine",
         "type" => "town",
@@ -5411,7 +5411,7 @@ return [
         ]
     ],
     "hancock" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hancock",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hancock,_Maine",
         "type" => "town",
@@ -5450,7 +5450,7 @@ return [
         ]
     ],
     "manchester" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Manchester",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Manchester,_Maine",
         "type" => "town",
@@ -5488,7 +5488,7 @@ return [
         ]
     ],
     "harrison" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Harrison",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Harrison,_Maine",
         "type" => "town",
@@ -5526,7 +5526,7 @@ return [
         ]
     ],
     "whitefield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Whitefield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Whitefield,_Maine",
         "type" => "town",
@@ -5565,7 +5565,7 @@ return [
         ]
     ],
     "union" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Union",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Union,_Maine",
         "type" => "town",
@@ -5604,7 +5604,7 @@ return [
         ]
     ],
     "lincolnville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lincolnville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lincolnville,_Maine",
         "type" => "town",
@@ -5643,7 +5643,7 @@ return [
         ]
     ],
     "damariscotta" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Damariscotta",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Damariscotta,_Maine",
         "type" => "town",
@@ -5682,7 +5682,7 @@ return [
         ]
     ],
     "unity" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Unity",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Unity,_Maine",
         "type" => "town",
@@ -5725,7 +5725,7 @@ return [
 
     ],
     "anson" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Anson",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Anson,_Maine",
         "type" => "town",
@@ -5763,7 +5763,7 @@ return [
         ]
     ],
     "leeds" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Leeds",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Leeds,_Maine",
         "type" => "town",
@@ -5801,7 +5801,7 @@ return [
         ]
     ],
     "dixfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dixfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dixfield,_Maine",
         "type" => "town",
@@ -5839,7 +5839,7 @@ return [
         ]
     ],
     "minot" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Minot",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Minot,_Maine",
         "type" => "town",
@@ -5877,7 +5877,7 @@ return [
         ]
     ],
     "milo" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Milo",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Milo,_Maine",
         "type" => "town",
@@ -5915,7 +5915,7 @@ return [
         ]
     ],
     "orland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Orland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Orland,_Maine",
         "type" => "town",
@@ -5954,7 +5954,7 @@ return [
         ]
     ],
     "corinna" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Corinna",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Corinna,_Maine",
         "type" => "town",
@@ -5992,7 +5992,7 @@ return [
         ]
     ],
     "eddington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Eddington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Eddington,_Maine",
         "type" => "town",
@@ -6030,7 +6030,7 @@ return [
         ]
     ],
     "deer-isle" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Deer Isle",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Deer_Isle,_Maine",
         "type" => "town",
@@ -6069,7 +6069,7 @@ return [
         ]
     ],
     "canaan" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Canaan",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Canaan,_Maine",
         "type" => "town",
@@ -6107,7 +6107,7 @@ return [
         ]
     ],
     "phippsburg" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Phippsburg",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Phippsburg,_Maine",
         "type" => "town",
@@ -6145,7 +6145,7 @@ return [
         ]
     ],
     "mount-desert" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mount Desert",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mount_Desert,_Maine",
         "type" => "town",
@@ -6183,7 +6183,7 @@ return [
         ]
     ],
     "dayton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dayton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dayton,_Maine",
         "type" => "town",
@@ -6221,7 +6221,7 @@ return [
         ]
     ],
     "livermore" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Livermore",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Livermore,_Maine",
         "type" => "town",
@@ -6259,7 +6259,7 @@ return [
         ]
     ],
     "machias" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Machias",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Machias,_Maine",
         "type" => "town",
@@ -6298,7 +6298,7 @@ return [
         ]
     ],
     "st-albans" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "St. Albans",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/St._Albans,_Maine",
         "type" => "town",
@@ -6336,7 +6336,7 @@ return [
         ]
     ],
     "van-buren" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Van Buren",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Van_Buren,_Maine",
         "type" => "town",
@@ -6374,7 +6374,7 @@ return [
         ]
     ],
     "boothbay-harbor" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Boothbay Harbor",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Boothbay_Harbor,_Maine",
         "type" => "town",
@@ -6413,7 +6413,7 @@ return [
         ]
     ],
     "albion" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Albion",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Albion,_Maine",
         "type" => "town",
@@ -6451,7 +6451,7 @@ return [
         ]
     ],
     "buckfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Buckfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Buckfield,_Maine",
         "type" => "town",
@@ -6489,7 +6489,7 @@ return [
         ]
     ],
     "palmyra" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Palmyra",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Palmyra,_Maine",
         "type" => "town",
@@ -6527,7 +6527,7 @@ return [
         ]
     ],
     "sebago" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sebago",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sebago,_Maine",
         "type" => "town",
@@ -6565,7 +6565,7 @@ return [
         ]
     ],
     "west-bath" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "West Bath",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/West_Bath,_Maine",
         "type" => "town",
@@ -6603,7 +6603,7 @@ return [
         ]
     ],
     "mapleton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mapleton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mapleton,_Maine",
         "type" => "town",
@@ -6641,7 +6641,7 @@ return [
         ]
     ],
     "otisfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Otisfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Otisfield,_Maine",
         "type" => "town",
@@ -6679,7 +6679,7 @@ return [
         ]
     ],
     "newcastle" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Newcastle",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Newcastle,_Maine",
         "type" => "town",
@@ -6718,7 +6718,7 @@ return [
         ]
     ],
     "veazie" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Veazie",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Veazie,_Maine",
         "type" => "town",
@@ -6756,7 +6756,7 @@ return [
         ]
     ],
     "parsonsfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Parsonsfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Parsonsfield,_Maine",
         "type" => "town",
@@ -6794,7 +6794,7 @@ return [
         ]
     ],
     "nobleboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Nobleboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Nobleboro,_Maine",
         "type" => "town",
@@ -6833,7 +6833,7 @@ return [
         ]
     ],
     "west-paris" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "West Paris",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/West_Paris,_Maine",
         "type" => "town",
@@ -6871,7 +6871,7 @@ return [
         ]
     ],
     "southwest-harbor" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Southwest Harbor",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Southwest_Harbor,_Maine",
         "type" => "town",
@@ -6910,7 +6910,7 @@ return [
         ]
     ],
     "randolph" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Randolph",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Randolph,_Maine",
         "type" => "town",
@@ -6948,7 +6948,7 @@ return [
         ]
     ],
     "dresden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dresden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dresden,_Maine",
         "type" => "town",
@@ -6987,7 +6987,7 @@ return [
         ]
     ],
     "mount-vernon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mount Vernon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mount_Vernon,_Maine",
         "type" => "town",
@@ -7025,7 +7025,7 @@ return [
         ]
     ],
     "lamoine" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lamoine",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lamoine,_Maine",
         "type" => "town",
@@ -7064,7 +7064,7 @@ return [
         ]
     ],
     "hartland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hartland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hartland,_Maine",
         "type" => "town",
@@ -7102,7 +7102,7 @@ return [
         ]
     ],
     "gouldsboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Gouldsboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Gouldsboro,_Maine",
         "type" => "town",
@@ -7141,7 +7141,7 @@ return [
         ]
     ],
     "hope" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hope",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hope,_Maine",
         "type" => "town",
@@ -7180,7 +7180,7 @@ return [
         ]
     ],
     "newfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Newfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Newfield,_Maine",
         "type" => "town",
@@ -7218,7 +7218,7 @@ return [
         ]
     ],
     "dedham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dedham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dedham,_Maine",
         "type" => "town",
@@ -7257,7 +7257,7 @@ return [
         ]
     ],
     "brownfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brownfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brownfield,_Maine",
         "type" => "town",
@@ -7295,7 +7295,7 @@ return [
         ]
     ],
     "surry" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Surry",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Surry,_Maine",
         "type" => "town",
@@ -7334,7 +7334,7 @@ return [
         ]
     ],
     "hiram" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hiram",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hiram,_Maine",
         "type" => "town",
@@ -7372,7 +7372,7 @@ return [
         ]
     ],
     "wales" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wales",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wales,_Maine",
         "type" => "town",
@@ -7410,7 +7410,7 @@ return [
         ]
     ],
     "porter" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Porter",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Porter,_Maine",
         "type" => "town",
@@ -7448,7 +7448,7 @@ return [
         ]
     ],
     "newburgh" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Newburgh",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Newburgh,_Maine",
         "type" => "town",
@@ -7486,7 +7486,7 @@ return [
         ]
     ],
     "washington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Washington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Washington,_Maine",
         "type" => "town",
@@ -7524,7 +7524,7 @@ return [
         ]
     ],
     "trenton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Trenton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Trenton,_Maine",
         "type" => "town",
@@ -7563,7 +7563,7 @@ return [
         ]
     ],
     "ogunquit" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Ogunquit",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Ogunquit,_Maine",
         "type" => "town",
@@ -7601,7 +7601,7 @@ return [
         ]
     ],
     "east-millinocket" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "East Millinocket",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/East_Millinocket,_Maine",
         "type" => "town",
@@ -7639,7 +7639,7 @@ return [
         ]
     ],
     "waterford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waterford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waterford,_Maine",
         "type" => "town",
@@ -7677,7 +7677,7 @@ return [
         ]
     ],
     "palermo" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Palermo",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Palermo,_Maine",
         "type" => "town",
@@ -7716,7 +7716,7 @@ return [
         ]
     ],
     "franklin" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Franklin",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Franklin,_Maine",
         "type" => "town",
@@ -7755,7 +7755,7 @@ return [
         ]
     ],
     "pownal" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Pownal",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Pownal,_Maine",
         "type" => "town",
@@ -7793,7 +7793,7 @@ return [
         ]
     ],
     "charleston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Charleston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Charleston,_Maine",
         "type" => "town",
@@ -7831,7 +7831,7 @@ return [
         ]
     ],
     "northport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Northport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Northport,_Maine",
         "type" => "town",
@@ -7874,7 +7874,7 @@ return [
 
     ],
     "tremont" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Tremont",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Tremont,_Maine",
         "type" => "town",
@@ -7913,7 +7913,7 @@ return [
         ]
     ],
     "stockton-springs" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stockton Springs",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stockton_Springs,_Maine",
         "type" => "town",
@@ -7952,7 +7952,7 @@ return [
         ]
     ],
     "bradley" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bradley",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bradley,_Maine",
         "type" => "town",
@@ -7990,7 +7990,7 @@ return [
         ]
     ],
     "washburn" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Washburn",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Washburn,_Maine",
         "type" => "town",
@@ -8028,7 +8028,7 @@ return [
         ]
     ],
     "limestone" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Limestone",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Limestone,_Maine",
         "type" => "town",
@@ -8066,7 +8066,7 @@ return [
         ]
     ],
     "baldwin" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Baldwin",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Baldwin,_Maine",
         "type" => "town",
@@ -8104,7 +8104,7 @@ return [
         ]
     ],
     "south-thomaston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "South Thomaston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/South_Thomaston,_Maine",
         "type" => "town",
@@ -8143,7 +8143,7 @@ return [
         ]
     ],
     "cornish" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cornish",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cornish,_Maine",
         "type" => "town",
@@ -8181,7 +8181,7 @@ return [
         ]
     ],
     "owls-head" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Owls Head",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Owls_Head,_Maine",
         "type" => "town",
@@ -8220,7 +8220,7 @@ return [
         ]
     ],
     "cushing" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cushing",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cushing,_Maine",
         "type" => "town",
@@ -8259,7 +8259,7 @@ return [
         ]
     ],
     "peru" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Peru",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Peru,_Maine",
         "type" => "town",
@@ -8297,7 +8297,7 @@ return [
         ]
     ],
     "new-sharon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Sharon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Sharon,_Maine",
         "type" => "town",
@@ -8335,7 +8335,7 @@ return [
         ]
     ],
     "greenbush" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Greenbush",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Greenbush,_Maine",
         "type" => "town",
@@ -8373,7 +8373,7 @@ return [
         ]
     ],
     "greenville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Greenville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Greenville,_Maine",
         "type" => "town",
@@ -8411,7 +8411,7 @@ return [
         ]
     ],
     "enfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Enfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Enfield,_Maine",
         "type" => "town",
@@ -8449,7 +8449,7 @@ return [
         ]
     ],
     "hudson" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hudson",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hudson,_Maine",
         "type" => "town",
@@ -8487,7 +8487,7 @@ return [
         ]
     ],
     "appleton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Appleton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Appleton,_Maine",
         "type" => "town",
@@ -8526,7 +8526,7 @@ return [
         ]
     ],
     "searsmont" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Searsmont",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Searsmont,_Maine",
         "type" => "town",
@@ -8565,7 +8565,7 @@ return [
         ]
     ],
     "swanville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Swanville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Swanville,_Maine",
         "type" => "town",
@@ -8604,7 +8604,7 @@ return [
         ]
     ],
     "milbridge" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Milbridge",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Milbridge,_Maine",
         "type" => "town",
@@ -8642,7 +8642,7 @@ return [
         ]
     ],
     "mars-hill" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mars Hill",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mars_Hill,_Maine",
         "type" => "town",
@@ -8680,7 +8680,7 @@ return [
         ]
     ],
     "woodstock" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Woodstock",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Woodstock,_Maine",
         "type" => "town",
@@ -8718,7 +8718,7 @@ return [
         ]
     ],
     "kenduskeag" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Kenduskeag",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Kenduskeag,_Maine",
         "type" => "town",
@@ -8756,7 +8756,7 @@ return [
         ]
     ],
     "chesterville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Chesterville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Chesterville,_Maine",
         "type" => "town",
@@ -8794,7 +8794,7 @@ return [
         ]
     ],
     "east-machias" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "East Machias",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/East_Machias,_Maine",
         "type" => "town",
@@ -8832,7 +8832,7 @@ return [
         ]
     ],
     "plymouth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Plymouth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Plymouth,_Maine",
         "type" => "town",
@@ -8870,7 +8870,7 @@ return [
         ]
     ],
     "easton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Easton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Easton,_Maine",
         "type" => "town",
@@ -8908,7 +8908,7 @@ return [
         ]
     ],
     "castine" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Castine",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Castine,_Maine",
         "type" => "town",
@@ -8947,7 +8947,7 @@ return [
         ]
     ],
     "baileyville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Baileyville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Baileyville,_Maine",
         "type" => "town",
@@ -8985,7 +8985,7 @@ return [
         ]
     ],
     "cornville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cornville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cornville,_Maine",
         "type" => "town",
@@ -9023,7 +9023,7 @@ return [
         ]
     ],
     "sangerville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sangerville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sangerville,_Maine",
         "type" => "town",
@@ -9061,7 +9061,7 @@ return [
         ]
     ],
     "hodgdon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hodgdon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hodgdon,_Maine",
         "type" => "town",
@@ -9099,7 +9099,7 @@ return [
         ]
     ],
     "eastport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Eastport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Eastport,_Maine",
         "type" => "city",
@@ -9137,7 +9137,7 @@ return [
         ]
     ],
     "vinalhaven" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Vinalhaven",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Vinalhaven,_Maine",
         "type" => "town",
@@ -9176,7 +9176,7 @@ return [
         ]
     ],
     "guilford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Guilford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Guilford,_Maine",
         "type" => "town",
@@ -9214,7 +9214,7 @@ return [
         ]
     ],
     "jonesport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Jonesport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Jonesport,_Maine",
         "type" => "town",
@@ -9252,7 +9252,7 @@ return [
         ]
     ],
     "lubec" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lubec",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lubec,_Maine",
         "type" => "town",
@@ -9290,7 +9290,7 @@ return [
         ]
     ],
     "frankfort" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Frankfort",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Frankfort,_Maine",
         "type" => "town",
@@ -9329,7 +9329,7 @@ return [
         ]
     ],
     "etna" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Etna",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Etna,_Maine",
         "type" => "town",
@@ -9367,7 +9367,7 @@ return [
         ]
     ],
     "hebron" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hebron",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hebron,_Maine",
         "type" => "town",
@@ -9405,7 +9405,7 @@ return [
         ]
     ],
     "rangeley" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Rangeley",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Rangeley,_Maine",
         "type" => "town",
@@ -9443,7 +9443,7 @@ return [
         ]
     ],
     "sullivan" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sullivan",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sullivan,_Maine",
         "type" => "town",
@@ -9482,7 +9482,7 @@ return [
         ]
     ],
     "woodland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Woodland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Woodland,_Aroostook_County,_Maine",
         "type" => "town",
@@ -9520,7 +9520,7 @@ return [
         ]
     ],
     "dixmont" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dixmont",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dixmont,_Maine",
         "type" => "town",
@@ -9558,7 +9558,7 @@ return [
         ]
     ],
     "hartford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hartford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hartford,_Maine",
         "type" => "town",
@@ -9596,7 +9596,7 @@ return [
         ]
     ],
     "sedgwick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sedgwick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sedgwick,_Maine",
         "type" => "town",
@@ -9635,7 +9635,7 @@ return [
         ]
     ],
     "ashland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Ashland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Ashland,_Maine",
         "type" => "town",
@@ -9673,7 +9673,7 @@ return [
         ]
     ],
     "denmark" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Denmark",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Denmark,_Maine",
         "type" => "town",
@@ -9711,7 +9711,7 @@ return [
         ]
     ],
     "edgecomb" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Edgecomb",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Edgecomb,_Maine",
         "type" => "town",
@@ -9750,7 +9750,7 @@ return [
         ]
     ],
     "medway" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Medway",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Medway,_Maine",
         "type" => "town",
@@ -9788,7 +9788,7 @@ return [
         ]
     ],
     "stetson" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stetson",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stetson,_Maine",
         "type" => "town",
@@ -9826,7 +9826,7 @@ return [
         ]
     ],
     "bradford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bradford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bradford,_Maine",
         "type" => "town",
@@ -9864,7 +9864,7 @@ return [
         ]
     ],
     "fayette" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Fayette",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Fayette,_Maine",
         "type" => "town",
@@ -9902,7 +9902,7 @@ return [
         ]
     ],
     "rome" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Rome",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Rome,_Maine",
         "type" => "town",
@@ -9940,7 +9940,7 @@ return [
         ]
     ],
     "addison" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Addison",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Addison,_Maine",
         "type" => "town",
@@ -9978,7 +9978,7 @@ return [
         ]
     ],
     "friendship" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Friendship",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Friendship,_Maine",
         "type" => "town",
@@ -10017,7 +10017,7 @@ return [
         ]
     ],
     "brownville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brownville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brownville,_Maine",
         "type" => "town",
@@ -10055,7 +10055,7 @@ return [
         ]
     ],
     "penobscot" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Penobscot",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Penobscot,_Maine",
         "type" => "town",
@@ -10094,7 +10094,7 @@ return [
         ]
     ],
     "wayne" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wayne",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wayne,_Maine",
         "type" => "town",
@@ -10132,7 +10132,7 @@ return [
         ]
     ],
     "steuben" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Steuben",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Steuben,_Maine",
         "type" => "town",
@@ -10170,7 +10170,7 @@ return [
         ]
     ],
     "south-bristol" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "South Bristol",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/South_Bristol,_Maine",
         "type" => "town",
@@ -10209,7 +10209,7 @@ return [
         ]
     ],
     "canton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Canton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Canton,_Maine",
         "type" => "town",
@@ -10247,7 +10247,7 @@ return [
         ]
     ],
     "strong" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Strong",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Strong,_Maine",
         "type" => "town",
@@ -10285,7 +10285,7 @@ return [
         ]
     ],
     "cherryfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cherryfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cherryfield,_Maine",
         "type" => "town",
@@ -10323,7 +10323,7 @@ return [
         ]
     ],
     "lovell" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lovell",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lovell,_Maine",
         "type" => "town",
@@ -10361,7 +10361,7 @@ return [
         ]
     ],
     "burnham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Burnham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Burnham,_Maine",
         "type" => "town",
@@ -10400,7 +10400,7 @@ return [
         ]
     ],
     "howland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Howland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Howland,_Maine",
         "type" => "town",
@@ -10438,7 +10438,7 @@ return [
         ]
     ],
     "georgetown" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Georgetown",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Georgetown,_Maine",
         "type" => "town",
@@ -10476,7 +10476,7 @@ return [
         ]
     ],
     "stonington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stonington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stonington,_Maine",
         "type" => "town",
@@ -10515,7 +10515,7 @@ return [
         ]
     ],
     "frenchville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Frenchville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Frenchville,_Maine",
         "type" => "town",
@@ -10553,7 +10553,7 @@ return [
         ]
     ],
     "garland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Garland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Garland,_Maine",
         "type" => "town",
@@ -10591,7 +10591,7 @@ return [
         ]
     ],
     "montville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Montville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Montville,_Maine",
         "type" => "town",
@@ -10630,7 +10630,7 @@ return [
         ]
     ],
     "troy" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Troy",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Troy,_Maine",
         "type" => "town",
@@ -10669,7 +10669,7 @@ return [
         ]
     ],
     "brooks" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brooks",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brooks,_Maine",
         "type" => "town",
@@ -10708,7 +10708,7 @@ return [
         ]
     ],
     "littleton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Littleton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Littleton,_Maine",
         "type" => "town",
@@ -10746,7 +10746,7 @@ return [
         ]
     ],
     "sumner" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sumner",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sumner,_Maine",
         "type" => "town",
@@ -10784,7 +10784,7 @@ return [
         ]
     ],
     "solon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Solon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Solon,_Maine",
         "type" => "town",
@@ -10822,7 +10822,7 @@ return [
         ]
     ],
     "belmont" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Belmont",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Belmont,_Maine",
         "type" => "town",
@@ -10861,7 +10861,7 @@ return [
         ]
     ],
     "morill" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Morill",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Morrill,_Maine",
         "type" => "town",
@@ -10900,7 +10900,7 @@ return [
         ]
     ],
     "exeter" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Exeter",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Exeter,_Maine",
         "type" => "town",
@@ -10938,7 +10938,7 @@ return [
         ]
     ],
     "machiasport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Machiasport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Machiasport,_Maine",
         "type" => "town",
@@ -10976,7 +10976,7 @@ return [
         ]
     ],
     "harrington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Harrington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Harrington,_Maine",
         "type" => "town",
@@ -11014,7 +11014,7 @@ return [
         ]
     ],
     "kingfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Kingfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Kingfield,_Maine",
         "type" => "town",
@@ -11052,7 +11052,7 @@ return [
         ]
     ],
     "athens" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Athens",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Athens,_Maine",
         "type" => "town",
@@ -11090,7 +11090,7 @@ return [
         ]
     ],
     "linneus" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Linneus",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Linneus,_Maine",
         "type" => "town",
@@ -11128,7 +11128,7 @@ return [
         ]
     ],
     "brooksville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brooksville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brooksville,_Maine",
         "type" => "town",
@@ -11167,7 +11167,7 @@ return [
         ]
     ],
     "liberty" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Liberty",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Liberty,_Maine",
         "type" => "town",
@@ -11206,7 +11206,7 @@ return [
         ]
     ],
     "monroe" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Monroe",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Monroe,_Maine",
         "type" => "town",
@@ -11245,7 +11245,7 @@ return [
         ]
     ],
     "smithfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Smithfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Smithfield,_Maine",
         "type" => "town",
@@ -11283,7 +11283,7 @@ return [
         ]
     ],
     "lee" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lee",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lee,_Maine",
         "type" => "town",
@@ -11321,7 +11321,7 @@ return [
         ]
     ],
     "embden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Embden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Embden,_Maine",
         "type" => "town",
@@ -11359,7 +11359,7 @@ return [
         ]
     ],
     "phillips" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Phillips",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Phillips,_Maine",
         "type" => "town",
@@ -11397,7 +11397,7 @@ return [
         ]
     ],
     "detroit" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Detroit",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Detroit,_Maine",
         "type" => "town",
@@ -11435,7 +11435,7 @@ return [
         ]
     ],
     "patten" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Patten",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Patten,_Maine",
         "type" => "town",
@@ -11473,7 +11473,7 @@ return [
         ]
     ],
     "bingham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bingham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bingham,_Maine",
         "type" => "town",
@@ -11511,7 +11511,7 @@ return [
         ]
     ],
     "clifton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Clifton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Clifton,_Maine",
         "type" => "town",
@@ -11549,7 +11549,7 @@ return [
         ]
     ],
     "alton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Alton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Alton,_Maine",
         "type" => "town",
@@ -11587,7 +11587,7 @@ return [
         ]
     ],
     "brooklin" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brooklin",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brooklin,_Maine",
         "type" => "town",
@@ -11626,7 +11626,7 @@ return [
         ]
     ],
     "harmony" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Harmony",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Harmony,_Maine",
         "type" => "town",
@@ -11664,7 +11664,7 @@ return [
         ]
     ],
     "bremen" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bremen",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bremen,_Maine",
         "type" => "town",
@@ -11703,7 +11703,7 @@ return [
         ]
     ],
     "sherman" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sherman",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sherman,_Maine",
         "type" => "town",
@@ -11741,7 +11741,7 @@ return [
         ]
     ],
     "knox" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Knox",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Knox,_Maine",
         "type" => "town",
@@ -11780,7 +11780,7 @@ return [
         ]
     ],
     "perry" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Perry",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Perry,_Maine",
         "type" => "town",
@@ -11818,7 +11818,7 @@ return [
         ]
     ],
     "waldo" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waldo",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waldo,_Maine",
         "type" => "town",
@@ -11857,7 +11857,7 @@ return [
         ]
     ],
     "pembroke" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Pembroke",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Pembroke,_Maine",
         "type" => "town",
@@ -11895,7 +11895,7 @@ return [
         ]
     ],
     "industry" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Industry",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Industry,_Maine",
         "type" => "town",
@@ -11933,7 +11933,7 @@ return [
         ]
     ],
     "jackman" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Jackman",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Jackman,_Maine",
         "type" => "town",
@@ -11971,7 +11971,7 @@ return [
         ]
     ],
     "thorndike" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Thorndike",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Thorndike,_Maine",
         "type" => "town",
@@ -12010,7 +12010,7 @@ return [
         ]
     ],
     "greenwood" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Greenwood",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Greenwood,_Maine",
         "type" => "town",
@@ -12048,7 +12048,7 @@ return [
         ]
     ],
     "eagle-lake" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Eagle Lake",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Eagle_Lake,_Maine",
         "type" => "town",
@@ -12086,7 +12086,7 @@ return [
         ]
     ],
     "new-portland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Portland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Portland,_Maine",
         "type" => "town",
@@ -12124,7 +12124,7 @@ return [
         ]
     ],
     "island-falls" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Island Falls",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Island_Falls,_Maine",
         "type" => "town",
@@ -12162,7 +12162,7 @@ return [
         ]
     ],
     "andover" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Andover",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Andover,_Maine",
         "type" => "town",
@@ -12200,7 +12200,7 @@ return [
         ]
     ],
     "parkman" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Parkman",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Parkman,_Maine",
         "type" => "town",
@@ -12238,7 +12238,7 @@ return [
         ]
     ],
     "princeton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Princeton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Princeton,_Maine",
         "type" => "town",
@@ -12276,7 +12276,7 @@ return [
         ]
     ],
     "monticello" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Monticello",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Monticello,_Maine",
         "type" => "town",
@@ -12314,7 +12314,7 @@ return [
         ]
     ],
     "st-agatha" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "St. Agatha",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/St._Agatha,_Maine",
         "type" => "town",
@@ -12352,7 +12352,7 @@ return [
         ]
     ],
     "new-vineyard" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Vineyard",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Vineyard,_Maine",
         "type" => "town",
@@ -12390,7 +12390,7 @@ return [
         ]
     ],
     "westport-island" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Westport Island",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Westport_Island,_Maine",
         "type" => "town",
@@ -12429,7 +12429,7 @@ return [
         ]
     ],
     "freedom" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Freedom",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Freedom,_Maine",
         "type" => "town",
@@ -12468,7 +12468,7 @@ return [
         ]
     ],
     "alna" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Alna",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Alna,_Maine",
         "type" => "town",
@@ -12507,7 +12507,7 @@ return [
         ]
     ],
     "mercer" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mercer",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mercer,_Maine",
         "type" => "town",
@@ -12545,7 +12545,7 @@ return [
         ]
     ],
     "prospect" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Prospect",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Prospect,_Maine",
         "type" => "town",
@@ -12584,7 +12584,7 @@ return [
         ]
     ],
     "otis" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Otis",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Otis,_Maine",
         "type" => "town",
@@ -12623,7 +12623,7 @@ return [
         ]
     ],
     "carrabassett-valley" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Carrabassett Valley",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Carrabassett_Valley,_Maine",
         "type" => "town",
@@ -12661,7 +12661,7 @@ return [
         ]
     ],
     "blaine" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Blaine",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Blaine,_Maine",
         "type" => "town",
@@ -12699,7 +12699,7 @@ return [
         ]
     ],
     "sebec" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sebec",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sebec,_Maine",
         "type" => "town",
@@ -12737,7 +12737,7 @@ return [
         ]
     ],
     "oakfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Oakfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Oakfield,_Maine",
         "type" => "town",
@@ -12775,7 +12775,7 @@ return [
         ]
     ],
     "abbot" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Abbot",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Abbot,_Maine",
         "type" => "town",
@@ -12813,7 +12813,7 @@ return [
         ]
     ],
     "eustis" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Eustis",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Eustis,_Maine",
         "type" => "town",
@@ -12851,7 +12851,7 @@ return [
         ]
     ],
     "lagrange" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "LaGrange",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lagrange,_Maine",
         "type" => "town",
@@ -12889,7 +12889,7 @@ return [
         ]
     ],
     "southport" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Southport",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Southport,_Maine",
         "type" => "town",
@@ -12928,7 +12928,7 @@ return [
         ]
     ],
     "jackson" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Jackson",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Jackson,_Maine",
         "type" => "town",
@@ -12967,7 +12967,7 @@ return [
         ]
     ],
     "monson" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Monson",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Monson,_Maine",
         "type" => "town",
@@ -13005,7 +13005,7 @@ return [
         ]
     ],
     "somerville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Somerville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Somerville,_Maine",
         "type" => "town",
@@ -13044,7 +13044,7 @@ return [
         ]
     ],
     "mattawamkeag" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mattawamkeag",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mattawamkeag,_Maine",
         "type" => "town",
@@ -13082,7 +13082,7 @@ return [
         ]
     ],
     "starks" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Starks",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Starks,_Maine",
         "type" => "town",
@@ -13120,7 +13120,7 @@ return [
         ]
     ],
     "danforth" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Danforth",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Danforth,_Maine",
         "type" => "town",
@@ -13158,7 +13158,7 @@ return [
         ]
     ],
     "islesboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Islesboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Islesboro,_Maine",
         "type" => "town",
@@ -13197,7 +13197,7 @@ return [
         ]
     ],
     "jonesboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Jonesboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Jonesboro,_Maine",
         "type" => "town",
@@ -13235,7 +13235,7 @@ return [
         ]
     ],
     "vienna" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Vienna",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Vienna,_Maine",
         "type" => "town",
@@ -13273,7 +13273,7 @@ return [
         ]
     ],
     "new-sweden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Sweden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Sweden,_Maine",
         "type" => "town",
@@ -13311,7 +13311,7 @@ return [
         ]
     ],
     "new-limerick" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Limerick",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Limerick,_Maine",
         "type" => "town",
@@ -13349,7 +13349,7 @@ return [
         ]
     ],
     "chester" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Chester",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Chester,_Maine",
         "type" => "town",
@@ -13387,7 +13387,7 @@ return [
         ]
     ],
     "robbinston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Robbinston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Robbinston,_Maine",
         "type" => "town",
@@ -13425,7 +13425,7 @@ return [
         ]
     ],
     "bridgewater" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bridgewater",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bridgewater,_Maine",
         "type" => "town",
@@ -13463,7 +13463,7 @@ return [
         ]
     ],
     "marshfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Marshfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Marshfield,_Maine",
         "type" => "town",
@@ -13501,7 +13501,7 @@ return [
         ]
     ],
     "temple" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Temple",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Temple,_Maine",
         "type" => "town",
@@ -13539,7 +13539,7 @@ return [
         ]
     ],
     "alexander" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Alexander",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Alexander,_Maine",
         "type" => "town",
@@ -13577,7 +13577,7 @@ return [
         ]
     ],
     "cutler" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cutler",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cutler,_Maine",
         "type" => "town",
@@ -13615,7 +13615,7 @@ return [
         ]
     ],
     "wallagrass" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wallagrass",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wallagrass,_Maine",
         "type" => "town",
@@ -13653,7 +13653,7 @@ return [
         ]
     ],
     "carthage" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Carthage",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Carthage,_Maine",
         "type" => "town",
@@ -13691,7 +13691,7 @@ return [
         ]
     ],
     "verona island" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Verona Island",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Verona_Island,_Maine",
         "type" => "town",
@@ -13730,7 +13730,7 @@ return [
         ]
     ],
     "chapman" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Chapman",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Chapman,_Maine",
         "type" => "town",
@@ -13768,7 +13768,7 @@ return [
         ]
     ],
     "ripley" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Ripley",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Ripley,_Maine",
         "type" => "town",
@@ -13806,7 +13806,7 @@ return [
         ]
     ],
     "whiting" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Whiting",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Whiting,_Maine",
         "type" => "town",
@@ -13844,7 +13844,7 @@ return [
         ]
     ],
     "arrowsic" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Arrowsic",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Arrowsic,_Maine",
         "type" => "town",
@@ -13882,7 +13882,7 @@ return [
         ]
     ],
     "columbia falls" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Columbia Falls",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Columbia_Falls,_Maine",
         "type" => "town",
@@ -13920,7 +13920,7 @@ return [
         ]
     ],
     "moscow" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Moscow",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Moscow,_Maine",
         "type" => "town",
@@ -13958,7 +13958,7 @@ return [
         ]
     ],
     "mariaville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mariaville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mariaville,_Maine",
         "type" => "town",
@@ -13997,7 +13997,7 @@ return [
         ]
     ],
     "winter-harbor" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Winter Harbor",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Winter_Harbor,_Maine",
         "type" => "town",
@@ -14036,7 +14036,7 @@ return [
         ]
     ],
     "westfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Westfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Westfield,_Maine",
         "type" => "town",
@@ -14074,7 +14074,7 @@ return [
         ]
     ],
     "avon" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Avon",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Avon,_Maine",
         "type" => "town",
@@ -14112,7 +14112,7 @@ return [
         ]
     ],
     "cambridge" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cambridge",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cambridge,_Maine",
         "type" => "town",
@@ -14150,7 +14150,7 @@ return [
         ]
     ],
     "beals" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Beals",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Beals,_Maine",
         "type" => "town",
@@ -14188,7 +14188,7 @@ return [
         ]
     ],
     "smyrna" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Smyrna",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Smyrna,_Maine",
         "type" => "town",
@@ -14226,7 +14226,7 @@ return [
         ]
     ],
     "st-francis" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "St. Francis",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/St._Francis,_Maine",
         "type" => "town",
@@ -14264,7 +14264,7 @@ return [
         ]
     ],
     "columbia" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Columbia",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Columbia,_Maine",
         "type" => "town",
@@ -14302,7 +14302,7 @@ return [
         ]
     ],
     "ludlow" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Ludlow",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Ludlow,_Maine",
         "type" => "town",
@@ -14340,7 +14340,7 @@ return [
         ]
     ],
     "eastbrook" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Eastbrook",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Eastbrook,_Maine",
         "type" => "town",
@@ -14379,7 +14379,7 @@ return [
         ]
     ],
     "north-haven" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "North Haven",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/North_Haven,_Maine",
         "type" => "town",
@@ -14418,7 +14418,7 @@ return [
         ]
     ],
     "newry" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Newry",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Newry,_Maine",
         "type" => "town",
@@ -14456,7 +14456,7 @@ return [
         ]
     ],
     "sweden" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sweden",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sweden,_Maine",
         "type" => "town",
@@ -14494,7 +14494,7 @@ return [
         ]
     ],
     "winn" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Winn",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Winn,_Maine",
         "type" => "town",
@@ -14532,7 +14532,7 @@ return [
         ]
     ],
     "chebeague-island" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Chebeague Island",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Chebeague_Island,_Maine",
         "type" => "town",
@@ -14570,7 +14570,7 @@ return [
         ]
     ],
     "stow" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stow",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stow,_Maine",
         "type" => "town",
@@ -14608,7 +14608,7 @@ return [
         ]
     ],
     "stacyville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stacyville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stacyville,_Maine",
         "type" => "town",
@@ -14646,7 +14646,7 @@ return [
         ]
     ],
     "weld" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Weld",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Weld,_Maine",
         "type" => "town",
@@ -14684,7 +14684,7 @@ return [
         ]
     ],
     "castle-hill" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Castle Hill",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Castle_Hill,_Maine",
         "type" => "town",
@@ -14722,7 +14722,7 @@ return [
         ]
     ],
     "burlington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Burlington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Burlington,_Maine",
         "type" => "town",
@@ -14760,7 +14760,7 @@ return [
         ]
     ],
     "perham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Perham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Perham,_Maine",
         "type" => "town",
@@ -14798,7 +14798,7 @@ return [
         ]
     ],
     "lowell" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lowell",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lowell,_Maine",
         "type" => "town",
@@ -14836,7 +14836,7 @@ return [
         ]
     ],
     "grand-isle" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Grand Isle",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Grand_Isle,_Maine",
         "type" => "town",
@@ -14874,7 +14874,7 @@ return [
         ]
     ],
     "roxbury" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Roxbury",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Roxbury,_Maine",
         "type" => "town",
@@ -14912,7 +14912,7 @@ return [
         ]
     ],
     "portage-lake" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Portage Lake",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Portage_Lake,_Maine",
         "type" => "town",
@@ -14950,7 +14950,7 @@ return [
         ]
     ],
     "passadumkeag" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Passadumkeag",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Passadumkeag,_Maine",
         "type" => "town",
@@ -14988,7 +14988,7 @@ return [
         ]
     ],
     "swans-island" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Swan's Island",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Swan%27s_Island,_Maine",
         "type" => "town",
@@ -15027,7 +15027,7 @@ return [
         ]
     ],
     "charlotte" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Charlotte",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Charlotte,_Maine",
         "type" => "town",
@@ -15065,7 +15065,7 @@ return [
         ]
     ],
     "waltham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waltham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waltham,_Maine",
         "type" => "town",
@@ -15104,7 +15104,7 @@ return [
         ]
     ],
     "new-canada" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "New Canada",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/New_Canada,_Maine",
         "type" => "town",
@@ -15142,7 +15142,7 @@ return [
         ]
     ],
     "dallas-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dallas Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dallas_Plantation,_Maine",
         "type" => "plantation",
@@ -15170,7 +15170,7 @@ return [
         ]
     ],
     "dennysville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dennysville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dennysville,_Maine",
         "type" => "town",
@@ -15208,7 +15208,7 @@ return [
         ]
     ],
     "wade" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wade",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wade,_Maine",
         "type" => "town",
@@ -15246,7 +15246,7 @@ return [
         ]
     ],
     "roque-bluffs" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Roque Bluffs",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Roque_Bluffs,_Maine",
         "type" => "town",
@@ -15284,7 +15284,7 @@ return [
         ]
     ],
     "springfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Springfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Springfield,_Maine",
         "type" => "town",
@@ -15322,7 +15322,7 @@ return [
         ]
     ],
     "caswell" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Caswell",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Caswell,_Maine",
         "type" => "town",
@@ -15360,7 +15360,7 @@ return [
         ]
     ],
     "hanover" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hanover",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hanover,_Maine",
         "type" => "town",
@@ -15398,7 +15398,7 @@ return [
         ]
     ],
     "sorrento" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sorrento",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sorrento,_Maine",
         "type" => "town",
@@ -15437,7 +15437,7 @@ return [
         ]
     ],
     "st-john-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "St. John Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/St._John_Plantation,_Maine",
         "type" => "plantation",
@@ -15475,7 +15475,7 @@ return [
         ]
     ],
     "stoneham" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stoneham",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stoneham,_Maine",
         "type" => "town",
@@ -15513,7 +15513,7 @@ return [
         ]
     ],
     "amity" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Amity",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Amity,_Maine",
         "type" => "town",
@@ -15551,7 +15551,7 @@ return [
         ]
     ],
     "shirley" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Shirley",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Shirley,_Maine",
         "type" => "town",
@@ -15589,7 +15589,7 @@ return [
         ]
     ],
     "stockholm" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Stockholm",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Stockholm,_Maine",
         "type" => "town",
@@ -15627,7 +15627,7 @@ return [
         ]
     ],
     "crystal" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Crystal",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Crystal,_Maine",
         "type" => "town",
@@ -15665,7 +15665,7 @@ return [
         ]
     ],
     "amherst" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Amherst",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Amherst,_Maine",
         "type" => "town",
@@ -15704,7 +15704,7 @@ return [
         ]
     ],
     "weston" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Weston",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Weston,_Maine",
         "type" => "town",
@@ -15742,7 +15742,7 @@ return [
         ]
     ],
     "allagash" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Allagash",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Allagash,_Maine",
         "type" => "town",
@@ -15780,7 +15780,7 @@ return [
         ]
     ],
     "long-island" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Long Island",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Long_Island,_Maine",
         "type" => "town",
@@ -15818,7 +15818,7 @@ return [
         ]
     ],
     "medford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Medford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Medford,_Maine",
         "type" => "town",
@@ -15856,7 +15856,7 @@ return [
         ]
     ],
     "wellington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wellington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wellington,_Maine",
         "type" => "town",
@@ -15894,7 +15894,7 @@ return [
         ]
     ],
     "dyer-brook" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dyer Brook",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dyer_Brook,_Maine",
         "type" => "town",
@@ -15932,7 +15932,7 @@ return [
         ]
     ],
     "merrill" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Merrill",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Merrill,_Maine",
         "type" => "town",
@@ -15970,7 +15970,7 @@ return [
         ]
     ],
     "masardis" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Masardis",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Masardis,_Maine",
         "type" => "town",
@@ -16008,7 +16008,7 @@ return [
         ]
     ],
     "whitneyville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Whitneyville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Whitneyville,_Maine",
         "type" => "town",
@@ -16046,7 +16046,7 @@ return [
         ]
     ],
     "woodville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Woodville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Woodville,_Maine",
         "type" => "town",
@@ -16084,7 +16084,7 @@ return [
         ]
     ],
     "baring-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Baring Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Baring_Plantation,_Maine",
         "type" => "plantation",
@@ -16122,7 +16122,7 @@ return [
         ]
     ],
     "gilead" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Gilead",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Gilead,_Maine",
         "type" => "town",
@@ -16160,7 +16160,7 @@ return [
         ]
     ],
     "winterville-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Winterville Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Winterville_Plantation,_Maine",
         "type" => "plantation",
@@ -16198,7 +16198,7 @@ return [
         ]
     ],
     "moose-river" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Moose River",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Moose_River,_Maine",
         "type" => "town",
@@ -16236,7 +16236,7 @@ return [
         ]
     ],
     "mount-chase" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Mount Chase",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Mount_Chase,_Maine",
         "type" => "town",
@@ -16274,7 +16274,7 @@ return [
         ]
     ],
     "rangeley-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Rangeley Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Rangeley_Plantation,_Maine",
         "type" => "plantation",
@@ -16312,7 +16312,7 @@ return [
         ]
     ],
     "topsfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Topsfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Topsfield,_Maine",
         "type" => "town",
@@ -16350,7 +16350,7 @@ return [
         ]
     ],
     "northfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Northfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Northfield,_Maine",
         "type" => "town",
@@ -16388,7 +16388,7 @@ return [
         ]
     ],
     "cooper" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cooper",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cooper,_Maine",
         "type" => "town",
@@ -16426,7 +16426,7 @@ return [
         ]
     ],
     "hamlin" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hamlin",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hamlin,_Maine",
         "type" => "town",
@@ -16464,7 +16464,7 @@ return [
         ]
     ],
     "cranberry-isles" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cranberry Isles",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cranberry_Isles,_Maine",
         "type" => "town",
@@ -16503,7 +16503,7 @@ return [
         ]
     ],
     "orient" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Orient",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Orient,_Maine",
         "type" => "town",
@@ -16541,7 +16541,7 @@ return [
         ]
     ],
     "lake-view-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lake View Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lake_View_Plantation,_Maine",
         "type" => "plantation",
@@ -16579,7 +16579,7 @@ return [
         ]
     ],
     "meddybemps" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Meddybemps",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Meddybemps,_Maine",
         "type" => "town",
@@ -16617,7 +16617,7 @@ return [
         ]
     ],
     "carroll-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Carroll Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Carroll_Plantation,_Maine",
         "type" => "plantation",
@@ -16655,7 +16655,7 @@ return [
         ]
     ],
     "bowerbank" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Bowerbank",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Bowerbank,_Maine",
         "type" => "town",
@@ -16693,7 +16693,7 @@ return [
         ]
     ],
     "willimantic" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Willimantic",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Willimantic,_Maine",
         "type" => "town",
@@ -16731,7 +16731,7 @@ return [
         ]
     ],
     "edinburg" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Edinburg",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Edinburg,_Maine",
         "type" => "town",
@@ -16769,7 +16769,7 @@ return [
         ]
     ],
     "beaver-cove" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Beaver Cove",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Beaver_Cove,_Maine",
         "type" => "town",
@@ -16807,7 +16807,7 @@ return [
         ]
     ],
     "coplin-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Coplin Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Coplin_Plantation,_Maine",
         "type" => "plantation",
@@ -16845,7 +16845,7 @@ return [
         ]
     ],
     "reed-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Reed Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Reed_Plantation,_Maine",
         "type" => "plantation",
@@ -16883,7 +16883,7 @@ return [
         ]
     ],
     "sandy-river-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Sandy River Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Sandy_River_Plantation,_Maine",
         "type" => "plantation",
@@ -16921,7 +16921,7 @@ return [
         ]
     ],
     "grand-lake-stream" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Grand Lake Stream",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Grand_Lake_Stream,_Maine",
         "type" => "plantation",
@@ -16959,7 +16959,7 @@ return [
         ]
     ],
     "wesley" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Wesley",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Wesley,_Maine",
         "type" => "town",
@@ -16997,7 +16997,7 @@ return [
         ]
     ],
     "lakeville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lakeville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lakeville,_Maine",
         "type" => "town",
@@ -17035,7 +17035,7 @@ return [
         ]
     ],
     "byron" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Byron",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Byron,_Maine",
         "type" => "town",
@@ -17073,7 +17073,7 @@ return [
         ]
     ],
     "vanceboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Vanceboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Vanceboro,_Maine",
         "type" => "town",
@@ -17111,7 +17111,7 @@ return [
         ]
     ],
     "haynesville" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Haynesville",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Haynesville,_Maine",
         "type" => "town",
@@ -17149,7 +17149,7 @@ return [
         ]
     ],
     "crawford" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Crawford",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Crawford,_Maine",
         "type" => "town",
@@ -17187,7 +17187,7 @@ return [
         ]
     ],
     "aurora" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Aurora",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Aurora,_Maine",
         "type" => "town",
@@ -17226,7 +17226,7 @@ return [
         ]
     ],
     "isle-au-haut" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Isle au Haut",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Isle_au_Haut,_Maine",
         "type" => "town",
@@ -17265,7 +17265,7 @@ return [
         ]
     ],
     "hammond" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hammond",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hammond,_Maine",
         "type" => "town",
@@ -17303,7 +17303,7 @@ return [
         ]
     ],
     "maxfield" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Maxfield",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Maxfield,_Maine",
         "type" => "town",
@@ -17341,7 +17341,7 @@ return [
         ]
     ],
     "pleasant-ridge-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Pleasant Ridge Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Pleasant_Ridge_Plantation,_Maine",
         "type" => "plantation",
@@ -17379,7 +17379,7 @@ return [
         ]
     ],
     "caratunk" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Caratunk",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Caratunk,_Maine",
         "type" => "town",
@@ -17417,7 +17417,7 @@ return [
         ]
     ],
     "westmanland" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Westmanland",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Westmanland,_Maine",
         "type" => "town",
@@ -17455,7 +17455,7 @@ return [
         ]
     ],
     "garfield-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Garfield Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Garfield_Plantation,_Maine",
         "type" => "plantation",
@@ -17493,7 +17493,7 @@ return [
         ]
     ],
     "cyr-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Cyr Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Cyr_Plantation,_Maine",
         "type" => "plantation",
@@ -17531,7 +17531,7 @@ return [
         ]
     ],
     "deblois" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Deblois",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Deblois,_Maine",
         "type" => "town",
@@ -17569,7 +17569,7 @@ return [
         ]
     ],
     "hersey" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Hersey",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Hersey,_Maine",
         "type" => "town",
@@ -17607,7 +17607,7 @@ return [
         ]
     ],
     "talmadge" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Talmadge",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Talmadge,_Maine",
         "type" => "town",
@@ -17645,7 +17645,7 @@ return [
         ]
     ],
     "upton" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Upton",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Upton,_Maine",
         "type" => "town",
@@ -17683,7 +17683,7 @@ return [
         ]
     ],
     "webster-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Webster Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Webster_Plantation,_Maine",
         "type" => "plantation",
@@ -17721,7 +17721,7 @@ return [
         ]
     ],
     "waite" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Waite",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Waite,_Maine",
         "type" => "town",
@@ -17759,7 +17759,7 @@ return [
         ]
     ],
     "osborn" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Osborn",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Osborn,_Maine",
         "type" => "town",
@@ -17798,7 +17798,7 @@ return [
         ]
     ],
     "monhegan" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Monhegan",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Monhegan,_Maine",
         "type" => "plantation",
@@ -17836,7 +17836,7 @@ return [
         ]
     ],
     "macwahoc-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Macwahoc Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Macwahoc,_Maine",
         "type" => "plantation",
@@ -17874,7 +17874,7 @@ return [
         ]
     ],
     "brighton-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Brighton Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Brighton_Plantation,_Maine",
         "type" => "plantation",
@@ -17912,7 +17912,7 @@ return [
         ]
     ],
     "great-pond" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Great Pond",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Great_Pond,_Maine",
         "type" => "town",
@@ -17951,7 +17951,7 @@ return [
         ]
     ],
     "dennistown-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Dennistown Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Dennistown,_Maine",
         "type" => "plantation",
@@ -17989,7 +17989,7 @@ return [
         ]
     ],
     "beddington" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Beddington",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Beddington,_Maine",
         "type" => "town",
@@ -18027,7 +18027,7 @@ return [
         ]
     ],
     "west-forks" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "West Forks",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/West_Forks,_Maine",
         "type" => "plantation",
@@ -18065,7 +18065,7 @@ return [
         ]
     ],
     "matinicus-isle" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Matinicus Isle",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Matinicus_Isle,_Maine",
         "type" => "plantation",
@@ -18103,7 +18103,7 @@ return [
         ]
     ],
     "highland-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Highland Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Highland_Plantation,_Maine",
         "type" => "plantation",
@@ -18141,7 +18141,7 @@ return [
         ]
     ],
     "the-forks" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "The Forks",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/The_Forks,_Maine",
         "type" => "plantation",
@@ -18179,7 +18179,7 @@ return [
         ]
     ],
     "moro-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Moro Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Moro_Plantation,_Maine",
         "type" => "plantation",
@@ -18217,7 +18217,7 @@ return [
         ]
     ],
     "lincoln-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Lincoln Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Lincoln_Plantation,_Maine",
         "type" => "plantation",
@@ -18255,7 +18255,7 @@ return [
         ]
     ],
     "seboeis-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Seboeis Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Seboeis_Plantation,_Maine",
         "type" => "plantation",
@@ -18293,7 +18293,7 @@ return [
         ]
     ],
     "frye-island" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Frye Island",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Frye_Island,_Maine",
         "type" => "town",
@@ -18331,7 +18331,7 @@ return [
         ]
     ],
     "frenchboro" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Frenchboro",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Frenchboro,_Maine",
         "type" => "town",
@@ -18370,7 +18370,7 @@ return [
         ]
     ],
     "kingsbury-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Kingsbury Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Kingsbury_Plantation,_Maine",
         "type" => "plantation",
@@ -18408,7 +18408,7 @@ return [
         ]
     ],
     "nashville-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Nashville Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Nashville_Plantation,_Maine",
         "type" => "plantation",
@@ -18446,7 +18446,7 @@ return [
         ]
     ],
     "glenwood-plantation" => [
-        "state" => "me",
+        "state" => "ME",
         "name" => "Glenwood Plantation",
         "href" => "https:\/\/en.wikipedia.org\/wiki\/Glenwood_Plantation,_Maine",
         "type" => "plantation",

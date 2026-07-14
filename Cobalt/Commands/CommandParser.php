@@ -16,13 +16,6 @@ class CommandParser {
         // $this->define_known_errors();
     }
 
-    // #[Override]
-    // public function define_known_errors(): array {
-    //     return [
-    //         ''
-    //     ];
-    // }
-
     function get_commands():array {
         return $this->commands;
     }
@@ -37,11 +30,11 @@ class CommandParser {
         if(!file_exists(self::APP_COMMANDS)) return;
 
         $app_commands = include self::APP_COMMANDS;
-        if(!is_array($built_in_commands)) {
+        if(!is_array($app_commands)) {
             throw new Exception("Failed to load commands");
         }
 
-        $this->commands += $built_in_commands;
+        $this->commands += $app_commands;
     }
 
     const ERR_COMMAND_NOT_FOUND   = 1;
@@ -55,25 +48,22 @@ class CommandParser {
             say("No command specified. Try using " . fmt("-h", 'w') . " to list available commands");
             return;
         }
+
         // If there's no name, default to "help"
-        // if(!$name) $name = "help";
         if(!key_exists($name, $this->commands)) {
             say("Command not found", "e");
             return self::ERR_COMMAND_NOT_FOUND;
         }
-
-        $method = array_shift($command);
-        // if($name === "help") {
-        //     if(!$method) $method = "list";
-        //     else if($method !== "list") {
-        //         array_unshift($command, $method);
-        //         $method = "list";
-        //     }
-        // }
-
-        $cmd = $this->commands[$name];
         
+        $cmd = $this->commands[$name];
         $commandMethods = $cmd->validCommands();
+
+        if(count($command) <= 0 && !$commandMethods->hasDefaultCommand()) {
+            call_user_func($GLOBALS['built_in_flags']['h']['function'],'list');
+            return $this->exec($_SERVER[COMMAND_KEY], $_SERVER[FLAGS_KEY]);
+        }
+        $method = array_shift($command);
+
         $commandItem = $commandMethods->findByCommandName($method);
         if(!$commandItem) {
             say("Invalid command", "e");

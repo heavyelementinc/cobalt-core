@@ -130,6 +130,14 @@ abstract class ModelController extends Controller {
          *  * index
          *  * new
          *  * edit
+         * @param ?string $prefix
+         * @param array{
+         *  navigation:'admin_panel'|'presentation_settings'|'application_settings'|'advanced_settings'|'submenu_group'|string,
+         *  anchor:string,
+         *  edit:array,
+         *  new_document:array,
+         *  index:array
+         * } $options
          */
         static function admin(?string $prefix = null, array $options = []) {
             $class   = static::className();

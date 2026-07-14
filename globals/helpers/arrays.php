@@ -79,9 +79,10 @@ function associative_array_to_html_attributes(array $attributes):string {
  * @return bool 
  */
 function is_associative_array(mixed $array) {
-    if(gettype($array) !== "array") return false;
+    if(!is_array($array)) return false;
     if (array() === $array) return false;
-    return array_keys($array) !== range(0, count($array) - 1);
+    return !array_is_list($array);
+    // return array_keys($array) !== range(0, count($array) - 1);
 }
 
 function is_dictionary_array(mixed $array) {

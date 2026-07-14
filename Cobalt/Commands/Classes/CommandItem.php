@@ -4,6 +4,7 @@ namespace Cobalt\Commands\Classes;
 
 use Closure;
 use Cobalt\Commands\Attributes\Description;
+use Cobalt\Commands\Exceptions\CommandError;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -42,7 +43,25 @@ class CommandItem {
         if(isset($this->instance) && $this->instance instanceof CommandInterface) {
             $this->instance->handleFlags($flags, $this, $this->function, $arguments);
         }
+
+        $reflection = new ReflectionMethod($this->instance, $this->function);
+        $params = $reflection->getParameters();
+        foreach($params as $index => $param) {
+            $this->paramSanityCheck($param, $arguments[$index] ?? null);
+        }
+
         return $this->instance->{$this->function}(...$arguments);
+    }
+
+    private function paramSanityCheck(ReflectionParameter $param, mixed $value = null) {
+        $name = $param->getName();
+        $pos = $param->getPosition();
+        if($param->isOptional() === false && $value == null) {
+            throw new CommandError("Parameter ".fmt("`\$$name`").fmt(" at position $pos is required.","e"));
+        }
+        if($param->hasType()) {
+            if(gettype($value) !== (string)$param->getType()) throw new CommandError("Parameter `$"."$name` must be of type ".$param->getType());
+        }
     }
 
     function getIsDefault():bool {

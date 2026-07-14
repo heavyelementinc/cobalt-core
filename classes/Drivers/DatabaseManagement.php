@@ -331,9 +331,9 @@ class DatabaseManagement {
     function initialize(Model $model, bool $dropBeforeInit = false, &$count = 0):Generator {
         if($model instanceof Migration == false) throw new Exception("Model must implement migration");
         if($dropBeforeInit) {
-            $count = $model->countDocuments([]);
+            $dropped_count = $model->countDocuments([]);
             $model->drop();
-            printf(fmt("\nDropped %s documents\n\n", "e"), $count);
+            printf(fmt("\nDropped %s documents\n\n", "e"), $dropped_count);
         }
         return $model->__initializeDataset($count);
     }

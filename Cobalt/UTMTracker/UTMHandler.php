@@ -20,7 +20,7 @@ class UTMHandler {
 
     function hydrate() {
         global $UTMDetails;
-        if(!$_SESSION[self::SESSION_NAME] ?? null) {
+        if(!($_SESSION[self::SESSION_NAME] ?? null)) {
             $UTMDetails = null;
             return;
         }

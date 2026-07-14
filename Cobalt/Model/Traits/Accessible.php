@@ -15,13 +15,7 @@ use MongoDB\UpdateResult;
 use PDO;
 
 trait Accessible {
-    private array $TYPE_MAP = [
-        // 'typeMap' => [
-        //     'root' => 'array',
-        //     'document' => 'array',
-        //     'array' => 'array'
-        // ]
-    ];
+
     public null|Client|PDO $client = null;
     public ?Database $db;
     public ?Collection $collection;
@@ -102,14 +96,14 @@ trait Accessible {
     final function findOne($filter, array $options = []):array|object|null {
         $this->__initAccessible();
         benchmark_reads();
-        $options += $this->TYPE_MAP;
+        $options += $this->getTypeMap();
         return $this->collection->findOne($filter, $options);
     }
 
     final function findOneAndUpdate($filter, $update, array $options = []):array|object|null {
         $this->__initAccessible();
         benchmark_reads();
-        $options += $this->TYPE_MAP;
+        $options += $this->getTypeMap();
         return $this->collection->findOneAndUpdate($filter, $update, $options);
     }
 
@@ -123,7 +117,7 @@ trait Accessible {
     final function find($filter = [], array $options = []):?CobaltCursor {
         $this->__initAccessible();
         benchmark_reads();
-        $options += $this->TYPE_MAP;
+        $options += $this->getTypeMap();
         if($this->client instanceof Client) {
             $cursor = $this->collection->find($filter, $options);
             if($cursor) return new CobaltCursor($cursor);
@@ -199,7 +193,7 @@ trait Accessible {
 
     final function aggregate($pipeline, $options = []) {
         $this->__initAccessible();
-        $options += $this->TYPE_MAP;
+        $options += $this->getTypeMap();
         $cursor = $this->collection->aggregate($pipeline, $options);
         benchmark_reads();
         return $cursor;
@@ -208,5 +202,12 @@ trait Accessible {
     final function drop() {
         $this->__initAccessible();
         $this->collection->drop();
+    }
+
+    /**
+     * @return array{'typeMap':array{'root':'array','document':'array','array':'array'}}
+     */
+    function getTypeMap():array {
+        return [];
     }
 }

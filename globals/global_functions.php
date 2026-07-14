@@ -260,12 +260,12 @@ function set_template($path, $vars = []) {
 }
 
 /**
- * @param array $user_bar {type: html, ...}
+ * @param array<string,string> $array_of_html_items
  * @return void 
  */
-function register_user_bar_items(array $user_bar):void {
+function register_user_bar_items(array $array_of_html_items):void {
     global $USER_BAR_DETAILS;
-    $USER_BAR_DETAILS += $user_bar;
+    $USER_BAR_DETAILS += $array_of_html_items;
 }
 
 /** Creates @global WEB_PROCESSOR_VARS or merges param into WEB_PROCESSOR_VARS.

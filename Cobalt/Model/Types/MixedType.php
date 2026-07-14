@@ -33,7 +33,7 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
 
     use Prototypable, ClientUpdateFilter, DirectiveBaseline, MixedTypeToField, SharedFilterEnums;
     protected bool $isSet = false;
-    protected $value = null;
+    protected $value;
     protected string $type = "mixed";
     // protected string $name;
     protected string $fieldName = "";
@@ -60,7 +60,7 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
     }
 
     public function isSet(): bool {
-        return $this->isSet;
+        return isset($this->value);
     }
 
     /**
@@ -70,17 +70,17 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
      * @return void|mixed 
      */
     public function getValue():mixed {
-        $val = $this->value;
-        if(!$this->isSet) $val = $this->directiveOrNull(self::DEFAULT);
-        if($val === null) $val = $this->directiveOrNull(self::DEFAULT);
-        if($this->hasDirective(DIRECTIVE_KEY_GET)) return $this->getDirective(self::GET, $val);
-        return $val;
+        if(!isset($this->value)) {
+            if($this->hasDirective(DIRECTIVE_KEY_GET)) return $this->getDirective(self::GET, $val);
+            return $this->directiveOrNull(self::DEFAULT) ?? null;
+        }
+        return $this->value;
     }
 
     public function setValue(mixed $value):void {
         if($this->isSet && $this->directiveOrNull(self::IMMUTABLE)) throw new ImmutableTypeError("This value is considered immutable and must not be changed.");
         $this->value = $value;
-        $this->isSet = true;
+        if($value !== null) $this->isSet = true;
     }
 
     public function setName(string $name):void {
@@ -182,7 +182,7 @@ class MixedType implements Stringable, ArrayAccess, IMixedType {
     public function __isset($property) {
         switch($property) {
             case "value":
-                return $this->hasDirective('default') || $this->isSet;
+                return $this->hasDirective('default') || $this->isSet();
             case "raw":
             case "original":
                 return $this->isSet;

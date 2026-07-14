@@ -26,11 +26,11 @@ class DB extends CommandInterface {
     #[Override]
     public function validCommands(): CommandList {
         $list = new CommandList();
-        $list->add(new CommandItem($this, 'list', 'list'));
-        $list->add(new CommandItem($this, 'export', 'export'));
-        $list->add(new CommandItem($this, 'import', 'import'));
+        $list->add(new CommandItem($this, 'list',    'list'));
+        $list->add(new CommandItem($this, 'export',  'export'));
+        $list->add(new CommandItem($this, 'import',  'import'));
         $list->add(new CommandItem($this, 'migrate', 'migrate'));
-        $list->add(new CommandItem($this, 'init', 'init'));
+        $list->add(new CommandItem($this, 'init',    'init'));
         return $list;
     }
 
@@ -157,8 +157,15 @@ class DB extends CommandInterface {
     }
 
     #[Description("(namespaced_model) Initialize data in the database")]
+    #[AcceptsFlags(
+        "-F - Drops the collection without a prompt.",
+        "-e - By default, this flag will try to replace `/` characters with `\`. Use this flag to prevent this behavior."
+    )]
     function init(string $namespaced_model):int {
         $t = microtime(true);
+        if(!$this->flags['e']) {
+            $namespaced_model = str_replace("/",'\\', $namespaced_model);
+        }
         // Check if namespace exists
         try {
             /** @var Model $model */
@@ -172,8 +179,12 @@ class DB extends CommandInterface {
             return self::CONVERT_FAIL; // 1 means failure
         }
 
-        print("Do you want to ".fmt("drop the collection","e")." \"".fmt($model->getCollectionName(), "i")."\" before continuing? ");
-        $dropBeforeInit = readline("(y)es, (n)o, (A)bort ");
+        if(!$this->flags['F']) {
+            print("Do you want to ".fmt("drop the collection","e")." \"".fmt($model->getCollectionName(), "i")."\" before continuing? ");
+            $dropBeforeInit = readline("(y)es, (n)o, (A)bort ");
+        } else {
+            $dropBeforeInit = 'y';
+        }
         if($dropBeforeInit === "" || $dropBeforeInit === "a" || $dropBeforeInit === "A") {
             if($dropBeforeInit === "") say("You need to type either 'y' or 'n' to continue.",'i');
             say("No changes were made.");

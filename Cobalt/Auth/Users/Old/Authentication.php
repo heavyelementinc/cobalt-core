@@ -276,6 +276,7 @@ class Authentication {
         $user = (new UserCRUD())->getUserById(new ObjectId($_SESSION[SESSION_USER_ID]));
         if(!$user) throw new NotFound(AUTH_PROCESS_ERROR__USER_NOT_FOUND);
 
+
         $resume = urldecode($_GET[SESSION_RESUME_PARAM] ?? server_name() ."/admin");
 
         // If 2FA is not enabled, then the user should be logged in at this point
@@ -284,7 +285,12 @@ class Authentication {
             $view = "/authentication/login/stage-2-tfa-not-enabled.php";
             $_SESSION[SESSION_STAGE_STATE] = AUTH_STAGE_0_USER_ACCOUNT_VERIFIED;
             $resume = $this->auth_stage_login_check();
+        } else if(__APP_SETTINGS__['TwoFactorAuthentication_nag_unenrolled_users'] == false) {
+            // $_SESSION[SESSION_STAGE_STATE] = 
+            header("Location: ". $_SESSION[SESSION_RESUME_PARAM]);
+            exit;
         }
+
         $vars = [
             'user' => $user, 
             SESSION_RESUME_PARAM => $resume ? $resume : "/admin/",

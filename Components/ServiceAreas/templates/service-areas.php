@@ -70,20 +70,4 @@
             margin-bottom: var(--margin-xxl)
         }
     }
-    /* .columns {
-        columns: 6 200px;
-        img {
-            object-fit: cover;
-            width: 100%;
-            height: 200px;
-            display: block;
-        }
-        ul {
-            list-style: none;
-            padding-top: 0;
-        }
-        a {
-            --color: gray;
-        }
-    } */
 </style>

@@ -1,10 +1,12 @@
 <?php
 
-namespace Components\Towns\Models;
+namespace Components\ServiceAreas\Models;
 
+use Cobalt\Commands\Exceptions\CommandError;
 use Cobalt\Controllers\ModelController;
 use Cobalt\Model\Interfaces\Migration;
 use Cobalt\Model\Model;
+use Cobalt\Model\Types\BooleanType;
 use Cobalt\Model\Types\ImageType;
 use Cobalt\Model\Types\MarkdownType;
 use Cobalt\Model\Types\StringType;
@@ -17,12 +19,17 @@ class County extends Model implements Migration {
     public function defineSchema(array $schema = []): array
     {
         return [
-            'name' => new StringType,
+            'name' => [
+                new StringType,
+                'index' => []
+            ],
+            'slug' => new StringType,
             'href' => new StringType,
             'location' => new StringType,
             'img' => new ImageType,
             'credit' => new StringType,
-            'blurb' => new MarkdownType
+            'blurb' => new MarkdownType,
+            'include' => new BooleanType,
         ];
     }
 
@@ -36,6 +43,12 @@ class County extends Model implements Migration {
         return "1.0";
     }
 
+    public function getValidCounties():array {
+        $name = $this->distinct('name');
+        $filled = array_combine($name, $name);
+        return $filled;
+    }
+
     public function getCollectionName($string = null): string
     {
         return "counties";
@@ -44,16 +57,26 @@ class County extends Model implements Migration {
     public function __initializeDataset(int &$count):Generator
     {
         $inserted = 0;
-        $data = json_decode(file_get_contents(__APP_ROOT__ . "/Components/Towns/Controllers/maine-towns.json"), true);
-        foreach($data['counties'] as $key => $data) {
+        $data = include __DIR__ . "/../Controllers/countyData.php";
+        foreach($data as $key => $data) {
             $mutant = $data;
             $mutant['name'] = $key;
+            $mutant['slug'] = strtolower($key);
             $doc = new $this();
-            $id = $doc->img->__store(__APP_ROOT__."/public/".$mutant['img'], pathinfo($mutant['img'], PATHINFO_BASENAME));
-            if(!$id) throw new Exception("Failed to upload image");
-            $mutant['img'] = $id;
-            $validated = $doc->__filter($mutant);
-            yield $validated;
+            if($mutant['img']) {
+                $file_name = str_replace("/core-content", "", $mutant['img']);
+                $image = __APP_ROOT__."/public/res/$file_name";
+                if(!file_exists($image)) $image = __ENV_ROOT__."/shared/$file_name";
+                if(!file_exists($image)) throw new CommandError("Failed to find $file_name");
+            }
+            if($image) {
+                $id = $doc->img->__store($image, pathinfo($mutant['img'], PATHINFO_BASENAME));
+                if(!$id) throw new Exception("Failed to upload image");
+                $mutant['img'] = $id;
+            }
+            unset($mutant['dark']);
+            $doc->bsonUnserialize($mutant);
+            yield $doc;
         }
     }
 

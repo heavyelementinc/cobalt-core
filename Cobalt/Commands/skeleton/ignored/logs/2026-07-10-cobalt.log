@@ -1,0 +1,4 @@
+[2026-07-10T19:30:23+00:00] [EXCEPTION] KILL config.php validation failed. Key `database` contains invalid data.
+[2026-07-10T15:31:05-04:00] [EXCEPTION] KILL File appears to be malformed
+[2026-07-10T19:31:16+00:00] [EXCEPTION] KILL Cobalt requires your config.php file to declare $CONFIG
+[2026-07-10T15:31:53-04:00] [EXCEPTION] KILL File appears to be malformed

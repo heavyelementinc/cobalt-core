@@ -21,7 +21,7 @@ const CSRF_INCOMING_FIELD = 'authentication';
  * @throws RandomException 
  */
 function csrf_get_token():string {
-    if(csrf_is_expired($_SESSION[CSRF_EXPIRE_KEY])) {
+    if(csrf_is_expired($_SESSION[CSRF_EXPIRE_KEY] ?? null)) {
         csrf_generate_token();
     }
     return $_SESSION[CSRF_TOKEN_KEY];

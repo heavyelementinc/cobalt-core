@@ -9,6 +9,8 @@ use Contact\ContactManager;
 use Routes\Options;
 use Routes\Route;
 use Symfony\Component\Console\Attribute\Option;
+use Components\ServiceAreas\Controllers\Counties;
+use Components\ServiceAreas\Controllers\Towns;
 
 Route::get("/", "CoreAdmin@index", [
     'name' => 'Dashboard',
@@ -225,6 +227,10 @@ Route::get("/integrations/{class}", "IntegrationsController@token_editor");
 //     ])
 // );
 
+if(__APP_SETTINGS__['ServiceAreas_enabled']) {
+    Towns::admin(options:['navigation' => 'presentation_settings', 'index' => ['anchor' => ['icon' => 'map-marker-outline', 'label' => 'Towns']]]);
+    Counties::admin(options:['navigation' => 'presentation_settings', 'index' => ['anchor' => ['icon' => 'map-outline', 'label' => 'Counties']]]);
+}
 
 /** 
 *  ========================================================

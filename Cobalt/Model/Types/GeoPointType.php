@@ -3,11 +3,10 @@
 namespace Cobalt\Model\Types;
 
 use Cobalt\Model\Attributes\Prototype;
-use Cobalt\Model\Types\Traits\GeoCommon;
+use Cobalt\Model\Types\Abstracts\GeoCommon;
 use Validation\Exceptions\ValidationIssue;
 
-class GeoPointType extends MixedType {
-    use GeoCommon;
+class GeoPointType extends GeoCommon {
     const LNG_INDEX = 0;
     const LAT_INDEX = 1;
     const COORD_KEY = 'coordinates';
@@ -102,4 +101,9 @@ class GeoPointType extends MixedType {
     public function display(): mixed {
         return "<small>Lat: $this->lat, Lng: $this->lng</small>"; 
     }
+
+    function distance(GeoPointType $other, string $unit = self::DISTANCE_UNIT_MILES) {
+        return self::compute_distance($this->lat, $this->long, $other->lat, $other->long, $unit);
+    }
+    
 }

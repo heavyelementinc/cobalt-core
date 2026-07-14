@@ -42,11 +42,11 @@ require_once __ENV_ROOT__ . "/globals/locales/en_us.php";
 
 // Establish our app root
 $app_root = "";
+$skeleton_app = __DIR__ . "/Cobalt/Commands/skeleton/";
 // Go up one directory so we're not in the public space
 if (!empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) $app_root = $_SERVER['CONTEXT_DOCUMENT_ROOT'] . "/../";
 // Rely on the Cobalt CLI to mandate the path to our app
-else if (defined("__CLI_ROOT__")) $app_root = $_SERVER['flags']['app'];
-else if (key_exists("unit_test", $GLOBALS)) $app_root = $GLOBALS['unit_test'];
+else if (defined("__CLI_ROOT__") || defined("UNIT_TESTS")) $app_root = $_SERVER['flags']['app'] ?? $skeleton_app;
 else {
     header(INTERNAL_SERVER_ERROR);
     kill("Cannot establish absolute path to app root"); // Die.
@@ -136,8 +136,8 @@ try {
 
 // Let's find our trusted cobalt domain
 $_SERVER['COBALT_TRUSTED_HOST'] = null;
-if(in_array($_SERVER['HTTP_HOST'], $app->__settings->API_CORS_allowed_origins->getArrayCopy())) {
-    $_SERVER['COBALT_TRUSTED_HOST'] = $_SERVER['HTTP_HOST'];
+if(in_array($_SERVER['HTTP_HOST'] ?? "", $app->__settings->API_CORS_allowed_origins->getArrayCopy())) {
+    $_SERVER['COBALT_TRUSTED_HOST'] = $_SERVER['HTTP_HOST'] ?? "";
     $app->__settings->trusted_host = $_SERVER['COBALT_TRUSTED_HOST'];
 }
 
@@ -191,7 +191,7 @@ if($utm_details) {
     exit;
 }
 // Let's check to see that we have a CSRF token created
-if($_SESSION[CSRF_TOKEN_KEY] === null) csrf_generate_token();
+if(isset($_SESSION[CSRF_TOKEN_KEY]) && is_null($_SESSION[CSRF_TOKEN_KEY])) csrf_generate_token();
 // Ensure we have a fresh CSRF token for this session!
 csrf_get_token();
 
@@ -208,4 +208,4 @@ if (!version_compare($depends, __COBALT_VERSION, ">=")) kill("This app depends o
 ob_end_clean(); // Prevent any dependencies from polluting our output
 
 /** If we're NOT in a CLI environment, we should import the context processor */
-if (!defined("__CLI_ROOT__")) require_once __ENV_ROOT__ . "/globals/context.php";
+if (!defined("__CLI_ROOT__") && !defined('UNIT_TESTS')) require_once __ENV_ROOT__ . "/globals/context.php";

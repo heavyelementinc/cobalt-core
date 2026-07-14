@@ -60,7 +60,7 @@ $flags = [
 
 function __app_context($app = ""){
     if(empty($app)) throw new Exception("App name invalid");
-    $_SERVER['flags'] = ['app' => $app];
+    $_SERVER[FLAGS_KEY] = ['app' => $app];
     $file = __CLI_ROOT__ . "/../../";
     $index = "/public/index.php";
     $context_found = false;

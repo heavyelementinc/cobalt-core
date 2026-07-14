@@ -6,6 +6,8 @@ use Cobalt\Documentation\Controllers\Documentation;
 use Cobalt\EventListings\Controllers\Events;
 use Cobalt\JobQueue\Controllers\JobStatus;
 use Cobalt\Settings\Controllers\Settings;
+use Components\ServiceAreas\Controllers\Counties;
+use Components\ServiceAreas\Controllers\Towns;
 use Components\StructuredData\Controllers\BusinessDetails;
 use Routes\Options;
 use Routes\Route;
@@ -103,6 +105,11 @@ if(__APP_SETTINGS__['Enable_database_import_export']) {
     Route::s_post('/database/export/','DBMgmt@download', [
         'permission' => 'Database_database_export',
     ]);
+}
+
+if(__APP_SETTINGS__['ServiceAreas_enabled']) {
+    Towns::apiv1();
+    Counties::apiv1();
 }
 
 Route::s_delete((new Options("/image-editor/{id}/{name}?","ImageEditor@delete"))

@@ -45,6 +45,6 @@ switch(count($_SERVER['command'])) {
         call_user_func($GLOBALS['built_in_flags']['h']['function'],'list');
         break;
     case 1:
-        call_user_func($GLOBALS['built_in_flags']['h']['function'],'list');
+        // call_user_func($GLOBALS['built_in_flags']['h']['function'],'list');
         break;
 }

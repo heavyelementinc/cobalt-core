@@ -94,7 +94,7 @@ class Users extends CommandInterface {
     public function delete(string $username) {
         $u = new User();
         $user = $u->findOne(['uname' => $username]);
-        if(!key_exists('f',$_SERVER['flags'])) {
+        if(!key_exists('f',$_SERVER[FLAGS_KEY])) {
             $bool = cli_to_bool(readline("This will delete $user->fname. There is no undo. (y/N): "));
             if(!$bool) {
                 say("Aborted.");
@@ -174,7 +174,7 @@ class Users extends CommandInterface {
         return COBALT_COMMAND_SUCCESS;
     }
 
-    #[Description("Make a user root")]
+    #[Description("Grant a user root privileges")]
     public function promote(string $user) {
         $u = new User();
         $result = $u->findOne(['uname' => $user]);
@@ -194,7 +194,7 @@ class Users extends CommandInterface {
         return COBALT_COMMAND_SUCCESS;
     }
 
-    #[Description("Remove a user's root status")]
+    #[Description("Revoke a user's root privileges")]
     public function demote(string $user) {
         $u = new User();
         $result = $u->findOne(['uname' => $user]);

@@ -86,7 +86,7 @@ function route_replacement($path, $args, $data = []) {
  * This will only return the first route that uses $directiveName
  * @param string $directiveName the "Controller@method" direvitve specified in your router table
  * @param array $args Any arguments used here will get filled in as values for {variables} in route names from left to right
- * @param array $context The context to search ("web", "admin", "apiv1", etc.)
+ * @param array{method:"get"|"post"|"put"|"delete",context:string} $context The context to search ("web", "admin", "apiv1", etc.)
  * @return string 
  * @throws Exception 
  */

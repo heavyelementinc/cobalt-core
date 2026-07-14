@@ -2,6 +2,8 @@
 
 namespace Cobalt\Commands\Native;
 
+use Cobalt\Commands\Attributes\AcceptsFlags;
+use Cobalt\Commands\Attributes\Description;
 use Cobalt\Commands\Classes\CommandInterface;
 use Cobalt\Commands\Classes\CommandList;
 use Override;
@@ -12,7 +14,7 @@ class Init extends CommandInterface {
     #[Override]
     public function validCommands(): CommandList {
         $list = new CommandList();
-
+        $list->add(new CommandItem($this, 'app', 'app'));
         return $list;
     }
 
@@ -25,46 +27,68 @@ class Init extends CommandInterface {
      * @var array{'app':string}
      */
     private array $project = [
-        'app' => null
+        'app' => null,
+        'directory' => null,
+        'database' => null,
+        'db_addr' => "localhost:27017",
+        'dbusername' => null,
+        'dbpword' => null,
     ];
 
     private array $prompt = [
         'app' => [
-            'method' => static function($val) {
-                return ;
+            'method' => static function(&$val, &$project) {
+                $is_valid = ctype_alnum($val);
+                if($is_valid) $project['directory'] = $val;
+                return $is_valid;
             }
         ],
         'directory' => [
-            'method' => static function($val) {
+            'method' => static function(&$val, &$project) {
                 
             }
         ],
         'db_addr' => [
-            "localhost:27017"
+            'method' => static function (&$val, &$project) {
+
+            }
         ],
         'database'  => [
-            'method' => static function($val) {
+            'method' => static function(&$val, &$project) {
                 
             }
         ],
         'dbusername'   => [
-            'method' => static function($val) {
+            'method' => static function(&$val, &$project) {
                 
             }
         ],
         'dbpword'   => [
-            'method' => static function($val) {
+            'method' => static function(&$val, &$project) {
                 
             }
         ],
-
     ];
 
-    public function create() {
+    #[Description('Create a new Cobalt application')]
+    #[AcceptsFlags('-f - Skip validation checks',
+    '--app - Application name',
+    '--directory - Application directory',
+    '--db_addr - Database address (defaults to "localhost:27017")',
+    '--database',
+    '--dbusername',
+    '--dbpword',
+    )]
+    public function app() {
         $names = array_keys($this->project);
+        $args = func_get_args();
         for($i = 0; $i >= count($this->project); $i++) {
             $name = $names[$i];
-            $value = $this->project[$name];
+            $value = $this->flags[$name] ?? $args[$i] ?? $this->project[$name];
+            if(!$this->prompt[$name]['method']($value, $this->project)) {
+                $i--;
+                continue;
+            }
             try {
                 $this->project[$name] = $this->{"get_$name"}($value);
             }catch(ValidationIssue $e) {

@@ -17,6 +17,7 @@ use Cobalt\Model\Types\TextType;
 use Cobalt\Model\Types\URLType;
 use Cobalt\SchemaPrototypes\Compound\WeakEnumResult;
 use Components\ServiceAreas\Controllers\Areas;
+use Components\ServiceAreas\Controllers\Towns;
 use PHPMailer\PHPMailer\PHPMailer;
 
 const TEMPLATE_DEBUG_SHOW_TYPES   = 0b0001;
@@ -64,6 +65,10 @@ const CONTACT_SUCCESS_EMAIL   = 0b001000;
 const CONTACT_CLIENT_SUCCESS_REDIRECT = 0b0001;
 const CONTACT_CLIENT_SUCCESS_STATUS   = 0b0010;
 const CONTACT_CLIENT_SUCCESS_STAGE    = 0b0100;
+
+const HTML_TAG_CLASSES_TEMPLATE = "template-site";
+
+$town_page_descritive_text_placeholders = "Include <code>".join(", ",Towns::DESCRIPTIVE_TEXT_ITEMS)."</code> in your description for that value.";
 
 return [
     /** BASIC */
@@ -1658,7 +1663,7 @@ return [
             "default" => true
         ],
         'TwoFactorAuthentication_nag_unenrolled_users' => [
-            'default' => true
+            'default' => false
         ],
 
     /** PUBLIC */
@@ -2160,6 +2165,49 @@ return [
         "Websocket_tick_rate_in_milliseconds" => [
             'default' => 500, // 2 ticks per second
         ],
+    
+    /** Service Areas */
+    'ServiceAreas_enabled' => false,
+    'ServiceAreas_default_cta_header' => [
+        'default' => 'Ready to Get Started?',
+        'meta' => [
+            'type' => new StringType(),
+            'label' => "Service Area CTA Header",
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+        ]
+    ],
+    'ServiceAreas_default_cta_body' => [
+        'default' => <<<HTML
+        We offer our services in %town%. Reach out with the link below!
+        HTML,
+        'meta' => [
+            'type' => new MarkdownType(),
+            'label' => "Service Area CTA Body",
+            'description' => 'Use <code>%town%</code> for the town name, <code>%county%</code> for the county name, and <code>%region%</code> for the region name.',
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+        ]
+    ],
+    'ServiceAreas_default_cta_label' => [
+        'default' => "Let's work together",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => "Service Area CTA Label",
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+        ]
+    ],
+    'ServiceAreas_default_cta_href' => [
+        'default' => "/contact/",
+        'meta' => [
+            'type' => new StringType(),
+            'label' => "Service Area CTA HREF",
+            'group' => GROUP_SEO,
+            'subgroup' => SUBGROUP_SEO_AREA,
+        ]
+    ],
+
     'ServiceAreas_default_location' => [
         'default' => 'belfast',
         'meta' => [
@@ -2181,12 +2229,13 @@ return [
             'subgroup' => SUBGROUP_SEO_AREA,
         ]
     ],
+
     'ServiceAreas_strings_under_ten_miles' => [
-        'default' => "Plus, we're right next door (just %s miles away)!",
+        'default' => "Plus, we're right next door (just %distance% miles away)!",
         'meta' => [
             'type' => new StringType(),
             'label' => 'Distance between 10 miles or less',
-            'help' => 'Include a <code>%s</code> placeholder where you want to display the distance in ',
+            'help' => $town_page_descritive_text_placeholders,
             'description' => 'What to say when a town landing page is 10 miles or less from your headquarters',
             'group' => GROUP_SEO,
             'subgroup' => SUBGROUP_SEO_AREA,
@@ -2194,11 +2243,11 @@ return [
         ]
     ],
     'ServiceAreas_strings_between_ten_and_thirty' => [
-        'default' => "Plus, we're practically right next door (just %s miles away)!",
+        'default' => "Plus, we're practically right next door (just %distance% miles away)!",
         'meta' => [
             'type' => new StringType(),
             'label' => 'Distance between 10 and 30 miles',
-            'help' => 'Include a <code>%d</code> distance and a <code>%s</code> for the town name.',
+            'help' => $town_page_descritive_text_placeholders,
             'description' => 'What to say when a town landing page is between 10 and 30 miles from your headquarters',
             'group' => GROUP_SEO,
             'subgroup' => SUBGROUP_SEO_AREA,
@@ -2206,11 +2255,11 @@ return [
         ]
     ],
     'ServiceAreas_strings_between_thirty_and_sixty' => [
-        'default' => "Plus, we're just %d miles from you!",
+        'default' => "Plus, we're just %distance% miles from you!",
         'meta' => [
             'type' => new StringType(),
             'label' => 'Distance between 30 and 60 miles',
-            'help' => 'Include a <code>%d</code> distance and a <code>%s</code> for the town name.',
+            'help' => $town_page_descritive_text_placeholders,
             'description' => 'What to say when a town landing page is between 30 and 60 miles from your headquarters',
             'group' => GROUP_SEO,
             'subgroup' => SUBGROUP_SEO_AREA,
@@ -2218,11 +2267,11 @@ return [
         ]
     ],
     'ServiceAreas_strings_under_120_miles' => [
-        'default' => "We're just a day trip away (about %d miles).",
+        'default' => "We're just a day trip away (about %distance% miles).",
         'meta' => [
             'type' => new StringType(),
             'label' => 'Distance under 120 miles',
-            'help' => 'Include a <code>%d</code> distance and a <code>%s</code> for the town name.',
+            'help' => $town_page_descritive_text_placeholders,
             'description' => 'What to say when a town landing page is under 120 miles from your headquarters',
             'group' => GROUP_SEO,
             'subgroup' => SUBGROUP_SEO_AREA,
@@ -2230,11 +2279,11 @@ return [
         ]
     ],
     'ServiceAreas_strings_120_and_over' => [
-        'default' => "We're about %d miles from %s.",
+        'default' => "We're about %distance% miles from %town_name%.",
         'meta' => [
             'type' => new StringType(),
             'label' => 'Distance 120 or Greater',
-            'help' => 'Include a <code>%d</code> distance and a %s for the town name.',
+            'help' => $town_page_descritive_text_placeholders,
             'description' => 'What to say when a town landing page is 120 miles or greater from your headquarters',
             'group' => GROUP_SEO,
             'subgroup' => SUBGROUP_SEO_AREA,

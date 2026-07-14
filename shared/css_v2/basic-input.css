@@ -37,7 +37,11 @@
 }
 
 :where(
-    input:not([type='radio'],[type='check'],[type='checkbox']),
+    input:not(
+        [type='radio'],
+        [type='check'],
+        [type='checkbox']
+    ),
     textarea,
     markdown-area,
     select,
@@ -46,8 +50,9 @@
     async-button[native],
     [role='button'],
     [__custom-input],
-    [cobalt-component="cobalt-component"]:not(input-switch)
-), .button[native]
+    [cobalt-component="cobalt-component"]
+),
+.button[native]
 {
     display: inline-block;
     border: var(--input-element-border-value);
