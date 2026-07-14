@@ -1,0 +1,9 @@
+.vscode/
+.ignored/**/*
+ignored/**/*
+.cache/**/*
+cache/**/*
+.tmp/**/*
+tmp/**/*
+vendor/**/*
+./composer.lock
