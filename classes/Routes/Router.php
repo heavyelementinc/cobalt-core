@@ -76,7 +76,7 @@ class Router {
             ];
 
             $results = [];
-            Extensions::invoke("register_routes", $context, $results);
+            // Extensions::invoke("register_routes", $context, $results);
             // Make a list of all the routes we need to load
             $this->router_table_list[$context] = [
                 ...$results,
@@ -304,7 +304,7 @@ class Router {
             __ENV_ROOT__ . "/controllers"
         ];
 
-        extensions()::invoke("register_controller_dir", $controller_search);
+        // extensions()::invoke("register_controller_dir", $controller_search);
 
         try {
             // We are doing these in reverse order because we want our app's 
@@ -349,7 +349,7 @@ class Router {
         if ($GLOBALS['route_context']) $prefix = "^" . app("context_prefixes")[$GLOBALS['route_context']]['prefix'];
         $prefix = substr($prefix, 0, -1);
 
-        extensions()::invoke("register_client_controllers",$this->router_js_table);
+        // extensions()::invoke("register_client_controllers",$this->router_js_table);
 
         foreach ($this->routes as $context => $methods) {
             foreach ($methods as $method => $routes) {

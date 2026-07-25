@@ -7,6 +7,7 @@ $TEMPLATE_PATHS = [
     __ENV_ROOT__,
     __APP_ROOT__ . "/templates/",
     __APP_ROOT__ . "/private/templates/",
+    __ENV_ROOT__ . "/templates/",
 ];
 
 global $TEMPLATE_CACHE;
@@ -114,6 +115,7 @@ function bind($binding_name, $value) {
 }
 
 const DATABASE_DRIVER_MONGODB  = "MongoDB";
+/** @deprecated */
 const DATABASE_DRIVER_POSTGRES = "Postgres";
 
 const FLOATING_SAVE_BUTTON = '<button type="submit" class="floater floater--save-item"><i name="%s"></i> %s</button>';

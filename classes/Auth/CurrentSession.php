@@ -156,7 +156,7 @@ class CurrentSession extends \Drivers\Database {
                 'state'   => $state,
             ];
 
-            Extensions::invoke("session_creation", $session);
+            // Extensions::invoke("session_creation", $session);
 
             $result = $this->updateOne(
                 [$this->cookie_name => $this->token_value],

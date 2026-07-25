@@ -14,7 +14,10 @@
 
 use Cache\Manager;
 use Cobalt\Customization\CustomSchema;
+use Cobalt\Database\Interfaces\DbClient;
+use Cobalt\DataModel\Directives\Media\Accept;
 use Cobalt\DefinedModel\DefinedModel;
+use Cobalt\Database\Drivers\MongoDb\Client;
 use Cobalt\Exceptions\CobaltAutoloadFailure;
 use Cobalt\Maps\Exceptions\LookupFailure;
 use Cobalt\Maps\GenericMap;
@@ -825,46 +828,14 @@ function get_extension_from_file($file_path, $file_name = null, $trust_filename 
     return mime_content_type(mime_content_type($file_path));
 }
 
+/**
+ * @deprecated use Accept::toExtension() instead
+ * @param mixed $mimetype 
+ * @param string $type 
+ * @return string 
+ */
 function mime_content_type_to_extension($mimetype, $type = "audio") {
-    $ext = explode("/", $mimetype);
-    $type = $ext[0];
-    $ext = $ext[1];
-    if(substr($ext, 0, 2) == "x-") $ext = substr($ext, 2);
-    return match($ext) {
-        "svg+xml" => "svg",
-        "abiword" => "abw",
-        "freearc" => "arc",
-        "msvideo" => "avi",
-        "vnd.amazon.ebook" => "azw",
-        "octet-stream" => "bin",
-        "bzip" => "bz",
-        "bzip2" => "bz2",
-        "cdf" => "cda",
-        "msword" => "doc",
-        "vnd.openxmlformats-officedocument.wordprocessingml.document" => "docx",
-        "vnd.ms-fontobject" => "eot",
-        "epub+zip" => "epub",
-        "gzip" => "gz",
-        "vnd.microsoft.icon" => "ico",
-        "java-archive" => "jar",
-        "javascript" => "js",
-        "ld+json" => "jsonld",
-        "mpeg" => ($type == "audio") ? "mp3" : "mpeg",
-        "vnd.apple.installer+xml" => "mpkg",
-        "vnd.oasis.opendocument.presentation" => "opd",
-        "vnd.oasis.opendocument.spreadsheet" => "ods",
-        "vnd.oasis.opendocument.text" => "odt",
-        "ogg" => ($type == "audio") ? "oga" : (($type == "video") ? "ogv" : "ogx"),
-        "httpd-php" => "php",
-        "vnd.ms-powerpoint" => "ppt",
-        "vnd.openxmlformats-officedocument.presentationml.presentation" => "pptx",
-        "vnd.rar" => "rar",
-        "mp2t" => "ts",
-        "plain" => "txt",
-        "xhtml+xml" => "xhtml",
-        // "vnd.ms-excel" => "",
-        default => $ext
-    };
+    return Accept::toExtension($mimetype, $type);
 }
 
 const USABLE_MIME_TYPE_CACHE_NAME = "mime_type.json";
@@ -914,7 +885,7 @@ function isKeyboardModifierSet($constantValue, $header = null):bool {
     return ($header & $constantValue) === $constantValue;
 }
 
-function millitime():int {
+function millitime():int|float {
     return floor(microtime(true) * 1000);
 }
 
@@ -947,4 +918,13 @@ function DOMinnerHTML(DOMNode $element) {
     }
 
     return $innerHTML; 
-} 
+}
+
+function db_client():DbClient {
+    switch(config()['db_driver']) {
+        case DATABASE_DRIVER_MONGODB:
+            return new Client();
+        default:
+            throw new Exception("Unknown database type");
+    }
+}

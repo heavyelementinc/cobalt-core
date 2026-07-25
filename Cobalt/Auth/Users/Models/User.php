@@ -9,7 +9,7 @@ use Cobalt\Auth\UserAccounts\Types\UserSocialAccounts;
 use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\Auth\Users\Traits\Permissions;
 use Cobalt\Controllers\ModelController;
-use Cobalt\DBManagement\CobaltCursor;
+use Cobalt\Database\Classes\CobaltCursor;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Directives\SearchableDirective;
 use Cobalt\Model\Interfaces\Migration;

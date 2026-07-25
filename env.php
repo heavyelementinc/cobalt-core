@@ -119,7 +119,8 @@ spl_autoload_register("cobalt_autoload", true);
 //     kill($e->getMessage());
 // }
 
-require_once __ENV_ROOT__ . "/globals/extensions.php";
+// Let's not even bother with extensions we never use extensions anyway.
+// require_once __ENV_ROOT__ . "/globals/extensions.php";
 
 try {
     //TODO: fix settings cache so it doesn't need to bootstrap every time!

@@ -1,0 +1,7 @@
+#!/bin/bash
+BASEDIR=$(pwd)
+if [ ! -d "../cobalt-core" ] ; then
+  echo "This directory is not a Cobalt app"
+  exit 1
+fi
+sudo su www-data -s /bin/bash -c "php \"$BASEDIR/../cobalt-core/cli/cobalt.php\" \"--app=$BASEDIR\" $@"

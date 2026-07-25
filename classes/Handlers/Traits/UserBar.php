@@ -43,7 +43,7 @@ trait UserBar {
         global $USER_BAR_DETAILS;
         $buttons += $USER_BAR_DETAILS;
         $this->userbar_before_extensions($buttons);
-        Extensions::invoke("register_templates_dir", $buttons);
+        // Extensions::invoke("register_templates_dir", $buttons);
         $this->userbar_after_extensions($buttons);
 
         foreach($buttons as $type => $html) {

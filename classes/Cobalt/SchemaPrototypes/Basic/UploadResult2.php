@@ -335,7 +335,7 @@ class UploadResult2 extends MapResult {
         }
 
         // Let's query for those files
-        $files = $this->__collection->find($query);
+        $files = $this->__binaryStorageCollection->find($query);
         
         if($files === null) {
             // If value is null, then we should just return the default

@@ -7,8 +7,8 @@ use Cobalt\Model\Interfaces\ServerEvents;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\OrderedListOfForeignIds;
 use Cobalt\Model\Types\Traits\FileHandler;
-use Cobalt\JobQueue\Jobs\Job;
-use Cobalt\Model\Interfaces\JobHandler;
+use Cobalt\Model\Jobs\Job;
+// use Cobalt\JobQueue\Interfaces\JobHandler;
 use Exceptions\HTTP\BadRequest;
 use Iterator;
 use MongoDB\BSON\ObjectId;
@@ -17,7 +17,7 @@ use MongoDB\Model\BSONDocument;
 use Override;
 use Validation\Exceptions\ValidationIssue;
 
-class ImageArrayType extends OrderedListOfForeignIds implements JobHandler {
+class ImageArrayType extends OrderedListOfForeignIds {
     use FileHandler;
     protected string $operator = '$set';
 
@@ -93,23 +93,23 @@ class ImageArrayType extends OrderedListOfForeignIds implements JobHandler {
         }
     }
 
-    #[Override]
-    public function __job__on_start(object $item, Job $job, int $index) {
-        $oids = [];
-        // $result = $this->uploadFilesAndGetArrayOfIds($filesKey, ['for' => $this->model->_id ?? null], $_FILES);
-        foreach($job->adopted->queue[$this->name] as $index => $arr) {
-            $filename = $this->filename($arr);
-            $result = $this->__store($arr['tmp_name'], $filename);
-            if(!$result) throw new ValidationIssue("Failed to store $arr[file]");
-            $oids[] = $result;
-        }
-        $this->operator = '$addToSet';
-    }
+    // #[Override]
+    // public function __job__on_start(object $item, Job $job, int $index) {
+    //     $oids = [];
+    //     // $result = $this->uploadFilesAndGetArrayOfIds($filesKey, ['for' => $this->model->_id ?? null], $_FILES);
+    //     foreach($job->adopted->queue[$this->name] as $index => $arr) {
+    //         $filename = $this->filename($arr);
+    //         $result = $this->__store($arr['tmp_name'], $filename);
+    //         if(!$result) throw new ValidationIssue("Failed to store $arr[file]");
+    //         $oids[] = $result;
+    //     }
+    //     $this->operator = '$addToSet';
+    // }
 
-    #[Override]
-    public function __job__on_complete(object $item, Job $job, int $index) {
-        foreach($job->adopted->queue[$this->name] as $index => $files) {
+    // #[Override]
+    // public function __job__on_complete(object $item, Job $job, int $index) {
+    //     foreach($job->adopted->queue[$this->name] as $index => $files) {
 
-        }
-    }
+    //     }
+    // }
 }

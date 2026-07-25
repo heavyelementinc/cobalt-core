@@ -38,9 +38,18 @@ abstract class DirectiveCommon {
         $this->name = $name;
     }
 
-    function getName():string {
+    final function getName():string {
         if(isset($this->name)) return $this->name;
-        return strtolower((new ReflectionClass($this))->getShortName());
+        return self::directiveName();
+    }
+
+    final static function directiveName() {
+        return strtolower(
+            from_camel_case(
+                new ReflectionClass(static::class)->getShortName(), 
+                "_"
+                )
+            );
     }
 
     abstract function setValue(mixed $value):void;

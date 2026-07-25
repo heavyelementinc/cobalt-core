@@ -11,7 +11,7 @@ use Cobalt\Model\Types\MixedType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Directives\MutateDirective;
 use Cobalt\JobQueue\Controllers\JobStatus;
-use Cobalt\JobQueue\Jobs\Job;
+use Cobalt\Model\Jobs\Job;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\Error;
 use MongoDB\BSON\ObjectId;
@@ -77,17 +77,17 @@ trait Filterable {
     }
 
     public function __filter_setup(array &$toValidate, bool $queueAfterCreation):?Job {
-        $filterJob = new Job();
-        $filterJob->init($this, $this->_id, 'filter');
-        foreach($toValidate as $field => $value) {
-            if($field === "") continue;
-            /** @var MixedType $instance */
-            $instance = $this->__schema[$field]['type'];
-            $instance->filter_setup($toValidate, $field, $filterJob, $this);
-        }
+        // $filterJob = new Job();
+        // $filterJob->init($this, $this->_id, 'filter');
+        // foreach($toValidate as $field => $value) {
+        //     if($field === "") continue;
+        //     /** @var MixedType $instance */
+        //     $instance = $this->__schema[$field]['type'];
+        //     $instance->filter_setup($toValidate, $field, $filterJob, $this);
+        // }
 
-        if($queueAfterCreation) $this->__filter_queue($filterJob);
-        if($filterJob->length() >= 1) return $filterJob;
+        // if($queueAfterCreation) $this->__filter_queue($filterJob);
+        // if($filterJob->length() >= 1) return $filterJob;
         return null;
     }
 

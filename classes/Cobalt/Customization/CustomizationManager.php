@@ -73,7 +73,7 @@ class CustomizationManager extends \Drivers\Database {
         global $DECLARED_CUSTOMIZATIONS;
         $DECLARED_CUSTOMIZATIONS = [];
         $customization_files = self::CUSTOMIZATION_FILE;
-        Extensions::invoke("register_customizations", $customization_files);
+        // Extensions::invoke("register_customizations", $customization_files);
         foreach($customization_files as $file) {
             if(!file_exists($file)) continue;
             if(is_callable("say")) say("Importing " . obfuscate_path_name($file));

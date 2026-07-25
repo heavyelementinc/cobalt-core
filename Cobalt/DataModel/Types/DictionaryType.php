@@ -22,7 +22,7 @@ use TypeError;
 
 class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess {
     use Overloading;
-    protected $__initialized = false;
+    protected $__isInitialized = false;
     protected bool $__allowOverloadedFilterFields = false;
 
     function __construct(null|DictionaryType|ArrayType $model = null, ?DictionaryType $rootModel = null) {
@@ -32,21 +32,8 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
         $this->initialize();
     }
 
-    /**
-     * This is intended to be the vector for validating *all* database
-     * updates from the client.
-     * @param mixed $toValidate 
-     * @return FilterResult
-     */
-    function filterDocument(mixed $toValidate, bool $allowOverloadedFilterFields = false):FilterResult {
-        $this->filterResult->setModel($this);
-        $this->__allowOverloadedFilterFields = $allowOverloadedFilterFields;
-        $this->__filter($toValidate);
-        return $this->filterResult;
-    }
-
     #[Override]
-    public function filter(mixed $toValidate): mixed {
+    public function filter(mixed $toValidate, mixed $raw): mixed {
         // $issueCapture = new FilterFailed("Failed to validate fields");
         foreach($toValidate as $fieldName => $value) {
             if(!isset($this->{$fieldName})) {
@@ -134,7 +121,7 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
             $this->modelFieldHandler($property);
         }
 
-        $this->__initialized = true;
+        $this->__isInitialized = true;
         $this->__onInitialized();
     }
 
@@ -172,8 +159,10 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
         // Model fields must be explicitly `readonly`
         if(!$property->isReadOnly()) return false;
         
-        // $generic = $this->__hydrate($name, );
+        // Filter out non-Generic `public readonly` fields
+        if(!is_a($property->getType()->getName(), Generic::class, true)) return false;
 
+        // Do we need to double-check that this is a generic?
         // Model fields must be an instance of `Generic`
         /** @var Generic $instance */
         $generic = new $typeName($this, $this->rootModel);

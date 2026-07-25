@@ -8,15 +8,14 @@ use Cobalt\Commands\Classes\CommandList;
 use Override;
 use Cobalt\Commands\Classes\CommandItem;
 use Cobalt\Commands\Exceptions\CommandError;
-use Cobalt\JobQueue\Jobs\Job;
-use Cobalt\Model\Interfaces\JobHandler;
+use Cobalt\JobQueue\Interfaces\JobHandler;
+use Cobalt\JobQueue\Models\Job;
 use Exception;
 use MongoDB\BSON\ObjectId;
 
 class Jobs extends CommandInterface {
     #[Override]
-    public function validCommands(): CommandList
-    {
+    public function validCommands(): CommandList {
         $commandList = new CommandList();
         $commandList->add(new CommandItem($this, 'run', 'run'));
         return $commandList;
@@ -27,8 +26,20 @@ class Jobs extends CommandInterface {
         return COBALT_COMMAND_SUCCESS;
     }
 
-    #[Description("Execute a JobId")]
+    #[Description("Executes a single job based on the JobId")]
     public function run(string $id) {
+        $model = new Job();
+        try{ 
+            $_id = new ObjectId($id);
+        } catch(Exception $e) {
+            throw new CommandError("Invalid JobId");
+        }
+        $job = $model->findOne(['_id' => $_id]);
+
+        $job->execute();
+    }
+
+    public function run1(string $id) {
         $job = new Job();
         try{ 
             $_id = new ObjectId($id);

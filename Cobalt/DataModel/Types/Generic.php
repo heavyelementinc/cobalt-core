@@ -7,6 +7,7 @@ use Cobalt\DataModel\Classes\Undefined;
 use Cobalt\DataModel\Directives\Base\DirectiveCommon;
 use Cobalt\DataModel\Classes\DirectiveList;
 use Cobalt\DataModel\Filters\FilterResult;
+use Cobalt\DataModel\Traits\Joinable;
 use Cobalt\DataModel\Traits\GenericFields;
 use Cobalt\DataModel\Traits\GenericFilters;
 use Cobalt\DataModel\Traits\GenericPrototypes;
@@ -37,7 +38,8 @@ abstract class Generic implements Stringable, JsonSerializable {
     // An array may be a model
     protected null|DictionaryType|ArrayType $model = null;
     protected ?DictionaryType $rootModel = null;
-    protected DirectiveList $directives;
+
+    readonly DirectiveList $directives;
 
     function __construct(null|DictionaryType|ArrayType $model = null, ?DictionaryType $rootModel = null) {
         if($model) {
@@ -73,7 +75,7 @@ abstract class Generic implements Stringable, JsonSerializable {
      * Called when typecasing this Generic into a string
      * @return string 
      */
-    #[Override]
+    // #[Override]
     public function __toString(): string {
         return $this->display() ?? "";
     }
@@ -89,9 +91,20 @@ abstract class Generic implements Stringable, JsonSerializable {
         return [$this->value];
     }
 
-    #[Override]
+    // #[Override]
     public function jsonSerialize(): mixed {
         return $this->getValue();
+    }
+
+    /**
+     * Returns a "canonicalized" version of the value from the client during the
+     * filter process.
+     * 
+     * @param mixed $value 
+     * @return mixed 
+     */
+    public function jsonUnserialize(mixed $value):mixed {
+        return $value;
     }
 
     const SERIALIZE_MODE_ALL_FIELDS = 1;

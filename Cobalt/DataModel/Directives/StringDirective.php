@@ -8,7 +8,6 @@ use Override;
 
 #[Attribute()]
 class StringDirective extends AbstractStringDirective {
-    #[Override]
     function __construct(protected string $name, string $value, bool $isMethod = false)
     {
         return parent::__construct($value, $isMethod);

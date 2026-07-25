@@ -19,7 +19,7 @@ class BooleanType extends Generic {
     }
 
     #[Override]
-    public function filter(mixed $toValidate): mixed {
+    public function filter(mixed $toValidate, mixed $raw): mixed {
         if($toValidate === null && $this->isNullable($toValidate)) return null;
         if(is_bool($toValidate)) return $toValidate;
         $toValidate = filter_var($toValidate, FILTER_VALIDATE_BOOL);

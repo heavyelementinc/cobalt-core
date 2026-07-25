@@ -1,4 +1,6 @@
 <?php
+/** @deprecated */
+
 use Cobalt\Extensions\Extensions;
 try {
     $safe_mode = key_exists('safe-mode', $_SERVER['flags'] ?? []);
@@ -29,6 +31,7 @@ try {
 /**
  * Returns the global extension manager which can be accessed:
  *   extensions()::invoke("some_method", $SOME_VALUE);
+ * @deprecated 2026-07-15
  * @return Extensions 
  */
 function extensions():\Cobalt\Extensions\Extensions {

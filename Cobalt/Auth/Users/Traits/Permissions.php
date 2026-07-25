@@ -24,6 +24,21 @@ trait Permissions {
         return self::explicitPermission($user, $permission);
     }
 
+    /**
+     * Returns true if the user has *any* permission in the supplied $permission array
+     * @param null|User $user 
+     * @param array $permissions 
+     * @param bool $throwOnFail 
+     * @return bool 
+     */
+    static function hasAnyPermission(?User $user, array $permissions, bool $throwOnFail = true):bool {
+        foreach($permissions as $permission) {
+            $has = self::hasPermission($user, $permission, $throwOnFail);
+            if($has) return true;
+        }
+        return false;
+    }
+
     static function explicitPermission(?User $user, string $permission) {
         // If the user is not root, let's check if they have the permission
         if(!key_exists($permission, $user->__dataset['permissions']->getValue()->__dataset ?? [])) return false;

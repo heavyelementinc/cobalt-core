@@ -7,6 +7,7 @@ use Cobalt\DataModel\Directives\Filters\Arrays\Each;
 use Cobalt\DataModel\Filters\FilterFailed;
 use Cobalt\DataModel\Filters\FilterIssue;
 use Cobalt\DataModel\Traits\Overloading;
+use Countable;
 use Iterator;
 use JsonSerializable;
 use Override;
@@ -15,10 +16,15 @@ use TypeError;
 /** 
  * @package Cobalt\DataModel\Types
  * */
-class ArrayType extends Generic implements Iterator, ArrayAccess {
+class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     use Overloading;
     protected array $keys = [];
     protected int $index = 0;
+
+    #[Override]
+    public function count(): int {
+        return count($this->getValue());
+    }
 
     #[Override]
     protected function composeFieldname(string|int $name): string {
@@ -26,7 +32,7 @@ class ArrayType extends Generic implements Iterator, ArrayAccess {
     }
 
     #[Override]
-    public function filter(mixed $toValidate): mixed {
+    public function filter(mixed $toValidate, mixed $raw): mixed {
         if(!is_array($toValidate)) {
             return $this->filterResult->addIssue($this, "Must be an array");
         }

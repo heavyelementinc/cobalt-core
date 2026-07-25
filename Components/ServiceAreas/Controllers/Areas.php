@@ -152,24 +152,37 @@ class Areas extends Controller {
             $headquarters['lng'], 
         "M");
 
+        $needles = [
+            '%town_name%',
+            '%county_name%',
+            '%distance%',
+            '%distance_fmt%',
+        ];
+        $replacements = [
+            $town['name'],
+            $town['county'],
+            round($distance),
+            (new NumberFormatter("en", NumberFormatter::SPELLOUT))->format(round($distance, 0)),
+        ];
+
         $descriptiveDistance = "";
         switch($distance) {
             case is_nan($distance):
                 break;
             case $distance < 10:
-                $descriptiveDistance = sprintf(__APP_SETTINGS__['ServiceAreas_strings_under_ten_miles'], (new NumberFormatter("en", NumberFormatter::SPELLOUT))->format(round($distance, 0)));
+                $descriptiveDistance = str_replace($needles, $replacements, __APP_SETTINGS__['ServiceAreas_strings_under_ten_miles']);//sprintf(__APP_SETTINGS__['ServiceAreas_strings_under_ten_miles'], (new NumberFormatter("en", NumberFormatter::SPELLOUT))->format(round($distance, 0)));
                 break;
             case $distance < 30:
-                $descriptiveDistance = sprintf(__APP_SETTINGS__['ServiceAreas_strings_between_ten_and_thirty'], round($distance, 0), $town['name']);
+                $descriptiveDistance = str_replace($needles, $replacements, __APP_SETTINGS__['ServiceAreas_strings_between_ten_and_thirty']);//sprintf(__APP_SETTINGS__['ServiceAreas_strings_between_ten_and_thirty'], round($distance, 0), $town['name']);
                 break;
             case $distance < 60:
-                $descriptiveDistance = sprintf(__APP_SETTINGS__['ServiceAreas_strings_between_thirty_and_sixty'],round($distance, 0), $town['name']);
+                $descriptiveDistance = str_replace($needles, $replacements, __APP_SETTINGS__['ServiceAreas_strings_between_thirty_and_sixty']);//sprintf(__APP_SETTINGS__['ServiceAreas_strings_between_thirty_and_sixty'],round($distance, 0), $town['name']);
                 break;
             case $distance > 120:
-                $descriptiveDistance = sprintf(__APP_SETTINGS__['ServiceAreas_strings_under_120_miles'], (round($distance / 10) * 10), $town['name']);
+                $descriptiveDistance = str_replace($needles, $replacements, __APP_SETTINGS__['ServiceAreas_strings_under_120_miles']);//sprintf(__APP_SETTINGS__['ServiceAreas_strings_under_120_miles'], (round($distance / 10) * 10), $town['name']);
                 break;
             default:
-                $descriptiveDistance = sprintf(__APP_SETTINGS__['ServiceAreas_strings_120_and_over'], round($distance, 0), $town['name']);
+                $descriptiveDistance = str_replace($needles, $replacements, __APP_SETTINGS__['ServiceAreas_strings_120_and_over']);//sprintf(__APP_SETTINGS__['ServiceAreas_strings_120_and_over'], round($distance, 0), $town['name']);
                 break;
         }
 

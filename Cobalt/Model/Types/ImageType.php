@@ -5,12 +5,12 @@ use Cobalt\Commands\Exceptions\CommandError;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Filters\Issues\FilterIssue;
 use Cobalt\Model\GenericModel;
-use Cobalt\Model\Interfaces\JobHandler;
+use Cobalt\JobQueue\Interfaces\JobHandler;
 use Cobalt\Model\Interfaces\ServerEvents;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\ForeignId;
 use Cobalt\Model\Types\Traits\FileHandler;
-use Cobalt\JobQueue\Jobs\Job;
+use Cobalt\Model\Jobs\Job;
 use Error;
 use Exceptions\HTTP\BadRequest;
 use MongoDB\BSON\ObjectId;
@@ -19,7 +19,7 @@ use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
 use Override;
 
-class ImageType extends ForeignId implements JobHandler {
+class ImageType extends ForeignId {
     use FileHandler;
     
     /** Accept must return an array of valid mimetypes */
@@ -101,25 +101,25 @@ class ImageType extends ForeignId implements JobHandler {
         }
     }
 
-    #[Override]
-    public function __job__on_start(object $item, Job $job, int $index) {
-        $filename = $this->filename($item->file);
-        $path = $item->file->tmp_name;
-        if(!file_exists($path)) {
-            $job->updateQueueItem($index, Job::STATUS_ABORTED, 'File missing');
-            throw new CommandError("File is missing");
-        }
-        $id = $this->__store($path, $filename, $item->file->options ?? []);
-        $this->model->updateOne(['_id' => $job->getAdopted()->refid], ['$set' => [$item['name'] => $id]]);
-        unlink($path);
-        $job->updateQueueItem($index, Job::STATUS_FINISHED, "Done");
-        $job->increment();
+    // #[Override]
+    // public function __job__on_start(object $item, Job $job, int $index) {
+    //     $filename = $this->filename($item->file);
+    //     $path = $item->file->tmp_name;
+    //     if(!file_exists($path)) {
+    //         $job->updateQueueItem($index, Job::STATUS_ABORTED, 'File missing');
+    //         throw new CommandError("File is missing");
+    //     }
+    //     $id = $this->__store($path, $filename, $item->file->options ?? []);
+    //     $this->model->updateOne(['_id' => $job->getAdopted()->refid], ['$set' => [$item['name'] => $id]]);
+    //     unlink($path);
+    //     $job->updateQueueItem($index, Job::STATUS_FINISHED, "Done");
+    //     $job->increment();
 
-    }
+    // }
 
-    #[Override]
-    public function __job__on_complete(object $item, Job $job, int $index) {
+    // #[Override]
+    // public function __job__on_complete(object $item, Job $job, int $index) {
         
-    }
+    // }
 
 }

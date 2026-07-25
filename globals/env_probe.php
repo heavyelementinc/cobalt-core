@@ -61,6 +61,7 @@ $dependencies = [
     "bcmath",
     "igbinary",
     "curl",
+    "imagick",
     // "ERROR FOR TESTING PURPOSES",
 ];
 

@@ -251,7 +251,7 @@ abstract class SettingsAbstract extends \Drivers\Database {
                 }
             }
 
-            Extensions::invoke("register_settings_definitions", $this->raw_decode, $this->manifest_raw_decode);
+            // Extensions::invoke("register_settings_definitions", $this->raw_decode, $this->manifest_raw_decode);
 
             $values = [];
             $definitions = [];

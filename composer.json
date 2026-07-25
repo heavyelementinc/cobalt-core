@@ -27,5 +27,8 @@
         "allow-plugins": {
             "php-http/discovery": true
         }
+    },
+    "scripts": {
+        "directive-list": "./Cobalt/DataModel/automations/build-directive-list.php"
     }
 }

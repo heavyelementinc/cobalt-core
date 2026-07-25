@@ -3,7 +3,7 @@
 namespace Cobalt\Documentation\Model;
 
 use Cobalt\Controllers\ModelController;
-use Cobalt\DBManagement\CobaltCursor;
+use Cobalt\Database\Classes\CobaltCursor;
 use Cobalt\Documentation\Controllers\Documentation as ControllersDocumentation;
 use Cobalt\Model\Directives\IndexableDirective;
 use Cobalt\Model\Directives\SearchableDirective;

@@ -24,7 +24,7 @@ class FileController extends \Controllers\FileController {
         global $SHARED_CONTENT;
         $path = $ROUTER->uri;
         $extensions = [];
-        Extensions::invoke("register_shared_dir", $extensions);
+        // Extensions::invoke("register_shared_dir", $extensions);
         $path = sanitize_path_name($path);
         // $file = __ENV_ROOT__ . "/shared/$path";
         $file = find_one_file([
@@ -55,7 +55,7 @@ class FileController extends \Controllers\FileController {
             $file = $cache->file_path;
         } else {
             $extensions = [];
-            Extensions::invoke("register_js_dirs", $extensions);
+            // Extensions::invoke("register_js_dirs", $extensions);
             $file = find_one_file([
                 __APP_ROOT__ . "/src/",
                 ...$extensions,

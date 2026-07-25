@@ -2,7 +2,7 @@
 namespace Cobalt\Model\Types;
 
 use Cobalt\Auth\Users\Models\User;
-use Cobalt\DBManagement\CobaltCursor;
+use Cobalt\Database\Classes\CobaltCursor;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\Abstracts\ForeignId;

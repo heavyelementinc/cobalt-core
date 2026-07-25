@@ -26,7 +26,7 @@ class CoreUserAccounts extends Crudable {
         $user_permission_table = $GLOBALS['auth']->permissions->get_permission_table($document);
 
         $extension_tabs = [];
-        Extensions::invoke('register_user_editor_tabs', $tabs);
+        // Extensions::invoke('register_user_editor_tabs', $tabs);
 
         try{
             $push = new PushNotifications();

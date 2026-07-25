@@ -3,7 +3,7 @@
 namespace Cobalt\Model\Types\Abstracts;
 
 use ArrayAccess;
-use Cobalt\DBManagement\CobaltCursor;
+use Cobalt\Database\Classes\CobaltCursor;
 use Cobalt\Model\Model;
 use Exception;
 use MongoDB\BSON\ObjectId;

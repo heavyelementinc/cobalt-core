@@ -19,7 +19,7 @@ class CoreAdmin {
             'contact_manager' => (new ContactManager())->get_unread_count_for_user(session()),
             'user_accounts' => (new User())->count([]),
             'events' => (new EventManager())->getAdminWidget(),
-            'plugin_count' => Extensions::get_active_count(),
+            // 'plugin_count' => Extensions::get_active_count(),
             'cron_job' => (new \Cron\Run())->renderTaskStats(),
         ]);
         return view("/authentication/admin-dashboard/index.html");

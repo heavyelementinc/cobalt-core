@@ -10,10 +10,14 @@ use Cobalt\DataModel\Types\BooleanType;
 use Cobalt\DataModel\Types\DictionaryType;
 use Cobalt\DataModel\Types\StringType;
 use Cobalt\DataModel\Types\Generic;
+use Cobalt\DataModel\Types\IdType;
 use Cobalt\DataModel\Types\NumberType;
 use MongoDB\BSON\ObjectId;
 use TypeError;
 
+/**
+ * @mixin Generic
+ */
 trait Overloading {
     protected bool $__allowOverloadedFilterFields = false;
     public readonly FilterResult $filterResult;
@@ -63,7 +67,11 @@ trait Overloading {
                         break;
                     }
                 case "object":
-                    $field = new DictionaryType($this, $this->rootModel);
+                    if($value instanceof ObjectId) {
+                        $field = new IdType($this, $this->rootModel);
+                    } else {
+                        $field = new DictionaryType($this, $this->rootModel);
+                    }
                     break;
                 case "NULL":
                     // Set a directive

@@ -2,15 +2,18 @@
 
 namespace Cobalt\JobQueue\Controllers;
 
+use Cobalt\Auth\Users\Models\User;
 use Cobalt\Controllers\Controller;
-use Cobalt\JobQueue\Jobs\Job;
+use Cobalt\JobQueue\Enums\JobState;
 use Cobalt\Model\Traits\Accessible;
 use Exception;
 use Exceptions\HTTP\BadRequest;
 use Exceptions\HTTP\NotFound;
 use Exceptions\HTTP\Unauthorized;
+use Exceptions\HTTP\UnknownError;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Model\BSONDocument\BSONDocument;
 use Override;
 
 class JobStatus extends Controller {
@@ -23,49 +26,92 @@ class JobStatus extends Controller {
 
     public function status(string|ObjectId $id) {
         try {
-            // Convert a string to an ObjectId
-            if(is_string($id)) {
-                $id  = $id;
-                $_id = new ObjectId($id);
-            } else {
-                $_id = $id;
-                $id  = (string)$id;
+            if($id instanceof ObjectId === false) $_id = new ObjectId($id);
+            else {
+                $_id = (string)$id;
             }
             /** @var ObjectId $_id */
         } catch (Exception $e) {
-            throw new BadRequest("Invalid object ID");
-        }
-        // Check if the user is allowed to read the job's status
-        if(!is_root() && !in_array($id, $_SESSION[self::SESSION_JOB_QUEUE_KEY] ?? [])) {
-            throw new Unauthorized("You're not authorized to read the given status");
+            throw new BadRequest("Invalid Job ID");
         }
 
-        $job = new Job();
-        $doc = $job->adopt($_id);
-        if(!$doc) throw new NotFound("Unknown job");
-        
-        if($doc->status === Job::STATUS_FINISHED || $doc->current >= $doc->total) {
-            $projection = [];
-            foreach($doc->queue as $item) {
-                $projection[$item->name] = 1;
-            }
-            
-            $model = $job->getAdoptedModelInstance();
-            $mutable = $model->findOne(['_id' => $model], ['projection' => $projection]);
-            foreach($doc->queue as $item) {
-                $model->{$item->name}->onUpdateConfirmed($mutable->{$item->name}->value);
+        // At this point, the job's document is available to
+        // the class
+        /** @var Job $jobItem */
+        $jobItem = $this->findOne(['_id' => $id]);
+
+        // Check if the current session has permission to see this model
+        $permissions = $jobItem->getPermissions();
+        if(!empty($permissions)) {
+            if(!User::hasAnyPermission(null, $permissions, true)) {
+                throw new Unauthorized("Not allowed.");
             }
         }
 
+        // Check the state of this job
+        switch($jobItem->getState()) {
+            // Handle values approporiately
+            case JobState::CREATED:
+                throw new UnknownError("Something went wrong.");
+            case JobState::QUEUED:
+            case JobState::FINISHED:
+                return;
+        }
+
+        // Respond with the job's details 
         return [
-            'id'      => $id,
-            'status'  => $doc->status,
-            'total'   => $doc->total,
-            'current' => $doc->current,
-            'update'  => $doc->update,
-            'message' => $doc->message,
+            'status'   => $jobItem->getState(),
+            'progress' => $jobItem->getProgress(),
+            'message'  => $jobItem->getMessage(),
         ];
+
     }
+
+    // public function status_old(string|ObjectId $id) {
+    //     try {
+    //         // Convert a string to an ObjectId
+    //         if(is_string($id)) {
+    //             $id  = $id;
+    //             $_id = new ObjectId($id);
+    //         } else {
+    //             $_id = $id;
+    //             $id  = (string)$id;
+    //         }
+    //         /** @var ObjectId $_id */
+    //     } catch (Exception $e) {
+    //         throw new BadRequest("Invalid object ID");
+    //     }
+    //     // Check if the user is allowed to read the job's status
+    //     if(!is_root() && !in_array($id, $_SESSION[self::SESSION_JOB_QUEUE_KEY] ?? [])) {
+    //         throw new Unauthorized("You're not authorized to read the given status");
+    //     }
+
+    //     $job = new Job();
+    //     $doc = $job->adopt($_id);
+    //     if(!$doc) throw new NotFound("Unknown job");
+        
+    //     if($doc->status === Job::STATUS_FINISHED || $doc->current >= $doc->total) {
+    //         $projection = [];
+    //         foreach($doc->queue as $item) {
+    //             $projection[$item->name] = 1;
+    //         }
+            
+    //         $model = $job->getAdoptedModelInstance();
+    //         $mutable = $model->findOne(['_id' => $model], ['projection' => $projection]);
+    //         foreach($doc->queue as $item) {
+    //             $model->{$item->name}->onUpdateConfirmed($mutable->{$item->name}->value);
+    //         }
+    //     }
+
+    //     return [
+    //         'id'      => $id,
+    //         'status'  => $doc->status,
+    //         'total'   => $doc->total,
+    //         'current' => $doc->current,
+    //         'update'  => $doc->update,
+    //         'message' => $doc->message,
+    //     ];
+    // }
 
     public function event(string|ObjectId $id) {
         ignore_user_abort(true);

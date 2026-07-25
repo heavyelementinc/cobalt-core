@@ -15,7 +15,7 @@ use PHPUnit\Util\Filter;
  */
 class StringType extends Generic {
     #[Override]
-    public function filter(mixed $toValidate): mixed {
+    public function filter(mixed $toValidate, mixed $raw): mixed {
         if($toValidate === null && $this->isNullable($toValidate)) return null;
         if(!is_string($toValidate)) return $this->filterResult->addIssue($this, "Must be a string");
         
@@ -45,6 +45,10 @@ class StringType extends Generic {
     #[Override]
     public function serialize(int $mode = self::SERIALIZE_MODE_ALL_FIELDS) {
         return $this->value ?? null;
+    }
+
+    public function toUrlFragment():string {
+        return url_fragment_sanitize($this->value);
     }
 
 }

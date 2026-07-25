@@ -8,8 +8,10 @@ use Cobalt\DataModel\Filters\FilterResult;
 use Cobalt\DataModel\Filters\FilterSkip;
 use Cobalt\DataModel\Types\Generic;
 
+/**
+ * @mixin Generic
+ */
 trait GenericFilters {
-    protected DirectiveList $directives;
     public readonly FilterResult $filterResult;
 
     protected bool $__isModified = false;
@@ -36,17 +38,32 @@ trait GenericFilters {
         $this->__isModified = true;
     }
     /**
-     * This function is called when it's time to validate a value
-     * for storage in the database.
+     * This function is called when it's time to validate a value for storage 
+     * in the database.
      * 
-     * @param mixed $toValidate 
+     * This method should be robust enough to handle the field's JSON-ized value
+     * from the client.
+     * 
+     * This method should return the canonincalized version of the fields value.
+     * (For example, converting a string version of an ObjectId into an instance
+     * of MongoDB\ObjectId or an ISO 8601 date into an instance of MongoDB\UTCDateTime)
+     * 
+     * @param mixed $unserialized -- The unserialized version of the value
+     * @param mixed $raw -- The raw version submitted by the client
      * @return mixed The filtered and validated value fit for storage
      */
-    abstract function filter(mixed $toValidate):mixed;
+    abstract function filter(mixed $unserialized, mixed $raw):mixed;
 
     // Why use a wrapper method? Ease of implementation on the coder side of things.
+    /**
+     * The wrapper method for the filter process. This method calls the Generic's
+     * filter() method and handles updating the returned result for the field.
+     * This simplifies the filter
+     * @param mixed $toValidate 
+     * @return FilterResult 
+     */
     function __filter(mixed $toValidate):FilterResult {
-        $result = $this->filter($toValidate);
+        $result = $this->filter($this->jsonUnserialize($toValidate), $toValidate);
         $update = $this->filterResult->resultForField($this);
         if($update->hasIssues()) {
             return $update;
@@ -55,6 +72,8 @@ trait GenericFilters {
         $this->updateValue($result);
         return $update;
     }
+
+    abstract function jsonUnserialize(mixed $value):mixed;
 
     function isNullable(mixed $toValidate):mixed {
         $nullable  =  $this->directives->nullable?->value ?? false;

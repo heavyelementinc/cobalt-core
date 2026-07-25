@@ -3,7 +3,7 @@
 namespace Components\Projects\Controllers;
 
 use Cobalt\Controllers\ModelController;
-use Cobalt\DBManagement\CobaltCursor;
+use Cobalt\Database\Classes\CobaltCursor;
 use Cobalt\Model\Model;
 use Components\Projects\Models\Project;
 use Exceptions\HTTP\NotFound;

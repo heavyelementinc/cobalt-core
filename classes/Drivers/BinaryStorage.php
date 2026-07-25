@@ -16,11 +16,11 @@ use MongoDB\UpdateResult;
 
 trait BinaryStorage {
     protected string $__db;
-    protected \MongoDB\Client $__client;
-    protected \MongoDB\Database $__database;
-    protected \MongoDB\GridFS\Bucket $__bucket;
-    protected \MongoDB\Collection $__collection;
-    protected bool $__initialized = false;
+    protected \MongoDB\Client $__binaryStorageClient;
+    protected \MongoDB\Database $__binaryStorageDatabase;
+    protected \MongoDB\GridFS\Bucket $__binaryStorageBucket;
+    protected \MongoDB\Collection $__binaryStorageCollection;
+    protected bool $__isBinaryStorageInitialized = false;
 
     /**
      * Store a file in the GridFS filesystem
@@ -37,7 +37,7 @@ trait BinaryStorage {
         if(!file_exists($pathToFile)) throw new NotFound("File does not exist");
 
         $md5_sum = md5_file($pathToFile);
-        $deduplication_search_result = $this->__collection->findOne(['md5' => $md5_sum]);
+        $deduplication_search_result = $this->__binaryStorageCollection->findOne(['md5' => $md5_sum]);
         if($deduplication_search_result !== null) {
             return $deduplication_search_result['_id'];
         }
@@ -45,11 +45,11 @@ trait BinaryStorage {
         $resource = fopen($pathToFile, 'r');
         if($resource === false) throw new ServiceUnavailable("Could not open file");
 
-        $id = $this->__bucket->uploadFromStream($filenameForStorage, $resource, $storageOptions);
+        $id = $this->__binaryStorageBucket->uploadFromStream($filenameForStorage, $resource, $storageOptions);
         $data['meta'] = $this->__getMetadata($pathToFile);
         $data['_v'] = 3;
         
-        $result = $this->__collection->updateOne(
+        $result = $this->__binaryStorageCollection->updateOne(
             ['_id' => $id],
             ['$set' => $data]
         );
@@ -79,26 +79,26 @@ trait BinaryStorage {
 
     final public function __updateFile(string $filename, array|GenericMap|SchemaResult|Document $data):void {
         $this->__initFS();
-        $this->__collection->updateOne(
+        $this->__binaryStorageCollection->updateOne(
             ['name' => $filename],
             ['$set' => $data]
         );
         return;
     }
 
-    final public function __findOne(array $query, array $options = []):null|BSONArray|BSONDocument|Persistable{
+    final public function __findOne(array $query = [], array $options = []):null|BSONArray|BSONDocument|Persistable{
         $this->__initFS();
-        return $this->__collection->findOne($query, $options);
+        return $this->__binaryStorageCollection->findOne($query, $options);
     }
 
-    final public function __find(array $query, array $options) {
+    final public function __find(array $query = [], array $options = []) {
         $this->__initFS();
-        return $this->__collection->find($query, $options);
+        return $this->__binaryStorageCollection->find($query, $options);
     }
 
-    final public function __count(array $query, array $options) {
+    final public function __count(array $query = [], array $options = []) {
         $this->__initFS();
-        return $this->__collection->count($query, $options);
+        return $this->__binaryStorageCollection->count($query, $options);
     }
 
     final public function __get_uploaded_files(string|int|null $field = null, int $limit = 0):?array {
@@ -126,7 +126,7 @@ trait BinaryStorage {
             case ($mime_type === "image/svg+xml"):
                 return $this->getSVGMetadata($path_to_file, $mime_type);
             case "image":
-                return $this->getImageMetadata($path_to_file, $mime_type);
+                return $this->getRasterMetadata($path_to_file, $mime_type);
             case "video":
                 return $this->getVideoMetadata($path_to_file, $mime_type);
             case "audio":
@@ -137,17 +137,17 @@ trait BinaryStorage {
     }
 
     private function __initFS() {
-        if($this->__initialized) return;
+        if($this->__isBinaryStorageInitialized) return;
         $this->__db = $GLOBALS['CONFIG']['database'];
-        $this->__client = \db_cursor('', null, true);
-        $this->__database = $this->__client->{$this->__db};
-        $this->__bucket = $this->__database->selectGridFSBucket();
-        $this->__collection = $this->__bucket->getFilesCollection();
-        $this->__initialized = true;
+        $this->__binaryStorageClient = \db_cursor('', null, true);
+        $this->__binaryStorageDatabase = $this->__binaryStorageClient->{$this->__db};
+        $this->__binaryStorageBucket = $this->__binaryStorageDatabase->selectGridFSBucket();
+        $this->__binaryStorageCollection = $this->__binaryStorageBucket->getFilesCollection();
+        $this->__isBinaryStorageInitialized = true;
     }
 
     public function __rename(ObjectId $id, string $name):UpdateResult {
-        return $this->__collection->updateOne(
+        return $this->__binaryStorageCollection->updateOne(
             ['_id' => $id], 
             [
                 '$set' => [
@@ -158,7 +158,7 @@ trait BinaryStorage {
     }
 
     public function __alt(ObjectId $id, string $name):UpdateResult {
-        return $this->__collection->updateOne(
+        return $this->__binaryStorageCollection->updateOne(
             ['_id' => $id], 
             [
                 '$set' => [
@@ -168,7 +168,7 @@ trait BinaryStorage {
         );
     }
 
-    private function getImageMetadata($path_to_file, $mime_type = null) {
+    private function getRasterMetadata($path_to_file, $mime_type = null) {
         if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
         
         $metadata = getimagesize($path_to_file);

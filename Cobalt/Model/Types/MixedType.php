@@ -12,7 +12,7 @@ use Cobalt\Model\Types\Traits\ClientUpdateFilter;
 use Cobalt\Model\Types\Traits\MixedTypeToField;
 use Cobalt\Model\Types\Traits\Prototypable;
 use Cobalt\Model\Types\Traits\SharedFilterEnums;
-use Cobalt\JobQueue\Jobs\Job;
+use Cobalt\Model\Jobs\Job;
 use MongoDB\BSON\Document;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;

@@ -79,6 +79,15 @@ class Controller {
     }
 
     /**
+     * @template T of static
+     * @param string $path
+     * @param key-of<T>|string $method Method of controller
+     */
+    static function options(string $path, string $method):Options {
+        return new Options($path, $method);
+    }
+
+    /**
      * This will only return the first route that uses $directiveName
      * @param string $methodName the "Controller@method" direvitve specified in your router table
      * @param array $args Any arguments used here will get filled in as values for {variables} in route names from left to right

@@ -50,7 +50,7 @@ function phone_number_normalize($number) {
 }
 
 /**
- * 
+ * @deprecated 2026-07-15
  * @param iterator $results the results of a Mongo query
  * @param string $schema_name the name of the schema class
  * @return array|null every instance of the mongo query as a Cobalt schema
@@ -70,14 +70,23 @@ function plural($number, string $suffix = "s", string $singular = "") {
     return $suffix;
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function cookie_consent_check() {
     return isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === "all";
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function sanitize_path_name($path) {
     return str_replace(["../"], "", $path);
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function path_exists_in_base(string $base_path, $untrusted_path): bool {
     $path_to_test = realpath($untrusted_path);
     $base_ln = strlen($base_path);
@@ -85,6 +94,9 @@ function path_exists_in_base(string $base_path, $untrusted_path): bool {
     return false;
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function relative_time($time = false, $now = null, $limit = 86400, $format = "M jS g:i A") {
     if($time instanceof UTCDateTime || $time instanceof DriversUTCDateTime) $time = $time->toDateTime();
     if($time instanceof DateTime) $time = $time->getTimestamp();
@@ -113,7 +125,9 @@ function relative_time($time = false, $now = null, $limit = 86400, $format = "M 
     return $relative;
 }
 
-
+/**
+ * @deprecated 2026-07-15
+ */
 function obscure_email(string $email, int $threshold = 3, string $character = "â€¢"): string {
     $obscured = "";
     $temp_thresh = $threshold;
@@ -136,6 +150,9 @@ function obscure_email(string $email, int $threshold = 3, string $character = "â
     return $obscured;
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function country2flag(?string $countryCode, ?string $countryName = null): string {
     if(!$countryCode) return "";
     $unicode = (string) preg_replace_callback(
@@ -146,7 +163,9 @@ function country2flag(?string $countryCode, ?string $countryName = null): string
     return "<span title='$countryName' draggable='false'>" . $unicode . "</span>";
 }
 
-
+/**
+ * @deprecated 2026-07-15
+ */
 function syntax_highlighter($code, $filename = "", $language = "json", $line_numbers = true, $action_panel = false) {
     if(gettype($code) !== "string") $code = json_encode($code, JSON_PRETTY_PRINT);
     $mutant = "<pre data-file='$filename' data-lang='$language'>$code</pre>";
@@ -197,6 +216,9 @@ function syntax_highlighter($code, $filename = "", $language = "json", $line_num
 //     }
 // }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function convertFractionToChar($string) {
     return str_replace(" ", "", str_replace(
         ["1/4",   "1/2",   "3/4",   "1/7",    "1/9",    "1/10",   "1/3",    "2/3",    "1/5",    "2/5",    "3/5",    "4/5",    "1/6",    "5/6",    "1/8",    "3/8",    "5/8",    "7/8"],
@@ -205,6 +227,9 @@ function convertFractionToChar($string) {
     ));
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function convertCommonTextElements($string) {
     return str_replace(
         ['--'],
@@ -216,7 +241,7 @@ function convertCommonTextElements($string) {
 
 /**
  * from_markdown
- *
+ * @deprecated 2026-07-15
  * @param  string $string - The string you wish to parse as markdown
  * @param  bool $untrusted - Whether the markdown is user input
  * @return string - HTML-formatted string
@@ -250,7 +275,9 @@ function from_markdown($string, bool $untrusted = true) {
         $parsed
     );
 }
-
+/**
+ * @deprecated 2026-07-15
+ */
 function youtube_embedder(DOMElement $img, DOMDocument $doc){
     $url = $img->getAttribute('src');
     $rawParams = parse_url($url, PHP_URL_QUERY);
@@ -287,6 +314,9 @@ function youtube_embedder(DOMElement $img, DOMDocument $doc){
     
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function instagram_embedder(DOMElement $img, DOMDocument $dom) {
     $src = $img->getAttribute("src");
     $figure = new DOMElement('figure');
@@ -298,7 +328,7 @@ function instagram_embedder(DOMElement $img, DOMDocument $dom) {
     $img->replaceWith($figure);
 }
 
-/** @deprecated  */
+/** @deprecated */
 function embed_from_img_tags($html) {
     $dom = new DOMDocument();
     $dom->loadHTML($html);
@@ -323,6 +353,9 @@ function embed_from_img_tags($html) {
     return $dom->saveHTML();
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function markdown_to_plaintext(?string $string, $stripWhitespace = false) {
     $md = from_markdown($string);
     $md = strip_tags($md);
@@ -348,10 +381,12 @@ function random_string($length, $fromChars = null) {
     }
     return $random;
 }
-
+/**
+ * @deprecated 2026-07-15
+ */
 function aesthetic_string(string $prefix = "", int $dash_mod = 7) {
-    $string = uniqid(true) . microtime();
-    $string = (double)bin2hex($string);
+    $string = uniqid(more_entropy: true) . microtime();
+    $string = (float)bin2hex($string);
     $p = str_replace("=", "", base64_encode(sprintf("%d",($string * 1.27) << 1)));
     if($dash_mod === -1) return $p;
     $pkey = "$prefix";
@@ -483,7 +518,7 @@ const TIME_TO_READ_WORDS_PER_MINUTE = 200;
 const TIME_TO_READ_FORMAT_ROUND = 0;
 const TIME_TO_READ_FORMAT_MINSEC = 1;
 /**
- * 
+ * @deprecated 2026-07-15
  * @param string $string 
  * @param int $output 
  * @return string 
@@ -509,6 +544,7 @@ const FAILURE_NOT_A_DATA_URI = -1;
 const CONVERT_URI_MAKE_PATH = 0b11111111;
 /**
  * Converts a `data:file/mimetype;base64,ai63138b7...` data URI into a file
+ * @deprecated 2026-07-15
  * @param string $filename - The location the decoded file should be written to
  * @param string $uri - The URI to be decoded
  * @param int $flags - Also valid are file_put_contents flags: FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
@@ -530,18 +566,30 @@ function convert_data_uri_to_file(string $filename, string $uri, int $flags = 0)
     return $put_result;
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function is_data_uri($uri):bool {
     if(!is_string($uri)) return false;
     if(substr($uri, 0, 5) === "data:") return true;
     return false;
 }
 
+/**
+ * @deprecated 2026-07-15
+ */
 function is_function(mixed $subject):bool {
     if($subject instanceof Closure) return true;
     if(is_string($subject)) return false;
     return is_callable($subject);
 }
 
+/**
+ * @deprecated
+ * @param string $html 
+ * @param string $t 
+ * @return string 
+ */
 function add_target_blank_to_external_links(string $html, string $t = "p"):string {
     $dom = new DOMDocument();
     $dom->preserveWhiteSpace = true;
@@ -590,9 +638,6 @@ function social_media_links(array $included = []):string {
     return $social_links;
 }
 
-function snake_case_fixer(string $str):string {
-    return str_replace("_", " ", $str);
-}
 
 function embed_image(null|array|BSONArray|BSONDocument|ImageType|ObjectId $doc, null|ObjectId $docid = null, array $attributes = []):string {
     if($doc instanceof ObjectId) $doc = get_image_details($doc);
@@ -645,7 +690,32 @@ function get_image_details(ObjectId $id):?BSONDocument {
     return (new ImageType())->__findOne(['_id' => $id]);
 }
 
+
+/**
+ * @deprecated
+ * @param string $str 
+ * @return string 
+ */
+function snake_case_fixer(string $str):string {
+    return from_snake_case($str);
+}
+
+/**
+ * @deprecated
+ * @param string $fieldName 
+ * @return string 
+ */
 function prettify_fieldname(string $fieldName):string {
     $split = str_replace([".","_"], " ", $fieldName);
     return ucwords($split);
+}
+
+function from_snake_case(string $name, string $delimiter = " "):string {
+    return strtolower(str_replace([".","_"], $delimiter, $name));
+}
+
+function from_camel_case(string $name, string $delimiter = " "):string {
+    $lower = trim(strtolower(preg_replace(["/([A-Z])/","/[_\.]/"], ["$delimiter$1",$delimiter], $name)));
+    if($lower[0] === $delimiter) return substr($lower, 1);
+    return $lower;
 }

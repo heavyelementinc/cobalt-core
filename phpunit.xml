@@ -8,8 +8,10 @@
         <const name="UNIT_TESTS" value="true"/>
     </php>
     <testsuites>
+        
         <testsuite name="end-to-end">
-            <directory>Cobalt/DataModel/Models/test</directory>
+            <directory>Cobalt/Database/Drivers/MongoDb/test/</directory>
+            <directory>Cobalt/DataModel/Tests/test</directory>
         </testsuite>
     </testsuites>
 </phpunit>

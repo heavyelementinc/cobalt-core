@@ -2231,7 +2231,7 @@ return [
     ],
 
     'ServiceAreas_strings_under_ten_miles' => [
-        'default' => "Plus, we're right next door (just %distance% miles away)!",
+        'default' => "Plus, we're right next door (just %distance_fmt% miles away)!",
         'meta' => [
             'type' => new StringType(),
             'label' => 'Distance between 10 miles or less',

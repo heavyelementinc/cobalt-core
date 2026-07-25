@@ -10,18 +10,25 @@ use Cobalt\Model\Exceptions\ImmutableTypeError;
 use Cobalt\Model\GenericModel;
 use Cobalt\Model\Traits\Hydrateable;
 use Cobalt\Model\Types\Traits\SharedFilterEnums;
+use Countable;
 use Error;
 use Exception;
 use MongoDB\Model\BSONArray;
 use MongoDB\Model\BSONDocument;
+use Override;
 use Stringable;
 
 /**
  * @method delimiter
  * @package Cobalt\Model\Types
  */
-class ArrayType extends MixedType implements ArrayAccess, Stringable {
+class ArrayType extends MixedType implements ArrayAccess, Stringable, Countable {
     use Hydrateable;
+
+    #[Override]
+    public function count(): int {
+        return count($this->getValue());
+    }
 
     public function setValue($array):void {
         $this->value = [];

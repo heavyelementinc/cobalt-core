@@ -1,7 +1,7 @@
 <?php
 namespace Cobalt\Model\Traits;
 
-use Cobalt\DBManagement\CobaltCursor;
+use Cobalt\Database\Classes\CobaltCursor;
 use Error;
 use Exception;
 use MongoDB\Client;
@@ -120,7 +120,7 @@ trait Accessible {
         $options += $this->getTypeMap();
         if($this->client instanceof Client) {
             $cursor = $this->collection->find($filter, $options);
-            if($cursor) return new CobaltCursor($cursor);
+            if($cursor) return new CobaltCursor($cursor, [$filter, $options]);
             return null;
         } else {
             throw new Exception(config()['db_driver']." is not implemented!");

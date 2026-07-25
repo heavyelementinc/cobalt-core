@@ -8,6 +8,10 @@ use Exception;
 use MongoDB\BSON\ObjectId;
 use TypeError;
 
+/**
+ * @deprecated 2026-07-15
+ * @package Cobalt\Extensions
+ */
 class Extensions extends \Drivers\Database {
     var bool $safe_mode = false;
     var $options = [];

@@ -8,9 +8,13 @@ use Error;
 use ReflectionMethod;
 use ReflectionObject;
 use TypeError;
+use Cobalt\DataModel\Types\Generic;
 
+/**
+ * @mixin Generic
+ */
 trait GenericPrototypes {
-    protected DirectiveList $directives;
+    // protected DirectiveList $directives;
     protected string $name;
     abstract public function getValue(): mixed;
 
@@ -23,12 +27,13 @@ trait GenericPrototypes {
         return $this->json(true);
     }
 
-    function getLabel($includeHtml = true, $small_text = ""):string {
-        $is_required = $this->directives['required'] ?? false;
-        $labelText = $this->directives['label'] ?? prettify_fieldname($this->name);
-        if($includeHtml === false) {
-            return $labelText . ($is_required) ? "*" : "";
-        }
+    #[PrototypeMethod]
+    protected function getLabel($includeHtml = true, $small_text = ""):string {
+        $is_required = $this->directives->required?->value ?? false;
+        $labelText = $this->directives->label?->value ?? from_snake_case($this->getFieldDotNotation());
+        if($includeHtml === false) return $labelText . ($is_required) ? "*" : "";
+
+        // $labelStart
 
         return "";
     }
@@ -76,5 +81,26 @@ trait GenericPrototypes {
         $attributes = $method->getAttributes(PrototypeMethod::class);
         if(count($attributes) == 0) throw $protoFail;
         return $this->{$name}(...$arguments);
+    }
+
+    /**
+     * If you need to find a specific generic that may be nested multiple
+     * DictionaryTypes deep, you can call __lookup with a dot notated name and
+     * it should return a specific URL
+     * @param string $name 
+     * @return null|Generic 
+     */
+    function __lookup(string $name):?Generic {
+        $split = explode(".", $name);
+        /** @var Generic $candidate */
+        $candidate = $this;
+        foreach($split as $value) {
+            if(!isset($candidate->{$value})) return null;
+            if($candidate->{$value} instanceof Generic === false) return null;
+            /** @var Generic $candidate */
+            $candidate = $candidate->{$value};
+        }
+        if(!isset($value) || $candidate->name !== $value) return null;
+        return $candidate;
     }
 }

@@ -99,7 +99,7 @@ trait FileHandler {
             case ($mime_type === "image/svg+xml"):
                 return $this->getSVGMetadata($path_to_file, $mime_type);
             case "image":
-                return $this->getImageMetadata($path_to_file, $mime_type);
+                return $this->getRasterMetadata($path_to_file, $mime_type);
             case "video":
                 return $this->getVideoMetadata($path_to_file, $mime_type);
             case "audio":
@@ -109,7 +109,7 @@ trait FileHandler {
         return ['mimetype' => $mime_type];
     }
 
-    public function getImageMetadata($path_to_file, $mime_type = null) {
+    public function getRasterMetadata($path_to_file, $mime_type = null) {
         if(!$mime_type) $mime_type = $this->getMimeType($path_to_file);
         
         $metadata = getimagesize($path_to_file);
@@ -262,14 +262,14 @@ trait FileHandler {
     public function renameFile($oid, $value) {
         $search = ["/", " ", "&",];
         $replace = ["", "-", "and",];
-        $existing = $this->__collection->findOne(['_id' => $oid]);
+        $existing = $this->__binaryStorageCollection->findOne(['_id' => $oid]);
         $oldName = pathinfo($existing['filename']);
         $ext = mime_content_type_to_extension($existing['meta']['mimetype']) ?? $oldName['extension'];
         $path = ($oldName['pathname']) ? $oldName['pathname'] . "/" : "";
         $newName = $path. preg_replace("/([^A-Za-z0-9-])/","",str_replace($search, $replace, trim($value))) . (($ext) ? ".$ext" : "");
         $canonicalizedPath = realpath($newName);
         if(!$canonicalizedPath) $canonicalizedPath = $newName;
-        $count = $this->__collection->findOne(['filename' => $canonicalizedPath]);
+        $count = $this->__binaryStorageCollection->findOne(['filename' => $canonicalizedPath]);
         if($count && (string)$oid !== (string)$count['_id']) {
             throw new BadRequest("Cannot rename file. That filename already exists!", true);
         }
@@ -277,7 +277,7 @@ trait FileHandler {
     }
 
     public function __updateColor(ObjectId $oid, string $value, string $type) {
-        return $this->__collection->updateOne(
+        return $this->__binaryStorageCollection->updateOne(
             ['_id' => $oid], 
             [
                 '$set' => [

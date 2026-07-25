@@ -3,6 +3,8 @@
  * @global int COBALT_BOOTSTRAP_AS_NEEDED - 0
  */
 
+use Cobalt\Database\Drivers\MongoDb\Client as MongoDbClient;
+use Cobalt\Database\Interfaces\DbClient;
 use MongoDB\Client;
 
 define("COBALT_BOOSTRAP_AS_NEEDED", 0);
@@ -180,4 +182,13 @@ function db_cursor($collection, $database = null, $returnClient = false, $return
     }
     $database = $client->{$database};
     return $database->{$collection};
+}
+
+function getDatabaseClient():DbClient {
+    switch(config()['db_driver']) {
+        case DATABASE_DRIVER_MONGODB:
+            return new MongoDbClient();
+        case DATABASE_DRIVER_POSTGRES:
+    }
+    throw new Exception("Driver type `".config()['db_driver']."` is not a supported driver");
 }

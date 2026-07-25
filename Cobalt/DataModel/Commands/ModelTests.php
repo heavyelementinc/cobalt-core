@@ -6,7 +6,7 @@ use Cobalt\Commands\Classes\CommandInterface;
 use Cobalt\Commands\Classes\CommandList;
 use Override;
 use Cobalt\Commands\Classes\CommandItem;
-use Cobalt\DataModel\Types\ModelType;
+use Cobalt\DataModel\Types\DocumentType;
 use Cobalt\DataModel\Models\PrimaryDebugModel as DataModelTest;
 
 class ModelTests extends CommandInterface {

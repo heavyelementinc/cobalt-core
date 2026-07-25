@@ -12,14 +12,15 @@ use TypeError;
 
 class NumberType extends Generic {
     #[Override]
-    public function filter(mixed $toValidate): mixed {
+    public function filter(mixed $toValidate, mixed $raw): mixed {
         if(!is_numeric($toValidate)) throw $this->filterResult->addIssue($this, "This field requires a numeric value.");
         $toValidate = $this->filter_pattern($toValidate);
         $min = $this->directives->min;
+        $max = $this->directives->max;
+                
         if($min instanceof Min && $toValidate < $min->getValue()) {
             $this->filterResult->addIssue($this, sprintf("Value must be greater than or equal to %d",$min->getValue()));
         }
-        $max = $this->directives->max;
         if($max instanceof Max && $toValidate > $max->getValue()) {
             $this->filterResult->addIssue($this, sprintf("Value must be less than or equal to %d", $max->getValue()));
         }
