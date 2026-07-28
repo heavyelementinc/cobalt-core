@@ -5,11 +5,11 @@ namespace Cobalt\DataModel\Tests;
 use Cobalt\DataModel\Directives\Filters\Required;
 use Cobalt\DataModel\Directives\Filters\Valid;
 use Cobalt\DataModel\Types\BooleanType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class BooleanDebugModel extends DocumentType {
+class BooleanDebugModel extends DataModel {
     #[Valid([true])]
     readonly BooleanType $truthy;
 

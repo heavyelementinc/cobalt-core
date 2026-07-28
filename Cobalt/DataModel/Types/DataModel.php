@@ -25,11 +25,10 @@ use ReflectionProperty;
  * DataModel is the final boss of Cobalt's modeling system.
  * 
  * 
- * 
  * @package Cobalt\DataModel
  */
 
-abstract class DocumentType extends DictionaryType implements Persistable {
+abstract class DataModel extends DictionaryType implements Persistable {
     use Accessible;
 
     // #[PrivateValue()]
@@ -56,7 +55,7 @@ abstract class DocumentType extends DictionaryType implements Persistable {
     }
 
     #[Override]
-    public function bsonUnserialize(array $data): void {
+    public function bsonUnserialize(array|object $data): void {
         $this->__id = $data['_id'];
         unset($data["__id"]);
         $this->setValue($data);

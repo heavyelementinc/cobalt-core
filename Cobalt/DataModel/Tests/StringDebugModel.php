@@ -3,7 +3,7 @@ namespace Cobalt\DataModel\Tests;
 
 use Cobalt\DataModel\Directives\Base\DirectiveCommon;
 use Cobalt\DataModel\Directives\Filters\Clearable;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Directives\DefaultValue;
 use Cobalt\DataModel\Directives\Filters\Max;
 use Cobalt\DataModel\Directives\Filters\Min;
@@ -16,7 +16,7 @@ use Cobalt\DataModel\Directives\StringDirective;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class StringDebugModel extends DocumentType {
+class StringDebugModel extends DataModel {
     #[Clearable()]
     readonly StringType $clearable;
 

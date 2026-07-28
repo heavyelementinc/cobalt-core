@@ -2,7 +2,7 @@
 
 namespace Cobalt\DataModel\Tests;
 
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Directives\DefaultValue;
 use Cobalt\DataModel\Directives\ReferenceModel;
 use Cobalt\DataModel\Directives\Filters\Max;
@@ -16,7 +16,7 @@ use Cobalt\DataModel\Types\NumberType;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class PrimaryDebugModel extends DocumentType {
+class PrimaryDebugModel extends DataModel {
     #[DefaultValue(['one' => 'One'])]
     readonly ArrayType $array;
 

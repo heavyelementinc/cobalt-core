@@ -15,7 +15,7 @@ use Cobalt\DataModel\Models\ImageMetaModel;
 use Cobalt\DataModel\Models\ImageModel;
 use Cobalt\DataModel\Types\DateType;
 use Cobalt\DataModel\Types\DictionaryType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\IdType;
 use DateTime;
 use Exception;

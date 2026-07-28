@@ -2,11 +2,11 @@
 
 namespace Cobalt\DataModel\Tests;
 
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class ModelDebugNested extends DocumentType {
+class ModelDebugNested extends DataModel {
     readonly BooleanDebugModel $bools;
     readonly NumberDebugModel $numbers;
     readonly StringDebugModel $strings;

@@ -23,7 +23,7 @@ class ImageType extends ForeignDocumentType {
     }
 
     /**
-     * @return ?DocumentType 
+     * @return ?DataModel 
      * @throws Exception 
      */
     // public function getValue(): mixed {

@@ -3,7 +3,7 @@
 namespace Cobalt\Database\Classes;
 
 use Cobalt\Database\Interfaces\DbCollection;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\Model\Model;
 use Iterator;
 use MongoDB\Driver\Cursor;

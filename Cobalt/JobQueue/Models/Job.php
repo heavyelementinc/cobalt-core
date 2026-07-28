@@ -6,7 +6,7 @@ use Cobalt\Database\Traits\Accessible;
 use Cobalt\DataModel\Types\DictionaryType;
 use Cobalt\DataModel\Types\Generic;
 use Cobalt\DataModel\Types\IdType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\NumberType;
 use Cobalt\DataModel\Types\StringType;
 use Cobalt\JobQueue\Enums\JobState;
@@ -68,7 +68,7 @@ class Job implements JobInterface, Persistable {
      * @var array<string,BatchItem[]>
      */
     public array $batchItems = [];
-    public DocumentType $model;
+    public DataModel $model;
     public JobState $state = JobState::CREATED;
     public array $permissions = [];
     public int $progress = 1;

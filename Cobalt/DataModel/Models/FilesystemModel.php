@@ -3,12 +3,12 @@
 namespace Cobalt\DataModel\Models;
 
 use Cobalt\DataModel\Types\DateType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\NumberType;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class FilesystemModel extends DocumentType {
+class FilesystemModel extends DataModel {
     readonly NumberType $chunkSize;
     readonly StringType $filename;
     readonly NumberType $length;

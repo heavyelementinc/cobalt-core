@@ -6,12 +6,12 @@ use Cobalt\DataModel\Directives\Filters\Arrays\Each;
 use Cobalt\DataModel\Directives\Filters\Max;
 use Cobalt\DataModel\Directives\Filters\Min;
 use Cobalt\DataModel\Types\ArrayType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\NumberType;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class ArrayDebugModel extends DocumentType {
+class ArrayDebugModel extends DataModel {
 
     #[Min(2)]
     readonly ArrayType $min;

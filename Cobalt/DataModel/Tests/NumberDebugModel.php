@@ -5,12 +5,12 @@ namespace Cobalt\DataModel\Tests;
 use Cobalt\DataModel\Directives\Filters\Max;
 use Cobalt\DataModel\Directives\Filters\Min;
 use Cobalt\DataModel\Directives\Filters\Pattern;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\NumberType;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class NumberDebugModel extends DocumentType {
+class NumberDebugModel extends DataModel {
 
     #[Min(1)]
     readonly NumberType $min;

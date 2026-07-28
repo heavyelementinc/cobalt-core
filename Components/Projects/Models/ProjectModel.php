@@ -18,7 +18,7 @@ use Cobalt\DataModel\Types\BooleanType;
 use Cobalt\DataModel\Types\ColorType;
 use cobalt\DataModel\Types\Composite\UrlType;
 use Cobalt\DataModel\Types\DateType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\ForeignDocumentType;
 use Cobalt\DataModel\Types\GeoPointType;
 use Cobalt\DataModel\Types\ImageType;
@@ -27,7 +27,7 @@ use Cobalt\Model\Types\ImageArrayType;
 use Components\ServiceAreas\Models\Town;
 use Override;
 
-class ProjectModel extends DocumentType {
+class ProjectModel extends DataModel {
     const NAP_REMINDER = <<<HTML
     <li>Make sure that if you use your company name that it's spelled and 
         formatted exactly the same way you normally do. Don't abbreviate or 

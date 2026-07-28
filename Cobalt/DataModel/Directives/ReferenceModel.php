@@ -4,12 +4,12 @@ namespace Cobalt\DataModel\Directives;
 
 use Attribute;
 use Cobalt\DataModel\Directives\Base\DirectiveCommon;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Override;
 
 #[Attribute()]
 class ReferenceModel extends DirectiveCommon {
-    protected DocumentType $value;
+    protected DataModel $value;
     protected string $name = 'reference_model';
     #[Override]
     public function setValue(mixed $value): void {
@@ -18,7 +18,7 @@ class ReferenceModel extends DirectiveCommon {
 
     /**
      * Returns the document
-     * @return DocumentType
+     * @return DataModel
      */
     #[Override]
     public function getValue(): mixed {

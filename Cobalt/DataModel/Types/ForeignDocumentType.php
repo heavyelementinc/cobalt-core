@@ -5,7 +5,7 @@ namespace Cobalt\DataModel\Types;
 use Cobalt\DataModel\Directives\ReferenceModel;
 use Cobalt\DataModel\Filters\FilterIssue;
 use Cobalt\DataModel\Traits\Joinable;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Exception;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
@@ -36,7 +36,7 @@ class ForeignDocumentType extends Generic {
         ];
     }
 
-    public function getExternalModel():DocumentType {
+    public function getExternalModel():DataModel {
         if(!isset($this->directives->external_model)) {
             throw new Exception("Required directive `external_model` is not defined on ObjectIdType: `".($this->name ?? "%field_name%")."`");
         }
@@ -74,7 +74,7 @@ class ForeignDocumentType extends Generic {
     }
 
     /**
-     * @return ?DocumentType 
+     * @return ?DataModel 
      * @throws Exception 
      */
     #[Override]

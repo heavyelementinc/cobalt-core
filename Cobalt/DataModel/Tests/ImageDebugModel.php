@@ -4,11 +4,11 @@ namespace Cobalt\DataModel\Tests;
 
 use Cobalt\DataModel\Directives\Images\Thumbnail;
 use Cobalt\DataModel\Types\ImageType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\StringType;
 use Override;
 
-class ImageDebugModel extends DocumentType {
+class ImageDebugModel extends DataModel {
     readonly StringType $string;
     #[Thumbnail()]
     readonly ImageType $image;

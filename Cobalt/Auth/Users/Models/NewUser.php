@@ -18,7 +18,7 @@ use Cobalt\DataModel\Types\DateType;
 use Cobalt\DataModel\Types\DictionaryType;
 use Cobalt\DataModel\Types\EnumType;
 use Cobalt\DataModel\Types\ImageType;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\DataModel\Types\PasswordHashType;
 use Cobalt\DataModel\Types\StringType;
 use Cobalt\Database\Classes\CobaltCursor;
@@ -49,7 +49,7 @@ use Validation\Exceptions\ValidationIssue;
  * @property BinaryType $state
  * @property DateType $since
  * @property ArrayType $tokens
- * @property DocumentType $prefs
+ * @property DataModel $prefs
  * @property ArrayType $groups
  * @property ArrayOfPermissionsType $permissions
  * @property BooleanType $is_root
@@ -62,18 +62,18 @@ use Validation\Exceptions\ValidationIssue;
  * @property StringType $twitter_profile
  * @property StringType $instagram_profile
  * @property StringType $youtube_profile
- * @property DocumentType $integrations
+ * @property DataModel $integrations
  * @property ArrayType $login_tokens
  * @property BooleanType $tfa->totp->enabled
  * @property StringType $tfa->totp->secret
  * @property ArrayType $tfa->totp->backups
- * @property DocumentType $tfa->totp
- * @property DocumentType $tfa
- * @property DocumentType $notifications
+ * @property DataModel $tfa->totp
+ * @property DataModel $tfa
+ * @property DataModel $notifications
  * @property StringType $session_data
  * @package Cobalt\Auth\Users\Models
  */
-class User extends DocumentType implements Migration {
+class User extends DataModel implements Migration {
     use Permissions;
 
     readonly StringType $uname;
@@ -106,10 +106,10 @@ class User extends DocumentType implements Migration {
     readonly StringType $twitter_profile;
     readonly StringType $instagram_profile;
     readonly StringType $youtube_profile;
-    readonly DocumentType $integrations;
+    readonly DataModel $integrations;
     readonly ArrayType $login_tokens;
-    readonly DocumentType $tfa;
-    readonly DocumentType $notifications;
+    readonly DataModel $tfa;
+    readonly DataModel $notifications;
     readonly StringType $session_data;
 
     var $additional = null;
@@ -236,7 +236,7 @@ class User extends DocumentType implements Migration {
                 new ArrayType
             ],
             'prefs' => [
-                new DocumentType
+                new DataModel
             ],
             'groups' => [
                 new ArrayType
@@ -285,16 +285,16 @@ class User extends DocumentType implements Migration {
                 new StringType
             ],
             'integrations' => [
-                new DocumentType,
+                new DataModel,
             ],
             'login_tokens' => [
                 new ArrayType,
             ],
             'tfa' => [
-                new DocumentType,
+                new DataModel,
                 'schema' => [
                     'totp' => [
-                        new DocumentType,
+                        new DataModel,
                         'schema' => [
                             'enabled' => new BooleanType,
                             'secret' => new StringType,
@@ -304,9 +304,9 @@ class User extends DocumentType implements Migration {
                 ]
             ],
             'notifications' => [
-                new DocumentType,
+                new DataModel,
                 'schema' => [
-                    'push' => new DocumentType
+                    'push' => new DataModel
                 ]
             ],
             'session_data' => new StringType

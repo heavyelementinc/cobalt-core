@@ -3,7 +3,7 @@ namespace Cobalt\DataModel\Filters;
 
 use Cobalt\DataModel\Types\DictionaryType;
 use Cobalt\DataModel\Types\Generic;
-use Cobalt\DataModel\Types\DocumentType;
+use Cobalt\DataModel\Types\DataModel;
 use Cobalt\JobQueue\Interfaces\JobInterface;
 use Cobalt\JobQueue\Models\Job;
 use stdClass;
