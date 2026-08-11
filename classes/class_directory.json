@@ -26,8 +26,6 @@
         }
     },
     "namespaces": {
-        "Exceptions\\HTTP": {
-            "path": "__ENV_CLASSES__/Exceptions/HTTP/"
-        }
+        
     }
 }

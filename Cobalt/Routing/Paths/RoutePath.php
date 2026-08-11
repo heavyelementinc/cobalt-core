@@ -2,55 +2,58 @@
 
 namespace Cobalt\Routing\Paths;
 
+use Cobalt\Routing\Route;
+use Exception;
 use Override;
 use Stringable;
 
 class RoutePath implements Stringable {
-    protected ?string $context_root = null;
-    protected ?string $original_path = null;
-    protected ?string $real_path = null;
-    protected ?string $real_regex = null;
-    protected array $arguments = [];
+    public private(set) ?string $context;
+    public private(set) ?string $context_root = null;
+    public private(set) ?string $original_path = null;
+    public private(set) ?string $real_path = null;
+    public private(set) ?string $real_regex = null;
+    public private(set) array $arguments = [];
+
+    function __construct(public Route $route) {
+        
+    }
 
     #[Override]
     public function __toString(): string {
-        
+        return $this->real_path;
     }
 
     function matches(string $uri):bool {
         $matches = [];
-        $bool = preg_match($this->real_regex, $uri, $uri_var, $matches);
+        $bool = preg_match($this->real_regex, $uri, $this->route->uri_vars);
         $this->arguments = $matches;
-        return $bool >= 0;
+        return $bool === 1;
     }
 
     const VAR_REGEX = "%\{([^/?]+)\}%";
 
     public function setPath(string $path, ?string $context = null):self {
         $this->original_path = $path;
-        if(!$context) $context = $GLOBALS['ROUTE_TABLE_ADDRESS'];
-        if(!$context) throw new Exception("Route for ".htmlspecialchars($path)." is being instanced without explicit prefix outside of declarative window.");
-        
+        return $this;
+    }
+
+    public function setContext(string $context, array $details):self {
         $this->context = $context;
-        $this->context_prefix = __APP_SETTINGS__['context_prefixes'][$context]['prefix'];
-
-        $this->real_path = substr(__APP_SETTINGS__['context_prefixes'][$this->context]['prefix'] ?? "", 0, -1);
+        $this->real_path = substr($details['prefix'] ?? "", 0, -1) . $this->original_path;
         $this->real_regex = self::convert_path_to_regex_pattern($this->real_path);
-
         return $this;
     }
 
     public function getPath() {
-        if(isset($this->path)) return $this->path;
+        // if(isset($this->path)) return $this->path;
         $path = [
             'original_path' => $this->original_path,
-            'real_path'     => $this->context_prefix . $this->original_path,
+            'real_path'     => $this->real_path,
             'real_regex'    => $this->real_regex,
             'var_names'     => [],
-
         ];
         preg_match_all(static::VAR_REGEX, $path['original_path'], $path['var_names']);
-        $this->path = $path;
         return $path;
     }
     

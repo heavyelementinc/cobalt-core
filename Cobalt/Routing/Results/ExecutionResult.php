@@ -8,13 +8,14 @@ use Stringable;
 
 class ExecutionResult implements InterfacesExecutionResult {
 
-    public private(set) ?string $bodyTemplate = null;
+    public private(set) ?string $bodyTemplate = "templates/parts/body.php";
     /**
      * @var array<string,string>
      */
     public private(set) array $replacementValues = [];
     
     public function getBodyView(array $vars = []): string {
+        // $view = view($this->bodyTemplate, $vars);
         $view = view($this->bodyTemplate, $vars);
         return str_replace(
             array_keys($this->replacementValues), 

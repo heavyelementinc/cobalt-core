@@ -43,16 +43,16 @@ function maybe_with($template, $vars = []) {
  * @return string Processed template
  */
 function view(string $template, array $vars = [], bool $absolute_path = false):string {
-    if(__APP_SETTINGS__['Render_use_v2_engine']) {
+    // if(__APP_SETTINGS__['Render_use_v2_engine']) {
     $render = new Render();
-        $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
-        $render->getBodyFromTemplate($template);
-    } else {
-        $render = new \Render\Render();
-        $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
-        $render->set_vars($vars);
-        $render->from_template($template, $absolute_path);
-    }
+    $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
+    $render->getBodyFromTemplate($template);
+    // } else {
+        // $render = new \Render\Render();
+        // $vars = array_merge($GLOBALS['WEB_PROCESSOR_VARS'] ?? [], $vars);
+        // $render->set_vars($vars);
+        // $render->from_template($template, $absolute_path);
+    // }
     return $render->execute();
 }
 

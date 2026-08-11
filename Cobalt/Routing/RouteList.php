@@ -3,6 +3,7 @@
 namespace Cobalt\Routing;
 
 use ArrayAccess;
+use Cobalt\Routing\Enums\HttpMethods;
 use Iterator;
 
 /**
@@ -16,19 +17,29 @@ class RouteList implements ArrayAccess, Iterator {
      * @var Route[]
      */
     private array $canonicalList = [];
+    public private(set) array $typedList = [
+        'get'    => [],
+        'post'   => [],
+        'put'    => [],
+        'delete' => [],
+    ];
 
-    public function addRoute( $route) {
-
+    function __construct() {
+        
     }
 
-    public function setCanonicalList(array $canonicalList) {
-
+    public function addRoute(Route $route):Route {
+        $index = count($this->typedList[$route->method->value]);
+        $this->typedList[$route->method->value][] = $route;
+        $route->setNaturalOrder($index);
+        $this->canonicalList[] = $route;
+        return $route;
     }
 
-    // public function getListByType(string $type):RouteList {
-    //     $list = new RouteList();
-    //     return $list;
-    // }
+    public function getListByType(HttpMethods $type):array {
+        if($type === HttpMethods::HEAD) return $this->canonicalList;
+        return $this->typedList[$type->value];
+    }
 
     public function current(): mixed {
         return $this->canonicalList[$this->index];

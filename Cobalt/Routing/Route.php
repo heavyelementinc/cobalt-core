@@ -2,7 +2,7 @@
 
 namespace Cobalt\Routing;
 
-use Cobalt\Routing\Interfaces\Controller;
+use Cobalt\Routing\Interfaces\ControllerInterface;
 use Closure;
 use Cobalt\Routing\Enums\HttpMethods;
 use Cobalt\Routing\Interfaces\Routeable;
@@ -21,36 +21,38 @@ class Route implements Routeable {
      */
     readonly RoutePath $path;
     
-    protected ?Controller $controller = null;
+    public private(set) ?string $controller = null;
 
-    protected array $var_names = [];
-    protected array $uri_var_names = [];
-    protected array $uri_var_types = [];
+    /** @var array<int,string> */
+    public array $uri_vars = [];
+    public array $var_names = [];
+    public private(set) array $uri_var_names = [];
+    public private(set) array $uri_var_types = [];
     
-    protected ?string $context = null;
-    protected ?string $context_prefix = null;
+    public private(set) ?string $context = null;
+    public private(set) ?string $context_prefix = null;
 
-    protected ?HttpMethods $method = null;
+    public private(set) ?HttpMethods $method = null;
     
-    protected string|Closure|null $backend_handler = null;
-    protected ?string $frontend_handler = null;
-    protected array $frontend_handler_data = [];
+    public private(set) string|Closure|null $backend_handler = null;
+    public private(set) ?string $frontend_handler = null;
+    public private(set) array $frontend_handler_data = [];
     
-    protected Closure|null $headers = null;
-    protected Closure|null $sitemap = null;
-    protected array $permission = [];
+    public private(set) Closure|null $headers = null;
+    public private(set) Closure|null $sitemap = null;
+    public private(set) array $permission = [];
 
-    protected ?string $navigation = null;
+    public private(set) ?string $navigation = null;
     
-    protected ?string $panel_name = null;
-    protected ?string $route_file = null;
-    protected bool $csrf_required = false;
-    protected ?string $cache_control = null;
+    public private(set) ?string $panel_name = null;
+    public private(set) ?string $route_file = null;
+    public private(set) bool $csrf_required = false;
+    public private(set) ?string $cache_control = null;
 
-    protected ?string $require_session = null;
-    protected ?string $nat_order = null;
+    public private(set) ?string $require_session = null;
+    public private(set) ?string $nat_order = null;
 
-    function __construct(?Controller $controller, HttpMethods $httpMethod, string $path, string|Closure $backend_handler){
+    function __construct(null|string|ControllerInterface $controller, HttpMethods $httpMethod, string $path, string|Closure $backend_handler){
         $file = null;
         if (app("enable_debug_routes")) {
             $backtrace = debug_backtrace();
@@ -58,47 +60,13 @@ class Route implements Routeable {
             $file = str_replace([__APP_ROOT__, __ENV_ROOT__], ["__APP_ROOT__", "__ENV_ROOT__"], $file);
         }
         $this->route_file = $file;
-        $this->path = new RoutePath();
-        $this->path->setPath($path);
+        $this->path = new RoutePath($this);
+        $this->setPath($path);
         $this->setController($controller);
         $this->setHttpMethod($httpMethod);
         $this->setBackendHandler($backend_handler);
-        
     }
 
-    public static function rt(Controller $controller, HttpMethods $httpMethod, string $path, string|Closure $handler): Routeable {
-        $route = new static($controller, $httpMethod, $path, $handler);
-        /** @var Router $ROUTER */
-        global $ROUTER;
-        $ROUTER->routes->addRoute($route);
-        return $route;
-    }
-
-    #[Override]
-    public static function get(Controller $controller, string $path, string|Closure $handler): Routeable {
-        return static::rt($controller, HttpMethods::GET, $path, $handler);
-    }
-
-    #[Override]
-    public static function post(Controller $controller, string $path, string|Closure $handler): Routeable {
-        return static::rt($controller, HttpMethods::POST, $path, $handler);
-    }
-
-    #[Override]
-    public static function delete(Controller $controller, string $path, string|Closure $handler): Routeable {
-        return static::rt($controller, HttpMethods::DELETE, $path, $handler);
-    }
-
-    #[Override]
-    public static function put(Controller $controller, string $path, string|Closure $handler): Routeable {
-        return static::rt($controller, HttpMethods::PUT, $path, $handler);
-    }
-
-    #[Override]
-    public static function head(Controller $controller, string $path, string|Closure $handler): Routeable {
-        return static::rt($controller, HttpMethods::HEAD, $path, $handler);
-    }
-    
 
     public function setOptions(array $options) {
         // $this->options = $options;
@@ -129,36 +97,34 @@ class Route implements Routeable {
         return $route;
     }
     
-    /* ======= Route Getters/Setters ======= */
-
-    
-
-
-    public function setController(string|Controller $controller):self {
-        if(is_string($controller)) $controller = new $controller();
-        $this->controller = $controller;
-        return $this;
+    public function setPath(string $path) {
+        $this->path->setPath($path);
     }
-    public function getController():Controller {
-        return $this->controller;
+
+    public function setContext(string $context, array $details):void {
+        $this->path->setContext($context, $details);
+    }
+
+    /* ======= Route Getters/Setters ======= */
+    public function setController(string|ControllerInterface $controller):self {
+        $this->controller = $controller;
+        
+        return $this;
     }
 
     public function setHttpMethod(HttpMethods $method):self {
         $this->method = $method;
         return $this;
     }
-    public function getHttpMethod():HttpMethods {
-        return $this->method;
-    }
-
 
     public function setBackendHandler(string|Closure $backend_handler):self {
         $this->backend_handler = $backend_handler;
         return $this;
     }
-    public function getBanckendHandler():string|Closure {
-        return $this->backend_handler;
-    }
 
+    public function setNaturalOrder(int $order):self { 
+        $this->nat_order = $order;
+        return $this;
+    }
 
 }

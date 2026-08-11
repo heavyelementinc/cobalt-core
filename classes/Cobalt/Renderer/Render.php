@@ -4,7 +4,6 @@ namespace Cobalt\Renderer;
 
 use Cobalt\Renderer\Exceptions\TemplateException;
 use Exceptions\HTTP\NotFound;
-use SebastianBergmann\Type\VoidType;
 
 class Render {
     protected string $body = "";

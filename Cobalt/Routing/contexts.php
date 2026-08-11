@@ -1,7 +1,7 @@
 <?php
 
-use Cobalt\Kernel\Web;
 use Cobalt\Routing\Kernels\Enums\Modes;
+use Cobalt\Routing\Kernels\WebKernel;
 
 /**
  * @return array<string,array{
@@ -18,6 +18,14 @@ use Cobalt\Routing\Kernels\Enums\Modes;
  * }>
  */
 return [
+    // "init" => [
+    //     "processor" => WebKernel::class,
+    //     "mode" => Modes::TEXT_HTML,
+    //     "session_refresh" => false,
+    //     "api_access" => false,
+    //     "prefix" => "/",
+    //     "active" => file_exists(__APP_ROOT__ . "/ignored/init.set")
+    // ],
     "admin" => [
         "processor" => "Handlers\\AdminHandler",
         "prefix" => "/admin/",
@@ -55,13 +63,6 @@ return [
             "html_class" => "debug-panel"
         ]
     ],
-    "init" => [
-        "processor" => "Handlers\\WebHandler",
-        "mode" => Modes::APPLICATION_JSON,
-        "session_refresh" => false,
-        "api_access" => false,
-        "prefix" => null
-    ],
     "shared" => [
         "processor" => "Handlers\\SharedHandler",
         "mode" => Modes::APPLICATION_JSON,
@@ -98,7 +99,7 @@ return [
         "prefix" => "/webhooks/"
     ],
     "web" => [
-        "processor" => Web::class,
+        "kernel" => WebKernel::class,
         "mode" => Modes::TEXT_HTML,
         "session_refresh" => true,
         "api_access" => true,

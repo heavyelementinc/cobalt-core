@@ -14,6 +14,7 @@
 
 use Cobalt\Auth\Users\Authentication;
 use Cobalt\Customization\CustomizationManager;
+use Cobalt\Routing\Route;
 use Cobalt\Routing\Router;
 use Exceptions\HTTP\Unauthorized;
 
@@ -46,7 +47,7 @@ try {
 }
 
 $kernel = $ROUTER->getKernel();
-if($kernel->hasPermission()) {
+if($kernel->hasPermission() === false) {
     throw new Unauthorized("Failed authorization.");
 }
 
