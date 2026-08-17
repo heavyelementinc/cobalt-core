@@ -100,6 +100,34 @@ class Users extends ModelController {
         header("X-Refresh: @now");
     }
 
+    public function magic_link(string $ident, string $pword) {
+        if(!$pword) {
+            redirect("/login");
+            exit;
+        }
+        $sessions = new Session();
+        $discoveredSession = $sessions->findOne(['magic_links.ident' => $ident]);
+        if($discoveredSession == null) {
+            redirect("/login");
+            exit;
+        }
+        $verified = false;
+        foreach($discoveredSession->magic_links as $index => $link) {
+            if($link->ident->value !== $ident) continue;
+            if(password_verify($pword, $link->pword->value)) {
+                $verified = true;
+                break;
+            }
+        }
+        if(!$verified) {
+            redirect("/login");
+            exit;
+        }
+        
+        redirect("/");
+        exit;
+    }
+
     public function login_form() {
         if(isset($_GET['reset'])) $_SESSION[self::LOGIN_STAGE_KEY] = self::LOGIN_STAGE_DISCOVER_USER;
 
@@ -110,8 +138,7 @@ class Users extends ModelController {
             redirect("/login");
             return;
         }
-        $login_stage = (isset($_GET[self::LOGIN_STAGE_KEY])) ? (int)$_GET[self::LOGIN_STAGE_KEY] : $_SESSION[self::LOGIN_STAGE_KEY];
-        // Let's ensure we're not blindly trusting the user-supplied login stage
+        $login_stage = $_SESSION[self::LOGIN_STAGE_KEY];
         if(!isset($_SESSION[self::LOGIN_USER_LOGGED_IN_KEY])) $_SESSION[self::LOGIN_STAGE_KEY] = self::LOGIN_STAGE_DISCOVER_USER;
         set('title', 'Login');
         // return view("Cobalt/Auth/Users/templates/login/login-form-basic.php");
@@ -171,7 +198,7 @@ class Users extends ModelController {
             throw new Unauthorized($generic_message);
         }
         unset(
-            $_SESSION[self::LOGIN_USER_LOGGED_IN_KEY],
+            // $_SESSION[self::LOGIN_USER_LOGGED_IN_KEY],
             $_SESSION[self::LOGIN_USER_ID_KEY],
             $_SESSION[self::LOGIN_STAGE_KEY],
         );
@@ -259,8 +286,11 @@ class Users extends ModelController {
             return $this->login_form();
         }
         // if($this->user->getUserTFAModes() === 0) {
-        $_SESSION[self::LOGIN_STAGE_KEY] = self::LOGIN_STAGE_AUTH_TWO_FACTOR;
-        return $this->login_form();
+        // $_SESSION[self::LOGIN_STAGE_KEY] = self::LOGIN_STAGE_AUTH_TWO_FACTOR;
+        // return $this->login_form();
+        $this->login_complete(true);
+        unset($_SESSION[self::LOGIN_STAGE_KEY]);
+        redirect($_SESSION[SESSION_RESUME_PARAM] ?? "/");
         // }
         // $this->login_complete();
     }

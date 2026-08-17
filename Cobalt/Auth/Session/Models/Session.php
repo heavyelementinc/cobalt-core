@@ -11,6 +11,7 @@ use Cobalt\Model\Types\DateType;
 use Cobalt\Model\Types\ModelType;
 use Cobalt\Model\Types\NumberType;
 use Cobalt\Model\Types\StringType;
+use Cobalt\Model\Types\ArrayType;
 use DateTime;
 use Exception;
 use Exceptions\HTTP\NotFound;
@@ -24,6 +25,7 @@ use MongoDB\BSON\UTCDateTime;
  * @property BooleanType $persist
  * @property ArrayOfUsersType $represents
  * @property NumberType $current_index
+ * @property ArrayType $magic_links
  * @package Cobalt\Auth\Session\Models
  */
 class Session extends Model {
@@ -43,7 +45,8 @@ class Session extends Model {
             'persist'       => new BooleanType,
             // 'refresh'       => new DateType,
             'represents'    => new ArrayOfUsersType,
-            'current_index' => new NumberType
+            'current_index' => new NumberType,
+            'magic_links'   => new ArrayType,
         ];
     }
 
@@ -114,13 +117,26 @@ class Session extends Model {
             'persist' => true,
             // 'refresh' => 
             'represents' => [$user->_id],
-            'current_index' => 0
+            'current_index' => 0,
+            'magic_links' => []
         ];
 
         $session = new Session($raw);
         $filtered = $session->__filter($raw);
         $session->insertOne($filtered);
         return $session;
+    }
+
+    static function provisionMagicLoginLink(User $user):string {
+        $session = static::newSession($user);
+        $ident = random_string(10);
+        $link = random_string(12);
+        $session->updateOne(['_id' => $session->_id], ['$push' => ['magic_links' => [
+            'ident' => $ident,
+            'pword' => password_hash($link, null),
+            'date' => new UTCDateTime()
+        ]]]);
+        return "$ident/$link";
     }
 
     static function getBrowserDetails() {

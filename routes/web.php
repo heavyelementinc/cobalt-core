@@ -62,7 +62,8 @@ if(__APP_SETTINGS__['CobaltEvents_enable_public_index']) {
 if (app("Auth_logins_enabled")) {
     // Redirect anyone coming to the "/admin" page (without a trailing slash)
     Route::get("/admin", "CoreController@admin_redirect");
-    Users::get((new Options('/login', 'login_form')));
+    Users::get((new Options('/login/{id}/{nonce}', 'login_link')));
+    Users::get((new Options('/login/', 'login_form')));
 }
 
 if (__APP_SETTINGS__['Contact_form_public_routes_enabled'] && __APP_SETTINGS__['API_contact_form_enabled']) {
