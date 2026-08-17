@@ -144,7 +144,7 @@ class Users extends ModelController {
         // return view("Cobalt/Auth/Users/templates/login/login-form-basic.php");
         switch($login_stage) {
             case self::LOGIN_STAGE_AUTH_TWO_FACTOR:
-                return $this->login_stage_web_two_factor_auth();
+                return $this->login_complete();
             case self::LOGIN_STAGE_PASSWORD_AUTH:
                 return $this->login_stage_web_password_auth();
             case self::LOGIN_STAGE_DISCOVER_USER:
