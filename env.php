@@ -68,7 +68,7 @@ define("COBALT_LOG_ERROR", 3);
 define("COBALT_LOG_EXCEPTION", 4);
 
 function cobalt_log($source, $string, $level = COBALT_LOG_MESSAGE) {
-    if($level < config()['log_level']) return;
+    if($level < config()['log_level'] ?? COBALT_LOG_ERROR) return;
     $levels = ['MESSAGE','NOTICE','WARNING','ERROR','EXCEPTION'];
     $date = date("c");
     $log_line = "[$date] [".$levels[$level]."] $source ". str_replace(["\r\n", "\r", "\n", PHP_EOL],"",$string).PHP_EOL;

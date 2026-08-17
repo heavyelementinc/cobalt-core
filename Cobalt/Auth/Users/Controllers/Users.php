@@ -114,6 +114,7 @@ class Users extends ModelController {
         // Let's ensure we're not blindly trusting the user-supplied login stage
         if(!isset($_SESSION[self::LOGIN_USER_LOGGED_IN_KEY])) $_SESSION[self::LOGIN_STAGE_KEY] = self::LOGIN_STAGE_DISCOVER_USER;
         set('title', 'Login');
+        // return view("Cobalt/Auth/Users/templates/login/login-form-basic.php");
         switch($login_stage) {
             case self::LOGIN_STAGE_AUTH_TWO_FACTOR:
                 return $this->login_stage_web_two_factor_auth();
@@ -159,6 +160,38 @@ class Users extends ModelController {
                     'userTFAModes' => $userTFAModes
                 ]);
         }
+    }
+
+    public function basic_login() {
+        $generic_message = "Login failed";
+        if(!$_POST['uname']) {
+            throw new Unauthorized($generic_message);
+        }
+        if(!$_POST['pword']) {
+            throw new Unauthorized($generic_message);
+        }
+        unset(
+            $_SESSION[self::LOGIN_USER_LOGGED_IN_KEY],
+            $_SESSION[self::LOGIN_USER_ID_KEY],
+            $_SESSION[self::LOGIN_STAGE_KEY],
+        );
+
+        $user = $this->model->findOne([
+            '$or' => [
+                ['uname' => $_POST['uname']],
+                ['email' => $_POST['uname']]
+            ]
+        ]);
+        if(!$user) {
+            throw new Unauthorized($generic_message);
+        }
+        if(!password_verify($_POST['pword'], $user->pword->value)) {
+            throw new Unauthorized($generic_message);
+        }
+        global $auth;
+        $auth->logInUser($this->user);
+        redirect($_GET['resume'] ?? "/admin/");
+        exit;
     }
 
     public function api_login_handler() {

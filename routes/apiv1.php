@@ -21,7 +21,8 @@ if(app("UGC_enable_user_generated_content")) {
 /** API routes for authorization */
 if (app('Auth_logins_enabled')) {
     Users::apiv1();
-    Users::post((new Options('/login', 'api_login_handler')));
+    Users::post((new Options('/login/basic', 'basic_login')));
+    Users::post((new Options('/login/', 'api_login_handler')));
     Users::get((new Options("/logout", "api_logout")));
     Users::get((new Options("/session/authenticated/", "api_list_authenticated_users")));
     Users::put((new Options("/session/switch/{index}", "api_switch_to_authenticated_user")));
