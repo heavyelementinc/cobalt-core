@@ -56,6 +56,12 @@ class ForeignDocumentType extends Generic {
         return $this->objectId ?? null;
     }
 
+    // TODO: Implement this
+    #[Override]
+    public function toClientJson(?int $mode = null)  {
+        return parent::toClientJson($mode);
+    }
+
     
 
     /**

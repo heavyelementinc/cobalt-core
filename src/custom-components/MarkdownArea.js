@@ -31,6 +31,9 @@ export default class MarkdownArea extends ICustomInput {
         element.addEventListener("change", event => {
             event.bubbles = true;
         });
+        element.addEventListener("input", event => {
+            event.bubbles = true;
+        })
         let renderConfig = {}
         if(this.hasAttribute("syntax-highlighting") && this.getAttribute("true")) {
             // renderConfig.codeSyntaxHighlighting = true;

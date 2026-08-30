@@ -26,19 +26,18 @@ use Cobalt\DataModel\Directives\Media\MinResolution;
 use Cobalt\DataModel\Directives\PrivateValue;
 use Cobalt\DataModel\Directives\ReferenceModel;
 use Cobalt\DataModel\Directives\StringDirective;
+use Cobalt\DataModel\Interfaces\InheritableDirective;
 use Cobalt\DataModel\Types\Generic;
 use Iterator;
 use Override;
+use Reflection;
+use ReflectionClass;
 use TypeError;
 
 /**
  * @implements Iterator<string|int, DirectiveCommon>
  * @implements ArrayAccess<string|int, DirectiveCommon>
  * @package Cobalt\DataModel\Classes
- *
- *
- *
- *
  *
  * @property-read ?Accept $accept
  * @property-read ?AllowOverloading $allow_overloading
@@ -68,6 +67,7 @@ class DirectiveList implements Iterator, ArrayAccess {
      * @var array{allow_overloading:AllowOverloading,default:DefaultValue,external_model:ReferenceModel,max:Max,min:Min,nullable:Nullable,pattern:Pattern,private_value:PrivateValue,required:Required,valid:Valid}
      */
     private array $list = [];
+    private array $misses = [];
     function __construct(protected Generic $generic) {
 
     }
@@ -81,8 +81,23 @@ class DirectiveList implements Iterator, ArrayAccess {
         $this->{$directive->getName()} = $directive;
     }
 
-    function __get($name):?DirectiveCommon {
-        return $this->list[$name] ?? null;
+    public function __get($name): ?DirectiveCommon {
+        // If we do not have an inheritable directive, just return the value
+        if (key_exists($name, $this->list)) return $this->list[$name];
+        
+        // Check if we've traversed the tree once already and came up empty-handed
+        if (key_exists($name, $this->misses)) return null;
+
+        // If not found natively, recursively traverse up the tree
+        $inheritedDirective = $this->__getInheritedValue($name);
+        
+        if ($inheritedDirective !== null) {
+            // Cache the result within this classList so we don't have to traverse the tree again next time
+            $this->list[$name] = $inheritedDirective;
+            return $inheritedDirective;
+        }
+
+        return null;
     }
 
     function __set($name, $value) {
@@ -90,10 +105,77 @@ class DirectiveList implements Iterator, ArrayAccess {
         $this->list[$name] = $value;
     }
     function __unset($name) {
-        unset($this->list[$name]);
+        if(key_exists($name, $this->list)) unset($this->list[$name]);
+        $this->generic->model->directives->__unset($name);
     }
     function __isset($name) {
-        return key_exists($name, $this->list);
+        if(key_exists($name, $this->list)) {
+            return true;
+        }
+        return !!$this->generic?->model?->directives->__get($name);
+    }
+
+    /**
+     * Recursively traverses up the model tree to find and extract inherited directive values.
+     * 
+     * @param string $directiveName The name of the directive (e.g., 'default')
+     * @param array $path The accumulated property path from the originating child
+     * @return null|DirectiveCommon
+     */
+    protected function __getInheritedValue(string $directiveName, array $path = []): ?DirectiveCommon {
+        $parent = $this->generic->model;
+
+        // If $parent is null, we know we've reached the top of the tree with no matches
+        if ($parent === null) {
+            $this->misses[] = $directiveName;
+            return null;
+        }
+
+        // Track our way up by prepending the current fieldname to the path.
+        // Layer 1: ['enabled'], Layer 2: ['vowels', 'enabled']
+        array_unshift($path, $this->generic->name);
+
+        $parentDirectives = $parent->directives;
+
+        // Check if the parent has a native directive
+        if (!key_exists($directiveName, $parentDirectives->list)) {
+            return $parentDirectives->__getInheritedValue($directiveName, $path);
+        }
+
+        $parentDirective = $parentDirectives->list[$directiveName];
+
+        // Check that this is an inheritable property. Do we need to continue if it's
+        // not an inheritable property? It won't change if it's not! I think we can
+        // safely abort here with a *null* value?
+        if ($parentDirective instanceof InheritableDirective === false) {
+            $this->misses[] = $directiveName;
+            return null; // $parentDirectives->__getInheritedValue($directiveName, $path);
+        }
+
+        $nestedValue = $parentDirective->getValue();
+        $found = true;
+
+        // Drill down into the array using our accumulated path
+        foreach ($path as $key) {
+            if (is_array($nestedValue) && array_key_exists($key, $nestedValue)) {
+                $nestedValue = $nestedValue[$key];
+            } else {
+                // The array branch ends before reaching our target child node
+                $found = false; 
+                break;
+            }
+        }
+
+        // If we successfully navigated the array path to find a value, 
+        // return a NEW instance of the directive to apply directly to this child node.
+        if (!$found) {
+            return $parentDirectives->__getInheritedValue($directiveName, $path);
+        }
+        $className = get_class($parentDirective);
+        $newDirective = new $className($nestedValue);
+        $newDirective->setInstance($this->generic);
+        $newDirective->setModel($parent);
+        return $newDirective;
     }
 
     #[Override]

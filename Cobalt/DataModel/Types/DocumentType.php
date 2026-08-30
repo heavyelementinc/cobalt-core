@@ -35,7 +35,7 @@ abstract class DocumentType extends DictionaryType implements Persistable {
     // #[PrivateValue()]
     // readonly ArrayType $__job_queue;
 
-    readonly ObjectId $__id;
+    public readonly ObjectId $_id;
 
     /**
      * This function returns the default string. This is how the field is
@@ -57,8 +57,9 @@ abstract class DocumentType extends DictionaryType implements Persistable {
 
     #[Override]
     public function bsonUnserialize(array $data): void {
-        $this->__id = $data['_id'];
-        unset($data["__id"]);
+        if($this->__isInitialized == false) $this->__construct();
+        if(key_exists('_id', $data)) $this->_id = $data['_id'];
+        unset($data["_id"], $data['__pclass'], $data['__pClass']);
         $this->setValue($data);
     }
 

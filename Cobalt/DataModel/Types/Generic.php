@@ -42,14 +42,17 @@ abstract class Generic implements Stringable, JsonSerializable {
     readonly DirectiveList $directives;
 
     function __construct(null|DictionaryType|ArrayType $model = null, ?DictionaryType $rootModel = null) {
-        if($model) {
+        if(!is_null($model)) {
             $this->setModel($model);
-            $this->setRootModel($rootModel);
-            
-            // Set up filter results
-            $this->filterResult = $model->filterResult ?? new FilterResult();
-            $this->filterResult->setModel($rootModel);
+            $this->setRootModel($rootModel ?? $model);
+        } else if ($this instanceof DictionaryType || $this instanceof ArrayType) {
+            $model = $this;
         }
+        
+        // Set up filter results so we can scan through our documents and validate stuff
+        $this->filterResult = $model->filterResult ?? new FilterResult();
+        // This is less terrible, but still sucks.
+        $this->filterResult->setModel($rootModel ?? $model ?? $this->filterResult?->model ?? new DictionaryType());
 
         $this->directives = new DirectiveList($this);
         // Handle built-in attributes
@@ -91,9 +94,15 @@ abstract class Generic implements Stringable, JsonSerializable {
         return [$this->value];
     }
 
+    public function toClientJson(?int $mode = null){ 
+        if(!$mode) $mode = self::SERIALIZE_MODE_ONLY_PUBLIC + self::SERIALIZE_MODE_VALUE_DISPLAY + self::SERIALIZE_MODE_INCLUDE_FOREIGN_FIELDS;
+        if($mode & self::SERIALIZE_MODE_VALUE_DISPLAY) return $this->display();
+        return $this->value;
+    }
+
     // #[Override]
     public function jsonSerialize(): mixed {
-        return $this->getValue();
+        return $this->serialize();
     }
 
     /**
@@ -109,6 +118,10 @@ abstract class Generic implements Stringable, JsonSerializable {
 
     const SERIALIZE_MODE_ALL_FIELDS = 1;
     const SERIALIZE_MODE_ONLY_MODIFIED = 2;
+    const SERIALIZE_MODE_ONLY_PUBLIC = 4;
+    const SERIALIZE_MODE_VALUE_DISPLAY = 8;
+    const SERIALIZE_MODE_INCLUDE_FOREIGN_FIELDS = 16;
+    const SERIALIZE_MODE_INCLUDE_ID = 32;
     /**
      * Returns the raw data that's suitable for database storage
      * @return mixed 
@@ -134,7 +147,7 @@ abstract class Generic implements Stringable, JsonSerializable {
     public function getValue(): mixed {
         if(!isset($this->value)) {
             if($this->directives->hasDirective('default')) {
-                return $this->directives->default->getValue();
+                return $this->directives?->default->getValue();
             } else {
                 return null;
             }

@@ -48,4 +48,6 @@ class MarkdownResult extends StringResult {
         // $html = "<markdown-area name=\"$this->name\">" . $this->value . "</markdown-area>";
         // return $html;
     }
+
+    function toClient
 }

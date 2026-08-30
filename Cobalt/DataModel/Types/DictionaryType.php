@@ -5,6 +5,7 @@ namespace Cobalt\DataModel\Types;
 use ArrayAccess;
 use Cobalt\DataModel\Classes\DirectiveList;
 use Cobalt\DataModel\Directives\Base\DirectiveCommon;
+use Cobalt\DataModel\Directives\DefaultValue;
 use Cobalt\DataModel\Filters\FilterFailed;
 use Cobalt\DataModel\Filters\FilterIssue;
 use Cobalt\DataModel\Filters\FilterResult;
@@ -12,7 +13,9 @@ use Cobalt\DataModel\Traits\Overloading;
 use Cobalt\DataModel\Types\Generic;
 use Cobalt\DataModel\Types\StringType;
 use Countable;
+use Dom\DocumentType;
 use Iterator;
+use JsonSerializable;
 use Override;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -20,15 +23,17 @@ use ReflectionNamedType;
 use ReflectionProperty;
 use TypeError;
 
-class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess {
+class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess, JsonSerializable {
     use Overloading;
-    protected $__isInitialized = false;
+    protected bool $__isInitialized = false;
+    protected bool $__isConstructed = false;
     protected bool $__allowOverloadedFilterFields = false;
 
     function __construct(null|DictionaryType|ArrayType $model = null, ?DictionaryType $rootModel = null) {
+        $this->__isConstructed = true;
         // Set our default model and rootModel to our current instance.
         // If we're a child of another model, it will get overwritten.
-        parent::__construct($model ?? $this, $rootModel ?? $this);
+        parent::__construct($model, $rootModel);
         $this->initialize();
     }
 
@@ -80,14 +85,34 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
         // the modified fields
         if($this->isModified()) return $this->getModifiedFields();
         $arr = [];
+        /** @var string $field
+         * @var Generic $value
+         */
         foreach($this as $field => $value) {
-            $arr[$field] = $value->serialize();
+            if($mode & self::SERIALIZE_MODE_ONLY_PUBLIC && $value->directives?->private?->getValue()) continue;
+            $arr[$field] = $value->toClientJson($mode);
         }
         return $arr;
     }
 
+    public function jsonSerialize(): mixed {
+        return $this->toClientJson();
+    }
+
+    #[Override]
+    public function toClientJson(?int $mode = null):mixed {
+        if(!$mode) $mode = self::SERIALIZE_MODE_ONLY_PUBLIC + self::SERIALIZE_MODE_VALUE_DISPLAY + self::SERIALIZE_MODE_INCLUDE_FOREIGN_FIELDS + self::SERIALIZE_MODE_INCLUDE_ID;
+        $serialized = [];
+        $serialized = $this->serialize($mode);
+        if(isset($this->_id) && $mode & self::SERIALIZE_MODE_INCLUDE_ID) {
+            $serialized['_id'] = (string)$this->_id;
+        }
+        return $serialized;
+    }
+
     #[Override]
     public function setValue($mixed):void {
+        if($this->__isInitialized == false) $this->__construct();
         /** @var Generic $value */
         foreach($mixed as $field => $value) {
             if(!isset($this->{$field})) {
@@ -107,6 +132,8 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
     }
     
     public function initialize() {
+        if($this->__isConstructed === false) $this->__construct();
+        if($this->__isInitialized === true) return;
         $this->__beforeInitialized();
         $class = new ReflectionClass($this);
 
@@ -145,6 +172,7 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
 
         $attributes = $property->getAttributes();
         self::handleAttributes($attributes, $generic->directives);
+        
         array_push($this->_fields, $name);
         return true;
     }

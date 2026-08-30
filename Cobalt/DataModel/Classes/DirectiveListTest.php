@@ -72,7 +72,8 @@ class DirectiveList implements Iterator, ArrayAccess {
     }
 
     function __get($name):?DirectiveCommon {
-        return $this->list[$name] ?? null;
+        if(key_exists($name, $this->list)) $this->list[$name];
+        return $this->generic?->model?->directives->__get($name) ?? null;
     }
 
     function __set($name, $value) {
@@ -80,10 +81,14 @@ class DirectiveList implements Iterator, ArrayAccess {
         $this->list[$name] = $value;
     }
     function __unset($name) {
-        unset($this->list[$name]);
+        if(key_exists($name, $this->list)) unset($this->list[$name]);
+        $this->generic->model->directives->__unset($name);
     }
     function __isset($name) {
-        return key_exists($name, $this->list);
+        if(key_exists($name, $this->list)) {
+            return true;
+        }
+        return $this->generic?->model?->directives->__isset($name);
     }
 
     #[Override]

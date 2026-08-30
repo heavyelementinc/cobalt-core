@@ -390,6 +390,10 @@ return [
         "version" => 2
     ]),
     (new Item)->ingest([
+        'href' => 'TemporalDatePicker.js',
+        'contexts' => ['common']
+    ]),
+    (new Item)->ingest([
         "href" => "components/datetime.css",
         "contexts" => ["common"]
     ]),

@@ -3,6 +3,7 @@
 namespace Cobalt\DataModel\Types;
 
 use ArrayAccess;
+use Cobalt\DataModel\Classes\Undefined;
 use Cobalt\DataModel\Directives\Filters\Arrays\Each;
 use Cobalt\DataModel\Filters\FilterFailed;
 use Cobalt\DataModel\Filters\FilterIssue;
@@ -10,6 +11,7 @@ use Cobalt\DataModel\Traits\Overloading;
 use Countable;
 use Iterator;
 use JsonSerializable;
+use MongoDB\Model\BSONArray;
 use Override;
 use TypeError;
 
@@ -54,8 +56,6 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
             );
         }
 
-
-
         // We only care if it throws a FilterIssue!
         try{ 
             $this->each($toValidate);
@@ -74,6 +74,7 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
             $this->value = [];
             return;
         }
+        if($mixed instanceof BSONArray) $mixed = $mixed->getArrayCopy();
         // Keep things sane
         if(!is_array($mixed)) throw new TypeError("Must be an array");
         if(is_associative_array($mixed)) throw new TypeError("Must not be an associative array");
@@ -86,7 +87,16 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     
     #[Override]
     public function getValue(): mixed {
-        return $this->each($this->value ?? []);
+        return $this->each($this->value ?? $this->directives?->default?->getValue() ?? []);
+    }
+
+    #[Override]
+    public function toClientJson(?int $mode = null) {
+        $arr = [];
+        foreach($this as $index => $field) {
+            $arr[$index] = $field->toClientJson($mode);
+        }
+        return $arr;
     }
 
     public function each(array $element, bool $filter = false):array {
@@ -117,7 +127,12 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     }
 
     function get($index) {
-        return $this->__hydrate($index, $this->value[$index], $this->directives->each?->value);
+        $val = $this->getValue() ?? [];
+        if(!key_exists($index, $val)) {
+            return new Undefined();
+        }
+        if($val[$index] instanceof Generic) return $val[$index];
+        return $this->__hydrate($index, $val[$index], $this->directives->each?->value);
     }
 
     public function includes(mixed $value):bool {

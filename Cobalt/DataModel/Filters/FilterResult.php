@@ -9,7 +9,7 @@ use Cobalt\JobQueue\Models\Job;
 use stdClass;
 
 class FilterResult {
-    protected DictionaryType $model;
+    public DictionaryType $model;
     readonly array $toValidate;
     readonly array $filteredValue;
     protected bool $validationComplete = false;

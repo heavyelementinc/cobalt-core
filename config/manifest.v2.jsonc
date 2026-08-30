@@ -105,6 +105,10 @@
     //     "package": "deferred"
     // },
     {
+        "href": "TemporalDatePicker.js",
+        "contexts": ["common"]
+    },
+    {
         "href":"components/datepicker.js",
         "contexts": ["common"],
         "package": "deferred"
@@ -384,6 +388,10 @@
         "href": "components/flex-table.css",
         "contexts": ["common"],
         "version": 2
+    },
+    {
+        "href": "temporal-date-picker.css",
+        "contexts": ["common"]
     },
     {
         "href": "components/datetime.css",
