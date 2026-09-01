@@ -14,6 +14,7 @@ use Cobalt\DataModel\Types\Generic;
 use Cobalt\DataModel\Types\StringType;
 use Countable;
 use Dom\DocumentType;
+use Exceptions\HTTP\BadRequest;
 use Iterator;
 use JsonSerializable;
 use Override;
@@ -112,6 +113,9 @@ class DictionaryType extends Generic implements Iterator, Countable, ArrayAccess
 
     #[Override]
     public function setValue($mixed):void {
+        if(in_array($mixed,['name'])) {
+            throw new BadRequest("This is a reserved field name and cannot be used to overload properties");
+        }
         if($this->__isInitialized == false) $this->__construct();
         /** @var Generic $value */
         foreach($mixed as $field => $value) {

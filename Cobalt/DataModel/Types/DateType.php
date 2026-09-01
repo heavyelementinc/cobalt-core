@@ -9,7 +9,7 @@ use Override;
 use TypeError;
 
 /**
- * @property DateTime $value
+ * @property-read DateTime $value
  * @package Cobalt\DataModel\Types
  */
 class DateType extends Generic {
@@ -27,7 +27,10 @@ class DateType extends Generic {
     const FORMAT_12_HOUR = "g:i a";
     const FORMAT_24_HOUR = "H:i";
     const FORMAT_SECONDS = "g:i:s A";
-
+    
+    /** @var DateTime $value */
+    protected mixed $value;
+    
     #[Override]
     public function serialize(int $mode = self::SERIALIZE_MODE_ALL_FIELDS) {
         return new UTCDateTime($this->value);
