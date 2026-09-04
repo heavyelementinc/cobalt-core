@@ -104,6 +104,13 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
         return $arr;
     }
 
+    /**
+     * @template TValue
+     * @template TInitial
+     * @param Closure(TInitial, TValue) $callback
+     * @return null 
+     */
+
     public function reduce(Closure $callback) {
         return array_reduce($this->value ?? [], $callback);
     }
