@@ -3,6 +3,7 @@
 namespace Cobalt\DataModel\Types;
 
 use ArrayAccess;
+use Closure;
 use Cobalt\DataModel\Classes\Undefined;
 use Cobalt\DataModel\Directives\Filters\Arrays\Each;
 use Cobalt\DataModel\Filters\FilterFailed;
@@ -10,6 +11,7 @@ use Cobalt\DataModel\Filters\FilterIssue;
 use Cobalt\DataModel\Traits\Overloading;
 use Countable;
 use Iterator;
+use IteratorAggregate;
 use JsonSerializable;
 use MongoDB\Model\BSONArray;
 use Override;
@@ -17,7 +19,10 @@ use TypeError;
 
 /** 
  * @package Cobalt\DataModel\Types
- * */
+ * @template T
+ * @implements ArrayAccess<int|string, T>
+ * @implements IteratorAggregate<int|string, T>
+ */
 class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     use Overloading;
     protected array $keys = [];
@@ -100,7 +105,7 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     }
 
     public function reduce(Closure $callback) {
-        return array_reduce($this->value, $callback);
+        return array_reduce($this->value ?? [], $callback);
     }
 
     public function each(array $element, bool $filter = false):array {

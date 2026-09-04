@@ -57,7 +57,30 @@ class DB extends CommandInterface {
         "--include - A comma-delimited list of collections to import",
     )]
     public function list():int {
-        throw new CommandError("Not implemented");
+        $db = new DatabaseManagement(database: $this->flags['database']);
+        $collections = $db->collections();
+        $list = [];
+        $nameMax = 0;
+        $typeMax = 0;
+        foreach($collections as $idx => $item) {
+            $list[$idx] = [
+                'name' => $item->getName(),
+                'type' => $item->getType(),
+                'count' => $db->getCollection($item->getName())->count([])
+            ];
+            $nameLength = strlen($list[$idx]['name']);
+            $typeLength = strlen($list[$idx]['type']);
+            $nameMax = ($nameLength > $nameMax) ? $nameLength : $nameMax;
+            $typeMax = ($typeLength > $typeMax) ? $typeLength : $typeMax;
+        }
+        foreach($list as $idx => $item) {
+            sprintf(" - %s %s %s\n", 
+            fmt(str_pad($item['name'], $nameMax), 'i'),
+            str_pad($item['type'], $typeMax), 
+            fmt($item['count'], "i")
+            );
+        }
+        return COBALT_COMMAND_SUCCESS;
     }
 
     #[Description( "[filename] Export a database backup.")]

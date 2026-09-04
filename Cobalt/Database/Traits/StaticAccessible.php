@@ -93,8 +93,7 @@ trait StaticAccessible {
      * 
      * @param array $filter 
      * @param array $options
-     * @template T of static 
-     * @return null|CobaltCursor<T>
+     * @return null|CobaltCursor<static>
      * @throws Exception 
      */
     final static function find($filter = [], array $options = []):?CobaltCursor {
