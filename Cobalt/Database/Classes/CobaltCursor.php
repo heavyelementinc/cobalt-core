@@ -9,6 +9,10 @@ use Iterator;
 use MongoDB\Driver\Cursor;
 use MongoDB\Driver\CursorInterface;
 
+/**
+ * @template TValue
+ * @implements Iterator<int, TValue>
+ */
 class CobaltCursor implements Iterator {
     private int $index = 0;
     

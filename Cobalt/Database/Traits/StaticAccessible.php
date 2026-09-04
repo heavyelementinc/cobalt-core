@@ -69,6 +69,9 @@ trait StaticAccessible {
     }
 
     /* READ */
+    /**
+     * @return ?static
+     */
     final static function findOne($filter, array $options = []):array|object|null {
         static::__initAccessible();
         benchmark_reads();
@@ -76,6 +79,9 @@ trait StaticAccessible {
         return static::$collection->findOne($filter, $options);
     }
 
+    /**
+     * @return ?static
+     */
     final static function findOneAndUpdate($filter, $update, array $options = []):array|object|null {
         static::__initAccessible();
         benchmark_reads();
@@ -86,8 +92,9 @@ trait StaticAccessible {
     /**
      * 
      * @param array $filter 
-     * @param array $options 
-     * @return null|CobaltCursor
+     * @param array $options
+     * @template T of static 
+     * @return null|CobaltCursor<T>
      * @throws Exception 
      */
     final static function find($filter = [], array $options = []):?CobaltCursor {

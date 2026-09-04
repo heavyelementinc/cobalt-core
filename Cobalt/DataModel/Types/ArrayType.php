@@ -99,6 +99,10 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
         return $arr;
     }
 
+    public function reduce(Closure $callback) {
+        return array_reduce($this->value, $callback);
+    }
+
     public function each(array $element, bool $filter = false):array {
         /** @var ?Generic $each */
         $each = $this->directives->each?->value;
