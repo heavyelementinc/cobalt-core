@@ -13,6 +13,7 @@ use Exceptions\HTTP\RangeNotSatisfiable;
 use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Model\BSONDocument;
+use Override;
 
 class Users extends ModelController {
     static $api_read_permission          = "Auth_allow_editing_users";
@@ -28,6 +29,11 @@ class Users extends ModelController {
 
     public static function defineModel(): Model {
         return new User();
+    }
+
+    #[Override]
+    public function update($post_data, &$id, Model $model): array {
+        return array_undot($post_data);
     }
 
     public function edit($document): string {

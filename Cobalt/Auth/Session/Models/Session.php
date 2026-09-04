@@ -80,9 +80,14 @@ class Session extends Model {
     }
 
     public function logInUser(User $user) {
-        $this->represents->push($user);
-        $this->current_index = $this->represents->length() - 1;
-        $this->updateOne(['_id' => $this->_id], ['$set' => $this]);
+        // $this->represents->push($user);
+        // $this->current_index = $this->represents->length() - 1;
+        $newDoc = [
+            'represents' => $this->represents->raw,
+            'current_index' => $this->represents->length() - 1
+        ];
+        $newDoc['represents'][] = $user->_id;
+        $this->updateOne(['_id' => $this->_id], ['$set' => $newDoc]);
     }
 
     public function logOutUser(User $user) {
@@ -123,7 +128,7 @@ class Session extends Model {
 
         $session = new Session($raw);
         $filtered = $session->__filter($raw);
-        $session->insertOne($filtered);
+        $result = $session->insertOne($filtered);
         return $session;
     }
 

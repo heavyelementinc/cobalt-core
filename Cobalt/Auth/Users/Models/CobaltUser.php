@@ -8,6 +8,7 @@ use Cobalt\Auth\UserAccounts\Types\UserPreferences;
 use Cobalt\Auth\UserAccounts\Types\UserSocialAccounts;
 use Cobalt\Auth\Users\Controllers\Users;
 use Cobalt\Auth\Users\Traits\Permissions;
+use Cobalt\Auth\Users\Types\Permissions as TypesPermissions;
 use Cobalt\Controllers\ModelController;
 use Cobalt\DataModel\Directives\Filters\Arrays\Each;
 use Cobalt\DataModel\Models\PasswordModel;
@@ -22,6 +23,7 @@ use Cobalt\DataModel\Types\DocumentType;
 use Cobalt\DataModel\Types\PasswordHashType;
 use Cobalt\DataModel\Types\StringType;
 use Cobalt\Database\Classes\CobaltCursor;
+use Cobalt\DataModel\Directives\Filters\Valid;
 use Cobalt\Model\Attributes\Prototype;
 use Cobalt\Model\Directives\SearchableDirective;
 use Cobalt\Model\Interfaces\Migration;
@@ -37,48 +39,18 @@ use Override;
 use PSpell\Dictionary;
 use Validation\Exceptions\ValidationIssue;
 
-/**
- * @property StringType $uname
- * @property StringType $fname
- * @property StringType $lname
- * @property EnumType $name_format
- * @property PasswordHashType $pword
- * @property EmailAddressType $email
- * @property ImageType $avatar
- * @property BinaryType $flags
- * @property BinaryType $state
- * @property DateType $since
- * @property ArrayType $tokens
- * @property DocumentType $prefs
- * @property ArrayType $groups
- * @property ArrayOfPermissionsType $permissions
- * @property BooleanType $is_root
- * @property StringType $public_name
- * @property FakeType $display_name
- * @property BlockType $default_bio_blurb
- * @property BlockType $full_biography
- * @property StringType $fediverse_profile
- * @property StringType $facebook_profile
- * @property StringType $twitter_profile
- * @property StringType $instagram_profile
- * @property StringType $youtube_profile
- * @property DocumentType $integrations
- * @property ArrayType $login_tokens
- * @property BooleanType $tfa->totp->enabled
- * @property StringType $tfa->totp->secret
- * @property ArrayType $tfa->totp->backups
- * @property DocumentType $tfa->totp
- * @property DocumentType $tfa
- * @property DocumentType $notifications
- * @property StringType $session_data
- * @package Cobalt\Auth\Users\Models
- */
-class User extends DocumentType implements Migration {
+class CobaltUser extends DocumentType implements Migration {
     use Permissions;
 
     readonly StringType $uname;
     readonly StringType $fname;
     readonly StringType $lname;
+    #[Valid([
+        self::NAME_FORMAT_DEFAULT    => "First name, last initial",
+        self::NAME_FORMAT_FIRST_LAST => "First and last names",
+        self::NAME_FORMAT_FIRST_ONLY => "First name only",
+        self::NAME_FORMAT_USER_ONLY  => "Username only",
+    ])]
     readonly EnumType $name_format;
     readonly PasswordModel $pword;
     readonly EmailAddressType $email;
@@ -95,17 +67,14 @@ class User extends DocumentType implements Migration {
     readonly DictionaryType $prefs;
     readonly ArrayType $groups;
 
-    // readonly ArrayOfPermissionsType $permissions;
+    readonly TypesPermissions $permissions;
+
     readonly BooleanType $is_root;
     readonly StringType $public_name;
     // readonly FakeType $display_name;
     // readonly BlockType $default_bio_blurb;
     // readonly BlockType $full_biography;
-    readonly StringType $fediverse_profile;
-    readonly StringType $facebook_profile;
-    readonly StringType $twitter_profile;
-    readonly StringType $instagram_profile;
-    readonly StringType $youtube_profile;
+
     readonly DocumentType $integrations;
     readonly ArrayType $login_tokens;
     readonly DocumentType $tfa;
@@ -119,20 +88,9 @@ class User extends DocumentType implements Migration {
         return $this->uname;
     }
 
-    public function defineController(): ModelController
-    {
-        return new Users();
-    }
-
-    public static function __getVersion(): string
-    {
+    public static function __getVersion(): string {
         return "5.0";
     }
-
-    // public function modelView($document): string
-    // {
-    //     throw new \Exception('Not implemented');
-    // }
 
     const NAME_FORMAT_DEFAULT    = 0;
     const NAME_FORMAT_FIRST_LAST = 1;
@@ -236,13 +194,13 @@ class User extends DocumentType implements Migration {
                 new ArrayType
             ],
             'prefs' => [
-                new DocumentType
+                new DictionaryType
             ],
             'groups' => [
                 new ArrayType
             ],
             'permissions' => [
-                new ArrayOfPermissionsType,
+                new TypesPermissions,
                 // 'index' => [
                 //     'display' => function () {
                 //         return $this->permissions?->length ?? 0;

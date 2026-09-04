@@ -50,11 +50,11 @@ class Authentication {
 
     public function logInUser(User $user) {
         $_SESSION[Users::LOGIN_USER_LOGGED_IN_KEY] = true;
-        if(!$this->session) {
+        // if(!$this->session) {
             Session::newSession($user);
             return true;
-        }
-        $this->session->logInUser($user);
-        return true;
+        // }
+        // $this->session->logInUser($user);
+        // return true;
     }
 }
