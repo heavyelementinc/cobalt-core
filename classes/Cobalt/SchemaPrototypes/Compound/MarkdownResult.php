@@ -49,5 +49,4 @@ class MarkdownResult extends StringResult {
         // return $html;
     }
 
-    function toClient
 }

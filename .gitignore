@@ -1,5 +1,9 @@
 .vscode/
-/ignored/
-vendor/
-classes/ReadyTicket/config.json
+.ignored/**/*
+ignored/**/*
+.cache/**/*
+cache/**/*
+.tmp/**/*
+tmp/**/*
+vendor/**/*
 ./composer.lock

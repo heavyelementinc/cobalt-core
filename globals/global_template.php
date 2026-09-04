@@ -38,13 +38,16 @@ function maybe_with($template, $vars = []) {
  * included so you can include a template inside another template. This has the
  * potential to cause some recursive crap... so use caution!
  *
+ * @deprecated use Template::view() instead
  * @param  string $template The name of the template
  * @param  mixed  $vars     Variables to include
  * @return string Processed template
  */
 function view(string $template, array $vars = [], bool $absolute_path = false):string {
+    // return 
+
     if(__APP_SETTINGS__['Render_use_v2_engine']) {
-    $render = new Render();
+        $render = new Render();
         $render->setVars(array_merge($GLOBALS['WEB_PROCESSOR_VARS'], $vars));
         $render->getBodyFromTemplate($template);
     } else {
@@ -56,6 +59,12 @@ function view(string $template, array $vars = [], bool $absolute_path = false):s
     return $render->execute();
 }
 
+/**
+ * @deprecated use Template::fromString() instead
+ * @param string $view 
+ * @param array $vars 
+ * @return string 
+ */
 function view_from_string(string $view, array $vars = []):string {
     $render = new \Render\Render();
     if ($vars === []) $vars = $GLOBALS['WEB_PROCESSOR_VARS'] ?? [];

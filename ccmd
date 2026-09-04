@@ -1,7 +1,43 @@
 #!/bin/bash
 BASEDIR=$(pwd)
-if [ ! -d "../cobalt-core" ] ; then
-  echo "This directory is not a Cobalt app"
-  exit 1
+
+# Detect the Apache user on the system
+detect_apache_user() {
+    if command -v apache2ctl &>/dev/null; then
+        apache2ctl -S 2>/dev/null | awk '/User:/ {print $2; exit}' | tr -d '"'
+    elif command -v httpd &>/dev/null; then
+        httpd -S 2>/dev/null | awk '/User:/ {print $2; exit}' | tr -d '"'
+    elif id "www-data" &>/dev/null; then
+    echo "www-data"
+    elif id "apache" &>/dev/null; then
+        echo "apache"
+    elif id "nginx" &>/dev/null; then
+        echo "nginx"
+    else
+        echo ""
+    fi
+}
+
+APACHE_USER=$(detect_apache_user)
+
+if [ -z "$APACHE_USER" ]; then
+    echo "Error: Could not detect the web server user." >&2
+    exit 1
 fi
-sudo su www-data -s /bin/bash -c "php \"$BASEDIR/../cobalt-core/cli/cobalt.php\" \"--app=$BASEDIR\" $@"
+
+CURRENT_USER=$(whoami)
+
+# If not running as the target user, elevate/switch user and re-run
+if [ "$CURRENT_USER" != "$APACHE_USER" ]; then
+    echo "Current user ($CURRENT_USER) is not '$APACHE_USER'. Switching user..."
+
+    # Use sudo if available, otherwise fall back to su
+    if command -v sudo &>/dev/null; then
+        exec sudo -u "$APACHE_USER" -- "$0" "$@"
+    else
+        exec su "$APACHE_USER" -s /bin/bash -c "\"$0\" \"\$@\"" -- "$@"
+    fi
+fi
+
+# Execute the target CLI command
+exec php "$BASEDIR/../cobalt-core/cli/cobalt.php" "--app=$BASEDIR" "$@"

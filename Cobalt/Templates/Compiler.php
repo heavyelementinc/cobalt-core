@@ -15,13 +15,14 @@ class Compiler {
         
     }
 
-    public function set_template($full_path) {
+    public function set_template(string $full_path) {
         if(!file_exists($full_path)) throw new FileNotFound("Path `$full_path` not found");
         $this->path = $full_path;
     }
-
     public function compile() {
-        $content = file_get_contents($this->path);
+        return $this->compileString(file_get_contents($this->path));
+    }
+    public function compileString(string $content) {
         $extractedCustomNames = json_encode($this->extractCustomNames($content));
         $now = date("c");
         $mutant = <<<HTML
