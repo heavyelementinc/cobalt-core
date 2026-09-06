@@ -40,6 +40,15 @@ function send_access_control_allow_origin_header(array $hosts, ?string $from = n
     return $is_trusted;
 }
 
+function send_cache_control_expires_at_future_date(DateTime $sharedFutureDate, int $browserAge = 0) {
+    $timezone = new DateTimeZone('America/New_York');
+
+    $now = new DateTime('now', $timezone);
+    $secondsUntilExpiry = $sharedFutureDate->getTimestamp() - $now->getTimestamp();
+
+    header("Cache-Control: max-age=$browserAge, s-maxage=$secondsUntilExpiry");
+}
+
 function unparse_url($parsed_url) {
   $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
   $host     = isset($parsed_url['host']) ? $parsed_url['host'] : '';
