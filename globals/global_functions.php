@@ -821,7 +821,7 @@ function juggler(string $canonincal, mixed $value) {
  * @return string|false Will return 
  */
 function get_extension_from_file($file_path, $file_name = null, $trust_filename = false) {
-    if($file_name && $trust_filename) return pathinfo($file_name, PATHINFO_EXTENSION);
+    if($file_name) return pathinfo($file_name, PATHINFO_EXTENSION);
     if(!file_exists($file_path)) return false;
     
     // get_usable_mime_array();

@@ -34,6 +34,7 @@ export default class MarkdownArea extends ICustomInput {
         element.addEventListener("input", event => {
             event.bubbles = true;
         })
+
         let renderConfig = {}
         if(this.hasAttribute("syntax-highlighting") && this.getAttribute("true")) {
             // renderConfig.codeSyntaxHighlighting = true;
@@ -54,6 +55,10 @@ export default class MarkdownArea extends ICustomInput {
             this.props.changed = true;
         });
 
+        this.editor.codemirror.on("paste", (cm, event) => {
+            this.imagePasteListener(event);
+        });
+
         this.addEventListener("focusout", e => {
             this.triggerAutosaveChangeEvent();
         });
@@ -66,4 +71,35 @@ export default class MarkdownArea extends ICustomInput {
         this.props.changed = false;
     }
 
+    async imagePasteListener(event) {
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+            if (!item.type.startsWith('image/')) continue;
+            const file = item.getAsFile();
+            if (file) {
+                event.preventDefault(); // Prevents default text-pasting behavior
+                const image = await this.imageUpload(file);
+                this.editor.codemirror.replaceSelection(`![](${image.file.url})`);
+                break;
+            }
+        }
+    }
+
+    async imageUpload(image) {
+        const endpoint = this.getAttribute("action") ?? "/api/v1/block-editor/upload/";
+        const formData = new FormData();
+        formData.append('image', image, 'pasted-image.png');
+        const response = await fetch(endpoint, {
+            method: "POST",
+            body: formData
+        });
+        if(!response.ok) {
+            new StatusError("Failed to upload");
+            return;
+        }
+        const result = await response.json();
+        return result;
+    }
 }
