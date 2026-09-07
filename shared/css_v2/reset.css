@@ -574,3 +574,78 @@ ul.columnated {
     display: block;
     font-family: monospace;
 }
+
+
+@property --elegant-scroll-top-opacity {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+
+@property --elegant-scroll-bottom-opacity {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
+@keyframes elegantscroll {
+    0% {
+        --elegant-scroll-top-opacity: 1;
+        --elegant-scroll-bottom-opacity: 0;
+    }
+    10% {
+        --elegant-scroll-top-opacity: 0;
+        --elegant-scroll-bottom-opacity: 0;
+    }
+    90% {
+        --elegant-scroll-top-opacity: 0;
+        --elegant-scroll-bottom-opacity: 0;
+    }
+    100% {
+        --elegant-scroll-top-opacity: 0;
+        --elegant-scroll-bottom-opacity: 1;
+    }
+}
+
+.elegant-scroll {
+    overflow-y: scroll;
+    scrollbar-width: narrow;
+    flex: 1;
+    min-height: 0;
+
+    --elegant-scroll-top-opacity: 1;
+    --top-2: 1;
+    --bottom-1: 1;
+    --elegant-scroll-bottom-opacity: 0;
+
+    mask-image: linear-gradient(
+        rgb(0 0 0 / var(--elegant-scroll-top-opacity)) 0%,
+        rgb(0 0 0 / 1) 15%,
+        rgb(0 0 0 / 1) 85%,
+        rgb(0 0 0 / var(--elegant-scroll-bottom-opacity)) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        rgb(0 0 0 / var(--elegant-scroll-top-opacity)) 0%,
+        rgb(0 0 0 / 1) 15%,
+        rgb(0 0 0 / 1) 85%,
+        rgb(0 0 0 / var(--elegant-scroll-bottom-opacity)) 100%
+    );
+
+    /* Animation linked to scroll position */
+    animation-name: elegantscroll;
+    animation-timeline: scroll(self);
+    animation-fill-mode: both;
+    &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0 0 0 / 0);
+        background-color: transparent;
+    }
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: currentColor;
+    }
+}

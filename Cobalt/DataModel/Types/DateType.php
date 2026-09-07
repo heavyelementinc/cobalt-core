@@ -33,7 +33,8 @@ class DateType extends Generic {
     
     #[Override]
     public function serialize(int $mode = self::SERIALIZE_MODE_ALL_FIELDS) {
-        return new UTCDateTime($this->value);
+        if($this->directives->nullable->value && !$this->value) return null;
+        return new UTCDateTime($this->getValue());
     }
 
     #[Override]
@@ -42,13 +43,14 @@ class DateType extends Generic {
         if(is_string($mixed)) $mixed = new DateTime($mixed);
         // if($mixed instanceof DateTime)
         $this->value = $mixed;
+        if(!$mixed) return;
         $this->value->setTimezone(new DateTimeZone($_SESSION['timezone'] ?? config()['timezone']));
     }
 
     #[Override]
     public function filter(mixed $toValidate, mixed $raw): mixed {
+        if(!$toValidate && $this->directives->nullable->value) return null;
         if($toValidate instanceof UTCDateTime) $toValidate = $toValidate->toDateTime();
-        
         if(is_string($toValidate)) return new DateTime($toValidate);
         if($toValidate instanceof DateTime) return $toValidate;
         $this->filterResult->addIssue($this,"Failed to evaluate ".gettype($toValidate)." as valid DateTime");
