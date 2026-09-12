@@ -175,7 +175,8 @@ class Router {
             $this->context_prefix = app("context_prefixes")[$context]['prefix'];
             $this->uri = substr($this->uri, strlen($this->context_prefix) - 1);
         }
-
+        // $allow_geo = __APP_SETTINGS__['enable_geo'] && app("context_prefixes")[$context]['enable_geo'];
+        // if()
         // $route = null;
         /** Search through our current routes and look for a match */
         foreach ($this->routes[$context][$method] as $preg_pattern => $directives) {

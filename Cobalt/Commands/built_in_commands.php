@@ -16,5 +16,5 @@ return [
     'jobs' => new Jobs(),
     'settings' => new SettingsCommand(),
     'user' => new Users(),
-    'model' => new ModelTests(),
+    // 'model' => new ModelTests(),
 ];

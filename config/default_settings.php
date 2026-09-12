@@ -1080,7 +1080,8 @@ return [
         "Posts_public_index_options" => [
             'default'=> [
                 "anchor" => ["label" => "Posts"],
-                "navigation" => ["main_navigation"]
+                "navigation" => ["main_navigation"],
+                "enable_geo" => true,
             ],
         ],
         "Posts_public_post" => [
@@ -1256,7 +1257,13 @@ return [
         "Font_backend" => [
             'default' => FONT_BACKEND_GOOGLE
         ],
-        
+
+        'enable_geo' => [
+            'default' => true,
+        ],
+        'geo_cache_length' => [
+            'default' => 60 * 60 * 24 // One day
+        ],
         "Web_embedded_content_in_header" => [
             'default' => "",
             'meta' => [
@@ -2007,6 +2014,7 @@ return [
                         "session_refresh" => true,
                         "api_access" => true,
                         "router_boundry" => true,
+                        "enable_geo" => false,
                         "vars" => [
                             "html_class" => "cli"
                         ]
@@ -2021,6 +2029,7 @@ return [
                         "session_refresh" => true,
                         "api_access" => true,
                         "router_boundry" => true,
+                        "enable_geo" => false,
                         "vars" => [
                             "html_class" => "admin-panel"
                         ]
@@ -2033,6 +2042,7 @@ return [
                         "session_refresh" => true,
                         "api_access" => true,
                         "router_boundry" => true,
+                        "enable_geo" => false,
                         "vars" => [
                             "html_class" => "documentation"
                         ]
@@ -2046,6 +2056,7 @@ return [
                         "session_refresh" => true,
                         "api_access" => true,
                         "router_boundry" => true,
+                        "enable_geo" => false,
                         "vars" => [
                             "html_class" => "debug-panel"
                         ]
@@ -2055,56 +2066,64 @@ return [
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => null
+                        "prefix" => null,
+                        "enable_geo" => false,
                     ],
                     "shared" => [
                         "processor" => "Handlers\\SharedHandler",
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/core-content/"
+                        "prefix" => "/core-content/",
+                        "enable_geo" => false,
                     ],
                     "res" => [
                         'processor' => "Handlers\\SharedHandler",
                         'mode' => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/res/"
+                        "prefix" => "/res/",
+                        "enable_geo" => false,
                     ],
                     "apinotifications" => [
                         "processor" => "Handlers\\ApiHandler",
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/api/notifications/"
+                        "prefix" => "/api/notifications/",
+                        "enable_geo" => false,
                     ],
                     "apiv1" => [
                         "processor" => "Handlers\\ApiHandler",
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/api/v1/"
+                        "prefix" => "/api/v1/",
+                        "enable_geo" => false,
                     ],
                     "webhooks" => [
                         "processor" => "Handlers\\ApiHandler",
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/webhooks/"
+                        "prefix" => "/webhooks/",
+                        "enable_geo" => false,
                     ],
                     "streams" => [
                         "processor" => "Handlers\\ApiHandler",
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/streams/"
+                        "prefix" => "/streams/",
+                        "enable_geo" => false,
                     ],
                     "websocket" => [
                         "processor" => "Handlers\\WebsSocketHandler",
                         "mode" => "application/json",
                         "session_refresh" => false,
                         "api_access" => false,
-                        "prefix" => "/websocket"
+                        "prefix" => "/websocket",
+                        "enable_geo" => false,
                     ],
                     "web" => [
                         "processor" => "Handlers\\WebHandler",
@@ -2114,6 +2133,7 @@ return [
                         "api_access" => true,
                         "router_boundry" => true,
                         "prefix" => "/",
+                        "enable_geo" => true,
                         "vars" => [
                             "html_class" => "cobalt-app"
                         ]

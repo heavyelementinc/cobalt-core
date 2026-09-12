@@ -9,7 +9,9 @@ if(app("UGC_enable_user_generated_content")) {
     Route::get(new Options(trim_trailing_slash(app("UGC_retrieval_endpoint")) . "/{file_id}", "UGC@retrieve"));
 }
 
-Route::get(new Options("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']));
+Route::get((new Options("/", "Pages@index", __APP_SETTINGS__['Landing_page_home_route_options']))
+    ->set_enable_geo(true)
+);
 
 Route::get(new Options("/ServiceWorker.js", "FileController@service_worker"));
 

@@ -60,6 +60,7 @@ class CommandItem {
             throw new CommandError("Parameter ".fmt("`\$$name`").fmt(" at position $pos is required.","e"));
         }
         if($param->hasType()) {
+            if($value === null && $param->isDefaultValueAvailable()) $value = $param->getDefaultValue();
             if(gettype($value) !== (string)$param->getType()) throw new CommandError("Parameter `$"."$name` must be of type ".$param->getType());
         }
     }

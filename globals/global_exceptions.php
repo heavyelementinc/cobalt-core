@@ -72,7 +72,10 @@ function get_fetch_error($error) {
 }
 
 function trim_trailing_slash(string $path, string $char = "/") {
-    return ($path[strlen($path) - 1] == $char) ? substr($path, 0, -1) : $path;
+    return rtrim($path, $char);
+    // if(str_ends_with($path, $char)) return substr($path, 0, strlen($char) * -1);
+    // return $path;
+    // return ($path[strlen($path) - 1] == $char) ? substr($path, 0, -1) : $path;
 }
 
 

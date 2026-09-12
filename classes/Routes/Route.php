@@ -19,30 +19,7 @@ class Route {
      * 
      * @param string|Options $pattern A REQUEST_URI to be matched against using Cobalt's route syntax
      * @param string $controller A controller/method pair in the "Controller@method" format
-     * @param array{handler:string,
-     *   permission: string, 
-     *   groups: string, 
-     *   anchor: array{
-     *      name: string,
-     *      href: string,
-     *      icon: string,
-     *      order: int,
-     *      attributes: array
-     *   },
-     *   navigation: array{
-     *      name: string,
-     *      href: string,
-     *      icon: string,
-     *      order: int,
-     *      attributes: array
-     *   },
-     *   csrf_required: bool,
-     *   sitemap: array{
-     *      ignore: bool,
-     *      children: callable,
-     *      lastmod: callable
-     *   }
-     * } $options
+     * @param array{handler:string,permission:string,groups:string,anchor:array{name:string,href:string,icon:string,order:int,attributes:array},navigation:array{name:string,href:string,icon:string,order:int,attributes:array},csrf_required:bool,sitemap:array{ignore:bool,children:callable,lastmod:callable},enable_geo:bool} $options
      */
     static function get(String|Options $pattern,$controller = "",array|BSONArray|BSONDocument $options = []) {
         if($pattern instanceof Options) return Route::add_route_from_option($pattern, 'get');
@@ -136,7 +113,7 @@ class Route {
         // }
 
         // Convert the path to a regex
-        $regex = Route::convert_path_to_regex_pattern($path);
+        $regex = Route::convert_path_to_regex_pattern($path, false);
 
         // If the client handler is set, we should get that handler
         $handler_data = null;
@@ -144,6 +121,7 @@ class Route {
         else $handler_data = Route::get_js_handler($options['handler'], $regex, $controller);
         $router_table_address = $GLOBALS['ROUTE_TABLE_ADDRESS'];
         $context_permission = __APP_SETTINGS__['context_prefixes'][$router_table_address]['permission'] ?? null;
+        $allow_geo = __APP_SETTINGS__['context_prefixes'][$router_table_address]['enable_geo'] ?? null;
         // $context_permission = ($GLOBALS['permission_needed'] !== false) ? $GLOBALS['permission_needed'] : null;
 
         $file = null;
@@ -156,7 +134,7 @@ class Route {
         $path_prefix = app('context_prefixes')[$router_table_address]['prefix'];
 
         $real_path = substr($path_prefix ?? "",0,-1) . $path;
-        $real_regex = Route::convert_path_to_regex_pattern($real_path);
+        $real_regex = Route::convert_path_to_regex_pattern($real_path, $allow_geo);
 
         if (isset($options['anchor']) && !isset($options['anchor']['href'])) {
             if ($type === "get" && count($var_names[1]) !== 0) throw new \Exception("You must specify an href value in the anchor key for any GET route using variables.");
@@ -199,6 +177,7 @@ class Route {
             //     'children' => fn () => '', // A delta function that returns a string of valid <url> entries
             //     'lastmod' => fn () => null, // A delta function which returns `Y-m-d` formatted string to indicate the last modification date, otherwise it uses the date the controller file was modified
             // ],  ?? []),
+            'enable_geo' => $options['geo'] ?? __APP_SETTINGS__['enable_geo'] ?? false,
 
             // Permission for a page or API 
             'permission' => $options['permission'] ?? $context_permission ?? null,
@@ -277,6 +256,7 @@ class Route {
             'handler' => $route->get_handler(),
             'handler_data' => '', // Unused?
             'sitemap ' => $route->get_sitemap(),
+            'enable_geo' => $route->get_enable_geo(),
             'navigation' => $route->get_navigation(),
             'cache_control' => $route->get_cache_control(),
             'unread' => $route->get_unread(),
@@ -321,7 +301,7 @@ class Route {
      * 
      *     ?      - 0 or 1 of the preceeding character or token
      */
-    static function convert_path_to_regex_pattern($route) {
+    static function convert_path_to_regex_pattern($route, $allow_geo = false) {
         $preg_quote = self::$preg_quote;
         $regex_search = "%\{$preg_quote\}%";
         $regex_replace = "($preg_quote)";
@@ -332,16 +312,19 @@ class Route {
 
         // Finally, we create our regex pattern
         $new_route = "%^" . str_replace(["/", "..."], ["\/", "(.*)"], $new_route);
+        
+        // Check if this route allows geo
+        $terminator = "\/?$%";
+        if($allow_geo) $terminator = "(\.md)?\/?$%";
 
-
-
-        // Make the route tolerant of trailing slashes
-        if (substr($new_route, -2) === "\/") {
-            $new_route .= "?";
+        // Apply the terminator to the end of the pattern
+        if(str_ends_with($new_route, "\/")) {
+            $new_route = substr($new_route, 0, -2) . $terminator;
         } else {
-            $new_route .= "\/?";
+            $new_route = $new_route . $terminator;
         }
-        return "$new_route$%";
+
+        return $new_route;
     }
 
     static function get_js_handler($handler, $path, $controller) {

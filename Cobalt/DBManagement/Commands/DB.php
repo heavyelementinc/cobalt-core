@@ -10,6 +10,8 @@ use Cobalt\Commands\Classes\CommandInterface;
 use Cobalt\Commands\Classes\CommandItem;
 use Cobalt\Commands\Classes\CommandList;
 use Cobalt\Commands\Exceptions\CommandError;
+use Cobalt\DataModel\Interfaces\Migration;
+use Cobalt\DataModel\Types\DocumentType;
 use Cobalt\DBManagement\Import;
 use Cobalt\Model\Model;
 use Cobalt\Model\Types\MixedType;
@@ -19,6 +21,8 @@ use Drivers\DatabaseManagement;
 use Error;
 use Exception;
 use Override;
+use Throwable;
+use TypeError;
 use Validation\Exceptions\ValidationIssue;
 
 class DB extends CommandInterface {
@@ -119,15 +123,64 @@ class DB extends CommandInterface {
             $this->failed_instantiation($e);
             return self::CONVERT_FAIL;
         }
-
-        // Load and verify that the namespace is a Model
-        if ($model instanceof Model === false) {
+        if($model instanceof DocumentType) {
+            $this->handleDataModelMigration($model, $skip);
+        } else if ($model instanceof Model === false) {
+            $this->handleModelMigration($model, $skip);
+        } else {
+            // Load and verify that the namespace is a Model
             // If it's *not* a model, fail gracefully
             say("$namespaced_model is not an instance of Model", 'e');
             return self::CONVERT_FAIL;
         }
+        
+        $delta = microtime(true) - $t;
+        print(" > Completed in " . fmt(round($delta, 2), "i") . " seconds\n");
+        return self::CONVERT_SUCCESS;
+    }
+
+    private function handleDataModelMigration(DocumentType $model, string $skip = ""):int {
+        if($model instanceof Migration == false) {
+            throw new TypeError("This DataModel does not implement the Cobalt\DataModel\Interfaces\Migration interface");
+        }
+        echo sprintf("\n✅ %s is an instance of %s", fmt($model::class, "i"), fmt("DataModel", 'w'));
+        $filter = [];
+        $model::_getQuery($filter);
+        $limit = $model::countDocuments($filter);
+        $total = $model::countDocuments([]);
+        $options = ['limit' => $limit];
+        $model::_getOptions($filter, $options);
+        $progress = 0;
+        $skipped = 0;
+
+        // Enforce an all-array typeMap so we have a consistent means of manipulating the document
+        $options['typeMap'] = ['root' => 'array','document' => 'array','array' => 'array'];
+        $cursor = $model::find($filter, $options);
+        echo sprintf("\nThis migration will modify %s collection's %d of %d documents.\n", 
+            fmt($model::getCollectionName(), "i"),
+            fmt($limit, "i"),
+            fmt($total, "w")
+        );
+        /** @var array $doc */
+        foreach($cursor as $doc) {
+            $updateQuery = ['_id' => $doc['_id']];
+            $updateOperations = [];
+            $updateOptions = [];
+            $model::_onModify($doc, $updateOperations);
+            $model::_onUpdate($updateQuery, $updateOperations, $updateOptions);
+            $result = $model::updateOne($updateQuery, $updateOperations, $updateOptions);
+            $modified = $result->getModifiedCount();
+            if($modified) $progress += $modified;
+            else $skipped += $modified;
+            echo sprintf("\r > Updated: %s Skipped: %s", fmt($progress, "i"), fmt($skipped, "i"));
+        }
+        echo "\n";
+        return self::CONVERT_SUCCESS;
+    }
+
+    private function handleModelMigration(Model $model, string $skip) {
         $limit = $model->count([]);
-        $chars = strlen($limit);
+        $chars = strlen((string)$limit);
         $progress = 0;
         $skipped = 0;
         $db = new DatabaseManagement();
@@ -143,9 +196,6 @@ class DB extends CommandInterface {
             say($e->getMessage(), 'e');
             return self::CONVERT_FAIL;
         }
-        $delta = microtime(true) - $t;
-        print(" > Completed in " . fmt(round($delta, 2), "i") . " seconds\n");
-        return self::CONVERT_SUCCESS;
     }
 
     private function failed_instantiation($e) {

@@ -237,7 +237,7 @@ function getHeader($header, $headerList = null, $latest = true, $exception = tru
 
     if(gettype($match) === "array" && $latest) return $match[count($match) - 1];
     if($match) return $match;
-    if($exception) throw new NoValue("The specified header was not found among the request headers");
+    if($exception) throw new NoValue("The specified header ($header) was not found among the request headers");
     return null;
 }
 

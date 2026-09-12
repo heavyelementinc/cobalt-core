@@ -20,6 +20,7 @@ class Options implements Iterator, JsonSerializable {
         'handler',
         'navigation',
         'sitemap',
+        'enable_geo',
         'cache_control',
         'unread',
         'permission',
@@ -48,6 +49,7 @@ class Options implements Iterator, JsonSerializable {
     
     /** @var array{ignore: bool, children: callable, lastmod: callable} */
     private ?array $sitemap = null; // ['ignore' => false];
+    private ?bool $enable_geo = null;
     /** @var array{disallow: bool, max-age: string, type: string} */
     private ?array $cache_control = null; //['disallow' => false,'max-age' => '604800','type' => 'private',];
     private mixed $unread = false;
@@ -236,6 +238,15 @@ class Options implements Iterator, JsonSerializable {
      */
     public function get_sitemap():array {
         return $this->sitemap ?? [];
+    }
+
+    public function set_enable_geo(bool $enable_geo):self {
+        $this->enable_geo = $enable_geo;
+        return $this;
+    }
+
+    public function get_enable_geo():?bool {
+        return $this->enable_geo;
     }
 
     /**
