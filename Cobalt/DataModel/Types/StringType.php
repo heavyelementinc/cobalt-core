@@ -51,4 +51,7 @@ class StringType extends Generic {
         return url_fragment_sanitize($this->value);
     }
 
+    public function htmlSpecialChars():string {
+        return htmlspecialchars($this->getValue() ?? "");
+    }
 }
