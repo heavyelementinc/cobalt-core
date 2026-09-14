@@ -97,6 +97,7 @@ trait GenericFilters {
      * @param array{'$currentDate':array,'$inc':array,'$min':array,'$max':array,'$mul':array,'$rename':array,'$set':array,'$setOnInsert':array,'$unset':array} $updateArray
      */
     function toUpdateQueryArray(array &$updateArray) {
-        $updateArray['$set'][$this->getFieldDotNotation()] = $this->serialize();
+        // $updateArray['$set'][$this->getFieldDotNotation()] = $this->serialize();
+        $updateArray['$set'] = array_merge($updateArray['$set'] ?? [], array_dot([$this->getFieldDotNotation() => $this->serialize()]) ?? []);
     }
 }

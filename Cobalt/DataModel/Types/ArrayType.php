@@ -89,6 +89,14 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
         $this->index = 0;
     }
 
+    /**
+     * Returns an array
+     * @param array{'$currentDate':array,'$inc':array,'$min':array,'$max':array,'$mul':array,'$rename':array,'$set':array,'$setOnInsert':array,'$unset':array} $updateArray
+     */
+    #[Override]
+    function toUpdateQueryArray(array &$updateArray) {
+        $updateArray['$set'][$this->getFieldDotNotation()] = $this->serialize();
+    }
     
     #[Override]
     public function getValue(): mixed {
