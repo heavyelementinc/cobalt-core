@@ -29,6 +29,10 @@ class NumberType extends Generic {
     
     #[Override]
     public function setValue($mixed):void {
+        if($this->directives?->nullable?->value && !$mixed) {
+            $this->value = null;
+            return;
+        }
         if(!is_numeric($mixed)) throw new TypeError("Value `$mixed` is not numeric");
         $this->value = $mixed;
     }
