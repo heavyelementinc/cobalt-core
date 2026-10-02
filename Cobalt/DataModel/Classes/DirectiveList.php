@@ -8,6 +8,7 @@ use Cobalt\DataModel\Directives\Base\DirectiveCommon;
 use Cobalt\DataModel\Directives\ClassList;
 use Cobalt\DataModel\Directives\DefaultValue;
 use Cobalt\DataModel\Directives\Filters\Arrays\Each;
+use Cobalt\DataModel\Directives\ExternalModel;
 use Cobalt\DataModel\Directives\Filters\Clearable;
 use Cobalt\DataModel\Directives\Filters\Filter;
 use Cobalt\DataModel\Directives\Filters\Max;
@@ -45,6 +46,7 @@ use TypeError;
  * @property-read ?Clearable $clearable
  * @property-read ?DefaultValue $default
  * @property-read ?Each $each
+ * @property-read ?ExternalModel $external_model
  * @property-read ?Filename $filename
  * @property-read ?Filter $filter
  * @property-read ?Label $label

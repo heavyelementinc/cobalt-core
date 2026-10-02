@@ -8,7 +8,6 @@ use Override;
 
 #[Attribute()]
 class BoolDirective extends AbstractBoolDirective {
-    #[Override]
     function __construct(string $name, bool|string $value){
         return parent::__construct($value);
     }

@@ -2,6 +2,7 @@
 
 namespace Cobalt\DataModel\Types;
 
+use Cobalt\Database\Traits\Accessible;
 use Cobalt\Database\Traits\StaticAccessible;
 use Cobalt\DataModel\Directives\Base\DirectiveCommon;
 use Cobalt\DataModel\Directives\Filters\Valid;
@@ -30,7 +31,7 @@ use ReflectionProperty;
  */
 
 abstract class DocumentType extends DictionaryType implements Persistable {
-    use StaticAccessible;
+    use Accessible;
 
     // #[PrivateValue()]
     // readonly ArrayType $__job_queue;
@@ -84,5 +85,15 @@ abstract class DocumentType extends DictionaryType implements Persistable {
             $this->filterResult->job->queue();
         }
         return $this->filterResult;
+    }
+
+    function getTypeMap():array {
+        return [
+            'typeMap' => [
+                'root' => $this::class,
+                'document' => 'array',
+                'array' => 'array',
+            ]
+        ];
     }
 }

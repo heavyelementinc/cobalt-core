@@ -41,7 +41,7 @@ class ForeignDocumentType extends Generic {
             throw new Exception("Required directive `external_model` is not defined on ObjectIdType: `".($this->name ?? "%field_name%")."`");
         }
         // Populate this element when its value is actually read and not before!
-        return $this->value = $this->directives->external_model->getValue();
+        return $this->value = $this->directives?->external_model?->getValue();
     }
 
     #[Override]

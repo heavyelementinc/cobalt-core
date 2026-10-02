@@ -86,8 +86,8 @@ $required_functions = [
     'imagegif',
     'imagecreatefromwebp',
     'imagewebp',
-    'imagecreatefromavif',
-    'imageavif',
+    // 'imagecreatefromavif',
+    // 'imageavif',
 
     "exif_imagetype",
     "exif_read_data",

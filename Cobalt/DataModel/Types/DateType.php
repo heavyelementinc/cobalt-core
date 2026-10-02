@@ -57,6 +57,11 @@ class DateType extends Generic {
         return $toValidate;
     }
 
+    public function toDateTime():DateTime {
+        if(!$this->value) $this->value = new DateTime();
+        return $this->value;
+    }
+
     public function format(string $format = self::FORMAT_DT_LOCAL):string {
         $value = $this->getValue();
         if(!$value) return "";

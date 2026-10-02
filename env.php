@@ -19,6 +19,7 @@
  */
 
 use Cobalt\Auth\Session\Models\Session;
+use Cobalt\Settings\Settings;
 use Cobalt\UTMTracker\UTMHandler;
 ini_set('display_errors', 'Off');
 
@@ -124,14 +125,14 @@ spl_autoload_register("cobalt_autoload", true);
 
 try {
     //TODO: fix settings cache so it doesn't need to bootstrap every time!
-    $application = new \Cobalt\Settings\Settings(COBALT_BOOSTRAP_ALWAYS);//config()['bootstrap_mode'] ?? COBALT_BOOSTRAP_AS_NEEDED);
-    /** @global $app How we set up and process our settings */
+    $application = new Settings(COBALT_BOOSTRAP_ALWAYS);//config()['bootstrap_mode'] ?? COBALT_BOOSTRAP_AS_NEEDED);
+    /** @var Settings $app How we set up and process our settings */
     $app = $application;
 } catch (Exception $e) {
-    cobalt_log($application::class, $e->getMessage(), COBALT_LOG_EXCEPTION);
+    cobalt_log(Settings::class, $e->getMessage(), COBALT_LOG_EXCEPTION);
     kill($e->getMessage());
 } catch (Error $e) {
-    cobalt_log($application::class, $e->getMessage(), COBALT_LOG_ERROR);
+    cobalt_log(Settings::class, $e->getMessage(), COBALT_LOG_ERROR);
     kill($e->getMessage());
 }
 

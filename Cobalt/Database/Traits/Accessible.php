@@ -182,9 +182,11 @@ trait Accessible {
      */
     function getTypeMap():array {
         return [
-            'root' => ($this instanceof Persistable) ? $this::class : 'array',
-            'document' => 'array',
-            'array' => 'array',
+            'typeMap' => [
+                'root' => ($this instanceof Persistable) ? $this::class : 'array',
+                'document' => 'array',
+                'array' => 'array',
+            ]
         ];
     }
 }
