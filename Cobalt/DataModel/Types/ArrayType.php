@@ -29,11 +29,6 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     protected int $index = 0;
 
     #[Override]
-    public function count(): int {
-        return count($this->getValue());
-    }
-
-    #[Override]
     protected function composeFieldname(string|int $name): string {
         return "$this->fieldname.$name";
     }
@@ -112,16 +107,6 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
         return $arr;
     }
 
-    /**
-     * @template TValue
-     * @template TInitial
-     * @param Closure(TInitial, TValue) $callback
-     * @return null 
-     */
-
-    public function reduce(Closure $callback) {
-        return array_reduce($this->value ?? [], $callback);
-    }
 
     public function each(array $element, bool $filter = false):array {
         /** @var ?Generic $each */
@@ -222,6 +207,31 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
     #[Override]
     public function rewind(): void {
         $this->index = 0;
+    }
+
+
+    // -------------------------------------------------------------- //
+    // ---------------------- ARRAY METHODS ------------------------- //
+    // -------------------------------------------------------------- //
+    
+    #[Override]
+    public function count(): int {
+        return count($this->getValue());
+    }
+
+    /**
+     * @template TValue
+     * @template TInitial
+     * @param Closure(TInitial, TValue) $callback
+     * @return null 
+     */
+
+    public function reduce(Closure $callback) {
+        return array_reduce($this->value ?? [], $callback);
+    }
+
+    public function column(string|int $key, $index = null):array {
+        return array_column($this->getValue(), $key, $index);
     }
     
 }

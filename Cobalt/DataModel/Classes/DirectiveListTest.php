@@ -111,7 +111,7 @@ class DirectiveList implements Iterator, ArrayAccess {
         $this->__unset($offset);
     }
 
-    private int $index = 0;
+    private int $__index = 0;
 
     #[Override]
     public function current(): mixed {
@@ -120,12 +120,12 @@ class DirectiveList implements Iterator, ArrayAccess {
 
     #[Override]
     public function next(): void {
-        $this->index += 1;
+        $this->__index += 1;
     }
 
     #[Override]
     public function key(): mixed {
-        return array_keys($this->list)[$this->index];
+        return array_keys($this->list)[$this->__index];
     }
 
     #[Override]
@@ -135,7 +135,7 @@ class DirectiveList implements Iterator, ArrayAccess {
 
     #[Override]
     public function rewind(): void {
-        $this->index = 0;
+        $this->__index = 0;
     }
 
 }

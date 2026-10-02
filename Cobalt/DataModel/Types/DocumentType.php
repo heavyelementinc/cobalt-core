@@ -3,35 +3,25 @@
 namespace Cobalt\DataModel\Types;
 
 use Cobalt\Database\Traits\Accessible;
-use Cobalt\Database\Traits\StaticAccessible;
-use Cobalt\DataModel\Directives\Base\DirectiveCommon;
-use Cobalt\DataModel\Directives\Filters\Valid;
-use Cobalt\DataModel\Directives\PrivateValue;
 use Cobalt\DataModel\Filters\FilterResult;
+use Cobalt\DataModel\Traits\ControllerIndex;
 use Cobalt\DataModel\Types\StringType;
-use Cobalt\DataModel\Types\Generic;
 use Cobalt\DataModel\Types\DictionaryType;
-use Exception;
 use MongoDB\BSON\Document;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\Persistable;
 use stdClass;
 use Override;
-use ReflectionAttribute;
-use ReflectionClass;
-use ReflectionNamedType;
-use ReflectionProperty;
+
 
 /**
  * DataModel is the final boss of Cobalt's modeling system.
- * 
- * 
  * 
  * @package Cobalt\DataModel
  */
 
 abstract class DocumentType extends DictionaryType implements Persistable {
-    use Accessible;
+    use Accessible, ControllerIndex;
 
     // #[PrivateValue()]
     // readonly ArrayType $__job_queue;
@@ -44,6 +34,15 @@ abstract class DocumentType extends DictionaryType implements Persistable {
      * @return StringType 
      */
     abstract public function getDefaultField(): StringType;
+
+    #[Override]
+    public function indexDetails(): array {
+        return [
+            'filter' => [],
+            'options' => []
+        ];
+    }
+
 
     public function getFieldsetLegend():string {
         $label = $this->directives->fieldset?->value ?? $this->directives->label?->value;

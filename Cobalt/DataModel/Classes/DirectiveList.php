@@ -11,6 +11,7 @@ use Cobalt\DataModel\Directives\Filters\Arrays\Each;
 use Cobalt\DataModel\Directives\ExternalModel;
 use Cobalt\DataModel\Directives\Filters\Clearable;
 use Cobalt\DataModel\Directives\Filters\Filter;
+use Cobalt\DataModel\Directives\Index;
 use Cobalt\DataModel\Directives\Filters\Max;
 use Cobalt\DataModel\Directives\Filters\Min;
 use Cobalt\DataModel\Directives\Filters\Nullable;
@@ -49,6 +50,7 @@ use TypeError;
  * @property-read ?ExternalModel $external_model
  * @property-read ?Filename $filename
  * @property-read ?Filter $filter
+ * @property-read ?Index $__index
  * @property-read ?Label $label
  * @property-read ?Max $max
  * @property-read ?MaxResolution $max_resolution
@@ -200,7 +202,7 @@ class DirectiveList implements Iterator, ArrayAccess {
         $this->__unset($offset);
     }
 
-    private int $index = 0;
+    private int $__index = 0;
 
     #[Override]
     public function current(): mixed {
@@ -209,12 +211,12 @@ class DirectiveList implements Iterator, ArrayAccess {
 
     #[Override]
     public function next(): void {
-        $this->index += 1;
+        $this->__index += 1;
     }
 
     #[Override]
     public function key(): mixed {
-        return array_keys($this->list)[$this->index];
+        return array_keys($this->list)[$this->__index];
     }
 
     #[Override]
@@ -224,7 +226,7 @@ class DirectiveList implements Iterator, ArrayAccess {
 
     #[Override]
     public function rewind(): void {
-        $this->index = 0;
+        $this->__index = 0;
     }
 
 }

@@ -7,15 +7,13 @@ use Cobalt\DataModel\Classes\Undefined;
 use Cobalt\DataModel\Directives\Base\DirectiveCommon;
 use Cobalt\DataModel\Classes\DirectiveList;
 use Cobalt\DataModel\Filters\FilterResult;
-use Cobalt\DataModel\Traits\Joinable;
+use Cobalt\DataModel\Traits\IndexMethods;
 use Cobalt\DataModel\Traits\GenericFields;
 use Cobalt\DataModel\Traits\GenericFilters;
 use Cobalt\DataModel\Traits\GenericPrototypes;
 use JsonSerializable;
-use Override;
 use ReflectionAttribute;
 use ReflectionClass;
-use Serializable;
 use Stringable;
 use TypeError;
 
@@ -31,7 +29,7 @@ use TypeError;
  * @package Cobalt\DataModel\Types
  */
 abstract class Generic implements Stringable, JsonSerializable {
-    use GenericPrototypes, GenericFilters, GenericFields;
+    use GenericPrototypes, GenericFilters, GenericFields, IndexMethods;
     protected mixed $value;
     protected string $name;
     protected string $fieldname;
@@ -97,7 +95,7 @@ abstract class Generic implements Stringable, JsonSerializable {
     public function toClientJson(?int $mode = null){ 
         if(!$mode) $mode = self::SERIALIZE_MODE_ONLY_PUBLIC + self::SERIALIZE_MODE_VALUE_DISPLAY + self::SERIALIZE_MODE_INCLUDE_FOREIGN_FIELDS;
         if($mode & self::SERIALIZE_MODE_VALUE_DISPLAY) return $this->display();
-        return $this->value;
+        return $this->value ?? null;
     }
 
     // #[Override]

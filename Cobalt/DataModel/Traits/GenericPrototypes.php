@@ -9,6 +9,7 @@ use ReflectionMethod;
 use ReflectionObject;
 use TypeError;
 use Cobalt\DataModel\Types\Generic;
+use Exceptions\HTTP\BadRequest;
 
 /**
  * @mixin Generic
@@ -45,13 +46,6 @@ trait GenericPrototypes {
         return $this->getValue();
     }
 
-    function getValid():?array {
-        if($this->directives->hasDirective('valid')) {
-            return $this->directives->valid->normalized();
-        }
-        return null;
-    }
-
     function options(mixed $preselected = null, array $arbitrary_additional_values = []):?string {
         if($this->directives->hasDirective('valid')) {
             return $this->directives->valid->options($preselected, $arbitrary_additional_values);
@@ -72,7 +66,7 @@ trait GenericPrototypes {
      * @throws TypeError 
      */
     function __call(string $name, array $arguments):mixed {
-        $protoFail = new TypeError("Method $name does not exist on `\$this`");
+        $protoFail = new TypeError("Method $name does not exist on `".$this::class."`");
         if(!method_exists($this, $name)) throw $protoFail;
         if(get_cfg_var("opcache.save_comments") === false) {
             throw new Error('comments must be saved');
