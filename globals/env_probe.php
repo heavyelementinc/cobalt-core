@@ -146,3 +146,7 @@ if(file_exists(__APP_COMPOSER__)) {
     $composer = __ENV_ROOT__ . "/vendor/autoload.php";
     $__dependency_dir = "cobalt-core";
 }
+
+if(get_cfg_var("opcache.save_comments") === false) {
+    kill('<code>opcache</code> is misconfigured. Please set <code>opcache.save_comments=1</code> in your <code>php.ini</code> file.');
+}

@@ -106,4 +106,43 @@ class NumberType extends Generic {
         $this->value *= -1;
         return $this;
     }
+
+    #[PrototypeMethod()]
+    protected function format(int $decimals = 0, ?string $decimal_separator = '.', ?string $thousands_separator = ',') {
+        return number_format($this->getValue(),$decimals, $decimal_separator, $thousands_separator);
+    }
+
+    #[PrototypeMethod()]
+    protected function avg(int|float|NumberType ...$numbers) {
+        $sum = $this->getValue();
+        foreach($numbers as $number) {
+            $sum += $number->value ?? $number;
+        }
+        return $sum / (count($numbers) + 1);
+    }
+
+    #[PrototypeMethod()]
+    protected function ratio(int|float|NumberType $total) {
+        $total = $total->value ?? $total;
+        if($total === 0) throw new TypeError("Cannot divide by zero");
+        return $this->getValue() / $total;
+    }
+
+    #[PrototypeMethod()]
+    protected function min(int|float|NumberType ...$numbers) {
+        $values = [$this->getValue()];
+        foreach($numbers as $number) {
+            $values[] = $number->value ?? $number;
+        }
+        return min($values);
+    }
+
+    #[PrototypeMethod()]
+    protected function max(int|float|NumberType ...$numbers) {
+        $values = [$this->getValue()];
+        foreach($numbers as $number) {
+            $values[] = $number->value ?? $number;
+        }
+        return max($values);
+    }
 }

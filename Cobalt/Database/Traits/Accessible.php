@@ -166,7 +166,8 @@ trait Accessible {
 
     final function aggregate($pipeline, $options = []) {
         $this->__initAccessible();
-        $options += $this->getTypeMap();
+        // $options += $this->getTypeMap();
+        $options['typeMap'] = ['document' => 'array', 'root' => 'array'];
         $cursor = $this->collection->aggregate($pipeline, $options);
         benchmark_reads();
         return $cursor;

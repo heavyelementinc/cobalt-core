@@ -68,9 +68,6 @@ trait GenericPrototypes {
     function __call(string $name, array $arguments):mixed {
         $protoFail = new TypeError("Method $name does not exist on `".$this::class."`");
         if(!method_exists($this, $name)) throw $protoFail;
-        if(get_cfg_var("opcache.save_comments") === false) {
-            throw new Error('comments must be saved');
-        }
         $method = new ReflectionMethod($this, $name);
         $attributes = $method->getAttributes(PrototypeMethod::class);
         if(count($attributes) == 0) throw $protoFail;
