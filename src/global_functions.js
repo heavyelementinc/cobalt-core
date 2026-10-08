@@ -143,6 +143,7 @@ async function lightbox(origin, animate = true) {
     let lightbox_content = `<img src='${imageUrl}'>`;
     if (imageUrl.indexOf("youtube.com") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split("?v=")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     if (imageUrl.indexOf("youtu.be") !== -1) lightbox_content = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${imageUrl.split(".be/")[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    if (imageUrl.indexOf("vimeo.com") !== -1) lightbox_content = `<iframe src="https://player.vimeo.com/video/${imageUrl.split(".com/")[1]}?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" width="560" height="315" title="Vimeo Video Embed"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`;
     const modal = new Modal({
         parentClass: "lightbox",
         body: lightbox_content,
