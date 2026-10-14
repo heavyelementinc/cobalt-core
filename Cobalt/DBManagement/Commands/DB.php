@@ -139,6 +139,13 @@ class DB extends CommandInterface {
         return self::CONVERT_SUCCESS;
     }
 
+    /**
+     * Summary of handleDataModelMigration
+     * @param DocumentType&Migration $model
+     * @param string $skip
+     * @throws TypeError
+     * @return int
+     */
     private function handleDataModelMigration(DocumentType $model, string $skip = ""):int {
         if($model instanceof Migration == false) {
             throw new TypeError("This DataModel does not implement the Cobalt\DataModel\Interfaces\Migration interface");
@@ -146,8 +153,8 @@ class DB extends CommandInterface {
         echo sprintf("\n✅ %s is an instance of %s", fmt($model::class, "i"), fmt("DataModel", 'w'));
         $filter = [];
         $model::_getQuery($filter);
-        $limit = $model::countDocuments($filter);
-        $total = $model::countDocuments([]);
+        $limit = $model->countDocuments($filter);
+        $total = $model->countDocuments([]);
         $options = ['limit' => $limit];
         $model::_getOptions($filter, $options);
         $progress = 0;
@@ -155,9 +162,9 @@ class DB extends CommandInterface {
 
         // Enforce an all-array typeMap so we have a consistent means of manipulating the document
         $options['typeMap'] = ['root' => 'array','document' => 'array','array' => 'array'];
-        $cursor = $model::find($filter, $options);
-        echo sprintf("\nThis migration will modify %s collection's %d of %d documents.\n", 
-            fmt($model::getCollectionName(), "i"),
+        $cursor = $model->find($filter, $options);
+        echo sprintf("\nThis migration will modify %s collection's %s of %s documents.\n", 
+            fmt($model->getCollectionName(), "i"),
             fmt($limit, "i"),
             fmt($total, "w")
         );
@@ -168,7 +175,7 @@ class DB extends CommandInterface {
             $updateOptions = [];
             $model::_onModify($doc, $updateOperations);
             $model::_onUpdate($updateQuery, $updateOperations, $updateOptions);
-            $result = $model::updateOne($updateQuery, $updateOperations, $updateOptions);
+            $result = $model->updateOne($updateQuery, $updateOperations, $updateOptions);
             $modified = $result->getModifiedCount();
             if($modified) $progress += $modified;
             else $skipped += $modified;

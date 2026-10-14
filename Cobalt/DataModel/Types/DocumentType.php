@@ -58,7 +58,7 @@ abstract class DocumentType extends DictionaryType implements Persistable {
     #[Override]
     public function bsonUnserialize(array $data): void {
         if($this->__isInitialized == false) $this->__construct();
-        if(key_exists('_id', $data)) $this->_id = $data['_id'];
+        if(isset($data['_id'])) $this->_id = $data['_id'];
         unset($data["_id"], $data['__pclass'], $data['__pClass']);
         $this->setValue($data);
     }

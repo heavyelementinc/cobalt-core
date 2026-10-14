@@ -14,7 +14,7 @@ use Imagick;
 use Override;
 
 class ImageType extends ForeignDocumentType {
-    use FileHandlerImage;
+    use FileHandlerImage;   
     const FILE_UPLOAD_INDICATOR = '$_FILES_$';
 
     function __construct(null|DictionaryType|ArrayType $model = null, ?DictionaryType $rootModel = null) {
