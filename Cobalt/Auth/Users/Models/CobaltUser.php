@@ -243,16 +243,16 @@ class CobaltUser extends DocumentType implements Migration {
                 new StringType
             ],
             'integrations' => [
-                new DocumentType,
+                new DictionaryType,
             ],
             'login_tokens' => [
                 new ArrayType,
             ],
             'tfa' => [
-                new DocumentType,
+                new DictionaryType,
                 'schema' => [
                     'totp' => [
-                        new DocumentType,
+                        new DictionaryType,
                         'schema' => [
                             'enabled' => new BooleanType,
                             'secret' => new StringType,

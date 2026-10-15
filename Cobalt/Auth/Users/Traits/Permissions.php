@@ -41,9 +41,9 @@ trait Permissions {
 
     static function explicitPermission(?User $user, string $permission) {
         // If the user is not root, let's check if they have the permission
-        if(!key_exists($permission, $user->__dataset['permissions']->getValue()->__dataset ?? [])) return false;
+        if(!key_exists($permission, $user->__dataset['permissions']->getValue() ?? [])) return false;
         
-        return $user->__dataset['permissions']->getValue()->__dataset[$permission]->getValue();
+        return $user->__dataset['permissions']->getValue()[$permission]->getValue();
     }
 
     function findUsersByPermission(string|array $permission, bool $permissionType = true) {

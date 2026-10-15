@@ -209,6 +209,7 @@ class User extends Model implements Migration
                 //         return $this->permissions?->length ?? 0;
                 //     }
                 // ]
+                
             ],
             'is_root' => [
                 new BooleanType,

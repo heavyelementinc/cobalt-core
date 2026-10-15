@@ -23,7 +23,6 @@ foreach($additionalFields as $key => $details) {
     <small>{{doc._id}}</small>
 </hgroup>
 
-<form-request method="{{method}}" action="{{action}}" {{autosave}}>
     <tab-nav>
         <nav>
             <a href="#basics"><i name="card-account-details"></i> Basic Info</a>
@@ -33,6 +32,7 @@ foreach($additionalFields as $key => $details) {
             <?= $links ?>
         </nav>
         <div id="basics">
+            <form-request method="{{method}}" action="{{action}}" {{autosave}}>
             <ul class="list-panel">
                 <li class="hbox">
                     <div>
@@ -60,16 +60,20 @@ foreach($additionalFields as $key => $details) {
                     <?= $doc->email->field() ?>
                 </li>
             </ul>
+            </form-request>
         </div>
         <div id="security">
+            <form-request method="{{method}}" action="{{action}}" {{autosave}}>
             <ul class='list-panel'>
                 <li>
                     <?= $doc->pword->getLabel() ?>
                     <?= $doc->pword->field() ?>
                 </li>
             </ul>
+            <form-request method="{{method}}" action="{{action}}" {{autosave}}>
         </div>
         <div id="permissions">
+            <form-request method="{{method}}" action="{{action}}" autosave="form">
             <?php
             $permissions = [];
             /**
@@ -111,8 +115,10 @@ foreach($additionalFields as $key => $details) {
                     </li>
                 </ul>
             </div>
+            </form-request>
         </div>
         <div id="sessions">
+            <form-request method="{{method}}" action="{{action}}" {{autosave}}>
             <?php
                 $sessions = new Session();
                 $currentSession = (string)session()->_id;
@@ -152,6 +158,7 @@ foreach($additionalFields as $key => $details) {
                     HTML;
                 }
             ?>
+            </form-request>
         </div>
         <?= $panels ?>
     </tab-nav>
