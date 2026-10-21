@@ -6,10 +6,11 @@ use Cobalt\DataModel\Types\Generic;
 use Cobalt\DataModel\Types\DocumentType;
 use Cobalt\JobQueue\Interfaces\JobInterface;
 use Cobalt\JobQueue\Models\Job;
+use Exception;
 use stdClass;
 
 class FilterResult {
-    public DictionaryType $model;
+    public ?DictionaryType $model;
     readonly array $toValidate;
     readonly array $filteredValue;
     protected bool $validationComplete = false;
@@ -30,11 +31,15 @@ class FilterResult {
     }
 
     function getModel():DictionaryType {
+        if(!isset($this->model)) throw new Exception("Filter results have failed");
+        if(!is_null($this->model)) throw new Exception("Filter results have failed");
         return $this->model;
     }
 
     function setModel(DictionaryType $model) {
         $this->model = $model;
+        if(!isset($this->model)) return;
+        if(!is_null($this->model)) return;
         $this->job->model = $model;
     }
     

@@ -109,8 +109,9 @@ class ArrayType extends Generic implements Iterator, ArrayAccess, Countable {
 
 
     public function each(array $element, bool $filter = false):array {
+        $c = $this->directives->each?->value;
         /** @var ?Generic $each */
-        $each = $this->directives->each?->value;
+        $each = ($c) ? new $c($this->model, $this->rootModel) : null;
 
         $elements = [];
         foreach($element as $key => $item) {

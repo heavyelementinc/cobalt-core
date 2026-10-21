@@ -28,14 +28,21 @@ function is_secure():bool {
 function is_trusted_host(array $hosts = [], ?string $from = null):bool {
     $from = $from ?? $_SERVER['HTTP_REFERER'];
     $hosts = [...__APP_SETTINGS__['API_CORS_allowed_origins'], ...$hosts];
-    return in_array(parse_url($from, PHP_URL_HOST), $hosts);
+    $url = parse_url($from, PHP_URL_HOST);
+    $port = parse_url($from, PHP_URL_PORT);
+    if($port) {
+        return in_array("$url:$port", $hosts);
+    }
+    return in_array($url, $hosts);
 }
 
 function send_access_control_allow_origin_header(array $hosts, ?string $from = null) {
     $is_trusted = is_trusted_host($hosts, $from);
     if($is_trusted) {
-        $parsed = parse_url($_SERVER['HTTP_REFERER'],);
-        header("Access-Control-Allow-Origin: $parsed[scheme]://$parsed[host]");
+        $parsed = parse_url($_SERVER['HTTP_REFERER']);
+        $url = "$parsed[scheme]://$parsed[host]";
+        if($parsed['port']) $url .= ":$parsed[port]";
+        header("Access-Control-Allow-Origin: $url");
     }
     return $is_trusted;
 }

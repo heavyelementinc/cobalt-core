@@ -23,7 +23,13 @@ function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_E
     if(defined("UNIT_TESTS")) die("FATAL ERROR: $msg\n");
     if(defined("COBALT_LOG_EXCEPTION")) cobalt_log("KILL", $msg, COBALT_LOG_EXCEPTION);
     else $specific_message .= "<p>Additionally, this error has not been logged.</p>";
-    $html = "<html>
+    $php_version = "<var>".PHP_VERSION."</var><ul>";
+    foreach(get_loaded_extensions() as $ext) {
+        $php_version .= "<li><code>$ext</code></li>";
+    }
+    $php_version = "</ul>";
+    $html = <<<HTML
+    <html>
     <head>
         <title>$title</title>
         <style>
@@ -56,8 +62,10 @@ function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_E
             <h1>$title</h1>
             <p>$msg</p>
         </main>
+        <details><summary>Environment</summary>$php_version</details>
     </body>
-    </html>";
+    </html>
+    HTML;
     die($html);
 }
 

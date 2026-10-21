@@ -35,7 +35,7 @@ abstract class Generic implements Stringable, JsonSerializable {
     protected string $fieldname;
     // An array may be a model
     protected null|DictionaryType|ArrayType $model = null;
-    protected ?DictionaryType $rootModel = null;
+    protected null|DictionaryType $rootModel = null;
 
     readonly DirectiveList $directives;
 
@@ -47,11 +47,6 @@ abstract class Generic implements Stringable, JsonSerializable {
             $model = $this;
         }
         
-        // Set up filter results so we can scan through our documents and validate stuff
-        $this->filterResult = $model->filterResult ?? new FilterResult();
-        // This is less terrible, but still sucks.
-        $this->filterResult->setModel($rootModel ?? $model ?? $this->filterResult?->model ?? new DictionaryType());
-
         $this->directives = new DirectiveList($this);
         // Handle built-in attributes
         $class = new ReflectionClass($this);

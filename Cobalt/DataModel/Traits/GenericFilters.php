@@ -6,6 +6,7 @@ use Cobalt\DataModel\Classes\DirectiveList;
 use Cobalt\DataModel\Filters\FilterIssue;
 use Cobalt\DataModel\Filters\FilterResult;
 use Cobalt\DataModel\Filters\FilterSkip;
+use Cobalt\DataModel\Types\DictionaryType;
 use Cobalt\DataModel\Types\Generic;
 
 /**
@@ -63,6 +64,7 @@ trait GenericFilters {
      * @return FilterResult 
      */
     function __filter(mixed $toValidate):FilterResult {
+        $this->initFilterResult();
         $result = $this->filter($this->jsonUnserialize($toValidate), $toValidate);
         $update = $this->filterResult->resultForField($this);
         if($update->hasIssues()) {
@@ -99,5 +101,14 @@ trait GenericFilters {
     function toUpdateQueryArray(array &$updateArray) {
         // $updateArray['$set'][$this->getFieldDotNotation()] = $this->serialize();
         $updateArray['$set'] = array_merge($updateArray['$set'] ?? [], array_dot([$this->getFieldDotNotation() => $this->serialize()]) ?? []);
+    }
+
+    function initFilterResult():void {
+        if(isset($this->filterResult)) {
+            return;
+        }
+        $model = $this->rootModel ?? $this->model;
+        $this->filterResult = $model?->filterResult ?? new FilterResult();
+        $this->filterResult->setModel($model ?? new DictionaryType());
     }
 }

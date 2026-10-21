@@ -74,6 +74,7 @@ abstract class DocumentType extends DictionaryType implements Persistable {
      * @return FilterResult
      */
     function filterDocument(mixed $toValidate, bool $allowOverloadedFilterFields = false):FilterResult {
+        $this->filterResult = new FilterResult();
         $this->filterResult->setModel($this);
         $this->__allowOverloadedFilterFields = $allowOverloadedFilterFields;
         $this->__filter($toValidate);
