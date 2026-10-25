@@ -2,8 +2,10 @@
 namespace Cobalt\Cron;
 
 use Cobalt\Model\Traits\Accessible;
+use Cobalt\Cron\Tasks\ICronTask;
 use Error;
 use Exception;
+use MongoDB\BSON\UTCDateTime;
 use Override;
 
 /**
@@ -22,7 +24,7 @@ class CronManager {
     }
 
     /**
-     * @return array<ICronTask>
+     * @return array<int, ICronTask>
      */
     function load_tasks():array {
         $tasks = $this->get_task_file(self::COBALT_CORE_TASK_FILE);
@@ -31,7 +33,7 @@ class CronManager {
     }
 
     /**
-     * @return array<ICronTask>
+     * @return array<int, ICronTask>
      */
     private function get_task_file(string $path, bool $required = true):array {
         if(!file_exists($path)) {
@@ -58,15 +60,22 @@ class CronManager {
             return;
         }
         foreach($tasks as $task) {
-            // $details = $task->crontask_details();
             $this->runCronTask($task);
         }
     }
 
     function runCronTask(ICronTask $task) {
         $start = microtime(true);
+        $details = $task->crontask_details();
+        $lastTask = $this->findOne([
+                'name' => $details['name']
+            ], [
+                'lastRan' => ['date' => -1],
+                'typeMap' => ['root' => 'array']
+            ]
+        );
         try {
-            $task->crontask_setup();
+            $task->crontask_setup($lastTask);
             $status = $task->crontask_execute($this);
             $task->crontask_post($status);
             $end = microtime(true);
@@ -82,7 +91,19 @@ class CronManager {
         if($status >= 1) {
             cobalt_log('TASK_EXEC', $task::class . " failed with the following failure state: ".$task->crontask_status_lookup($status));
         } else {
-            cobalt_log('TASK_EXEC', $task::class . " completed successfully in ".($start - $end)." seconds");
+            cobalt_log('TASK_EXEC', $task::class . " completed successfully in ".($end - $start)." seconds");
         }
+
+        $this->updateOne([
+            'name' => $details['name']
+        ], [
+            '$set' => [
+                'lastRan' => new UTCDateTime(),
+                'benchmark' => $end - $start,
+                'status' => $status,
+            ]
+        ], [
+            'upsert' => true
+        ]);
     }
 }
