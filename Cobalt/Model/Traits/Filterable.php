@@ -70,13 +70,13 @@ trait Filterable {
         // upload files to the database, etc.
 
         if($this->__filter_job) {
-            $this->__filter_queue($this->__filter_job);
+            $this->__filter_queue($this->__filter_job); // We're inserting our second filter job here
             async_run_command("jobs run ".(string)$this->__filter_job->_id);
         }
         return $this;
     }
 
-    public function __filter_setup(array &$toValidate, bool $queueAfterCreation):?Job {
+    public function __filter_setup(array &$toValidate):?Job {
         $filterJob = new Job();
         $filterJob->init($this, $this->_id, 'filter');
         foreach($toValidate as $field => $value) {
@@ -86,14 +86,14 @@ trait Filterable {
             $instance->filter_setup($toValidate, $field, $filterJob, $this);
         }
 
-        if($queueAfterCreation) $this->__filter_queue($filterJob);
-        if($filterJob->length() >= 1) return $filterJob;
+        // if($queueAfterCreation) $this->__filter_queue($filterJob);
+        if($filterJob->get_total() >= 1) return $filterJob;
         return null;
     }
 
     public function __filter_queue(Job $filterJob):?ObjectId {
         $filterId = null;
-        if($filterJob->length() >= 1) $filterId = $filterJob->queue();
+        if($filterJob->get_total() >= 1) $filterId = $filterJob->queue();
         return $filterId;
     }
 

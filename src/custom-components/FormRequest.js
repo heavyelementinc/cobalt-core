@@ -347,7 +347,7 @@ export default class FormRequest extends ProgressWizard {
             if(element?.readonly === true) continue;
             const name = element.name ?? element.getAttribute("name");
             const value = this.getFormElementValue(element, event);
-            formData.set(name, value);
+            formData.append(name, value);
         }
 
         return formData;

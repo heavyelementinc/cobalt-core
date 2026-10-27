@@ -12,6 +12,7 @@ use Cobalt\JobQueue\Jobs\Job;
 use Cobalt\Model\Interfaces\JobHandler;
 use Exception;
 use MongoDB\BSON\ObjectId;
+use Throwable;
 
 class Jobs extends CommandInterface {
     #[Override]
@@ -37,6 +38,7 @@ class Jobs extends CommandInterface {
         }
         // Get the job's document
         $doc = $job->adopt($_id);
+        $job->in_progress("Working...");
         // Get the model
         $model = $job->getAdoptedModelInstance();
         // Find the document to run the operation on
@@ -46,20 +48,28 @@ class Jobs extends CommandInterface {
         if(!$result) {
             $job->finish("Could not find specified entry for job");
             say("Failed to locate job ID `$doc->refid`");
-            return COBALT_COMMANT_UNKNOWN_ERR;
+            return 2;
         }
         
-        foreach($doc->queue as $index => $item) {
-            $implements = class_implements($result->{$item->name}, true);
-            if(!$implements || !in_array("Cobalt\Model\Interfaces\JobHandler",$implements)) {
-                $message = "Field $item->name not an instance of JobHandler";
-                $job->updateQueueItem($index, Job::STATUS_ABORTED, $message);
-                say($message, "e");
-                continue;
+        try {
+            foreach($doc->queue as $index => $item) {
+                $implements = class_implements($result->{$item->name}, true);
+                if(!$implements || !in_array("Cobalt\Model\Interfaces\JobHandler",$implements)) {
+                    $message = "Field $item->name not an instance of JobHandler";
+                    $job->updateQueueItem($index, Job::STATUS_ABORTED, $message);
+                    say($message, "e");
+                    continue;
+                }
+                $result->{$item->name}->__job__on_start($item, $job, $index);
+                $result->{$item->name}->__job__on_complete($item, $job, $index);
             }
-            $result->{$item->name}->__job__on_start($item, $job, $index);
-            $result->{$item->name}->__job__on_complete($item, $job, $index);
+        } catch (Throwable $e) {
+            $job->abort($e->getMessage());
+            return 4;
         }
+
+        $job->finish("Done");
+        
         return COBALT_COMMAND_SUCCESS;
     }
     

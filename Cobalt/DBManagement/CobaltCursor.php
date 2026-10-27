@@ -4,7 +4,6 @@ namespace Cobalt\DBManagement;
 
 use Cobalt\Model\Model;
 use Iterator;
-use MongoDB\Driver\Cursor;
 use MongoDB\Driver\CursorInterface;
 
 class CobaltCursor implements Iterator {

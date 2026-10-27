@@ -7,6 +7,7 @@
  */
 
 class AsyncFetch extends EventTarget {
+    statusMessage = null;
     constructor(action, method = "GET", {
         asJSON = true,
         credentials = true,
@@ -15,6 +16,7 @@ class AsyncFetch extends EventTarget {
         form = null,
     } = {}) {
         super();
+        this.id = action.replace(/\W/g, '');
         this.action = action;
         this.method = method;
         this.format = null;
@@ -27,6 +29,7 @@ class AsyncFetch extends EventTarget {
         this.totalUploadSize = 0;
         this.form = form;
         this.errorHandled = false;
+        this.statusMessage = document.querySelector(`#${this.id}`)?.messageInstance;
         
         this.data = "";
         this.response = null; // The raw response from the fetch request
@@ -62,7 +65,7 @@ class AsyncFetch extends EventTarget {
             const client = new XMLHttpRequest();
             
             if(uploadSize >= 200) {
-                this.statusMessage = new StatusMessage({message: "Working...", icon: 'working'});
+                this.statusMessage = new StatusMessage({message: "Working...", icon: 'working', id: this.id});
                 client.upload.onprogress = progress => this._onuploadprogress(progress, client);
             }
             client.onprogress = progress =>  this._onprogress(progress, client);
@@ -128,7 +131,11 @@ class AsyncFetch extends EventTarget {
     _onload(event, client, resolve) {
         this.response = client.response;
         this.setResponseHeaders(client.getAllResponseHeaders());
-        this.dispatchHeaderDirectives();
+        this.instanceHeaderDirectives();
+        for(const instance in this.headerReactions) {
+            this.headerReactions[instance].onDone();
+        }
+        
         if(client.status !== 200 && this.errorHandled === false) {
             const nonOkResponse = this.handleNonOkResponse(event, client, resolve);
             if(nonOkResponse === true) return true;
@@ -187,7 +194,7 @@ class AsyncFetch extends EventTarget {
                 break;
             case client.HEADERS_RECEIVED:
                 this.setResponseHeaders(client.getAllResponseHeaders());
-                this.dispatchHeaderDirectives();
+                this.instanceHeaderDirectives();
                 break;
             case client.LOADING:
                 break;
@@ -269,12 +276,12 @@ class AsyncFetch extends EventTarget {
         return this.responseHeaders;
     }
 
-    dispatchHeaderDirectives() {
+    instanceHeaderDirectives() {
         for(const headerName in this.responseHeaders) {
             if(headerName in this.headerDirectiveMap === false) continue;
+            if(headerName in this.headerReactions === true) continue;
             this.headerReactions[headerName] = new this.headerDirectiveMap[headerName](this.responseHeaders[headerName], headerName, this);
-            this.headerReactions[headerName].execute();
-
+            this.headerReactions[headerName].onHeadersRecieved();
         }
     }
 
@@ -282,6 +289,9 @@ class AsyncFetch extends EventTarget {
         return this.responseHeaders[name.toLowerCase()] || null;
     }
 
+    getJobStatusMessageId() {
+        return `jobid-${this.responseHeaders['x-job-status'].replace(/\W/g, '')}`;
+    }
 }
 
 async function get(url) {
@@ -426,6 +436,13 @@ class HeaderDirective {
         return `${this.props.method}__${this.props.action.replace('/',"_")}`;
     }
 
+    onHeadersRecieved() {
+
+    }
+
+    onDone() {
+        this.execute();
+    }
 
     execute() {
 
@@ -621,12 +638,38 @@ class XReauth extends HeaderDirective {
 
 class XJobStatus extends HeaderDirective {
     status;
-    async execute() {
-        const url = this.props.rawContent;
+    poll = 2500;
+    retries = 30;
+    url = "";
+    constructor(headerContent, name, xhrRequest) {
+        super(headerContent, name, xhrRequest);
+        const attributes = headerContent.split(";");
+        for(const attr of attributes) {
+            let [name, value] = attr.split("=");
+            name = name.trim();
+            value = value?.trim();
+            if(name[0] === "<" && name[name.length - 1] === ">") {
+                this.url = decodeURIComponent(name.substring(1, name.length - 1));
+                if(this.url !== xhrRequest.action) {
+                    xhrRequest.statusMessage.element.id = this.url.replace(/\W/g,'');
+                }
+            }
+            if(name && name == "poll") {
+                this.poll = parseInt(value);
+            }
+            if(name && name == "retries") {
+                this.retries = parseInt(value);
+            }
+        }
+    }
+    async onHeadersRecieved() {
+        const url = this.url;
         const message = this.props.xhrRequest.statusMessage ?? new StatusMessage({message: "Processing. Please wait..."});
         message.progress(0, 100, "Processing. Please wait...");
-        let intervalsPending = 0;
-        let interval = setInterval(async () => {
+        if(!message.element.dataset.tries) message.element.dataset.tries = this.retries;
+
+        let intervalsPending = message.element.dataset.tries;
+        let interval = setTimeout(async () => {
             const api = new AsyncFetch(url, 'GET', {});
             const details = await api.get();
             message.progress(details.current,  details.total, "Processing. Please wait...");
@@ -634,14 +677,14 @@ class XJobStatus extends HeaderDirective {
                 case "inprogress":
                     intervalsPending = 0;
                     if(details.current >= details.total) {
-                        clearInterval(interval);
+                        clearTimeout(interval);
                         message.update("Finished.");
                     }
                     break;
                 case "pending":
-                    intervalsPending += 1;
-                    if(intervalsPending >= 30) {
-                        clearInterval(interval);
+                    this.message.element.dataset.tries -= 1;
+                    if(this.message.element.dataset.tries <= 0) {
+                        clearTimeout(interval);
                         message.update("Job took too long to start");
                     }
                     break;
@@ -651,10 +694,10 @@ class XJobStatus extends HeaderDirective {
                     message.update(details.status ?? "Something went wrong.", "error");
                 default:
                     intervalsPending = 0;
-                    clearInterval(interval);
+                    clearTimeout(interval);
                     break;
             }
-        }, 1000);
+        }, this.poll);
     }
 
     listener(event) {

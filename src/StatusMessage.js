@@ -1,9 +1,9 @@
 class StatusMessage {
     constructor({ message, id = null, icon = "", duration = 0, action = e => true, close = true, type = "status" }) {
         this.message = message;
+        this.id = id || random_string();
         this.icon = this.decideIcon(icon, type);
         this.type = type;
-        this.id = id || random_string();
         this.action = action;
         this.closeable = close;
         this.duration = duration;
@@ -14,6 +14,7 @@ class StatusMessage {
 
         // Let's now set this message up to be added to the MessageHandler class
         this.element = window.messageHandler.message(this);
+        this.element.messageInstance = this;
 
         this.updateClasses();
     }
@@ -181,7 +182,10 @@ class MessageHandler {
     }
 
     message(details) {
-        const message = document.createElement("message-item");
+        let message = null;
+        if("id" in details) message = this.container.querySelector(`#${details.id}`);
+        if(!message) message = document.createElement("message-item");
+
         message.setAttribute("name",details.type);
         message.classList.add(`status-message`);
         message.setAttribute("data-id",details.id);

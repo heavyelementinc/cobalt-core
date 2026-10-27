@@ -9,6 +9,10 @@ use MongoDB\BSON\ObjectId;
 
 function async_run_command(string $command) {
     $shell = __APP_ROOT__ . "/cobalt";
+    if(!file_exists($shell)) {
+        $result = copy(__ENV_ROOT__."/Cobalt/Commands/skeleton/cobalt", $shell);
+        if($result === false) throw new Exception("Failed to execute asynchronous command");
+    }
     $pid = shell_exec("nohup nice -n 10 sh $shell $command > /dev/null & printf \"%u\"");
     return $pid;
 }

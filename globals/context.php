@@ -69,7 +69,7 @@ if ($route_context !== "web") {
 
 // Invoke our context processor.
 /**
- * @global \Handlers\RequestHandler
+ * @var \Handlers\RequestHandler
  */
 $context_processor = new $processor();
 
@@ -133,6 +133,7 @@ try {
     benchmark_end("context_setup");
     benchmark_start("controller_execution");
 
+    // ob_clean();
     $router_result = $ROUTER->execute_route();
     $context_processor->_stage_execute($router_result);
     $context_processor->_stage_bootstrap['_stage_execute'] = true;
@@ -142,7 +143,7 @@ try {
     
     ob_flush(); // Write the output buffer to the client
 } catch (Exceptions\HTTP\HTTPException $e) {
-     ob_clean(); // Clear the output buffer
+    ob_clean(); // Clear the output buffer
     $http_version = $e->getHttpVersion() ?? "1.0";
     $status_code = $e->getStatusCode() ?? "500";
     $name = $e->getStatusName() ?? "Internal Server Error";

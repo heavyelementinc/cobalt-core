@@ -49,7 +49,8 @@ class ImageType extends ForeignId implements JobHandler {
         if($oid === self::FILE_UPLOAD_INDICATOR && key_exists($filesKey, $_FILES)) {
             $files = normalize_uploaded_files($_FILES);
             $count = count($files[$filesKey]);
-            if($count == 0 || $count >= 2) throw new BadRequest("Too many images uploaded for $filesKey");
+            if($count == 0) throw new BadRequest("You must attach one image");
+            if($count !== 1) throw new BadRequest("Too many images uploaded for $filesKey");
 
             $arr = $files[$filesKey][0];
 
@@ -98,6 +99,7 @@ class ImageType extends ForeignId implements JobHandler {
                 'file' => $files[$key][0],
                 'name' => $key,
             ]);
+            $filterJob->set_total(1);
         }
     }
 
@@ -111,7 +113,11 @@ class ImageType extends ForeignId implements JobHandler {
         }
         $id = $this->__store($path, $filename, $item->file->options ?? []);
         $this->model->updateOne(['_id' => $job->getAdopted()->refid], ['$set' => [$item['name'] => $id]]);
-        unlink($path);
+        $removed = unlink($path);
+        if($removed === false) {
+            $job->updateQueueItem($index, Job::STATUS_ABORTED, 'Failed to remove file');
+            throw new CommandError("Failed to remove file");
+        }
         $job->updateQueueItem($index, Job::STATUS_FINISHED, "Done");
         $job->increment();
 

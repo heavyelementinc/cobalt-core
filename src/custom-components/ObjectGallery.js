@@ -26,18 +26,23 @@ export class ObjectGallery extends ICustomInput {
         this.uploadField.method = this.getAttribute("method");
         this.uploadField.action = this.getAttribute("action");
         this.uploadField.max = this.max;
+        this.uploadField.addEventListener("change", event => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            this.dispatchEvent(new Event("change", {bubbles: true}));
+        });
 
         const picker = document.createElement("object-picker");
         picker.innerText = "Add Existing...";
         picker.title = "Append existing elements to this gallery";
         this.uploadField.appendChild(picker);
         picker.addEventListener("selection", event => {
-            this.addObjectsToList(event.detail, true)
+            this.addMultipleObjectsToList(event.detail, true)
         });
         this.appendChild(this.uploadField);
     }
 
-    addObjectsToList(elements, triggerChange) {
+    addMultipleObjectsToList(elements, triggerChange) {
         for(const element of elements) {
             this.addObjectToList(element.id, element.html, false);
         }

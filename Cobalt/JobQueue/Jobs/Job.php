@@ -30,6 +30,7 @@ class Job {
     private ?ObjectId $refid;
     private string $type;
     private array $queue = [];
+    private int $total = 0;
 
     function init(Model $model, ?ObjectId $id, string $type) {
         $this->model = $model;
@@ -41,22 +42,29 @@ class Job {
         $this->refid = $id;
     }
 
+    function get_total():int {
+        return $this->total;
+    }
+    function set_total(int $total) {
+        $this->total = $total;
+    }
+
     function queue() {
         $document = [
             // '_id'     => '',     // ObjectId
-            'model'   => $this->model::class, // Namespaced model
-            'refid'   => $this->refid, // ObjectId for model
-            'jobtype' => $this->type,  // The job type
-            'total'   => $this->length(), // The total amount of work to be done
-            'current' =>  0,        // The current work item to be done
-            'queue'   => $this->queue,    // Arbitrary list of job items
+            'model'   => $this->model::class,  // Namespaced model
+            'refid'   => $this->refid,         // ObjectId for model
+            'jobtype' => $this->type,          // The job type
+            'total'   => $this->get_total(),   // The total amount of work to be done
+            'current' =>  0,                   // The current work item to be done
+            'queue'   => $this->queue,         // Arbitrary list of job items
             'status'  => self::STATUS_PENDING, // A list job status
         ];
         $result = $this->insertOne($document);
         $id = $result->getInsertedId();
 
         $this->handleJobAuthForSession($id);
-        header("X-Job-Status: ". JobStatus::get_route_href("status", [$id]));
+        Job::sendJobStatusHeader($id);
         $this->_id = $id;
         return $id;
     }
@@ -87,7 +95,7 @@ class Job {
     /**
      * @property object{current:int,total:int,model:Model,queue:array} $adopted
      */
-    private object $adopted;
+    public object $adopted;
     function getAdopted():object {
         return $this->adopted;
     }
@@ -96,7 +104,6 @@ class Job {
         if(!$result) throw new Exception("Invalid JobId");
         $this->adopted = $result;
         if(!$this->adopted) throw new Exception("Invalid job item");
-        $this->updateOne(["_id" => $id], ['$set' => ['status' => self::STATUS_IN_PROGRESS]]);
         return $this->adopted;
     }
 
@@ -114,7 +121,6 @@ class Job {
         if($this->adopted->current >= $this->adopted->total) {
             $this->finish("Done");
         }
-        
     }
 
     public function updateQueueItem(int $index, string $status, string $message) {
@@ -122,6 +128,14 @@ class Job {
             '$set' => [
                 "queue.$index.status" => $status,
                 "queue.$index.message" => $message,
+            ]
+        ]);
+    }
+
+    public function in_progress(string $message) {
+        $this->updateOne(["_id" => $this->adopted->_id], [
+            '$set' => [
+                'status' => self::STATUS_IN_PROGRESS
             ]
         ]);
     }
@@ -134,5 +148,21 @@ class Job {
                 'status' => self::STATUS_FINISHED,
             ]
         ]);
+    }
+
+    public function abort(string $message) {
+        $this->updateOne(['_id' => $this->adopted->_id],[
+            '$set' => [
+                'message' => $message,
+                'date' => new UTCDateTime(),
+                'status' => self::STATUS_ABORTED,
+            ]
+        ]);
+    }
+    
+
+    public static function sendJobStatusHeader(string|ObjectId $id, int $poll = 1500, int $retries = -1) {
+        $maxRetries = 30;
+        header("X-Job-Status: <".urlencode(server_name() . JobStatus::get_route_href("status", [$id])).">; poll=$poll; retries=$retries;");
     }
 }
