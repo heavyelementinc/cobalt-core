@@ -12,6 +12,7 @@
  * @author Gardiner Bryant <gardiner@heavyelement.io>
  */
 
+use Cobalt\Auth\Session\Models\Session;
 use Cobalt\Auth\Users\Authentication;
 use Cobalt\Customization\CustomizationManager;
 benchmark_start("router_setup");
@@ -121,6 +122,14 @@ try {
     /** @global array $current_route_meta contains the discovered route's metadata */
     $current_route_meta = $ROUTER->discover_route();
 
+    if($current_route_meta[1]['session_starts_route'] ?? true === true) {
+        if(session_status() === PHP_SESSION_NONE) {
+            session_name(Session::SESSION_COOKIE_KEY);
+            $cobalt_session_started = session_start([
+                'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
+            ]);
+        }
+    }
     benchmark_end("router_setup");
     benchmark_start("context_setup");
     $context_processor->_stage_route_discovered(...$current_route_meta);

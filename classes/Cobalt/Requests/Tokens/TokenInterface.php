@@ -43,7 +43,6 @@ abstract class TokenInterface implements Iterator {
             'method' => "POST",
             'headers' => [],
             'params' => [
-
             ]
         ];
     }

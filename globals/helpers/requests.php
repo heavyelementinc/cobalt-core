@@ -47,13 +47,17 @@ function send_access_control_allow_origin_header(array $hosts, ?string $from = n
     return $is_trusted;
 }
 
-function send_cache_control_expires_at_future_date(DateTime $sharedFutureDate, int $browserAge = 0) {
-    $timezone = new DateTimeZone('America/New_York');
+function send_cache_control_expires_at_future_date(DateTime $sharedFutureDate, int $browserAge = 0): void {
+    $now = new DateTime('now', new DateTimeZone('UTC'));
+    $secondsUntilExpiry = max(0, $sharedFutureDate->getTimestamp() - $now->getTimestamp());
 
-    $now = new DateTime('now', $timezone);
-    $secondsUntilExpiry = $sharedFutureDate->getTimestamp() - $now->getTimestamp();
-
-    header("Cache-Control: max-age=$browserAge, s-maxage=$secondsUntilExpiry");
+    // s-maxage controls Cloudflare / CDNs
+    // max-age controls the end-user browser
+    header("Cache-Control: public, max-age={$browserAge}, s-maxage={$secondsUntilExpiry}");
+    // Remove any existing Pragma header
+    header_remove("Pragma");
+    // Direct browsers to consider the response expired immediately
+    header("Expires: 0");
 }
 
 function unparse_url($parsed_url) {

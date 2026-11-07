@@ -18,7 +18,6 @@
  * @copyright 2023 - Heavy Element, Inc.
  */
 
-use Cobalt\Auth\Session\Models\Session;
 use Cobalt\Settings\Settings;
 use Cobalt\UTMTracker\UTMHandler;
 ini_set('display_errors', 'Off');
@@ -170,22 +169,6 @@ if(__APP_SETTINGS__['AI_prohibit_scraping_notice']) {
 //     }
 // }
 
-session_name(Session::SESSION_COOKIE_KEY);
-// $sameSite = "Lax";
-// $referer = str_replace(['https://', 'http://'], '', getHeader('referer', null, true, false) ?? $_SERVER['HTTP_REFERER']);
-// if(in_array($referer, __APP_SETTINGS__['API_CORS_allowed_origins'])) {
-//     ini_set('session.cookie_samesite', 'None');
-// }
-// session_set_cookie_params([
-//     'secure' => "1",
-//     'httponly' => "1",
-//     'samesite' => $sameSite,
-// ]);
-$cobalt_session_started = session_start([
-    'cookie_lifetime' => app('Auth_session_days_until_expiration') * 24 * 60 * 60,
-    // 'cookie_httponly' => !__APP_SETTINGS__['require_https_login_and_cookie'],
-    // 'cookie_secure'   => !__APP_SETTINGS__['require_https_login_and_cookie']
-]);
 $utm_manager = new UTMHandler();
 $utm_details = $utm_manager->parseUTM($_GET);
 if($utm_details) {

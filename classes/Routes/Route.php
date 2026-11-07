@@ -202,6 +202,9 @@ class Route {
             // Cache Control stuff is only honored by API page requests
             'cache_control' => array_merge($options['cache_control'] ?? [], $cache_control),
             'unread' => $options['unread'] ?? false,
+            
+            // Session stuff
+            'session_starts_route' => $options['session_starts_route'] ?? true,
             'require_session' => $options['require_session'] ?? !app("Web_normally_open_pages"),
 
             // Info that route groups need
