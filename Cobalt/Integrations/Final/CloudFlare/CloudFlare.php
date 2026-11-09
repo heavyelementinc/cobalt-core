@@ -58,6 +58,10 @@ class CloudFlare extends Base {
         if($files !== null) $data['files'] = $files;
         if($tags !== null) $data['tags'] = $tags;
         if($prefixes !== null) $data['prefixes'] = $prefixes;
+        if(empty($data)) throw new TypeError("At least one of files, tags or prefixes must be provided");
+        /**
+         * @var array{response:{errors:array,messages:array,result:{id:string},success:bool}} $result
+         */
         $result = $this->fetch("POST",
             "https://api.cloudflare.com/client/v4/zones/".$zoneId."/purge_cache",
             $data

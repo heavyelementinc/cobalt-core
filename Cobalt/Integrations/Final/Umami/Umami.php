@@ -21,7 +21,8 @@ class Umami extends Base {
 
     #[Override]
     public function get_unique_token(): string {
-        throw new \Exception('Not implemented');
+        // throw new \Exception('Not implemented');
+        return "umami";
     }
 
     #[Override]
@@ -38,7 +39,7 @@ class Umami extends Base {
     #[Override]
     public function html_token_editor(): string
     {
-        return 
+        return "";
     }
 
 }
