@@ -57,7 +57,7 @@ function send_cache_control_expires_at_future_date(DateTime $sharedFutureDate, i
     // Remove any existing Pragma header
     header_remove("Pragma");
     // Direct browsers to consider the response expired immediately
-    header("Expires: 0");
+    // header("Expires: 0");
 }
 
 function unparse_url($parsed_url) {

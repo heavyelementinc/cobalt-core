@@ -13,6 +13,20 @@ const ERROR_RESOURCE_NOT_FOUND = "Requested resource does not exist.";
 const ERROR_STALE_TOKEN = "Stale token detected. You're no longer the author of this document.";
 
 function kill(string $specific_message = "", int $error_type = INTERNAL_SERVER_ERROR):never {
+    try {
+        throw new Exception("Killing this script with message: {$specific_message}");
+    } catch(Throwable $e) {
+    }
+    // Destroy all our output buffers so we can send a clean error message to the client
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    // Send a valid HTTP 500 header so Apache doesn't throw AH01070
+    if (!headers_sent()) {
+        header('HTTP/1.1 500 Internal Server Error');
+        header('Content-Type: text/plain; charset=utf-8');
+    }
     if(!key_exists($error_type, ERROR_ARRAY)) $error_type = 0;
     [$header, $title, $message] = ERROR_ARRAY[$error_type];
     if(!$header) [$header, $title, $message] = ERROR_ARRAY[UNKNOWN_ERROR];

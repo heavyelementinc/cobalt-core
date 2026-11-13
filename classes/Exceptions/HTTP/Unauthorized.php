@@ -14,7 +14,7 @@ class Unauthorized extends HTTPException{
         // if()
         // $result = redirect("/login/?message=unauthorized");
         $result = redirect("/login/?".SESSION_RESUME_PARAM."=".urlencode($_REQUEST['url'])."&message=unauthorized");
-        if($result === false) exit;
+        // if($result === false) exit;
         // $vars = (new Authentication)->generate_login_form();
         // $merge = array_merge($vars[0], $data, ['template' => $vars[1]]);
         parent::__construct($message, $publicMessage, []);

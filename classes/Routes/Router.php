@@ -33,6 +33,7 @@ use Exceptions\HTTP\Unauthorized;
 use MongoDB\BSON\UTCDateTime;
 use ReflectionObject;
 use Routes\Exceptions\UnexpectedBasePath;
+use Throwable;
 
 class Router {
 
@@ -227,7 +228,7 @@ class Router {
             $permission = true;
             try {
                 $permission = $GLOBALS['auth']->has_permission($exe['permission']);
-            } catch (\Exceptions\HTTP\Unauthorized $e) {
+            } catch (Throwable $e) {
                 $permission = false;
             }
             $unauthorized = "\\Exceptions\\HTTP\\Unauthorized";

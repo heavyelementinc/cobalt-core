@@ -57,6 +57,7 @@ $flags = [
     ],
 ];
 
+if(!defined('FLAGS_KEY')) define('FLAGS_KEY','__cobalt_flags__');
 
 function __app_context($app = ""){
     if(empty($app)) throw new Exception("App name invalid");

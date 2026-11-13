@@ -19,7 +19,10 @@ if(file_exists(__APP_ROOT__ . "/ignored/DEVELOPMENT") || file_exists(__APP_ROOT_
 }
 register_shutdown_function( "fatal_handler" );
 
-const FATAL_ERROR_CODES = [64];
+const FATAL_ERROR_CODES = [
+    E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR
+    // 64
+];
 
 function fatal_handler() {
     $errfile = "unknown file";
@@ -29,15 +32,18 @@ function fatal_handler() {
 
     $error = error_get_last();
     
-    if($error !== NULL 
-        && in_array($error['type'], FATAL_ERROR_CODES)
-    ) {
+    if($error !== NULL && in_array($error['type'], FATAL_ERROR_CODES)) {
         $errno   = $error["type"];
         $errfile = $error["file"];
         $errline = $error["line"];
         $errstr  = $error["message"];
-
-        kill("A fatal error occurred: " . "$errno $errstr ".str_replace([__APP_ROOT__, __ENV_ROOT__],["__APP_ROOT__", "__ENV_ROOT__"],$errfile)." $errline");
+        $message = "A fatal error occurred: " . "$errno $errstr ".str_replace([__APP_ROOT__, __ENV_ROOT__],["__APP_ROOT__", "__ENV_ROOT__"],$errfile)." $errline";
+        try {
+            throw new Exception($message);
+        } catch(Throwable $e) {
+    
+        }
+        kill($message);
     }
 }
 
